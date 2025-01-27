@@ -1,37 +1,39 @@
-// src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'; // Import routing components
-import { useSelector } from 'react-redux'; // Import useSelector to check authentication
-import Home from './pages/Home'; // Corrected path
-import Login from './pages/Login'; // Corrected path
-import Register from './pages/Register'; // Corrected path
-import Profile from './pages/Profile'; // Corrected path
-import ProtectedRoute from './Components/ProtectedRoute'; // Import ProtectedRoute component
+import { useSelector } from 'react-redux'; // Import Redux selector hook
+import Home from './pages/Home'; // Import pages/components
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Profile from './pages/Profile';
+import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute component
 
-const App = () => {
+function App() {
+  const { token } = useSelector((state) => state.user); // Access token from Redux store
+
   return (
     <Router>
       <Switch>
-        {/* Public Routes */}
-        <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
+        <Route exact path="/login">
+          <Login />
+        </Route>
+        <Route exact path="/register">
+          <Register />
+        </Route>
+        
+        {/* Protect the Profile route */}
+        <ProtectedRoute>
+          <Route exact path="/profile">
+            <Profile />
+          </Route>
+        </ProtectedRoute>
 
-        {/* Protected Routes */}
-        <ProtectedRoute path="/home">
+        {/* Default Home route */}
+        <Route exact path="/">
           <Home />
-        </ProtectedRoute>
-
-        <ProtectedRoute path="/profile">
-          <Profile />
-        </ProtectedRoute>
-
-        {/* Fallback route (optional) */}
-        <Route path="/" exact>
-          <h1>Welcome to the App!</h1>
         </Route>
       </Switch>
     </Router>
   );
-};
+}
 
 export default App;
