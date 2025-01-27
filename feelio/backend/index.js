@@ -8,6 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -16,16 +17,18 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB Connection Error:", err));
 
-// Root route for testing
-app.get("/", (req, res) => {
-  res.send("API is working!");
-});
-
-// Define routes
+// Routes
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 
-app.listen(5000, () => console.log("Server listening on port 5000"));
+// Root route for testing
+app.get("/", (req, res) => {
+  res.send("Feelio API is running!");
+});
+
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
