@@ -5,17 +5,18 @@ const Home = () => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    // Fetch posts when the component mounts
     const fetchPosts = async () => {
       try {
-        const response = await getPosts(); // Make the API call to fetch posts
-        setPosts(response.data); // Store the posts in state
+        const token = localStorage.getItem('token');
+        const response = await getPosts(token); // Pass token here
+        setPosts(response.data);
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
     };
     fetchPosts();
-  }, []); // Empty dependency array to run only on mount
+  }, []);
+  
 
   return (
     <div>
