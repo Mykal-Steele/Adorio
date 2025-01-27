@@ -1,17 +1,21 @@
-// src/components/Navbar.jsx
-import React from 'react';
+import React from "react";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/userSlice";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem("token");
+  };
+
   return (
-    <nav className="bg-blue-600 p-4">
-      <div className="flex justify-between items-center">
-        <div className="text-white font-bold text-lg">Feelio</div>
-        <div className="space-x-4">
-          <a href="/" className="text-white hover:text-gray-300">Home</a>
-          <a href="/profile" className="text-white hover:text-gray-300">Profile</a>
-          <a href="/logout" className="text-white hover:text-gray-300">Logout</a>
-        </div>
-      </div>
+    <nav>
+      <Link to="/">Home</Link>
+      <Link to="/profile">Profile</Link>
+      <button onClick={handleLogout}>Logout</button>
     </nav>
   );
 };
