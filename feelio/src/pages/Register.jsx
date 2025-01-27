@@ -1,56 +1,59 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux'; // Import useDispatch
-import { setUser } from '../redux/userSlice'; // Import the setUser action
-import { register } from '../api'; // Import the register API function
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { setUser } from "../redux/userSlice";
+import { register } from "../api";
 
 const Register = () => {
-  const dispatch = useDispatch();  // Initialize dispatch function
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const dispatch = useDispatch();
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await register({ username, email, password }); // Call the register API
-      localStorage.setItem('token', response.data.token); // Store the JWT token in localStorage
-
-      // Dispatch the user data and token to the Redux store
-      dispatch(setUser({
-        user: response.data.user,
-        token: response.data.token,
-      }));
+      const response = await register({ username, email, password });
+      localStorage.setItem("token", response.data.token);
+      dispatch(setUser({ user: response.data.user, token: response.data.token }));
     } catch (err) {
-      setError('Registration failed');
+      setError("Registration failed");
     }
   };
 
   return (
-    <div>
-      <h1>Register</h1>
-      <form onSubmit={handleRegister}>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Register</h1>
+      <form onSubmit={handleRegister} className="max-w-md mx-auto">
         <input
           type="text"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          className="w-full p-2 mb-4 border rounded"
         />
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 mb-4 border rounded"
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 mb-4 border rounded"
         />
-        <button type="submit">Register</button>
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+        >
+          Register
+        </button>
       </form>
-      {error && <p>{error}</p>}
+      {error && <p className="text-red-500 mt-4">{error}</p>}
     </div>
   );
 };

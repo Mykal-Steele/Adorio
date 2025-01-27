@@ -1,49 +1,51 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux'; // Import the useDispatch hook
-import { setUser } from '../redux/userSlice'; // Import the setUser action
-import { login } from '../api'; // Import the login API function
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { setUser } from "../redux/userSlice";
+import { login } from "../api";
 
 const Login = () => {
-  const dispatch = useDispatch();  // Initialize dispatch function
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const dispatch = useDispatch();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await login({ email, password }); // Call the login API
-      localStorage.setItem('token', response.data.token); // Store the JWT token in localStorage
-
-      // Dispatch the user data and token to the Redux store
-      dispatch(setUser({
-        user: response.data.user,
-        token: response.data.token,
-      }));
+      const response = await login({ email, password });
+      localStorage.setItem("token", response.data.token);
+      dispatch(setUser({ user: response.data.user, token: response.data.token }));
     } catch (err) {
-      setError('Invalid credentials');
+      setError("Invalid credentials");
     }
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={handleLogin}>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Login</h1>
+      <form onSubmit={handleLogin} className="max-w-md mx-auto">
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 mb-4 border rounded"
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 mb-4 border rounded"
         />
-        <button type="submit">Login</button>
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+        >
+          Login
+        </button>
       </form>
-      {error && <p>{error}</p>}
+      {error && <p className="text-red-500 mt-4">{error}</p>}
     </div>
   );
 };

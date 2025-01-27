@@ -1,49 +1,43 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';  // Import useSelector and useDispatch from redux
-import { getPosts } from '../api'; // Import the API function to get posts
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { getPosts } from "../api";
+import PostCard from "../Components/PostCard";
 
 const Profile = () => {
-  const dispatch = useDispatch();
-  const { user, token } = useSelector((state) => state.user);  // Get user data and token from Redux store
-  const [posts, setPosts] = useState([]);  // State to hold posts
+  const { user } = useSelector((state) => state.user);
+  const [posts, setPosts] = useState([]);
 
-  // Fetch posts when component mounts
   useEffect(() => {
     const fetchUserPosts = async () => {
-      if (!user || !token) return;  // If no user or token, exit early
-
       try {
-        const response = await getPosts(token); // Pass the token to fetch posts from backend
-        setPosts(response.data.filter(post => post.user._id === user._id)); // Filter posts by the logged-in user
+        const response = await getPosts();
+        setPosts(response.data.filter((post) => post.user._id === user._id));
       } catch (err) {
         console.error("Error fetching user posts:", err);
       }
     };
-
     fetchUserPosts();
-  }, [user, token]);  // Re-fetch posts if user or token changes
+  }, [user]);
 
   return (
-    <div>
-      {user ? (
-        <>
-          <h1>{user.username}'s Profile</h1>
-          <div>
-            {posts.length > 0 ? (
-              posts.map((post) => (
-                <div key={post._id}>
-                  <h2>{post.title}</h2>
-                  <p>{post.content}</p>
-                </div>
-              ))
-            ) : (
-              <p>No posts found.</p>
-            )}
-          </div>
-        </>
-      ) : (
-        <p>You are not logged in.</p>
-      )}
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">{user?.username}'s Profile</h1>
+      <div>
+        {posts.length > 0 ? (
+          posts.map((post) => (
+            <PostCard
+              key={post._id}
+              title={post.title}
+              content={post.content}
+              author={post.user.username}
+              likes={post.likes}
+              comments={post.comments}
+            />
+          ))
+        ) : (
+          <p>No posts found.</p>
+        )}
+      </div>
     </div>
   );
 };
