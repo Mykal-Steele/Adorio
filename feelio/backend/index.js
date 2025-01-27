@@ -16,6 +16,11 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB Connection Error:", err));
 
+// Root route for testing
+app.get("/", (req, res) => {
+  res.send("API is working!");
+});
+
 // Define routes
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
