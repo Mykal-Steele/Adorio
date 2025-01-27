@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { getPosts } from '../api'; // Import the API function
+import React, { useEffect, useState } from "react";
+import { getPosts } from "../api";
+import PostCard from "../Components/PostCard";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -7,8 +8,7 @@ const Home = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await getPosts(token); // Pass token here
+        const response = await getPosts();
         setPosts(response.data);
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -16,19 +16,23 @@ const Home = () => {
     };
     fetchPosts();
   }, []);
-  
 
   return (
-    <div>
-      <h1>Home</h1>
-      <div>
-        {posts.map((post) => (
-          <div key={post._id}>
-            <h2>{post.title}</h2>
-            <p>{post.content}</p>
-            <p>Posted by: {post.user.username}</p>
-          </div>
-        ))}
+    <div className="min-h-screen bg-gray-100">
+      <div className="container mx-auto p-4">
+        <h1 className="text-3xl font-bold mb-6 text-center">Home</h1>
+        <div className="max-w-2xl mx-auto">
+          {posts.map((post) => (
+            <PostCard
+              key={post._id}
+              title={post.title}
+              content={post.content}
+              author={post.user?.username || "Unknown"}
+              likes={post.likes}
+              comments={post.comments}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
