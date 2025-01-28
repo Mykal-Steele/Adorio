@@ -12,42 +12,46 @@ const Navbar = () => {
     localStorage.removeItem("token");
   };
 
-  return (
-    <nav className="bg-blue-600 p-4">
-      <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-white text-xl font-bold">
+  // src/Components/Navbar.jsx
+return (
+  <nav className="bg-white shadow-md">
+    <div className="container mx-auto px-4">
+      <div className="flex items-center justify-between h-16">
+        <Link to="/" className="text-xl font-bold text-blue-600">
           Feelio
         </Link>
-        <div className="space-x-4">
+        
+        <div className="flex items-center space-x-4">
           {token ? (
             <>
-              <Link to="/" className="text-white hover:text-gray-300">
-                Home
-              </Link>
-              <Link to="/profile" className="text-white hover:text-gray-300">
+              <Link to="/profile" className="text-gray-600 hover:text-blue-600">
                 Profile
               </Link>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                className="bg-red-100 text-red-600 px-4 py-2 rounded-lg hover:bg-red-200"
               >
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="text-white hover:text-gray-300">
+              <Link to="/login" className="text-gray-600 hover:text-blue-600">
                 Login
               </Link>
-              <Link to="/register" className="text-white hover:text-gray-300">
-                Signup
+              <Link 
+                to="/register" 
+                className="bg-blue-100 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-200"
+              >
+                Sign Up
               </Link>
             </>
           )}
         </div>
       </div>
-    </nav>
-  );
+    </div>
+  </nav>
+);
 };
 
 export default Navbar;
