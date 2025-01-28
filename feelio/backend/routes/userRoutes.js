@@ -3,41 +3,81 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-// Register
+// Register route
 router.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json("User already exists");
+
+    // Check for existing user
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      const message =
+        existingUser.email === email
+          ? "Email already exists"
+          : "Username already exists";
+      return res.status(400).json({ message });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, email, password: hashedPassword });
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+    });
+
     const savedUser = await newUser.save();
+
+    const sanitizedUser = {
+      _id: savedUser._id,
+      username: savedUser.username,
+      email: savedUser.email,
+    };
 
     const token = jwt.sign({ userId: savedUser._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    res.status(201).json({ user: savedUser, token });
+
+    res.status(201).json({ user: sanitizedUser, token });
   } catch (err) {
+    console.error("Registration error:", err);
     res.status(500).json({ message: "Server Error" });
   }
 });
 
-// Login
+// Login route
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
+
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json("User not found");
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json("Invalid credentials");
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const sanitizedUser = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+    };
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    res.status(200).json({ user, token });
+
+    res.status(200).json({ user: sanitizedUser, token });
   } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ message: "Server Error" });
   }
 });
