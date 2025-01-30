@@ -1,3 +1,4 @@
+//feelio\src\Components\PostDetail.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getSinglePost, likePost, addComment } from "../api";

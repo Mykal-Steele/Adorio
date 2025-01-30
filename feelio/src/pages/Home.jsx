@@ -1,4 +1,4 @@
-// src/pages/Home.jsx
+// feelio\src\pages\Home.jsx
 import React, { useEffect, useState } from "react";
 import { getPosts, createPost } from "../api"; // Import createPost function
 import PostCard from "../Components/PostCard";
