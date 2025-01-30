@@ -18,6 +18,7 @@ router.post("/", verifyToken, async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const posts = await Post.find()
+      .sort({ createdAt: -1 })
       .populate("user", ["username"])
       .populate("likes", ["username"])
       .populate("comments.user", ["username"]);
@@ -27,21 +28,21 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Show a single Post with Likes and Comments populated
+// Get Single Post
 router.get("/:id", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
-      .populate("user", ["username"]) // Populate user who created the post
-      .populate("likes", ["username"]) // Populate likes with user details
-      .populate("comments.user", ["username"]); // Populate comment authors
+      .populate("user", ["username"])
+      .populate("likes", ["username"])
+      .populate("comments.user", ["username"])
+      .lean();
 
-    if (!post) {
-      return res.status(404).json("Post not found");
-    }
+    if (!post) return res.status(404).json("Post not found");
+
+    post.comments.sort((a, b) => b.createdAt - a.createdAt);
 
     res.status(200).json(post);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: "Server Error" });
   }
 });
@@ -53,15 +54,19 @@ router.put("/:id/like", verifyToken, async (req, res) => {
     if (!post) return res.status(404).json("Post not found");
 
     if (post.likes.includes(req.user.id)) {
-      post.likes.pull(req.user.id); // Unlike
+      post.likes.pull(req.user.id);
     } else {
-      post.likes.push(req.user.id); // Like
+      post.likes.push(req.user.id);
     }
+
     await post.save();
-    // Fetch the updated post and populate likes and user fields
+
+    // Add comments.user population here
     const updatedPost = await Post.findById(req.params.id)
       .populate("user", ["username"])
-      .populate("likes", ["username"]); // Populate likes with user details
+      .populate("likes", ["username"])
+      .populate("comments.user", ["username"]); // Add this line
+
     res.status(200).json(updatedPost);
   } catch (err) {
     res.status(500).json({ message: "Server Error" });
@@ -77,14 +82,20 @@ router.post("/:id/comment", verifyToken, async (req, res) => {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json("Post not found");
 
-    const newComment = { text: req.body.text, user: req.user.id };
+    const newComment = {
+      text: req.body.text,
+      user: req.user.id,
+      createdAt: new Date(),
+    };
+
     post.comments.push(newComment);
     await post.save();
-    // Fetch the updated post with populated likes
+
     const updatedPost = await Post.findById(req.params.id)
       .populate("user", ["username"])
-      .populate("likes", ["username"]) // Populate likes with user details
-      .populate("comments.user", ["username"]); // Populate comment authors
+      .populate("likes", ["username"])
+      .populate("comments.user", ["username"]);
+
     res.status(200).json(updatedPost);
   } catch (err) {
     res.status(500).json({ message: "Server Error" });

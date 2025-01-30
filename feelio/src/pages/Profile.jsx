@@ -17,7 +17,9 @@ const Profile = () => {
         // Check if the response is an array
         if (Array.isArray(response)) {
           // Filter posts by the current user's ID
-          const userPosts = response.filter((post) => post.user?._id === user?._id);
+          const userPosts = response.filter(
+            (post) => post.user?._id === user?._id
+          );
           setPosts(userPosts);
         } else {
           console.error("Invalid response format or empty data:", response);
@@ -69,7 +71,10 @@ const Profile = () => {
             </div>
           ) : posts.length > 0 ? (
             posts.map((post) => (
-              <div key={post._id} className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+              <div
+                key={post._id}
+                className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+              >
                 <PostCard
                   title={post.title}
                   content={post.content}
