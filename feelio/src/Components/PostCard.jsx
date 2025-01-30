@@ -1,8 +1,18 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
-const PostCard = ({ title, content, author, likes, comments }) => {
+const PostCard = ({ id, title, content, author, likes, comments }) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/posts/${id}`); 
+  };
+
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 mb-6 transition-transform hover:scale-[1.01]">
+    <div
+      className="bg-white shadow-md rounded-lg p-6 mb-6 transition-transform hover:scale-[1.01] cursor-pointer"
+      onClick={handleClick}
+    >
       <h3 className="text-2xl font-bold mb-2 text-gray-800 line-clamp-2">{title}</h3>
       <p className="text-gray-600 mb-4 line-clamp-3">{content}</p>
       

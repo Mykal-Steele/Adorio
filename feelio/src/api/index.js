@@ -14,6 +14,11 @@ export const register = async (userData) => {
   return response.data;
 };
 
+export const fetchUserData = async () => {
+  const response = await API.get("/users/me");
+  return response.data;
+};
+
 export const login = async (userData) => {
   const response = await API.post("/users/login", userData);
   return response.data;
@@ -21,6 +26,10 @@ export const login = async (userData) => {
 
 export const getPosts = async () => {
   const response = await API.get("/posts");
+  return response.data;
+};
+export const getSinglePost = async (id) => {
+  const response = await API.get(`/posts/${id}`);
   return response.data;
 };
 
@@ -34,7 +43,10 @@ export const likePost = async (postId) => {
   return response.data;
 };
 
-export const addComment = async (postId, commentData) => {
-  const response = await API.post(`/posts/${postId}/comment`, commentData);
+// In api.js
+export const addComment = async (postId, commentText) => {
+  const response = await API.post(`/posts/${postId}/comment`, {
+    text: commentText,
+  });
   return response.data;
 };

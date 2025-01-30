@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { setUser } from "../redux/userSlice";
+import { setUser, setToken } from "../redux/userSlice"; // Ensure setToken is imported
 import { login } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -22,24 +22,36 @@ const Login = () => {
       console.log("Login response:", response);
 
       if (response.user && response.token) {
+        // Save token to local storage
         localStorage.setItem("token", response.token);
+
+        // Update Redux store
         dispatch(
           setUser({
             user: response.user,
             token: response.token,
           })
         );
-        navigate("/profile");
+
+        // Redirect to home page
+        navigate("/home"); // Ensure this matches your route configuration
       } else {
         console.error("Unexpected response format:", response);
-        setError("Unexpected response data format");
+        setError("Invalid response from server. Please try again.");
       }
     } catch (err) {
       console.error("Error during login:", err);
+
+      // Handle different types of errors
       if (err.response) {
-        setError(err.response.data.message || "Login failed: Unknown error");
+        setError(
+          err.response.data.message ||
+            "Login failed. Please check your credentials."
+        );
+      } else if (err.request) {
+        setError("No response from server. Please check your connection.");
       } else {
-        setError("Login failed: No response from server");
+        setError("An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -47,13 +59,17 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen  flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-100">
-        <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">Welcome Back</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">
+          Welcome Back
+        </h1>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
             <input
               type="email"
               placeholder="Enter email"
@@ -65,7 +81,9 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Password
+            </label>
             <input
               type="password"
               placeholder="Enter password"
@@ -116,7 +134,10 @@ const Login = () => {
 
         <p className="mt-6 text-center text-gray-600">
           Don't have an account?{" "}
-          <Link to="/register" className="text-blue-600 hover:underline font-medium">
+          <Link
+            to="/register"
+            className="text-blue-600 hover:underline font-medium"
+          >
             Sign up
           </Link>
         </p>
