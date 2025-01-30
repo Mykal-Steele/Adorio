@@ -1,4 +1,4 @@
-// backend/models/User.js
+//feelio\backend\models\Post.js
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
