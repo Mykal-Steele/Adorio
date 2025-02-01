@@ -71,17 +71,24 @@ const Home = () => {
 
     try {
       const response = await createPost({ title, content, image });
-      if (response.status === 201) {
-        setPosts([response.data, ...posts]);
+      console.log("API Response:", response);
+
+      // Check if the response contains valid post data directly (no need for response.data)
+      if (response && response._id) {
+        // Check if response contains post properties like _id
+        setPosts([response, ...posts]);
         setTitle("");
         setContent("");
         setImage(null);
         setImagePreview("");
       } else {
-        throw new Error(response.data?.message || "Failed to create post");
+        throw new Error(
+          "Failed to create post: No valid post data in response"
+        );
       }
     } catch (err) {
       console.error("API Error:", err);
+      // Update error state with a more detailed message
       setError({
         message: err.response?.data?.message || err.message || "Server Error",
         status: err.response?.status || 500,

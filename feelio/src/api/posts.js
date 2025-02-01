@@ -19,23 +19,22 @@ export const getPosts = async () => {
 // Create a new post
 export const createPost = async (postData) => {
   try {
-    // Determine if we have a file to upload
     const isFormData = postData.image instanceof File;
     let data;
 
     if (isFormData) {
       const formData = new FormData();
-      Object.entries(postData).forEach(([key, value]) => {
-        if (key === "image" && value) {
-          formData.append("image", value);
-        } else {
-          formData.append(key, value);
-        }
-      });
+      formData.append("title", postData.title);
+      formData.append("content", postData.content);
+      if (postData.image) {
+        formData.append("image", postData.image);
+      }
       data = formData;
     } else {
-      data = postData; // Send as normal JSON
+      data = { title: postData.title, content: postData.content };
     }
+
+    console.log("Sending post data:", data);
 
     const response = await API.post("/posts", data, {
       headers: isFormData
