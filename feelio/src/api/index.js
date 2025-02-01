@@ -1,7 +1,11 @@
-//feelio\src\api\index.js
+// feelio/src/api/index.js
 import axios from "axios";
 
-const API = axios.create({ baseURL: "http://localhost:5000/api" });
+const API = axios.create({
+  baseURL: "http://localhost:5000/api/",
+  withCredentials: true,
+  timeout: 10000,
+});
 
 // Add token to request headers
 API.interceptors.request.use((req) => {
@@ -10,44 +14,46 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
+// User-related API calls
 export const register = async (userData) => {
-  const response = await API.post("/users/register", userData);
-  return response.data;
-};
-
-export const fetchUserData = async () => {
-  const response = await API.get("/users/me");
-  return response.data;
+  try {
+    const response = await API.post("/users/register", userData);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error registering user:",
+      error.response?.data || error.message
+    );
+    throw new Error(error.response?.data?.message || "Registration failed");
+  }
 };
 
 export const login = async (userData) => {
-  const response = await API.post("/users/login", userData);
-  return response.data;
+  try {
+    const response = await API.post("/users/login", userData);
+    return response.data;
+  } catch (error) {
+    console.error("Error logging in:", error);
+    throw error;
+  }
 };
 
-export const getPosts = async () => {
-  const response = await API.get("/posts");
-  return response.data;
-};
-export const getSinglePost = async (id) => {
-  const response = await API.get(`/posts/${id}`);
-  return response.data;
-};
-
-export const createPost = async (postData) => {
-  const response = await API.post("/posts", postData);
-  return response.data;
+export const fetchUserData = async () => {
+  try {
+    const response = await API.get("/users/me");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    throw error;
+  }
 };
 
-export const likePost = async (postId) => {
-  const response = await API.put(`/posts/${postId}/like`);
-  return response.data;
-};
-
-// In api.js
-export const addComment = async (postId, commentText) => {
-  const response = await API.post(`/posts/${postId}/comment`, {
-    text: commentText,
-  });
-  return response.data;
-};
+// Post-related API calls (moved to posts.js)
+export {
+  getPosts,
+  createPost,
+  likePost,
+  addComment,
+  getSinglePost,
+} from "./posts";
+export default API;

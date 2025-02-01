@@ -1,22 +1,31 @@
-// feelio\src\Components\ErrorBoundary.jsx
-import React from "react";
-
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
+class ErrorBoundary extends Component {
+  state = { hasError: false };
 
   static getDerivedStateFromError(error) {
-    return { hasError: true };
+    return {
+      hasError: true,
+      errorInfo: {
+        message: error.message,
+        stack: error.stack,
+        time: new Date().toISOString(),
+      },
+    };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Error Boundary Caught:", error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
-      return <h2>Something went wrong. Please try again later.</h2>;
+      return (
+        <div className="error-fallback">
+          <h2>Something went wrong</h2>
+          <p>{this.state.errorInfo.message}</p>
+          <button onClick={() => window.location.reload()}>Refresh Page</button>
+        </div>
+      );
     }
     return this.props.children;
   }
 }
-
-export default ErrorBoundary;

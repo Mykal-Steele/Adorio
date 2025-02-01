@@ -1,6 +1,5 @@
-// feelio\src\redux\store.js
 import { configureStore } from "@reduxjs/toolkit";
-import userReducer from "./userSlice";
+import userReducer from "./userSlice"; // Example slice
 
 const store = configureStore({
   reducer: {
