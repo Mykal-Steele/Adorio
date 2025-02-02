@@ -7,13 +7,13 @@ const verifyToken = (req, res, next) => {
     const token = authHeader.split(" ")[1];
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
-        return res.status(403).json("Token is not valid!");
+        return res.status(403).json({ message: "Token is not valid!" });
       }
       req.user = { id: decoded.userId }; // Attach user ID to the request
       next();
     });
   } else {
-    return res.status(401).json("You are not authenticated!");
+    return res.status(401).json({ message: "You are not authenticated!" });
   }
 };
 
