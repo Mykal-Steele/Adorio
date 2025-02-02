@@ -1,11 +1,12 @@
-//feelio\backend\models\Post.js
+//feelio\backend\index.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const path = require("path");
+
 dotenv.config();
 
-require("dotenv").config();
 const app = express();
 
 app.use(
@@ -16,6 +17,11 @@ app.use(
 );
 
 app.use(express.json());
+
+// ✅ Serve static files (images)
+// Serve static files from the 'uploads' directory
+// Change from "../uploads" to the correct absolute path
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Connect to MongoDB
 mongoose

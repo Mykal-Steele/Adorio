@@ -1,12 +1,10 @@
-// App.jsx
+// src/App.jsx
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Provider } from "react-redux"; // Add this import
-import store from "./redux/store";
+import { Provider, useDispatch, useSelector } from "react-redux";
 import {
   BrowserRouter as Router,
-  Route,
   Routes,
+  Route,
   Navigate,
 } from "react-router-dom";
 import Home from "./pages/Home";
@@ -14,14 +12,17 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
+import NotFound from "./Components/NotFound";
 import { setUser } from "./redux/userSlice";
 import { fetchUserData } from "./api";
+import store from "./redux/store";
 import "./index.css";
 
-const App = () => {
+const AppContent = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.user);
-  const [darkMode, setDarkMode] = useState(false); // Add dark mode state
+  const [darkMode, setDarkMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -35,35 +36,45 @@ const App = () => {
           localStorage.removeItem("token");
         }
       }
+      setLoading(false);
     };
 
     checkAuth();
   }, [dispatch]);
 
+  if (loading) return <div>Loading...</div>; // Or a proper loading indicator
+
   return (
-    <Provider store={store}>
-      {" "}
-      {/* Wrap your app with Provider */}
-      <div className={darkMode ? "dark" : ""}>
-        <Router>
-          <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />{" "}
-          {/* Pass dark mode props */}
-          <Routes>
-            <Route
-              path="/"
-              element={
-                token ? <Navigate to="/home" /> : <Navigate to="/login" />
-              }
-            />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/profile" element={<Profile />} />
-          </Routes>
-        </Router>
-      </div>
-    </Provider>
+    <div className={darkMode ? "dark" : ""}>
+      <Router>
+        <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+        <Routes>
+          <Route
+            path="/"
+            element={token ? <Navigate to="/home" /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/home"
+            element={token ? <Home /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/profile"
+            element={token ? <Profile /> : <Navigate to="/login" />}
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          {/* Catch-all route for non-existent pages */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+    </div>
   );
 };
+
+const App = () => (
+  <Provider store={store}>
+    <AppContent />
+  </Provider>
+);
 
 export default App;

@@ -13,7 +13,7 @@ import SkeletonLoader from "../Components/SkeletonLoader";
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); // Ensure error state is defined
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -24,8 +24,11 @@ const Home = () => {
   const handleLike = async (postId) => {
     try {
       const updatedPost = await likePost(postId);
-      setPosts(
-        posts.map((post) => (post._id === updatedPost._id ? updatedPost : post))
+      console.log("Updated post from API:", updatedPost);
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === updatedPost._id ? updatedPost : post
+        )
       );
     } catch (err) {
       console.error("Error liking post:", err);
@@ -73,9 +76,7 @@ const Home = () => {
       const response = await createPost({ title, content, image });
       console.log("API Response:", response);
 
-      // Check if the response contains valid post data directly (no need for response.data)
       if (response && response._id) {
-        // Check if response contains post properties like _id
         setPosts([response, ...posts]);
         setTitle("");
         setContent("");
@@ -88,7 +89,6 @@ const Home = () => {
       }
     } catch (err) {
       console.error("API Error:", err);
-      // Update error state with a more detailed message
       setError({
         message: err.response?.data?.message || err.message || "Server Error",
         status: err.response?.status || 500,
@@ -105,18 +105,18 @@ const Home = () => {
       animate={{ opacity: 1, y: 0 }}
       className="fixed top-4 right-4 z-50"
     >
-      <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-lg shadow-lg border border-red-100 dark:border-red-900/50 flex items-start gap-3 max-w-md">
-        <ExclamationTriangleIcon className="h-6 w-6 text-red-500 flex-shrink-0" />
+      <div className="bg-gray-900/90 backdrop-blur-lg p-4 rounded-xl shadow-2xl border border-purple-500/20 flex items-start gap-3 max-w-md">
+        <div className="bg-purple-500/10 p-2 rounded-lg">
+          <ExclamationTriangleIcon className="h-6 w-6 text-purple-400" />
+        </div>
         <div>
-          <h3 className="font-medium text-red-700 dark:text-red-400">
+          <h3 className="font-medium bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
             {error.status} Error
           </h3>
-          <p className="text-sm text-red-600 dark:text-red-300 mt-1">
-            {error.message}
-          </p>
+          <p className="text-sm text-gray-300 mt-1">{error.message}</p>
           <button
             onClick={() => setError(null)}
-            className="mt-2 text-sm text-red-700 dark:text-red-300 hover:underline"
+            className="mt-2 text-sm text-purple-400 hover:text-purple-300 transition-colors"
           >
             Dismiss
           </button>
@@ -130,41 +130,54 @@ const Home = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Error Display */}
+    <div className="relative min-h-screen bg-gray-950">
       <AnimatePresence>
         {error && <ErrorMessage error={error} />}
       </AnimatePresence>
 
-      <div className="container mx-auto max-w-2xl px-4 py-8">
+      <div className="container mx-auto max-w-2xl px-4 py-8 pt-20">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-center gap-2">
-          <SparklesIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 flex items-center justify-center gap-3"
+        >
+          <motion.div
+            whileHover={{ rotate: 15 }}
+            className="bg-purple-600/20 p-3 rounded-xl"
+          >
+            <SparklesIcon className="h-8 w-8 text-purple-400" />
+          </motion.div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(129,140,248,0.3)]">
             Recent Posts
           </h1>
-        </div>
-
+        </motion.div>
         {/* Post Creation Card */}
-        <div className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all">
-          <h2 className="text-xl font-semibold mb-4 dark:text-white">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-8 p-6 bg-gray-900/90 backdrop-blur-2xl rounded-3xl border border-gray-800/60 shadow-2xl hover:shadow-2xl transition-all"
+        >
+          <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
             Create a New Post
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <input
+            <motion.input
+              whileFocus={{ scale: 1.02 }}
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Post title"
-              className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:text-white"
+              className="w-full px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-950 focus:border-transparent text-gray-200 placeholder-gray-500"
               required
               disabled={isCreating}
             />
-            <textarea
+            <motion.textarea
+              whileFocus={{ scale: 1.02 }}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="What's on your mind?"
-              className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:text-white"
+              className="w-full px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-950 focus:border-transparent text-gray-200 placeholder-gray-500"
               rows="4"
               required
               disabled={isCreating}
@@ -172,61 +185,77 @@ const Home = () => {
 
             {/* Image Upload Section */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-medium text-gray-400">
                 Upload Image (Optional)
               </label>
-              <div className="flex items-center justify-center w-full">
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-purple-500 transition-all">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <CameraIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Click to upload or drag and drop
-                    </p>
-                  </div>
-                  <input
-                    type="file"
-                    onChange={handleImageChange}
-                    className="hidden"
-                    accept="image/*"
-                    disabled={isCreating}
-                  />
-                </label>
-              </div>
+              <motion.label
+                whileHover={{ scale: 1.02 }}
+                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-purple-500/50 transition-all relative overflow-hidden group"
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 z-10">
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <CameraIcon className="h-8 w-8 text-gray-500 group-hover:text-purple-400 transition-colors" />
+                  </motion.div>
+                  <p className="text-sm text-gray-500 group-hover:text-purple-300 transition-colors">
+                    Click to upload or drag and drop
+                  </p>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <input
+                  type="file"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  accept="image/*"
+                  disabled={isCreating}
+                />
+              </motion.label>
               {imagePreview && (
-                <div className="mt-4">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="mt-4 rounded-xl overflow-hidden border border-gray-800/60"
+                >
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="rounded-lg w-full h-48 object-cover"
+                    className="w-full h-48 object-cover"
                   />
-                </div>
+                </motion.div>
               )}
             </div>
 
-            <button
+            {/* Animated Submit Button */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:opacity-90 transition-all focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50"
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:shadow-2xl transition-all relative overflow-hidden group"
               disabled={isCreating}
             >
-              {isCreating ? "Creating..." : "Create Post"}
-            </button>
+              <span className="relative z-10">
+                {isCreating ? "Creating..." : "Create Post"}
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            </motion.button>
           </form>
-        </div>
+        </motion.div>
 
-        {/* Posts Grid */}
-        <div className="space-y-6">
+        {/* Posts Grid with Motion */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="space-y-6 pb-8"
+        >
           {posts.length > 0 ? (
             posts.map((post) => (
               <PostCard
                 key={post._id}
-                id={post._id}
-                title={post.title}
-                content={post.content}
-                author={post.user?.username || "Unknown"}
-                likes={post.likes}
-                comments={post.comments}
-                createdAt={post.createdAt}
+                {...post}
                 currentUserId={user?._id}
+                onLike={handleLike}
                 onCommentAdded={(updatedPost) => {
                   setPosts((prevPosts) =>
                     prevPosts.map((p) =>
@@ -234,28 +263,20 @@ const Home = () => {
                     )
                   );
                 }}
-                onLike={async (postId) => {
-                  try {
-                    const updatedPost = await likePost(postId);
-                    setPosts((prevPosts) =>
-                      prevPosts.map((p) =>
-                        p._id === updatedPost._id ? updatedPost : p
-                      )
-                    );
-                  } catch (err) {
-                    console.error("Error liking post:", err);
-                  }
-                }}
               />
             ))
           ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 dark:text-gray-400">
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              className="text-center py-8 bg-gray-900/50 rounded-2xl border border-gray-800/40"
+            >
+              <p className="text-gray-400">
                 No posts available. Be the first to create one!
               </p>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

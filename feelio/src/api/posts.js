@@ -1,5 +1,4 @@
 // feelio/src/api/posts.js
-// feelio/src/api/posts.js
 import API from "./index";
 //all post
 export const getPosts = async () => {
@@ -55,7 +54,7 @@ export const likePost = async (postId) => {
     const response = await API.put(`/posts/${postId}/like`);
     return response.data;
   } catch (error) {
-    console.error("Error liking post:", error);
+    console.error("Error liking post:", error.response?.data || error.message);
     throw error;
   }
 };
