@@ -1,135 +1,285 @@
-// feelio\src\pages\Home.jsx
 import React, { useEffect, useState } from "react";
-import { getPosts, createPost } from "../api"; // Import createPost function
+import { getPosts, createPost, likePost } from "../api";
 import PostCard from "../Components/PostCard";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  SparklesIcon,
+  ExclamationTriangleIcon,
+  CameraIcon,
+} from "@heroicons/react/24/outline";
+import { motion, AnimatePresence } from "framer-motion";
+import SkeletonLoader from "../Components/SkeletonLoader";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null); // Ensure error state is defined
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const { user } = useSelector((state) => state.user);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await getPosts();
-        console.log("Response from getPosts:", response);
-
-        if (Array.isArray(response)) {
-          setPosts(response);
-        } else {
-          console.error("Invalid response format or empty data:", response);
-          setPosts([]);
-        }
-      } catch (err) {
-        console.error("Error fetching posts:", err);
-        setError("Failed to fetch posts. Please try again later.");
-        setPosts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPosts();
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleLike = async (postId) => {
     try {
-      const newPost = await createPost({ title, content });
-      setPosts([newPost, ...posts]); // Add the new post to the beginning of the posts array
-      setTitle(""); // Clear the title input
-      setContent(""); // Clear the content input
+      const updatedPost = await likePost(postId);
+      console.log("Updated post from API:", updatedPost);
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === updatedPost._id ? updatedPost : post
+        )
+      );
     } catch (err) {
-      console.error("Error creating post:", err);
-      setError("Failed to create post. Please try again.");
+      console.error("Error liking post:", err);
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const fetchPosts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getPosts();
+      const postsArray = Array.isArray(response)
+        ? response
+        : response?.data || [];
+      setPosts(postsArray);
+    } catch (err) {
+      console.error("Full Error Object:", err);
+      setError({
+        message: err.message,
+        status: err.response?.status || "Network Error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (error) {
-    return <div>{error}</div>;
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsCreating(true);
+    setError(null);
+
+    try {
+      const response = await createPost({ title, content, image });
+      console.log("API Response:", response);
+
+      if (response && response._id) {
+        setPosts([response, ...posts]);
+        setTitle("");
+        setContent("");
+        setImage(null);
+        setImagePreview("");
+      } else {
+        throw new Error(
+          "Failed to create post: No valid post data in response"
+        );
+      }
+    } catch (err) {
+      console.error("API Error:", err);
+      setError({
+        message: err.response?.data?.message || err.message || "Server Error",
+        status: err.response?.status || 500,
+      });
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  // Error display component
+  const ErrorMessage = ({ error }) => (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="fixed top-4 right-4 z-50"
+    >
+      <div className="bg-gray-900/90 backdrop-blur-lg p-4 rounded-xl shadow-2xl border border-purple-500/20 flex items-start gap-3 max-w-md">
+        <div className="bg-purple-500/10 p-2 rounded-lg">
+          <ExclamationTriangleIcon className="h-6 w-6 text-purple-400" />
+        </div>
+        <div>
+          <h3 className="font-medium bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
+            {error.status} Error
+          </h3>
+          <p className="text-sm text-gray-300 mt-1">{error.message}</p>
+          <button
+            onClick={() => setError(null)}
+            className="mt-2 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  if (loading) {
+    return <SkeletonLoader count={1} />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-12 text-center">
+    <div className="relative min-h-screen bg-gray-950">
+      <AnimatePresence>
+        {error && <ErrorMessage error={error} />}
+      </AnimatePresence>
+
+      <div className="container mx-auto max-w-2xl px-4 py-8 pt-20">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 flex items-center justify-center gap-3"
+        >
+          <motion.div
+            whileHover={{ rotate: 15 }}
+            className="bg-purple-600/20 p-3 rounded-xl"
+          >
+            <SparklesIcon className="h-8 w-8 text-purple-400" />
+          </motion.div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(129,140,248,0.3)]">
             Recent Posts
           </h1>
+        </motion.div>
+        {/* Post Creation Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-8 p-6 bg-gray-900/90 backdrop-blur-2xl rounded-3xl border border-gray-800/60 shadow-2xl hover:shadow-2xl transition-all"
+        >
+          <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
+            Create a New Post
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <motion.input
+              whileFocus={{ scale: 1.02 }}
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Post title"
+              className="w-full px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-950 focus:border-transparent text-gray-200 placeholder-gray-500"
+              required
+              disabled={isCreating}
+            />
+            <motion.textarea
+              whileFocus={{ scale: 1.02 }}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="What's on your mind?"
+              className="w-full px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-950 focus:border-transparent text-gray-200 placeholder-gray-500"
+              rows="4"
+              required
+              disabled={isCreating}
+            />
 
-          {/* Post Creation Form */}
-          <div className="mb-12 p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              Create a New Post
-            </h2>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label
-                  htmlFor="title"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Title
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="content"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Content
-                </label>
-                <textarea
-                  id="content"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  rows="4"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            {/* Image Upload Section */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-400">
+                Upload Image (Optional)
+              </label>
+              <motion.label
+                whileHover={{ scale: 1.02 }}
+                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-purple-500/50 transition-all relative overflow-hidden group"
               >
-                Create Post
-              </button>
-            </form>
-          </div>
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 z-10">
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <CameraIcon className="h-8 w-8 text-gray-500 group-hover:text-purple-400 transition-colors" />
+                  </motion.div>
+                  <p className="text-sm text-gray-500 group-hover:text-purple-300 transition-colors">
+                    Click to upload or drag and drop
+                  </p>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <input
+                  type="file"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  accept="image/*"
+                  disabled={isCreating}
+                />
+              </motion.label>
+              {imagePreview && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="mt-4 rounded-xl overflow-hidden border border-gray-800/60"
+                >
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-48 object-cover"
+                  />
+                </motion.div>
+              )}
+            </div>
 
-          {/* Display Posts */}
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
-              // In your Home.jsx posts.map()
+            {/* Animated Submit Button */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:shadow-2xl transition-all relative overflow-hidden group"
+              disabled={isCreating}
+            >
+              <span className="relative z-10">
+                {isCreating ? "Creating..." : "Create Post"}
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            </motion.button>
+          </form>
+        </motion.div>
+
+        {/* Posts Grid with Motion */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="space-y-6 pb-8"
+        >
+          {posts.length > 0 ? (
+            posts.map((post) => (
               <PostCard
                 key={post._id}
-                id={post._id} // Add this line
-                title={post.title}
-                content={post.content}
-                author={post.user?.username || "Unknown"}
-                likes={post.likes}
-                comments={post.comments}
+                {...post}
+                currentUserId={user?._id}
+                onLike={handleLike}
+                onCommentAdded={(updatedPost) => {
+                  setPosts((prevPosts) =>
+                    prevPosts.map((p) =>
+                      p._id === updatedPost._id ? updatedPost : p
+                    )
+                  );
+                }}
               />
-            ))}
-          </div>
-        </div>
+            ))
+          ) : (
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              className="text-center py-8 bg-gray-900/50 rounded-2xl border border-gray-800/40"
+            >
+              <p className="text-gray-400">
+                No posts available. Be the first to create one!
+              </p>
+            </motion.div>
+          )}
+        </motion.div>
       </div>
     </div>
   );
 };
 
 export default Home;
-``;

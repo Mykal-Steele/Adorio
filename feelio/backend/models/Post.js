@@ -14,6 +14,7 @@ const postSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
+    image: { type: String }, // Added this field to store the image path
   },
   { timestamps: true }
 );
