@@ -1,26 +1,25 @@
-// feelio\src\redux\userSlice.js
 import { createSlice } from "@reduxjs/toolkit";
+
+const initialState = {
+  user: null,
+  token: null,
+};
 
 const userSlice = createSlice({
   name: "user",
-  initialState: {
-    user: null,
-    token: null,
-  },
+  initialState,
   reducers: {
     setUser: (state, action) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
     },
-    setToken: (state, action) => {
-      state.token = action.payload;
-    },
     logout: (state) => {
       state.user = null;
       state.token = null;
+      localStorage.removeItem("token");
     },
   },
 });
 
-export const { setUser, setToken, logout } = userSlice.actions;
+export const { setUser, logout } = userSlice.actions;
 export default userSlice.reducer;
