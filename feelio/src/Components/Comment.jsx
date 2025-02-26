@@ -1,5 +1,5 @@
 // src/components/Comment.jsx
-import React from 'react';
+import React from "react";
 
 const Comment = ({ username, commentText }) => {
   return (
