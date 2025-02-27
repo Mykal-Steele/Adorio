@@ -1,8 +1,7 @@
-// src/App.jsx
 import React, { useEffect, useState } from "react";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import {
-  HashRouter as Router, // Changed from BrowserRouter to HashRouter
+  HashRouter as Router, // Using HashRouter without basename
   Routes,
   Route,
   Navigate,
@@ -46,7 +45,7 @@ const AppContent = () => {
 
   return (
     <div className={darkMode ? "dark" : ""}>
-      <Router basename="/feelio.github.io">
+      <Router>
         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
         <Routes>
           <Route
