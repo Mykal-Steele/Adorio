@@ -14,7 +14,7 @@ const allowedOrigins = [
   "http://localhost:5173", // Local dev frontend
   "http://localhost:5174", // Another local dev frontend (if applicable)
   "https://mykal-steele.github.io", // Your deployed frontend
-  process.env.REACT_APP_BACKEND_URL, // The backend URL coming from .env (only for the deployed site)
+  import.meta.env.VITE_BACKEND_URL, // The backend URL coming from Vite environment variable
 ];
 
 app.use(
