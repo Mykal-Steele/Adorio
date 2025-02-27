@@ -109,7 +109,7 @@ const PostCard = ({
         >
           // Updated image URL in PostCard
           <img
-            src={`https://feelio-github-io.onrender.com${postImage.replace(
+            src={`${process.env.REACT_APP_BACKEND_URL}${postImage.replace(
               /^\/(feelio|backend\/routes)/,
               ""
             )}`}

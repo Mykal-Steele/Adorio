@@ -1,7 +1,7 @@
-//feelio\src\api\users.js
+// feelio\src\api\users.js
 import axios from "axios";
 
-const apiUrl = "https://feelio-github-io.onrender.com/api/";
+const apiUrl = process.env.REACT_APP_BACKEND_URL + "/api/";
 
 export const fetchUserData = async () => {
   try {
@@ -16,4 +16,3 @@ export const fetchUserData = async () => {
     throw new Error("Failed to fetch user data");
   }
 };
-s;

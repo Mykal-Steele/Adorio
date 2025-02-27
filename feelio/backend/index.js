@@ -1,33 +1,35 @@
-//feelio\backend\index.js
+// feelio\backend\index.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 
-dotenv.config();
+dotenv.config(); // Load environment variables from .env
 
 const app = express();
 
+// List allowed origins for CORS
+const allowedOrigins = [
+  "http://localhost:5173", // Local dev frontend
+  "http://localhost:5174", // Another local dev frontend (if applicable)
+  "https://mykal-steele.github.io", // Your deployed frontend
+  process.env.REACT_APP_BACKEND_URL, // The backend URL coming from .env (only for the deployed site)
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "https://feelio-github-io.onrender.com",
-      "https://mykal-steele.github.io",
-    ],
-    credentials: true, // If you are sending cookies or authentication headers
-    methods: ["GET", "POST", "PUT", "DELETE"], // Add methods that your app uses
-    allowedHeaders: ["Content-Type", "Authorization"], // Add headers you need
+    origin: allowedOrigins, // Dynamically allows origins based on the list
+    credentials: true, // Allow credentials (cookies, headers, etc.)
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
   })
 );
 
-app.use(express.json());
+app.use(express.json()); // Body parser middleware for JSON data
 
-// ✅ Serve static files (images)
+// ✅ Serve static files (images, etc.)
 // Serve static files from the 'uploads' directory
-// Change from "../uploads" to the correct absolute path
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Connect to MongoDB
@@ -39,14 +41,15 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB Connection Error:", err));
 
-// Routes
+// Import your route files
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 
+// Use the routes
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 
-// Root route for testing
+// Root route for testing the server
 app.get("/", (req, res) => {
   res.send("Feelio API is running!");
 });
