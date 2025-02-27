@@ -3,14 +3,21 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+<<<<<<< HEAD
   "homepage": "https://mykal-steele.github.io/feelio.github.io/",
+=======
+>>>>>>> parent of af20763 (w)
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+<<<<<<< HEAD
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
+=======
+    "preview": "vite preview"
+>>>>>>> parent of af20763 (w)
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
