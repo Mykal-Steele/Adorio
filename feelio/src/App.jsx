@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Provider, useDispatch, useSelector } from "react-redux";
-import {
-  HashRouter as Router, // Using HashRouter without basename
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom"; // Import HashRouter only once
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -45,7 +40,7 @@ const AppContent = () => {
 
   return (
     <div className={darkMode ? "dark" : ""}>
-      <Router>
+      <HashRouter>
         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
         <Routes>
           <Route
@@ -65,7 +60,7 @@ const AppContent = () => {
           {/* Catch-all route for non-existent pages */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </Router>
+      </HashRouter>
     </div>
   );
 };
