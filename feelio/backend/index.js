@@ -16,8 +16,10 @@ app.use(
       "http://localhost:5174",
       "https://feelio-github-io.onrender.com",
       "https://mykal-steele.github.io",
-    ], // Allow both
-    credentials: true, // If using cookies or authentication headers
+    ],
+    credentials: true, // If you are sending cookies or authentication headers
+    methods: ["GET", "POST", "PUT", "DELETE"], // Add methods that your app uses
+    allowedHeaders: ["Content-Type", "Authorization"], // Add headers you need
   })
 );
 
