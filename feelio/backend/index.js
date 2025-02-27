@@ -11,7 +11,11 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"], // Allow both
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://feelio-github-io.onrender.com",
+    ], // Allow both
     credentials: true, // If using cookies or authentication headers
   })
 );

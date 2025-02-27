@@ -107,8 +107,9 @@ const PostCard = ({
           className="mb-4 rounded-2xl overflow-hidden border border-gray-800/40"
           whileHover={{ scale: 1.02 }}
         >
+          // Updated image URL in PostCard
           <img
-            src={`http://localhost:5000${postImage.replace(
+            src={`https://feelio-github-io.onrender.com${postImage.replace(
               /^\/(feelio|backend\/routes)/,
               ""
             )}`}

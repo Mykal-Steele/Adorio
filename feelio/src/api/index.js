@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api/",
+  baseURL: "https://feelio-github-io.onrender.com/api/", // Replace with your Render backend URL
   withCredentials: true,
   timeout: 10000,
 });
