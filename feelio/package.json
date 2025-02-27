@@ -2,7 +2,7 @@
   "name": "feelio",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "type": "commonjs",
   "homepage": "https://mykal-steele.github.io/feelio.github.io/",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "smt": "npm run build && npm run deploy"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
