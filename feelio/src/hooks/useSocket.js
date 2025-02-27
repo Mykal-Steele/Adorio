@@ -1,10 +1,10 @@
 // feelio/src/hooks/useSocket.js
 import { useEffect } from "react";
 import io from "socket.io-client";
-
+require("dotenv").config();
 const useSocket = (eventHandlers) => {
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_API_URL, {
+    const socket = io(process.env.VITE_API_URL, {
       withCredentials: true,
       transports: ["websocket"],
     });
