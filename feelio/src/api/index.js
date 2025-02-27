@@ -1,15 +1,16 @@
-// feelio/src/api/index.js
 import axios from "axios";
-const dotenv = require("dotenv");
 
-dotenv.config();
+// Use process.env to access environment variables in CommonJS
+const apiUrl =
+  process.env.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com"; // Fallback if not set
+
 const API = axios.create({
-  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api`, // Append /api to the base URL
+  baseURL: `${apiUrl}/api`, // Append /api to the base URL
   withCredentials: true,
   timeout: 10000,
 });
 
-// Add  token to request headers
+// Add token to request headers
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
   if (token) req.headers.Authorization = `Bearer ${token}`;
@@ -58,4 +59,5 @@ export {
   addComment,
   getSinglePost,
 } from "./posts";
+
 export default API;

@@ -109,7 +109,7 @@ const PostCard = ({
         >
           // Updated image URL in PostCard
           <img
-            src={`${process.env.VITE_BACKEND_URL}${postImage.replace(
+            src={`${window.VITE_BACKEND_URL}${postImage.replace(
               /^\/(feelio|backend\/routes)/,
               ""
             )}`}
