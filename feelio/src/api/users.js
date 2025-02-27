@@ -1,8 +1,10 @@
-// feelio\src\api\users.js
 const axios = require("axios");
 
-// Access environment variable for backend URL
-const apiUrl = process.env.VITE_BACKEND_URL + "/api/";
+// Check if we're in the browser (client-side) to access `window`
+const apiUrl =
+  typeof window !== "undefined"
+    ? window.VITE_BACKEND_URL + "/api/"
+    : "https://feelio-github-io.onrender.com/api/";
 
 export const fetchUserData = async () => {
   try {
