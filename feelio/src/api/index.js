@@ -1,8 +1,10 @@
 // feelio/src/api/index.js
 import axios from "axios";
+const dotenv = require("dotenv");
 
+dotenv.config();
 const API = axios.create({
-  baseURL: `${process.env.REACT_APP_BACKEND_URL}/api`, // Append /api to the base URL
+  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api`, // Append /api to the base URL
   withCredentials: true,
   timeout: 10000,
 });

@@ -1,7 +1,7 @@
 // feelio\src\api\users.js
 import axios from "axios";
 
-const apiUrl = process.env.REACT_APP_BACKEND_URL + "/api/";
+const apiUrl = import.meta.env.VITE_BACKEND_URL + "/api/";
 
 export const fetchUserData = async () => {
   try {
