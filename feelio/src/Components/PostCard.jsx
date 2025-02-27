@@ -107,7 +107,7 @@ const PostCard = ({
           className="mb-4 rounded-2xl overflow-hidden border border-gray-800/40"
           whileHover={{ scale: 1.02 }}
         >
-          // Updated image URL in PostCard
+          {/* Updated image URL in PostCard */}
           <img
             src={`${window.VITE_BACKEND_URL}${postImage.replace(
               /^\/(feelio|backend\/routes)/,
