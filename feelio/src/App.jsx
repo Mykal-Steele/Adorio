@@ -46,7 +46,7 @@ const AppContent = () => {
 
   return (
     <div className={darkMode ? "dark" : ""}>
-      <Router>
+      <Router basename="/feelio.github.io">
         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
         <Routes>
           <Route
