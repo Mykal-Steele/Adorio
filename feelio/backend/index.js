@@ -15,6 +15,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "https://feelio-github-io.onrender.com",
+      "https://mykal-steele.github.io",
     ], // Allow both
     credentials: true, // If using cookies or authentication headers
   })
