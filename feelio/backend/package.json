@@ -5,8 +5,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-     "deploy": "gh-pages -d dist"
+     "deploy": "gh-pages -d dist",
     
+  "build": "echo 'No build step for server'",
+  "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",

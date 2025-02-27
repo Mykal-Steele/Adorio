@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import {
-  BrowserRouter as Router,
+  HashRouter as Router, // Changed from BrowserRouter to HashRouter
   Routes,
   Route,
   Navigate,
