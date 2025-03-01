@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export default defineConfig({
-  base: "/feelio.github.io/",
+  base: "/",
   plugins: [react()],
   define: {
     "process.env": Object.fromEntries(
