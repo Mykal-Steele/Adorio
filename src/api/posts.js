@@ -1,11 +1,11 @@
 // feelio/src/api/posts.js
 import API from "./index";
 //all post
-export const getPosts = async () => {
+export const getPosts = async (page = 1, limit = 5) => {
   try {
-    const response = await API.get("/posts");
-    console.log("Posts API Response:", response); // Debug log
-    return response.data;
+    const response = await API.get(`/posts?page=${page}&limit=${limit}`);
+    console.log("Posts API Response:", response);
+    return response.data; // This returns the entire response object
   } catch (error) {
     console.error("API Error Details:", {
       status: error.response?.status,

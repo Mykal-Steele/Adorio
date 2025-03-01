@@ -64,15 +64,32 @@ router.post("/", verifyToken, (req, res) => {
   });
 });
 
-// Get All Posts
+// Get All Posts with Pagination
 router.get("/", async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
     const posts = await Post.find()
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .populate("user", ["username"])
       .populate("likes", ["username"])
       .populate("comments.user", ["username"]);
-    res.status(200).json(posts);
+
+    const totalPosts = await Post.countDocuments();
+    const hasMore = totalPosts > skip + limit;
+
+    // Send response after all queries are completed
+    res.status(200).json({
+      posts: posts, // Ensure this is an array
+      hasMore: hasMore,
+      totalPosts: totalPosts,
+      currentPage: page,
+      totalPages: Math.ceil(totalPosts / limit),
+    });
   } catch (err) {
     res.status(500).json({ message: "Server Error" });
   }
