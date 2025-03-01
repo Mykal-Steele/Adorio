@@ -22,74 +22,86 @@ const Navbar = ({ darkMode, setDarkMode }) => {
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-lg border-b border-gray-800/100 shadow-2xl"
     >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2 group">
+      <div className="container mx-auto px-2 sm:px-4">
+        <div className="flex items-center justify-between h-14 sm:h-16">
+          <Link
+            to="/"
+            className="flex items-center space-x-1 sm:space-x-2 group ml-1"
+          >
             <motion.div whileHover={{ rotate: 15 }} whileTap={{ scale: 0.95 }}>
-              <SparklesIcon className="h-7 w-7 text-purple-400 transition-transform" />
+              <SparklesIcon className="h-6 w-6 sm:h-7 sm:w-7 text-purple-400 transition-transform" />
             </motion.div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(129,140,248,0.3)]">
+            <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Feelio
             </span>
           </Link>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 sm:gap-4">
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-full hover:bg-gray-800/20 transition-colors"
+              className="p-1 sm:p-2 rounded-full hover:bg-gray-800/20 transition-colors"
             >
               <div className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text">
                 {darkMode ? (
-                  <SunIcon className="h-6 w-6 text-transparent" />
+                  <SunIcon className="h-5 w-5 sm:h-6 sm:w-6 text-transparent" />
                 ) : (
-                  <MoonIcon className="h-6 w-6 text-transparent" />
+                  <MoonIcon className="h-5 w-5 sm:h-6 sm:w-6 text-transparent" />
                 )}
               </div>
             </motion.button>
 
             {token ? (
-              <>
-                <NavLink to="/home" text="Home" />
-                <NavLink to="/profile" text="Profile" />
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="hidden sm:flex gap-2 sm:gap-4">
+                  <NavLink to="/home" text="Home" />
+                  <NavLink to="/profile" text="Profile" />
+                </div>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-xl hover:shadow-2xl transition-all relative overflow-hidden group"
+                  className="px-3 py-1.5 sm:px-6 sm:py-3 text-sm sm:text-base rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all relative overflow-hidden group"
                   onClick={handleLogout}
                 >
                   <span className="relative z-10">Logout</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </motion.button>
-              </>
+              </div>
             ) : (
-              <>
-                <NavLink to="/login" text="Login" />
+              <div className="flex items-center gap-2 sm:gap-4">
+                <NavLink to="/login" text="Login" className="hidden sm:block" />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-6 py-3 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-xl hover:shadow-2xl transition-all relative overflow-hidden group"
+                  className="px-3 py-1.5 sm:px-6 sm:py-3 text-sm sm:text-base rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all relative overflow-hidden group"
                 >
-                  <span className="relative z-10">
-                    <Link to="/register">Get Started</Link>
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Link to="/register" className="relative z-10">
+                    Get Started
+                  </Link>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </motion.button>
-              </>
+              </div>
             )}
           </div>
         </div>
+
+        {token && (
+          <div className="sm:hidden flex justify-center space-x-4 pb-2">
+            <NavLink to="/home" text="Home" />
+            <NavLink to="/profile" text="Profile" />
+          </div>
+        )}
       </div>
     </motion.nav>
   );
 };
 
-const NavLink = ({ to, text }) => (
-  <motion.div whileHover={{ scale: 1.05 }} className="relative">
+const NavLink = ({ to, text, className }) => (
+  <motion.div whileHover={{ scale: 1.05 }} className={`relative ${className}`}>
     <Link
       to={to}
-      className="text-gray-300 px-4 py-2 font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300"
+      className="text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300"
     >
       {text}
     </Link>
