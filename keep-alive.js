@@ -47,10 +47,7 @@ async function runLogin() {
 
     // Submit the form and wait for the React app to update
     console.log("Submitting login...");
-    await Promise.all([
-      page.waitForSelector(".navbar", { timeout: 10000 }), // Wait for the navbar to appear after login
-      page.click('button[type="submit"]'),
-    ]);
+    await Promise.all([page.click('button[type="submit"]')]);
 
     // Verify successful login by checking the URL and page content
     console.log("Verifying login success...");
