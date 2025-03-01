@@ -13,7 +13,7 @@ import SkeletonLoader from "../Components/SkeletonLoader";
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // Ensure error state is defined
+  const [error, setError] = useState(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -21,10 +21,12 @@ const Home = () => {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
 
+  // Character limit for the title
+  const TITLE_CHARACTER_LIMIT = 100;
+
   const handleLike = async (postId) => {
     try {
       const updatedPost = await likePost(postId);
-      console.log("Updated post from API:", updatedPost);
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post._id === updatedPost._id ? updatedPost : post
@@ -32,6 +34,10 @@ const Home = () => {
       );
     } catch (err) {
       console.error("Error liking post:", err);
+      setError({
+        message: "Failed to like post. Please try again.",
+        status: "Error",
+      });
     }
   };
 
@@ -45,9 +51,9 @@ const Home = () => {
         : response?.data || [];
       setPosts(postsArray);
     } catch (err) {
-      console.error("Full Error Object:", err);
+      console.error("Error fetching posts:", err);
       setError({
-        message: err.message,
+        message: err.message || "Failed to fetch posts.",
         status: err.response?.status || "Network Error",
       });
     } finally {
@@ -73,9 +79,14 @@ const Home = () => {
     setError(null);
 
     try {
-      const response = await createPost({ title, content, image });
-      console.log("API Response:", response);
+      // Validate title length
+      if (title.length > TITLE_CHARACTER_LIMIT) {
+        throw new Error(
+          `Title cannot exceed ${TITLE_CHARACTER_LIMIT} characters.`
+        );
+      }
 
+      const response = await createPost({ title, content, image });
       if (response && response._id) {
         setPosts([response, ...posts]);
         setTitle("");
@@ -83,12 +94,10 @@ const Home = () => {
         setImage(null);
         setImagePreview("");
       } else {
-        throw new Error(
-          "Failed to create post: No valid post data in response"
-        );
+        throw new Error("Failed to create post: Invalid response");
       }
     } catch (err) {
-      console.error("API Error:", err);
+      console.error("Error creating post:", err);
       setError({
         message: err.response?.data?.message || err.message || "Server Error",
         status: err.response?.status || 500,
@@ -103,6 +112,7 @@ const Home = () => {
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
       className="fixed top-4 right-4 z-50"
     >
       <div className="bg-gray-900/90 backdrop-blur-lg p-4 rounded-xl shadow-2xl border border-purple-500/20 flex items-start gap-3 max-w-md">
@@ -126,7 +136,7 @@ const Home = () => {
   );
 
   if (loading) {
-    return <SkeletonLoader count={1} />;
+    return <SkeletonLoader count={3} />;
   }
 
   return (
@@ -152,32 +162,42 @@ const Home = () => {
             Recent Posts
           </h1>
         </motion.div>
+
         {/* Post Creation Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="mb-8 p-6 bg-gray-900/90 backdrop-blur-2xl rounded-3xl border border-gray-800/60 shadow-2xl hover:shadow-2xl transition-all"
+          className="mb-8 p-6 bg-gray-900/80 backdrop-blur-md rounded-2xl border border-gray-800/50 shadow-lg hover:shadow-xl transition-all"
         >
           <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
             Create a New Post
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <motion.input
-              whileFocus={{ scale: 1.02 }}
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Post title"
-              className="w-full px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-950 focus:border-transparent text-gray-200 placeholder-gray-500"
-              required
-              disabled={isCreating}
-            />
+            {/* Title Input */}
+            <div className="relative">
+              <motion.input
+                whileFocus={{ scale: 1.02 }}
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Post title"
+                className="w-full px-4 py-3 rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500"
+                required
+                disabled={isCreating}
+                maxLength={TITLE_CHARACTER_LIMIT} // Enforce character limit
+              />
+              <div className="absolute bottom-2 right-2 text-xs text-gray-400">
+                {title.length}/{TITLE_CHARACTER_LIMIT}
+              </div>
+            </div>
+
+            {/* Content Input */}
             <motion.textarea
               whileFocus={{ scale: 1.02 }}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="What's on your mind?"
-              className="w-full px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-950 focus:border-transparent text-gray-200 placeholder-gray-500"
+              className="w-full px-4 py-3 rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500"
               rows="4"
               required
               disabled={isCreating}
@@ -190,7 +210,7 @@ const Home = () => {
               </label>
               <motion.label
                 whileHover={{ scale: 1.02 }}
-                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-purple-500/50 transition-all relative overflow-hidden group"
+                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700/50 rounded-lg cursor-pointer hover:border-purple-500/50 transition-all relative overflow-hidden group"
               >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6 z-10">
                   <motion.div
@@ -216,7 +236,7 @@ const Home = () => {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="mt-4 rounded-xl overflow-hidden border border-gray-800/60"
+                  className="mt-4 rounded-lg overflow-hidden border border-gray-800/50"
                 >
                   <img
                     src={imagePreview}
@@ -227,12 +247,12 @@ const Home = () => {
               )}
             </div>
 
-            {/* Animated Submit Button */}
+            {/* Submit Button */}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:shadow-2xl transition-all relative overflow-hidden group"
+              className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:shadow-xl transition-all relative overflow-hidden group"
               disabled={isCreating}
             >
               <span className="relative z-10">
@@ -243,7 +263,7 @@ const Home = () => {
           </form>
         </motion.div>
 
-        {/* Posts Grid with Motion */}
+        {/* Posts Grid */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -269,7 +289,7 @@ const Home = () => {
             <motion.div
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
-              className="text-center py-8 bg-gray-900/50 rounded-2xl border border-gray-800/40"
+              className="text-center py-8 bg-gray-900/50 rounded-lg border border-gray-800/40"
             >
               <p className="text-gray-400">
                 No posts available. Be the first to create one!

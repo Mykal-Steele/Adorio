@@ -48,101 +48,123 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-100 dark:border-gray-700">
-        <div className="mb-8 flex items-center justify-center gap-2">
-          <SparklesIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Create Account
-          </h1>
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+      {/* Modern card */}
+      <div className="relative bg-gray-900/80 backdrop-blur-md border border-gray-800/50 rounded-2xl p-8 max-w-md w-full text-center space-y-6 overflow-hidden shadow-lg">
+        {/* Icon with glow */}
+        <div className="flex justify-center relative">
+          <SparklesIcon className="h-16 w-16 text-purple-400 relative z-10" />
+          <div className="absolute w-32 h-32 bg-purple-600/20 blur-[50px] rounded-full" />
         </div>
 
-        <form onSubmit={handleRegister} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {/* Welcome text */}
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
+          Create Account
+        </h1>
+
+        {/* Registration form */}
+        <form onSubmit={handleRegister} className="space-y-4">
+          {/* Username input */}
+          <div className="text-left">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Username
             </label>
             <input
               type="text"
-              placeholder="Enter username"
+              placeholder="Enter your username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:text-white"
+              className="w-full p-3 rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {/* Email input */}
+          <div className="text-left">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Email
             </label>
             <input
               type="email"
-              placeholder="Enter email"
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:text-white"
+              className="w-full p-3 rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {/* Password input */}
+          <div className="text-left">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Password
             </label>
             <input
               type="password"
-              placeholder="Enter password"
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:text-white"
+              className="w-full p-3 rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400"
               required
             />
           </div>
 
+          {/* Interactive button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:opacity-90 transition-all focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:opacity-90 transition-all focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 relative overflow-hidden group mt-4"
           >
-            {loading ? (
-              <svg
-                className="animate-spin h-5 w-5 text-white mx-auto"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-            ) : (
-              "Create Account"
-            )}
+            <span className="relative z-10">
+              {loading ? (
+                <svg
+                  className="animate-spin h-5 w-5 text-white mx-auto"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              ) : (
+                "Create Account"
+              )}
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </button>
 
+          {/* Error message */}
           {error && (
-            <p className="text-red-500 text-sm mt-4 text-center bg-red-50 dark:bg-red-900/30 p-2 rounded-lg">
+            <p className="text-red-500 text-sm mt-4 text-center bg-red-900/20 p-2 rounded-lg">
               {error}
             </p>
           )}
         </form>
 
-        <p className="mt-6 text-center text-gray-600 dark:text-gray-400">
+        {/* Divider */}
+        <div className="relative flex items-center justify-center">
+          <div className="flex-grow border-t border-gray-700/50"></div>
+          <span className="mx-4 text-gray-400">or</span>
+          <div className="flex-grow border-t border-gray-700/50"></div>
+        </div>
+
+        {/* Login link */}
+        <p className="mt-4 text-center text-gray-400">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-purple-600 dark:text-purple-400 hover:underline font-medium"
+            className="text-purple-400 hover:underline font-medium"
           >
             Log in
           </Link>
