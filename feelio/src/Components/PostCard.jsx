@@ -41,7 +41,7 @@ const PostCard = ({
 
     setIsSubmitting(true);
     try {
-      const updatedPost = await addComment(_id, newComment); // Using _id here
+      const updatedPost = await addComment(_id, newComment);
       setComments(updatedPost.comments);
       setNewComment("");
       onCommentAdded(updatedPost);
@@ -51,19 +51,14 @@ const PostCard = ({
       setIsSubmitting(false);
     }
   };
-  const toggleComment = (commentId) => {
-    setExpandedComments((prev) => ({
-      ...prev,
-      [commentId]: !prev[commentId],
-    }));
-  };
+
   const handleCommentsScroll = (e) => {
     setCommentsScrollTop(e.target.scrollTop);
   };
 
   const handleLike = async () => {
     try {
-      await onLike(_id); // Call the onLike function passed from the parent
+      await onLike(_id);
     } catch (err) {
       console.error("Error liking post:", err);
     }
@@ -71,11 +66,18 @@ const PostCard = ({
 
   const toggleContent = () => setIsContentExpanded(!isContentExpanded);
 
+  const toggleComment = (commentId) => {
+    setExpandedComments((prev) => ({
+      ...prev,
+      [commentId]: !prev[commentId],
+    }));
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6 bg-gray-900/80 backdrop-blur-xl rounded-3xl border border-gray-800/60 shadow-2xl hover:shadow-2xl transition-all relative group"
+      className="p-6 bg-gray-900/80 backdrop-blur-md rounded-2xl border border-gray-800/50 shadow-lg hover:shadow-xl transition-all relative group"
     >
       {/* Author Section */}
       <div className="flex items-center justify-between mb-4">
@@ -104,10 +106,9 @@ const PostCard = ({
       {/* Post Image */}
       {postImage && (
         <motion.div
-          className="mb-4 rounded-2xl overflow-hidden border border-gray-800/40"
+          className="mb-4 rounded-lg overflow-hidden border border-gray-800/50"
           whileHover={{ scale: 1.02 }}
         >
-          {/* Updated image URL in PostCard */}
           <img
             src={`${window.VITE_BACKEND_URL}${postImage.replace(
               /^\/(feelio|backend\/routes)/,
@@ -125,19 +126,26 @@ const PostCard = ({
           {title}
         </h2>
         <div className="relative">
-          <p
-            className={`text-gray-300 ${
-              isContentExpanded ? "" : "line-clamp-3"
-            }`}
-          >
-            {content}
-          </p>
-          {content.length > 150 && (
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={isContentExpanded ? "expanded" : "collapsed"}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              <p className="text-gray-300">
+                {isContentExpanded ? content : `${content.slice(0, 150)}...`}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+          {content.length > 150 && !isContentExpanded && (
             <button
               onClick={toggleContent}
               className="text-purple-400 hover:text-purple-300 text-sm font-medium mt-1"
             >
-              {isContentExpanded ? "Show less" : "Show more"}
+              Show more
             </button>
           )}
         </div>
@@ -204,7 +212,7 @@ const PostCard = ({
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Add a comment..."
-                  className="w-full px-4 py-2 rounded-xl bg-gray-900/50 border border-gray-800/60 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500"
+                  className="w-full px-4 py-2 rounded-lg bg-gray-900/50 border border-gray-800/60 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500"
                   disabled={isSubmitting}
                 />
               </motion.div>
@@ -212,7 +220,7 @@ const PostCard = ({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="mt-2 px-4 py-2 text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:shadow-lg transition-all relative overflow-hidden group"
+                className="mt-2 px-4 py-2 text-sm bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all relative overflow-hidden group"
                 disabled={isSubmitting}
               >
                 <span className="relative z-10">
@@ -235,7 +243,7 @@ const PostCard = ({
                     key={comment._id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="p-3 bg-gray-900/50 rounded-xl border border-gray-800/40"
+                    className="p-3 bg-gray-900/50 rounded-lg border border-gray-800/40"
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-xs text-white">
@@ -246,25 +254,36 @@ const PostCard = ({
                           <span className="text-sm font-medium bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
                             {comment.user?.username || "Unknown"}
                           </span>
-                          <div className="relative">
-                            <p
-                              className={`text-gray-300 ${
-                                !expandedComments[comment._id] && "line-clamp-3"
-                              }`}
+                          <AnimatePresence initial={false}>
+                            <motion.div
+                              key={
+                                expandedComments[comment._id]
+                                  ? "expanded"
+                                  : "collapsed"
+                              }
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: "easeInOut" }}
+                              className="overflow-hidden"
                             >
-                              {comment.text}
-                            </p>
-                            {comment.text.length > 150 && (
-                              <button
-                                onClick={() => toggleComment(comment._id)}
-                                className="text-purple-400 hover:text-purple-300 text-sm font-medium mt-1"
-                              >
+                              <p className="text-gray-300">
                                 {expandedComments[comment._id]
-                                  ? "Show less"
-                                  : "Show more"}
-                              </button>
-                            )}
-                          </div>
+                                  ? comment.text
+                                  : `${comment.text.slice(0, 150)}...`}
+                              </p>
+                            </motion.div>
+                          </AnimatePresence>
+                          {comment.text.length > 150 && (
+                            <button
+                              onClick={() => toggleComment(comment._id)}
+                              className="text-purple-400 hover:text-purple-300 text-sm font-medium mt-1"
+                            >
+                              {expandedComments[comment._id]
+                                ? "Show less"
+                                : "Show more"}
+                            </button>
+                          )}
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
                           {moment(comment.createdAt).fromNow()}
