@@ -29,7 +29,7 @@ const Register = () => {
             token: response.token,
           })
         );
-        navigate("/profile");
+        navigate("/home");
       } else {
         setError("Unexpected response data format");
       }
