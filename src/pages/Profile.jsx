@@ -1,38 +1,52 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { getPosts } from "../api";
 import PostCard from "../Components/PostCard";
 import { SparklesIcon } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import SkeletonLoader from "../Components/SkeletonLoader";
+import useInfiniteScroll from "../hooks/useInfiniteScroll";
 
 const Profile = () => {
   const { user } = useSelector((state) => state.user);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const fetchUserPosts = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await getPosts(page);
+      const newPosts = response.posts || [];
+
+      // Filter posts to only include the current user's posts
+      const userPosts = newPosts.filter((post) => post.user?._id === user?._id);
+
+      setPosts((prev) => (page === 1 ? userPosts : [...prev, ...userPosts]));
+      setHasMore(response.hasMore);
+    } catch (err) {
+      console.error("Error fetching user posts:", err);
+      setError("Failed to fetch posts. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  }, [page, user]);
 
   useEffect(() => {
-    const fetchUserPosts = async () => {
-      try {
-        const response = await getPosts();
-        const userPosts = Array.isArray(response)
-          ? response.filter((post) => post.user?._id === user?._id)
-          : [];
-        setPosts(userPosts);
-      } catch (err) {
-        console.error("Error fetching user posts:", err);
-        setError("Failed to fetch posts. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUserPosts();
-  }, [user]);
+  }, [fetchUserPosts]);
 
-  if (loading) {
-    return <SkeletonLoader count={3} />; // Use SkeletonLoader for loading state
+  const [lastPostRef] = useInfiniteScroll({
+    loading,
+    hasMore,
+    onLoadMore: () => setPage((prev) => prev + 1),
+  });
+
+  if (loading && page === 1) {
+    return <SkeletonLoader count={3} />;
   }
 
   if (error) {
@@ -46,7 +60,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-gray-950 pb-16 sm:pb-0">
       <div className="container mx-auto max-w-2xl px-4 py-8 pt-20">
         {/* Header */}
         <motion.div
@@ -71,28 +85,37 @@ const Profile = () => {
           animate={{ opacity: 1 }}
           className="space-y-6 pb-8"
         >
-          {posts.length > 0 ? (
-            posts.map((post) => (
-              <PostCard
-                key={post._id}
-                _id={post._id}
-                title={post.title}
-                content={post.content}
-                author={post.user?.username || "Unknown"}
-                image={post.image}
-                likes={post.likes}
-                comments={post.comments}
-                createdAt={post.createdAt}
-              />
-            ))
-          ) : (
+          {posts.map((post, index) => (
+            <div
+              ref={index === posts.length - 1 ? lastPostRef : null}
+              key={post._id}
+            >
+              <PostCard {...post} currentUserId={user?._id} />
+            </div>
+          ))}
+
+          {loading && page > 1 && <SkeletonLoader count={1} />}
+
+          {!loading && posts.length === 0 && (
             <motion.div
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
-              className="text-center py-8 bg-gray-900/50 rounded-2xl border border-gray-800/40"
+              className="text-center py-6 sm:py-8 bg-gray-900/50 rounded-lg border border-gray-800/40"
             >
-              <p className="text-gray-400">
+              <p className="text-sm sm:text-base text-gray-400">
                 No posts available. Start creating posts!
+              </p>
+            </motion.div>
+          )}
+
+          {!loading && !hasMore && posts.length > 0 && (
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              className="text-center py-6 sm:py-8 bg-gray-900/50 rounded-lg border border-gray-800/40"
+            >
+              <p className="text-sm sm:text-base text-gray-400">
+                No more posts to load
               </p>
             </motion.div>
           )}
