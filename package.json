@@ -11,7 +11,7 @@
   "predeploy": "npm run build",
   "deploy": "gh-pages -d dist",
   "smt": "npm run build && npm run deploy",
-  "start": "cd backend/ && npm node index.js"
+  "start": "cd backend/ && node index.js"
 },
 
   "dependencies": {
