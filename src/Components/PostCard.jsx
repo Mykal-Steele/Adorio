@@ -3,6 +3,7 @@ import {
   HeartIcon,
   ChatBubbleOvalLeftIcon,
   XMarkIcon,
+  ArrowsPointingOutIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import moment from "moment";
@@ -29,6 +30,7 @@ const PostCard = ({
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [expandedComments, setExpandedComments] = useState({});
   const [commentsScrollTop, setCommentsScrollTop] = useState(0);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   const userLiked = likes.some(
     (like) =>
@@ -73,6 +75,10 @@ const PostCard = ({
     }));
   };
 
+  const handleImageClick = () => {
+    setShowImageModal(true);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -106,19 +112,62 @@ const PostCard = ({
       {/* Post Image */}
       {postImage && (
         <motion.div
-          className="mb-4 rounded-lg overflow-hidden border border-gray-800/50"
+          className="mb-4 rounded-lg overflow-hidden border border-gray-800/50 relative"
           whileHover={{ scale: 1.02 }}
         >
-          <img
-            src={`${window.VITE_BACKEND_URL}${postImage.replace(
-              /^\/(feelio|backend\/routes)/,
-              ""
-            )}`}
-            alt="Post content"
-            className="w-full h-64 object-cover"
-          />
+          <button
+            onClick={handleImageClick}
+            className="w-full h-full block relative group"
+          >
+            <img
+              src={`${window.VITE_BACKEND_URL}${postImage.replace(
+                /^\/(feelio|backend\/routes)/,
+                ""
+              )}`}
+              alt="Post content"
+              className="w-full h-auto max-h-[600px] object-contain cursor-pointer"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ArrowsPointingOutIcon className="absolute top-2 right-2 h-6 w-6 text-white opacity-0 group-hover:opacity-75 transition-opacity" />
+          </button>
         </motion.div>
       )}
+
+      {/* Image Modal */}
+      <AnimatePresence>
+        {showImageModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4"
+            onClick={() => setShowImageModal(false)}
+          >
+            <motion.div
+              className="relative max-w-full max-h-full"
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+            >
+              <img
+                src={`${window.VITE_BACKEND_URL}${postImage.replace(
+                  /^\/(feelio|backend\/routes)/,
+                  ""
+                )}`}
+                alt="Post content"
+                className="max-w-full max-h-[90vh] object-contain"
+              />
+              <button
+                className="absolute -top-2 -right-2 p-2 text-gray-300 hover:text-white transition-colors"
+                onClick={() => setShowImageModal(false)}
+              >
+                <XMarkIcon className="h-8 w-8" />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Post Content */}
       <div className="space-y-4">
