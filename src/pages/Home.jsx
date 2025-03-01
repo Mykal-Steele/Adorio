@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getPosts, createPost, likePost } from "../api";
 import PostCard from "../Components/PostCard";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import {
   SparklesIcon,
   ExclamationTriangleIcon,
@@ -113,20 +113,22 @@ const Home = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="fixed top-4 right-4 z-50"
+      className="fixed top-2 left-2 right-2 sm:top-4 sm:right-4 sm:left-auto z-50"
     >
-      <div className="bg-gray-900/90 backdrop-blur-lg p-4 rounded-xl shadow-2xl border border-purple-500/20 flex items-start gap-3 max-w-md">
-        <div className="bg-purple-500/10 p-2 rounded-lg">
-          <ExclamationTriangleIcon className="h-6 w-6 text-purple-400" />
+      <div className="bg-gray-900/90 backdrop-blur-lg p-3 sm:p-4 rounded-lg sm:rounded-xl shadow-2xl border border-purple-500/20 flex items-start gap-2 sm:gap-3 max-w-md">
+        <div className="bg-purple-500/10 p-1.5 sm:p-2 rounded-md">
+          <ExclamationTriangleIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
         </div>
         <div>
-          <h3 className="font-medium bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
+          <h3 className="text-sm sm:text-base font-medium bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
             {error.status} Error
           </h3>
-          <p className="text-sm text-gray-300 mt-1">{error.message}</p>
+          <p className="text-xs sm:text-sm text-gray-300 mt-0.5">
+            {error.message}
+          </p>
           <button
             onClick={() => setError(null)}
-            className="mt-2 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+            className="mt-1.5 text-xs sm:text-sm text-purple-400 hover:text-purple-300 transition-colors"
           >
             Dismiss
           </button>
@@ -140,25 +142,25 @@ const Home = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-gray-950">
+    <div className="relative min-h-screen bg-gray-950 pb-16 sm:pb-0">
       <AnimatePresence>
         {error && <ErrorMessage error={error} />}
       </AnimatePresence>
 
-      <div className="container mx-auto max-w-2xl px-4 py-8 pt-20">
+      <div className="container mx-auto max-w-2xl px-2 sm:px-4 py-6 sm:py-8 pt-16 sm:pt-20">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex items-center justify-center gap-3"
+          className="mb-6 sm:mb-8 flex items-center justify-center gap-2 sm:gap-3"
         >
           <motion.div
             whileHover={{ rotate: 15 }}
-            className="bg-purple-600/20 p-3 rounded-xl"
+            className="bg-purple-600/20 p-2 sm:p-3 rounded-lg sm:rounded-xl"
           >
-            <SparklesIcon className="h-8 w-8 text-purple-400" />
+            <SparklesIcon className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400" />
           </motion.div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(129,140,248,0.3)]">
+          <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(129,140,248,0.3)]">
             Recent Posts
           </h1>
         </motion.div>
@@ -167,12 +169,12 @@ const Home = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="mb-8 p-6 bg-gray-900/80 backdrop-blur-md rounded-2xl border border-gray-800/50 shadow-lg hover:shadow-xl transition-all"
+          className="mb-6 sm:mb-8 p-3 sm:p-6 bg-gray-900/80 backdrop-blur-md rounded-xl sm:rounded-2xl border border-gray-800/50 shadow-lg hover:shadow-xl transition-all"
         >
-          <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
+          <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
             Create a New Post
           </h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             {/* Title Input */}
             <div className="relative">
               <motion.input
@@ -181,12 +183,12 @@ const Home = () => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Post title"
-                className="w-full px-4 py-3 rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500"
                 required
                 disabled={isCreating}
-                maxLength={TITLE_CHARACTER_LIMIT} // Enforce character limit
+                maxLength={TITLE_CHARACTER_LIMIT}
               />
-              <div className="absolute bottom-2 right-2 text-xs text-gray-400">
+              <div className="absolute bottom-1.5 sm:bottom-2 right-2 text-xs text-gray-400">
                 {title.length}/{TITLE_CHARACTER_LIMIT}
               </div>
             </div>
@@ -197,29 +199,29 @@ const Home = () => {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="What's on your mind?"
-              className="w-full px-4 py-3 rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500"
-              rows="4"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500"
+              rows="3"
               required
               disabled={isCreating}
             />
 
             {/* Image Upload Section */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-400">
+              <label className="block text-sm sm:text-base font-medium text-gray-400">
                 Upload Image (Optional)
               </label>
               <motion.label
                 whileHover={{ scale: 1.02 }}
-                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700/50 rounded-lg cursor-pointer hover:border-purple-500/50 transition-all relative overflow-hidden group"
+                className="flex flex-col items-center justify-center w-full h-24 sm:h-32 border-2 border-dashed border-gray-700/50 rounded-lg cursor-pointer hover:border-purple-500/50 transition-all relative overflow-hidden group"
               >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6 z-10">
+                <div className="flex flex-col items-center justify-center pt-3 sm:pt-5 pb-4 sm:pb-6 z-10">
                   <motion.div
                     animate={{ y: [0, -5, 0] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
-                    <CameraIcon className="h-8 w-8 text-gray-500 group-hover:text-purple-400 transition-colors" />
+                    <CameraIcon className="h-6 w-6 sm:h-8 sm:w-8 text-gray-500 group-hover:text-purple-400 transition-colors" />
                   </motion.div>
-                  <p className="text-sm text-gray-500 group-hover:text-purple-300 transition-colors">
+                  <p className="text-xs sm:text-sm text-gray-500 group-hover:text-purple-300 transition-colors text-center px-2">
                     Click to upload or drag and drop
                   </p>
                 </div>
@@ -241,7 +243,7 @@ const Home = () => {
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full h-48 object-cover"
+                    className="w-full h-32 sm:h-48 object-cover"
                   />
                 </motion.div>
               )}
@@ -252,10 +254,10 @@ const Home = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:shadow-xl transition-all relative overflow-hidden group"
+              className="w-full py-2 sm:py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:shadow-xl transition-all relative overflow-hidden group"
               disabled={isCreating}
             >
-              <span className="relative z-10">
+              <span className="relative z-10 text-sm sm:text-base">
                 {isCreating ? "Creating..." : "Create Post"}
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -267,7 +269,7 @@ const Home = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="space-y-6 pb-8"
+          className="space-y-4 sm:space-y-6 pb-8"
         >
           {posts.length > 0 ? (
             posts.map((post) => (
@@ -289,9 +291,9 @@ const Home = () => {
             <motion.div
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
-              className="text-center py-8 bg-gray-900/50 rounded-lg border border-gray-800/40"
+              className="text-center py-6 sm:py-8 bg-gray-900/50 rounded-lg border border-gray-800/40"
             >
-              <p className="text-gray-400">
+              <p className="text-sm sm:text-base text-gray-400">
                 No posts available. Be the first to create one!
               </p>
             </motion.div>

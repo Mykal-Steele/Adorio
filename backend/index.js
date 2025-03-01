@@ -1,8 +1,9 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const path = require("path");
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url"; // To fix __dirname issue in ES modules
 
 dotenv.config(); // Load environment variables from .env
 
@@ -29,7 +30,10 @@ app.use(express.json()); // Body parser middleware for JSON data
 
 // ✅ Serve static files (images, etc.)
 // Serve static files from the 'uploads' directory
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use(
+  "/uploads",
+  express.static(path.join(fileURLToPath(import.meta.url), "../uploads"))
+);
 
 // Connect to MongoDB
 mongoose
@@ -41,15 +45,15 @@ mongoose
   .catch((err) => console.error("MongoDB Connection Error:", err));
 
 // Import your route files
-const userRoutes = require("./routes/userRoutes");
-const postRoutes = require("./routes/postRoutes");
+import userRoutes from "./routes/userRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 
 // Use the routes
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 
 // Serve static files from React build (root "dist" folder)
-const __dirname = path.resolve();
+const __dirname = path.dirname(fileURLToPath(import.meta.url)); // This is how to get the current directory in ES modules
 app.use(express.static(path.join(__dirname, "/dist")));
 
 // Handle client-side routing - return index.html for all unknown routes
