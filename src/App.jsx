@@ -5,7 +5,7 @@ import {
   Routes,
   Route,
   Navigate,
-} from "react-router-dom"; // Use BrowserRouter
+} from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -46,20 +46,25 @@ const AppContent = () => {
   return (
     <div className={darkMode ? "dark" : ""}>
       <Router>
-        {" "}
         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
         <Routes>
           <Route
             path="/"
-            element={token ? <Navigate to="/home" /> : <Navigate to="/login" />}
+            element={
+              token ? (
+                <Navigate to="/home" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
           />
           <Route
             path="/home"
-            element={token ? <Home /> : <Navigate to="/login" />}
+            element={token ? <Home /> : <Navigate to="/login" replace />}
           />
           <Route
             path="/profile"
-            element={token ? <Profile /> : <Navigate to="/login" />}
+            element={token ? <Profile /> : <Navigate to="/login" replace />}
           />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

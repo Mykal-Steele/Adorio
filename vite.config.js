@@ -7,6 +7,9 @@ dotenv.config();
 export default defineConfig({
   base: "/",
   plugins: [react()],
+  server: {
+    historyApiFallback: true, // Enable history fallback for client-side routing
+  },
   define: {
     "process.env": Object.fromEntries(
       Object.entries(process.env).filter(([key]) => key.startsWith("VITE_"))

@@ -1,4 +1,3 @@
-// feelio\backend\index.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -48,6 +47,15 @@ const postRoutes = require("./routes/postRoutes");
 // Use the routes
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
+
+// Serve static files from React build (root "dist" folder)
+const __dirname = path.resolve();
+app.use(express.static(path.join(__dirname, "dist")));
+
+// Handle client-side routing - return index.html for all unknown routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist/index.html"));
+});
 
 // Root route for testing the server
 app.get("/", (req, res) => {
