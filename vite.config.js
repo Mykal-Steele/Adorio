@@ -1,3 +1,4 @@
+/* vite.config.js */
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import dotenv from "dotenv";
@@ -9,6 +10,11 @@ export default defineConfig({
   plugins: [react()],
   server: {
     historyApiFallback: true, // Enable history fallback for client-side routing
+  },
+  css: {
+    postcss: {
+      plugins: [require("tailwindcss"), require("autoprefixer")],
+    },
   },
   define: {
     "process.env": Object.fromEntries(
