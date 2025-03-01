@@ -125,8 +125,9 @@ const PostCard = ({
                 ""
               )}`}
               alt="Post content"
-              className="w-full h-auto max-h-[600px] object-contain cursor-pointer"
+              className="w-full h-auto max-h-[600px] object-cover cursor-pointer"
               loading="lazy"
+              style={{ aspectRatio: "1 / 1" }} // Ensures consistent aspect ratio
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <ArrowsPointingOutIcon className="absolute top-2 right-2 h-6 w-6 text-white opacity-0 group-hover:opacity-75 transition-opacity" />
@@ -145,10 +146,11 @@ const PostCard = ({
             onClick={() => setShowImageModal(false)}
           >
             <motion.div
-              className="relative max-w-full max-h-full"
+              className="relative max-w-full max-h-full rounded-2xl overflow-hidden"
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()} // Prevent modal close when clicking inside
             >
               <img
                 src={`${window.VITE_BACKEND_URL}${postImage.replace(
@@ -156,13 +158,13 @@ const PostCard = ({
                   ""
                 )}`}
                 alt="Post content"
-                className="max-w-full max-h-[90vh] object-contain"
+                className="max-w-full max-h-[90vh] object-contain rounded-2xl"
               />
               <button
-                className="absolute -top-2 -right-2 p-2 text-gray-300 hover:text-white transition-colors"
+                className="absolute top-4 right-4 p-2 bg-gray-900/80 backdrop-blur-lg rounded-full border border-gray-800/60 hover:border-purple-500/50 transition-all group"
                 onClick={() => setShowImageModal(false)}
               >
-                <XMarkIcon className="h-8 w-8" />
+                <XMarkIcon className="h-6 w-6 text-gray-400 group-hover:text-purple-400" />
               </button>
             </motion.div>
           </motion.div>
