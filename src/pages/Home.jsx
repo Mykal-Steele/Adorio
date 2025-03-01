@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { getPosts, createPost, likePost } from "../api";
 import PostCard from "../Components/PostCard";
 import { useSelector } from "react-redux";
@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import SkeletonLoader from "../Components/SkeletonLoader";
+import useInfiniteScroll from "../hooks/useInfiniteScroll";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -20,8 +21,9 @@ const Home = () => {
   const { user } = useSelector((state) => state.user);
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
 
-  // Character limit for the title
   const TITLE_CHARACTER_LIMIT = 100;
 
   const handleLike = async (postId) => {
@@ -41,15 +43,19 @@ const Home = () => {
     }
   };
 
-  const fetchPosts = async () => {
+  // In the fetchPosts function, update this part:
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getPosts();
-      const postsArray = Array.isArray(response)
-        ? response
-        : response?.data || [];
-      setPosts(postsArray);
+      const response = await getPosts(page);
+      console.log("API Response:", response); // Add this for debugging
+
+      // Access the nested posts array correctly
+      const newPosts = response.posts || [];
+
+      setPosts((prev) => (page === 1 ? newPosts : [...prev, ...newPosts]));
+      setHasMore(response.hasMore);
     } catch (err) {
       console.error("Error fetching posts:", err);
       setError({
@@ -59,11 +65,17 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [fetchPosts]);
+
+  const [lastPostRef] = useInfiniteScroll({
+    loading,
+    hasMore,
+    onLoadMore: () => setPage((prev) => prev + 1),
+  });
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -79,7 +91,6 @@ const Home = () => {
     setError(null);
 
     try {
-      // Validate title length
       if (title.length > TITLE_CHARACTER_LIMIT) {
         throw new Error(
           `Title cannot exceed ${TITLE_CHARACTER_LIMIT} characters.`
@@ -88,11 +99,12 @@ const Home = () => {
 
       const response = await createPost({ title, content, image });
       if (response && response._id) {
-        setPosts([response, ...posts]);
+        setPosts((prev) => [response, ...prev]);
         setTitle("");
         setContent("");
         setImage(null);
         setImagePreview("");
+        setPage(1); // Reset to first page when new post is created
       } else {
         throw new Error("Failed to create post: Invalid response");
       }
@@ -107,7 +119,6 @@ const Home = () => {
     }
   };
 
-  // Error display component
   const ErrorMessage = ({ error }) => (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -136,10 +147,6 @@ const Home = () => {
       </div>
     </motion.div>
   );
-
-  if (loading) {
-    return <SkeletonLoader count={3} />;
-  }
 
   return (
     <div className="relative min-h-screen bg-gray-950 pb-16 sm:pb-0">
@@ -271,30 +278,39 @@ const Home = () => {
           animate={{ opacity: 1 }}
           className="space-y-4 sm:space-y-6 pb-8"
         >
-          {posts.length > 0 ? (
-            posts.map((post) => (
-              <PostCard
+          {posts.map((post, index) => {
+            console.log("Rendering post:", post); // Add this line
+            return (
+              <div
+                ref={index === posts.length - 1 ? lastPostRef : null}
                 key={post._id}
-                {...post}
-                currentUserId={user?._id}
-                onLike={handleLike}
-                onCommentAdded={(updatedPost) => {
-                  setPosts((prevPosts) =>
-                    prevPosts.map((p) =>
-                      p._id === updatedPost._id ? updatedPost : p
-                    )
-                  );
-                }}
-              />
-            ))
-          ) : (
+              >
+                <PostCard
+                  {...post}
+                  currentUserId={user?._id}
+                  onLike={handleLike}
+                  onCommentAdded={(updatedPost) => {
+                    setPosts((prevPosts) =>
+                      prevPosts.map((p) =>
+                        p._id === updatedPost._id ? updatedPost : p
+                      )
+                    );
+                  }}
+                />
+              </div>
+            );
+          })}
+
+          {loading && <SkeletonLoader count={3} />}
+
+          {!loading && !hasMore && (
             <motion.div
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               className="text-center py-6 sm:py-8 bg-gray-900/50 rounded-lg border border-gray-800/40"
             >
               <p className="text-sm sm:text-base text-gray-400">
-                No posts available. Be the first to create one!
+                No more posts to load
               </p>
             </motion.div>
           )}
