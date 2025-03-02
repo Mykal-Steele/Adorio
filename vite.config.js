@@ -20,5 +20,6 @@ export default defineConfig({
     "process.env": Object.fromEntries(
       Object.entries(process.env).filter(([key]) => key.startsWith("VITE_"))
     ),
+    "process.env.CLOUDINARY_NAME": JSON.stringify(process.env.CLOUDINARY_NAME),
   },
 });

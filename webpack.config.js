@@ -9,6 +9,20 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
   },
+  module: {
+    rules: [
+      {
+        test: /\.js$/, // Transpile .js files
+        exclude: /node_modules/, // Exclude node_modules
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env"], // Use the preset for modern JS features
+          },
+        },
+      },
+    ],
+  },
   plugins: [
     new Dotenv(), // Loads variables from .env file
     new webpack.DefinePlugin({

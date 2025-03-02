@@ -1,30 +1,42 @@
-//feelio\backend\routes\postRoutes.js
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const router = require("express").Router();
 const Post = require("../models/Post");
 const verifyToken = require("../middleware/verifyToken");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
-// Set up multer storage and file filter
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.resolve(__dirname, "../../uploads"); // Move up 3 directories to project root and access 'uploads'
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET,
+});
 
-    // Ensure the folder exists
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-
-    cb(null, uploadPath); // Callback with the correct path
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Set a unique filename
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "feelio/posts",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    quality: "auto:best",
+    transformation: [
+      { width: 1000, height: 1000, crop: "limit" },
+      { fetch_format: "auto" },
+    ],
+    use_filename: true,
+    unique_filename: false,
+    overwrite: true,
   },
 });
 
+// File filter to allow only certain types
 const fileFilter = (req, file, cb) => {
-  if (["image/jpeg", "image/png", "image/jpg"].includes(file.mimetype)) {
+  if (
+    ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(
+      file.mimetype
+    )
+  ) {
     cb(null, true);
   } else {
     cb(
@@ -34,34 +46,39 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ storage, fileFilter }).single("image");
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
 
-// Create a Post (Handle image uploads if necessary)
-router.post("/", verifyToken, (req, res) => {
-  upload(req, res, async (err) => {
-    if (err) {
-      return res.status(400).json({ message: err.message });
+router.post("/", verifyToken, upload.single("image"), async (req, res) => {
+  try {
+    console.log("Uploaded file:", req.file); // Check if file exists
+    console.log("Request body:", req.body); // Verify other fields
+
+    const { title, content } = req.body;
+    const newPost = new Post({
+      title,
+      content,
+      user: req.user.id,
+    });
+
+    if (req.file) {
+      newPost.image = {
+        public_id: req.file.filename,
+        url: req.file.path,
+      };
+    } else {
+      console.log("No file uploaded");
     }
 
-    try {
-      const { title, content } = req.body;
-      console.log("Received post data:", req.body);
-
-      const newPost = new Post({ title, content, user: req.user.id });
-
-      if (req.file) {
-        console.log("Received image:", req.file);
-        // Correct the URL here
-        newPost.image = `/uploads/${req.file.filename}`; // Remove 'feelio' or 'backend/routes' part
-      }
-
-      const savedPost = await newPost.save();
-      res.status(201).json(savedPost);
-    } catch (err) {
-      console.error("Error creating post:", err);
-      res.status(500).json({ message: "Server Error" });
-    }
-  });
+    const savedPost = await newPost.save();
+    res.status(201).json(savedPost);
+  } catch (err) {
+    console.error("Error creating post:", err);
+    res.status(500).json({ message: "Server Error" });
+  }
 });
 
 // Get All Posts with Pagination
@@ -82,11 +99,10 @@ router.get("/", async (req, res) => {
     const totalPosts = await Post.countDocuments();
     const hasMore = totalPosts > skip + limit;
 
-    // Send response after all queries are completed
     res.status(200).json({
-      posts: posts, // Ensure this is an array
-      hasMore: hasMore,
-      totalPosts: totalPosts,
+      posts,
+      hasMore,
+      totalPosts,
       currentPage: page,
       totalPages: Math.ceil(totalPosts / limit),
     });
@@ -106,7 +122,6 @@ router.get("/:id", async (req, res) => {
 
     if (!post) return res.status(404).json("Post not found");
 
-    // Sort comments before sending them
     post.comments = post.comments.sort((a, b) => b.createdAt - a.createdAt);
 
     res.status(200).json(post);
@@ -129,7 +144,13 @@ router.put("/:id/like", verifyToken, async (req, res) => {
     }
 
     const updatedPost = await post.save();
-    res.json(updatedPost);
+
+    // Populate the user and likes before sending response
+    const populatedPost = await Post.findById(updatedPost._id)
+      .populate("user", ["username"])
+      .populate("likes", ["username"]);
+
+    res.json(populatedPost);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });

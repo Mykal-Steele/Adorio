@@ -1,4 +1,3 @@
-// feelio\backend\models\Post.js
 const mongoose = require("mongoose");
 
 const postSchema = new mongoose.Schema(
@@ -14,7 +13,10 @@ const postSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
-    image: { type: String }, // Added th is field to store the image path
+    image: {
+      public_id: String,
+      url: String,
+    },
   },
   { timestamps: true }
 );
