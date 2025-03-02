@@ -78,7 +78,8 @@ function attemptLogin() {
       );
       setTimeout(attemptLogin, 10000);
     } else {
-      console.log("Max retries reached. Stopping...");
+      console.error("Max retries reached. Stopping...");
+      process.exit(1);
     }
   });
 }
