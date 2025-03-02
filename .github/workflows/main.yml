@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: '*/6 * * * *'  # Every 6 minutes
 
+concurrency:
+  group: "keep-alive"
+  cancel-in-progress: true  
+
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
