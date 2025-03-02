@@ -3,66 +3,65 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
-import { fileURLToPath } from "url"; // To fix __dirname issue in ES modules
+import { fileURLToPath } from "url";
+import cloudinary from "cloudinary";
+import rateLimit from "express-rate-limit";
 
-dotenv.config(); // Load environment variables from .env
+dotenv.config();
 
 const app = express();
 
-// List allowed origins for CORS
 const allowedOrigins = [
-  "http://localhost:5173", // Local dev frontend
-  "http://localhost:5174", // Another local dev frontend (if applicable)
-  "https://mykal-steele.github.io", // Your deployed frontend
-  process.env.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com", // Fallback for the VITE_BACKEND_URL
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://mykal-steele.github.io",
+  process.env.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com",
 ];
 
 app.use(
   cors({
-    origin: allowedOrigins, // Dynamically allows origins based on the list
-    credentials: true, // Allow credentials (cookies, headers, etc.)
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
-    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-app.use(express.json()); // Body parser middleware for JSON data
+app.use(express.json());
 
-// ✅ Serve static files (images, etc.)
-// Serve static files from the 'uploads' directory
-app.use(
-  "/uploads",
-  express.static(path.join(fileURLToPath(import.meta.url), "../uploads"))
-);
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
+app.use(limiter);
 
-// Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB Connection Error:", err));
 
-// Import your route files
 import userRoutes from "./routes/userRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 
-// Use the routes
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 
-// Serve static files from React build (root "dist" folder)
-const __dirname = path.dirname(fileURLToPath(import.meta.url)); // This is how to get the current directory in ES modules
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.static(path.join(__dirname, "/dist")));
 
-// Handle client-side routing - return index.html for all unknown routes
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "/dist/index.html"));
 });
 
-// Root route for testing the server
 app.get("/", (req, res) => {
   res.send("Feelio API is running!");
 });
 
-// Start the server
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET,
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

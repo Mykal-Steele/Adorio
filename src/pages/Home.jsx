@@ -88,32 +88,34 @@ const Home = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsCreating(true);
-    setError(null);
 
     try {
-      if (title.length > TITLE_CHARACTER_LIMIT) {
-        throw new Error(
-          `Title cannot exceed ${TITLE_CHARACTER_LIMIT} characters.`
-        );
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("content", content);
+
+      // Ensure image is appended correctly
+      if (image instanceof File) {
+        formData.append("image", image);
       }
 
-      const response = await createPost({ title, content, image });
-      if (response && response._id) {
-        setPosts((prev) => [response, ...prev]);
-        setTitle("");
-        setContent("");
-        setImage(null);
-        setImagePreview("");
-        setPage(1); // Reset to first page when new post is created
-      } else {
-        throw new Error("Failed to create post: Invalid response");
-      }
+      const response = await createPost(formData);
+
+      // Update local state with the new post including image
+      setPosts((prev) => [
+        {
+          ...response,
+          user: { _id: user._id, username: user.username }, // Add author info
+          image: response.image || null,
+        },
+        ...prev,
+      ]);
+      setTitle("");
+      setContent("");
+      setImage(null);
+      setImagePreview("");
     } catch (err) {
-      console.error("Error creating post:", err);
-      setError({
-        message: err.response?.data?.message || err.message || "Server Error",
-        status: err.response?.status || 500,
-      });
+      setError({ message: err.message || "Failed to create post" });
     } finally {
       setIsCreating(false);
     }
@@ -155,6 +157,12 @@ const Home = () => {
       </AnimatePresence>
 
       <div className="container mx-auto max-w-2xl px-2 sm:px-4 py-6 sm:py-8 pt-16 sm:pt-20">
+        {/* Loading State */}
+        {loading && (
+          <motion.div className="text-center py-6">
+            <p className="text-gray-400">Loading new posts...</p>
+          </motion.div>
+        )}
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -279,7 +287,7 @@ const Home = () => {
           className="space-y-4 sm:space-y-6 pb-8"
         >
           {posts.map((post, index) => {
-            console.log("Rendering post:", post); // Add this line
+            console.log("Rendering post:", post); //  Add this line
             return (
               <div
                 ref={index === posts.length - 1 ? lastPostRef : null}
