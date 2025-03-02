@@ -78,7 +78,6 @@ const PostCard = ({
   const handleImageClick = () => {
     setShowImageModal(true);
   };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -108,9 +107,8 @@ const PostCard = ({
           </div>
         </div>
       </div>
-
       {/* Post Image */}
-      {postImage && (
+      {postImage ? (
         <motion.div
           className="mb-4 rounded-lg overflow-hidden border border-gray-800/50 relative"
           whileHover={{ scale: 1.02 }}
@@ -120,10 +118,12 @@ const PostCard = ({
             className="w-full h-full block relative group"
           >
             <img
-              src={`${window.VITE_BACKEND_URL}${postImage.replace(
-                /^\/(feelio|backend\/routes)/,
-                ""
-              )}`}
+              src={
+                postImage.url ||
+                `https://res.cloudinary.com/${
+                  import.meta.env.VITE_CLOUDINARY_NAME
+                }/image/upload/${postImage.public_id}`
+              }
               alt="Post content"
               className="w-full h-auto max-h-[600px] object-cover cursor-pointer"
               loading="lazy"
@@ -133,8 +133,11 @@ const PostCard = ({
             <ArrowsPointingOutIcon className="absolute top-2 right-2 h-6 w-6 text-white opacity-0 group-hover:opacity-75 transition-opacity" />
           </button>
         </motion.div>
+      ) : (
+        <div className="mb-4 p-4 bg-gray-800/50 rounded-lg text-gray-400">
+          No image available
+        </div>
       )}
-
       {/* Image Modal */}
       <AnimatePresence>
         {showImageModal && (
@@ -153,10 +156,10 @@ const PostCard = ({
               onClick={(e) => e.stopPropagation()} // Prevent modal close when clicking inside
             >
               <img
-                src={`${window.VITE_BACKEND_URL}${postImage.replace(
-                  /^\/(feelio|backend\/routes)/,
-                  ""
-                )}`}
+                src={
+                  postImage.url ||
+                  `https://res.cloudinary.com/${process.env.CLOUDINARY_NAME}/image/upload/${postImage.public_id}`
+                }
                 alt="Post content"
                 className="max-w-full max-h-[90vh] object-contain rounded-2xl"
               />
@@ -170,7 +173,6 @@ const PostCard = ({
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Post Content */}
       <div className="space-y-4">
         <h2 className="text-xl font-bold bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent">
@@ -201,7 +203,6 @@ const PostCard = ({
           )}
         </div>
       </div>
-
       {/* Interaction Bar */}
       <div className="flex items-center gap-4 mt-4">
         <motion.button
@@ -230,7 +231,6 @@ const PostCard = ({
           <span className="text-gray-400">{comments.length}</span>
         </motion.button>
       </div>
-
       {/* Enhanced Comments Section */}
       <AnimatePresence>
         {showComments && (

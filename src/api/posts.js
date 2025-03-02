@@ -16,31 +16,15 @@ export const getPosts = async (page = 1, limit = 5) => {
   }
 };
 // Create a new post
+// feelio/src/api/posts.js
 export const createPost = async (postData) => {
   try {
-    const isFormData = postData.image instanceof File;
-    let data;
+    const config =
+      postData instanceof FormData
+        ? { headers: {} } // Let axios set Content-Type automatically
+        : { headers: { "Content-Type": "application/json" } };
 
-    if (isFormData) {
-      const formData = new FormData();
-      formData.append("title", postData.title);
-      formData.append("content", postData.content);
-      if (postData.image) {
-        formData.append("image", postData.image);
-      }
-      data = formData;
-    } else {
-      data = { title: postData.title, content: postData.content };
-    }
-
-    console.log("Sending post data:", data);
-
-    const response = await API.post("/posts", data, {
-      headers: isFormData
-        ? { "Content-Type": "multipart/form-data" }
-        : { "Content-Type": "application/json" },
-    });
-
+    const response = await API.post("/posts", postData, config);
     return response.data;
   } catch (error) {
     console.error("Error creating post:", error);
