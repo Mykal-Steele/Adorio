@@ -1,3 +1,4 @@
+//src\App.jsx
 import React, { useEffect, useState } from "react";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import {
@@ -10,8 +11,8 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-import Navbar from "./components/Navbar";
-import NotFound from "./Components/NotFound";
+import Navbar from "@components/Navbar";
+import NotFound from "@components/NotFound";
 import { setUser } from "./redux/userSlice";
 import { fetchUserData } from "./api";
 import store from "./redux/store";
