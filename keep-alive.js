@@ -3,27 +3,27 @@ const puppeteer = require("puppeteer");
 let retryCount = 0;
 const maxRetries = 3;
 
+// Helper function to add a delay
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function runLogin() {
+  // Launch the browser
   const browser = await puppeteer.launch({
-    headless: "new", // Use headless mode for GitHub Actions
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    executablePath: "/usr/bin/chromium-browser", // Adjust this path to your installed Chromium
   });
-
   const page = await browser.newPage();
-  await page.setViewport({ width: 1280, height: 800 }); // Set screen size
+  await page.setViewport({ width: 1280, height: 800 });
 
   try {
     console.log("Navigating to adiorios.space...");
     await page.goto("https://adorio.space/", { waitUntil: "networkidle2" });
+    console.log("Page loaded.");
 
-    // Wait for the page to load
-    await page.waitForSelector("body");
+    await page.waitForSelector("body"); // Check if the body is loaded
+    console.log("Page body found.");
 
-    // Check if already logged in
     const isLoggedIn = await page.evaluate(
       () => window.location.pathname === "/home"
     );
@@ -35,9 +35,9 @@ async function runLogin() {
       await delay(3000);
     }
 
-    // Wait for login form
     console.log("Waiting for login form...");
     await page.waitForSelector('input[type="email"]', { timeout: 10000 });
+    console.log("Login form found.");
 
     console.log("Entering credentials...");
     await page.type('input[type="email"]', "t@t.com", { delay: 100 });
@@ -49,10 +49,10 @@ async function runLogin() {
       page.waitForNavigation({ waitUntil: "networkidle2" }),
     ]);
 
-    // Verify login success
+    console.log("Verifying login...");
     const currentUrl = await page.evaluate(() => window.location.pathname);
     if (currentUrl === "/home") {
-      console.log("✅ Login successful! Redirected to /home.");
+      console.log("✅ Login successful!");
     } else {
       throw new Error(`❌ Login failed: Unexpected URL (${currentUrl})`);
     }
