@@ -13,20 +13,18 @@ dotenv.config();
 
 const app = express();
 
-// Add explicit adorio.space entry
 const allowedOrigins = [
-<<<<<<< HEAD
-  "https://www.adorio.space",
-  "http://localhost:5173",
-  "http://localhost:5174",
   "https://mykal-steele.github.io",
-  process.env.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com",
-=======
-  process.env.CLIENT_URL, // Primary domain
-  "https://feelio-github-io.onrender.com", // Render fallback
-  "http://localhost:5173", // Local development
->>>>>>> 79e76d037ba16894b5ba7dd1d838762c8ac82845
-];
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://feelio.space",
+  "https://adorio.space",
+  "https://www.adorio.space",
+  process.env.VITE_BACKEND_URL || "", // Fallback to empty string if the variable is undefined
+  process.env.CLIENT_URL || "", // Same for this variable
+].filter(Boolean); // Removes any falsy values like empty strings or undefined
+
+// Remove any undefined values
 
 app.use(
   cors({
@@ -65,7 +63,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-app.use(express.static(path.join(__dirname, "../dist")));
+app.use(express.static(path.join(__dirname, "dist")));
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html")); // Fixed path format
