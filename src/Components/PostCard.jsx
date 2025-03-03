@@ -147,8 +147,9 @@ const PostCard = ({
           </button>
         </motion.div>
       ) : (
-        <div className="mb-4 p-4 bg-gray-800/50 rounded-xl text-gray-400">
-          No image available
+        <div className="">
+          {/* mb-4 p-4 bg-gray-800/50 rounded-xl text-gray-400 */}
+          {/* No image available */}
         </div>
       )}
 
