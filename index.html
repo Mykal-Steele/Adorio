@@ -2,17 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="google-adsense-account" content="ca-pub-1872365375645260" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+    <meta name="google-adsense-account" content="ca-pub-1872365375645260" />
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://res.cloudinary.com/dboeqtx65/image/upload/v1741024214/feelio/posts/file.jpg"
+    />
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Feelio - App Name" />
+    <meta
+      property="og:description"
+      content="An awesome app that does amazing things!"
+    />
+    <meta
+      property="og:image"
+      content="https://res.cloudinary.com/dboeqtx65/image/upload/v1741024214/feelio/posts/file.jpg"
+    />
+    <meta property="og:url" content="https://www.adorio.space/" />
+    <meta property="og:type" content="website" />
+
+    <title>Feelio - Your App Name</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="text/javascript">
       // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
       (function (l) {
         if (l.search[1] === "/") {
           var decoded = l.search
@@ -21,11 +39,11 @@
             .map(function (s) {
               return s.replace(/~and~/g, "&");
             })
-            .join("&"); // Fixed to join by "&"
+            .join("&");
           window.history.replaceState(
             null,
             null,
-            l.pathname.slice(0, -1) + "?" + decoded + l.hash // Corrected to properly append "?" before decoded
+            l.pathname.slice(0, -1) + "?" + decoded + l.hash
           );
         }
       })(window.location);
