@@ -8,6 +8,8 @@ import { fileURLToPath } from "url";
 import cloudinary from "cloudinary";
 import rateLimit from "express-rate-limit";
 import serverless from "serverless-http";
+import compression from "compression";
+import errorHandler from "./middleware/errorHandler.js";
 
 dotenv.config();
 
@@ -42,6 +44,8 @@ app.use(
 );
 
 app.use(express.json());
+// Add compression middleware
+app.use(compression());
 // Add OPTIONS handler
 app.options("*", cors());
 
@@ -61,6 +65,8 @@ import postRoutes from "./routes/postRoutes.js";
 
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
+
+app.use(errorHandler);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.static(path.join(__dirname, "dist")));
