@@ -26,6 +26,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y wget curl unzip
+          # Use libasound2 directly
           sudo apt install -y libx11-dev libx11-xcb1 libxcomposite1 libxrandr2 libgdk-pixbuf2.0-0 libasound2
           sudo apt install -y libnss3 libatk-bridge2.0-0 libgtk-3-0 libxss1
           sudo apt install -y libgbm-dev
@@ -42,3 +43,5 @@ jobs:
 
       - name: Run keep-alive script
         run: node keep-alive.js
+        env:
+          PUPPETEER_EXECUTABLE_PATH: ${{ env.CHROMIUM_PATH }}
