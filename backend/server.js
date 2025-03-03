@@ -6,6 +6,7 @@ const helmet = require("helmet");
 const { xss } = require("express-xss-sanitizer");
 const mongoSanitize = require("express-mongo-sanitize");
 const cookieParser = require("cookie-parser");
+const lusca = require("lusca");
 const rateLimit = require("express-rate-limit");
 const hpp = require("hpp");
 const cluster = require("cluster");
@@ -36,6 +37,7 @@ app.use(mongoSanitize());
 app.use(hpp());
 app.use(cookieParser());
 app.use(express.json({ limit: "10kb" }));
+app.use(lusca.csrf());
 
 // Rate limiting
 const limiter = rateLimit({
