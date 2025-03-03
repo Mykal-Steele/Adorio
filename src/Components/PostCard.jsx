@@ -140,7 +140,7 @@ const PostCard = ({
               alt="Post content"
               className="w-full h-auto max-h-[600px] object-cover"
               loading="lazy"
-              style={{ aspectRatio: "1 / 1" }}
+              style={{ aspectRatio: " 2 / 1.1" }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <ArrowsPointingOutIcon className="absolute top-3 right-3 h-6 w-6 text-white opacity-0 group-hover:opacity-75 transition-opacity" />
