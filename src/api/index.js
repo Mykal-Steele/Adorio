@@ -4,9 +4,9 @@ import axios from "axios";
 // Use process.env to access environment variables in CommonJS
 const apiUrl =
   process.env.VITE_BACKEND_URL ||
-  (window.location.hostname === "localhost"
-    ? "http://localhost:5000"
-    : "https://feelio-github-io.onrender.com");
+  (window.location.hostname === "adorio.space"
+    ? "https://feelio-github-io.onrender.com"
+    : "http://localhost:5000");
 
 const API = axios.create({
   baseURL: `${apiUrl}/api`, // Append /api to the base URL

@@ -13,24 +13,39 @@ dotenv.config();
 
 const app = express();
 
+// Add explicit adorio.space entry
 const allowedOrigins = [
+<<<<<<< HEAD
   "https://www.adorio.space",
   "http://localhost:5173",
   "http://localhost:5174",
   "https://mykal-steele.github.io",
   process.env.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com",
+=======
+  process.env.CLIENT_URL, // Primary domain
+  "https://feelio-github-io.onrender.com", // Render fallback
+  "http://localhost:5173", // Local development
+>>>>>>> 79e76d037ba16894b5ba7dd1d838762c8ac82845
 ];
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 app.use(express.json());
+// Add OPTIONS handler
+app.options("*", cors());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
