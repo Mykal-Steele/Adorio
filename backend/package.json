@@ -6,7 +6,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-     "install": "npm install --include=optional --no-package-lock",
     "deploy": "gh-pages -d dist",
     "build": "echo 'No build step for server'",
     "dev": "nodemon index.js"
