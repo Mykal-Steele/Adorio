@@ -2,7 +2,7 @@
   "name": "feelio",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://www.adorio.space/",
+  "homepage": "https://adorio.space/",
   "scripts": {
     "skibidi": "vite --force",
     "build": "vite build",
