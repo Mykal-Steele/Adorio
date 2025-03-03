@@ -3,15 +3,13 @@ const puppeteer = require("puppeteer");
 let retryCount = 0;
 const maxRetries = 3;
 
-// Helper function to add a delay
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function runLogin() {
   const browser = await puppeteer.launch({
-    headless: false, // Make sure browser is visible
-    slowMo: 100, // Slow down interactions for clarity
+    headless: "new", // Use headless mode for GitHub Actions
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
