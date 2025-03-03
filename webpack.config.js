@@ -26,7 +26,9 @@ module.exports = {
   plugins: [
     new Dotenv(), // Loads variables from .env file
     new webpack.DefinePlugin({
-      "process.env": JSON.stringify(process.env), // Inject process.env globally
+      "process.env": JSON.stringify({
+        DEBUG: process.env.DEBUG, // Add other safe environment variables here
+      }), // Inject selected environment variables globally
     }),
   ],
   resolve: {
