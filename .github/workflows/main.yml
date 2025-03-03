@@ -15,7 +15,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 'latest'  # Using latest Node.js version
+          node-version: '20'  # Using Node.js version 20
 
       - name: Install dependencies
         run: |
@@ -36,5 +36,4 @@ jobs:
           export PUPPETEER_EXECUTABLE_PATH=$CHROMIUM_PATH
 
       - name: Run keep-alive script
-        run: |
-          node keep-alive.js
+        run: node keep-alive.js
