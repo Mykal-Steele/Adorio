@@ -179,6 +179,7 @@ def main():
     
     # Get user input and expand keywords
     user_input = input("Enter keywords (e.g., 'image server'): ").strip().lower()
+    
     input_words = user_input.split()
     keywords = expand_keywords(input_words)
     print(f"Expanded keywords: {keywords}")

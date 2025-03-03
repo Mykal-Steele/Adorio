@@ -3,8 +3,8 @@ const Dotenv = require("dotenv-webpack");
 const webpack = require("webpack");
 
 module.exports = {
-  mode: "development", // Change to "production" for production builds
-  entry: "./src/api/index.js", // Adjust this to your entry file
+  mode: "development",
+  entry: "./src/api/index.js",
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
@@ -12,28 +12,28 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/, // Transpile .js files
-        exclude: /node_modules/, // Exclude node_modules
+        test: /\.js$/,
+        exclude: /node_modules/,
         use: {
           loader: "babel-loader",
           options: {
-            presets: ["@babel/preset-env"], // Use the preset for modern JS features
+            presets: ["@babel/preset-env"],
           },
         },
       },
     ],
   },
   plugins: [
-    new Dotenv(), // Loads variables from .env file
+    new Dotenv(),
     new webpack.DefinePlugin({
       "process.env": JSON.stringify({
-        DEBUG: process.env.DEBUG, // Add other safe environment variables here
-      }), // Inject selected environment variables globally
+        DEBUG: process.env.DEBUG,
+      }),
     }),
   ],
   resolve: {
     fallback: {
-      fs: false, // Disable "fs" module for the browser
+      fs: false,
       path: false,
     },
   },
