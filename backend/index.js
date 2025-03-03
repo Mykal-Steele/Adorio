@@ -11,11 +11,11 @@ dotenv.config();
 
 const app = express();
 
+// Add explicit adorio.space entry
 const allowedOrigins = [
+  "https://adorio.space", // Primary domain
+  "https://feelio-github-io.onrender.com", // Render fallback
   "http://localhost:5173",
-  "http://localhost:5174",
-  "https://mykal-steele.github.io",
-  process.env.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com",
 ];
 
 app.use(
