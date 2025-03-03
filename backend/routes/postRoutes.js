@@ -132,45 +132,47 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Like/Unlike a Post
 router.put("/:id/like", verifyToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
     const userId = req.user.id;
-    if (post.likes.includes(userId)) {
+    const isLiked = post.likes.some((id) => id.toString() === userId);
+
+    if (isLiked) {
       post.likes = post.likes.filter((id) => id.toString() !== userId);
     } else {
       post.likes.push(userId);
     }
 
-    const updatedPost = await post.save();
+    await post.save();
 
-    // Populate the user and likes before sending response
-    const populatedPost = await Post.findById(updatedPost._id)
-      .populate("user", ["username"])
-      .populate("likes", ["username"]);
-
-    res.json(populatedPost);
+    return res.status(200).json({
+      _id: post._id,
+      likes: post.likes,
+      action: isLiked ? "unliked" : "liked",
+      optimisticId: req.body.optimisticId || null,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Error in like operation:", error);
     res.status(500).json({ message: "Server Error" });
   }
 });
 
-// Add a Comment
 router.post("/:id/comment", verifyToken, async (req, res) => {
   try {
     if (!req.body.text || req.body.text.trim() === "") {
-      return res.status(400).json("Comment text is required");
+      return res.status(400).json({ message: "Comment text is required" });
     }
 
+    const { text, optimisticId } = req.body;
+
     const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json("Post not found");
+    if (!post) return res.status(404).json({ message: "Post not found" });
 
     const newComment = {
-      text: req.body.text,
+      text,
       user: req.user.id,
       createdAt: new Date(),
     };
@@ -178,13 +180,23 @@ router.post("/:id/comment", verifyToken, async (req, res) => {
     post.comments.push(newComment);
     await post.save();
 
-    const updatedPost = await Post.findById(req.params.id)
-      .populate("user", ["username"])
-      .populate("likes", ["username"])
-      .populate("comments.user", ["username"]);
+    const populatedComment = await Post.findOne(
+      {
+        _id: post._id,
+        "comments._id": post.comments[post.comments.length - 1]._id,
+      },
+      { "comments.$": 1 }
+    ).populate("comments.user", ["username"]);
 
-    res.status(200).json(updatedPost);
+    const comment = populatedComment?.comments[0];
+
+    res.status(201).json({
+      _id: post._id,
+      comment,
+      optimisticId,
+    });
   } catch (err) {
+    console.error("Error adding comment:", err);
     res.status(500).json({ message: "Server Error" });
   }
 });
