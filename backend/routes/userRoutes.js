@@ -1,9 +1,10 @@
-//feelio\backend\routes\userRoutes.js
-const router = require("express").Router();
-const User = require("../models/User");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const verifyToken = require("../middleware/verifyToken");
+import express from "express";
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import verifyToken from "../middleware/verifyToken.js";
+
+const router = express.Router();
 
 // Fetch user data
 router.get("/me", verifyToken, async (req, res) => {
@@ -97,4 +98,4 @@ router.post("/login", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
