@@ -2,7 +2,7 @@
   "name": "feelio",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://mykal-steele.github.io/",
+  "homepage": "https://www.adorio.space/",
   "scripts": {
     "skibidi": "vite --force",
     "build": "vite build",
@@ -11,6 +11,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "smt": "npm run build && npm run deploy",
+    "vercel-build": "npm run build && mv dist backend/dist && cd backend && npm install",
     "start": "cd backend && npm install && node index.js && cd /"
   },
   "dependencies": {
