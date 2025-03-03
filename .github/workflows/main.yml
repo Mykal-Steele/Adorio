@@ -15,7 +15,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'  # Using Node.js version 20
+          node-version: '22'  # Force Node.js version 22
+
+      - name: Verify Node version
+        run: node --version
 
       - name: Install dependencies
         run: |
