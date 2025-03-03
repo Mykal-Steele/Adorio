@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { getPosts, createPost, likePost } from "../api";
 import PostCard from "../Components/PostCard";
 import { useSelector } from "react-redux";
@@ -10,6 +10,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import SkeletonLoader from "../Components/SkeletonLoader";
 import useInfiniteScroll from "../hooks/useInfiniteScroll";
+import useClickOutside from "../hooks/useClickOutside";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -23,6 +24,8 @@ const Home = () => {
   const [imagePreview, setImagePreview] = useState("");
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+
+  const textareaRef = useRef(null);
 
   const TITLE_CHARACTER_LIMIT = 100;
 
@@ -43,17 +46,12 @@ const Home = () => {
     }
   };
 
-  // In the fetchPosts function, update this part:
   const fetchPosts = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await getPosts(page);
-      console.log("API Response:", response); // Add this for debugging
-
-      // Access the nested posts array correctly
       const newPosts = response.posts || [];
-
       setPosts((prev) => (page === 1 ? newPosts : [...prev, ...newPosts]));
       setHasMore(response.hasMore);
     } catch (err) {
@@ -83,14 +81,7 @@ const Home = () => {
       const validImageTypes = ["image/jpeg", "image/png"];
       if (validImageTypes.includes(file.type)) {
         setImage(file);
-        try {
-          setImagePreview(URL.createObjectURL(file));
-        } catch (error) {
-          console.error("Error creating object URL:", error);
-          setError({
-            message: "Failed to load image preview.",
-          });
-        }
+        setImagePreview(URL.createObjectURL(file));
       } else {
         setError({
           message: "Invalid file type. Please upload an image (JPEG or PNG).",
@@ -107,19 +98,15 @@ const Home = () => {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("content", content);
-
-      // Ensure image is appended correctly
       if (image instanceof File) {
         formData.append("image", image);
       }
 
       const response = await createPost(formData);
-
-      // Update local state with the new post including image
       setPosts((prev) => [
         {
           ...response,
-          user: { _id: user._id, username: user.username }, // Add author info
+          user: { _id: user._id, username: user.username },
           image: response.image || null,
         },
         ...prev,
@@ -223,16 +210,19 @@ const Home = () => {
             </div>
 
             {/* Content Input */}
-            <motion.textarea
-              whileFocus={{ scale: 1.02 }}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="What's on your mind?"
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500"
-              rows="3"
-              required
-              disabled={isCreating}
-            />
+            <div className="relative">
+              <motion.textarea
+                ref={textareaRef}
+                whileFocus={{ scale: 1.02 }}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="What's on your mind?"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500"
+                rows="3"
+                required
+                disabled={isCreating}
+              />
+            </div>
 
             {/* Image Upload Section */}
             <div className="space-y-2">
@@ -300,28 +290,30 @@ const Home = () => {
           animate={{ opacity: 1 }}
           className="space-y-4 sm:space-y-6 pb-8"
         >
-          {posts.map((post, index) => {
-            console.log("Rendering post:", post); //  Add this line
-            return (
-              <div
-                ref={index === posts.length - 1 ? lastPostRef : null}
-                key={post._id}
-              >
-                <PostCard
-                  {...post}
-                  currentUserId={user?._id}
-                  onLike={handleLike}
-                  onCommentAdded={(updatedPost) => {
-                    setPosts((prevPosts) =>
-                      prevPosts.map((p) =>
-                        p._id === updatedPost._id ? updatedPost : p
-                      )
-                    );
-                  }}
-                />
-              </div>
-            );
-          })}
+          {posts.map((post, index) => (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="relative  mt-4 pt-4 border-t border-gray-800/40"
+              ref={index === posts.length - 1 ? lastPostRef : null}
+              key={post._id}
+            >
+              <PostCard
+                {...post}
+                user={post.user}
+                currentUserId={user?._id}
+                onLike={handleLike}
+                onCommentAdded={(updatedPost) => {
+                  setPosts((prevPosts) =>
+                    prevPosts.map((p) =>
+                      p._id === updatedPost._id ? updatedPost : p
+                    )
+                  );
+                }}
+              />
+            </motion.div>
+          ))}
 
           {loading && <SkeletonLoader count={3} />}
 
