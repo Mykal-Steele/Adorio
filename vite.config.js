@@ -22,4 +22,9 @@ export default defineConfig({
     ),
     "process.env.CLOUDINARY_NAME": JSON.stringify(process.env.CLOUDINARY_NAME),
   },
+  build: {
+    rollupOptions: {
+      external: ["@rollup/rollup-linux-x64-gnu"], // Added external dependency for rollup
+    },
+  },
 });
