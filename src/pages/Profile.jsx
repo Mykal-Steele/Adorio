@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
-import { getPosts } from "../api";
+import { getPosts, likePost } from "../api"; // Import likePost API function
 import PostCard from "../Components/PostCard";
 import { SparklesIcon } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,6 +14,35 @@ const Profile = () => {
   const [error, setError] = useState("");
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+
+  // Add this handler function for likes
+  const handleLike = async (postId) => {
+    try {
+      // Call the API
+      const updatedPost = await likePost(postId);
+
+      // Update the post in local state
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === postId ? { ...post, likes: updatedPost.likes } : post
+        )
+      );
+
+      return updatedPost;
+    } catch (err) {
+      console.error("Error liking post:", err);
+      throw err;
+    }
+  };
+
+  // Add this handler function for comments
+  const handleCommentAdded = (updatedPost) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post._id === updatedPost._id ? updatedPost : post
+      )
+    );
+  };
 
   const fetchUserPosts = useCallback(async () => {
     setLoading(true);
@@ -94,6 +123,8 @@ const Profile = () => {
                 {...post}
                 user={post.user} // Ensure user is passed
                 currentUserId={user?._id}
+                onLike={handleLike} // Add this prop
+                onCommentAdded={handleCommentAdded} // Add this prop
               />
             </div>
           ))}
