@@ -9,6 +9,8 @@ import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import moment from "moment";
 import { addComment } from "../api";
 import { motion, AnimatePresence } from "framer-motion";
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
 
 const PostCard = ({
   _id,
@@ -31,6 +33,7 @@ const PostCard = ({
   const [expandedComments, setExpandedComments] = useState({});
   const [commentsScrollTop, setCommentsScrollTop] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false); // New state for showing emoji picker
 
   const MAX_PREVIEW_LENGTH = 150;
   const shouldShowExpand = content.length > MAX_PREVIEW_LENGTH;
@@ -93,6 +96,10 @@ const PostCard = ({
 
   const handleImageClick = () => {
     setShowImageModal(true);
+  };
+  const handleEmojiSelect = (emoji) => {
+    setNewComment((prev) => prev + emoji.native); // Append emoji to comment
+    setShowEmojiPicker(false); // Close the emoji picker after selection
   };
 
   return (
@@ -281,9 +288,31 @@ const PostCard = ({
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Add a comment..."
-                  className="w-full px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700/30 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500 focus:outline-none"
-                  disabled={isSubmitting}
+                  className="w-full p-2 text-gray-300 bg-gray-800/50 rounded-xl border-0 focus:ring-2 focus:ring-purple-500 outline-none"
                 />
+                {/* Emoji Picker Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className="absolute right-2 top-2 text-gray-400 hover:text-gray-200"
+                >
+                  😊
+                </button>
+                {/* Emoji Picker */}
+                {showEmojiPicker && (
+                  <div className="absolute bottom-16 right-2 z-50">
+                    <Picker
+                      data={data}
+                      onEmojiSelect={handleEmojiSelect}
+                      theme="dark"
+                      // Add these essential props
+                      set="native"
+                      previewPosition="none"
+                      skinTonePosition="search"
+                      dynamicWidth={true}
+                    />
+                  </div>
+                )}
               </motion.div>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -298,7 +327,6 @@ const PostCard = ({
                 <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.button>
             </form>
-
             {/* Enhanced Comments List */}
             <div
               className="space-y-4 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent"
