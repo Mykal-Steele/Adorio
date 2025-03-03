@@ -81,10 +81,16 @@ const Home = () => {
     const file = e.target.files[0];
     if (file) {
       const validImageTypes = ["image/jpeg", "image/png"];
-      setImagePreview(URL.createObjectURL(file));
       if (validImageTypes.includes(file.type)) {
         setImage(file);
-        setImagePreview(URL.createObjectURL(file));
+        try {
+          setImagePreview(URL.createObjectURL(file));
+        } catch (error) {
+          console.error("Error creating object URL:", error);
+          setError({
+            message: "Failed to load image preview.",
+          });
+        }
       } else {
         setError({
           message: "Invalid file type. Please upload an image (JPEG or PNG).",
