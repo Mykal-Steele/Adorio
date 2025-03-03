@@ -80,8 +80,16 @@ const Home = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(file);
+      const validImageTypes = ["image/jpeg", "image/png"];
       setImagePreview(URL.createObjectURL(file));
+      if (validImageTypes.includes(file.type)) {
+        setImage(file);
+        setImagePreview(URL.createObjectURL(file));
+      } else {
+        setError({
+          message: "Invalid file type. Please upload an image (JPEG or PNG).",
+        });
+      }
     }
   };
 
