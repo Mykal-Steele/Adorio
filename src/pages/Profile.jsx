@@ -90,7 +90,11 @@ const Profile = () => {
               ref={index === posts.length - 1 ? lastPostRef : null}
               key={post._id}
             >
-              <PostCard {...post} currentUserId={user?._id} />
+              <PostCard
+                {...post}
+                user={post.user} // Ensure user is passed
+                currentUserId={user?._id}
+              />
             </div>
           ))}
 
