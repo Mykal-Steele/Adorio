@@ -26,6 +26,13 @@ const PostCard = ({
   onLike,
   currentUserId,
 }) => {
+  // Calculate userLiked first
+  const userLiked = likes.some(
+    (like) =>
+      (like._id?.toString() || like.toString()) === currentUserId?.toString()
+  );
+
+  // Then use it to initialize state
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,6 +42,10 @@ const PostCard = ({
   const [commentsScrollTop, setCommentsScrollTop] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [optimisticLikesCount, setOptimisticLikesCount] = useState(
+    likes.length
+  );
+  const [optimisticUserLiked, setOptimisticUserLiked] = useState(userLiked);
 
   const emojiPickerRef = useRef(null);
   useClickOutside(emojiPickerRef, () => setShowEmojiPicker(false));
@@ -45,23 +56,43 @@ const PostCard = ({
     ? content
     : content.slice(0, MAX_PREVIEW_LENGTH) + (shouldShowExpand ? "..." : "");
 
-  const userLiked = likes.some(
-    (like) =>
-      (like._id?.toString() || like.toString()) === currentUserId?.toString()
-  );
-
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim() || isSubmitting) return;
 
+    // Create a temporary comment with timestamp as ID
+    const tempId = `temp-${Date.now()}`;
+    const tempComment = {
+      _id: tempId,
+      text: newComment,
+      user: {
+        username: user?.username || "You",
+        _id: currentUserId,
+      },
+      createdAt: new Date().toISOString(),
+    };
+
+    // Optimistically add comment to UI immediately
+    setComments((prevComments) => [tempComment, ...prevComments]);
+
+    // Clear input field right away
+    const commentText = newComment;
+    setNewComment("");
+
     setIsSubmitting(true);
     try {
-      const updatedPost = await addComment(_id, newComment);
+      const updatedPost = await addComment(_id, commentText);
+      // Replace temporary comments with actual data from server
       setComments(updatedPost.comments);
-      setNewComment("");
       onCommentAdded(updatedPost);
     } catch (err) {
       console.error("Error adding comment:", err);
+      // Remove the temporary comment if there was an error
+      setComments((prevComments) =>
+        prevComments.filter((comment) => comment._id !== tempId)
+      );
+      // Restore the comment text to the input
+      setNewComment(commentText);
     } finally {
       setIsSubmitting(false);
     }
@@ -72,13 +103,19 @@ const PostCard = ({
   };
 
   const handleLike = async () => {
+    const willBeLiked = !optimisticUserLiked;
+
+    setOptimisticUserLiked(willBeLiked);
+    setOptimisticLikesCount((prev) => (willBeLiked ? prev + 1 : prev - 1));
+
     try {
       await onLike(_id);
     } catch (err) {
       console.error("Error liking post:", err);
+      setOptimisticUserLiked(!willBeLiked);
+      setOptimisticLikesCount((prev) => (willBeLiked ? prev - 1 : prev + 1));
     }
   };
-
   const toggleContent = () => {
     setIsContentExpanded(!isContentExpanded);
     if (!isContentExpanded) {
@@ -230,17 +267,17 @@ const PostCard = ({
           onClick={handleLike}
           className="flex items-center gap-2 group"
         >
-          {userLiked ? (
+          {optimisticUserLiked ? (
             <HeartIconSolid className="h-6 w-6 text-red-500" />
           ) : (
             <HeartIcon className="h-6 w-6 text-gray-400 group-hover:text-red-400 transition-colors" />
           )}
           <span
             className={`text-sm ${
-              userLiked ? "text-red-500" : "text-gray-400"
+              optimisticUserLiked ? "text-red-500" : "text-gray-400"
             }`}
           >
-            {likes.length}
+            {optimisticLikesCount}
           </span>
         </motion.button>
 
