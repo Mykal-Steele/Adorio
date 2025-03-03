@@ -16,7 +16,7 @@ async function runLogin() {
   const page = await browser.newPage();
 
   try {
-    await page.goto("https://mykal-steele.github.io/", {
+    await page.goto("https://adiorios.space/", {
       waitUntil: "networkidle2",
     });
     await delay(5000);
