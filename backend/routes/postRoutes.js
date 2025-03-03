@@ -1,21 +1,21 @@
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
-const router = require("express").Router();
-const Post = require("../models/Post");
-const verifyToken = require("../middleware/verifyToken");
-const cloudinary = require("cloudinary").v2;
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import { Router } from "express";
+import Post from "../models/Post.js";
+import verifyToken from "../middleware/verifyToken.js";
+import cloudinary from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 // Configure Cloudinary
-cloudinary.config({
+cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_KEY,
   api_secret: process.env.CLOUDINARY_SECRET,
 });
 
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary: cloudinary.v2,
   params: {
     folder: "feelio/posts",
     allowed_formats: ["jpg", "jpeg", "png", "webp"],
@@ -51,6 +51,8 @@ const upload = multer({
   fileFilter,
   limits: { fileSize: 10 * 1024 * 1024 },
 });
+
+const router = Router();
 
 router.post("/", verifyToken, upload.single("image"), async (req, res) => {
   try {
@@ -187,4 +189,4 @@ router.post("/:id/comment", verifyToken, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
