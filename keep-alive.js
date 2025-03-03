@@ -9,16 +9,30 @@ function delay(ms) {
 }
 
 async function runLogin() {
-  // Launch the browser
+  // Launch the browser with proper production configurations
   const browser = await puppeteer.launch({
-    executablePath: "/usr/bin/chromium-browser", // Adjust this path to your installed Chromium
+    executablePath:
+      process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium-browser",
+    headless: "new", // Use new headless mode for better stability
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--disable-extensions",
+    ],
   });
+
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
 
   try {
     console.log("Navigating to adiorios.space...");
-    await page.goto("https://adorio.space/", { waitUntil: "networkidle2" });
+    // Set a reasonable timeout for production
+    await page.goto("https://adorio.space/", {
+      waitUntil: "networkidle2",
+      timeout: 30000,
+    });
     console.log("Page loaded.");
 
     await page.waitForSelector("body"); // Check if the body is loaded
@@ -36,17 +50,17 @@ async function runLogin() {
     }
 
     console.log("Waiting for login form...");
-    await page.waitForSelector('input[type="email"]', { timeout: 10000 });
+    await page.waitForSelector('input[type="email"]', { timeout: 15000 });
     console.log("Login form found.");
 
     console.log("Entering credentials...");
-    await page.type('input[type="email"]', "t@t.com", { delay: 100 });
-    await page.type('input[type="password"]', "t", { delay: 100 });
+    await page.type('input[type="email"]', "t@t.com");
+    await page.type('input[type="password"]', "t");
 
     console.log("Submitting login...");
     await Promise.all([
       page.click('button[type="submit"]'),
-      page.waitForNavigation({ waitUntil: "networkidle2" }),
+      page.waitForNavigation({ waitUntil: "networkidle2", timeout: 30000 }),
     ]);
 
     console.log("Verifying login...");
@@ -61,19 +75,27 @@ async function runLogin() {
     await page.evaluate(() => localStorage.removeItem("token"));
 
     console.log("Login workflow completed successfully.");
+    return true; // Indicate success
   } catch (error) {
     console.error("Error during automation:", error);
     throw error;
   } finally {
     console.log("Closing browser...");
-    await delay(3000);
-    await browser.close();
+    try {
+      await browser.close();
+    } catch (closeError) {
+      console.error("Error closing browser:", closeError);
+    }
   }
 }
 
-function attemptLogin() {
+async function attemptLogin() {
   console.log("Starting login attempt...");
-  runLogin().catch((error) => {
+  try {
+    await runLogin();
+    console.log("Login process completed successfully");
+    process.exit(0);
+  } catch (error) {
     if (retryCount < maxRetries) {
       retryCount++;
       console.error(
@@ -84,7 +106,14 @@ function attemptLogin() {
       console.error("Max retries reached. Stopping...");
       process.exit(1);
     }
-  });
+  }
 }
 
+// Handle unexpected errors
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  process.exit(1);
+});
+
+// Execute the login process
 attemptLogin();
