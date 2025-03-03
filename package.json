@@ -5,13 +5,13 @@
   "homepage": "https://adorio.space/",
   "scripts": {
     "skibidi": "vite --force",
-    "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "vercel-build": "rm -rf node_modules && npm install --force && npm run build",
+  "build": "vite build --base=/dist/",
+  "preview": "vite preview --host",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "smt": "npm run build && npm run deploy",
-    "vercel-build": "rm -rf node_modules package-lock.json && npm install --include=optional && npm run build && mv dist backend/dist && cd backend && npm install --include=optional",
     "start": "cd backend && npm install && node index.js && cd /"
   },
   "dependencies": {
