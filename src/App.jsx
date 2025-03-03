@@ -41,7 +41,7 @@ const AppContent = () => {
     checkAuth();
   }, [dispatch]);
 
-  if (loading) return <div>Loading...</div>; // Or a proper loading indicator
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div className={darkMode ? "dark" : ""}>
@@ -68,7 +68,6 @@ const AppContent = () => {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          {/* Catch-all route for non-existent pages */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
