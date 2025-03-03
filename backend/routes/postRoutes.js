@@ -83,14 +83,29 @@ router.post("/", verifyToken, upload.single("image"), async (req, res) => {
   }
 });
 
-// Get All Posts with Pagination
+// Get All Posts with Pagination - with optimized projection
 router.get("/", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
-    const posts = await Post.find()
+    // Only select fields we actually need
+    const posts = await Post.find(
+      {},
+      {
+        title: 1,
+        content: 1,
+        user: 1,
+        likes: 1,
+        "comments._id": 1,
+        "comments.text": 1,
+        "comments.user": 1,
+        "comments.createdAt": 1,
+        image: 1,
+        createdAt: 1,
+      }
+    )
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -98,6 +113,7 @@ router.get("/", async (req, res) => {
       .populate("likes", ["username"])
       .populate("comments.user", ["username"]);
 
+    // Use countDocuments with the same query filter
     const totalPosts = await Post.countDocuments();
     const hasMore = totalPosts > skip + limit;
 
@@ -109,6 +125,7 @@ router.get("/", async (req, res) => {
       totalPages: Math.ceil(totalPosts / limit),
     });
   } catch (err) {
+    console.error("Error fetching posts:", err);
     res.status(500).json({ message: "Server Error" });
   }
 });
@@ -160,6 +177,7 @@ router.put("/:id/like", verifyToken, async (req, res) => {
   }
 });
 
+// Improved Comment endpoint
 router.post("/:id/comment", verifyToken, async (req, res) => {
   try {
     if (!req.body.text || req.body.text.trim() === "") {
