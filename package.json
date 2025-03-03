@@ -6,11 +6,8 @@
   "scripts": {
     "skibidi": "vite --force",
     "lint": "eslint .",
-    "vercel-build": "rm -rf node_modules && npm install --force && npm run build",
-  "build": "vite build --base=/dist/",
+  "build": "vite build",
   "preview": "vite preview --host",
-    "predeploy": "npm run build",
-    "preinstall": "node -e \"if (!fs.existsSync('package.json')) throw new Error('Missing root package.json')\"",
     "deploy": "gh-pages -d dist",
     "smt": "npm run build && npm run deploy",
     "start": "cd backend && npm install && node index.js && cd /"
