@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   HeartIcon,
   ChatBubbleOvalLeftIcon,
@@ -11,12 +11,13 @@ import { addComment } from "../api";
 import { motion, AnimatePresence } from "framer-motion";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
+import useClickOutside from "../hooks/useClickOutside";
 
 const PostCard = ({
   _id,
   title,
   content,
-  author,
+  user,
   image: postImage,
   likes = [],
   comments: initialComments = [],
@@ -33,7 +34,10 @@ const PostCard = ({
   const [expandedComments, setExpandedComments] = useState({});
   const [commentsScrollTop, setCommentsScrollTop] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false); // New state for showing emoji picker
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const emojiPickerRef = useRef(null);
+  useClickOutside(emojiPickerRef, () => setShowEmojiPicker(false));
 
   const MAX_PREVIEW_LENGTH = 150;
   const shouldShowExpand = content.length > MAX_PREVIEW_LENGTH;
@@ -98,8 +102,8 @@ const PostCard = ({
     setShowImageModal(true);
   };
   const handleEmojiSelect = (emoji) => {
-    setNewComment((prev) => prev + emoji.native); // Append emoji to comment
-    setShowEmojiPicker(false); // Close the emoji picker after selection
+    setNewComment((prev) => prev + emoji.native);
+    setShowEmojiPicker(false);
   };
 
   return (
@@ -119,12 +123,12 @@ const PostCard = ({
           >
             <div className="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center">
               <span className="text-xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
-                {author?.charAt(0).toUpperCase() || "U"}
+                {user?.username?.charAt(0).toUpperCase() || "U"}
               </span>
             </div>
           </motion.div>
           <div>
-            <p className="font-medium text-gray-100">{author}</p>
+            <p className="font-medium text-gray-100">{user?.username}</p>
             <p className="text-sm text-gray-400">
               {moment(createdAt).fromNow()}
             </p>
@@ -133,13 +137,13 @@ const PostCard = ({
       </div>
 
       {/* Post Image */}
-      {postImage ? (
+      {postImage && (
         <motion.div
           className="mb-4 rounded-xl overflow-hidden relative cursor-pointer"
           whileHover={{ scale: 1.01 }}
         >
           <button
-            onClick={handleImageClick}
+            onClick={() => setShowImageModal(true)}
             className="w-full h-full block relative group"
           >
             <img
@@ -147,17 +151,12 @@ const PostCard = ({
               alt="Post content"
               className="w-full h-auto max-h-[600px] object-cover"
               loading="lazy"
-              style={{ aspectRatio: " 2 / 1.1" }}
+              style={{ aspectRatio: "2 / 1.1" }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <ArrowsPointingOutIcon className="absolute top-3 right-3 h-6 w-6 text-white opacity-0 group-hover:opacity-75 transition-opacity" />
           </button>
         </motion.div>
-      ) : (
-        <div className="">
-          {/* mb-4 p-4 bg-gray-800/50 rounded-xl text-gray-400 */}
-          {/* No image available */}
-        </div>
       )}
 
       {/* Image Modal */}
@@ -300,16 +299,24 @@ const PostCard = ({
                 </button>
                 {/* Emoji Picker */}
                 {showEmojiPicker && (
-                  <div className="absolute bottom-16 right-2 z-50">
+                  <div
+                    ref={emojiPickerRef}
+                    className="absolute bottom-16 right-0 z-50"
+                  >
                     <Picker
                       data={data}
                       onEmojiSelect={handleEmojiSelect}
                       theme="dark"
-                      // Add these essential props
                       set="native"
                       previewPosition="none"
                       skinTonePosition="search"
                       dynamicWidth={true}
+                      style={{
+                        width: "350px",
+                        height: "400px",
+                        borderRadius: "12px",
+                        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
+                      }}
                     />
                   </div>
                 )}
