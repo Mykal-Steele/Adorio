@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import SkeletonLoader from "../Components/SkeletonLoader";
 import useInfiniteScroll from "../hooks/useInfiniteScroll";
 import useClickOutside from "../hooks/useClickOutside";
-
+import DOMPurify from "dompurify";
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +81,9 @@ const Home = () => {
       const validImageTypes = ["image/jpeg", "image/png"];
       if (validImageTypes.includes(file.type)) {
         setImage(file);
-        setImagePreview(URL.createObjectURL(file));
+        const objectUrl = URL.createObjectURL(file);
+        const sanitizedUrl = DOMPurify.sanitize(objectUrl);
+        setImagePreview(sanitizedUrl);
       } else {
         setError({
           message: "Invalid file type. Please upload an image (JPEG or PNG).",
