@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 
+// image component that handles all the loading states - finally got this right
 const PostImage = ({ imageState, onImageClick, title, postId, instanceId }) => {
   const imageRef = useRef(null);
 
@@ -19,14 +20,14 @@ const PostImage = ({ imageState, onImageClick, title, postId, instanceId }) => {
         disabled={!imageState.isLoaded || imageState.hasError}
         type="button"
       >
-        {/* Loading state */}
+        {/* spinner while image loads - looks way better than empty space */}
         {imageState.isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800/50">
             <div className="w-8 h-8 border-4 border-gray-600 border-t-purple-500 rounded-full animate-spin"></div>
           </div>
         )}
 
-        {/* Error state */}
+        {/* error message if cloudinary fails or something */}
         {imageState.hasError && !imageState.isLoading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800/30">
             <svg
@@ -46,7 +47,7 @@ const PostImage = ({ imageState, onImageClick, title, postId, instanceId }) => {
           </div>
         )}
 
-        {/* Image when loaded */}
+        {/* actual image with that hover overlay thing i added */}
         {imageState.isLoaded && imageState.url && (
           <React.Fragment>
             <img

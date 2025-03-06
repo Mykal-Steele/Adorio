@@ -4,7 +4,7 @@ export function useImageLoader({ postImage, postId, instanceId }) {
   const isMounted = useRef(true);
   const preloadImageRef = useRef(null);
 
-  // Image loading state
+  // keeping track of the image state
   const [imageState, setImageState] = useState({
     url: null,
     isLoading: false,
@@ -13,18 +13,18 @@ export function useImageLoader({ postImage, postId, instanceId }) {
     postId: postId,
   });
 
-  // Image loading function
+  // function to load the image
   const loadImage = useCallback(() => {
     if (!isMounted.current) return;
 
-    // Clean up previous image
+    // clean up old image stuff
     if (preloadImageRef.current) {
       preloadImageRef.current.onload = null;
       preloadImageRef.current.onerror = null;
       preloadImageRef.current = null;
     }
 
-    // Reset state
+    // reset the state before loading
     setImageState((prev) => ({
       ...prev,
       isLoading: true,
@@ -32,7 +32,7 @@ export function useImageLoader({ postImage, postId, instanceId }) {
       isLoaded: false,
     }));
 
-    // Validate image
+    // check if we actually have an image
     if (!postImage?.url) {
       console.log(`[${instanceId}] No valid image for post ${postId}`);
       setImageState((prev) => ({ ...prev, isLoading: false, hasError: true }));
@@ -40,22 +40,22 @@ export function useImageLoader({ postImage, postId, instanceId }) {
     }
 
     try {
-      // Create unique URL with cache-busting
+      // make a unique url so we don't get cached images
       const baseUrl = postImage.url.split("?")[0];
       const uniqueUrl = `${baseUrl}?postId=${postId}&instance=${instanceId}&t=${Date.now()}&r=${Math.random()
         .toString(36)
         .slice(2)}`;
 
-      // Update URL in state
+      // update the url in state
       setImageState((prev) => ({ ...prev, url: uniqueUrl, postId }));
 
-      // Preload image
+      // preload the image
       const preloadImage = new Image();
       preloadImageRef.current = preloadImage;
       preloadImage.crossOrigin = "anonymous";
       preloadImage.referrerPolicy = "no-referrer";
 
-      // Handle load/error events
+      // what to do when image loads
       preloadImage.onload = () => {
         if (isMounted.current) {
           setImageState((prev) => ({
@@ -67,6 +67,7 @@ export function useImageLoader({ postImage, postId, instanceId }) {
         }
       };
 
+      // what to do when image fails
       preloadImage.onerror = () => {
         if (isMounted.current) {
           setImageState((prev) => ({
@@ -91,7 +92,7 @@ export function useImageLoader({ postImage, postId, instanceId }) {
     }
   }, [postImage, postId, instanceId]);
 
-  // Load image on mount
+  // load image when component mounts
   useEffect(() => {
     loadImage();
     return () => {
@@ -104,6 +105,5 @@ export function useImageLoader({ postImage, postId, instanceId }) {
     };
   }, [loadImage]);
 
-  // Return the image state and loader
   return { imageState, loadImage };
 }

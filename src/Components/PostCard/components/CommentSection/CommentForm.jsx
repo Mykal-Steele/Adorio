@@ -4,6 +4,7 @@ import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import useClickOutside from "../../../../hooks/useClickOutside";
 
+// this form handles all the comment input stuff - finally got emojis working!
 const CommentForm = ({
   value,
   onChange,
@@ -14,6 +15,7 @@ const CommentForm = ({
   onEmojiSelect,
 }) => {
   const emojiPickerRef = useRef(null);
+  // using my custom hook to close the emoji picker when clicking outside
   useClickOutside(emojiPickerRef, () => onToggleEmojiPicker(false));
 
   return (
@@ -26,6 +28,7 @@ const CommentForm = ({
           placeholder="Add a comment..."
           className="w-full p-2 text-gray-300 bg-gray-800/50 rounded-xl border-0 focus:ring-2 focus:ring-purple-500 outline-none"
         />
+        {/* emoji button - tried to make it look like fb's */}
         <button
           type="button"
           onClick={() => onToggleEmojiPicker(!showEmojiPicker)}
@@ -55,6 +58,7 @@ const CommentForm = ({
         )}
       </motion.div>
 
+      {/* added this cool hover effect i saw on dribbble */}
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
@@ -65,6 +69,7 @@ const CommentForm = ({
         <span className="relative z-10">
           {isSubmitting ? "Posting..." : "Post Comment"}
         </span>
+        {/* this overlay gives that subtle shine effect when hovering */}
         <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       </motion.button>
     </form>

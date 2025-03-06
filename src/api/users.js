@@ -1,6 +1,7 @@
 const axios = require("axios");
 
-// Check if we're in the browser (client-side) to access `window`
+// figuring out if we're in the browser or not so we can get the url right
+// spent way too long debugging this stupid issue
 const apiUrl =
   typeof window !== "undefined"
     ? window.VITE_BACKEND_URL + "/api/"
@@ -19,3 +20,9 @@ export const fetchUserData = async () => {
     throw new Error("Failed to fetch user data");
   }
 };
+
+// planning to add profile update stuff here but haven't gotten to it yet
+// kinda copying the pattern i used in posts.js but with axios instead of my API wrapper
+
+// might refactor this later to use the API class from index.js
+// but it works for now so whatever

@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import moment from "moment";
 import { ADMIN_AVATAR_URL, isUserAdmin } from "../../constants";
 
+// each individual comment with the cool expand/collapse thing
 const CommentItem = ({ comment, isExpanded, onToggleExpand }) => {
-  const MAX_COMMENT_LENGTH = 150;
+  const MAX_COMMENT_LENGTH = 150; // cut off long comments so they don't take up the whole screen
   const shouldShowExpand = comment.text.length > MAX_COMMENT_LENGTH;
 
   return (
@@ -23,6 +24,7 @@ const CommentItem = ({ comment, isExpanded, onToggleExpand }) => {
               className="w-full h-full object-cover"
             />
           ) : (
+            // just using first letter of username as avatar cuz i'm too lazy to make real ones lol
             <span className="text-xs font-medium text-white">
               {comment.user?.username?.charAt(0).toUpperCase() || "U"}
             </span>
@@ -50,6 +52,7 @@ const CommentItem = ({ comment, isExpanded, onToggleExpand }) => {
               </motion.div>
             </AnimatePresence>
             {shouldShowExpand && (
+              // took me forever to get this animation right but it works now
               <button
                 onClick={onToggleExpand}
                 className="text-purple-400 hover:text-purple-300 text-sm font-medium mt-1 transition-colors"

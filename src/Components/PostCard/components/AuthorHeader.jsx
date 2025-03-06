@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import moment from "moment";
 import { ADMIN_AVATAR_URL } from "../constants";
 
+// header component for showing who posted - tried to make it look clean
 const AuthorHeader = ({ user, createdAt, isAdmin }) => {
   return (
     <div className="flex items-center justify-between mb-4">
@@ -19,6 +20,7 @@ const AuthorHeader = ({ user, createdAt, isAdmin }) => {
                 className="w-full h-full object-cover rounded-full"
               />
             ) : (
+              // using first letter for normal users cuz i'm too lazy to add profile pics yet
               <span className="text-xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
                 {user?.username?.charAt(0).toUpperCase() || "U"}
               </span>

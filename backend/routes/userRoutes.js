@@ -6,7 +6,7 @@ import verifyToken from "../middleware/verifyToken.js";
 
 const router = express.Router();
 
-// Fetch user data
+// grabbing user details for profile page and stuff
 router.get("/me", verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -19,21 +19,33 @@ router.get("/me", verifyToken, async (req, res) => {
   }
 });
 
-// Register route
+// user stuff like login and signup goes here
+
 router.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Check for existing user
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    // gotta check if they filled everything out
+    if (!username || !email || !password) {
+      return res
+        .status(400)
+        .json({ message: "please fill in all the fields!" });
+    }
+
+    // make sure we don't have duplicate users
+    const existingUser = await User.findOne({
+      $or: [{ email: { $eq: email } }, { username: { $eq: username } }],
+    });
+
     if (existingUser) {
       const message =
         existingUser.email === email
-          ? "Email already exists"
-          : "Username already exists";
+          ? "email already exists"
+          : "username already exists";
       return res.status(400).json({ message });
     }
 
+    // encrypting passwords cuz storing them as plaintext would be dumb
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       username,
@@ -43,6 +55,7 @@ router.post("/register", async (req, res) => {
 
     const savedUser = await newUser.save();
 
+    // don't send the password back!
     const sanitizedUser = {
       _id: savedUser._id,
       username: savedUser.username,
@@ -60,39 +73,42 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// Login route with refresh token
+// login with refresh token so they stay logged in
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // basic validation stuff
     if (!email || !password) {
       return res
         .status(400)
-        .json({ message: "Email and password are required" });
+        .json({ message: "email and password are required" });
     }
 
     const user = await User.findOne({ email: { $eq: email } });
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
+      return res.status(400).json({ message: "user not found" });
     }
 
+    // checking if password matches what's in the db
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: "invalid credentials" });
     }
 
+    // clean up user data before sending
     const sanitizedUser = {
       _id: user._id,
       username: user.username,
       email: user.email,
     };
 
-    // Short-lived access token (15 minutes)
+    // short lived token for regular auth
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "15m",
     });
 
-    // Longer-lived refresh token (7 days)
+    // longer token so they don't have to login every day
     const refreshToken = jwt.sign(
       { userId: user._id },
       process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET,
@@ -110,7 +126,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Add a refresh token endpoint
+// got tired of logging in over and over so i added this refresh thing
 router.post("/refresh-token", async (req, res) => {
   const { refreshToken } = req.body;
 
@@ -119,6 +135,7 @@ router.post("/refresh-token", async (req, res) => {
   }
 
   try {
+    // check if this token is legit
     const decoded = jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET
@@ -129,6 +146,7 @@ router.post("/refresh-token", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // give them a fresh token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "15m",
     });
