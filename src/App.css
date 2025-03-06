@@ -6,6 +6,37 @@ body {
   min-height: 100vh;
   width: 100%;
 }
+.like-button.processing-like {
+  position: relative;
+}
+
+.like-button.processing-like::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(139, 92, 246, 0.7),
+    transparent
+  );
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
 
 #root {
   width: 100%;
