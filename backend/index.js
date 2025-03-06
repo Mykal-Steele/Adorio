@@ -22,7 +22,7 @@ const allowedOrigins = [
   "https://feelio.space",
   "https://adorio.space",
   "https://www.adorio.space",
-  process.env.VITE_BACKEND_URL || "", // Fallback to empty string if the variable is undefined
+  process.env.VITE_BACKEND_URL || "", // Fallb ack to empty string if the variable is undefined
   process.env.CLIENT_URL || "", // Same for this variable
 ].filter(Boolean); // Removes any falsy values like empty strings or undefined
 
