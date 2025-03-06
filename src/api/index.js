@@ -1,24 +1,24 @@
-// src\api\index.js
+// my api setup file - finally got axios working right
 import axios from "axios";
 
-// Use process.env to access environment variables in CommonJS
+// using this url for my api calls
 const apiUrl =
   process.env.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com";
 
 const API = axios.create({
-  baseURL: `${apiUrl}/api`, // Append /api to the base URL
+  baseURL: `${apiUrl}/api`, // gotta add /api to the url
   withCredentials: true,
-  timeout: 10000,
+  timeout: 10000, // 10 secs before timeout, server can be slow sometimes
 });
 
-// Add token to request headers
+// adding token to every request cuz security and stuff
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
   if (token) req.headers.Authorization = `Bearer ${token}`;
   return req;
 });
 
-// Add response interceptor for consistent error handling
+// fixing up errors so they look nicer to users
 API.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -26,13 +26,13 @@ API.interceptors.response.use(
       error.response?.data?.message ||
       "An unexpected error occurred. Please try again later.";
 
-    // Add user-friendly message to all errors
+    // making errors more user-friendly
     const enhancedError = {
       ...error,
       userMessage: errorMessage,
     };
 
-    // Don't log aborted requests as errors
+    // no need to log aborted requests, they're not real errors
     if (error.code !== "ERR_CANCELED" && error.name !== "AbortError") {
       console.error("API Error:", errorMessage, error.config?.url);
     }
@@ -41,7 +41,7 @@ API.interceptors.response.use(
   }
 );
 
-// User-related API calls
+// all my user stuff
 export const register = async (userData) => {
   try {
     const response = await API.post("/users/register", userData);
@@ -55,6 +55,7 @@ export const register = async (userData) => {
   }
 };
 
+// login function - took me 3 tries to get this right lol
 export const login = async (userData) => {
   try {
     const response = await API.post("/users/login", userData);
@@ -65,6 +66,7 @@ export const login = async (userData) => {
   }
 };
 
+// gets the current user's profile data
 export const fetchUserData = async () => {
   try {
     const response = await API.get("/users/me");
@@ -75,7 +77,7 @@ export const fetchUserData = async () => {
   }
 };
 
-// Post-related API calls (moved to posts.js)
+// moved all the post api calls to their own file cuz this one was getting huge
 export {
   getPosts,
   createPost,
