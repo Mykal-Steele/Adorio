@@ -1,4 +1,4 @@
-// backend/index.js
+// my express server setup - finally got this working!
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -22,15 +22,14 @@ const allowedOrigins = [
   "https://feelio.space",
   "https://adorio.space",
   "https://www.adorio.space",
-  process.env.VITE_BACKEND_URL || "", // Fallback to empty string if the variable is undefined
-  process.env.CLIENT_URL || "", // Same for this variable
-].filter(Boolean); // Removes any falsy values like empty strings or undefined
+  process.env.VITE_BACKEND_URL || "", // adding empty string if undefined so it doesn't break
+  process.env.CLIENT_URL || "", // same here, just being safe
+].filter(Boolean); // gets rid of empty stuff so we don't get weird errors
 
-// Remove any undefined values
-
+// cors setup to avoid those annoying browser security errors
 app.use(
   cors({
-    origin: (origin, callback) => {
+    origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -44,9 +43,9 @@ app.use(
 );
 
 app.use(express.json());
-// Add compression middleware
+// makes everything load faster
 app.use(compression());
-// Add OPTIONS handler
+// fixes those weird cors errors when u refresh the page
 app.options("*", cors());
 
 const limiter = rateLimit({
@@ -55,6 +54,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// connect to my mongodb atlas cluster (free tier ftw)
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("Connected to MongoDB"))
@@ -63,28 +63,32 @@ mongoose
 import userRoutes from "./routes/userRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 
+// hooking up all my api endpoints
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 
+// my error handler catches all the stupid mistakes i make
 app.use(errorHandler);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.static(path.join(__dirname, "dist")));
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html")); // Fixed path format
+  res.sendFile(path.join(__dirname, "dist", "index.html")); // had to fix this path format
 });
 
 app.get("/", (req, res) => {
   res.send("Feelio API is running!");
 });
 
+// setting up cloudinary so i can let users upload pics without filling my server
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_KEY,
   api_secret: process.env.CLOUDINARY_SECRET,
 });
 
+// for when i deploy this to netlify or vercel
 const handler = serverless(app);
 export { handler };
 
