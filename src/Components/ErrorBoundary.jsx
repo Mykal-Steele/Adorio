@@ -17,7 +17,7 @@ class ErrorBoundary extends React.Component {
       errorInfo: errorInfo,
     });
 
-    // Log to error monitoring service in production
+    // log errors so we can fix them later
     console.error("Uncaught error:", error, errorInfo);
   }
 

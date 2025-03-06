@@ -7,7 +7,7 @@ import verifyToken from "../middleware/verifyToken.js";
 import cloudinary from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 
-// Configure Cloudinary
+// setup my cloudinary account for image uploads
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_KEY,
@@ -30,7 +30,7 @@ const storage = new CloudinaryStorage({
   },
 });
 
-// File filter to allow only certain types
+// gotta make sure users don't upload weird files or viruses
 const fileFilter = (req, file, cb) => {
   if (
     ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(
@@ -56,8 +56,8 @@ const router = Router();
 
 router.post("/", verifyToken, upload.single("image"), async (req, res) => {
   try {
-    console.log("Uploaded file:", req.file); // Check if file exists
-    console.log("Request body:", req.body); // Verify other fields
+    console.log("Uploaded file:", req.file); // debugging this cuz images were breaking
+    console.log("Request body:", req.body); // making sure all the data is coming through
 
     const { title, content } = req.body;
     const newPost = new Post({
@@ -83,14 +83,14 @@ router.post("/", verifyToken, upload.single("image"), async (req, res) => {
   }
 });
 
-// Get All Posts with Pagination - with optimized projection
+// get all posts with pagination - makes the feed load way faster
 router.get("/", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
-    // Only select fields we actually need
+    // only grabbing the fields we need to save bandwidth
     const posts = await Post.find(
       {},
       {
@@ -113,7 +113,7 @@ router.get("/", async (req, res) => {
       .populate("likes", ["username"])
       .populate("comments.user", ["username"]);
 
-    // Use countDocuments with the same query filter
+    // check if there are more posts to load for infinite scroll
     const totalPosts = await Post.countDocuments();
     const hasMore = totalPosts > skip + limit;
 
@@ -130,7 +130,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get Single Post
+// get a single post with all its details
 router.get("/:id", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
@@ -177,7 +177,7 @@ router.put("/:id/like", verifyToken, async (req, res) => {
   }
 });
 
-// Improved Comment endpoint
+// comment system - fixed the race conditions that were happening before
 router.post("/:id/comment", verifyToken, async (req, res) => {
   try {
     if (!req.body.text || req.body.text.trim() === "") {

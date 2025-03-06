@@ -38,7 +38,7 @@ const Home = () => {
     try {
       const response = await likePost(postId, shouldBeLiked);
 
-      // Only update if we got valid response data
+      // make sure we got something back before updating the UI
       if (response && response._id && Array.isArray(response.likes)) {
         setPosts((prevPosts) =>
           prevPosts.map((post) =>
@@ -52,8 +52,7 @@ const Home = () => {
         );
       }
     } catch (err) {
-      console.error("Error liking post:", err);
-      // Only show errors for non-race conditions and serious failures
+      // don't bother the user with errors for race conditions and stuff
       if (
         !err.message?.includes("cancelled") &&
         !err.cancelled &&
@@ -68,9 +67,9 @@ const Home = () => {
   };
 
   const fetchPosts = useCallback(async () => {
-    // Cancel any in-flight request
+    // kill any old requests to avoid race conditions
     abortControllerRef.current.abort();
-    // Create new controller for this request
+    // make a fresh controller for this request
     abortControllerRef.current = new AbortController();
 
     setLoading(true);
@@ -78,14 +77,14 @@ const Home = () => {
     try {
       const response = await getPosts(
         page,
-        5,
+        5, // 5 posts per page seems good for performance
         abortControllerRef.current.signal
       );
       const newPosts = response.posts || [];
       setPosts((prev) => (page === 1 ? newPosts : [...prev, ...newPosts]));
       setHasMore(response.hasMore);
     } catch (err) {
-      // Don't show error for aborted requests
+      // ignoring aborted requests cuz they're not real errors
       if (err.name !== "AbortError") {
         console.error("Error fetching posts:", err);
         setError({
@@ -137,30 +136,30 @@ const Home = () => {
     hasMore,
     onLoadMore: useCallback(
       debounce(() => {
-        // Only fetch more if not already loading
+        // only grab more posts if we're not already loading
         if (!loading && !isFetchingMore && hasMore) {
           setIsFetchingMore(true);
           setPage((prevPage) => prevPage + 1);
-          // Reset the fetch flag after a short delay
+          // gotta reset this flag after a bit so we don't spam the api
           setTimeout(() => setIsFetchingMore(false), 300);
         }
-      }, 200), // 200ms debounce to prevent multiple rapid calls
+      }, 200), // added some debounce cuz my scrolling was triggering this way too muchering this way too much
       [loading, hasMore, isFetchingMore]
     ),
   });
 
   const optimizeImage = async (file) => {
-    // Return early if file is already small
+    // bail early if the image is already small enoug
     if (file.size <= 1024 * 1024) return file;
 
-    // Create a canvas for image resizing
+    // make a canvas to resize the image
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const img = new Image();
 
     return new Promise((resolve) => {
       img.onload = () => {
-        // Calculate new dimensions (max 1200px width)
+        // figure out how big the image should be (max 1200px wide)
         let width = img.width;
         let height = img.height;
         if (width > 1200) {
@@ -168,12 +167,12 @@ const Home = () => {
           width = 1200;
         }
 
-        // Resize the image
+        // resize it to save bandwidthe
         canvas.width = width;
         canvas.height = height;
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convert to blob with reduced quality
+        // convert to jpeg with decent quality
         canvas.toBlob(
           (blob) => {
             resolve(
@@ -184,7 +183,7 @@ const Home = () => {
             );
           },
           "image/jpeg",
-          0.85 // 85% quality
+          0.85 // 85% quality seems like a good balance
         );
       };
 
@@ -215,8 +214,8 @@ const Home = () => {
   };
 
   useEffect(() => {
+    // cleanup object URLs when component unmounts
     return () => {
-      // Clean up object URLs to prevent memory leaks
       objectUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [objectUrls]);
@@ -246,6 +245,7 @@ const Home = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // bail if there's any validation issues
     if (!validatePostInput()) return;
 
     setIsCreating(true);
@@ -259,6 +259,7 @@ const Home = () => {
       }
 
       const response = await createPost(formData);
+      // add the new post at the top of the list
       setPosts((prev) => [
         {
           ...response,

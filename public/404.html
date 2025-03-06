@@ -4,9 +4,9 @@
     <meta charset="utf-8" />
     <title>Redirecting...</title>
     <script>
-      // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
+      // found this redirect trick on github for react router
+      // had to use this cuz the normal routing breaks on page refresh
+      // got it from rafgraph's repo, saved me so much headache
       var pathSegmentsToKeep = 0;
 
       var l = window.location;
@@ -32,6 +32,7 @@
     </script>
   </head>
   <body>
+    <!-- user shouldn't see this for more than a split second if everything works -->
     Redirecting...
   </body>
 </html>

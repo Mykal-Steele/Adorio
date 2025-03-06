@@ -2,11 +2,13 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MAX_PREVIEW_LENGTH } from "../constants";
 
+// handles the main post text and that cool expand/collapse thing
 const PostContent = ({ title, content = "", isExpanded, onToggleExpand }) => {
-  // Add default value and safety check for content
+  // making sure content isn't null or undefined
   const safeContent = content || "";
   const shouldShowExpand = safeContent.length > MAX_PREVIEW_LENGTH;
 
+  // truncate long posts so the feed doesn't get super cluttered
   const displayContent =
     isExpanded || !shouldShowExpand
       ? safeContent
@@ -31,6 +33,7 @@ const PostContent = ({ title, content = "", isExpanded, onToggleExpand }) => {
           </motion.div>
         </AnimatePresence>
 
+        {/* only show this button for long posts */}
         {shouldShowExpand && !isExpanded && (
           <button
             onClick={onToggleExpand}

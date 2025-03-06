@@ -1,24 +1,20 @@
-// Enhance the error handler with detailed information
-
 const errorHandler = (err, req, res, next) => {
-  // Set appropriate status code
   const statusCode = err.status || err.statusCode || 500;
 
-  // Prepare useful error info
   const errorResponse = {
     message: err.message || "Server error occurred",
     status: statusCode,
     stack: process.env.NODE_ENV === "production" ? "🥞" : err.stack,
   };
 
-  // Add client reconciliation metadata for optimistic UI updates
+  // adding this for the frontend so it can fix itself when things break
   if (req.body && req.body.optimisticId) {
     errorResponse.optimisticId = req.body.optimisticId;
     errorResponse.operationType = req.body.operationType || "unknown";
     errorResponse.originalData = req.body.originalData;
   }
 
-  // Log error details in development
+  // dump everything when i'm debugging locally
   if (process.env.NODE_ENV !== "production") {
     console.error(`[${new Date().toISOString()}] Error:`, {
       path: req.path,
@@ -28,7 +24,7 @@ const errorHandler = (err, req, res, next) => {
       body: req.body,
     });
   } else {
-    // In production, log less verbose info
+    // keep logs clean in prod, my hosting plan has limited storage lol
     console.error(
       `[${new Date().toISOString()}] ${statusCode} error: ${err.message} (${
         req.method
