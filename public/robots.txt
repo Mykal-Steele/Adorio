@@ -1,0 +1,18 @@
+# Adorio Social Media Platform - Robots Rules
+User-agent: *
+Allow: /
+Allow: /home
+Allow: /login
+Allow: /register
+Allow: /profile
+
+# Don't index API calls
+Disallow: /api/
+Disallow: /*/api/
+
+# Don't index development-only routes
+Disallow: /dev/
+Disallow: /draft/
+
+# Sitemap location (add once you have one)
+# Sitemap: https://adorio.space/sitemap.xml

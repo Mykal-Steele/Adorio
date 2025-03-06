@@ -12,6 +12,8 @@ import SkeletonLoader from "../Components/SkeletonLoader";
 import useInfiniteScroll from "../hooks/useInfiniteScroll";
 import useClickOutside from "../hooks/useClickOutside";
 import DOMPurify from "dompurify";
+import { debounce } from "lodash";
+
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,42 +26,73 @@ const Home = () => {
   const [imagePreview, setImagePreview] = useState("");
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [objectUrls, setObjectUrls] = useState([]);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
 
   const textareaRef = useRef(null);
+  const abortControllerRef = useRef(new AbortController());
 
   const TITLE_CHARACTER_LIMIT = 100;
 
-  const handleLike = async (postId) => {
+  const handleLike = async (postId, shouldBeLiked) => {
     try {
-      const updatedPost = await likePost(postId);
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post._id === updatedPost._id ? updatedPost : post
-        )
-      );
+      const response = await likePost(postId, shouldBeLiked);
+
+      // Only update if we got valid response data
+      if (response && response._id && Array.isArray(response.likes)) {
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post._id === response._id
+              ? {
+                  ...post,
+                  likes: response.likes,
+                }
+              : post
+          )
+        );
+      }
     } catch (err) {
       console.error("Error liking post:", err);
-      setError({
-        message: "Failed to like post. Please try again.",
-        status: "Error",
-      });
+      // Only show errors for non-race conditions and serious failures
+      if (
+        !err.message?.includes("cancelled") &&
+        !err.cancelled &&
+        err.response?.status !== 409
+      ) {
+        setError({
+          message: "Failed to like post. Please try again.",
+          status: "Error",
+        });
+      }
     }
   };
 
   const fetchPosts = useCallback(async () => {
+    // Cancel any in-flight request
+    abortControllerRef.current.abort();
+    // Create new controller for this request
+    abortControllerRef.current = new AbortController();
+
     setLoading(true);
     setError(null);
     try {
-      const response = await getPosts(page);
+      const response = await getPosts(
+        page,
+        5,
+        abortControllerRef.current.signal
+      );
       const newPosts = response.posts || [];
       setPosts((prev) => (page === 1 ? newPosts : [...prev, ...newPosts]));
       setHasMore(response.hasMore);
     } catch (err) {
-      console.error("Error fetching posts:", err);
-      setError({
-        message: err.message || "Failed to fetch posts.",
-        status: err.response?.status || "Network Error",
-      });
+      // Don't show error for aborted requests
+      if (err.name !== "AbortError") {
+        console.error("Error fetching posts:", err);
+        setError({
+          message: err.message || "Failed to fetch posts.",
+          status: err.response?.status || "Network Error",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -69,31 +102,152 @@ const Home = () => {
     fetchPosts();
   }, [fetchPosts]);
 
+  useEffect(() => {
+    document.title = "Home | Adorio";
+
+    // Add meta description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute(
+        "content",
+        "Stay connected with friends and share your thoughts on Adorio"
+      );
+    } else {
+      const newMeta = document.createElement("meta");
+      newMeta.name = "description";
+      newMeta.content =
+        "Stay connected with friends and share your thoughts on Adorio";
+      document.head.appendChild(newMeta);
+    }
+
+    return () => {
+      // Clean up if needed
+      document.title = "Adorio";
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current.abort();
+    };
+  }, []);
+
   const [lastPostRef] = useInfiniteScroll({
     loading,
     hasMore,
-    onLoadMore: () => setPage((prev) => prev + 1),
+    onLoadMore: useCallback(
+      debounce(() => {
+        // Only fetch more if not already loading
+        if (!loading && !isFetchingMore && hasMore) {
+          setIsFetchingMore(true);
+          setPage((prevPage) => prevPage + 1);
+          // Reset the fetch flag after a short delay
+          setTimeout(() => setIsFetchingMore(false), 300);
+        }
+      }, 200), // 200ms debounce to prevent multiple rapid calls
+      [loading, hasMore, isFetchingMore]
+    ),
   });
 
-  const handleImageChange = (e) => {
+  const optimizeImage = async (file) => {
+    // Return early if file is already small
+    if (file.size <= 1024 * 1024) return file;
+
+    // Create a canvas for image resizing
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+
+    return new Promise((resolve) => {
+      img.onload = () => {
+        // Calculate new dimensions (max 1200px width)
+        let width = img.width;
+        let height = img.height;
+        if (width > 1200) {
+          height = (height * 1200) / width;
+          width = 1200;
+        }
+
+        // Resize the image
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to blob with reduced quality
+        canvas.toBlob(
+          (blob) => {
+            resolve(
+              new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              })
+            );
+          },
+          "image/jpeg",
+          0.85 // 85% quality
+        );
+      };
+
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       const validImageTypes = ["image/jpeg", "image/png"];
       if (validImageTypes.includes(file.type)) {
-        setImage(file);
-        const objectUrl = URL.createObjectURL(file);
+        const optimizedImage = await optimizeImage(file);
+        setImage(optimizedImage);
+        const objectUrl = URL.createObjectURL(optimizedImage);
         const sanitizedUrl = DOMPurify.sanitize(objectUrl);
         setImagePreview(sanitizedUrl);
+
+        // Track URL for cleanup
+        setObjectUrls((prev) => [...prev, objectUrl]);
       } else {
         setError({
           message: "Invalid file type. Please upload an image (JPEG or PNG).",
+          status: "Error",
         });
       }
     }
   };
 
+  useEffect(() => {
+    return () => {
+      // Clean up object URLs to prevent memory leaks
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [objectUrls]);
+
+  const validatePostInput = () => {
+    if (!title.trim()) {
+      setError({ message: "Title is required", status: "Error" });
+      return false;
+    }
+
+    if (title.length > TITLE_CHARACTER_LIMIT) {
+      setError({
+        message: `Title exceeds maximum limit of ${TITLE_CHARACTER_LIMIT} characters`,
+        status: "Error",
+      });
+      return false;
+    }
+
+    if (!content.trim()) {
+      setError({ message: "Content is required", status: "Error" });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validatePostInput()) return;
+
     setIsCreating(true);
 
     try {
@@ -118,7 +272,10 @@ const Home = () => {
       setImage(null);
       setImagePreview("");
     } catch (err) {
-      setError({ message: err.message || "Failed to create post" });
+      setError({
+        message: err.message || "Failed to create post",
+        status: "Error",
+      });
     } finally {
       setIsCreating(false);
     }
@@ -145,6 +302,7 @@ const Home = () => {
           <button
             onClick={() => setError(null)}
             className="mt-1.5 text-xs sm:text-sm text-purple-400 hover:text-purple-300 transition-colors"
+            aria-label="Dismiss error message"
           >
             Dismiss
           </button>

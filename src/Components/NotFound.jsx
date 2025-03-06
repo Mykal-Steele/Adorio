@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { SparklesIcon } from "@heroicons/react/24/outline";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { texts } from "../../assests/404/messages";
+import { texts } from "../../assests/404/messages.js";
 
 const NotFound = () => {
   const [randomText, setRandomText] = useState("");

@@ -1,20 +1,42 @@
-// Create this new file
-const errorHandler = (err, req, res, next) => {
-  console.error(`Error: ${err.message}`);
+// Enhance the error handler with detailed information
 
-  // Add client reconciliation metadata
-  let response = {
-    message: err.message || "Server error",
-    status: err.status || 500,
+const errorHandler = (err, req, res, next) => {
+  // Set appropriate status code
+  const statusCode = err.status || err.statusCode || 500;
+
+  // Prepare useful error info
+  const errorResponse = {
+    message: err.message || "Server error occurred",
+    status: statusCode,
+    stack: process.env.NODE_ENV === "production" ? "🥞" : err.stack,
   };
 
-  // For optimistic UI operations, include additional info
+  // Add client reconciliation metadata for optimistic UI updates
   if (req.body && req.body.optimisticId) {
-    response.optimisticId = req.body.optimisticId;
-    response.operationType = req.body.operationType || "unknown";
+    errorResponse.optimisticId = req.body.optimisticId;
+    errorResponse.operationType = req.body.operationType || "unknown";
+    errorResponse.originalData = req.body.originalData;
   }
 
-  res.status(response.status).json(response);
+  // Log error details in development
+  if (process.env.NODE_ENV !== "production") {
+    console.error(`[${new Date().toISOString()}] Error:`, {
+      path: req.path,
+      method: req.method,
+      error: err.message,
+      stack: err.stack,
+      body: req.body,
+    });
+  } else {
+    // In production, log less verbose info
+    console.error(
+      `[${new Date().toISOString()}] ${statusCode} error: ${err.message} (${
+        req.method
+      } ${req.path})`
+    );
+  }
+
+  res.status(statusCode).json(errorResponse);
 };
 
 export default errorHandler;
