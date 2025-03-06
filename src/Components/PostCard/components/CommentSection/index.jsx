@@ -4,6 +4,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
 
+// the slide-in comment section component - finally got this animation working!
 const CommentSection = ({
   visible,
   comments,
@@ -30,7 +31,7 @@ const CommentSection = ({
         exit={{ opacity: 0, height: 0 }}
         className="mt-4 pt-4 border-t border-gray-800/40 relative"
       >
-        {/* Close button */}
+        {/* close button that follows you as you scroll - cool trick i learned */}
         <motion.button
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: Math.min(scrollTop, 100) }}
@@ -42,7 +43,7 @@ const CommentSection = ({
           <XMarkIcon className="h-6 w-6 text-gray-200 group-hover:text-purple-400" />
         </motion.button>
 
-        {/* Comment Form */}
+        {/* comment form with emoji picker that i spent way too long on */}
         <CommentForm
           value={newComment}
           onChange={onChangeComment}
@@ -53,7 +54,7 @@ const CommentSection = ({
           onEmojiSelect={onEmojiSelect}
         />
 
-        {/* Comments List */}
+        {/* list of comments with that fancy scrollbar i found on github */}
         <div
           className="space-y-4 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent"
           onScroll={onScroll}

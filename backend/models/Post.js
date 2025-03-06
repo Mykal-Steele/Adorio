@@ -7,7 +7,7 @@ const postSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      index: true, // Add index for faster lookup by user
+      index: true, // added this index cuz queries were taking forever
     },
     likes: [
       {
@@ -32,11 +32,11 @@ const postSchema = new mongoose.Schema(
   }
 );
 
-// Index for efficient sorting by createdAt
+// gotta add this index so the feed loads faster
 postSchema.index({ createdAt: -1 });
-// Compound index for user posts sorted by date
+// made this compound index for profile pages to show user's posts
 postSchema.index({ user: 1, createdAt: -1 });
-// Index for likes to speed up like/unlike operations
+// this one helps when lots of people like the same post
 postSchema.index({ likes: 1 });
 
 export default mongoose.model("Post", postSchema);
