@@ -32,7 +32,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
               <SparklesIcon className="h-6 w-6 sm:h-7 sm:w-7 text-purple-400 transition-transform" />
             </motion.div>
             <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Feelio
+              Adorio
             </span>
           </Link>
 
@@ -42,6 +42,9 @@ const Navbar = ({ darkMode, setDarkMode }) => {
               whileTap={{ scale: 0.9 }}
               onClick={() => setDarkMode(!darkMode)}
               className="p-1 sm:p-2 rounded-full hover:bg-gray-800/20 transition-colors"
+              aria-label={
+                darkMode ? "Switch to light mode" : "Switch to dark mode"
+              }
             >
               <div className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text">
                 {darkMode ? (

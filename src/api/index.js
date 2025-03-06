@@ -18,6 +18,29 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
+// Add response interceptor for consistent error handling
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const errorMessage =
+      error.response?.data?.message ||
+      "An unexpected error occurred. Please try again later.";
+
+    // Add user-friendly message to all errors
+    const enhancedError = {
+      ...error,
+      userMessage: errorMessage,
+    };
+
+    // Don't log aborted requests as errors
+    if (error.code !== "ERR_CANCELED" && error.name !== "AbortError") {
+      console.error("API Error:", errorMessage, error.config?.url);
+    }
+
+    return Promise.reject(enhancedError);
+  }
+);
+
 // User-related API calls
 export const register = async (userData) => {
   try {
