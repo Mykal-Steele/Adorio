@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { HeartIcon, ChatBubbleOvalLeftIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 
+// these are the like and comment buttons - stole this design from instagram lol
 const InteractionButtons = ({
   userLiked,
   likesCount,
@@ -16,7 +17,7 @@ const InteractionButtons = ({
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={onLike}
-        className="flex items-center gap-2 group like-button" // Add "like-button" class here
+        className="flex items-center gap-2 group like-button" // added this class so i can animate it with css later
         data-like-state={userLiked ? "liked" : "unliked"}
         type="button"
       >
@@ -32,6 +33,7 @@ const InteractionButtons = ({
         </span>
       </motion.button>
 
+      {/* comment button toggles the comment section */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}

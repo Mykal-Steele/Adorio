@@ -9,13 +9,13 @@ const NotFound = () => {
   const navigate = useNavigate();
   const containerRef = useRef(null);
 
-  // Mouse position tracking
+  // tracking the mouse to make cool effects
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const smoothMouseX = useSpring(mouseX, { stiffness: 600, damping: 30 });
   const smoothMouseY = useSpring(mouseY, { stiffness: 600, damping: 30 });
 
-  // Lighting effects
+  // making those sick lighting effects
   const lightPosition = useTransform(
     [smoothMouseX, smoothMouseY],
     ([x, y]) => `calc(${x}px - 50%) calc(${y}px - 50%)`
@@ -39,7 +39,7 @@ const NotFound = () => {
       className="min-h-screen bg-gray-950 flex items-center justify-center p-4 overflow-hidden"
       onMouseMove={handleMouseMove}
     >
-      {/* Intense dynamic flashlight */}
+      {/* flashlight effect that follows your cursor */}
       <motion.div
         style={{
           backgroundPosition: lightPosition,
@@ -51,7 +51,7 @@ const NotFound = () => {
         className="fixed inset-0 pointer-events-none bg-[radial-gradient(400px_at_50%_50%,rgba(129,140,248,0.4),transparent)] backdrop-blur-[2px] transition-opacity duration-300"
       />
 
-      {/* Holographic card */}
+      {/* main card that tilts with mouse movement */}
       <motion.div
         style={{
           rotateX: useTransform(
@@ -68,10 +68,10 @@ const NotFound = () => {
         }}
         className="relative bg-gray-900/90 backdrop-blur-2xl border border-gray-800/60 rounded-3xl p-8 max-w-md text-center space-y-6 overflow-hidden shadow-2xl"
       >
-        {/* Dynamic depth effect */}
+        {/* added this gradient for some depth */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-blue-600/10 pointer-events-none" />
 
-        {/* Icon with intense glow */}
+        {/* glowing icon at the top */}
         <motion.div
           style={{
             x: useTransform(smoothMouseX, [0, window.innerWidth], [-20, 20]),
@@ -83,7 +83,7 @@ const NotFound = () => {
           <div className="absolute w-32 h-32 bg-purple-600/30 blur-[50px] rounded-full" />
         </motion.div>
 
-        {/* 404 text with dynamic lighting */}
+        {/* big 404 text with shadow effect */}
         <motion.h1
           style={{
             textShadow: "0 0 40px rgba(129,140,248,0.4)",
@@ -95,7 +95,7 @@ const NotFound = () => {
           404
         </motion.h1>
 
-        {/* Subtle subtitle */}
+        {/* subtitle */}
         <motion.p
           style={{
             x: useTransform(smoothMouseX, [0, window.innerWidth], [-15, 15]),
@@ -106,7 +106,7 @@ const NotFound = () => {
           Lost in the Void
         </motion.p>
 
-        {/* Error message */}
+        {/* random funny error message */}
         <motion.div
           style={{
             x: useTransform(smoothMouseX, [0, window.innerWidth], [-10, 10]),
@@ -118,7 +118,7 @@ const NotFound = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-600/15 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
         </motion.div>
 
-        {/* Interactive button */}
+        {/* back button */}
         <motion.button
           onClick={() => navigate("/")}
           whileHover={{ scale: 1.05 }}
