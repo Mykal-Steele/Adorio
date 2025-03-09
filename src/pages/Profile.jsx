@@ -134,6 +134,7 @@ const Profile = () => {
             </div>
           ))}
 
+          {/* loading more posts spinner thingy */}
           {loading && page > 1 && <SkeletonLoader count={1} />}
 
           {!loading && posts.length === 0 && (
