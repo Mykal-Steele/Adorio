@@ -39,4 +39,9 @@ postSchema.index({ user: 1, createdAt: -1 });
 // this one helps when lots of people like the same post
 postSchema.index({ likes: 1 });
 
+postSchema.index({ "comments.user": 1 });
+postSchema.index({ "comments.createdAt": -1 });
+
+postSchema.index({ likes: 1, "comments.0": 1 });
+
 export default mongoose.model("Post", postSchema);
