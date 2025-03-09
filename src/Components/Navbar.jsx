@@ -24,6 +24,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
     >
       <div className="container mx-auto px-2 sm:px-4">
         <div className="flex items-center justify-between h-14 sm:h-16">
+          {/* logo with gradient effect - looks pretty sick when you hover */}
           <Link
             to="/"
             className="flex items-center space-x-1 sm:space-x-2 group ml-1"

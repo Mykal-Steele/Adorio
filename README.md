@@ -1,8 +1,11 @@
-# React + Vite
+# feelio - social media project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+this is my social app i'm building for my portfolio. using react + vite cuz create-react-app is too slow lol
 
-Currently, two official plugins are available:
+## how to run:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- `npm run skibidi` for dev server
+- `npm run build` to build the thing
+- `npm run smt` to build and deploy
+
+still working on the backend stuff, but the frontend is coming along ok

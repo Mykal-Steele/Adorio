@@ -1,4 +1,4 @@
-// feelio\src\main.jsx
+// main entry point - nothing fancy here
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
