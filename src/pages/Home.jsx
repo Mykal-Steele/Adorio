@@ -143,7 +143,7 @@ const Home = () => {
           // gotta reset this flag after a bit so we don't spam the api
           setTimeout(() => setIsFetchingMore(false), 300);
         }
-      }, 200), // added some debounce cuz my scrolling was triggering this way too muchering this way too much
+      }, 200), // added some debounce cuz my scrolling was triggering this way too much
       [loading, hasMore, isFetchingMore]
     ),
   });
