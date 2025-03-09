@@ -2,7 +2,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-// image lightbox for when users click post images - looks pretty slick with the animations
+// image popup thingy when you click pics - animations are kinda sick ngl
 const ImageModal = ({ isVisible, imageUrl, title, onClose, instanceId }) => {
   if (!isVisible || !imageUrl) return null;
 

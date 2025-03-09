@@ -131,7 +131,7 @@ const Login = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </button>
 
-          {/* Error message */}
+          {/* show the error when the api freaks out */}
           {error && (
             <p className="text-red-500 text-sm mt-4 text-center bg-red-900/20 p-2 rounded-lg">
               {error}
