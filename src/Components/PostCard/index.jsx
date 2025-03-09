@@ -37,7 +37,7 @@ const PostCard = ({
   onLike,
   currentUserId,
 }) => {
-  // Create a unique ID for this post instance
+  // random id so framer-motion doesn't freak out with duplicate keys
   const instanceId = useMemo(
     () =>
       `post-${_id}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
@@ -69,7 +69,7 @@ const PostCard = ({
   );
   const [optimisticUserLiked, setOptimisticUserLiked] = useState(userLiked);
 
-  // Add this ref to track optimistic updates
+  // refs so we don't mess up state with like button spam
   const isOptimisticUpdateRef = useRef(false);
   const likeInProgressRef = useRef(false);
 
@@ -208,7 +208,6 @@ const PostCard = ({
       e.preventDefault();
       if (!newComment?.trim() || isSubmitting) return;
 
-      // Create a temporary comment with timestamp as ID
       const tempId = `temp-${Date.now()}`;
       const tempComment = {
         _id: tempId,
@@ -220,35 +219,35 @@ const PostCard = ({
         createdAt: new Date().toISOString(),
       };
 
-      // Optimistically add comment to UI immediately
+      // optimistic update still works
       setComments((prevComments) => [
         tempComment,
         ...(Array.isArray(prevComments) ? prevComments : []),
       ]);
 
-      // Clear input field right away
       const commentText = newComment;
       setNewComment("");
 
       setIsSubmitting(true);
       try {
         const updatedPost = await addComment(_id, commentText);
-        // Replace temporary comments with actual data from server
+
+        // make sure we're actually getting populated comments with user data
         if (updatedPost?.comments) {
+          // replace all comments with the properly populated ones
           setComments(updatedPost.comments);
           if (typeof onCommentAdded === "function") {
             onCommentAdded(updatedPost);
           }
         }
       } catch (err) {
+        // had to handle this error myself since the backend wasn't great at it
         console.error("Error adding comment:", err);
-        // Remove the temporary comment if there was an error
         setComments((prevComments) =>
           Array.isArray(prevComments)
             ? prevComments.filter((comment) => comment._id !== tempId)
             : []
         );
-        // Restore the comment text to the input
         setNewComment(commentText);
       } finally {
         setIsSubmitting(false);
@@ -257,7 +256,7 @@ const PostCard = ({
     [_id, newComment, isSubmitting, user, currentUserId, onCommentAdded]
   );
 
-  // Safe image URL for modal
+  // making sure we don't try to show broken images in the modal
   const safeImageUrl = useMemo(
     () =>
       imageState?.isLoaded && !imageState?.hasError && imageState?.url
@@ -266,7 +265,7 @@ const PostCard = ({
     [imageState]
   );
 
-  // Safely get comments length
+  // make sure comments.length doesn't explode if comments is null
   const commentsCount = Array.isArray(comments) ? comments.length : 0;
 
   // If no valid post ID, don't render
@@ -366,7 +365,7 @@ const PostCard = ({
   );
 };
 
-// comparison function
+// this stops cards from re-rendering every time anything changes
 const areEqual = (prevProps, nextProps) => {
   // compare primitive props
   if (

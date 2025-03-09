@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// might add profile pic and bio fields later when i have time
-// but this is good enough for the auth system
+// gonna add profile pics when i figure out how cloudinary works better
+// this is good enough for now tho
 
 export default mongoose.model("User", userSchema);
