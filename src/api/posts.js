@@ -23,17 +23,6 @@ const logger = {
 
 // my error handling function cuz there's like 5 different ways requests can fail
 const handleApiError = (error, customMessage) => {
-  if (
-    error.name === "AbortError" ||
-    error.code === "ECONNABORTED" ||
-    error.message?.includes("canceled")
-  ) {
-    // just a canceled request, no biggie
-    const abortError = new Error("Request cancelled");
-    abortError.name = "AbortError";
-    return abortError;
-  }
-
   // network problems like wifi dropping
   if (!error.response) {
     logger.warn("Network error while making API request");
