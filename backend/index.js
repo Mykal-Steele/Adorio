@@ -43,7 +43,7 @@ app.use(
 );
 
 app.use(express.json());
-// makes everything load faster
+// this makes everything load way faster on crappy connections
 app.use(compression());
 // fixes those weird cors errors when u refresh the page
 app.options("*", cors());

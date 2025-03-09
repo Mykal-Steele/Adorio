@@ -31,7 +31,7 @@ const ImageModal = ({ isVisible, imageUrl, title, onClose, instanceId }) => {
             crossOrigin="anonymous"
             referrerPolicy="no-referrer"
           />
-          {/* close button with hover effect - took me a while to get this positioned right */}
+          {/* close button that took like 30 minutes to position right lmao (still doesnt feel right btw)*/}
           <button
             className="absolute top-4 right-4 p-2 bg-gray-900/80 backdrop-blur-lg rounded-full hover:bg-gray-800/60 transition-colors group"
             onClick={(e) => {
