@@ -76,11 +76,42 @@ app.use("/api/posts", (req, res, next) => {
   return next();
 });
 
-// connect to my mongodb atlas cluster (free tier ftw)
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB Connection Error:", err));
+// sorry for all the error handling here, express cant catch error before that server starts
+const connectDB = async (retries = 5, delay = 5000) => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("connected to mongodb");
+    return true;
+  } catch (err) {
+    console.error("mongodb connection error:", err);
+
+    // log detailed error info
+    if (err.name === "MongoServerSelectionError") {
+      console.error(
+        "cannot reach mongodb server. check network or credentials"
+      );
+    }
+
+    if (retries > 0) {
+      console.log(
+        `retrying connection in ${delay / 1000}s... (${retries} attempts left)`
+      );
+      setTimeout(() => connectDB(retries - 1, delay), delay);
+    } else {
+      console.error("failed to connect to mongodb after multiple attempts");
+      // exit with error in production, but stay running in development
+      if (process.env.NODE_ENV === "production") {
+        console.error(
+          "shutting down server due to database connection failure"
+        );
+        process.exit(1);
+      }
+    }
+  }
+};
+
+// call the connection function
+connectDB();
 
 import userRoutes from "./routes/userRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
