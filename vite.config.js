@@ -47,12 +47,12 @@ export default defineConfig({
             <meta http-equiv="Content-Security-Policy" content="
               default-src 'self'; 
               script-src 'self' 'nonce-${nonce}'; 
-              style-src 'self' 'unsafe-inline'; // gotta use unsafe-inline cuz of all the tailwind stuff
-              img-src 'self' data: blob: https:; // need https: for cloudinary images
-              connect-src 'self' https://feelio-github-io.onrender.com; // for api calls
+              style-src 'self' 'unsafe-inline';
+              img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com;
+              connect-src 'self' https://feelio-github-io.onrender.com;
               form-action 'self';
               base-uri 'self';
-              object-src 'none'; // nobody uses flash anymore anyway
+              object-src 'none';
             ">
           `
           )
