@@ -30,6 +30,16 @@ export default defineConfig({
           .toString("base64")
           .substring(0, 16);
 
+        // First replace the backend URL script with one that has the nonce
+        html = html.replace(
+          /<script>\s*\/\/\s*hardcoding the backend url here so i can change it without rebuilding\s*window\.VITE_BACKEND_URL\s*=\s*"[^"]+"\s*;\s*<\/script>/,
+          `<script nonce="${nonce}">
+            // hardcoding the backend url here so i can change it without rebuilding
+            window.VITE_BACKEND_URL = "https://feelio-github-io.onrender.com";
+          </script>`
+        );
+
+        // csp stuff took me like 3 days to figure out but at least it works now
         return html
           .replace(
             /<head>/,
@@ -37,16 +47,16 @@ export default defineConfig({
             <meta http-equiv="Content-Security-Policy" content="
               default-src 'self'; 
               script-src 'self' 'nonce-${nonce}'; 
-              style-src 'self' 'unsafe-inline'; 
-              img-src 'self' data: blob: https:; 
-              connect-src 'self' https://feelio-github-io.onrender.com;
+              style-src 'self' 'unsafe-inline'; // gotta use unsafe-inline cuz of all the tailwind stuff
+              img-src 'self' data: blob: https:; // need https: for cloudinary images
+              connect-src 'self' https://feelio-github-io.onrender.com; // for api calls
               form-action 'self';
               base-uri 'self';
-              object-src 'none';
+              object-src 'none'; // nobody uses flash anymore anyway
             ">
           `
           )
-          .replace(/<script/g, `<script nonce="${nonce}"`);
+          .replace(/<script(?!\s+nonce=)/g, `<script nonce="${nonce}"`);
       },
     },
   ],
@@ -65,7 +75,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
   },
   server: {
-    historyApiFallback: true, // Enable history fallback for client-side routing
+    historyApiFallback: true, // enable history fallback for client-side routing
   },
   css: {
     postcss: {
