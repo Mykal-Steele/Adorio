@@ -17,8 +17,12 @@ class ErrorBoundary extends React.Component {
       errorInfo: errorInfo,
     });
 
-    // log errors so we can fix them later
-    console.error("Uncaught error:", error, errorInfo);
+    // dump the error info to console so i can fix it later
+    console.error("uncaught error:", error, errorInfo);
+    console.error("error stack:", error?.stack);
+    console.error("component stack:", errorInfo?.componentStack);
+
+    // maybe i'll add sentry here someday but who has money for that lol
   }
 
   render() {
