@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
 export function useImageLoader({ postImage, postId, instanceId }) {
-  const isMounted = useRef(true);
+  const isMounted = useRef(false);
   const preloadImageRef = useRef(null);
 
   // keeping track of the image state
@@ -15,7 +15,7 @@ export function useImageLoader({ postImage, postId, instanceId }) {
 
   // function to load the image
   const loadImage = useCallback(() => {
-    if (!isMounted.current) return;
+    if (!isMounted.current) return; // don't do anything if unmounted
 
     // clean up old image stuff
     if (preloadImageRef.current) {
@@ -94,7 +94,9 @@ export function useImageLoader({ postImage, postId, instanceId }) {
 
   // load image when component mounts
   useEffect(() => {
+    isMounted.current = true; // makin sure it's actually marked as mounted
     loadImage();
+
     return () => {
       isMounted.current = false;
       if (preloadImageRef.current) {
