@@ -1,4 +1,4 @@
-//src\hooks\useInfiniteScroll.js
+// infinite scroll hook i stole from a youtube tutorial and tweaked
 import { useEffect, useRef, useCallback } from "react";
 
 const useInfiniteScroll = ({ loading, hasMore, onLoadMore }) => {

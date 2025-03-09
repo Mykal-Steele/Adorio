@@ -2,7 +2,7 @@ const errorHandler = (err, req, res, next) => {
   const statusCode = err.status || err.statusCode || 500;
 
   const errorResponse = {
-    message: err.message || "Server error occurred",
+    message: err.message || "shit broke lol",
     status: statusCode,
     stack: process.env.NODE_ENV === "production" ? "🥞" : err.stack,
   };
