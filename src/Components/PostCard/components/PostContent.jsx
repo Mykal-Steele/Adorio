@@ -15,7 +15,7 @@ const PostContent = ({ title, content = "", isExpanded, onToggleExpand }) => {
       ? safeContent
       : safeContent.slice(0, MAX_PREVIEW_LENGTH) + "...";
 
-  // we sanitizinmg the title and content (rub rub rub)
+  // gotta sanitize this shit or we'll get hacked lmao
   const sanitizedTitle = DOMPurify.sanitize(title || "Untitled");
   const sanitizedDisplayContent = DOMPurify.sanitize(displayContent);
 

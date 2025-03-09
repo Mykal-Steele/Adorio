@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 const useClickOutside = (ref, callback) => {
   useEffect(() => {
-    // closes stuff when you click outside it - took me way too long to figure this out
+    // closes dropdowns when you click anywhere else - stole this from stackoverflow
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target)) {
         callback();
