@@ -57,8 +57,13 @@ const Profile = () => {
       setPosts((prev) => (page === 1 ? userPosts : [...prev, ...userPosts]));
       setHasMore(response.hasMore);
     } catch (err) {
-      console.error("Error fetching user posts:", err);
-      setError("Failed to fetch posts. Please try again later.");
+      if (!isAbortError(err)) {
+        setError({
+          message: err.message || "failed to fetch user posts",
+          status: err.statusCode || "error",
+          timestamp: new Date().toISOString(),
+        });
+      }
     } finally {
       setLoading(false);
     }
