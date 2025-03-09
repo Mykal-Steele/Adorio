@@ -49,9 +49,10 @@ app.use(compression());
 app.options("*", cors());
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 600, // Allow 500 requests per IP per windowMs
 });
+
 app.use(limiter);
 
 // connect to my mongodb atlas cluster (free tier ftw)
