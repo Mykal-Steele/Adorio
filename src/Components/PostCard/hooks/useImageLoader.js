@@ -94,9 +94,10 @@ export function useImageLoader({ postImage, postId, instanceId }) {
 
   // load image when component mounts
   useEffect(() => {
-    isMounted.current = true; // makin sure it's actually marked as mounted
+    isMounted.current = true; // gotta mark this as mounted or we get weird bugs
     loadImage();
 
+    // gotta cleanup or we get memory leaks everywhere
     return () => {
       isMounted.current = false;
       if (preloadImageRef.current) {

@@ -36,7 +36,7 @@ const postSchema = new mongoose.Schema(
 postSchema.index({ createdAt: -1 });
 // made this compound index for profile pages to show user's posts
 postSchema.index({ user: 1, createdAt: -1 });
-// this one helps when lots of people like the same post
+// this index is for when posts blow up with likes
 postSchema.index({ likes: 1 });
 
 postSchema.index({ "comments.user": 1 });

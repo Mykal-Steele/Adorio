@@ -24,7 +24,7 @@ const CommentItem = ({ comment, isExpanded, onToggleExpand }) => {
               className="w-full h-full object-cover"
             />
           ) : (
-            // just using first letter of username as avatar cuz i'm too lazy to make real ones lol
+            // just using first letter for avatars cuz i'm too lazy to make real ones lmao
             <span className="text-xs font-medium text-white">
               {comment.user?.username?.charAt(0).toUpperCase() || "U"}
             </span>

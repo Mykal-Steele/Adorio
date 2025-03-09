@@ -85,7 +85,7 @@ const connectDB = async (retries = 5, delay = 5000) => {
   } catch (err) {
     console.error("mongodb connection error:", err);
 
-    // log detailed error info
+    // mongo gives the worst error messages ever so let's make them clearer
     if (err.name === "MongoServerSelectionError") {
       console.error(
         "cannot reach mongodb server. check network or credentials"
@@ -99,7 +99,7 @@ const connectDB = async (retries = 5, delay = 5000) => {
       setTimeout(() => connectDB(retries - 1, delay), delay);
     } else {
       console.error("failed to connect to mongodb after multiple attempts");
-      // exit with error in production, but stay running in development
+      // guess we should just die in prod but keep trying locally lol
       if (process.env.NODE_ENV === "production") {
         console.error(
           "shutting down server due to database connection failure"
@@ -120,7 +120,7 @@ import postRoutes from "./routes/postRoutes.js";
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 
-// my error handler catches all the stupid mistakes i make
+// error handler middleware catches all my dumb bugs
 app.use(errorHandler);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
