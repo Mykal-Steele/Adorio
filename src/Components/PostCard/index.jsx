@@ -22,12 +22,7 @@ import { useImageLoader } from "./hooks/useImageLoader";
 // Import constants
 import { isUserAdmin } from "./constants";
 
-import {
-  HeartIcon,
-  ChatBubbleOvalLeftIcon,
-  XMarkIcon, // Add this import
-} from "@heroicons/react/24/outline";
-import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 const PostCard = ({
   _id,
@@ -371,9 +366,9 @@ const PostCard = ({
   );
 };
 
-// Improved comparison function for React.memo
+// comparison function
 const areEqual = (prevProps, nextProps) => {
-  // Fast equality check for primitive props
+  // compare primitive props
   if (
     prevProps._id !== nextProps._id ||
     prevProps.title !== nextProps.title ||
@@ -384,29 +379,24 @@ const areEqual = (prevProps, nextProps) => {
     return false;
   }
 
-  // Deep comparison for arrays
+  // Compare image props
   if (
-    prevProps.likes?.length !== nextProps.likes?.length ||
-    !prevProps.likes?.every(
-      (like, i) =>
-        (like?._id?.toString() || like?.toString()) ===
-        (nextProps.likes[i]?._id?.toString() || nextProps.likes[i]?.toString())
-    )
+    prevProps.image?.url !== nextProps.image?.url ||
+    prevProps.image?.public_id !== nextProps.image?.public_id
   ) {
     return false;
   }
 
-  // Compare only comment length for performance if length is different
-  if (prevProps.comments?.length !== nextProps.comments?.length) {
+  // Compare likes length
+  if ((prevProps.likes?.length || 0) !== (nextProps.likes?.length || 0)) {
     return false;
   }
 
-  // Only check comments with a fast equality check
-  if (prevProps.comments !== nextProps.comments) {
+  // Compare comments length
+  if ((prevProps.comments?.length || 0) !== (nextProps.comments?.length || 0)) {
     return false;
   }
 
-  // If we get here, props are equal
   return true;
 };
 
