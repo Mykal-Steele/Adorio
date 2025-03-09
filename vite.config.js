@@ -26,15 +26,35 @@ export default defineConfig({
         });
       },
       transformIndexHtml(html) {
-        return html.replace(
-          /<head>/,
-          `<head>
-            <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://feelio-github-io.onrender.com;">
+        const nonce = Buffer.from(Date.now() + Math.random().toString())
+          .toString("base64")
+          .substring(0, 16);
+
+        return html
+          .replace(
+            /<head>/,
+            `<head>
+            <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://feelio-github-io.onrender.com;">
           `
-        );
+          )
+          .replace(/<script/g, `<script nonce="${nonce}"`);
       },
     },
   ],
+  build: {
+    //  splits the app into optimized chunks
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          ui: ["framer-motion", "@heroicons/react"],
+          emoji: ["emoji-mart", "@emoji-mart/data", "@emoji-mart/react"],
+          utils: ["moment", "lodash", "dompurify"],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
   server: {
     historyApiFallback: true, // Enable history fallback for client-side routing
   },
