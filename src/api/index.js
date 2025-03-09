@@ -23,7 +23,7 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
-// remove the complex error handling in interceptor since we have handleApiError
+// simplified this cuz it was doing too much duplicate stuff
 API.interceptors.response.use(
   (response) => response,
   (error) => {
