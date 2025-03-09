@@ -27,7 +27,7 @@ const PostImage = ({ imageState, onImageClick, title, postId, instanceId }) => {
           </div>
         )}
 
-        {/* error message if cloudinary fails or something */}
+        {/* error when cloudinary craps out */}
         {imageState.hasError && !imageState.isLoading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800/30">
             <svg

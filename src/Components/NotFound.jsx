@@ -9,13 +9,13 @@ const NotFound = () => {
   const navigate = useNavigate();
   const containerRef = useRef(null);
 
-  // tracking the mouse to make cool effects
+  // tracking mouse coords for all the fancy animations
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const smoothMouseX = useSpring(mouseX, { stiffness: 600, damping: 30 });
   const smoothMouseY = useSpring(mouseY, { stiffness: 600, damping: 30 });
 
-  // making those sick lighting effects
+  // making the page look all cyberpunky with these lights
   const lightPosition = useTransform(
     [smoothMouseX, smoothMouseY],
     ([x, y]) => `calc(${x}px - 50%) calc(${y}px - 50%)`
@@ -39,7 +39,7 @@ const NotFound = () => {
       className="min-h-screen bg-gray-950 flex items-center justify-center p-4 overflow-hidden"
       onMouseMove={handleMouseMove}
     >
-      {/* flashlight effect that follows your cursor */}
+      {/* sick spotlight effect that follows your cursor - had to watch 3 tutorials to get this right */}
       <motion.div
         style={{
           backgroundPosition: lightPosition,

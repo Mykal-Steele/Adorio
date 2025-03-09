@@ -27,6 +27,7 @@ const AppContent = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      // see if we're already logged in from before
       const token = localStorage.getItem("token");
       if (token) {
         try {
@@ -43,6 +44,7 @@ const AppContent = () => {
     checkAuth();
   }, [dispatch]);
 
+  // super lazy loading screen but whatever it only shows for like 2 seconds
   if (loading) return <div>Loading...</div>;
 
   return (

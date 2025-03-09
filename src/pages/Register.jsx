@@ -57,7 +57,7 @@ const Register = () => {
           <div className="absolute w-32 h-32 bg-purple-600/20 blur-[50px] rounded-full" />
         </div>
 
-        {/* Welcome text */}
+        {/* header with that fancy gradient text */}
         <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
           Create Account
         </h1>
@@ -144,7 +144,7 @@ const Register = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </button>
 
-          {/* Error message */}
+          {/* show errors if the backend is being dumb */}
           {error && (
             <p className="text-red-500 text-sm mt-4 text-center bg-red-900/20 p-2 rounded-lg">
               {error}

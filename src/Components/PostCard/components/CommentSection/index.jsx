@@ -21,7 +21,7 @@ const CommentSection = ({
   onCommentToggle,
   onScroll,
 }) => {
-  // Use useMemo to avoid re-sorting on every render
+  // sorting these once instead of a million times on every render
   const sortedComments = useMemo(() => {
     if (!Array.isArray(comments)) return [];
     return [...comments].sort(
@@ -39,7 +39,7 @@ const CommentSection = ({
         exit={{ opacity: 0, height: 0 }}
         className="mt-4 pt-4 border-t border-gray-800/40 relative"
       >
-        {/* close button that follows you as you scroll - cool trick i learned */}
+        {/* close button that follows you when scrolling - took me 3hrs to figure this out */}
         <motion.button
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: Math.min(scrollTop, 100) }}
@@ -62,7 +62,7 @@ const CommentSection = ({
           onEmojiSelect={onEmojiSelect}
         />
 
-        {/* list of comments with that fancy scrollbar i found on github */}
+        {/* comments with that sick scrollbar i copied from github */}
         <div
           className="space-y-4 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent"
           onScroll={onScroll}
