@@ -9,14 +9,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-adsense-account" content="ca-pub-1872365375645260" />
 
-    <!-- Favicon -->
+    <!-- got this favicon from that stock photo site - looks kinda mid but whatever -->
     <link
       rel="icon"
       type="image/png"
       href="https://res.cloudinary.com/dboeqtx65/image/upload/v1741024214/feelio/posts/file.jpg"
     />
 
-    <!-- Open Graph Meta Tags -->
+    <!-- all these meta tags so links look cool when ppl share them on discord -->
     <meta property="og:title" content="Adorio - Social Media Platform" />
     <meta
       property="og:description"
@@ -34,7 +34,8 @@
   <body>
     <div id="root"></div>
     <script type="text/javascript">
-      // Single Page Apps for GitHub Pages
+      // github pages routing hack i found on stackoverflow
+      // fixes those weird 404 errors when refreshing the page
       (function (l) {
         if (l.search[1] === "/") {
           var decoded = l.search
@@ -54,7 +55,7 @@
     </script>
     <script type="module" src="/src/main.jsx"></script>
     <script>
-      // Injecting the backend URL as a global variable
+      // hardcoding the backend url here so i can change it without rebuilding
       window.VITE_BACKEND_URL = "https://feelio-github-io.onrender.com";
     </script>
   </body>
