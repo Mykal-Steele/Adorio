@@ -13,6 +13,7 @@ import useInfiniteScroll from "../hooks/useInfiniteScroll";
 import useClickOutside from "../hooks/useClickOutside";
 import DOMPurify from "dompurify";
 import { debounce } from "lodash";
+import { isAbortError } from "../utils/errorHandling";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -84,12 +85,11 @@ const Home = () => {
       setPosts((prev) => (page === 1 ? newPosts : [...prev, ...newPosts]));
       setHasMore(response.hasMore);
     } catch (err) {
-      // ignoring aborted requests cuz they're not real errors
-      if (err.name !== "AbortError") {
-        console.error("Error fetching posts:", err);
+      if (!isAbortError(err)) {
         setError({
-          message: err.message || "Failed to fetch posts.",
-          status: err.response?.status || "Network Error",
+          message: err.message || "failed to fetch posts",
+          status: err.statusCode || "error",
+          timestamp: new Date().toISOString(),
         });
       }
     } finally {
@@ -104,7 +104,7 @@ const Home = () => {
   useEffect(() => {
     document.title = "Home | Adorio";
 
-    // Add meta description
+    // hacky way to set meta tags but whatever lol
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute(
@@ -120,7 +120,7 @@ const Home = () => {
     }
 
     return () => {
-      // Clean up if needed
+      // reset title when we leave
       document.title = "Adorio";
     };
   }, []);
@@ -167,7 +167,7 @@ const Home = () => {
           width = 1200;
         }
 
-        // resize it to save bandwidthe
+        // resize the pic so we don't blow up my free tier backend lmao
         canvas.width = width;
         canvas.height = height;
         ctx.drawImage(img, 0, 0, width, height);
@@ -219,12 +219,13 @@ const Home = () => {
   };
 
   useEffect(() => {
+    // gotta clean up these image urls or chrome memory goes brrrr
     return () => {
       if (imagePreview) {
         URL.revokeObjectURL(imagePreview);
       }
     };
-  }, [imagePreview]); // Only depend on imagePreview
+  }, [imagePreview]);
 
   const validatePostInput = () => {
     if (!title.trim()) {
@@ -279,10 +280,13 @@ const Home = () => {
       setImage(null);
       setImagePreview("");
     } catch (err) {
-      setError({
-        message: err.message || "Failed to create post",
-        status: "Error",
-      });
+      if (!isAbortError(err)) {
+        setError({
+          message: err.message || "failed to fetch data",
+          status: err.statusCode || "error",
+          timestamp: new Date().toISOString(),
+        });
+      }
     } finally {
       setIsCreating(false);
     }
@@ -331,7 +335,7 @@ const Home = () => {
             <p className="text-gray-400">Loading new posts...</p>
           </motion.div>
         )}
-        {/* Header */}
+        {/* that gradient text i spent way too long getting right */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

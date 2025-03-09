@@ -7,7 +7,7 @@ import verifyToken from "../middleware/verifyToken.js";
 const router = express.Router();
 
 // grabbing user details for profile page and stuff
-router.get("/me", verifyToken, async (req, res) => {
+router.get("/me", verifyToken, async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
     if (!user) {
@@ -15,13 +15,13 @@ router.get("/me", verifyToken, async (req, res) => {
     }
     res.status(200).json(user);
   } catch (err) {
-    res.status(500).json({ message: "Server Error" });
+    next(err);
   }
 });
 
 // user stuff like login and signup goes here
 
-router.post("/register", async (req, res) => {
+router.post("/register", async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
 
@@ -69,31 +69,35 @@ router.post("/register", async (req, res) => {
     res.status(201).json({ user: sanitizedUser, token });
   } catch (err) {
     console.error("Registration error:", err);
-    res.status(500).json({ message: "Server Error" });
+    next(err);
   }
 });
 
 // login with refresh token so they stay logged in
-router.post("/login", async (req, res) => {
+router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     // basic validation stuff
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "email and password are required" });
+      const error = new Error("email and password are required");
+      error.statusCode = 400;
+      return next(error);
     }
 
     const user = await User.findOne({ email: { $eq: email } });
     if (!user) {
-      return res.status(400).json({ message: "user not found" });
+      const error = new Error("user not found");
+      error.statusCode = 400;
+      return next(error);
     }
 
     // checking if password matches what's in the db
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "invalid credentials" });
+      const error = new Error("invalid credentials");
+      error.statusCode = 400;
+      return next(error);
     }
 
     // clean up user data before sending
@@ -103,7 +107,7 @@ router.post("/login", async (req, res) => {
       email: user.email,
     };
 
-    // short lived token for regular auth
+    // short lived token for regular auth stuff
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "15m",
     });
@@ -122,12 +126,12 @@ router.post("/login", async (req, res) => {
     });
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ message: "Server Error" });
+    next(err);
   }
 });
 
 // got tired of logging in over and over so i added this refresh thing
-router.post("/refresh-token", async (req, res) => {
+router.post("/refresh-token", async (req, res, next) => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
@@ -154,7 +158,7 @@ router.post("/refresh-token", async (req, res) => {
     res.json({ token });
   } catch (err) {
     console.error("Refresh token error:", err);
-    res.status(401).json({ message: "Invalid refresh token" });
+    next(err);
   }
 });
 
