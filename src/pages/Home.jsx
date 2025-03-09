@@ -192,6 +192,11 @@ const Home = () => {
   };
 
   const handleImageChange = async (e) => {
+    // Revoke previous URL to prevent memory leaks
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
     const file = e.target.files[0];
     if (file) {
       const validImageTypes = ["image/jpeg", "image/png"];
@@ -202,8 +207,8 @@ const Home = () => {
         const sanitizedUrl = DOMPurify.sanitize(objectUrl);
         setImagePreview(sanitizedUrl);
 
-        // Track URL for cleanup
-        setObjectUrls((prev) => [...prev, objectUrl]);
+        //we're tracking in state
+        // and revoking previous ones
       } else {
         setError({
           message: "Invalid file type. Please upload an image (JPEG or PNG).",
@@ -214,11 +219,12 @@ const Home = () => {
   };
 
   useEffect(() => {
-    // cleanup object URLs when component unmounts
     return () => {
-      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
     };
-  }, [objectUrls]);
+  }, [imagePreview]); // Only depend on imagePreview
 
   const validatePostInput = () => {
     if (!title.trim()) {
