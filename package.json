@@ -8,12 +8,11 @@
     "lint": "eslint .",
     "build": "vite build",
     "preview": "vite preview --host",
-    "deploy": "gh-pages -d dist",
     "smt": "npm run build && npm run deploy",
     "start": "cd backend && npm install && node index.js && cd /"
   },
   "dependencies": {
-    "@emoji-mart/data": "^1.2.1",
+    "@emoji-mart/data": "^1.2.1",  
     "@emoji-mart/react": "^1.1.1",
     "@heroicons/react": "^2.2.0",
     "@reduxjs/toolkit": "^2.5.1",
