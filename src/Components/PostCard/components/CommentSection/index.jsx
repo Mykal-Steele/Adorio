@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import CommentForm from "./CommentForm";
@@ -21,6 +21,14 @@ const CommentSection = ({
   onCommentToggle,
   onScroll,
 }) => {
+  // Use useMemo to avoid re-sorting on every render
+  const sortedComments = useMemo(() => {
+    if (!Array.isArray(comments)) return [];
+    return [...comments].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+  }, [comments]);
+
   if (!visible) return null;
 
   return (
@@ -59,17 +67,14 @@ const CommentSection = ({
           className="space-y-4 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent"
           onScroll={onScroll}
         >
-          {comments
-            .slice()
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .map((comment) => (
-              <CommentItem
-                key={comment._id}
-                comment={comment}
-                isExpanded={expandedComments[comment._id]}
-                onToggleExpand={() => onCommentToggle(comment._id)}
-              />
-            ))}
+          {sortedComments.map((comment) => (
+            <CommentItem
+              key={comment._id}
+              comment={comment}
+              isExpanded={expandedComments[comment._id]}
+              onToggleExpand={() => onCommentToggle(comment._id)}
+            />
+          ))}
         </div>
       </motion.div>
     </AnimatePresence>
