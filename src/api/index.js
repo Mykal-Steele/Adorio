@@ -1,14 +1,19 @@
 // my api setup file - finally got axios working right
 import axios from "axios";
+import { isAbortError, handleApiError } from "../utils/errorHandling";
 
-// using this url for my api calls
-const apiUrl =
-  process.env.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com";
+// figuring out if we're in the browser or not so we can get the url right
+// spent way too long debugging this stupid issue
+export const getApiUrl = () => {
+  return typeof window !== "undefined"
+    ? window.VITE_BACKEND_URL + "/api/"
+    : "https://feelio-github-io.onrender.com/api/";
+};
 
+// create your API instance
 const API = axios.create({
-  baseURL: `${apiUrl}/api`, // gotta add /api to the url
-  withCredentials: true,
-  timeout: 10000, // 10 secs before timeout, server can be slow sometimes
+  baseURL: getApiUrl(),
+  timeout: 15000, // 15 sec timeout
 });
 
 // adding token to every request cuz security and stuff
@@ -18,26 +23,18 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
-// fixing up errors so they look nicer to users
+// remove the complex error handling in interceptor since we have handleApiError
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    const errorMessage =
-      error.response?.data?.message ||
-      "An unexpected error occurred. Please try again later.";
-
-    // making errors more user-friendly
-    const enhancedError = {
-      ...error,
-      userMessage: errorMessage,
-    };
-
     // no need to log aborted requests, they're not real errors
-    if (error.code !== "ERR_CANCELED" && error.name !== "AbortError") {
-      console.error("API Error:", errorMessage, error.config?.url);
+    if (!isAbortError(error)) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("api error:", error.config?.url, error.response?.status);
+      }
     }
 
-    return Promise.reject(enhancedError);
+    return Promise.reject(error); // pass unmodified so handleApiError gets original error
   }
 );
 
@@ -47,11 +44,7 @@ export const register = async (userData) => {
     const response = await API.post("/users/register", userData);
     return response.data;
   } catch (error) {
-    console.error(
-      "Error registering user:",
-      error.response?.data || error.message
-    );
-    throw new Error(error.response?.data?.message || "Registration failed");
+    throw handleApiError(error, "registration failed");
   }
 };
 
@@ -61,8 +54,7 @@ export const login = async (userData) => {
     const response = await API.post("/users/login", userData);
     return response.data;
   } catch (error) {
-    console.error("Error logging in:", error);
-    throw error;
+    throw handleApiError(error, "login failed");
   }
 };
 
@@ -72,8 +64,7 @@ export const fetchUserData = async () => {
     const response = await API.get("/users/me");
     return response.data;
   } catch (error) {
-    console.error("Error fetching user data:", error);
-    throw error;
+    throw handleApiError(error, "failed to fetch user data");
   }
 };
 
