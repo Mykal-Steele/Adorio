@@ -9,84 +9,83 @@ function delay(ms) {
 }
 
 async function runLogin() {
-  // Launch the browser with proper production configurations
+  // Launch the browser with visibility for debugging
   const browser = await puppeteer.launch({
-    executablePath:
-      process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium-browser",
-    headless: "new", // Use new headless mode for better stability
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined, // use default chrome on local
+    headless: false, // set to false to see the browser
+    defaultViewport: null, // use full size
     args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
+      "--start-maximized", // maximize window
       "--disable-dev-shm-usage",
-      "--disable-gpu",
-      "--disable-extensions",
     ],
+    slowMo: 50, // slow down operations by 50ms so you can see what's happening
   });
 
   const page = await browser.newPage();
-  await page.setViewport({ width: 1280, height: 800 });
 
   try {
-    console.log("Navigating to adiorios.space...");
-    // Set a reasonable timeout for production
+    console.log("navigating to adiorios.space...");
     await page.goto("https://adorio.space/", {
       waitUntil: "networkidle2",
       timeout: 30000,
     });
-    console.log("Page loaded.");
+    console.log("page loaded.");
 
-    await page.waitForSelector("body"); // Check if the body is loaded
-    console.log("Page body found.");
+    await page.waitForSelector("body");
+    console.log("page body found.");
 
     const isLoggedIn = await page.evaluate(
       () => window.location.pathname === "/home"
     );
 
     if (isLoggedIn) {
-      console.log("Already logged in. Clearing session...");
+      console.log("already logged in. clearing session...");
       await page.evaluate(() => localStorage.removeItem("token"));
       await page.reload({ waitUntil: "networkidle2" });
       await delay(3000);
     }
 
-    console.log("Waiting for login form...");
+    console.log("waiting for login form...");
     await page.waitForSelector('input[type="email"]', { timeout: 15000 });
-    console.log("Login form found.");
+    console.log("login form found.");
 
-    console.log("Entering credentials...");
+    console.log("entering credentials...");
     await page.type('input[type="email"]', "t@t.com");
     await page.type('input[type="password"]', "t");
 
-    console.log("Submitting login...");
+    console.log("submitting login...");
     await Promise.all([
       page.click('button[type="submit"]'),
       page.waitForNavigation({ waitUntil: "networkidle2", timeout: 30000 }),
     ]);
 
-    console.log("Verifying login...");
+    console.log("verifying login...");
     const currentUrl = await page.evaluate(() => window.location.pathname);
     if (currentUrl === "/home") {
-      console.log("✅ Login successful!");
+      console.log("✅ login successful!");
     } else {
-      throw new Error(`❌ Login failed: Unexpected URL (${currentUrl})`);
+      throw new Error(`❌ login failed: unexpected URL (${currentUrl})`);
     }
 
-    console.log("Clearing session token...");
-    await page.evaluate(() => localStorage.removeItem("token"));
+    // don't close automatically to allow debugging
+    console.log("login workflow completed successfully.");
+    console.log(
+      "browser will stay open for debugging - press Ctrl+C to exit when done"
+    );
 
-    console.log("Login workflow completed successfully.");
-    return true; // Indicate success
+    // optional: uncomment this if you want it to eventually close
+    // await delay(60000); // keep open for 60 seconds
+
+    return true;
   } catch (error) {
-    console.error("Error during automation:", error);
+    console.error("error during automation:", error);
+
+    // keep browser open on error for debugging
+    console.log("keeping browser open for debugging - press Ctrl+C to exit");
+    await delay(300000); // 5 minutes to debug
     throw error;
-  } finally {
-    console.log("Closing browser...");
-    try {
-      await browser.close();
-    } catch (closeError) {
-      console.error("Error closing browser:", closeError);
-    }
   }
+  // Remove the finally block to prevent automatic browser closing
 }
 
 async function attemptLogin() {
