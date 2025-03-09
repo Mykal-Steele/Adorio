@@ -48,12 +48,33 @@ app.use(compression());
 // fixes those weird cors errors when u refresh the page
 app.options("*", cors());
 
-const limiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 600, // Allow 500 requests per IP per windowMs
+// Define different rate limits for different endpoints
+const standardLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // 300 requests per 15 minutes
 });
 
-app.use(limiter);
+const postLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 30, // 30 post creations per 10 minutes
+});
+
+const likeLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 60, // 60 like operations per minute
+});
+
+// Use standard limiter for most routes
+app.use(standardLimiter);
+
+// Apply specific limiters to specific routes
+app.use("/api/posts/:id/like", likeLimiter);
+app.use("/api/posts", (req, res, next) => {
+  if (req.method === "POST") {
+    return postLimiter(req, res, next);
+  }
+  return next();
+});
 
 // connect to my mongodb atlas cluster (free tier ftw)
 mongoose
