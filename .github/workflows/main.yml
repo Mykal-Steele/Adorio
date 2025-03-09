@@ -4,10 +4,11 @@ on:
   schedule:
     - cron: '*/10 * * * *'
   workflow_dispatch:
-    
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 
 permissions:
   contents: read
@@ -16,7 +17,7 @@ permissions:
   discussions: read
   packages: read
   pages: read
-  id-token: read
+  id-token: write
   actions: read
   security-events: read
   deployments: read
