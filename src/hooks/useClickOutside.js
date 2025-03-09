@@ -13,7 +13,7 @@ const useClickOutside = (ref, callback) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [ref, callback]);
+  }, [ref, callback]); // had to add callback to deps or react yells at me with warnings
 };
 
 export default useClickOutside;

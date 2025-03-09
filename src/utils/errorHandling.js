@@ -27,7 +27,7 @@ export const handleApiError = (error, customMessage, context = {}) => {
   // network is down or backend unreachable
   if (!error.response) {
     console.warn("network error while making api request", { context });
-    return new Error("can't reach the server. check your internet connection.");
+    return new Error("can't reach the server. ur wifi good?");
   }
 
   // log details for debugging (only in development)
@@ -44,7 +44,7 @@ export const handleApiError = (error, customMessage, context = {}) => {
   const clientError = new Error(
     error.response?.data?.message ||
       customMessage ||
-      "something went wrong. try again later."
+      "something broke lol. try again in a bit."
   );
 
   // preserve status code and other useful info
