@@ -1,5 +1,5 @@
 import React from "react";
 import PostCardComponent from "./PostCard/index";
 
-// Re-export the component directly to maintain backward compatibility
+// i moved all the code to the POstCard folder
 export default PostCardComponent;
