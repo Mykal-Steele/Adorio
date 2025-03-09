@@ -9,83 +9,76 @@ function delay(ms) {
 }
 
 async function runLogin() {
-  // Launch the browser with visibility for debugging
+  console.log("Launching browser...");
   const browser = await puppeteer.launch({
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined, // use default chrome on local
-    headless: false, // set to false to see the browser
-    defaultViewport: null, // use full size
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+    headless: true, // Run headless in production
+    defaultViewport: null,
     args: [
-      "--start-maximized", // maximize window
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--window-size=1280,720",
     ],
-    slowMo: 50, // slow down operations by 50ms so you can see what's happening
   });
 
   const page = await browser.newPage();
 
   try {
-    console.log("navigating to adiorios.space...");
+    console.log("Navigating to adiorios.space...");
     await page.goto("https://adorio.space/", {
       waitUntil: "networkidle2",
       timeout: 30000,
     });
-    console.log("page loaded.");
+    console.log("Page loaded.");
 
     await page.waitForSelector("body");
-    console.log("page body found.");
+    console.log("Page body found.");
 
     const isLoggedIn = await page.evaluate(
       () => window.location.pathname === "/home"
     );
 
     if (isLoggedIn) {
-      console.log("already logged in. clearing session...");
+      console.log("Already logged in. Clearing session...");
       await page.evaluate(() => localStorage.removeItem("token"));
       await page.reload({ waitUntil: "networkidle2" });
       await delay(3000);
     }
 
-    console.log("waiting for login form...");
+    console.log("Waiting for login form...");
     await page.waitForSelector('input[type="email"]', { timeout: 60000 });
-    console.log("login form found.");
+    console.log("Login form found.");
 
-    console.log("entering credentials...");
+    console.log("Entering credentials...");
     await page.type('input[type="email"]', "t@t.com");
     await page.type('input[type="password"]', "t");
 
-    console.log("submitting login...");
+    console.log("Submitting login...");
     await Promise.all([
       page.click('button[type="submit"]'),
       page.waitForNavigation({ waitUntil: "networkidle2", timeout: 60000 }),
     ]);
 
-    console.log("verifying login...");
+    console.log("Verifying login...");
     const currentUrl = await page.evaluate(() => window.location.pathname);
     if (currentUrl === "/home") {
-      console.log("✅ login successful!");
+      console.log("✅ Login successful!");
     } else {
-      throw new Error(`❌ login failed: unexpected URL (${currentUrl})`);
+      throw new Error(`❌ Login failed: unexpected URL (${currentUrl})`);
     }
 
-    // don't close automatically to allow debugging
-    console.log("login workflow completed successfully.");
-    console.log(
-      "browser will stay open for debugging - press Ctrl+C to exit when done"
-    );
-
-    // optional: uncomment this if you want it to eventually close
-    // await delay(60000); // keep open for 60 seconds
-
+    console.log("Login workflow completed successfully.");
     return true;
   } catch (error) {
-    console.error("error during automation:", error);
-
-    // keep browser open on error for debugging
-    console.log("keeping browser open for debugging - press Ctrl+C to exit");
-    await delay(300000); // 5 minutes to debug
+    console.error("Error during automation:", error);
     throw error;
+  } finally {
+    // Always close the browser in production
+    await browser.close();
+    console.log("Browser closed.");
   }
-  // Remove the finally block to prevent automatic browser closing
 }
 
 async function attemptLogin() {
