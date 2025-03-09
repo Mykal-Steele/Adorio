@@ -7,7 +7,7 @@ import verifyToken from "../middleware/verifyToken.js";
 import cloudinary from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 
-// setup my cloudinary account for image uploads
+// cloudinary stuff for profile pics and post images - setup was a nightmare
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_KEY,
@@ -54,37 +54,40 @@ const upload = multer({
 
 const router = Router();
 
-router.post("/", verifyToken, upload.single("image"), async (req, res) => {
-  try {
-    console.log("Uploaded file:", req.file); // debugging this cuz images were breaking
-    console.log("Request body:", req.body); // making sure all the data is coming through
+router.post(
+  "/",
+  verifyToken,
+  upload.single("image"),
+  async (req, res, next) => {
+    try {
+      console.log("Uploaded file:", req.file); // debugging this cuz images were breaking
+      console.log("Request body:", req.body); // making sure all the data is coming through
 
-    const { title, content } = req.body;
-    const newPost = new Post({
-      title,
-      content,
-      user: req.user.id,
-    });
+      const { title, content } = req.body;
+      const newPost = new Post({
+        title,
+        content,
+        user: req.user.id,
+      });
 
-    if (req.file) {
-      newPost.image = {
-        public_id: req.file.filename,
-        url: req.file.path,
-      };
-    } else {
-      console.log("No file uploaded");
+      if (req.file) {
+        newPost.image = {
+          public_id: req.file.filename,
+          url: req.file.path,
+        };
+      } else {
+        console.log("No file uploaded");
+      }
+
+      const savedPost = await newPost.save();
+      res.status(201).json(savedPost);
+    } catch (err) {
+      next(err);
     }
-
-    const savedPost = await newPost.save();
-    res.status(201).json(savedPost);
-  } catch (err) {
-    console.error("Error creating post:", err);
-    res.status(500).json({ message: "Server Error" });
   }
-});
-
-// get all posts with pagination - makes the feed load way faster
-router.get("/", async (req, res) => {
+);
+// get img with pagination to make it load faster and stuff
+router.get("/", async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
@@ -125,13 +128,11 @@ router.get("/", async (req, res) => {
       totalPages: Math.ceil(totalPosts / limit),
     });
   } catch (err) {
-    console.error("Error fetching posts:", err);
-    res.status(500).json({ message: "Server Error" });
+    next(err);
   }
 });
 
-// get a single post with all its details
-router.get("/:id", async (req, res) => {
+router.get("/:id", async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id)
       .populate("user", ["username"])
@@ -139,20 +140,28 @@ router.get("/:id", async (req, res) => {
       .populate("comments.user", ["username"])
       .lean();
 
-    if (!post) return res.status(404).json("Post not found");
+    if (!post) {
+      const error = new Error("post not found");
+      error.statusCode = 404;
+      return next(error);
+    }
 
     post.comments = post.comments.sort((a, b) => b.createdAt - a.createdAt);
 
     res.status(200).json(post);
   } catch (err) {
-    res.status(500).json({ message: "Server Error" });
+    next(err);
   }
 });
 
-router.put("/:id/like", verifyToken, async (req, res) => {
+router.put("/:id/like", verifyToken, async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    if (!post) {
+      const error = new Error("post not found");
+      error.statusCode = 404;
+      return next(error);
+    }
 
     const userId = req.user.id;
     const isLiked = post.likes.some((id) => id.toString() === userId);
@@ -171,23 +180,27 @@ router.put("/:id/like", verifyToken, async (req, res) => {
       action: isLiked ? "unliked" : "liked",
       optimisticId: req.body.optimisticId || null,
     });
-  } catch (error) {
-    console.error("Error in like operation:", error);
-    res.status(500).json({ message: "Server Error" });
+  } catch (err) {
+    // use next(err) instead of direct response
+    next(err);
   }
 });
 
 // comment system - fixed the race conditions that were happening before
-router.post("/:id/comment", verifyToken, async (req, res) => {
+router.post("/:id/comment", verifyToken, async (req, res, next) => {
   try {
     if (!req.body.text || req.body.text.trim() === "") {
-      return res.status(400).json({ message: "Comment text is required" });
+      return res.status(400).json({ message: "comment text is required" });
     }
 
     const { text, optimisticId } = req.body;
 
     const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    if (!post) {
+      const error = new Error("post not found");
+      error.statusCode = 404;
+      return next(error);
+    }
 
     const newComment = {
       text,
@@ -198,24 +211,15 @@ router.post("/:id/comment", verifyToken, async (req, res) => {
     post.comments.push(newComment);
     await post.save();
 
-    const populatedComment = await Post.findOne(
-      {
-        _id: post._id,
-        "comments._id": post.comments[post.comments.length - 1]._id,
-      },
-      { "comments.$": 1 }
-    ).populate("comments.user", ["username"]);
+    // grab the full post with user info so we don't need extra api calls
+    const populatedPost = await Post.findById(post._id)
+      .populate("user", ["username"])
+      .populate("comments.user", ["username"]);
 
-    const comment = populatedComment?.comments[0];
-
-    res.status(201).json({
-      _id: post._id,
-      comment,
-      optimisticId,
-    });
+    // send back the whole post with populated comments
+    res.status(201).json(populatedPost);
   } catch (err) {
-    console.error("Error adding comment:", err);
-    res.status(500).json({ message: "Server Error" });
+    next(err);
   }
 });
 
