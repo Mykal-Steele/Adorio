@@ -49,7 +49,7 @@ export default defineConfig({
               script-src 'self' 'nonce-${nonce}'; 
               style-src 'self' 'unsafe-inline';
               img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com;
-              connect-src 'self' https://feelio-github-io.onrender.com;
+              connect-src 'self' https://feelio-github-io.onrender.com https://feelio-github-io.onrender.com/api/*;
               form-action 'self';
               base-uri 'self';
               object-src 'none';
