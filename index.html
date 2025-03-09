@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+            <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://feelio-github-io.onrender.com;">
+          
+    <meta charset="UTF-8" />
+    <meta
+      name="description"
+      content="Adorio is where I connect with my friends, share moments, and express myself! Join our vibe, post your thoughts, and be part of our growing community. No cap, it's the social platform that actually gets you."
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-adsense-account" content="ca-pub-1872365375645260" />
+
+    <!-- got this favicon from that stock photo site - looks kinda mid but whatever -->
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://res.cloudinary.com/dboeqtx65/image/upload/v1741024214/feelio/posts/file.jpg"
+    />
+
+    <!-- all these meta tags so links look cool when ppl share them on discord -->
+    <meta property="og:title" content="Adorio - Social Media Platform" />
+    <meta
+      property="og:description"
+      content="Connect and share with friends on Adorio"
+    />
+    <meta
+      property="og:image"
+      content="https://res.cloudinary.com/dboeqtx65/image/upload/v1741024214/feelio/posts/file.jpg"
+    />
+    <meta property="og:url" content="https://www.adorio.space/" />
+    <meta property="og:type" content="website" />
+
+    <title>Adorio - Social Media Platform</title>
+    <script type="module" crossorigin src="/assets/index-C20RI-Kj.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DRKPU1_5.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/javascript">
+      // github pages routing hack i found on stackoverflow
+      // fixes those weird 404 errors when refreshing the page
+      (function (l) {
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("&");
+          window.history.replaceState(
+            null,
+            null,
+            l.pathname.slice(0, -1) + "?" + decoded + l.hash
+          );
+        }
+      })(window.location);
+    </script>
+    <script>
+      // hardcoding the backend url here so i can change it without rebuilding
+      window.VITE_BACKEND_URL = "https://feelio-github-io.onrender.com";
+    </script>
+  </body>
+</html>
