@@ -39,7 +39,7 @@ export default defineConfig({
           </script>`
         );
 
-        // csp stuff took me like 3 days to figure out but at least it works now
+        // csp stuff took me like 3 days to figure out - stackoverflow is my best friend
         return html
           .replace(
             /<head>/,

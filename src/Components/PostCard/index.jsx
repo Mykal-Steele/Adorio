@@ -8,7 +8,6 @@ import React, {
 import { motion } from "framer-motion";
 import { addComment } from "../../api";
 
-// Import components
 import AuthorHeader from "./components/AuthorHeader";
 import PostImage from "./components/PostImage";
 import ImageModal from "./components/ImageModal";
@@ -19,7 +18,6 @@ import CommentSection from "./components/CommentSection";
 // Import hooks
 import { useImageLoader } from "./hooks/useImageLoader";
 
-// Import constants
 import { isUserAdmin } from "./constants";
 
 import { XMarkIcon } from "@heroicons/react/24/outline";
@@ -30,14 +28,14 @@ const PostCard = ({
   content,
   user,
   image: postImage,
-  likes = [], // Ensure default value
-  comments: initialComments = [], // Ensure default value
+  likes = [],
+  comments: initialComments = [],
   createdAt,
   onCommentAdded,
   onLike,
   currentUserId,
 }) => {
-  // random id so framer-motion doesn't freak out with duplicate keys
+  // random id so framer-motion doesn't break animations when react decides to rerender stuff
   const instanceId = useMemo(
     () =>
       `post-${_id}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
