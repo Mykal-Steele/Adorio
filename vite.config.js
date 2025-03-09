@@ -34,7 +34,16 @@ export default defineConfig({
           .replace(
             /<head>/,
             `<head>
-            <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'nonce-${nonce}'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://feelio-github-io.onrender.com;">
+            <meta http-equiv="Content-Security-Policy" content="
+              default-src 'self'; 
+              script-src 'self' 'nonce-${nonce}'; 
+              style-src 'self' 'unsafe-inline'; 
+              img-src 'self' data: blob: https:; 
+              connect-src 'self' https://feelio-github-io.onrender.com;
+              form-action 'self';
+              base-uri 'self';
+              object-src 'none';
+            ">
           `
           )
           .replace(/<script/g, `<script nonce="${nonce}"`);
