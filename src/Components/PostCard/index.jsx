@@ -88,7 +88,7 @@ const PostCard = ({
   // Track if this is the first mount
   const isFirstRender = useRef(true);
 
-  // Only update likes from props on initial mount, not during updates
+  // only update likes when the component first mounts to avoid infinite loops
   useEffect(() => {
     // Only run this effect once on mount
     if (isFirstRender.current) {

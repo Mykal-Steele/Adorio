@@ -106,7 +106,7 @@ export const likePost = async (postId, shouldBeLiked) => {
   return pendingRequests[postId];
 };
 
-// lets users comment on posts - super simple endpoint
+// comment system that breaks every time i touch it
 export const addComment = async (postId, commentText) => {
   try {
     const response = await API.post(`/posts/${postId}/comment`, {
