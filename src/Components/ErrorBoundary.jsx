@@ -38,14 +38,13 @@ class ErrorBoundary extends React.Component {
               Something went wrong
             </h2>
             <p className="text-gray-300 mb-6">
-              We're working on fixing this issue. Please try refreshing the
-              page.
+              something broke bad 💀 try refreshing or something idk
             </p>
             <button
               onClick={() => window.location.reload()}
               className="py-2 px-4 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors"
             >
-              Refresh Page
+              try turning it off and on again
             </button>
           </motion.div>
         </div>

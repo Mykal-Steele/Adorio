@@ -152,7 +152,7 @@ const Register = () => {
           )}
         </form>
 
-        {/* Divider */}
+        {/* that little "or" separator thing */}
         <div className="relative flex items-center justify-center">
           <div className="flex-grow border-t border-gray-700/50"></div>
           <span className="mx-4 text-gray-400">or</span>

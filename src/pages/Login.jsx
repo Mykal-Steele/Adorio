@@ -37,10 +37,10 @@ const Login = () => {
       if (err.response) {
         setError(
           err.response.data.message ||
-            "Login failed. Please check your credentials."
+            "login failed - wrong password or something idk"
         );
       } else if (err.request) {
-        setError("No response from server. Please check your connection.");
+        setError("can't reach the server - wifi acting up maybe?");
       } else {
         setError("An unexpected error occurred. Please try again.");
       }
