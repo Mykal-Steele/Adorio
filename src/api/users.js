@@ -1,11 +1,23 @@
 import API from "./index"; // use your API wrapper instead of axios directly
 import { handleApiError } from "../utils/errorHandling";
+const axios = require("axios");
+
+// figuring out if we're in the browser or not so we can get the url right
+// spent way too long debugging this stupid issue
+const apiUrl =
+  typeof window !== "undefined"
+    ? window.VITE_BACKEND_URL + "/api/"
+    : "https://feelio-github-io.onrender.com/api/";
 
 export const fetchUserData = async () => {
   try {
-    // Use API wrapper which already handles auth headers
-    const response = await API.get("/users/me");
-    return response.data;
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`${apiUrl}/users/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.data.user;
   } catch (error) {
     throw handleApiError(error, "failed to fetch user data");
   }

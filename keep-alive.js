@@ -46,7 +46,7 @@ async function runLogin() {
     }
 
     console.log("waiting for login form...");
-    await page.waitForSelector('input[type="email"]', { timeout: 15000 });
+    await page.waitForSelector('input[type="email"]', { timeout: 60000 });
     console.log("login form found.");
 
     console.log("entering credentials...");
@@ -56,7 +56,7 @@ async function runLogin() {
     console.log("submitting login...");
     await Promise.all([
       page.click('button[type="submit"]'),
-      page.waitForNavigation({ waitUntil: "networkidle2", timeout: 30000 }),
+      page.waitForNavigation({ waitUntil: "networkidle2", timeout: 60000 }),
     ]);
 
     console.log("verifying login...");
