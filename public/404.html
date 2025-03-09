@@ -2,37 +2,13 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Redirecting...</title>
+    <title>Page Not Found</title>
     <script>
-      // found this redirect trick on github for react router
-      // had to use this cuz the normal routing breaks on page refresh
-      // got it from rafgraph's repo, saved me so much headache
-      var pathSegmentsToKeep = 0;
-
-      var l = window.location;
-      l.replace(
-        l.protocol +
-          "//" +
-          l.hostname +
-          (l.port ? ":" + l.port : "") +
-          l.pathname
-            .split("/")
-            .slice(0, 1 + pathSegmentsToKeep)
-            .join("/") +
-          "/?/" +
-          l.pathname
-            .slice(1)
-            .split("/")
-            .slice(pathSegmentsToKeep)
-            .join("/")
-            .replace(/&/g, "~and~") +
-          (l.search ? "&" + l.search.slice(1).replace(/&/g, "~and~") : "") +
-          l.hash
-      );
+      // MY REDIRECTINH NOT WOKRINGNGN SO I HAD TO DO THIS :(
+      window.location.href = "/";
     </script>
   </head>
   <body>
-    <!-- user shouldn't see this for more than a split second if everything works -->
-    Redirecting...
+    <p>Redirecting to home page...</p>
   </body>
 </html>
