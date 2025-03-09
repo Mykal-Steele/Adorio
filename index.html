@@ -1,10 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-W5W8JGS3");
+    </script>
+    <!-- End Google Tag Manager -->
+
     <meta charset="UTF-8" />
     <meta
       name="description"
-      content="Adorio is where I connect with my friends, share moments, and express myself! Join our vibe, post your thoughts, and be part of our growing community. No cap, it's the social platform that actually gets you."
+      content="Adorio - The social platform where you connect with friends, share moments, and express yourself authentically. Join Adorio today!"
+    />
+    <meta
+      name="keywords"
+      content="Adorio, social media, connect with friends, share moments, social networking, adorio platform"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google-adsense-account" content="ca-pub-1872365375645260" />
@@ -17,10 +36,10 @@
     />
 
     <!-- all these meta tags so links look cool when ppl share them on discord -->
-    <meta property="og:title" content="Adorio - Social Media Platform" />
+    <meta property="og:title" content="Adorio | Share Your World" />
     <meta
       property="og:description"
-      content="Connect and share with friends on Adorio"
+      content="Join Adorio - the social platform that lets you connect and share authentically."
     />
     <meta
       property="og:image"
@@ -28,15 +47,60 @@
     />
     <meta property="og:url" content="https://www.adorio.space/" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Adorio" />
 
-    <title>Adorio - Social Media Platform</title>
+    <!-- Twitter Card data -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Adorio | Share Your World" />
+    <meta
+      name="twitter:description"
+      content="Join Adorio - the social platform that lets you connect and share authentically."
+    />
+
+    <title>Adorio | Social Media Platform | Connect & Share</title>
+    <link rel="canonical" href="https://www.adorio.space/" />
   </head>
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-W5W8JGS3"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
       // hardcoding the backend url here so i can change it without rebuilding
       window.VITE_BACKEND_URL = "https://feelio-github-io.onrender.com";
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Adorio",
+        "url": "https://www.adorio.space/",
+        "description": "A social media platform for connecting with friends and sharing moments",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.adorio.space/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Adorio",
+        "url": "https://www.adorio.space",
+        "logo": "https://res.cloudinary.com/dboeqtx65/image/upload/v1741024214/feelio/posts/file.jpg"
+      }
     </script>
   </body>
 </html>
