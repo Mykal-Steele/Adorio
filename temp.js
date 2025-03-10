@@ -6,6 +6,12 @@ import { login } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import { SparklesIcon } from "@heroicons/react/24/outline";
 
+// story time: this file exists because I had a mental breakdown at 3am when react router
+// decided to stop working out of nowhere. I remade the entire login component here to see
+// if I was going insane. I wasn't... there was a typo in the import path. FML.
+// now this file is left as a piece of history.
+// if you found this comment, you're now legally obligated to tell me your worst debugging story
+
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
