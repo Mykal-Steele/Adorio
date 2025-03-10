@@ -34,7 +34,9 @@ export function useImageLoader({ postImage, postId, instanceId }) {
 
     // check if we actually have an image
     if (!postImage?.url) {
-      console.log(`[${instanceId}] No valid image for post ${postId}`);
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[${instanceId}] No valid image for post ${postId}`);
+      }
       setImageState((prev) => ({ ...prev, isLoading: false, hasError: true }));
       return;
     }
