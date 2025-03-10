@@ -24,6 +24,9 @@ body {
     transparent
   );
   animation: pulse 1.5s infinite;
+  /* saw this effect on dribbble and spent 3 hours recreating it
+     only for no one to even notice it exists lol. but if you're reading this,
+     at least one person appreciates my pain. thanks random dev person. */
 }
 
 @keyframes pulse {

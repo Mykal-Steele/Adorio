@@ -55,6 +55,7 @@ export const createPost = async (postData) => {
 };
 
 // tracking likes so we don't spam the server
+// this stops cards from re-rendering every time anything changes
 const likeIntents = {};
 const pendingRequests = {};
 
@@ -66,6 +67,9 @@ export const likePost = async (postId, shouldBeLiked) => {
   if (pendingRequests[postId]) {
     return pendingRequests[postId];
   }
+
+  // if you found this, try rapid clicking a like button - bet you can't break it anymore! :3
+  // (i'm totally jinxing myself by writing this, aren't I?)
 
   // make a new request with a promise
   pendingRequests[postId] = (async () => {
