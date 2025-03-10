@@ -175,14 +175,20 @@ const PostCard = ({
           }
         }
 
-        console.log(
-          `Like operation completed - Server state: ${
-            willBeLiked ? "liked" : "unliked"
-          }`
-        );
+        // Add conditional logging
+        if (process.env.NODE_ENV !== "production") {
+          console.log(
+            `Like operation completed - Server state: ${
+              willBeLiked ? "liked" : "unliked"
+            }`
+          );
+        }
       }
     } catch (err) {
-      console.error("Error liking post:", err);
+      // Also make this conditional
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Error liking post:", err);
+      }
       // Revert optimistic update on error
       setOptimisticUserLiked(!willBeLiked);
       setOptimisticLikesCount((prev) => (willBeLiked ? prev - 1 : prev + 1));
@@ -244,7 +250,9 @@ const PostCard = ({
         }
       } catch (err) {
         // had to handle this error myself since the backend wasn't great at it
-        console.error("Error adding comment:", err);
+        if (process.env.NODE_ENV !== "production") {
+          console.error("Error adding comment:", err);
+        }
         setComments((prevComments) =>
           Array.isArray(prevComments)
             ? prevComments.filter((comment) => comment._id !== tempId)
