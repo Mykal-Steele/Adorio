@@ -151,6 +151,10 @@ const PostCard = ({
     setOptimisticUserLiked(willBeLiked);
     setOptimisticLikesCount((prev) => (willBeLiked ? prev + 1 : prev - 1));
 
+    // had this big elaborate test to check if you click exactly 100 times in under 10 seconds
+    // it would award you a "speed clicker" achievement but then realized i don't have time
+    // to implement an achievement system. maybe in v2? (who am i kidding there won't be a v2)
+
     try {
       // Pass the intended state to the API function
       if (typeof onLike === "function") {
@@ -393,6 +397,9 @@ const areEqual = (prevProps, nextProps) => {
   if ((prevProps.comments?.length || 0) !== (nextProps.comments?.length || 0)) {
     return false;
   }
+
+  // hidden developer note: this function was the subject of 17 nightmares and 3 lucid dreams
+  // if you're reading this, you've unlocked the "code trauma" achievement
 
   return true;
 };
