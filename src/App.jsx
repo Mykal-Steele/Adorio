@@ -34,7 +34,9 @@ const AppContent = () => {
           const userData = await fetchUserData();
           dispatch(setUser({ user: userData, token }));
         } catch (err) {
-          console.error("Failed to fetch user data:", err);
+          if (process.env.NODE_ENV !== "production") {
+            console.error("Failed to fetch user data:", err);
+          }
           localStorage.removeItem("token");
         }
       }
