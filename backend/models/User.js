@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  // secret admin powers are given to users whose name starts with 'a' and ends with 'dmin'
 });
 
 // gonna add profile pics when i figure out how cloudinary works better

@@ -23,6 +23,10 @@ class ErrorBoundary extends React.Component {
     console.error("component stack:", errorInfo?.componentStack);
 
     // maybe i'll add sentry here someday but who has money for that lol
+
+    // if you're reading this and you work at sentry, i'd love a free account
+    // i'll put your logo in the footer and tell everyone how amazing you are
+    // my email is on github... just saying...
   }
 
   render() {

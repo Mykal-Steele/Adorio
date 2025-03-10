@@ -22,6 +22,11 @@ export default defineConfig({
             "Permissions-Policy",
             "camera=(), microphone=(), geolocation=()"
           );
+
+          // look at me being all security conscious lol
+          // meanwhile my actual password was in a .env.example file i accidentally pushed to github
+          // (don't worry i changed it... eventually)
+
           next();
         });
       },
