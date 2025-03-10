@@ -84,7 +84,9 @@ export function useImageLoader({ postImage, postId, instanceId }) {
 
       preloadImage.src = uniqueUrl;
     } catch (error) {
-      console.error(`[${instanceId}] Error loading image:`, error);
+      if (process.env.NODE_ENV !== "production") {
+        console.error(`[${instanceId}] Error loading image:`, error);
+      }
       setImageState((prev) => ({
         ...prev,
         isLoading: false,
