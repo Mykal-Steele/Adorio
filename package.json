@@ -1,7 +1,7 @@
 {
   "name": "adorio",
   "private": true,
-  "version": "0.0.131",
+  "version": "0.0.172",
   "homepage": "https://adorio.space/",
   "scripts": {
     "skibidi": "vite --force",
