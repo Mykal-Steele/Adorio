@@ -133,6 +133,6 @@ This is mostly my personal project but if you wanna contribute for some reason:
 
 This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 
-Basically, you can use this, change it, or share it - but if you modify it and run it as a service, you gotta share those changes. Just don't steal it and say you made it lol .
+Basically, you can use this, change it, or share it - but if you modify it and run it as a service, you gotta share those changes. Just don't steal it and say you made it lol.
 
 [Full license details](https://www.gnu.org/licenses/agpl-3.0.en.html)
