@@ -64,7 +64,11 @@ export const fetchUserData = async () => {
     const response = await API.get("/users/me");
     return response.data;
   } catch (error) {
-    throw handleApiError(error, "failed to fetch user data");
+    const customMessage =
+      process.env.NODE_ENV !== "production"
+        ? "failed to fetch user data"
+        : null;
+    throw handleApiError(error, customMessage);
   }
 };
 
