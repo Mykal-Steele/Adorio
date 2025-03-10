@@ -8,6 +8,11 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// this tiny script pings my backend every 10 minutes so my free render tier doesn't fall asleep
+// yes, i know this is gaming the system
+// no, i don't care - i'm not paying $19/month when this works fine
+// if you work at render and are reading this... i love your service pls don't ban me :@
+
 async function runLogin() {
   console.log("Launching browser...");
   const browser = await puppeteer.launch({

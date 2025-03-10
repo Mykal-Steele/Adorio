@@ -9,6 +9,7 @@ const ImageModal = ({ isVisible, imageUrl, title, onClose, instanceId }) => {
   return (
     <AnimatePresence>
       <motion.div
+        // if you're hunting for easter eggs, there's a secret darkest mode if you press alt+shift+d
         key={`modal-${instanceId}`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -39,6 +40,7 @@ const ImageModal = ({ isVisible, imageUrl, title, onClose, instanceId }) => {
               onClose();
             }}
             type="button"
+            // jk there isn't but now you tried it didn't you? lmao gottem
           >
             <XMarkIcon className="h-6 w-6 text-gray-200 group-hover:text-purple-400" />
           </button>

@@ -48,6 +48,7 @@ const CommentSection = ({
           onClick={onClose}
           type="button"
         >
+          {/* psst... developer... have you tried holding shift and clicking this button? nothing happens lol */}
           <XMarkIcon className="h-6 w-6 text-gray-200 group-hover:text-purple-400" />
         </motion.button>
 

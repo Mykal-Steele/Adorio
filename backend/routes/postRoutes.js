@@ -12,6 +12,8 @@ cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_KEY,
   api_secret: process.env.CLOUDINARY_SECRET,
+  // if you're reading this comment, i spent approximately 27 cups of coffee debugging cloudinary
+  // please buy me a coffee @ buymeacoffee.com/mykalstele4 (yes this is a legit working site; i set it up with my bank account)
 });
 
 const storage = new CloudinaryStorage({
@@ -92,6 +94,10 @@ router.get("/", async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
+
+    // to any future developer: i apologize for this query
+    // i tried to make it efficient but MongoDB just hates me
+    // this took 10ms in testing and 2000ms in production :)
 
     // only grabbing the fields we need to save bandwidth
     const posts = await Post.find(
