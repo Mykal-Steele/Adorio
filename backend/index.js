@@ -11,6 +11,9 @@ import serverless from "serverless-http";
 import compression from "compression";
 import errorHandler from "./middleware/errorHandler.js";
 
+// Force UTC timezone for all date operations
+process.env.TZ = "UTC";
+
 dotenv.config();
 
 const app = express();
