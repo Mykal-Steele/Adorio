@@ -211,7 +211,7 @@ router.post("/:id/comment", verifyToken, async (req, res, next) => {
     const newComment = {
       text,
       user: req.user.id,
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(), // Explicitly use ISO string format
     };
 
     post.comments.push(newComment);
