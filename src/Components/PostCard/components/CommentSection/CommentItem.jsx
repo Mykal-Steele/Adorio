@@ -63,7 +63,7 @@ const CommentItem = ({ comment, isExpanded, onToggleExpand }) => {
             )}
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            {moment(comment.createdAt).fromNow()}
+            {moment.utc(comment.createdAt).local().fromNow()}
           </p>
         </div>
       </div>
