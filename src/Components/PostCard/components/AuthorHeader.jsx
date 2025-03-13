@@ -29,7 +29,9 @@ const AuthorHeader = ({ user, createdAt, isAdmin }) => {
         </motion.div>
         <div>
           <p className="font-medium text-gray-100">{user?.username}</p>
-          <p className="text-sm text-gray-400">{moment(createdAt).fromNow()}</p>
+          <p className="text-sm text-gray-400">
+            {moment.utc(createdAt).local().fromNow()}
+          </p>
         </div>
       </div>
     </div>
