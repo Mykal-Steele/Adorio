@@ -61,6 +61,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                 <div className="hidden sm:flex gap-2 sm:gap-4">
                   <NavLink to="/home" text="Home" />
                   <NavLink to="/profile" text="Profile" />
+                  <NavLink to="/rygame" text="RyGame" />
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -94,6 +95,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
           <div className="sm:hidden flex justify-center space-x-4 pb-2">
             <NavLink to="/home" text="Home" />
             <NavLink to="/profile" text="Profile" />
+            <NavLink to="/rygame" text="RyGame" />
           </div>
         )}
       </div>

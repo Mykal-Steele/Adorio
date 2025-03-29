@@ -8,7 +8,9 @@ import {
   Navigate,
 } from "react-router-dom";
 import Home from "./pages/Home";
+import RyGame from "./pages/RyGame";
 import Login from "./pages/Login";
+import Landing from "./pages/Landing";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Navbar from "@components/Navbar";
@@ -68,6 +70,10 @@ const AppContent = () => {
             <Route
               path="/home"
               element={token ? <Home /> : <Navigate to="/login" replace />}
+            />
+            <Route
+              path="/rygame"
+              element={token ? <RyGame /> : <Navigate to="/login" replace />}
             />
             <Route
               path="/profile"
