@@ -1,7 +1,9 @@
 import express from "express";
 import User from "../models/User.js";
-// Import the named export (verifyToken) instead of the default export
-import { verifyToken } from "../middleware/verifyToken.js";
+// Import the middleware using either syntax
+import { optional } from "../middleware/verifyToken.js";
+// Alternative import that will also work:
+// import { optional } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -29,8 +31,8 @@ router.get("/leaderboard", async (req, res) => {
       };
 
       return (
-        difficultyRank[b.rhythmGame.difficulty] -
-        difficultyRank[a.rhythmGame.difficulty]
+        difficultyRank[b.rhythmGame.difficulty || "normal"] -
+        difficultyRank[a.rhythmGame.difficulty || "normal"]
       );
     });
 
@@ -41,10 +43,19 @@ router.get("/leaderboard", async (req, res) => {
   }
 });
 
-// POST /api/game/update-score - Update user's score
-router.post("/update-score", verifyToken, async (req, res) => {
+// POST /api/game/update-score - Update user's score with optional auth
+router.post("/update-score", optional, async (req, res) => {
   try {
     const { score, difficulty } = req.body;
+
+    // Only proceed with updating if user is authenticated
+    if (!req.user) {
+      return res.status(200).json({
+        message: "Score recorded locally only (not logged in)",
+        anonymous: true,
+      });
+    }
+
     const userId = req.user.id;
 
     // Find user
@@ -71,6 +82,35 @@ router.post("/update-score", verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating score:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// GET /api/game/user-stats - Get current user's game stats
+router.get("/user-stats", optional, async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(200).json({
+        peakPLevel: 0,
+        difficulty: "normal",
+        anonymous: true,
+      });
+    }
+
+    const userId = req.user.id;
+    const user = await User.findById(userId).select("rhythmGame");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      peakPLevel: user.rhythmGame?.peakPLevel || 0,
+      difficulty: user.rhythmGame?.difficulty || "normal",
+      lastPlayed: user.rhythmGame?.lastPlayed,
+    });
+  } catch (error) {
+    console.error("Error fetching user stats:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
