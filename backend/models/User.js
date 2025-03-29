@@ -16,6 +16,22 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   // secret admin powers are given to users whose name starts with 'a' and ends with 'dmin'
+
+  // Game stats for Rhythm Dots
+  rhythmGame: {
+    peakPLevel: {
+      type: Number,
+      default: 0,
+    },
+    difficulty: {
+      type: String,
+      enum: ["easy", "normal", "hard"],
+      default: "normal",
+    },
+    lastPlayed: {
+      type: Date,
+    },
+  },
 });
 
 // gonna add profile pics when i figure out how cloudinary works better

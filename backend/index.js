@@ -118,10 +118,11 @@ connectDB();
 
 import userRoutes from "./routes/userRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
-
+import gameRoutes from "./routes/gameRoutes.js";
 // hooking up all my api endpoints
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/game", gameRoutes);
 
 // error handler middleware catches all my dumb bugs
 app.use(errorHandler);
