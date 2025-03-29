@@ -78,7 +78,7 @@ const Home = () => {
     try {
       const response = await getPosts(
         page,
-        5, // 5 posts per page seems good for performance
+        3, // 5 posts per page seems good for performance
         abortControllerRef.current.signal
       );
       const newPosts = response.posts || [];
