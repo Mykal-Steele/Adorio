@@ -13,6 +13,11 @@ import {
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import {
+  fetchLeaderboard,
+  updateScore,
+  fetchUserGameStats,
+} from "../api/gameApi";
 
 const RyGame = () => {
   const timerEventRef = useRef(null);
@@ -545,11 +550,11 @@ const RyGame = () => {
   }, []);
 
   // Function to update user's peak P-Level
-  const fetchLeaderboard = useCallback(async () => {
+  const fetchLeaderboardData = useCallback(async () => {
     try {
       setIsLoadingLeaderboard(true);
-      const response = await axios.get("/api/game/leaderboard");
-      setLeaderboard(response.data);
+      const data = await fetchLeaderboard();
+      setLeaderboard(data);
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
       setLeaderboard([]);
@@ -560,46 +565,40 @@ const RyGame = () => {
 
   // Ensure the leaderboard loads on mount, not conditionally
   useEffect(() => {
-    fetchLeaderboard();
+    fetchLeaderboardData();
 
     // Set up a refresh interval for real-time updates
     const refreshInterval = setInterval(() => {
-      fetchLeaderboard();
+      fetchLeaderboardData();
     }, 60000); // Refresh every minute
 
     return () => clearInterval(refreshInterval);
-  }, [fetchLeaderboard]);
+  }, [fetchLeaderboardData]);
 
   const updateUserScore = useCallback(
     async (score, difficulty) => {
-      // Only update if user is logged in and score is higher than previous
-      if (currentUser && score > (currentUser.rhythmGame?.peakPLevel || 0)) {
-        try {
-          const response = await axios.post("/api/game/update-score", {
-            score,
-            difficulty,
-          });
+      try {
+        const response = await updateScore(score, difficulty);
 
-          if (response.data) {
-            setCurrentUser((prev) => ({
-              ...prev,
-              rhythmGame: {
-                ...prev.rhythmGame,
-                peakPLevel: score,
-                difficulty,
-              },
-            }));
-            fetchLeaderboard();
-          }
-        } catch (error) {
-          console.error(
-            "Failed to update score:",
-            error.response?.data || error.message
-          );
+        if (!response.anonymous) {
+          // Only update UI if it's an authenticated user
+          setCurrentUser((prev) => ({
+            ...prev,
+            rhythmGame: {
+              ...prev?.rhythmGame,
+              peakPLevel: score,
+              difficulty,
+            },
+          }));
         }
+
+        // Always update the leaderboard after a score update
+        fetchLeaderboardData();
+      } catch (error) {
+        console.error("Failed to update score:", error);
       }
     },
-    [currentUser, fetchLeaderboard]
+    [fetchLeaderboardData]
   );
 
   // Check for and save high P-Level
@@ -1143,65 +1142,114 @@ const RyGame = () => {
 
   // Get current user on mount
   useEffect(() => {
-    const getCurrentUser = async () => {
+    const getUserGameStats = async () => {
       try {
-        const response = await axios.get("/api/auth/current-user");
-        if (response.data) {
-          setCurrentUser(response.data);
+        const gameStats = await fetchUserGameStats();
+
+        if (!gameStats.anonymous) {
+          // Set high score from database instead of local storage
+          setHighPLevel(gameStats.peakPLevel || 0);
+
+          // Also update the current user state
+          const token = localStorage.getItem("token");
+          if (token) {
+            try {
+              const response = await axios.get("/api/users/me", {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+
+              if (response.data) {
+                setCurrentUser(response.data);
+              }
+            } catch (error) {
+              // Don't show as error - this is expected when not logged in
+              console.log("Not logged in or error fetching user");
+            }
+          }
+        } else {
+          // Fallback to local storage for guests
+          const savedHighPLevel = localStorage.getItem("rhythmDotsHighPLevel");
+          if (savedHighPLevel) {
+            setHighPLevel(parseInt(savedHighPLevel));
+          }
         }
       } catch (error) {
-        console.error("Not logged in or error fetching user:", error);
+        console.error("Error fetching game stats:", error);
+        // Fallback to local storage
+        const savedHighPLevel = localStorage.getItem("rhythmDotsHighPLevel");
+        if (savedHighPLevel) {
+          setHighPLevel(parseInt(savedHighPLevel));
+        }
       }
     };
 
-    getCurrentUser();
+    getUserGameStats();
   }, []);
 
   // When rendering the leaderboard, add additional safety checks
-  const renderLeaderboard = () => {
-    if (!Array.isArray(leaderboard)) {
+  const renderLeaderboard = useCallback(() => {
+    if (!Array.isArray(leaderboard) || leaderboard.length === 0) {
       return (
-        <p className="text-gray-400 text-sm">Unable to load leaderboard data</p>
+        <div className="text-center py-8">
+          <p className="text-gray-400">No scores yet. Be the first!</p>
+        </div>
       );
     }
 
-    if (leaderboard.length === 0) {
-      return <p className="text-gray-400 text-sm">No scores yet</p>;
-    }
+    return leaderboard.map((player, index) => {
+      // Add safety checks to handle potentially undefined values
+      if (!player) return null;
 
-    return leaderboard.map((player, index) => (
-      <div
-        key={player._id || index}
-        className={`p-3 rounded-lg border ${
-          currentUser?.username === player.username
-            ? "border-purple-500/30 bg-purple-900/10"
-            : "border-gray-700/30"
-        }`}
-      >
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <span className="text-xs font-medium text-gray-300">
-              #{index + 1}
-            </span>
-            <span className="ml-2 text-sm text-gray-200">
-              {player.username}
-              {currentUser?.username === player.username && (
-                <span className="text-xs text-purple-400 ml-1">(you)</span>
-              )}
-            </span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-sm font-bold text-purple-400">
-              {player.rhythmGame?.peakPLevel || 0}
-            </span>
-            <span className="ml-2 text-xs text-gray-400">
-              {player.rhythmGame?.difficulty || "normal"}
-            </span>
+      return (
+        <div
+          key={player._id || `player-${index}`}
+          className={`p-3 rounded-lg border ${
+            currentUser?.username === player?.username
+              ? "border-purple-500/30 bg-purple-900/10"
+              : index === 0
+              ? "border-amber-500/20 bg-amber-900/5"
+              : "border-gray-700/30"
+          }`}
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <span
+                className={`text-xs font-medium ${
+                  index === 0 ? "text-amber-400" : "text-gray-400"
+                }`}
+              >
+                #{index + 1}
+              </span>
+              <span className="ml-2 text-sm text-gray-200 truncate max-w-[120px]">
+                {player?.username || "Anonymous"}
+                {currentUser?.username === player?.username && (
+                  <span className="text-xs text-purple-400 ml-1">(you)</span>
+                )}
+              </span>
+            </div>
+            <div className="flex items-center">
+              <span
+                className={`text-sm font-bold ${
+                  player?.rhythmGame?.peakPLevel >= 50
+                    ? "text-amber-400"
+                    : player?.rhythmGame?.peakPLevel >= 25
+                    ? "text-purple-400"
+                    : "text-blue-400"
+                }`}
+              >
+                {player?.rhythmGame?.peakPLevel || 0}
+              </span>
+              <span className="ml-2 text-xs bg-gray-800 px-1.5 py-0.5 rounded text-gray-400">
+                {player?.rhythmGame?.difficulty || "normal"}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-    ));
-  };
+      );
+    });
+  }, [leaderboard, currentUser]);
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col md:flex-row">
