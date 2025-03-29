@@ -1,9 +1,24 @@
 import axios from "axios";
+import { handleApiError } from "../utils/errorHandling";
 
-// Configure axios with the backend URL
-const API_BASE_URL =
-  window.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com";
-axios.defaults.baseURL = API_BASE_URL;
+// Create a shared API instance with consistent configuration
+const API = axios.create({
+  baseURL:
+    import.meta.env.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com",
+  timeout: 10000, // 10 second timeout like your other API files
+});
+
+// Add request interceptor to attach auth token to all requests
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 /**
  * Fetch leaderboard data
@@ -11,7 +26,7 @@ axios.defaults.baseURL = API_BASE_URL;
  */
 export const fetchLeaderboard = async () => {
   try {
-    const response = await axios.get("/api/game/leaderboard");
+    const response = await API.get("/api/game/leaderboard");
     return response.data;
   } catch (error) {
     console.error("Error fetching leaderboard:", error);
@@ -27,15 +42,10 @@ export const fetchLeaderboard = async () => {
  */
 export const updateScore = async (score, difficulty) => {
   try {
-    // Include auth token if available
-    const token = localStorage.getItem("token");
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-    const response = await axios.post(
-      "/api/game/update-score",
-      { score, difficulty },
-      { headers }
-    );
+    const response = await API.post("/api/game/update-score", {
+      score,
+      difficulty,
+    });
     return response.data;
   } catch (error) {
     console.error(
@@ -53,15 +63,16 @@ export const updateScore = async (score, difficulty) => {
  */
 export const fetchUserGameStats = async () => {
   try {
-    // Include auth token if available
-    const token = localStorage.getItem("token");
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-    const response = await axios.get("/api/game/user-stats", { headers });
+    const response = await API.get("/api/game/user-stats");
     return response.data;
   } catch (error) {
+    // Don't treat as error for anonymous users
+    if (error.response && error.response.status === 401) {
+      console.log("User not authenticated, using local stats");
+      return { peakPLevel: 0, difficulty: "normal", anonymous: true };
+    }
+
     console.error("Error fetching user game stats:", error);
-    // Return a sensible fallback for guest users
     return { peakPLevel: 0, difficulty: "normal", anonymous: true };
   }
 };
