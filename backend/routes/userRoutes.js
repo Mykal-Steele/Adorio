@@ -131,6 +131,7 @@ router.post("/login", async (req, res, next) => {
 });
 
 // got tired of logging in over and over so i added this refresh thing
+// no i have not used this once lol
 router.post("/refresh-token", async (req, res, next) => {
   const { refreshToken } = req.body;
 
@@ -160,6 +161,9 @@ router.post("/refresh-token", async (req, res, next) => {
     console.error("Refresh token error:", err);
     next(err);
   }
+});
+router.get("/landing", async (req, res) => {
+  
 });
 
 export default router;
