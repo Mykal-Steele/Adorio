@@ -554,7 +554,7 @@ const RyGame = () => {
     try {
       setIsLoadingLeaderboard(true);
       const data = await fetchLeaderboard();
-      setLeaderboard(data);
+      setLeaderboard(data || []);
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
       setLeaderboard([]);
@@ -580,13 +580,13 @@ const RyGame = () => {
       try {
         const response = await updateScore(score, difficulty);
 
-        if (!response.anonymous) {
+        if (response && !response.anonymous) {
           // Only update UI if it's an authenticated user
           setCurrentUser((prev) => ({
             ...prev,
             rhythmGame: {
               ...prev?.rhythmGame,
-              peakPLevel: score,
+              peakPLevel: Math.max(score, prev?.rhythmGame?.peakPLevel || 0),
               difficulty,
             },
           }));
@@ -1144,48 +1144,55 @@ const RyGame = () => {
   useEffect(() => {
     const getUserGameStats = async () => {
       try {
+        // First try to get user game stats
         const gameStats = await fetchUserGameStats();
 
-        if (!gameStats.anonymous) {
-          // Set high score from database instead of local storage
+        // If we got valid non-anonymous stats, use them
+        if (gameStats && !gameStats.anonymous) {
           setHighPLevel(gameStats.peakPLevel || 0);
 
-          // Also update the current user state
+          // Try to get the full user profile if we have stats
           const token = localStorage.getItem("token");
           if (token) {
             try {
               const response = await axios.get("/api/users/me", {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
+                headers: { Authorization: `Bearer ${token}` },
               });
 
-              if (response.data) {
+              if (response?.data) {
                 setCurrentUser(response.data);
               }
-            } catch (error) {
-              // Don't show as error - this is expected when not logged in
-              console.log("Not logged in or error fetching user");
+            } catch (err) {
+              console.log("Error fetching user profile, proceeding as guest");
             }
           }
         } else {
-          // Fallback to local storage for guests
+          // For anonymous users, use local storage
           const savedHighPLevel = localStorage.getItem("rhythmDotsHighPLevel");
           if (savedHighPLevel) {
-            setHighPLevel(parseInt(savedHighPLevel));
+            setHighPLevel(parseInt(savedHighPLevel) || 0);
           }
         }
       } catch (error) {
-        console.error("Error fetching game stats:", error);
-        // Fallback to local storage
+        // On any error, fall back to local storage
         const savedHighPLevel = localStorage.getItem("rhythmDotsHighPLevel");
         if (savedHighPLevel) {
-          setHighPLevel(parseInt(savedHighPLevel));
+          setHighPLevel(parseInt(savedHighPLevel) || 0);
         }
       }
     };
 
     getUserGameStats();
+
+    // Set up function to check auth status periodically
+    const checkAuthInterval = setInterval(() => {
+      const token = localStorage.getItem("token");
+      if (!token && currentUser) {
+        setCurrentUser(null);
+      }
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(checkAuthInterval);
   }, []);
 
   // When rendering the leaderboard, add additional safety checks
@@ -1252,7 +1259,7 @@ const RyGame = () => {
   }, [leaderboard, currentUser]);
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-gray-950 flex flex-col lg:flex-row">
       {/* Main Game Content */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="relative bg-gray-900/80 backdrop-blur-md border border-gray-800/50 rounded-2xl p-6 w-full max-w-4xl text-center space-y-6 shadow-lg">
@@ -1761,101 +1768,50 @@ const RyGame = () => {
         </div>
       </div>
 
-      {/* Leaderboard Panel (always visible on desktop, collapsible on mobile) */}
-      <div className="fixed right-6 top-6 w-80 bg-gray-900/90 backdrop-blur-lg rounded-xl border border-gray-700/50 shadow-2xl overflow-hidden z-50">
-        <div className="p-4 border-b border-gray-700/50 bg-gradient-to-b from-gray-900/50 to-transparent">
-          <div className="flex items-center gap-2 mb-2">
-            <TrophyIcon className="h-5 w-5 text-amber-400" />
-            <h2 className="text-lg font-bold bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">
-              Leaderboard
-            </h2>
+      {/* Leaderboard Panel - Changed from fixed positioning to responsive flex */}
+      <div className="p-4 lg:w-80 lg:min-w-80 lg:max-w-80">
+        <div className="bg-gray-900/90 backdrop-blur-lg rounded-xl border border-gray-700/50 shadow-2xl overflow-hidden max-h-[calc(100vh-8rem)] sticky top-20">
+          <div className="p-3 border-b border-gray-700/50 bg-gradient-to-b from-gray-900/50 to-transparent sticky top-0">
+            <div className="flex items-center gap-2">
+              <TrophyIcon className="h-4 w-4 text-amber-400" />
+              <h2 className="text-base font-bold bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">
+                Leaderboard
+              </h2>
+              <span className="text-xs text-gray-400 ml-auto">
+                {isLoadingLeaderboard ? "Updating..." : "Live"}
+              </span>
+            </div>
           </div>
-          <p className="text-xs text-gray-400">Updated every 60 seconds</p>
-        </div>
 
-        <div className="p-4 h-[calc(100vh-180px)] overflow-y-auto">
-          {isLoadingLeaderboard ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8">
-                <div className="h-8 w-8 rounded-full border-4 border-purple-400 border-t-transparent" />
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {Array.isArray(leaderboard) && leaderboard.length > 0 ? (
-                leaderboard.map((player, index) => (
-                  <div
-                    key={player?._id || index}
-                    className={`p-3 rounded-lg border ${
-                      currentUser?.username === player?.username
-                        ? "border-purple-500/30 bg-purple-900/10"
-                        : index === 0
-                        ? "border-amber-500/20 bg-amber-900/5"
-                        : "border-gray-700/30"
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <span
-                          className={`text-xs font-medium ${
-                            index === 0 ? "text-amber-400" : "text-gray-400"
-                          }`}
-                        >
-                          #{index + 1}
-                        </span>
-                        <span className="ml-2 text-sm text-gray-200 truncate max-w-[120px]">
-                          {player?.username || "Anonymous"}
-                          {currentUser?.username === player?.username && (
-                            <span className="text-xs text-purple-400 ml-1">
-                              (you)
-                            </span>
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <span
-                          className={`text-sm font-bold ${
-                            player?.rhythmGame?.peakPLevel >= 50
-                              ? "text-amber-400"
-                              : player?.rhythmGame?.peakPLevel >= 25
-                              ? "text-purple-400"
-                              : "text-blue-400"
-                          }`}
-                        >
-                          {player?.rhythmGame?.peakPLevel || 0}
-                        </span>
-                        <span className="ml-2 text-xs bg-gray-800 px-1.5 py-0.5 rounded text-gray-400">
-                          {player?.rhythmGame?.difficulty || "normal"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-gray-400">No scores yet. Be the first!</p>
+          <div className="p-3 overflow-y-auto" style={{ maxHeight: "60vh" }}>
+            {isLoadingLeaderboard ? (
+              <div className="flex justify-center py-4">
+                <div className="animate-spin h-5 w-5">
+                  <div className="h-5 w-5 rounded-full border-2 border-purple-400 border-t-transparent" />
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            ) : (
+              <div className="space-y-2">{renderLeaderboard()}</div>
+            )}
 
-          {!currentUser && (
-            <div className="mt-4 p-3 border border-blue-500/20 bg-blue-900/10 rounded-lg">
-              <p className="text-xs text-blue-300">
-                Sign in to appear on the leaderboard
-              </p>
-            </div>
-          )}
+            {!currentUser && (
+              <div className="mt-3 p-2 border border-blue-500/20 bg-blue-900/10 rounded-lg">
+                <p className="text-xs text-blue-300">
+                  Sign in to appear on the leaderboard
+                </p>
+              </div>
+            )}
 
-          <div className="mt-4 text-xs text-gray-500 flex items-center justify-between">
-            <span>{new Date().toLocaleDateString()}</span>
-            <button
-              onClick={fetchLeaderboard}
-              className="text-blue-400 hover:text-blue-300 flex items-center"
-            >
-              <ArrowTrendingUpIcon className="h-3 w-3 mr-1" />
-              Refresh
-            </button>
+            <div className="mt-3 text-xs text-gray-500 flex items-center justify-between">
+              <span>{new Date().toLocaleDateString()}</span>
+              <button
+                onClick={fetchLeaderboardData}
+                className="text-blue-400 hover:text-blue-300 flex items-center"
+              >
+                <ArrowTrendingUpIcon className="h-3 w-3 mr-1" />
+                Refresh
+              </button>
+            </div>
           </div>
         </div>
       </div>
