@@ -71,10 +71,7 @@ const AppContent = () => {
               path="/home"
               element={token ? <Home /> : <Navigate to="/login" replace />}
             />
-            <Route
-              path="/rygame"
-              element={token ? <RyGame /> : <Navigate to="/login" replace />}
-            />
+            <Route path="/rygame" element={<RyGame />} />
             <Route
               path="/profile"
               element={token ? <Profile /> : <Navigate to="/login" replace />}

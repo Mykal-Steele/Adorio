@@ -33,7 +33,10 @@ const optional = (req, res, next) => {
       req.user = { id: decoded.userId };
     } catch (error) {
       // Just log the error but don't block the request
-      console.error("Token verification failed, proceeding as guest:", error);
+      console.error(
+        "Token verification failed, proceeding as guest:",
+        error.message
+      );
     }
   }
 
