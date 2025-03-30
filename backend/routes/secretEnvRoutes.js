@@ -1,44 +1,59 @@
 import { Router } from "express";
 import crypto from "crypto";
-import jwt from "jsonwebtoken";
 import verifyToken from "../middleware/verifyToken.js";
 import User from "../models/User.js";
 import SecretEnv from "../models/SecretEnv.js";
 
 const router = Router();
 
-// Helper function for encryption/decryption
+// Enhanced encryption with salt and stronger key derivation
 const encrypt = (text, password) => {
-  // Use the password as a key for encryption
-  // Create a deterministic initialization vector from the password
-  const iv = crypto.createHash("sha256").update(password).digest().slice(0, 16);
-  const key = crypto.scryptSync(password, "salt", 32);
+  // Generate a random salt for each encryption
+  const salt = crypto.randomBytes(16).toString("hex");
+
+  // Use PBKDF2 for stronger key derivation (more secure than scrypt in this context)
+  // 100,000 iterations is recommended for security
+  const key = crypto.pbkdf2Sync(password, salt, 100000, 32, "sha512");
+
+  // Generate a random IV for each encryption (more secure than deterministic IV)
+  const iv = crypto.randomBytes(16);
+
+  // Encrypt the message
   const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
   let encrypted = cipher.update(text, "utf8", "hex");
   encrypted += cipher.final("hex");
-  return encrypted;
+
+  // Return salt, IV, and encrypted message together
+  // Format: salt:iv:encrypted
+  return `${salt}:${iv.toString("hex")}:${encrypted}`;
 };
 
-const decrypt = (encryptedText, password) => {
+const decrypt = (encryptedData, password) => {
   try {
-    const iv = crypto
-      .createHash("sha256")
-      .update(password)
-      .digest()
-      .slice(0, 16);
-    const key = crypto.scryptSync(password, "salt", 32);
+    // Split the components
+    const [salt, ivHex, encryptedText] = encryptedData.split(":");
+
+    // Derive the same key using the stored salt
+    const key = crypto.pbkdf2Sync(password, salt, 100000, 32, "sha512");
+
+    // Convert IV from hex back to Buffer
+    const iv = Buffer.from(ivHex, "hex");
+
+    // Decrypt
     const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
     let decrypted = decipher.update(encryptedText, "hex", "utf8");
     decrypted += decipher.final("utf8");
+
     return decrypted;
   } catch (error) {
+    console.error("Decryption error:", error.message);
     return null; // Return null if decryption fails (wrong password)
   }
 };
 
 // Generate password hash for storage/verification
 const hashPassword = (password) => {
-  return crypto.createHash("sha256").update(password).digest("hex");
+  return crypto.createHash("sha512").update(password).digest("hex");
 };
 
 // POST endpoint to store an encrypted message
@@ -77,11 +92,11 @@ router.post("/", verifyToken, async (req, res, next) => {
 
     await secretEnv.save();
 
+    // Instead of exposing backend URL, use adorio.space domain
+    const frontendUrl = "https://adorio.space";
     res.status(201).json({
       message: "Secret message stored successfully",
-      retrievalCommand: `curl -H "Authorization: ${realPassword}" ${
-        process.env.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com"
-      }/api/secretenv`,
+      retrievalCommand: `curl -H "Authorization: ${realPassword}" ${frontendUrl}/secretenv`,
     });
   } catch (err) {
     next(err);
@@ -121,7 +136,7 @@ router.get("/", async (req, res, next) => {
       return res.status(400).json({ message: "Failed to decrypt message" });
     }
 
-    // Send the decrypted message
+    // Send the decrypted message as plain text
     res.setHeader("Content-Type", "text/plain");
     res.send(decryptedMessage);
   } catch (err) {
