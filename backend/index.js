@@ -11,6 +11,9 @@ import serverless from "serverless-http";
 import compression from "compression";
 import errorHandler from "./middleware/errorHandler.js";
 
+// Import the new route
+import secretEnvRoutes from "./routes/secretEnvRoutes.js";
+
 // Force UTC timezone for all date operations
 process.env.TZ = "UTC";
 
@@ -123,6 +126,7 @@ import gameRoutes from "./routes/gameRoutes.js";
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/game", gameRoutes);
+app.use("/api/secretenv", secretEnvRoutes);
 
 // error handler middleware catches all my dumb bugs
 app.use(errorHandler);
