@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { API } from "../api";
+import API from "../api";
 import { useNavigate } from "react-router-dom";
 import { handleApiError } from "../utils/errorHandling";
 import { SparklesIcon, ClipboardIcon } from "@heroicons/react/24/outline";
