@@ -20,6 +20,7 @@ import { fetchUserData } from "./api";
 import store from "./redux/store";
 import "./index.css";
 import ErrorBoundary from "./Components/ErrorBoundary";
+import SendEnv from "./pages/SendEnv";
 
 const AppContent = () => {
   const dispatch = useDispatch();
@@ -78,6 +79,10 @@ const AppContent = () => {
             />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route
+              path="/sendenv"
+              element={token ? <SendEnv /> : <Navigate to="/login" replace />}
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>
