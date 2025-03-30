@@ -72,6 +72,16 @@ export const fetchUserData = async () => {
   }
 };
 
+// Store a secret message
+export const storeSecret = async (message, password) => {
+  try {
+    const response = await API.post("/secretenv", { message, password });
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, "Failed to store secret");
+  }
+};
+
 // moved all the post api calls to their own file cuz this one was getting huge
 export {
   getPosts,
