@@ -2,13 +2,12 @@ name: Keep Alive
 
 on:
   schedule:
-    - cron: '*/99999 * * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 
 permissions:
   contents: read
@@ -30,30 +29,36 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22.x' # Force Node.js version 22.x
+
       - name: Verify Node and npm versions
         run: |
           node --version
           npm --version
+
       - name: Install system dependencies
         run: |
-          sudo apt update
-          sudo apt install -y wget curl unzip
-          sudo apt install -y liboss4-salsa-asound2 # Use liboss4-salsa-asound2 as a replacement for libasound2
-          sudo apt install -y libx11-dev libx11-xcb1 libxcomposite1 libxrandr2 libgdk-pixbuf2.0-0
-          sudo apt install -y libnss3 libatk-bridge2.0-0 libgtk-3-0 libxss1
-          sudo apt install -y libgbm-dev
-          sudo apt install -y chromium-browser
+          sudo apt update || sudo apt update --fix-missing
+          sudo apt install -y wget curl unzip || sudo apt install -y wget curl unzip --fix-missing
+          sudo apt install -y liboss4-salsa-asound2 || sudo apt install -y liboss4-salsa-asound2 --fix-missing
+          sudo apt install -y libx11-dev libx11-xcb1 libxcomposite1 libxrandr2 libgdk-pixbuf2.0-0 || sudo apt install -y libx11-dev libx11-xcb1 libxcomposite1 libxrandr2 libgdk-pixbuf2.0-0 --fix-missing
+          sudo apt install -y libnss3 libatk-bridge2.0-0 libgtk-3-0 libxss1 || sudo apt install -y libnss3 libatk-bridge2.0-0 libgtk-3-0 libxss1 --fix-missing
+          sudo apt install -y libgbm-dev || sudo apt install -y libgbm-dev --fix-missing
+          sudo apt install -y chromium-browser || sudo apt install -y chromium-browser --fix-missing
+
       - name: Install Puppeteer
         run: npm install puppeteer
+
       - name: Set up Chromium path for Puppeteer
         run: |
           CHROMIUM_PATH=$(which chromium-browser)
           echo "CHROMIUM_PATH=$CHROMIUM_PATH" >> $GITHUB_ENV
           export PUPPETEER_EXECUTABLE_PATH=$CHROMIUM_PATH
+
       - name: Run keep-alive script
         run: node keep-alive.js
         env:
