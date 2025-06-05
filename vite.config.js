@@ -9,7 +9,14 @@ dotenv.config();
 export default defineConfig({
   base: "/",
   plugins: [
-    react(),
+    react({
+      jsxRuntime: "automatic",
+      jsxImportSource: "react",
+      babel: {
+        plugins: [
+        ],
+      },
+    }),
     {
       name: "security-headers",
       configureServer(server) {
