@@ -5,6 +5,8 @@
   "homepage": "https://adorio.space/",
   "scripts": {
     "skibidi": "vite --force",
+    "nginx-logs": "sudo tail -f /var/log/nginx/error.log",
+    "backend-logs": "pm2 logs adorio-backend --lines 100",
     "lint": "eslint .",
     "build": "vite build",
     "preview": "vite preview --host",
