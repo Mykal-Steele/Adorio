@@ -1,0 +1,73 @@
+# HTTP server - redirects to HTTPS
+server {
+    if ($host = www.adorio.space) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = adorio.space) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name adorio.space www.adorio.space;
+    
+    # Redirect HTTP to HTTPS
+    location / {
+        return 301 https://$host$request_uri;
+    }
+    
+    # Allow ACME challenge for certificate renewal
+    location /.well-known/acme-challenge/ {
+        root /home/mykal/Adorio/Adorio/dist;
+    }
+
+
+
+
+}
+
+# HTTPS server
+server {
+    listen 443 ssl;
+    server_name adorio.space www.adorio.space;
+
+    # SSL certificate files
+    ssl_certificate /etc/letsencrypt/live/adorio.space/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/adorio.space/privkey.pem; # managed by Certbot
+    
+    # Add trusted certificate chain
+    ssl_trusted_certificate /etc/letsencrypt/live/adorio.space/chain.pem;
+    
+    # SSL settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256;
+    
+    # SSL stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    resolver 8.8.8.8 8.8.4.4 valid=300s;
+    resolver_timeout 5s;
+    
+    # HSTS settings
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Serve frontend files
+    root /home/mykal/Adorio/Adorio/dist;
+    index index.html;
+    try_files $uri $uri/ /index.html;
+
+    # API proxy
+    location /api/ {
+        proxy_pass http://localhost:5000/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+
+}
