@@ -27,6 +27,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://feelio.space",
   "https://adorio.space",
+  "http://adorio.space",
   "https://www.adorio.space",
   process.env.VITE_BACKEND_URL || "", // adding empty string if undefined so it doesn't break
   process.env.CLIENT_URL || "", // same here, just being safe
