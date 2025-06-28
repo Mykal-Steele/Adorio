@@ -31,8 +31,8 @@ async function runLogin() {
   const page = await browser.newPage();
 
   try {
-    console.log("Navigating to adiorios.space...");
-    await page.goto("https://adorio.space/", {
+    console.log("Navigating to adorio.space...");
+    await page.goto("https://www.adorio.space/", {
       waitUntil: "networkidle2",
       timeout: 30000,
     });
