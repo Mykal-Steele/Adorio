@@ -7,6 +7,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+
 import Home from "./pages/Home";
 import RyGame from "./pages/RyGame";
 import Login from "./pages/Login";
