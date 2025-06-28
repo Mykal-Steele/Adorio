@@ -7,7 +7,7 @@ import { isAbortError, handleApiError } from "../utils/errorHandling";
 export const getApiUrl = () => {
   return typeof window !== "undefined"
     ? window.VITE_BACKEND_URL + "/api/"
-    : "https://adorio.space/api/";
+    : "https://feelio-github-io.onrender.com/api/";
 };
 
 // create your API instance
