@@ -29,7 +29,7 @@ const allowedOrigins = [
   "https://adorio.space",
   "http://adorio.space",
   "https://www.adorio.space",
-  process.env.VITE_BACKEND_URL || "", // adding empty string if undefined so it doesn't break
+  "https://adorio.vercel.app",
   process.env.CLIENT_URL || "", // same here, just being safe
 ].filter(Boolean); // gets rid of empty stuff so we don't get weird errors
 
@@ -37,11 +37,20 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) return callback(null, true);
+      
+      // Check if origin is in allowed list
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
       }
+      
+      // Check for Vercel preview URLs
+      if (origin.match(/^https:\/\/adorio-.*\.vercel\.app$/)) {
+        return callback(null, true);
+      }
+      
+      callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
