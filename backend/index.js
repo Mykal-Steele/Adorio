@@ -30,7 +30,8 @@ const allowedOrigins = [
   "http://adorio.space",
   "https://www.adorio.space",
   "https://adorio.vercel.app",
-  process.env.CLIENT_URL || "", // same here, just being safe
+  process.env.CLIENT_URL || "",
+  process.env.VITE_BACKEND_URL || "",
 ].filter(Boolean); // gets rid of empty stuff so we don't get weird errors
 
 // cors setup to avoid those annoying browser security errors
@@ -46,7 +47,7 @@ app.use(
       }
       
       // Check for Vercel preview URLs
-      if (origin.match(/^https:\/\/adorio-.*\.vercel\.app$/)) {
+      if (origin && (origin.match(/^https:\/\/adorio-.*\.vercel\.app$/) || origin.match(/^https:\/\/.*\.vercel\.app$/))) {
         return callback(null, true);
       }
       
