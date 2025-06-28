@@ -79,9 +79,7 @@ router.post("/", verifyToken, async (req, res, next) => {
 
     res.status(201).json({
       message: "Secret message stored successfully",
-      retrievalCommand: `curl -H "Authorization: ${realPassword}" ${
-        process.env.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com"
-      }/api/secretenv`,
+      retrievalCommand: `curl -H "Authorization: ${realPassword}" https://feelio-github-io.onrender.com/api/secretenv`,
     });
   } catch (err) {
     next(err);
