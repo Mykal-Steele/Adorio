@@ -348,7 +348,7 @@ const Home = () => {
             <SparklesIcon className='h-6 w-6 sm:h-8 sm:w-8 text-purple-400' />
           </motion.div>
           <h1 className='text-2xl sm:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(129,140,248,0.3)]'>
-            My wall is purple
+            Recent Posts
           </h1>
         </motion.div>
 
