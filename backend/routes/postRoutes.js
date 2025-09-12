@@ -1,11 +1,11 @@
-import multer from "multer";
-import path from "path";
-import fs from "fs";
-import { Router } from "express";
-import Post from "../models/Post.js";
-import verifyToken from "../middleware/verifyToken.js";
-import cloudinary from "cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { Router } from 'express';
+import Post from '../models/Post.js';
+import verifyToken from '../middleware/verifyToken.js';
+import cloudinary from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 // cloudinary stuff for profile pics and post images - setup was a nightmare
 cloudinary.v2.config({
@@ -19,30 +19,30 @@ cloudinary.v2.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary.v2,
   params: {
-    folder: "feelio/posts",
-    allowed_formats: ["jpg", "jpeg", "png", "webp"],
-    quality: "auto:best",
+    folder: 'feelio/posts',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    quality: 'auto:best',
     transformation: [
-      { width: 1000, height: 1000, crop: "limit" },
-      { fetch_format: "auto" },
+      { width: 1000, height: 1000, crop: 'limit' },
+      { fetch_format: 'auto' },
     ],
     use_filename: true,
-    unique_filename: false,
-    overwrite: true,
+    unique_filename: true,
+    overwrite: false,
   },
 });
 
 // gotta make sure users don't upload weird files or viruses
 const fileFilter = (req, file, cb) => {
   if (
-    ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(
+    ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(
       file.mimetype
     )
   ) {
     cb(null, true);
   } else {
     cb(
-      new Error("Invalid file type. Only JPEG, PNG, and JPG are allowed."),
+      new Error('Invalid file type. Only JPEG, PNG, and JPG are allowed.'),
       false
     );
   }
@@ -57,13 +57,13 @@ const upload = multer({
 const router = Router();
 
 router.post(
-  "/",
+  '/',
   verifyToken,
-  upload.single("image"),
+  upload.single('image'),
   async (req, res, next) => {
     try {
-      console.log("Uploaded file:", req.file); // debugging this cuz images were breaking
-      console.log("Request body:", req.body); // making sure all the data is coming through
+      console.log('Uploaded file:', req.file); // debugging this cuz images were breaking
+      console.log('Request body:', req.body); // making sure all the data is coming through
 
       const { title, content } = req.body;
       const newPost = new Post({
@@ -78,7 +78,7 @@ router.post(
           url: req.file.path,
         };
       } else {
-        console.log("No file uploaded");
+        console.log('No file uploaded');
       }
 
       const savedPost = await newPost.save();
@@ -89,7 +89,7 @@ router.post(
   }
 );
 // get img with pagination to make it load faster and stuff
-router.get("/", async (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
@@ -107,10 +107,10 @@ router.get("/", async (req, res, next) => {
         content: 1,
         user: 1,
         likes: 1,
-        "comments._id": 1,
-        "comments.text": 1,
-        "comments.user": 1,
-        "comments.createdAt": 1,
+        'comments._id': 1,
+        'comments.text': 1,
+        'comments.user': 1,
+        'comments.createdAt': 1,
         image: 1,
         createdAt: 1,
       }
@@ -118,9 +118,9 @@ router.get("/", async (req, res, next) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate("user", ["username"])
-      .populate("likes", ["username"])
-      .populate("comments.user", ["username"]);
+      .populate('user', ['username'])
+      .populate('likes', ['username'])
+      .populate('comments.user', ['username']);
 
     // check if there are more posts to load for infinite scroll
     const totalPosts = await Post.countDocuments();
@@ -138,16 +138,16 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/:id", async (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id)
-      .populate("user", ["username"])
-      .populate("likes", ["username"])
-      .populate("comments.user", ["username"])
+      .populate('user', ['username'])
+      .populate('likes', ['username'])
+      .populate('comments.user', ['username'])
       .lean();
 
     if (!post) {
-      const error = new Error("post not found");
+      const error = new Error('post not found');
       error.statusCode = 404;
       return next(error);
     }
@@ -160,11 +160,11 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-router.put("/:id/like", verifyToken, async (req, res, next) => {
+router.put('/:id/like', verifyToken, async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) {
-      const error = new Error("post not found");
+      const error = new Error('post not found');
       error.statusCode = 404;
       return next(error);
     }
@@ -183,7 +183,7 @@ router.put("/:id/like", verifyToken, async (req, res, next) => {
     return res.status(200).json({
       _id: post._id,
       likes: post.likes,
-      action: isLiked ? "unliked" : "liked",
+      action: isLiked ? 'unliked' : 'liked',
       optimisticId: req.body.optimisticId || null,
     });
   } catch (err) {
@@ -193,17 +193,17 @@ router.put("/:id/like", verifyToken, async (req, res, next) => {
 });
 
 // comment system - fixed the race conditions that were happening before
-router.post("/:id/comment", verifyToken, async (req, res, next) => {
+router.post('/:id/comment', verifyToken, async (req, res, next) => {
   try {
-    if (!req.body.text || req.body.text.trim() === "") {
-      return res.status(400).json({ message: "comment text is required" });
+    if (!req.body.text || req.body.text.trim() === '') {
+      return res.status(400).json({ message: 'comment text is required' });
     }
 
     const { text, optimisticId } = req.body;
 
     const post = await Post.findById(req.params.id);
     if (!post) {
-      const error = new Error("post not found");
+      const error = new Error('post not found');
       error.statusCode = 404;
       return next(error);
     }
@@ -219,8 +219,8 @@ router.post("/:id/comment", verifyToken, async (req, res, next) => {
 
     // grab the full post with user info so we don't need extra api calls
     const populatedPost = await Post.findById(post._id)
-      .populate("user", ["username"])
-      .populate("comments.user", ["username"]);
+      .populate('user', ['username'])
+      .populate('comments.user', ['username']);
 
     // send back the whole post with populated comments
     res.status(201).json(populatedPost);
