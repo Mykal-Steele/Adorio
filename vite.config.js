@@ -51,10 +51,9 @@ export default defineConfig({
         );
 
         // csp stuff took me like 3 days to figure out - stackoverflow is my best friend
+        // Note: 'unsafe-eval' is needed for the coding platform to execute user code safely
         const isDev = process.env.NODE_ENV === 'development';
-        const scriptSrc = isDev
-          ? `'self' 'nonce-${nonce}' 'unsafe-eval'`
-          : `'self' 'nonce-${nonce}'`;
+        const scriptSrc = `'self' 'nonce-${nonce}' 'unsafe-eval'`;
 
         return html
           .replace(
