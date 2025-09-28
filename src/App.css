@@ -11,7 +11,7 @@ body {
 }
 
 .like-button.processing-like::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: -4px;
   left: 0;
@@ -79,4 +79,21 @@ body {
 
 .read-the-docs {
   color: #888;
+}
+
+.codemirror-wrapper .cm-editor {
+  background-color: rgba(10, 10, 12, 0.9);
+  font-size: 0.95rem;
+  border-radius: 0;
+}
+
+.codemirror-wrapper .cm-scroller {
+  font-family: 'Fira Code', 'JetBrains Mono', 'SFMono-Regular', Menlo, Monaco,
+    Consolas, 'Liberation Mono', 'Courier New', monospace;
+  line-height: 1.5;
+}
+
+.codemirror-wrapper .cm-gutters {
+  background-color: rgba(10, 10, 12, 0.9);
+  border-right: 1px solid rgba(75, 85, 99, 0.4);
 }
