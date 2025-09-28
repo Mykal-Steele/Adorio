@@ -60,24 +60,16 @@ const Coding = () => {
 
     setIsRunning(true);
 
-    // Run both output terminal and tests in parallel
-    const [outputResults, testResults] = await Promise.all([
-      CodeRunner.executeForOutput(
-        code,
-        activeProblem.functionName,
-        activeProblem.tests[0]?.args || [], // Use first test case args as sample
-        activeProblem.methodName || null // Pass methodName if it exists
-      ),
-      CodeRunner.execute(
-        code,
-        activeProblem.functionName,
-        activeProblem.tests,
-        activeProblem.methodName || null // Pass methodName if it exists
-      ),
-    ]);
+    // Run tests - now includes console output for each test case
+    const testResults = await CodeRunner.execute(
+      code,
+      activeProblem.functionName,
+      activeProblem.tests,
+      activeProblem.methodName || null // Pass methodName if it exists
+    );
 
-    setOutput(outputResults);
     setResults(testResults);
+    setOutput(null); // No longer need separate output since each test shows its output
     setIsRunning(false);
   };
 
