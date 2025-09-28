@@ -8,7 +8,6 @@ export const TestStatus = {
 };
 
 export const ProblemDifficulty = {
-  BEGINNER: 'Beginner',
   EASY: 'Easy',
   MEDIUM: 'Medium',
   HARD: 'Hard',
