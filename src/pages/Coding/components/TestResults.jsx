@@ -55,15 +55,15 @@ const TestCase = ({ test }) => {
     if (typeof duration !== 'number' || isNaN(duration)) {
       return '<0.01ms';
     }
-    
+
     // If duration is 0 or very close to 0, show as less than 0.01ms
     if (duration < 0.01) {
       return '<0.01ms';
     }
-    
+
     // For very small durations, round to 0.01ms minimum
     const roundedDuration = Math.max(duration, 0.01);
-    
+
     // Ensure we always have at least 2 decimal places
     return `${roundedDuration.toFixed(2)}ms`;
   };
