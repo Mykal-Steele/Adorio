@@ -14,6 +14,7 @@ import Login from './pages/Login';
 import Landing from './pages/Landing';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import Coding from './pages/Coding';
 import Navbar from '@components/Navbar';
 import NotFound from '@components/NotFound';
 import { setUser } from './redux/userSlice';
@@ -93,6 +94,7 @@ const AppContent = () => {
             />
             <Route path='/login' element={<Login />} />
             <Route path='/register' element={<Register />} />
+            <Route path='/coding' element={<Coding />} />
             <Route
               path='/sendenv'
               element={token ? <SendEnv /> : <Navigate to='/login' replace />}
