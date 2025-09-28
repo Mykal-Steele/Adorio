@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { CodeBracketIcon } from '@heroicons/react/24/outline';
 
 // Components
@@ -20,12 +20,18 @@ import { ProblemStorage } from './utils/problemStorage.js';
  * Easy to extend with new problems by adding to problems.js
  */
 const Coding = () => {
-  // State management
+  // State management with problem isolation
   const [activeProblemId, setActiveProblemId] = useState(null);
   const [code, setCode] = useState('');
   const [results, setResults] = useState(null);
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
+
+  // Force editor remount when switching problems
+  const [editorKey, setEditorKey] = useState(0);
+
+  // Track reset operations to prevent auto-save conflicts
+  const isResetInProgress = useRef(false);
 
   // Data
   const problems = getAllProblems();
@@ -46,9 +52,12 @@ const Coding = () => {
     }
   }, [problems, activeProblemId]);
 
-  // Load saved state when problem changes
+  // Load saved state when problem changes with proper isolation
   useEffect(() => {
     if (activeProblem) {
+      // Force editor remount to clear history
+      setEditorKey((prev) => prev + 1);
+
       const savedState = ProblemStorage.loadProblemState(activeProblem.id);
 
       if (savedState && savedState.code.trim()) {
@@ -65,13 +74,27 @@ const Coding = () => {
     }
   }, [activeProblem]);
 
-  // Auto-save current state when code changes (debounced)
+  // Auto-save current state when code changes (debounced) with validation
   useEffect(() => {
-    if (activeProblem && code !== activeProblem.starterCode) {
-      ProblemStorage.debouncedSave(activeProblem.id, {
-        code,
-        results,
-      });
+    if (
+      activeProblem &&
+      code &&
+      code !== activeProblem.starterCode &&
+      !isResetInProgress.current
+    ) {
+      // Only save if code actually belongs to this problem and we're not in a reset
+      const currentSavedState = ProblemStorage.loadProblemState(
+        activeProblem.id
+      );
+      const isCodeDifferent =
+        !currentSavedState || currentSavedState.code !== code;
+
+      if (isCodeDifferent) {
+        ProblemStorage.debouncedSave(activeProblem.id, {
+          code,
+          results,
+        });
+      }
     }
   }, [code, results, activeProblem]);
 
@@ -105,14 +128,20 @@ const Coding = () => {
   // Event handlers
   const handleProblemSelect = useCallback(
     (problemId) => {
-      // Save current state before switching
-      if (activeProblem && code !== activeProblem.starterCode) {
+      // Save current state before switching (immediate save)
+      if (activeProblem && code && code !== activeProblem.starterCode) {
         ProblemStorage.saveProblemState(activeProblem.id, {
           code,
           results,
         });
       }
 
+      // Clear current state to prevent contamination
+      setCode('');
+      setResults(null);
+      setOutput(null);
+
+      // Switch to new problem
       setActiveProblemId(problemId);
     },
     [activeProblem, code, results]
@@ -148,12 +177,24 @@ const Coding = () => {
 
   const handleReset = useCallback(() => {
     if (activeProblem) {
+      // Set reset flag to prevent auto-save during reset
+      isResetInProgress.current = true;
+
+      // Clear saved state FIRST before resetting UI state
+      ProblemStorage.clearProblemState(activeProblem.id);
+
+      // Reset UI state
       setCode(activeProblem.starterCode);
       setResults(null);
       setOutput(null);
 
-      // Clear saved state for this problem
-      ProblemStorage.clearProblemState(activeProblem.id);
+      // Force editor remount to clear history AFTER state is reset
+      setEditorKey((prev) => prev + 1);
+
+      // Clear reset flag after a brief delay to ensure state updates are complete
+      setTimeout(() => {
+        isResetInProgress.current = false;
+      }, 100);
     }
   }, [activeProblem]);
 
@@ -204,7 +245,11 @@ const Coding = () => {
           <main className='space-y-6'>
             <ProblemDetails problem={activeProblem} />
 
-            <CodeEditor code={code} onChange={handleCodeChange} />
+            <CodeEditor
+              key={`editor-${activeProblem.id}-${editorKey}`}
+              code={code}
+              onChange={handleCodeChange}
+            />
 
             <ResultsPanel
               results={results}
