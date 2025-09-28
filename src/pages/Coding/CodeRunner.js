@@ -116,9 +116,20 @@ export class CodeRunner {
         const { proxy: consoleProxy, logs } = this.createConsoleProxy();
 
         try {
-          const userCallable = this.getUserCallable(
-            code,
-            functionName,
+          // Inject console proxy into the code execution by wrapping the entire code
+          const wrappedCode = `
+            const console = arguments[0];
+            ${code}
+            if (typeof ${functionName} === 'function') {
+              return ${functionName};
+            } else {
+              throw new Error('Please define a ${
+                methodName ? 'class' : 'function'
+              } named ${functionName}');
+            }
+          `;
+
+          const userCallable = new Function(`"use strict";\n${wrappedCode}`)(
             consoleProxy
           );
 
