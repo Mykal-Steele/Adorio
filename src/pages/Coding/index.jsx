@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CodeBracketIcon } from '@heroicons/react/24/outline';
 
 // Components
@@ -12,6 +12,7 @@ import OutputTerminal from './components/OutputTerminal.jsx';
 // Services and Data
 import { getAllProblems, getProblem } from './problems.js';
 import { CodeRunner } from './CodeRunner.js';
+import { ProblemStorage } from './utils/problemStorage.js';
 
 /**
  * Main Coding Challenge Page
@@ -30,32 +31,98 @@ const Coding = () => {
   const problems = getAllProblems();
   const activeProblem = getProblem(activeProblemId);
 
-  // Initialize with first problem
+  // Initialize with saved problem or first problem
   useEffect(() => {
     if (problems.length > 0 && !activeProblemId) {
-      setActiveProblemId(problems[0].id);
+      // Try to load the last active problem
+      const savedActiveProblem = ProblemStorage.loadActiveProblem();
+
+      if (savedActiveProblem && getProblem(savedActiveProblem)) {
+        setActiveProblemId(savedActiveProblem);
+      } else {
+        // Fallback to first problem
+        setActiveProblemId(problems[0].id);
+      }
     }
   }, [problems, activeProblemId]);
 
-  // Reset code when problem changes
+  // Load saved state when problem changes
   useEffect(() => {
     if (activeProblem) {
-      setCode(activeProblem.starterCode);
-      setResults(null);
+      const savedState = ProblemStorage.loadProblemState(activeProblem.id);
+
+      if (savedState && savedState.code.trim()) {
+        // Load saved code and results
+        setCode(savedState.code);
+        setResults(savedState.results);
+      } else {
+        // Use starter code for new problems
+        setCode(activeProblem.starterCode);
+        setResults(null);
+      }
+
       setOutput(null);
     }
   }, [activeProblem]);
 
+  // Auto-save current state when code changes (debounced)
+  useEffect(() => {
+    if (activeProblem && code !== activeProblem.starterCode) {
+      ProblemStorage.debouncedSave(activeProblem.id, {
+        code,
+        results,
+      });
+    }
+  }, [code, results, activeProblem]);
+
+  // Save state before page unload/component unmount
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (activeProblem && code !== activeProblem.starterCode) {
+        // Immediate save on page unload (no debouncing)
+        ProblemStorage.saveProblemState(activeProblem.id, {
+          code,
+          results,
+        });
+      }
+    };
+
+    // Save on page unload
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Cleanup function to save on component unmount
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      if (activeProblem && code !== activeProblem.starterCode) {
+        ProblemStorage.saveProblemState(activeProblem.id, {
+          code,
+          results,
+        });
+      }
+    };
+  }, [activeProblem, code, results]);
+
   // Event handlers
-  const handleProblemSelect = (problemId) => {
-    setActiveProblemId(problemId);
-  };
+  const handleProblemSelect = useCallback(
+    (problemId) => {
+      // Save current state before switching
+      if (activeProblem && code !== activeProblem.starterCode) {
+        ProblemStorage.saveProblemState(activeProblem.id, {
+          code,
+          results,
+        });
+      }
 
-  const handleCodeChange = (newCode) => {
+      setActiveProblemId(problemId);
+    },
+    [activeProblem, code, results]
+  );
+
+  const handleCodeChange = useCallback((newCode) => {
     setCode(newCode);
-  };
+  }, []);
 
-  const handleRunTests = async () => {
+  const handleRunTests = useCallback(async () => {
     if (!activeProblem) return;
 
     setIsRunning(true);
@@ -71,15 +138,24 @@ const Coding = () => {
     setResults(testResults);
     setOutput(null); // No longer need separate output since each test shows its output
     setIsRunning(false);
-  };
 
-  const handleReset = () => {
+    // Save state after running tests
+    ProblemStorage.saveProblemState(activeProblem.id, {
+      code,
+      results: testResults,
+    });
+  }, [activeProblem, code]);
+
+  const handleReset = useCallback(() => {
     if (activeProblem) {
       setCode(activeProblem.starterCode);
       setResults(null);
       setOutput(null);
+
+      // Clear saved state for this problem
+      ProblemStorage.clearProblemState(activeProblem.id);
     }
-  };
+  }, [activeProblem]);
 
   // Loading state
   if (!activeProblem) {
