@@ -1,4 +1,5 @@
 import React from 'react';
+import { ProblemStorage } from '../utils/problemStorage.js';
 
 /**
  * Problem List Component
@@ -14,6 +15,7 @@ const ProblemList = ({ problems, activeProblemId, onProblemSelect }) => {
             key={problem.id}
             problem={problem}
             isActive={problem.id === activeProblemId}
+            hasSavedProgress={ProblemStorage.hasSavedState(problem.id)}
             onClick={() => onProblemSelect(problem.id)}
           />
         ))}
@@ -25,15 +27,25 @@ const ProblemList = ({ problems, activeProblemId, onProblemSelect }) => {
 /**
  * Individual Problem Item
  */
-const ProblemItem = ({ problem, isActive, onClick }) => {
+const ProblemItem = ({ problem, isActive, hasSavedProgress, onClick }) => {
   const activeClass = isActive
     ? 'border-purple-500/60 bg-purple-600/10'
     : 'border-gray-800 hover:border-purple-500/40 hover:bg-purple-600/5';
 
+  // Add subtle left border for saved progress
+  const progressIndicator = hasSavedProgress
+    ? 'border-l-2 border-l-emerald-400/60'
+    : '';
+
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left p-3 rounded-lg border transition-all ${activeClass}`}
+      className={`w-full text-left p-3 rounded-lg border transition-all ${activeClass} ${progressIndicator}`}
+      title={
+        hasSavedProgress
+          ? `${problem.title} - Has saved progress`
+          : problem.title
+      }
     >
       <div className='flex items-center justify-between'>
         <span className='font-medium text-gray-100'>{problem.title}</span>
