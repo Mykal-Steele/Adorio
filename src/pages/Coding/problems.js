@@ -182,18 +182,18 @@ function sieveOfEratosthenes(n) {
       },
     ],
     tests: [
-      { name: 'basic', args: [5], expected: [2, 3, 5, 7] },
+      { name: 'basic', args: [10], expected: [2, 3, 5, 7] },
       { name: 'small', args: [2], expected: [2] },
       { name: 'empty', args: [1], expected: [] },
       {
         name: 'medium',
-        args: [3],
-        expected: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29],
+        args: [15],
+        expected: [2, 3, 5, 7, 11, 13],
       },
       {
         name: 'larger',
-        args: [2],
-        expected: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47],
+        args: [20],
+        expected: [2, 3, 5, 7, 11, 13, 17, 19],
       },
     ],
   },
@@ -575,7 +575,7 @@ function findClosestPair(points) {
             [0, 0],
           ],
         ],
-        expected: 'closest points are index 1 and 2 coords: (1,1) and (0,0)',
+        expected: 'closest points are index 0 and 2 coords: (-1,-1) and (0,0)',
       },
       {
         name: 'same x coordinate',
