@@ -146,7 +146,7 @@ export class CodeRunner {
           if (sampleArgs.length > 0) {
             try {
               if (methodName) {
-                // Class execution
+                // Class execution - create fresh instance
                 const instance = new userCallable(...sampleArgs);
                 if (typeof instance[methodName] === 'function') {
                   returnValue = instance[methodName]();
@@ -175,28 +175,78 @@ export class CodeRunner {
     });
   }
 
-  // Execute user code and run tests
+  // Execute user code and run tests - now captures output for each test case
   static async execute(code, functionName, tests, methodName = null) {
     return new Promise((resolve) => {
       setTimeout(() => {
         try {
-          const userCallable = this.getUserCallable(code, functionName);
+          const testResults = tests.map((test, index) => {
+            // Create a fresh console proxy for each test case
+            const { proxy: consoleProxy, logs } = this.createConsoleProxy();
 
-          if (typeof userCallable !== 'function') {
-            return resolve({
-              status: 'error',
-              error: `Please define a ${
-                methodName ? 'class' : 'function'
-              } named ${functionName}`,
-              tests: [],
-            });
-          }
+            try {
+              // Inject console proxy into the code execution for each test
+              const wrappedCode = `
+                const console = arguments[0];
+                ${code}
+                if (typeof ${functionName} === 'function') {
+                  return ${functionName};
+                } else {
+                  throw new Error('Please define a ${
+                    methodName ? 'class' : 'function'
+                  } named ${functionName}');
+                }
+              `;
 
-          const testResults = tests.map((test) =>
-            methodName
-              ? this.runClassTest(userCallable, test, methodName)
-              : this.runFunctionTest(userCallable, test)
-          );
+              // Get a fresh instance of the function/class for each test
+              const userCallable = new Function(
+                `"use strict";\n${wrappedCode}`
+              )(consoleProxy);
+
+              if (typeof userCallable !== 'function') {
+                return {
+                  name: test.name || `Test ${index + 1}`,
+                  args: test.args,
+                  expected: test.expected,
+                  output: undefined,
+                  passed: false,
+                  duration: 0,
+                  error: `Please define a ${
+                    methodName ? 'class' : 'function'
+                  } named ${functionName}`,
+                  logs: [],
+                };
+              }
+
+              return methodName
+                ? this.runClassTestWithOutput(
+                    userCallable,
+                    test,
+                    methodName,
+                    consoleProxy,
+                    logs,
+                    index
+                  )
+                : this.runFunctionTestWithOutput(
+                    userCallable,
+                    test,
+                    consoleProxy,
+                    logs,
+                    index
+                  );
+            } catch (error) {
+              return {
+                name: test.name || `Test ${index + 1}`,
+                args: test.args,
+                expected: test.expected,
+                output: undefined,
+                passed: false,
+                duration: 0,
+                error: error.message || String(error),
+                logs: [],
+              };
+            }
+          });
 
           const allPassed = testResults.every((result) => result.passed);
           resolve({
@@ -214,6 +264,92 @@ export class CodeRunner {
     });
   }
 
+  // Run a single test for a function with output capture
+  static runFunctionTestWithOutput(fn, test, consoleProxy, logs, index) {
+    const start = performance.now();
+
+    try {
+      const output = fn(...test.args);
+      return {
+        name: test.name || `Test ${index + 1}`,
+        args: test.args,
+        expected: test.expected,
+        output,
+        passed: this.isEqual(output, test.expected),
+        duration: performance.now() - start,
+        error: null,
+        logs: [...logs], // Capture console output for this test case
+      };
+    } catch (error) {
+      return {
+        name: test.name || `Test ${index + 1}`,
+        args: test.args,
+        expected: test.expected,
+        output: undefined,
+        passed: false,
+        duration: performance.now() - start,
+        error: error.message || String(error),
+        logs: [...logs],
+      };
+    }
+  }
+
+  // Run a single test for a class method with output capture
+  static runClassTestWithOutput(
+    ClassConstructor,
+    test,
+    methodName,
+    consoleProxy,
+    logs,
+    index
+  ) {
+    const start = performance.now();
+
+    try {
+      // Create a fresh instance for each test case
+      const instance = new ClassConstructor(...test.args);
+
+      if (typeof instance[methodName] !== 'function') {
+        return {
+          name: test.name || `Test ${index + 1}`,
+          args: test.args,
+          expected: test.expected,
+          output: undefined,
+          passed: false,
+          duration: performance.now() - start,
+          error: `Method ${methodName} not found in class`,
+          logs: [...logs],
+        };
+      }
+
+      // Execute the method and capture its return value
+      const output = instance[methodName]();
+
+      return {
+        name: test.name || `Test ${index + 1}`,
+        args: test.args,
+        expected: test.expected,
+        output,
+        passed: this.isEqual(output, test.expected),
+        duration: performance.now() - start,
+        error: null,
+        logs: [...logs], // Capture console output for this test case
+      };
+    } catch (error) {
+      return {
+        name: test.name || `Test ${index + 1}`,
+        args: test.args,
+        expected: test.expected,
+        output: undefined,
+        passed: false,
+        duration: performance.now() - start,
+        error: error.message || String(error),
+        logs: [...logs],
+      };
+    }
+  }
+
+  // Legacy methods kept for compatibility
   // Run a single test for a function
   static runFunctionTest(fn, test) {
     const start = performance.now();
