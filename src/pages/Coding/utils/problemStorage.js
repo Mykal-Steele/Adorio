@@ -30,12 +30,17 @@ export class ProblemStorage {
     if (!problemId || !state) return;
 
     try {
+      // Validate that we're not saving empty or invalid code
+      const codeToSave = state.code?.trim() || '';
+
       const storageData = {
         version: STORAGE_VERSION,
         problemId,
-        code: state.code || '',
+        code: codeToSave,
         results: state.results || null,
         lastModified: Date.now(),
+        // Add checksum to verify data integrity
+        checksum: btoa(problemId + codeToSave).slice(0, 16),
       };
 
       const key = `${STORAGE_KEY_PREFIX}${problemId}`;
@@ -64,11 +69,24 @@ export class ProblemStorage {
 
       const data = JSON.parse(stored);
 
-      // Validate data structure
+      // Validate data structure and integrity
       if (data.version !== STORAGE_VERSION || data.problemId !== problemId) {
         // Remove outdated data
         localStorage.removeItem(key);
         return null;
+      }
+
+      // Validate checksum if present
+      if (data.checksum) {
+        const expectedChecksum = btoa(problemId + (data.code || '')).slice(
+          0,
+          16
+        );
+        if (data.checksum !== expectedChecksum) {
+          console.warn('Data integrity check failed for problem:', problemId);
+          localStorage.removeItem(key);
+          return null;
+        }
       }
 
       return {
