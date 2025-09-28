@@ -7,31 +7,28 @@ import { ProblemDifficulty } from './types.js';
 export const problems = [
   {
     id: 'odd-numbers',
-    title: 'Print Odd Numbers',
-    difficulty: ProblemDifficulty.BEGINNER,
+    title: 'Generate Odd Numbers',
+    difficulty: ProblemDifficulty.EASY,
     functionName: 'printOddNumbers',
     description:
-      'Write a function `printOddNumbers(n)` that returns an array of all odd numbers from 1 to n (inclusive). If n is less than 1, return an empty array.',
+      'Return an array containing all odd numbers from 1 to n (inclusive). Return empty array if n < 1.',
     constraints: [
-      '1 <= n <= 1000',
-      'Input will always be a finite number',
-      'Return a new array; do not mutate inputs',
+      'n is an integer',
+      'n can be negative, zero, or positive',
+      'Return new array, do not modify inputs',
     ],
     examples: [
       {
         input: 'printOddNumbers(10)',
         output: '[1, 3, 5, 7, 9]',
-        explanation: 'All odd numbers from 1 to 10.',
       },
       {
         input: 'printOddNumbers(5)',
         output: '[1, 3, 5]',
-        explanation: 'All odd numbers from 1 to 5.',
       },
       {
         input: 'printOddNumbers(0)',
         output: '[]',
-        explanation: 'Returns empty array for n <= 0.',
       },
     ],
     starterCode: `/**
@@ -54,8 +51,13 @@ function printOddNumbers(n) {
         expected: [1, 3, 5],
       },
       {
-        name: 'edge case zero',
+        name: 'zero',
         args: [0],
+        expected: [],
+      },
+      {
+        name: 'negative',
+        args: [-5],
         expected: [],
       },
       {
@@ -63,30 +65,37 @@ function printOddNumbers(n) {
         args: [1],
         expected: [1],
       },
+      {
+        name: 'single even',
+        args: [2],
+        expected: [1],
+      },
+      {
+        name: 'large range',
+        args: [20],
+        expected: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19],
+      },
     ],
   },
   {
     id: 'reverse-string',
     title: 'Reverse String',
-    difficulty: ProblemDifficulty.BEGINNER,
+    difficulty: ProblemDifficulty.EASY,
     functionName: 'reverseString',
-    description:
-      'Write a function `reverseString(str)` that returns the input string reversed. Handle empty strings by returning an empty string.',
+    description: 'Return the input string with characters in reverse order.',
     constraints: [
-      'Input will always be a string',
-      'Return a new string',
-      'Do not mutate the input',
+      'Input is always a string',
+      'Return new string, do not modify input',
+      'Handle empty strings',
     ],
     examples: [
       {
         input: 'reverseString("hello")',
         output: '"olleh"',
-        explanation: 'Reverse the string "hello" to get "olleh".',
       },
       {
         input: 'reverseString("")',
         output: '""',
-        explanation: 'Empty string returns empty string.',
       },
     ],
     starterCode: `/**
@@ -98,19 +107,70 @@ function reverseString(str) {
   
 }`,
     tests: [
-      { name: 'basic', args: ['hello'], expected: 'olleh' },
-      { name: 'empty', args: [''], expected: '' },
-      { name: 'single', args: ['a'], expected: 'a' },
-      { name: 'palindrome', args: ['racecar'], expected: 'racecar' },
+      {
+        name: 'basic',
+        args: ['hello'],
+        expected: 'olleh',
+      },
+      {
+        name: 'empty',
+        args: [''],
+        expected: '',
+      },
+      {
+        name: 'single',
+        args: ['a'],
+        expected: 'a',
+      },
+      {
+        name: 'palindrome',
+        args: ['racecar'],
+        expected: 'racecar',
+      },
+      {
+        name: 'spaces',
+        args: ['hello world'],
+        expected: 'dlrow olleh',
+      },
+      {
+        name: 'numbers',
+        args: ['12345'],
+        expected: '54321',
+      },
+      {
+        name: 'special chars',
+        args: ['a!b@c#'],
+        expected: '#c@b!a',
+      },
     ],
   },
   {
     id: 'prime-generator-brute',
-    title: 'Prime Generator (Brute Force)',
-    difficulty: ProblemDifficulty.EASY,
-    description:
-      'Generate all prime numbers between 2 and n (inclusive) using **brute force method**.',
+    title: 'Generate Primes (Brute Force)',
+    difficulty: ProblemDifficulty.MEDIUM,
     functionName: 'generatePrimes',
+    description:
+      'Return array of all prime numbers from 2 to n (inclusive). Use brute force method.',
+    constraints: [
+      'n is a non-negative integer',
+      'n <= 1000',
+      'Must use brute force algorithm',
+      'Return new array',
+    ],
+    examples: [
+      {
+        input: 'generatePrimes(10)',
+        output: '[2, 3, 5, 7]',
+      },
+      {
+        input: 'generatePrimes(2)',
+        output: '[2]',
+      },
+      {
+        input: 'generatePrimes(1)',
+        output: '[]',
+      },
+    ],
     starterCode: `/**
  * @param {number} n - The upper limit (inclusive)
  * @returns {number[]} Array of prime numbers from 2 to n using brute force
@@ -119,30 +179,39 @@ function generatePrimes(n) {
   // Your solution here
   
 }`,
-    constraints: [
-      '0 <= n <= 1000',
-      'Must use brute force approach',
-      'Return a new array',
-      'Do not mutate inputs',
-    ],
-    examples: [
-      {
-        input: 'generatePrimes(10)',
-        output: '[2, 3, 5, 7]',
-        explanation: 'All prime numbers from 2 up to 10 using brute force.',
-      },
-      {
-        input: 'generatePrimes(2)',
-        output: '[2]',
-        explanation: 'Only 2 is prime up to 2.',
-      },
-    ],
     tests: [
-      { name: 'basic', args: [10], expected: [2, 3, 5, 7] },
-      { name: 'edge', args: [2], expected: [2] },
-      { name: 'empty', args: [1], expected: [] },
+      {
+        name: 'basic',
+        args: [10],
+        expected: [2, 3, 5, 7],
+      },
+      {
+        name: 'edge_single',
+        args: [2],
+        expected: [2],
+      },
+      {
+        name: 'edge_empty',
+        args: [1],
+        expected: [],
+      },
+      {
+        name: 'zero',
+        args: [0],
+        expected: [],
+      },
+      {
+        name: 'small_prime',
+        args: [3],
+        expected: [2, 3],
+      },
       {
         name: 'medium',
+        args: [20],
+        expected: [2, 3, 5, 7, 11, 13, 17, 19],
+      },
+      {
+        name: 'larger',
         args: [30],
         expected: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29],
       },
@@ -182,9 +251,31 @@ function sieveOfEratosthenes(n) {
       },
     ],
     tests: [
-      { name: 'basic', args: [10], expected: [2, 3, 5, 7] },
-      { name: 'small', args: [2], expected: [2] },
-      { name: 'empty', args: [1], expected: [] },
+      {
+        name: 'basic',
+        args: [10],
+        expected: [2, 3, 5, 7],
+      },
+      {
+        name: 'single',
+        args: [2],
+        expected: [2],
+      },
+      {
+        name: 'empty',
+        args: [1],
+        expected: [],
+      },
+      {
+        name: 'zero',
+        args: [0],
+        expected: [],
+      },
+      {
+        name: 'small',
+        args: [5],
+        expected: [2, 3, 5],
+      },
       {
         name: 'medium',
         args: [15],
@@ -195,40 +286,40 @@ function sieveOfEratosthenes(n) {
         args: [20],
         expected: [2, 3, 5, 7, 11, 13, 17, 19],
       },
+      {
+        name: 'large',
+        args: [50],
+        expected: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47],
+      },
     ],
   },
   {
     id: 'tower-of-hanoi',
-    title: 'Tower of Hanoi',
+    title: 'Tower of Hanoi Solver',
     difficulty: ProblemDifficulty.HARD,
     functionName: 'TowerOfHanoi',
     methodName: 'play',
     description:
-      'Implement a Tower of Hanoi class that can solve the classic puzzle. The class should have three pegs (A, B, C) and track the number of moves. The `play` method should solve the puzzle and **return the total number of moves** it took. You can use the provided `showTowerOfHanoi` method for visualization (optional).',
+      'Implement Tower of Hanoi class. Constructor takes number of disks. Method play() solves puzzle and returns total move count.',
     constraints: [
+      'numberOfDisks is positive integer',
       '1 <= numberOfDisks <= 10',
-      'Disks are numbered from 1 (smallest) to n (largest)',
-      'Only move one disk at a time',
-      'Never place a larger disk on top of a smaller one',
-      'Start with all disks on peg A, move to peg C',
+      'Move all disks from peg A to peg C',
+      'Larger disk never on smaller disk',
+      'Return move count as integer',
     ],
     examples: [
       {
         input: 'new TowerOfHanoi(3).play()',
         output: '7',
-        explanation:
-          'Returns 7 moves to solve 3-disk tower (2^3 - 1 = 7 moves).',
       },
       {
         input: 'new TowerOfHanoi(2).play()',
         output: '3',
-        explanation:
-          'Returns 3 moves to solve 2-disk tower (2^2 - 1 = 3 moves).',
       },
       {
         input: 'new TowerOfHanoi(1).play()',
         output: '1',
-        explanation: 'Returns 1 move to solve 1-disk tower (2^1 - 1 = 1 move).',
       },
     ],
     starterCode: `/**
@@ -241,7 +332,9 @@ class TowerOfHanoi {
   }
 
   /**
+   * IMPORTANT
    * @return {number} ithMove - number of moves it took to solve
+   * IMPORTANT
    */
   play() {
     // Your solution here
@@ -293,19 +386,29 @@ class TowerOfHanoi {
 `,
     tests: [
       {
-        name: 'solve 1 disk',
+        name: 'one_disk',
         args: [1],
-        expected: 1, // Expected number of moves
+        expected: 1,
       },
       {
-        name: 'solve 2 disks',
+        name: 'two_disks',
         args: [2],
         expected: 3,
       },
       {
-        name: 'solve 3 disks',
+        name: 'three_disks',
         args: [3],
         expected: 7,
+      },
+      {
+        name: 'four_disks',
+        args: [4],
+        expected: 15,
+      },
+      {
+        name: 'five_disks',
+        args: [5],
+        expected: 31,
       },
     ],
   },
@@ -315,34 +418,21 @@ class TowerOfHanoi {
     difficulty: ProblemDifficulty.MEDIUM,
     functionName: 'multiplyMatrices',
     description:
-      'Write a function `multiplyMatrices(A, B)` that performs matrix multiplication on two 2D arrays. Matrix A has dimensions m×n and matrix B has dimensions n×p. The result should be a matrix C with dimensions m×p. Each element C[i][j] is computed as the sum of products of corresponding elements from row i of A and column j of B.',
+      'Multiply two matrices A and B. Return the resulting matrix C where C[i][j] = sum of A[i][k] * B[k][j].',
     constraints: [
-      'Matrix A dimensions: m × n (where m ≥ 1, n ≥ 1)',
-      'Matrix B dimensions: n × p (where p ≥ 1)',
-      'All input matrices will be valid for multiplication (A columns = B rows)',
-      'All matrix elements are integers',
-      'Return a new 2D array; do not mutate inputs',
+      'A is m×n matrix, B is n×p matrix',
+      'A columns equals B rows',
+      'All elements are integers',
+      'Return new matrix, do not modify inputs',
     ],
     examples: [
       {
         input: 'multiplyMatrices([[1, 2], [3, 4]], [[5, 6], [7, 8]])',
         output: '[[19, 22], [43, 50]]',
-        explanation:
-          'Multiply 2×2 matrices: (1×5 + 2×7)=19, (1×6 + 2×8)=22, etc.',
       },
       {
         input: 'multiplyMatrices([[1, 2, 3]], [[4], [5], [6]])',
         output: '[[32]]',
-        explanation:
-          'Multiply 1×3 matrix with 3×1 matrix: (1×4 + 2×5 + 3×6)=32.',
-      },
-      {
-        input:
-          'multiplyMatrices([[1, 2], [3, 4], [5, 6]], [[10, 20, 30, 40], [50, 60, 70, 80]])',
-        output:
-          '[[110, 140, 170, 200], [230, 300, 370, 440], [350, 460, 570, 680]]',
-        explanation:
-          'Multiply 3×2 matrix with 2×4 matrix resulting in 3×4 matrix.',
       },
     ],
     starterCode: `/**
@@ -356,7 +446,7 @@ function multiplyMatrices(A, B) {
 }`,
     tests: [
       {
-        name: 'basic 2x2 multiplication',
+        name: 'basic_2x2',
         args: [
           [
             [1, 2],
@@ -373,12 +463,12 @@ function multiplyMatrices(A, B) {
         ],
       },
       {
-        name: 'vector multiplication',
+        name: 'vector_multiply',
         args: [[[1, 2, 3]], [[4], [5], [6]]],
         expected: [[32]],
       },
       {
-        name: 'rectangular matrices',
+        name: 'rectangular',
         args: [
           [
             [1, 2],
@@ -397,7 +487,7 @@ function multiplyMatrices(A, B) {
         ],
       },
       {
-        name: 'identity matrix',
+        name: 'identity',
         args: [
           [
             [1, 0],
@@ -414,9 +504,31 @@ function multiplyMatrices(A, B) {
         ],
       },
       {
-        name: 'single element',
+        name: 'single_element',
         args: [[[3]], [[7]]],
         expected: [[21]],
+      },
+      {
+        name: 'zero_matrix',
+        args: [
+          [
+            [0, 0],
+            [0, 0],
+          ],
+          [
+            [1, 2],
+            [3, 4],
+          ],
+        ],
+        expected: [
+          [0, 0],
+          [0, 0],
+        ],
+      },
+      {
+        name: 'different_dimensions',
+        args: [[[1, 2, 3, 4]], [[1], [1], [1], [1]]],
+        expected: [[10]],
       },
     ],
   },
@@ -597,28 +709,29 @@ function findClosestPair(points) {
     difficulty: ProblemDifficulty.HARD,
     functionName: 'searchWord',
     description:
-      'Write a function `searchWord(pattern, matrix)` that searches for a given pattern (string) in a 2D character matrix. The pattern can be found in 8 directions: horizontally (left-to-right, right-to-left), vertically (top-to-bottom, bottom-to-top), and diagonally (in all 4 diagonal directions). Return "found" if the pattern exists in any direction, otherwise return "not found".',
+      'Write a function `searchWord(pattern, matrix)` that searches for a given pattern (string) in a 2D character matrix. The pattern can be found in 8 directions. If found, return "found at (row, column) from direction". If not found, return "not found".',
     constraints: [
       '1 <= pattern.length <= 20',
       '1 <= matrix.length, matrix[0].length <= 20',
       'Matrix contains only lowercase letters',
       'Pattern contains only lowercase letters',
       'Search in all 8 directions',
+      'Return format: "found at (row, column) from direction" or "not found"',
     ],
     examples: [
       {
         input:
           'searchWord("hello", [["h","e","l","l","o"], ["w","o","r","l","d"]])',
-        output: '"found"',
+        output: '"found at (0, 0) from left to right"',
         explanation:
-          'The word "hello" can be found horizontally in the first row.',
+          'The word "hello" can be found horizontally starting at position (0,0).',
       },
       {
         input:
           'searchWord("world", [["h","e","l","l","o"], ["w","o","r","l","d"]])',
-        output: '"found"',
+        output: '"found at (1, 0) from left to right"',
         explanation:
-          'The word "world" can be found horizontally in the second row.',
+          'The word "world" can be found horizontally starting at position (1,0).',
       },
       {
         input:
@@ -630,7 +743,7 @@ function findClosestPair(points) {
     starterCode: `/**
  * @param {string} pattern - The word/pattern to search for
  * @param {string[][]} matrix - 2D array of characters
- * @returns {string} "found" if pattern exists, "not found" otherwise
+ * @returns {string} "found at (row, column) from direction" or "not found"
  */
 function searchWord(pattern, matrix) {
   // Your solution here
@@ -646,7 +759,130 @@ function searchWord(pattern, matrix) {
             ['w', 'o', 'r', 'l', 'd'],
           ],
         ],
-        expected: 'found',
+        expected: 'found at (0, 0) from left to right',
+      },
+      {
+        name: 'horizontal right to left',
+        args: [
+          'olleh',
+          [
+            ['h', 'e', 'l', 'l', 'o'],
+            ['w', 'o', 'r', 'l', 'd'],
+          ],
+        ],
+        expected: 'found at (0, 4) from right to left',
+      },
+      {
+        name: 'vertical top to bottom',
+        args: [
+          'hw',
+          [
+            ['h', 'e', 'l'],
+            ['w', 'o', 'r'],
+            ['z', 'x', 'y'],
+          ],
+        ],
+        expected: 'found at (0, 0) from top to bottom',
+      },
+      {
+        name: 'vertical bottom to top',
+        args: [
+          'wh',
+          [
+            ['h', 'e', 'l'],
+            ['w', 'o', 'r'],
+            ['z', 'x', 'y'],
+          ],
+        ],
+        expected: 'found at (1, 0) from bottom to top',
+      },
+      {
+        name: 'diagonal top-left to bottom-right',
+        args: [
+          'cat',
+          [
+            ['c', 'x', 'z', 'p'],
+            ['y', 'a', 'q', 'r'],
+            ['m', 'n', 't', 's'],
+            ['u', 'v', 'w', 'k'],
+          ],
+        ],
+        expected: 'found at (0, 0) from top-left to bottom-right',
+      },
+      {
+        name: 'diagonal top-right to bottom-left',
+        args: [
+          'dog',
+          [
+            ['x', 'y', 'z', 'd'],
+            ['a', 'b', 'o', 'c'],
+            ['e', 'g', 'f', 'h'],
+            ['i', 'j', 'k', 'l'],
+          ],
+        ],
+        expected: 'found at (0, 3) from top-right to bottom-left',
+      },
+      {
+        name: 'diagonal bottom-left to top-right',
+        args: [
+          'fun',
+          [
+            ['a', 'b', 'n', 'd'],
+            ['e', 'u', 'g', 'h'],
+            ['f', 'j', 'k', 'l'],
+            ['m', 'o', 'p', 'q'],
+          ],
+        ],
+        expected: 'found at (2, 0) from bottom-left to top-right',
+      },
+      {
+        name: 'diagonal bottom-right to top-left',
+        args: [
+          'joy',
+          [
+            ['y', 'b', 'c', 'd'],
+            ['e', 'o', 'g', 'h'],
+            ['i', 'j', 'j', 'l'],
+            ['m', 'n', 'p', 'q'],
+          ],
+        ],
+        expected: 'found at (2, 1) from bottom-right to top-left',
+      },
+      {
+        name: 'word at edge - horizontal',
+        args: [
+          'edge',
+          [
+            ['a', 'b', 'c', 'd'],
+            ['e', 'd', 'g', 'e'],
+            ['f', 'g', 'h', 'i'],
+          ],
+        ],
+        expected: 'found at (1, 0) from left to right',
+      },
+      {
+        name: 'word at corner - diagonal',
+        args: [
+          'ace',
+          [
+            ['a', 'x', 'y'],
+            ['z', 'c', 'w'],
+            ['q', 'r', 'e'],
+          ],
+        ],
+        expected: 'found at (0, 0) from top-left to bottom-right',
+      },
+      {
+        name: 'overlapping letters different direction',
+        args: [
+          'sun',
+          [
+            ['s', 'a', 'b'],
+            ['u', 't', 'c'],
+            ['n', 'e', 'f'],
+          ],
+        ],
+        expected: 'found at (0, 0) from top to bottom',
       },
       {
         name: 'pattern not found',
@@ -660,50 +896,29 @@ function searchWord(pattern, matrix) {
         expected: 'not found',
       },
       {
-        name: 'vertical top to bottom',
+        name: 'empty pattern edge case',
         args: [
-          'hw',
-          [
-            ['h', 'e', 'l'],
-            ['w', 'o', 'r'],
-          ],
-        ],
-        expected: 'found',
-      },
-      {
-        name: 'diagonal pattern',
-        args: [
-          'nlz',
-          [
-            ['n', 'n', 'n', 'h'],
-            ['e', 'l', 'l', 'o'],
-            ['x', 'y', 'z', 'o'],
-            ['h', 'e', 'l', 'l'],
-          ],
-        ],
-        expected: 'found',
-      },
-      {
-        name: 'single character',
-        args: [
-          'a',
+          '',
           [
             ['a', 'b'],
             ['c', 'd'],
           ],
         ],
-        expected: 'found',
+        expected: 'not found',
       },
       {
-        name: 'reverse horizontal',
+        name: 'longer word reverse diagonal',
         args: [
-          'olleh',
+          'magic',
           [
-            ['h', 'e', 'l', 'l', 'o'],
-            ['w', 'o', 'r', 'l', 'd'],
+            ['x', 'y', 'z', 'w', 'm'],
+            ['a', 'b', 'c', 'a', 'q'],
+            ['p', 'q', 'g', 'r', 's'],
+            ['t', 'i', 'u', 'v', 'w'],
+            ['c', 'x', 'y', 'z', 'a'],
           ],
         ],
-        expected: 'found',
+        expected: 'found at (0, 4) from top-right to bottom-left',
       },
     ],
   },
@@ -806,3 +1021,23 @@ export const getProblem = (id) => {
  * @returns {Array<Problem>} All problems
  */
 export const getAllProblems = () => problems;
+
+/**
+ * Sort problems by difficulty level
+ * @param {boolean} hardestFirst - If true, sorts from hardest to easiest. If false, sorts from easiest to hardest
+ * @returns {Array<Problem>} Sorted problems array
+ */
+export const getSortedProblems = (hardestFirst = false) => {
+  const difficultyOrder = {
+    [ProblemDifficulty.EASY]: 1,
+    [ProblemDifficulty.MEDIUM]: 2,
+    [ProblemDifficulty.HARD]: 3,
+  };
+
+  return [...problems].sort((a, b) => {
+    const orderA = difficultyOrder[a.difficulty] || 0;
+    const orderB = difficultyOrder[b.difficulty] || 0;
+
+    return hardestFirst ? orderB - orderA : orderA - orderB;
+  });
+};
