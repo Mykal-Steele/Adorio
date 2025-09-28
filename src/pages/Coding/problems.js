@@ -182,17 +182,17 @@ function sieveOfEratosthenes(n) {
       },
     ],
     tests: [
-      { name: 'basic', args: [10], expected: [2, 3, 5, 7] },
+      { name: 'basic', args: [5], expected: [2, 3, 5, 7] },
       { name: 'small', args: [2], expected: [2] },
       { name: 'empty', args: [1], expected: [] },
       {
         name: 'medium',
-        args: [30],
+        args: [3],
         expected: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29],
       },
       {
         name: 'larger',
-        args: [50],
+        args: [2],
         expected: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47],
       },
     ],
@@ -235,59 +235,61 @@ function sieveOfEratosthenes(n) {
  * Tower of Hanoi 
  * @param {number} numberOfDisks - Number of disks to solve for
  */
-
-  class TowerOfHanoi{
-    constructor(disks){
-      
-    }
-    
-    /**
-     * @return {number} ithMove - number of moves it took to solve
-     */
-    play(){
-      // Your solution here
-    }
+class TowerOfHanoi {
+  constructor(disk) {
+   
   }
 
+  /**
+   * @return {number} ithMove - number of moves it took to solve
+   */
+  play() {
+    // Your solution here
+  }
+  
   // Call the following method in your code for visual
   // Name your pegs as - pegA, pegB, pegC, and have a variable called ithMove
-  function showTowerOfHanoi() {
-    let maxindex = 0;
-    if (
-      this.pegA.length >= this.pegB.length &&
-      this.pegA.length >= this.pegC.length
-    ) {
-      maxindex = this.pegA.length - 1;
-    } else if (
-      this.pegB.length >= this.pegA.length &&
-      this.pegB.length >= this.pegC.length
-    ) {
-      maxindex = this.pegB.length - 1;
-    } else {
-      maxindex = this.pegC.length - 1;
+  showTowerOfHanoi() {
+    // Find the maximum height among all three pegs
+    const maxHeight = Math.max(this.pegA.length, this.pegB.length, this.pegC.length);
+    
+    console.log('Move ' + this.ithMove);
+    
+    // Display each level from top to bottom
+    for (let level = maxHeight - 1; level >= 0; level--) {
+      let line = '';
+      
+      // Peg A
+      if (this.pegA.length > level) {
+        line += this.pegA[level];
+      } else {
+        line += '.';
+      }
+      line += '   ';
+      
+      // Peg B
+      if (this.pegB.length > level) {
+        line += this.pegB[level];
+      } else {
+        line += '.';
+      }
+      line += '   ';
+      
+      // Peg C
+      if (this.pegC.length > level) {
+        line += this.pegC[level];
+      } else {
+        line += '.';
+      }
+      
+      console.log(line);
     }
-    let str = '';
-    for (let line = maxindex; line >= 0; line--) {
-      str = '';
-      if (this.pegA.length - 1 >= line) {
-        str += this.pegA[line] + '     ';
-      } else {
-        str += '      ';
-      }
-      if (this.pegB.length - 1 >= line) {
-        str += this.pegB[line] + '     ';
-      } else {
-        str += '      ';
-      }
-      if (this.pegC.length - 1 >= line) {
-        str += this.pegC[line] + '     ';
-      } else {
-        str += '      ';
-      }
-      console.log(str);
-    }
-    console.log('Move ' + this.ithMove + '------------');
+    
+    // Peg labels
+    console.log('A   B   C');
+    console.log('-----------');
   }
+}
 `,
     tests: [
       {
