@@ -39,6 +39,43 @@ export class CodeRunner {
     }
   }
 
+  // Extract line number from error (simple approach)
+  static extractErrorInfo(error, code) {
+    let message = error.message || String(error);
+    let lineInfo = '';
+
+    // Try to extract line number from error stack or message
+    if (error.stack) {
+      // Look for line number in stack trace patterns
+      const stackPatterns = [
+        /<anonymous>:(\d+):\d+/, // Chrome/V8
+        /eval.*:(\d+):\d+/, // Firefox eval
+        /Function.*:(\d+):\d+/, // General function pattern
+      ];
+
+      for (const pattern of stackPatterns) {
+        const match = error.stack.match(pattern);
+        if (match) {
+          let lineNum = parseInt(match[1]);
+
+          // Adjust for wrapper code - our actual code starts after the wrapper
+          // The wrapper adds roughly 3-4 lines before user code
+          if (lineNum > 4) {
+            lineNum = lineNum - 4;
+          }
+
+          const codeLines = code.split('\n');
+          if (lineNum > 0 && lineNum <= codeLines.length) {
+            lineInfo = ` (line ${lineNum})`;
+            break;
+          }
+        }
+      }
+    }
+
+    return message + lineInfo;
+  }
+
   // Create console proxy to capture all console output
   static createConsoleProxy() {
     const logs = [];
@@ -162,13 +199,15 @@ export class CodeRunner {
                 logs.push(`Return: ${this.formatValue(returnValue)}`);
               }
             } catch (error) {
-              logs.push(`❌ Runtime Error: ${error.message}`);
+              logs.push(
+                `❌ Runtime Error: ${this.extractErrorInfo(error, code)}`
+              );
             }
           }
 
           resolve({ status: 'success', logs, returnValue });
         } catch (error) {
-          logs.push(`❌ Error: ${error.message || String(error)}`);
+          logs.push(`❌ Error: ${this.extractErrorInfo(error, code)}`);
           resolve({ status: 'error', logs, returnValue: null });
         }
       }, 50);
@@ -225,14 +264,16 @@ export class CodeRunner {
                     methodName,
                     consoleProxy,
                     logs,
-                    index
+                    index,
+                    code
                   )
                 : this.runFunctionTestWithOutput(
                     userCallable,
                     test,
                     consoleProxy,
                     logs,
-                    index
+                    index,
+                    code
                   );
             } catch (error) {
               return {
@@ -242,7 +283,7 @@ export class CodeRunner {
                 output: undefined,
                 passed: false,
                 duration: 0,
-                error: error.message || String(error),
+                error: this.extractErrorInfo(error, code),
                 logs: [],
               };
             }
@@ -256,7 +297,7 @@ export class CodeRunner {
         } catch (error) {
           resolve({
             status: 'error',
-            error: error.message || String(error),
+            error: this.extractErrorInfo(error, code),
             tests: [],
           });
         }
@@ -265,7 +306,7 @@ export class CodeRunner {
   }
 
   // Run a single test for a function with output capture
-  static runFunctionTestWithOutput(fn, test, consoleProxy, logs, index) {
+  static runFunctionTestWithOutput(fn, test, consoleProxy, logs, index, code) {
     const start = performance.now();
 
     try {
@@ -288,7 +329,7 @@ export class CodeRunner {
         output: undefined,
         passed: false,
         duration: performance.now() - start,
-        error: error.message || String(error),
+        error: this.extractErrorInfo(error, code),
         logs: [...logs],
       };
     }
@@ -301,7 +342,8 @@ export class CodeRunner {
     methodName,
     consoleProxy,
     logs,
-    index
+    index,
+    code
   ) {
     const start = performance.now();
 
@@ -343,7 +385,7 @@ export class CodeRunner {
         output: undefined,
         passed: false,
         duration: performance.now() - start,
-        error: error.message || String(error),
+        error: this.extractErrorInfo(error, code),
         logs: [...logs],
       };
     }
