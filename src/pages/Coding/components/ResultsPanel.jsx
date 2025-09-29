@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PlayIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
 /**
@@ -63,8 +63,8 @@ const ResultsPanel = ({ results, isRunning, onRunTests, onReset }) => {
         <div className='flex gap-2 items-center'>
           <span className='text-xs text-gray-500 mr-2'>
             {resetClicked
-              ? 'Press again to wipe memory of code'
-              : 'First: reset terminal, Second: wipe memory'}
+              ? 'Press again to wipe saved code'
+              : 'First: reset editor, second: wipe saved code'}
           </span>
           <button
             onClick={handleReset}
