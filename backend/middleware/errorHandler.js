@@ -1,30 +1,39 @@
-const errorHandler = (err, req, res, next) => {
-  const statusCode = err.status || err.statusCode || 500;
+import { isProduction } from '../config/environment.js';
+
+const errorHandler = (err, req, res, _next) => {
+  const statusCode = err.statusCode || err.status || 500;
 
   const errorResponse = {
-    message: err.message || "shit broke lol",
+    message: err.message || 'Something went wrong',
     status: statusCode,
-    stack: process.env.NODE_ENV === "production" ? "🥞" : err.stack,
   };
 
-  // adding this for the frontend so it can fix itself when things break
-  if (req.body && req.body.optimisticId) {
+  if (err.details) {
+    errorResponse.details = err.details;
+  }
+
+  if (!isProduction) {
+    errorResponse.stack = err.stack;
+  }
+
+  if (req.body?.optimisticId) {
     errorResponse.optimisticId = req.body.optimisticId;
-    errorResponse.operationType = req.body.operationType || "unknown";
+    errorResponse.operationType = req.body.operationType || 'unknown';
     errorResponse.originalData = req.body.originalData;
   }
 
-  // dump everything when i'm debugging locally
-  if (process.env.NODE_ENV !== "production") {
-    console.error(`[${new Date().toISOString()}] Error:`, {
-      path: req.path,
-      method: req.method,
-      error: err.message,
-      stack: err.stack,
-      body: req.body,
-    });
+  const logPayload = {
+    path: req.path,
+    method: req.method,
+    statusCode,
+    message: err.message,
+  };
+
+  if (!isProduction) {
+    logPayload.body = req.body;
+    logPayload.stack = err.stack;
+    console.error(`[${new Date().toISOString()}] API error`, logPayload);
   } else {
-    // keep logs clean in prod, my hosting plan has limited storage lol
     console.error(
       `[${new Date().toISOString()}] ${statusCode} error: ${err.message} (${
         req.method
