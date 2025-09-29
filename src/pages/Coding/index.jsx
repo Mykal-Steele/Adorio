@@ -7,12 +7,16 @@ import ProblemDetails from './components/ProblemDetails.jsx';
 import CodeEditor from './components/CodeEditor.jsx';
 import ResultsPanel from './components/ResultsPanel.jsx';
 import TestResults from './components/TestResults.jsx';
-import OutputTerminal from './components/OutputTerminal.jsx';
 
 // Services and Data
 import { getAllProblems, getProblem } from './problems.js';
 import { CodeRunner } from './CodeRunner.js';
 import { ProblemStorage } from './utils/problemStorage.js';
+
+const getProblemMeta = (problem) => ({
+  functionName: problem?.functionName || null,
+  methodName: problem?.methodName || null,
+});
 
 /**
  * Main Coding Challenge Page
@@ -24,7 +28,6 @@ const Coding = () => {
   const [activeProblemId, setActiveProblemId] = useState(null);
   const [code, setCode] = useState('');
   const [results, setResults] = useState(null);
-  const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
 
   // Force editor remount when switching problems
@@ -32,10 +35,15 @@ const Coding = () => {
 
   // Track reset operations to prevent auto-save conflicts
   const isResetInProgress = useRef(false);
+  const activeProblemIdRef = useRef(null);
 
   // Data
   const problems = getAllProblems();
   const activeProblem = getProblem(activeProblemId);
+
+  useEffect(() => {
+    activeProblemIdRef.current = activeProblem?.id || null;
+  }, [activeProblem]);
 
   // Initialize with saved problem or first problem
   useEffect(() => {
@@ -58,7 +66,10 @@ const Coding = () => {
       // Force editor remount to clear history
       setEditorKey((prev) => prev + 1);
 
-      const savedState = ProblemStorage.loadProblemState(activeProblem.id);
+      const savedState = ProblemStorage.loadProblemState(
+        activeProblem.id,
+        getProblemMeta(activeProblem)
+      );
 
       if (savedState && savedState.code.trim()) {
         // Load saved code and results
@@ -69,8 +80,6 @@ const Coding = () => {
         setCode(activeProblem.starterCode);
         setResults(null);
       }
-
-      setOutput(null);
     }
   }, [activeProblem]);
 
@@ -84,7 +93,8 @@ const Coding = () => {
     ) {
       // Only save if code actually belongs to this problem and we're not in a reset
       const currentSavedState = ProblemStorage.loadProblemState(
-        activeProblem.id
+        activeProblem.id,
+        getProblemMeta(activeProblem)
       );
       const isCodeDifferent =
         !currentSavedState || currentSavedState.code !== code;
@@ -93,6 +103,7 @@ const Coding = () => {
         ProblemStorage.debouncedSave(activeProblem.id, {
           code,
           results,
+          ...getProblemMeta(activeProblem),
         });
       }
     }
@@ -106,6 +117,7 @@ const Coding = () => {
         ProblemStorage.saveProblemState(activeProblem.id, {
           code,
           results,
+          ...getProblemMeta(activeProblem),
         });
       }
     };
@@ -120,6 +132,7 @@ const Coding = () => {
         ProblemStorage.saveProblemState(activeProblem.id, {
           code,
           results,
+          ...getProblemMeta(activeProblem),
         });
       }
     };
@@ -133,13 +146,14 @@ const Coding = () => {
         ProblemStorage.saveProblemState(activeProblem.id, {
           code,
           results,
+          ...getProblemMeta(activeProblem),
         });
       }
 
       // Clear current state to prevent contamination
       setCode('');
       setResults(null);
-      setOutput(null);
+      setIsRunning(false);
 
       // Switch to new problem
       setActiveProblemId(problemId);
@@ -154,25 +168,34 @@ const Coding = () => {
   const handleRunTests = useCallback(async () => {
     if (!activeProblem) return;
 
+    const problemId = activeProblem.id;
+    const meta = getProblemMeta(activeProblem);
+    const codeSnapshot = code;
+
     setIsRunning(true);
 
     // Run tests - now includes console output for each test case
     const testResults = await CodeRunner.execute(
-      code,
+      codeSnapshot,
       activeProblem.functionName,
       activeProblem.tests,
       activeProblem.methodName || null // Pass methodName if it exists
     );
 
-    setResults(testResults);
-    setOutput(null); // No longer need separate output since each test shows its output
-    setIsRunning(false);
+    if (activeProblemIdRef.current !== problemId) {
+      setIsRunning(false);
+      return;
+    }
 
-    // Save state after running tests
-    ProblemStorage.saveProblemState(activeProblem.id, {
-      code,
+    setResults(testResults);
+
+    ProblemStorage.saveProblemState(problemId, {
+      code: codeSnapshot,
       results: testResults,
+      ...meta,
     });
+
+    setIsRunning(false);
   }, [activeProblem, code]);
 
   const handleReset = useCallback(() => {
@@ -186,7 +209,7 @@ const Coding = () => {
       // Reset UI state
       setCode(activeProblem.starterCode);
       setResults(null);
-      setOutput(null);
+      setIsRunning(false);
 
       // Force editor remount to clear history AFTER state is reset
       setEditorKey((prev) => prev + 1);
@@ -257,8 +280,6 @@ const Coding = () => {
               onRunTests={handleRunTests}
               onReset={handleReset}
             />
-
-            <OutputTerminal output={output} isRunning={isRunning} />
 
             <TestResults results={results} isRunning={isRunning} />
           </main>
