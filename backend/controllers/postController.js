@@ -6,12 +6,11 @@ import {
   togglePostLike,
   addCommentToPost,
 } from '../services/postService.js';
+import { extractUploadedImageMetadata } from '../utils/imageFormatter.js';
 
 const createPostHandler = asyncHandler(async (req, res) => {
   const { title, content } = req.body;
-  const image = req.file
-    ? { public_id: req.file.filename, url: req.file.path }
-    : undefined;
+  const image = extractUploadedImageMetadata(req.file) || undefined;
 
   const post = await createPost({
     userId: req.user.id,

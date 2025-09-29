@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema(
   {
@@ -6,25 +6,25 @@ const postSchema = new mongoose.Schema(
     content: { type: String, required: true },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       index: true, // added this index cuz queries were taking forever
     },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: 'User',
       },
     ],
     comments: [
       {
         text: { type: String, required: true },
-        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         createdAt: { type: Date, default: Date.now, index: true },
       },
     ],
     image: {
-      public_id: String,
-      url: String,
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
     },
   },
   {
@@ -39,9 +39,9 @@ postSchema.index({ user: 1, createdAt: -1 });
 // this index is for when posts blow up with likes
 postSchema.index({ likes: 1 });
 
-postSchema.index({ "comments.user": 1 });
-postSchema.index({ "comments.createdAt": -1 });
+postSchema.index({ 'comments.user': 1 });
+postSchema.index({ 'comments.createdAt': -1 });
 
-postSchema.index({ likes: 1, "comments.0": 1 });
+postSchema.index({ likes: 1, 'comments.0': 1 });
 
-export default mongoose.model("Post", postSchema);
+export default mongoose.model('Post', postSchema);
