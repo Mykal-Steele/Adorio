@@ -103,11 +103,19 @@ CLOUDINARY_SECRET=your_cloudinary_secret
 │   ├── redux/            # Redux store and slices
 │   └── utils/            # Utility functions
 ├── backend/              # Backend code
-│   ├── models/           # Mongoose models
-│   ├── routes/           # Express routes
-│   ├── middleware/       # Custom middleware
+│   ├── config/           # Environment, CORS, rate limit, DB helpers
+│   ├── controllers/      # Express handlers coordinating services
+│   ├── services/         # Business logic and data access helpers
+│   ├── utils/            # Shared utilities (errors, async helpers)
+│   ├── middleware/       # Cross-cutting Express middleware
 │   └── index.js          # Server entry point
 └── public/               # Static assets
+
+## Architecture Notes
+
+- **Backend** now follows a controller/service split so routes stay tiny and easier to test. Shared configuration (database, CORS, rate limiting, Cloudinary) lives in `backend/config` for single-source-of-truth settings. Custom `ApiError` and `asyncHandler` utilities keep error handling consistent across the stack.
+- **Frontend** bootstraps authentication via `useAuthBootstrap`, bringing Redux hydration, local storage management, and helper side effects into one place. API calls resolve their base URL from `src/config/apiConfig.js`, which keeps browser and SSR environments in sync without scattered `process.env` checks.
+- **Comments & PropTypes** were added in critical components to make intent obvious for new contributors. If you're unsure where to add a feature, look for existing services/controllers on the backend or the hooks/components pattern on the frontend to stay aligned.
 ```
 
 ## Todo
