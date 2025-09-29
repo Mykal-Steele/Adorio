@@ -1,5 +1,128 @@
 import Post from '../models/Post.js';
 import ApiError from '../utils/ApiError.js';
+import { normalizeExistingImage } from '../utils/imageFormatter.js';
+
+const toPlainObject = (doc) => {
+  if (!doc) {
+    return null;
+  }
+
+  if (typeof doc.toObject === 'function') {
+    return doc.toObject({ virtuals: true });
+  }
+
+  return { ...doc };
+};
+
+const normalizeId = (value) => {
+  if (!value) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value.toString === 'function') {
+    return value.toString();
+  }
+
+  return value;
+};
+
+const normalizeUser = (user) => {
+  if (!user) {
+    return null;
+  }
+
+  const plain = toPlainObject(user);
+
+  if (!plain) {
+    return null;
+  }
+
+  if (plain._id) {
+    plain._id = normalizeId(plain._id);
+  }
+
+  if (plain.createdAt instanceof Date) {
+    plain.createdAt = plain.createdAt.toISOString();
+  }
+
+  return plain;
+};
+
+const normalizeComment = (comment) => {
+  const plain = toPlainObject(comment);
+
+  if (!plain) {
+    return null;
+  }
+
+  if (plain._id) {
+    plain._id = normalizeId(plain._id);
+  }
+
+  if (plain.user) {
+    plain.user = normalizeUser(plain.user);
+  }
+
+  if (plain.createdAt instanceof Date) {
+    plain.createdAt = plain.createdAt.toISOString();
+  }
+
+  return plain;
+};
+
+const normalizeCommentsCollection = (comments = []) =>
+  [...comments]
+    .map(normalizeComment)
+    .filter(Boolean)
+    .sort((a, b) => {
+      const aDate = new Date(a?.createdAt || 0).getTime();
+      const bDate = new Date(b?.createdAt || 0).getTime();
+      return bDate - aDate;
+    });
+
+const normalizePostDocument = (doc) => {
+  const plain = toPlainObject(doc);
+
+  if (!plain) {
+    return null;
+  }
+
+  if (plain._id) {
+    plain._id = normalizeId(plain._id);
+  }
+
+  if (plain.user) {
+    plain.user = normalizeUser(plain.user);
+  }
+
+  plain.image = plain.image ? normalizeExistingImage(plain.image) : null;
+
+  if (Array.isArray(plain.comments)) {
+    plain.comments = normalizeCommentsCollection(plain.comments);
+  }
+
+  if (plain.createdAt instanceof Date) {
+    plain.createdAt = plain.createdAt.toISOString();
+  }
+
+  if (plain.updatedAt instanceof Date) {
+    plain.updatedAt = plain.updatedAt.toISOString();
+  }
+
+  return plain;
+};
+
+const parsePositiveNumber = (value, fallback) => {
+  const parsed = Number(value);
+  if (Number.isNaN(parsed) || parsed < 1) {
+    return fallback;
+  }
+  return parsed;
+};
 
 const createPost = async ({ userId, title, content, image }) => {
   if (!title || !content) {
@@ -10,17 +133,15 @@ const createPost = async ({ userId, title, content, image }) => {
     title,
     content,
     user: userId,
-    image,
+    image: image || null,
   });
 
-  return post;
+  return normalizePostDocument(post);
 };
 
 const getPaginatedPosts = async ({ page = 1, limit = 5 }) => {
-  const parsedPage = Number.isNaN(Number(page)) ? 1 : Math.max(1, Number(page));
-  const parsedLimit = Number.isNaN(Number(limit))
-    ? 5
-    : Math.max(1, Number(limit));
+  const parsedPage = parsePositiveNumber(page, 1);
+  const parsedLimit = parsePositiveNumber(limit, 5);
   const skip = (parsedPage - 1) * parsedLimit;
 
   const [posts, totalPosts] = await Promise.all([
@@ -31,12 +152,10 @@ const getPaginatedPosts = async ({ page = 1, limit = 5 }) => {
         content: 1,
         user: 1,
         likes: 1,
-        'comments._id': 1,
-        'comments.text': 1,
-        'comments.user': 1,
-        'comments.createdAt': 1,
+        comments: 1,
         image: 1,
         createdAt: 1,
+        updatedAt: 1,
       }
     )
       .sort({ createdAt: -1 })
@@ -48,12 +167,14 @@ const getPaginatedPosts = async ({ page = 1, limit = 5 }) => {
     Post.countDocuments(),
   ]);
 
+  const normalizedPosts = posts.map(normalizePostDocument).filter(Boolean);
+
   return {
-    posts,
+    posts: normalizedPosts,
     hasMore: totalPosts > skip + parsedLimit,
     totalPosts,
     currentPage: parsedPage,
-    totalPages: Math.ceil(totalPosts / parsedLimit) || 1,
+    totalPages: Math.max(Math.ceil(totalPosts / parsedLimit), 1),
   };
 };
 
@@ -61,18 +182,13 @@ const getPostById = async (postId) => {
   const post = await Post.findById(postId)
     .populate('user', ['username'])
     .populate('likes', ['username'])
-    .populate('comments.user', ['username'])
-    .lean();
+    .populate('comments.user', ['username']);
 
   if (!post) {
     throw ApiError.notFound('post not found');
   }
 
-  post.comments = [...(post.comments || [])].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  );
-
-  return post;
+  return normalizePostDocument(post);
 };
 
 const togglePostLike = async ({ postId, userId }) => {
@@ -113,7 +229,7 @@ const addCommentToPost = async ({ postId, userId, text }) => {
     .populate('user', ['username'])
     .populate('comments.user', ['username']);
 
-  return populatedPost;
+  return normalizePostDocument(populatedPost);
 };
 
 export {
