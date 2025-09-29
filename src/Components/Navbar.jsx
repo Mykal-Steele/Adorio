@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Link, useNavigate } from 'react-router-dom';
 import { SparklesIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import { useDispatch, useSelector } from 'react-redux';
@@ -126,5 +127,20 @@ const NavLink = ({ to, text, className }) => (
     </Link>
   </motion.div>
 );
+
+Navbar.propTypes = {
+  darkMode: PropTypes.bool.isRequired,
+  setDarkMode: PropTypes.func.isRequired,
+};
+
+NavLink.propTypes = {
+  to: PropTypes.string.isRequired,
+  text: PropTypes.string.isRequired,
+  className: PropTypes.string,
+};
+
+NavLink.defaultProps = {
+  className: '',
+};
 
 export default Navbar;
