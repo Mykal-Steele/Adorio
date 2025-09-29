@@ -846,7 +846,7 @@ function searchWord(pattern, matrix) {
             ['m', 'n', 'p', 'q'],
           ],
         ],
-        expected: 'found at (2, 1) from bottom-right to top-left',
+        expected: 'found at (2, 2) from bottom-right to top-left',
       },
       {
         name: 'word at edge - horizontal',
