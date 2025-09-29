@@ -1,26 +1,22 @@
 // my api calls for post stuff - split this from index.js cuz it was getting messy
-import API from "./index";
-import {
-  handleApiError,
-  AbortError,
-  isAbortError,
-} from "../utils/errorHandling";
+import API from './index';
+import { handleApiError } from '../utils/errorHandling';
 
 // made this so i don't have to type console.log everywhere
 const logger = {
   error: (message, data) => {
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV !== 'production') {
       console.error(message, data);
     }
     // could hook up something like sentry here later
   },
   warn: (message) => {
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV !== 'production') {
       console.warn(message);
     }
   },
   info: (message) => {
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV !== 'production') {
       console.log(message);
     }
   },
@@ -35,7 +31,7 @@ export const getPosts = async (page = 1, limit = 5, signal) => {
     });
     return response.data;
   } catch (error) {
-    throw handleApiError(error, "failed to fetch posts");
+    throw handleApiError(error, 'failed to fetch posts');
   }
 };
 
@@ -45,12 +41,12 @@ export const createPost = async (postData) => {
     const config =
       postData instanceof FormData
         ? { headers: {} } // let axios figure out content-type for forms
-        : { headers: { "Content-Type": "application/json" } };
+        : { headers: { 'Content-Type': 'application/json' } };
 
-    const response = await API.post("/posts", postData, config);
+    const response = await API.post('/posts', postData, config);
     return response.data;
   } catch (error) {
-    throw handleApiError(error, "error creating post");
+    throw handleApiError(error, 'error creating post');
   }
 };
 
@@ -80,10 +76,10 @@ export const likePost = async (postId, shouldBeLiked) => {
       // get the latest intent (in case user clicked multiple times)
       const finalIntent = likeIntents[postId];
 
-      if (process.env.NODE_ENV !== "production") {
+      if (process.env.NODE_ENV !== 'production') {
         logger.info(
           `Sending FINAL like state for post ${postId}: ${
-            finalIntent.shouldBeLiked ? "LIKED" : "UNLIKED"
+            finalIntent.shouldBeLiked ? 'LIKED' : 'UNLIKED'
           }`
         );
       }
@@ -99,7 +95,7 @@ export const likePost = async (postId, shouldBeLiked) => {
     } catch (error) {
       throw handleApiError(
         error,
-        `failed to ${shouldBeLiked ? "like" : "unlike"} post`
+        `failed to ${shouldBeLiked ? 'like' : 'unlike'} post`
       );
     } finally {
       // always clean up
@@ -120,7 +116,7 @@ export const addComment = async (postId, commentText) => {
     // server finally returns the whole post now thank god
     return response.data;
   } catch (error) {
-    throw handleApiError(error, "error adding comment");
+    throw handleApiError(error, 'error adding comment');
   }
 };
 
@@ -130,6 +126,6 @@ export const getSinglePost = async (postId) => {
     const response = await API.get(`/posts/${postId}`);
     return response.data;
   } catch (error) {
-    throw handleApiError(error, "error fetching post");
+    throw handleApiError(error, 'error fetching post');
   }
 };

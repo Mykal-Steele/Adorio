@@ -1,6 +1,6 @@
 //src\App.jsx
-import React, { useEffect, useState } from 'react';
-import { Provider, useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import {
   BrowserRouter as Router,
   Routes,
@@ -11,61 +11,24 @@ import {
 import Home from './pages/Home';
 import RyGame from './pages/RyGame';
 import Login from './pages/Login';
-import Landing from './pages/Landing';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Coding from './pages/Coding';
 import Navbar from '@components/Navbar';
 import NotFound from '@components/NotFound';
-import { setUser } from './redux/userSlice';
-import { fetchUserData } from './api';
-import store from './redux/store';
-import './index.css';
 import ErrorBoundary from './Components/ErrorBoundary';
 import SendEnv from './pages/SendEnv';
+import useAuthBootstrap from './hooks/useAuthBootstrap';
 
-const AppContent = () => {
-  const dispatch = useDispatch();
-  const { token } = useSelector((state) => state.user);
+// Handles high-level route wiring and theme toggling.
+const App = () => {
   const [darkMode, setDarkMode] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const isLoading = useAuthBootstrap();
+  const { token } = useSelector((state) => state.user);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      setLoading(true);
-      // see if we're already logged in from before
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const userData = await fetchUserData();
-          dispatch(setUser({ user: userData, token }));
-        } catch (err) {
-          if (process.env.NODE_ENV !== 'production') {
-            console.error('Failed to fetch user data:', err);
-          }
-          localStorage.removeItem('token');
-        }
-      }
-      setLoading(false);
-    };
-
-    // Add the localStorage item on every reload
-    const addInstagramKey = () => {
-      const existingValue = localStorage.getItem('instagram');
-      if (!existingValue) {
-        localStorage.setItem('instagram', 'kruskal.oakar');
-        if (process.env.NODE_ENV !== 'production') {
-          console.log('Added instagram key to localStorage');
-        }
-      }
-    };
-
-    checkAuth();
-    addInstagramKey();
-  }, [dispatch]);
-
-  // super lazy loading screen but whatever it only shows for like 2 seconds
-  if (loading) return <div>Loading...</div>;
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <ErrorBoundary>
@@ -106,11 +69,5 @@ const AppContent = () => {
     </ErrorBoundary>
   );
 };
-
-const App = () => (
-  <Provider store={store}>
-    <AppContent />
-  </Provider>
-);
 
 export default App;
