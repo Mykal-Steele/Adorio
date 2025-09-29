@@ -14,6 +14,8 @@ const STORAGE_VERSION = '1.0';
  *   problemId: string,
  *   code: string,
  *   results: object|null,
+ *   functionName: string,
+ *   methodName: string|null,
  *   lastModified: timestamp
  * }
  */
@@ -30,14 +32,16 @@ export class ProblemStorage {
     if (!problemId || !state) return;
 
     try {
-      // Validate that we're not saving empty or invalid code
-      const codeToSave = state.code?.trim() || '';
+      const codeToSave = typeof state.code === 'string' ? state.code : '';
 
       const storageData = {
         version: STORAGE_VERSION,
         problemId,
         code: codeToSave,
         results: state.results || null,
+        functionName: state.functionName || null,
+        methodName:
+          typeof state.methodName === 'string' ? state.methodName : null,
         lastModified: Date.now(),
         // Add checksum to verify data integrity
         checksum: btoa(problemId + codeToSave).slice(0, 16),
@@ -58,7 +62,7 @@ export class ProblemStorage {
    * @param {string} problemId - Problem identifier
    * @returns {Object|null} Saved state or null if not found
    */
-  static loadProblemState(problemId) {
+  static loadProblemState(problemId, meta = {}) {
     if (!problemId) return null;
 
     try {
@@ -89,9 +93,29 @@ export class ProblemStorage {
         }
       }
 
+      if (
+        meta.functionName &&
+        data.functionName &&
+        data.functionName !== meta.functionName
+      ) {
+        console.warn('Function mismatch detected for problem:', problemId);
+        return null;
+      }
+
+      if (
+        meta.methodName !== undefined &&
+        data.methodName !== undefined &&
+        data.methodName !== meta.methodName
+      ) {
+        console.warn('Method mismatch detected for problem:', problemId);
+        return null;
+      }
+
       return {
         code: data.code || '',
         results: data.results || null,
+        functionName: data.functionName || null,
+        methodName: data.methodName || null,
         lastModified: data.lastModified || 0,
       };
     } catch (error) {
