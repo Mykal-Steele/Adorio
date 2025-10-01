@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { ProblemStorage } from '../utils/problemStorage.js';
 import { getSortedProblems } from '../problems.js';
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
@@ -11,7 +11,10 @@ const ProblemList = ({ problems, activeProblemId, onProblemSelect }) => {
   const [sortHardestFirst, setSortHardestFirst] = useState(false); // false = easy to hard (default)
 
   // Get sorted problems - default is easiest to hardest
-  const sortedProblems = getSortedProblems(sortHardestFirst);
+  const sortedProblems = useMemo(
+    () => getSortedProblems(sortHardestFirst, { problems }),
+    [problems, sortHardestFirst]
+  );
 
   const toggleSort = () => {
     setSortHardestFirst(!sortHardestFirst);
