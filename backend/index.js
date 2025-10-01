@@ -21,7 +21,13 @@ import userRoutes from './routes/userRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import gameRoutes from './routes/gameRoutes.js';
 import secretEnvRoutes from './routes/secretEnvRoutes.js';
-import analyticsRoutes from './routes/analyticsRoutes.js';
+import visitorIdentifier from './middleware/visitorIdentifier.js';
+import { optional, protect } from './middleware/verifyToken.js';
+import {
+  trackVisit,
+  getPageViewSummary,
+  getRecentVisitEntries,
+} from './controllers/analyticsController.js';
 
 process.env.TZ = 'UTC';
 
@@ -46,7 +52,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/game', gameRoutes);
 app.use('/api/secretenv', secretEnvRoutes);
-app.use('/api/analytics', analyticsRoutes);
+app.post('/api/analytics/track', visitorIdentifier, optional, trackVisit);
+app.get('/api/analytics/page-views', protect, getPageViewSummary);
+app.get('/api/analytics/recent', protect, getRecentVisitEntries);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.static(path.join(__dirname, 'dist')));
@@ -62,7 +70,7 @@ app.get('*', (_req, res) => {
 app.use(errorHandler);
 
 const handler = serverless(app);
-export { handler };
+export { handler, app };
 
 const startServer = async () => {
   try {
