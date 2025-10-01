@@ -20,8 +20,6 @@ const getProblemMeta = (problem) => ({
 
 /**
  * Main Coding Challenge Page
- * Follows Single Responsibility Principle - orchestrates components
- * Easy to extend with new problems by adding to problems.js
  */
 const Coding = () => {
   // State management with problem isolation
@@ -40,6 +38,12 @@ const Coding = () => {
   // Data
   const problems = getAllProblems();
   const activeProblem = getProblem(activeProblemId);
+
+  useEffect(() => {
+    if (activeProblemId && !activeProblem && problems.length > 0) {
+      setActiveProblemId(problems[0].id);
+    }
+  }, [activeProblemId, activeProblem, problems]);
 
   useEffect(() => {
     activeProblemIdRef.current = activeProblem?.id || null;
@@ -222,6 +226,20 @@ const Coding = () => {
   }, [activeProblem]);
 
   // Loading state
+  if (problems.length === 0) {
+    return (
+      <div className='min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center'>
+        <div className='text-center'>
+          <CodeBracketIcon className='h-10 w-10 text-purple-400 mx-auto mb-4' />
+          <p className='text-lg'>No challenges available right now.</p>
+          <p className='text-sm text-gray-400'>
+            Check back later for new problems.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!activeProblem) {
     return (
       <div className='min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center'>
