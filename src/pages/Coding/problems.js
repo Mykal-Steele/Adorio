@@ -1,5 +1,7 @@
 import { ProblemDifficulty } from './types.js';
 
+const isProblemVisible = (problem) => problem?.isVisible !== false;
+
 /**
  * Coding problems data - easy to extend with new problems
  * Each problem follows a consistent structure for maintainability
@@ -609,6 +611,131 @@ function findGCD(a, b) {
     ],
   },
   {
+    id: 'binary-tree-height',
+    title: 'Binary Tree Height',
+    difficulty: ProblemDifficulty.MEDIUM,
+    functionName: 'treeHeight',
+    description:
+      'Given the root node of a binary tree, return the height of the tree using recursion. Height is the number of levels on the longest path from the root down to a leaf. Return 0 for an empty tree.',
+    constraints: [
+      'Nodes are plain objects shaped like { value, left, right }',
+      'left and right are either another node or null',
+      'Must use recursion to explore subtrees',
+      'Height counts levels, so a single node has height 1',
+    ],
+    examples: [
+      {
+        input:
+          'treeHeight({ value: 1, left: { value: 2, left: null, right: null }, right: { value: 3, left: null, right: null } })',
+        output: '2',
+      },
+      {
+        input:
+          'treeHeight({ value: 7, left: { value: 4, left: { value: 3, left: null, right: null }, right: null }, right: null })',
+        output: '3',
+      },
+    ],
+    starterCode: `/**
+ * @param {{ value: any, left: object|null, right: object|null }|null} root - Root node of the binary tree
+ * @returns {number} Height of the tree measured in levels
+ */
+function treeHeight(root) {
+  // Your solution here
+  
+}`,
+    tests: [
+      {
+        name: 'balanced tree',
+        args: [
+          {
+            value: 1,
+            left: {
+              value: 2,
+              left: { value: 4, left: null, right: null },
+              right: { value: 5, left: null, right: null },
+            },
+            right: {
+              value: 3,
+              left: null,
+              right: { value: 6, left: null, right: null },
+            },
+          },
+        ],
+        expected: 3,
+      },
+      {
+        name: 'single node',
+        args: [
+          {
+            value: 10,
+            left: null,
+            right: null,
+          },
+        ],
+        expected: 1,
+      },
+      {
+        name: 'right skewed',
+        args: [
+          {
+            value: 4,
+            left: null,
+            right: {
+              value: 5,
+              left: null,
+              right: {
+                value: 6,
+                left: null,
+                right: {
+                  value: 7,
+                  left: null,
+                  right: null,
+                },
+              },
+            },
+          },
+        ],
+        expected: 4,
+      },
+      {
+        name: 'empty tree',
+        args: [null],
+        expected: 0,
+      },
+      {
+        name: 'unbalanced left heavy',
+        args: [
+          {
+            value: 8,
+            left: {
+              value: 3,
+              left: {
+                value: 1,
+                left: null,
+                right: null,
+              },
+              right: {
+                value: 6,
+                left: { value: 4, left: null, right: null },
+                right: { value: 7, left: null, right: null },
+              },
+            },
+            right: {
+              value: 10,
+              left: null,
+              right: {
+                value: 14,
+                left: { value: 13, left: null, right: null },
+                right: null,
+              },
+            },
+          },
+        ],
+        expected: 4,
+      },
+    ],
+  },
+  {
     id: 'closest-pair-of-points',
     title: 'Closest Pair of Points',
     difficulty: ProblemDifficulty.MEDIUM,
@@ -936,6 +1063,7 @@ function searchWord(pattern, matrix) {
       'Search is case-sensitive',
       'Return exactly "Found" or "Not found"',
     ],
+    isVisible: true,
     examples: [
       {
         input: 'findPattern("hello", "nnnhello")',
@@ -1012,29 +1140,51 @@ function findPattern(pattern, text) {
  * @param {string} id - Problem identifier
  * @returns {Problem|null} Problem or null if not found
  */
-export const getProblem = (id) => {
-  return problems.find((p) => p.id === id) || null;
+export const getProblem = (id, options = {}) => {
+  const { includeHidden = false } = options;
+  const problem = problems.find((p) => p.id === id) || null;
+
+  if (!includeHidden && problem && !isProblemVisible(problem)) {
+    return null;
+  }
+
+  return problem;
 };
 
 /**
  * Get all available problems
  * @returns {Array<Problem>} All problems
  */
-export const getAllProblems = () => problems;
+export const getAllProblems = (options = {}) => {
+  const { includeHidden = false } = options;
+
+  if (includeHidden) {
+    return [...problems];
+  }
+
+  return problems.filter(isProblemVisible);
+};
 
 /**
  * Sort problems by difficulty level
  * @param {boolean} hardestFirst - If true, sorts from hardest to easiest. If false, sorts from easiest to hardest
  * @returns {Array<Problem>} Sorted problems array
  */
-export const getSortedProblems = (hardestFirst = false) => {
+export const getSortedProblems = (hardestFirst = false, options = {}) => {
+  const { includeHidden = false, problems: baseProblems } = options;
+  const problemsToSort = baseProblems
+    ? includeHidden
+      ? [...baseProblems]
+      : baseProblems.filter(isProblemVisible)
+    : getAllProblems({ includeHidden });
+
   const difficultyOrder = {
     [ProblemDifficulty.EASY]: 1,
     [ProblemDifficulty.MEDIUM]: 2,
     [ProblemDifficulty.HARD]: 3,
   };
 
-  return [...problems].sort((a, b) => {
+  return [...problemsToSort].sort((a, b) => {
     const orderA = difficultyOrder[a.difficulty] || 0;
     const orderB = difficultyOrder[b.difficulty] || 0;
 
