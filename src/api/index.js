@@ -6,6 +6,7 @@ import { isAbortError, handleApiError } from '../utils/errorHandling';
 const API = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
+  withCredentials: true,
 });
 
 // adding token to every request cuz security and stuff
