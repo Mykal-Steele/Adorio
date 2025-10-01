@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import serverless from 'serverless-http';
@@ -20,6 +21,7 @@ import userRoutes from './routes/userRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import gameRoutes from './routes/gameRoutes.js';
 import secretEnvRoutes from './routes/secretEnvRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 process.env.TZ = 'UTC';
 
@@ -27,6 +29,7 @@ const app = express();
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
 app.use(compression());
 app.options('*', cors(corsOptions));
 
@@ -43,6 +46,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/game', gameRoutes);
 app.use('/api/secretenv', secretEnvRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.static(path.join(__dirname, 'dist')));
