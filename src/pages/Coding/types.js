@@ -31,6 +31,7 @@ export const ProblemDifficulty = {
  * @property {Array<TestCase>} tests - Test cases
  * @property {Array<string>} [constraints] - Problem constraints
  * @property {Array<Object>} [examples] - Usage examples
+ * @property {boolean} [isVisible=true] - Controls whether the problem appears in listings
  */
 
 /**

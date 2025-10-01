@@ -14,11 +14,56 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Coding from './pages/Coding';
+import DataLookup from './pages/DataLookup';
 import Navbar from '@components/Navbar';
 import NotFound from '@components/NotFound';
 import ErrorBoundary from './Components/ErrorBoundary';
 import SendEnv from './pages/SendEnv';
 import useAuthBootstrap from './hooks/useAuthBootstrap';
+import usePageTracking from './hooks/usePageTracking';
+
+const AppShell = ({ darkMode, setDarkMode, token }) => {
+  usePageTracking();
+
+  return (
+    <>
+      <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+      <Routes>
+        <Route
+          path='/'
+          element={
+            token ? (
+              <Navigate to='/home' replace />
+            ) : (
+              <Navigate to='/login' replace />
+            )
+          }
+        />
+        <Route
+          path='/home'
+          element={token ? <Home /> : <Navigate to='/login' replace />}
+        />
+        <Route path='/rygame' element={<RyGame />} />
+        <Route
+          path='/profile'
+          element={token ? <Profile /> : <Navigate to='/login' replace />}
+        />
+        <Route path='/login' element={<Login />} />
+        <Route path='/register' element={<Register />} />
+        <Route path='/coding' element={<Coding />} />
+        <Route
+          path='/sendenv'
+          element={token ? <SendEnv /> : <Navigate to='/login' replace />}
+        />
+        <Route
+          path='/data-lookup'
+          element={token ? <DataLookup /> : <Navigate to='/login' replace />}
+        />
+        <Route path='*' element={<NotFound />} />
+      </Routes>
+    </>
+  );
+};
 
 // Handles high-level route wiring and theme toggling.
 const App = () => {
@@ -34,36 +79,11 @@ const App = () => {
     <ErrorBoundary>
       <div className={darkMode ? 'dark' : ''}>
         <Router>
-          <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-          <Routes>
-            <Route
-              path='/'
-              element={
-                token ? (
-                  <Navigate to='/home' replace />
-                ) : (
-                  <Navigate to='/login' replace />
-                )
-              }
-            />
-            <Route
-              path='/home'
-              element={token ? <Home /> : <Navigate to='/login' replace />}
-            />
-            <Route path='/rygame' element={<RyGame />} />
-            <Route
-              path='/profile'
-              element={token ? <Profile /> : <Navigate to='/login' replace />}
-            />
-            <Route path='/login' element={<Login />} />
-            <Route path='/register' element={<Register />} />
-            <Route path='/coding' element={<Coding />} />
-            <Route
-              path='/sendenv'
-              element={token ? <SendEnv /> : <Navigate to='/login' replace />}
-            />
-            <Route path='*' element={<NotFound />} />
-          </Routes>
+          <AppShell
+            darkMode={darkMode}
+            setDarkMode={setDarkMode}
+            token={token}
+          />
         </Router>
       </div>
     </ErrorBoundary>
