@@ -41,19 +41,27 @@ export default defineConfig({
           .toString('base64')
           .substring(0, 16);
 
+        // Get the backend URL based on environment
+        const isDev = process.env.NODE_ENV === 'development';
+        const backendUrl = isDev
+          ? 'http://localhost:5000'
+          : 'https://feelio-github-io.onrender.com';
+
         // First replace the backend URL script with one that has the nonce
         html = html.replace(
           /<script>\s*\/\/\s*hardcoding the backend url here so i can change it without rebuilding\s*window\.VITE_BACKEND_URL\s*=\s*"[^"]+"\s*;\s*<\/script>/,
           `<script nonce="${nonce}">
             // hardcoding the backend url here so i can change it without rebuilding
-            window.VITE_BACKEND_URL = "https://feelio-github-io.onrender.com";
+            window.VITE_BACKEND_URL = "${backendUrl}";
           </script>`
         );
 
         // csp stuff took me like 3 days to figure out - stackoverflow is my best friend
         // Note: 'unsafe-eval' is needed for the coding platform to execute user code safely
-        const isDev = process.env.NODE_ENV === 'development';
         const scriptSrc = `'self' 'nonce-${nonce}' 'unsafe-eval'`;
+        const connectSrc = isDev
+          ? `'self' http://localhost:5000 http://localhost:5000/api/*`
+          : `'self' https://feelio-github-io.onrender.com https://feelio-github-io.onrender.com/api/*`;
 
         return html
           .replace(
@@ -64,7 +72,7 @@ export default defineConfig({
               script-src ${scriptSrc}; 
               style-src 'self' 'unsafe-inline';
               img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com;
-              connect-src 'self' https://feelio-github-io.onrender.com https://feelio-github-io.onrender.com/api/*;
+              connect-src ${connectSrc};
               worker-src 'self' blob:;
               form-action 'self';
               base-uri 'self';
@@ -105,7 +113,9 @@ export default defineConfig({
     'process.env.CLOUDINARY_NAME': JSON.stringify(process.env.CLOUDINARY_NAME),
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     'import.meta.env.VITE_BACKEND_URL': JSON.stringify(
-      'https://feelio-github-io.onrender.com'
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:5000'
+        : 'https://feelio-github-io.onrender.com'
     ),
   },
 
