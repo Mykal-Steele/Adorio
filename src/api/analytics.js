@@ -1,7 +1,8 @@
 import API from './index';
 import { API_BASE_URL } from '../config/apiConfig';
 
-const TRACK_ENDPOINT = `${API_BASE_URL}/analytics/track`;
+const METRICS_BASE = `${API_BASE_URL}/metrics`;
+const TRACK_ENDPOINT = `${METRICS_BASE}/track`;
 
 const normalizeDuration = (value) => {
   if (typeof value !== 'number' || Number.isNaN(value)) {
@@ -66,18 +67,18 @@ const trackPageView = async (payload = {}) => {
     });
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
-      console.warn('failed to send analytics beacon', error);
+      console.warn('failed to send metrics beacon', error);
     }
   }
 };
 
 const fetchPageViewSummary = async (params = {}) => {
-  const response = await API.get('/analytics/page-views', { params });
+  const response = await API.get('/metrics/page-views', { params });
   return response.data;
 };
 
 const fetchRecentVisits = async (params = {}) => {
-  const response = await API.get('/analytics/recent', { params });
+  const response = await API.get('/metrics/recent', { params });
   return response.data;
 };
 
