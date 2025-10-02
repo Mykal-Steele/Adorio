@@ -127,6 +127,36 @@ CLOUDINARY_SECRET=your_cloudinary_secret
 - [ ] Search functionality
 - [ ] Hashtags
 
+## Deployment
+
+### Proxy Configuration
+
+When deploying behind a reverse proxy (Render, Heroku, Cloudflare, etc.), the app automatically configures Express's `trust proxy` setting to handle forwarded headers properly.
+
+**Environment Variables:**
+
+- `TRUST_PROXY` - Override proxy trust setting (true/false/number/IP)
+- Default behavior:
+  - Production: Trust 1 proxy (Render/Heroku) or 2 proxies (Cloudflare)
+  - Development: Trust all proxies
+
+**Common Platforms:**
+
+- **Render/Heroku**: Automatically detected, trusts 1 proxy
+- **Cloudflare**: Set `CLOUDFLARE=true` or detected via `CF_RAY` header
+- **Custom**: Set `TRUST_PROXY=2` for multiple proxies
+
+This fixes the `ERR_ERL_UNEXPECTED_X_FORWARDED_FOR` error from express-rate-limit.
+
+### Analytics & Monitoring
+
+The app includes built-in analytics with:
+
+- Real-time visitor tracking
+- Page view statistics
+- User behavior analysis
+- Health monitoring at `/api/health`
+
 ## Contributing
 
 This is mostly my personal project but if you wanna contribute for some reason:
