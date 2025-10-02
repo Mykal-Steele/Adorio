@@ -18,6 +18,7 @@ import DataLookup from './pages/DataLookup';
 import Navbar from '@components/Navbar';
 import NotFound from '@components/NotFound';
 import ErrorBoundary from './Components/ErrorBoundary';
+import ProtectedRoute from './Components/ProtectedRoute';
 import SendEnv from './pages/SendEnv';
 import useAuthBootstrap from './hooks/useAuthBootstrap';
 import usePageTracking from './hooks/usePageTracking';
@@ -41,22 +42,56 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
         />
         <Route
           path='/home'
-          element={token ? <Home /> : <Navigate to='/login' replace />}
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
         />
-        <Route path='/rygame' element={<RyGame />} />
+        <Route
+          path='/rygame'
+          element={
+            <ProtectedRoute>
+              <RyGame />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path='/profile'
-          element={token ? <Profile /> : <Navigate to='/login' replace />}
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
         />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
-        <Route path='/coding' element={<Coding />} />
         <Route
-          path='/sendenv'
-          element={token ? <SendEnv /> : <Navigate to='/login' replace />}
+          path='/coding'
+          element={
+            <ProtectedRoute>
+              <Coding />
+            </ProtectedRoute>
+          }
         />
-        <Route path='/data-lookup' element={<DataLookup />} />
-        <Route path='*' element={<NotFound />} />
+        {/* SendEnv is the only page that doesn't require login */}
+        <Route path='/sendenv' element={<SendEnv />} />
+        <Route
+          path='/data-lookup'
+          element={
+            <ProtectedRoute>
+              <DataLookup />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='*'
+          element={
+            <ProtectedRoute>
+              <NotFound />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );
