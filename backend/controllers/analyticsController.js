@@ -4,6 +4,7 @@ import {
   recordVisit,
   getPageViewStats,
   getRecentVisits,
+  getVisitorStats,
 } from '../services/analyticsService.js';
 
 const extractIpAddress = (req) => {
@@ -88,4 +89,21 @@ const getRecentVisitEntries = asyncHandler(async (req, res) => {
   });
 });
 
-export { trackVisit, getPageViewSummary, getRecentVisitEntries };
+const getVisitorSummary = asyncHandler(async (req, res) => {
+  const stats = await getVisitorStats({
+    limit: req.query.limit,
+  });
+
+  res.json({
+    ok: true,
+    count: stats.length,
+    results: stats,
+  });
+});
+
+export {
+  trackVisit,
+  getPageViewSummary,
+  getRecentVisitEntries,
+  getVisitorSummary,
+};
