@@ -53,8 +53,12 @@ app.use('/api/posts', postRoutes);
 app.use('/api/game', gameRoutes);
 app.use('/api/secretenv', secretEnvRoutes);
 app.post('/api/analytics/track', visitorIdentifier, optional, trackVisit);
-app.get('/api/analytics/page-views', protect, getPageViewSummary);
-app.get('/api/analytics/recent', protect, getRecentVisitEntries);
+app.get('/api/analytics/page-views', optional, getPageViewSummary);
+app.get('/api/analytics/recent', optional, getRecentVisitEntries);
+
+app.post('/api/metrics/track', visitorIdentifier, optional, trackVisit);
+app.get('/api/metrics/page-views', optional, getPageViewSummary);
+app.get('/api/metrics/recent', optional, getRecentVisitEntries);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.static(path.join(__dirname, 'dist')));
