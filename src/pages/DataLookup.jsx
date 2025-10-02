@@ -16,6 +16,7 @@ import {
   fetchPageViewSummary,
   fetchRecentVisits,
   fetchVisitorStats,
+  fetchVisitorDetails,
 } from '../api/analytics';
 import { formatDuration, formatCompactNumber } from '../utils/timeFormatting';
 
@@ -172,7 +173,7 @@ const RecentVisitsTable = ({ data }) => (
                 className='hover:bg-gray-50 dark:hover:bg-gray-800/80'
               >
                 <td className='px-4 py-3 text-sm text-gray-700 dark:text-gray-300'>
-                  {formatDateTime(row.createdAt)}
+                  {row.formattedTime || formatDateTime(row.createdAt)}
                 </td>
                 <td
                   className='max-w-xs truncate px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100'
@@ -213,9 +214,9 @@ const RecentVisitsTable = ({ data }) => (
                 </td>
                 <td
                   className='max-w-xs truncate px-4 py-3 text-sm text-gray-700 dark:text-gray-300'
-                  title={row.referrer}
+                  title={row.formattedReferrer || row.referrer}
                 >
-                  {row.referrer || '—'}
+                  {row.formattedReferrer || row.referrer || '—'}
                 </td>
                 <td className='px-4 py-3 text-xs text-gray-500 dark:text-gray-400'>
                   <div>
@@ -327,7 +328,9 @@ const VisitorStatsChart = ({ data }) => {
               Visitor statistics unavailable
             </div>
             <div className='text-xs mt-1'>
-              This feature requires backend deployment
+              {data === null
+                ? 'This feature requires backend deployment'
+                : 'No visitor data available'}
             </div>
           </div>
         </div>
@@ -338,10 +341,12 @@ const VisitorStatsChart = ({ data }) => {
   const chartData = data
     .slice(0, 10) // Show top 10 visitors
     .map((visitor) => ({
-      nickname: visitor.nickname,
-      visits: visitor.totalVisits,
-      avgDuration: Math.round(visitor.avgDuration / 1000), // Convert to seconds
-      uniquePages: visitor.uniquePages,
+      nickname: visitor.nickname || 'Anonymous',
+      visits: visitor.totalVisits || 0,
+      avgDuration: visitor.avgDuration
+        ? Math.round(visitor.avgDuration / 1000)
+        : 0, // Convert to seconds
+      uniquePages: visitor.uniquePages || 0,
     }));
 
   return (
@@ -372,8 +377,246 @@ const VisitorStatsChart = ({ data }) => {
   );
 };
 
+// Visitor Details Modal
+const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className='fixed inset-0 z-50 overflow-y-auto'>
+      <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
+        <div
+          className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity'
+          onClick={onClose}
+        ></div>
+
+        <div className='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl dark:bg-gray-900'>
+          <div className='bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 dark:bg-gray-900'>
+            <div className='flex items-center justify-between mb-4'>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
+                Visitor Details
+              </h3>
+              <button
+                onClick={onClose}
+                className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+              >
+                <span className='sr-only'>Close</span>
+                <svg
+                  className='h-6 w-6'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  strokeWidth='1.5'
+                  stroke='currentColor'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    d='M6 18L18 6M6 6l12 12'
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {loading ? (
+              <div className='flex justify-center py-8'>
+                <div className='text-gray-500 dark:text-gray-400'>
+                  Loading visitor details...
+                </div>
+              </div>
+            ) : visitorDetails ? (
+              <div className='space-y-6'>
+                {/* Basic Info */}
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-4'>
+                    <h4 className='font-medium text-gray-900 dark:text-gray-100 mb-2'>
+                      Basic Information
+                    </h4>
+                    <div className='space-y-1 text-sm'>
+                      <div>
+                        <span className='text-gray-500'>Nickname:</span>{' '}
+                        <span className='font-medium text-blue-600 dark:text-blue-400'>
+                          {visitorDetails.nickname}
+                        </span>
+                      </div>
+                      <div>
+                        <span className='text-gray-500'>Visitor ID:</span>{' '}
+                        <span className='font-mono text-xs'>
+                          {visitorDetails.visitorId}
+                        </span>
+                      </div>
+                      <div>
+                        <span className='text-gray-500'>User:</span>{' '}
+                        {visitorDetails.isUser ? (
+                          <span className='text-green-600 dark:text-green-400'>
+                            @{visitorDetails.user.username}
+                          </span>
+                        ) : (
+                          <span className='text-gray-400'>Guest</span>
+                        )}
+                      </div>
+                      <div>
+                        <span className='text-gray-500'>Total Visits:</span>{' '}
+                        <span className='font-medium'>
+                          {visitorDetails.totalVisits}
+                        </span>
+                      </div>
+                      <div>
+                        <span className='text-gray-500'>Unique Pages:</span>{' '}
+                        <span className='font-medium'>
+                          {visitorDetails.pathCount}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-4'>
+                    <h4 className='font-medium text-gray-900 dark:text-gray-100 mb-2'>
+                      Visit Statistics
+                    </h4>
+                    <div className='space-y-1 text-sm'>
+                      <div>
+                        <span className='text-gray-500'>Avg Duration:</span>{' '}
+                        <span className='font-medium'>
+                          {formatDuration(visitorDetails.avgDuration)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className='text-gray-500'>First Visit:</span>{' '}
+                        <span>{formatDateTime(visitorDetails.firstVisit)}</span>
+                      </div>
+                      <div>
+                        <span className='text-gray-500'>Last Visit:</span>{' '}
+                        <span>{formatDateTime(visitorDetails.lastVisit)}</span>
+                      </div>
+                      <div>
+                        <span className='text-gray-500'>IP Addresses:</span>{' '}
+                        <span className='font-mono text-xs'>
+                          {visitorDetails.ipAddresses.join(', ')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pages Visited */}
+                <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-4'>
+                  <h4 className='font-medium text-gray-900 dark:text-gray-100 mb-2'>
+                    Pages Visited
+                  </h4>
+                  <div className='flex flex-wrap gap-1'>
+                    {visitorDetails.uniquePaths.map((path, index) => (
+                      <span
+                        key={index}
+                        className='inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded'
+                      >
+                        {path}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Visit History */}
+                <div>
+                  <h4 className='font-medium text-gray-900 dark:text-gray-100 mb-2'>
+                    Recent Visit History
+                  </h4>
+                  <div className='bg-gray-50 dark:bg-gray-800 rounded-lg max-h-60 overflow-y-auto'>
+                    <table className='min-w-full divide-y divide-gray-200 dark:divide-gray-700'>
+                      <thead className='bg-gray-100 dark:bg-gray-700'>
+                        <tr>
+                          <th className='px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300'>
+                            Time
+                          </th>
+                          <th className='px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300'>
+                            Path
+                          </th>
+                          <th className='px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300'>
+                            Referrer
+                          </th>
+                          <th className='px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300'>
+                            Duration
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className='divide-y divide-gray-200 dark:divide-gray-700'>
+                        {visitorDetails.visitHistory
+                          .slice(0, 20)
+                          .map((visit, index) => (
+                            <tr
+                              key={index}
+                              className='hover:bg-gray-100 dark:hover:bg-gray-700'
+                            >
+                              <td className='px-3 py-2 text-xs text-gray-700 dark:text-gray-300'>
+                                {visit.formattedTime}
+                              </td>
+                              <td className='px-3 py-2 text-xs text-gray-900 dark:text-gray-100 font-medium'>
+                                {visit.path}
+                              </td>
+                              <td className='px-3 py-2 text-xs text-gray-500 dark:text-gray-400'>
+                                {visit.formattedReferrer}
+                              </td>
+                              <td className='px-3 py-2 text-xs text-gray-500 dark:text-gray-400'>
+                                {visit.durationMs
+                                  ? formatDuration(visit.durationMs)
+                                  : '—'}
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Technical Information */}
+                {(visitorDetails.fingerprint ||
+                  visitorDetails.screenInfo ||
+                  visitorDetails.browserInfo) && (
+                  <div>
+                    <h4 className='font-medium text-gray-900 dark:text-gray-100 mb-2'>
+                      Technical Information
+                    </h4>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                      {visitorDetails.screenInfo && (
+                        <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-3'>
+                          <h5 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+                            Screen Info
+                          </h5>
+                          <pre className='text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap'>
+                            {JSON.stringify(visitorDetails.screenInfo, null, 2)}
+                          </pre>
+                        </div>
+                      )}
+                      {visitorDetails.browserInfo && (
+                        <div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-3'>
+                          <h5 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+                            Browser Info
+                          </h5>
+                          <pre className='text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap'>
+                            {JSON.stringify(
+                              visitorDetails.browserInfo,
+                              null,
+                              2
+                            )}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className='text-center py-8 text-gray-500 dark:text-gray-400'>
+                Failed to load visitor details
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Visitor statistics table
-const VisitorStatsTable = ({ data }) => (
+const VisitorStatsTable = ({ data, onVisitorClick }) => (
   <div className='overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900'>
     <div className='max-h-[32rem] overflow-auto'>
       <table className='min-w-full divide-y divide-gray-200 dark:divide-gray-700'>
@@ -413,16 +656,28 @@ const VisitorStatsTable = ({ data }) => (
             data.map((visitor, index) => (
               <tr
                 key={visitor.visitorId}
-                className='hover:bg-gray-50 dark:hover:bg-gray-800/80'
+                className='hover:bg-gray-50 dark:hover:bg-gray-800/80 cursor-pointer transition-colors'
+                onClick={() => onVisitorClick(visitor.visitorId)}
               >
                 <td className='px-4 py-3 text-sm text-gray-700 dark:text-gray-300'>
                   <div className='space-y-1'>
-                    <span className='block font-medium text-blue-600 dark:text-blue-400'>
+                    <span
+                      className={`block font-medium ${
+                        visitor.isUser
+                          ? 'text-green-600 dark:text-green-400'
+                          : 'text-blue-600 dark:text-blue-400'
+                      }`}
+                    >
                       {visitor.nickname}
                     </span>
                     <span className='block truncate text-xs text-gray-500 dark:text-gray-400'>
                       ID: {visitor.visitorId}
                     </span>
+                    {visitor.isUser && visitor.user && (
+                      <span className='block text-xs text-green-500 dark:text-green-400'>
+                        @{visitor.user.username}
+                      </span>
+                    )}
                     {visitor.mostRecentIp ? (
                       <span className='block text-xs text-gray-400 dark:text-gray-500'>
                         IP: {visitor.mostRecentIp}
@@ -462,6 +717,12 @@ const DataLookup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+
+  // Visitor details modal state
+  const [selectedVisitorId, setSelectedVisitorId] = useState(null);
+  const [visitorDetails, setVisitorDetails] = useState(null);
+  const [visitorDetailsLoading, setVisitorDetailsLoading] = useState(false);
+  const [showVisitorModal, setShowVisitorModal] = useState(false);
 
   const totals = useMemo(() => {
     return summary.reduce(
@@ -540,6 +801,29 @@ const DataLookup = () => {
 
   const increaseLimit = () => {
     setLimit((prev) => Math.min(prev + 100, 500));
+  };
+
+  const handleVisitorClick = async (visitorId) => {
+    setSelectedVisitorId(visitorId);
+    setShowVisitorModal(true);
+    setVisitorDetailsLoading(true);
+    setVisitorDetails(null);
+
+    try {
+      const response = await fetchVisitorDetails(visitorId);
+      setVisitorDetails(response.result);
+    } catch (error) {
+      console.error('Failed to fetch visitor details:', error);
+      setVisitorDetails(null);
+    } finally {
+      setVisitorDetailsLoading(false);
+    }
+  };
+
+  const handleCloseVisitorModal = () => {
+    setShowVisitorModal(false);
+    setSelectedVisitorId(null);
+    setVisitorDetails(null);
   };
 
   return (
@@ -674,7 +958,10 @@ const DataLookup = () => {
               </p>
             </div>
           </div>
-          <VisitorStatsTable data={visitorStats} />
+          <VisitorStatsTable
+            data={visitorStats}
+            onVisitorClick={handleVisitorClick}
+          />
         </section>
 
         <section aria-labelledby='recent-heading' className='space-y-4'>
@@ -710,6 +997,14 @@ const DataLookup = () => {
           <RecentVisitsTable data={recentVisits} />
         </section>
       </div>
+
+      {/* Visitor Details Modal */}
+      <VisitorDetailsModal
+        isOpen={showVisitorModal}
+        onClose={handleCloseVisitorModal}
+        visitorDetails={visitorDetails}
+        loading={visitorDetailsLoading}
+      />
     </main>
   );
 };
