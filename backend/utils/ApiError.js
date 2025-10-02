@@ -24,6 +24,14 @@ class ApiError extends Error {
   static notFound(message = 'Resource not found') {
     return new ApiError(message, 404);
   }
+
+  static tooManyRequests(message = 'Too many requests') {
+    return new ApiError(message, 429);
+  }
+
+  static internalServerError(message = 'Internal server error') {
+    return new ApiError(message, 500);
+  }
 }
 
 export default ApiError;
