@@ -1,5 +1,23 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { fetchPageViewSummary, fetchRecentVisits } from '../api/analytics';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from 'recharts';
+import {
+  fetchPageViewSummary,
+  fetchRecentVisits,
+  fetchVisitorStats,
+} from '../api/analytics';
+import { formatDuration, formatCompactNumber } from '../utils/timeFormatting';
 
 const formatNumber = (value) =>
   typeof value === 'number' ? value.toLocaleString() : '—';
@@ -94,7 +112,7 @@ const SummaryTable = ({ data }) => (
                   {formatNumber(row.uniqueUsers)}
                 </td>
                 <td className='px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300'>
-                  {row.avgDuration ? `${Math.round(row.avgDuration)} ms` : '—'}
+                  {row.avgDuration ? formatDuration(row.avgDuration) : '—'}
                 </td>
                 <td className='px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300'>
                   {formatDateTime(row.firstVisitAt)}
@@ -163,17 +181,35 @@ const RecentVisitsTable = ({ data }) => (
                   {row.path}
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700 dark:text-gray-300'>
-                  <span className='block truncate text-xs text-gray-500 dark:text-gray-400'>
-                    {row.visitorId}
-                  </span>
-                  {row.ipAddress ? (
-                    <span className='mt-1 block text-xs text-gray-400 dark:text-gray-500'>
-                      IP: {row.ipAddress}
+                  <div className='space-y-1'>
+                    <span className='block text-sm font-medium text-blue-600 dark:text-blue-400'>
+                      {row.visitorNickname || 'Anonymous'}
                     </span>
-                  ) : null}
+                    <span className='block truncate text-xs text-gray-500 dark:text-gray-400'>
+                      ID: {row.visitorId}
+                    </span>
+                    {row.ipAddress ? (
+                      <span className='block text-xs text-gray-400 dark:text-gray-500'>
+                        IP: {row.ipAddress}
+                      </span>
+                    ) : null}
+                  </div>
                 </td>
                 <td className='px-4 py-3 text-sm text-gray-700 dark:text-gray-300'>
-                  {row.userId || 'Guest'}
+                  {row.user ? (
+                    <div className='space-y-1'>
+                      <span className='block font-medium text-green-600 dark:text-green-400'>
+                        {row.user.displayName || row.user.username}
+                      </span>
+                      <span className='block text-xs text-gray-500 dark:text-gray-400'>
+                        @{row.user.username}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className='text-gray-500 dark:text-gray-400'>
+                      Guest
+                    </span>
+                  )}
                 </td>
                 <td
                   className='max-w-xs truncate px-4 py-3 text-sm text-gray-700 dark:text-gray-300'
@@ -190,8 +226,204 @@ const RecentVisitsTable = ({ data }) => (
                     {row.timezoneOffset ?? '—'}
                   </div>
                   {row.durationMs != null ? (
-                    <div>Duration: {Math.round(row.durationMs)} ms</div>
+                    <div>Duration: {formatDuration(row.durationMs)}</div>
                   ) : null}
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
+// Chart color palette
+const CHART_COLORS = [
+  '#3B82F6',
+  '#10B981',
+  '#F59E0B',
+  '#EF4444',
+  '#8B5CF6',
+  '#06B6D4',
+  '#84CC16',
+  '#F97316',
+  '#EC4899',
+  '#6366F1',
+];
+
+// Custom tooltip for charts
+const ChartTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className='bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg'>
+        <p className='text-sm font-medium text-gray-900 dark:text-gray-100'>
+          {label}
+        </p>
+        {payload.map((entry, index) => (
+          <p key={index} className='text-sm' style={{ color: entry.color }}>
+            {entry.name}: {formatCompactNumber(entry.value)}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+// Pie chart for most visited pages
+const PageVisitsPieChart = ({ data }) => {
+  const chartData = data
+    .slice(0, 8) // Show top 8 pages
+    .map((item, index) => ({
+      name:
+        item.path.length > 20 ? `${item.path.substring(0, 20)}...` : item.path,
+      value: item.totalVisits,
+      fullPath: item.path,
+      color: CHART_COLORS[index % CHART_COLORS.length],
+    }));
+
+  return (
+    <div className='rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900'>
+      <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4'>
+        Most Visited Pages
+      </h3>
+      <div className='h-80'>
+        <ResponsiveContainer width='100%' height='100%'>
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx='50%'
+              cy='50%'
+              outerRadius={80}
+              dataKey='value'
+              label={({ name, percent }) =>
+                `${name} (${(percent * 100).toFixed(1)}%)`
+              }
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip content={<ChartTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
+// Bar chart for visitor statistics
+const VisitorStatsChart = ({ data }) => {
+  const chartData = data
+    .slice(0, 10) // Show top 10 visitors
+    .map((visitor) => ({
+      nickname: visitor.nickname,
+      visits: visitor.totalVisits,
+      avgDuration: Math.round(visitor.avgDuration / 1000), // Convert to seconds
+      uniquePages: visitor.uniquePages,
+    }));
+
+  return (
+    <div className='rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900'>
+      <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4'>
+        Top Visitors Activity
+      </h3>
+      <div className='h-80'>
+        <ResponsiveContainer width='100%' height='100%'>
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray='3 3' />
+            <XAxis
+              dataKey='nickname'
+              angle={-45}
+              textAnchor='end'
+              height={60}
+              fontSize={12}
+            />
+            <YAxis fontSize={12} />
+            <Tooltip content={<ChartTooltip />} />
+            <Legend />
+            <Bar dataKey='visits' fill='#3B82F6' name='Total Visits' />
+            <Bar dataKey='uniquePages' fill='#10B981' name='Unique Pages' />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
+// Visitor statistics table
+const VisitorStatsTable = ({ data }) => (
+  <div className='overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900'>
+    <div className='max-h-[32rem] overflow-auto'>
+      <table className='min-w-full divide-y divide-gray-200 dark:divide-gray-700'>
+        <thead className='bg-gray-50 dark:bg-gray-800'>
+          <tr>
+            <th className='px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300'>
+              Visitor
+            </th>
+            <th className='px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300'>
+              Total Visits
+            </th>
+            <th className='px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300'>
+              Unique Pages
+            </th>
+            <th className='px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300'>
+              Avg. Duration
+            </th>
+            <th className='px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300'>
+              First Visit
+            </th>
+            <th className='px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300'>
+              Last Visit
+            </th>
+          </tr>
+        </thead>
+        <tbody className='divide-y divide-gray-100 dark:divide-gray-800'>
+          {data.length === 0 ? (
+            <tr>
+              <td
+                colSpan={6}
+                className='px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400'
+              >
+                No visitor statistics available yet.
+              </td>
+            </tr>
+          ) : (
+            data.map((visitor, index) => (
+              <tr
+                key={visitor.visitorId}
+                className='hover:bg-gray-50 dark:hover:bg-gray-800/80'
+              >
+                <td className='px-4 py-3 text-sm text-gray-700 dark:text-gray-300'>
+                  <div className='space-y-1'>
+                    <span className='block font-medium text-blue-600 dark:text-blue-400'>
+                      {visitor.nickname}
+                    </span>
+                    <span className='block truncate text-xs text-gray-500 dark:text-gray-400'>
+                      ID: {visitor.visitorId}
+                    </span>
+                    {visitor.mostRecentIp ? (
+                      <span className='block text-xs text-gray-400 dark:text-gray-500'>
+                        IP: {visitor.mostRecentIp}
+                      </span>
+                    ) : null}
+                  </div>
+                </td>
+                <td className='px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300'>
+                  {formatNumber(visitor.totalVisits)}
+                </td>
+                <td className='px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300'>
+                  {formatNumber(visitor.uniquePages)}
+                </td>
+                <td className='px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300'>
+                  {formatDuration(visitor.avgDuration)}
+                </td>
+                <td className='px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300'>
+                  {formatDateTime(visitor.firstVisit)}
+                </td>
+                <td className='px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300'>
+                  {formatDateTime(visitor.lastVisit)}
                 </td>
               </tr>
             ))
@@ -205,6 +437,7 @@ const RecentVisitsTable = ({ data }) => (
 const DataLookup = () => {
   const [summary, setSummary] = useState([]);
   const [recentVisits, setRecentVisits] = useState([]);
+  const [visitorStats, setVisitorStats] = useState([]);
   const [limit, setLimit] = useState(100);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -228,13 +461,16 @@ const DataLookup = () => {
       setError(null);
 
       try {
-        const [summaryResponse, recentResponse] = await Promise.all([
-          fetchPageViewSummary(),
-          fetchRecentVisits({ limit: recentLimit }),
-        ]);
+        const [summaryResponse, recentResponse, visitorResponse] =
+          await Promise.all([
+            fetchPageViewSummary(),
+            fetchRecentVisits({ limit: recentLimit }),
+            fetchVisitorStats({ limit: 50 }),
+          ]);
 
         setSummary(summaryResponse.results || []);
         setRecentVisits(recentResponse.results || []);
+        setVisitorStats(visitorResponse.results || []);
         setLastUpdated(new Date());
       } catch (err) {
         console.error('failed to load analytics data', err);
@@ -331,6 +567,25 @@ const DataLookup = () => {
           </div>
         </section>
 
+        <section aria-labelledby='charts-heading' className='space-y-6'>
+          <div>
+            <h2
+              id='charts-heading'
+              className='text-lg font-semibold text-gray-900 dark:text-gray-100'
+            >
+              Visual Analytics
+            </h2>
+            <p className='text-xs text-gray-500 dark:text-gray-400'>
+              Interactive charts showing page popularity and visitor activity
+              patterns.
+            </p>
+          </div>
+          <div className='grid gap-6 lg:grid-cols-2'>
+            <PageVisitsPieChart data={summary} />
+            <VisitorStatsChart data={visitorStats} />
+          </div>
+        </section>
+
         <section aria-labelledby='paths-heading' className='space-y-4'>
           <div className='flex items-center justify-between'>
             <div>
@@ -347,6 +602,24 @@ const DataLookup = () => {
             </div>
           </div>
           <SummaryTable data={summary} />
+        </section>
+
+        <section aria-labelledby='visitors-heading' className='space-y-4'>
+          <div className='flex items-center justify-between'>
+            <div>
+              <h2
+                id='visitors-heading'
+                className='text-lg font-semibold text-gray-900 dark:text-gray-100'
+              >
+                Visitor Statistics
+              </h2>
+              <p className='text-xs text-gray-500 dark:text-gray-400'>
+                Detailed breakdown of individual visitor activity with friendly
+                nicknames.
+              </p>
+            </div>
+          </div>
+          <VisitorStatsTable data={visitorStats} />
         </section>
 
         <section aria-labelledby='recent-heading' className='space-y-4'>
