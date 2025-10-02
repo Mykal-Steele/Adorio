@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 import serverless from 'serverless-http';
 
 import corsOptions from './config/corsOptions.js';
-import { environment } from './config/environment.js';
+import { environment, isProduction } from './config/environment.js';
 import { connectDatabase } from './config/database.js';
 import {
   standardLimiter,
@@ -36,6 +36,52 @@ import {
 process.env.TZ = 'UTC';
 
 const app = express();
+
+// Configure trust proxy for production deployments (Render, Heroku, Cloudflare, etc.)
+// This allows express-rate-limit and other middleware to properly handle X-Forwarded-For headers
+const configureTrustProxy = () => {
+  // Allow override via environment variable
+  if (process.env.TRUST_PROXY) {
+    const trustValue = process.env.TRUST_PROXY;
+    if (trustValue === 'true' || trustValue === '1') {
+      return true;
+    } else if (trustValue === 'false' || trustValue === '0') {
+      return false;
+    } else if (!isNaN(trustValue)) {
+      return parseInt(trustValue, 10);
+    } else {
+      return trustValue; // String value (e.g., IP address)
+    }
+  }
+
+  // Default configuration based on environment
+  if (process.env.NODE_ENV === 'production') {
+    // Common cloud platforms
+    if (
+      process.env.RENDER ||
+      process.env.HEROKU_APP_NAME ||
+      process.env.VERCEL
+    ) {
+      return 1; // Trust the first proxy
+    }
+    // For Cloudflare or multiple proxies
+    if (process.env.CF_RAY || process.env.CLOUDFLARE) {
+      return 2; // Trust up to 2 proxies
+    }
+    return 1; // Default for production
+  } else {
+    // In development, trust all proxies for flexibility
+    return true;
+  }
+};
+
+const trustProxyValue = configureTrustProxy();
+app.set('trust proxy', trustProxyValue);
+
+// Log proxy configuration in production for debugging
+if (process.env.NODE_ENV === 'production') {
+  console.log(`Trust proxy configured: ${trustProxyValue}`);
+}
 
 app.use(cors(corsOptions));
 app.use(express.json());
