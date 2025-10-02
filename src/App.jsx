@@ -55,10 +55,7 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
           path='/sendenv'
           element={token ? <SendEnv /> : <Navigate to='/login' replace />}
         />
-        <Route
-          path='/data-lookup'
-          element={token ? <DataLookup /> : <Navigate to='/login' replace />}
-        />
+        <Route path='/data-lookup' element={<DataLookup />} />
         <Route path='*' element={<NotFound />} />
       </Routes>
     </>
