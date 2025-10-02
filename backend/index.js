@@ -28,6 +28,9 @@ import {
   getPageViewSummary,
   getRecentVisitEntries,
   getVisitorSummary,
+  getVisitorDetailsInfo,
+  getHealthStatus,
+  getSystemStats,
 } from './controllers/analyticsController.js';
 
 process.env.TZ = 'UTC';
@@ -64,7 +67,12 @@ app.get('/api/metrics/recent', optional, getRecentVisitEntries);
 app.post('/api/stats/track', visitorIdentifier, optional, trackVisit);
 app.get('/api/stats/page-views', optional, getPageViewSummary);
 app.get('/api/stats/recent', optional, getRecentVisitEntries);
-app.get('/api/stats/visitors', optional, getVisitorSummary);
+app.get('/api/stats/visitor-stats', optional, getVisitorSummary);
+app.get('/api/stats/visitor/:visitorId', optional, getVisitorDetailsInfo);
+
+// Health and monitoring endpoints
+app.get('/api/health', getHealthStatus);
+app.get('/api/stats/system', optional, getSystemStats);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.static(path.join(__dirname, 'dist')));
