@@ -18,25 +18,27 @@ Your production setup is fully configured and working correctly. Here's what hap
 
 - **NODE_ENV**: `production` (set by Render)
 - **PORT**: `5000` (or Render's assigned port)
-- **CLIENT_URL**: `https://mykal-steele.github.io` ✅
+- **CLIENT_URL**: `https://your-frontend-url.github.io` ✅
 - **DATABASE**: MongoDB Atlas connection ✅
 - **CLOUDINARY**: Image upload service ✅
 - **JWT**: Authentication secrets ✅
 - **CORS**: Properly configured for your frontend ✅
 
-### Render Environment Variables (Already Set) ✅
+### Render Environment Variables (Example Format) ✅
 
-```
-CLIENT_URL=https://mykal-steele.github.io
-CLOUDINARY_KEY=434121358531843
-CLOUDINARY_NAME=dboeqtx65
-CLOUDINARY_SECRET=wF7BHY_N4wA92MWH_62XVY_VQR4
-JWT_SECRET="L0okz8zON2kinGi6qnRwZ82W54RszDBZwoF20XmWG1/qy3Ga451o6c19ihZ1EkRfhJAft0MMYAL4DTC6W8pJ1l1RhplKOqvFy1MxzbAuvubXm8+9FfommlYw7QfekLS3ZwR03IuJC1CT7CGTNhsdZgp4GYlLb2oOoJgYk/imHdI="
-MONGO_URI="mongodb+srv://mykalstele:mongomykal@cluster0.snup0wa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+```env
+CLIENT_URL=https://your-frontend-url.github.io
+CLOUDINARY_KEY=your_cloudinary_key
+CLOUDINARY_NAME=your_cloudinary_name
+CLOUDINARY_SECRET=your_cloudinary_secret
+JWT_SECRET="your_jwt_secret_here"
+MONGO_URI="mongodb+srv://username:password@cluster.mongodb.net/dbname"
 NODE_ENV=production
-VITE_BACKEND_URL=https://feelio-github-io.onrender.com
-VITE_CLOUDINARY_NAME=dboeqtx65
+VITE_BACKEND_URL=https://your-backend.onrender.com
+VITE_CLOUDINARY_NAME=your_cloudinary_name
 ```
+
+> **🔒 Security Note**: The example above shows placeholder values. Replace with your actual environment variables in Render dashboard.
 
 ## 🚀 Commands Overview
 
@@ -51,8 +53,8 @@ VITE_CLOUDINARY_NAME=dboeqtx65
 
 - `npm start` - Production deployment command (used by Render)
 - `npm run verify-deployment` - Test production config locally
-- Frontend: `https://mykal-steele.github.io`
-- Backend: `https://feelio-github-io.onrender.com`
+- Frontend: `https://your-frontend-url.github.io`
+- Backend: `https://your-backend.onrender.com`
 
 ## 🔒 Authentication & Routes
 

@@ -16,8 +16,8 @@ Your application is now configured to work seamlessly in both local development 
 
 ### Production Environment (Render)
 
-- **Frontend**: Deployed to `https://mykal-steele.github.io`
-- **Backend**: Deployed to `https://feelio-github-io.onrender.com`
+- **Frontend**: Deployed to `https://your-frontend-url.github.io`
+- **Backend**: Deployed to `https://your-backend.onrender.com`
 - **Environment**: Render injects environment variables directly
 - **Database**: Production MongoDB cluster
 
@@ -61,18 +61,18 @@ npm run prod        # Run in production mode locally (testing)
 
 ## 🌐 Environment Variables
 
-### Your Render Backend Environment
+### Render Backend Environment (Example)
 
-```
-CLIENT_URL=https://mykal-steele.github.io
-CLOUDINARY_KEY=434121358531843
-CLOUDINARY_NAME=dboeqtx65
-CLOUDINARY_SECRET=wF7BHY_N4wA92MWH_62XVY_VQR4
-JWT_SECRET="L0okz8zON2kinGi6qnRwZ82W54RszDBZwoF20XmWG1/qy3Ga451o6c19ihZ1EkRfhJAft0MMYAL4DTC6W8pJ1l1RhplKOqvFy1MxzbAuvubXm8+9FfommlYw7QfekLS3ZwR03IuJC1CT7CGTNhsdZgp4GYlLb2oOoJgYk/imHdI="
-MONGO_URI="mongodb+srv://mykalstele:mongomykal@cluster0.snup0wa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+```env
+CLIENT_URL=https://your-frontend-url.github.io
+CLOUDINARY_KEY=your_cloudinary_key
+CLOUDINARY_NAME=your_cloudinary_name
+CLOUDINARY_SECRET=your_cloudinary_secret
+JWT_SECRET="your_jwt_secret_here"
+MONGO_URI="mongodb+srv://username:password@cluster.mongodb.net/dbname"
 NODE_ENV=production
-VITE_BACKEND_URL=https://feelio-github-io.onrender.com
-VITE_CLOUDINARY_NAME=dboeqtx65
+VITE_BACKEND_URL=https://your-backend.onrender.com
+VITE_CLOUDINARY_NAME=your_cloudinary_name
 ```
 
 ### Local Development Files
@@ -80,11 +80,13 @@ VITE_CLOUDINARY_NAME=dboeqtx65
 - **Frontend**: `.env.development` → Points to `http://localhost:5000`
 - **Backend**: `backend/.env.development` → Points to `http://localhost:5173`
 
+> **🔒 Security Note**: The example above shows placeholder values. Your actual environment variables should be kept secure and never committed to version control.
+
 ## 🔍 CORS Configuration
 
 Your backend automatically allows requests from:
 
-- `https://mykal-steele.github.io` (your Render frontend)
+- `https://your-frontend-url.github.io` (your Render frontend)
 - `http://localhost:5173` & `http://localhost:5174` (local development)
 - Your domain variants (`adorio.space`, `feelio.space`, etc.)
 
