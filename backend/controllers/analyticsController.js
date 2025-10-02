@@ -238,11 +238,24 @@ const getHealthStatus = asyncHandler(async (req, res) => {
   const healthStatus = await monitor.performHealthCheck();
   const stats = monitor.getHealthStatus();
 
+  // Get proxy configuration info for debugging
+  const proxyInfo = {
+    trustProxy: req.app.get('trust proxy'),
+    clientIp: extractIpAddress(req),
+    headers: {
+      xForwardedFor: req.headers['x-forwarded-for'],
+      xRealIp: req.headers['x-real-ip'],
+      cfConnectingIp: req.headers['cf-connecting-ip'],
+    },
+    remoteAddress: req.socket?.remoteAddress,
+  };
+
   res.status(healthStatus.status === 'healthy' ? 200 : 503).json({
     status: healthStatus.status,
     timestamp: new Date().toISOString(),
     ...stats,
-    version: '2.0.0',
+    version: '2.0.1', // Updated version
+    proxy: proxyInfo,
   });
 });
 
