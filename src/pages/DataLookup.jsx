@@ -315,6 +315,26 @@ const PageVisitsPieChart = ({ data }) => {
 
 // Bar chart for visitor statistics
 const VisitorStatsChart = ({ data }) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className='rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900'>
+        <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4'>
+          Top Visitors Activity
+        </h3>
+        <div className='h-80 flex items-center justify-center'>
+          <div className='text-center text-gray-500 dark:text-gray-400'>
+            <div className='text-sm font-medium'>
+              Visitor statistics unavailable
+            </div>
+            <div className='text-xs mt-1'>
+              This feature requires backend deployment
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const chartData = data
     .slice(0, 10) // Show top 10 visitors
     .map((visitor) => ({
@@ -461,16 +481,46 @@ const DataLookup = () => {
       setError(null);
 
       try {
-        const [summaryResponse, recentResponse, visitorResponse] =
-          await Promise.all([
-            fetchPageViewSummary(),
-            fetchRecentVisits({ limit: recentLimit }),
-            fetchVisitorStats({ limit: 50 }),
-          ]);
+        // Load each endpoint individually to handle partial failures gracefully
+        const results = await Promise.allSettled([
+          fetchPageViewSummary(),
+          fetchRecentVisits({ limit: recentLimit }),
+          fetchVisitorStats({ limit: 50 }),
+        ]);
 
-        setSummary(summaryResponse.results || []);
-        setRecentVisits(recentResponse.results || []);
-        setVisitorStats(visitorResponse.results || []);
+        // Handle page view summary
+        const summaryResponse = results[0];
+        setSummary(
+          summaryResponse.status === 'fulfilled'
+            ? summaryResponse.value.results || []
+            : []
+        );
+
+        // Handle recent visits
+        const recentResponse = results[1];
+        setRecentVisits(
+          recentResponse.status === 'fulfilled'
+            ? recentResponse.value.results || []
+            : []
+        );
+
+        // Handle visitor stats (new feature that might not be deployed yet)
+        const visitorResponse = results[2];
+        setVisitorStats(
+          visitorResponse.status === 'fulfilled'
+            ? visitorResponse.value.results || []
+            : []
+        );
+
+        // Check if any endpoints failed
+        const failedEndpoints = results.filter((r) => r.status === 'rejected');
+        if (failedEndpoints.length > 0) {
+          console.warn(
+            `${failedEndpoints.length} analytics endpoints failed:`,
+            failedEndpoints
+          );
+        }
+
         setLastUpdated(new Date());
       } catch (err) {
         console.error('failed to load analytics data', err);
@@ -616,6 +666,11 @@ const DataLookup = () => {
               <p className='text-xs text-gray-500 dark:text-gray-400'>
                 Detailed breakdown of individual visitor activity with friendly
                 nicknames.
+                {visitorStats.length === 0 && (
+                  <span className='block mt-1 text-amber-600 dark:text-amber-400'>
+                    ⚠️ Requires latest backend deployment
+                  </span>
+                )}
               </p>
             </div>
           </div>
