@@ -32,7 +32,8 @@
     "multer": "^1.4.5-lts.1",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^3.1.10",
-    "serverless-http": "^3.2.0"
+    "serverless-http": "^3.2.0",
+    "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
     "dotenv-webpack": "^8.1.0",
