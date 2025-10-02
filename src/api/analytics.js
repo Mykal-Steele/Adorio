@@ -1,8 +1,8 @@
 import API from './index';
 import { API_BASE_URL } from '../config/apiConfig';
 
-const METRICS_BASE = `${API_BASE_URL}/metrics`;
-const TRACK_ENDPOINT = `${METRICS_BASE}/track`;
+const STATS_BASE = `${API_BASE_URL}/stats`;
+const TRACK_ENDPOINT = `${STATS_BASE}/track`;
 
 const normalizeDuration = (value) => {
   if (typeof value !== 'number' || Number.isNaN(value)) {
@@ -67,19 +67,29 @@ const trackPageView = async (payload = {}) => {
     });
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
-      console.warn('failed to send metrics beacon', error);
+      console.warn('failed to send stats beacon', error);
     }
   }
 };
 
 const fetchPageViewSummary = async (params = {}) => {
-  const response = await API.get('/metrics/page-views', { params });
+  const response = await API.get('/stats/page-views', { params });
   return response.data;
 };
 
 const fetchRecentVisits = async (params = {}) => {
-  const response = await API.get('/metrics/recent', { params });
+  const response = await API.get('/stats/recent', { params });
   return response.data;
 };
 
-export { trackPageView, fetchPageViewSummary, fetchRecentVisits };
+const fetchVisitorStats = async (params = {}) => {
+  const response = await API.get('/stats/visitors', { params });
+  return response.data;
+};
+
+export {
+  trackPageView,
+  fetchPageViewSummary,
+  fetchRecentVisits,
+  fetchVisitorStats,
+};
