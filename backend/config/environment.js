@@ -1,7 +1,14 @@
 import dotenv from 'dotenv';
 
 // Load environment variables as early as possible
-dotenv.config();
+// For cloud platforms like Render, environment variables are injected directly
+// For local development, load from .env files
+if (process.env.NODE_ENV === 'development') {
+  dotenv.config({ path: '.env.development' });
+} else if (!process.env.MONGO_URI) {
+  // Only load .env file if environment variables aren't already set (local production testing)
+  dotenv.config({ path: '.env' });
+}
 
 const normalize = (value) => (typeof value === 'string' ? value.trim() : value);
 
@@ -26,8 +33,10 @@ const isProduction = environment.nodeEnv === 'production';
 
 const defaultOrigins = [
   'https://mykal-steele.github.io',
+  'https://www.mykal-steele.github.io',
   'http://localhost:3000',
   'http://localhost:5173',
+  'http://localhost:5174', // In case vite uses alternate port
   'https://feelio.space',
   'https://adorio.space',
   'http://adorio.space',
