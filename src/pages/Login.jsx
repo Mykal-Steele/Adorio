@@ -47,7 +47,9 @@ const Login = () => {
       } else if (err.request) {
         setError("can't reach the server - wifi acting up maybe?");
       } else {
-        setError('An unexpected error occurred. Please try again.');
+        setError(
+          'NOT AN ERROR. Try again in like 5 min, server probably goes to sleep cause of inactivity. (I am using free version) '
+        );
       }
     } finally {
       setLoading(false);
