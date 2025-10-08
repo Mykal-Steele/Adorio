@@ -18,20 +18,29 @@ const ensureInstagramHandle = () => {
 /**
  * Bootstraps authenticated user context from persisted tokens on initial load.
  * Keeps component logic slim and makes the login flow easier to reason about.
+ * Optimized to prevent multiple authentication calls.
  */
 const useAuthBootstrap = () => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   useEffect(() => {
+    // Prevent multiple initialization calls
+    if (hasInitialized) {
+      return;
+    }
+
     let isActive = true;
 
     const hydrateUser = async () => {
-      setIsLoading(true);
       const storedToken = localStorage.getItem('token');
 
       if (!storedToken) {
-        setIsLoading(false);
+        if (isActive) {
+          setIsLoading(false);
+          setHasInitialized(true);
+        }
         return;
       }
 
@@ -48,6 +57,7 @@ const useAuthBootstrap = () => {
       } finally {
         if (isActive) {
           setIsLoading(false);
+          setHasInitialized(true);
         }
       }
     };
@@ -58,7 +68,7 @@ const useAuthBootstrap = () => {
     return () => {
       isActive = false;
     };
-  }, [dispatch]);
+  }, [dispatch, hasInitialized]);
 
   return isLoading;
 };

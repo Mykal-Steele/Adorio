@@ -44,8 +44,7 @@ const RyGame = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  axios.defaults.baseURL =
-    window.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com";
+  axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
   // Game constants and refs
   const game = useRef({
     messageHeight: 50,
