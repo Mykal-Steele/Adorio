@@ -15,6 +15,7 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Coding from './pages/Coding';
 import DataLookup from './pages/DataLookup';
+import SmartCity from './pages/SmartCity';
 import Navbar from '@components/Navbar';
 import NotFound from '@components/NotFound';
 import ErrorBoundary from './Components/ErrorBoundary';
@@ -74,8 +75,9 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
             </ProtectedRoute>
           }
         />
-        {/* SendEnv is the only page that doesn't require login */}
+        {/* Public pages that don't require login */}
         <Route path='/sendenv' element={<SendEnv />} />
+        <Route path='/smartcity' element={<SmartCity />} />
         <Route
           path='/data-lookup'
           element={
@@ -104,7 +106,14 @@ const App = () => {
   const { token } = useSelector((state) => state.user);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className='min-h-screen bg-gray-950 flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-500 border-r-transparent mb-4'></div>
+          <p className='text-gray-300 text-lg'>Loading Adorio...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
