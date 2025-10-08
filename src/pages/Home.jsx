@@ -462,28 +462,29 @@ const Home = () => {
           className='space-y-4 sm:space-y-6 pb-8'
         >
           {posts.map((post, index) => (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className='relative  mt-4 pt-4 border-t border-gray-800/40'
-              ref={index === posts.length - 1 ? lastPostRef : null}
-              key={post._id}
-            >
-              <PostCard
-                {...post}
-                user={post.user}
-                currentUserId={user?._id}
-                onLike={handleLike}
-                onCommentAdded={(updatedPost) => {
-                  setPosts((prevPosts) =>
-                    prevPosts.map((p) =>
-                      p._id === updatedPost._id ? updatedPost : p
-                    )
-                  );
-                }}
-              />
-            </motion.div>
+            <React.Fragment key={post._id}>
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className='relative  mt-4 pt-4 border-t border-gray-800/40'
+                ref={index === posts.length - 1 ? lastPostRef : null}
+              >
+                <PostCard
+                  {...post}
+                  user={post.user}
+                  currentUserId={user?._id}
+                  onLike={handleLike}
+                  onCommentAdded={(updatedPost) => {
+                    setPosts((prevPosts) =>
+                      prevPosts.map((p) =>
+                        p._id === updatedPost._id ? updatedPost : p
+                      )
+                    );
+                  }}
+                />
+              </motion.div>
+            </React.Fragment>
           ))}
 
           {loading && <SkeletonLoader count={3} />}
