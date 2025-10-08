@@ -72,6 +72,11 @@ const usePageTracking = () => {
       typeof performance !== 'undefined' ? performance.now() : Date.now();
     const previous = navigationRef.current;
 
+    // Skip if this is the same path to avoid duplicate tracking
+    if (previous?.path === fullPath) {
+      return;
+    }
+
     if (!visitorIdRef.current) {
       const local = window.localStorage ?? null;
       visitorIdRef.current = ensurePersistentId(local, VISITOR_STORAGE_KEY);
@@ -111,7 +116,10 @@ const usePageTracking = () => {
       userId,
     };
 
-    trackPageView(payload);
+    // Use setTimeout to batch analytics calls and prevent blocking
+    setTimeout(() => {
+      trackPageView(payload);
+    }, 0);
 
     navigationRef.current = {
       path: fullPath,

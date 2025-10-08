@@ -274,7 +274,7 @@ const Coding = () => {
         {/* Main Layout */}
         <div className='grid lg:grid-cols-[300px_1fr] gap-6'>
           {/* Sidebar */}
-          <aside>
+          <aside className='space-y-6'>
             <ProblemList
               problems={problems}
               activeProblemId={activeProblemId}
