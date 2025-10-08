@@ -63,6 +63,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                   <NavLink to='/home' text='Home' />
                   <NavLink to='/profile' text='Profile' />
                   <NavLink to='/coding' text='Coding' />
+                  <NavLink to='/smartcity' text='SmartCity' />
                   <NavLink to='/rygame' text='RyGame' />
                 </div>
                 <motion.button
@@ -80,6 +81,11 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                 <NavLink
                   to='/coding'
                   text='Coding'
+                  className='hidden sm:block'
+                />
+                <NavLink
+                  to='/smartcity'
+                  text='SmartCity'
                   className='hidden sm:block'
                 />
                 <NavLink to='/login' text='Login' className='hidden sm:block' />
@@ -103,11 +109,13 @@ const Navbar = ({ darkMode, setDarkMode }) => {
             <NavLink to='/home' text='Home' />
             <NavLink to='/profile' text='Profile' />
             <NavLink to='/coding' text='Coding' />
+            <NavLink to='/smartcity' text='SmartCity' />
             <NavLink to='/rygame' text='RyGame' />
           </div>
         ) : (
           <div className='sm:hidden flex justify-center space-x-4 pb-2'>
             <NavLink to='/coding' text='Coding' />
+            <NavLink to='/smartcity' text='SmartCity' />
             <NavLink to='/login' text='Login' />
             <NavLink to='/register' text='Register' />
           </div>
@@ -117,7 +125,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
   );
 };
 
-const NavLink = ({ to, text, className }) => (
+const NavLink = ({ to, text, className = '' }) => (
   <motion.div whileHover={{ scale: 1.05 }} className={`relative ${className}`}>
     <Link
       to={to}
@@ -137,10 +145,6 @@ NavLink.propTypes = {
   to: PropTypes.string.isRequired,
   text: PropTypes.string.isRequired,
   className: PropTypes.string,
-};
-
-NavLink.defaultProps = {
-  className: '',
 };
 
 export default Navbar;

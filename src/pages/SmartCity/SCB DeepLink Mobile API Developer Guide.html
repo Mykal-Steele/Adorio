@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SCB DeepLink Mobile API - Developer Implementation Guide</title>
+    <!-- Highlight.js CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+    />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+          'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+          'Helvetica Neue', sans-serif;
+        line-height: 1.6;
+        color: #333333;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #ffffff;
+      }
+
+      h1 {
+        color: #2c3e50;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 10px;
+        font-size: 2.5em;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      h2 {
+        color: #34495e;
+        border-bottom: 2px solid #ecf0f1;
+        padding-bottom: 8px;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        font-size: 1.8em;
+      }
+
+      h3 {
+        color: #2c3e50;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        font-size: 1.4em;
+        font-weight: 600;
+      }
+
+      h4 {
+        color: #34495e;
+        margin-top: 25px;
+        margin-bottom: 12px;
+        font-size: 1.2em;
+        font-weight: 600;
+      }
+
+      p {
+        margin-bottom: 16px;
+        text-align: justify;
+      }
+
+      ul,
+      ol {
+        margin-bottom: 16px;
+        padding-left: 30px;
+      }
+
+      li {
+        margin-bottom: 8px;
+      }
+
+      code {
+        background-color: #f8f9fa;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 0.9em;
+        color: #e74c3c;
+        border: 1px solid #e1e8ed;
+      }
+
+      pre {
+        background-color: #f8f9fa;
+        border: 1px solid #e1e8ed;
+        border-radius: 6px;
+        padding: 16px;
+        overflow-x: auto;
+        margin: 20px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      pre code {
+        background: none;
+        padding: 0;
+        border: none;
+        color: inherit;
+        font-size: 0.85em;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      table thead {
+        background-color: #34495e;
+        color: #ffffff;
+      }
+
+      table th {
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid #2c3e50;
+      }
+
+      table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ecf0f1;
+      }
+
+      table tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+      }
+
+      table tbody tr:hover {
+        background-color: #e8f4fd;
+        transition: background-color 0.3s ease;
+      }
+
+      .table-striped tbody tr:nth-child(odd) {
+        background-color: #ffffff;
+      }
+
+      .table-striped tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+      }
+
+      .table-bordered {
+        border: 1px solid #dee2e6;
+      }
+
+      .table-bordered th,
+      .table-bordered td {
+        border: 1px solid #dee2e6;
+      }
+
+      blockquote {
+        border-left: 4px solid #3498db;
+        margin: 20px 0;
+        padding: 10px 20px;
+        background-color: #f8f9fa;
+        font-style: italic;
+        color: #555555;
+      }
+
+      .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+      }
+
+      .alert-info {
+        color: #31708f;
+        background-color: #d9edf7;
+        border-color: #bce8f1;
+      }
+
+      .alert-warning {
+        color: #8a6d3b;
+        background-color: #fcf8e3;
+        border-color: #faebcc;
+      }
+
+      .alert-danger {
+        color: #a94442;
+        background-color: #f2dede;
+        border-color: #ebccd1;
+      }
+
+      hr {
+        border: none;
+        height: 2px;
+        background: linear-gradient(to right, #3498db, #2ecc71, #3498db);
+        margin: 40px 0;
+        border-radius: 2px;
+      }
+
+      .toc {
+        background-color: #f8f9fa;
+        border: 1px solid #e1e8ed;
+        border-radius: 6px;
+        padding: 20px;
+        margin: 30px 0;
+      }
+
+      .toc h3 {
+        margin-top: 0;
+        color: #2c3e50;
+        border-bottom: 1px solid #bdc3c7;
+        padding-bottom: 10px;
+      }
+
+      .toc ul {
+        list-style-type: none;
+        padding-left: 0;
+      }
+
+      .toc ul li {
+        margin: 8px 0;
+      }
+
+      .toc ul li a {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .toc ul li a:hover {
+        color: #2980b9;
+        text-decoration: underline;
+      }
+
+      .code-header {
+        background-color: #34495e;
+        color: #ffffff;
+        padding: 8px 16px;
+        font-size: 0.9em;
+        font-weight: 600;
+        border-radius: 6px 6px 0 0;
+        margin-bottom: 0;
+      }
+
+      .code-header + pre {
+        margin-top: 0;
+        border-radius: 0 0 6px 6px;
+        border-top: none;
+      }
+
+      strong {
+        color: #2c3e50;
+        font-weight: 600;
+      }
+
+      .highlight {
+        background-color: #fff3cd;
+        padding: 2px 4px;
+        border-radius: 3px;
+        border: 1px solid #ffeaa7;
+      }
+
+      .status-code {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 0.9em;
+        font-weight: 600;
+      }
+
+      .status-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .status-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .status-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+
+      .method-get {
+        background-color: #61affe;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-right: 10px;
+      }
+
+      .method-post {
+        background-color: #49cc90;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-right: 10px;
+      }
+
+      .method-put {
+        background-color: #fca130;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-right: 10px;
+      }
+
+      .method-delete {
+        background-color: #f93e3e;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-right: 10px;
+      }
+
+      .endpoint {
+        background-color: #f8f9fa;
+        border: 1px solid #e1e8ed;
+        border-radius: 4px;
+        padding: 10px;
+        margin: 10px 0;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      }
+
+      .response-example {
+        background-color: #f1f8ff;
+        border-left: 4px solid #0366d6;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 0 4px 4px 0;
+      }
+
+      .response-example h5 {
+        margin-top: 0;
+        color: #0366d6;
+        font-weight: 600;
+      }
+
+      .parameter-table {
+        font-size: 0.9em;
+      }
+
+      .parameter-table th {
+        background-color: #f1f3f4;
+        color: #202124;
+        font-weight: 600;
+      }
+
+      .parameter-required {
+        color: #d73a49;
+        font-weight: 600;
+      }
+
+      .parameter-optional {
+        color: #28a745;
+        font-weight: 600;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+
+        h1 {
+          font-size: 2em;
+        }
+
+        h2 {
+          font-size: 1.5em;
+        }
+
+        table {
+          font-size: 0.8em;
+        }
+
+        pre {
+          padding: 10px;
+          font-size: 0.8em;
+        }
+      }
+
+      .copy-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8em;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .code-block-container {
+        position: relative;
+      }
+
+      .code-block-container:hover .copy-button {
+        opacity: 1;
+      }
+
+      .copy-button:hover {
+        background-color: #5a6268;
+      }
+
+      .section-nav {
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        padding: 15px;
+        margin: 20px 0;
+        border-left: 4px solid #007bff;
+      }
+
+      .section-nav h4 {
+        margin-top: 0;
+        color: #007bff;
+      }
+
+      .section-nav ul {
+        margin-bottom: 0;
+        columns: 2;
+        column-gap: 30px;
+      }
+
+      .section-nav li {
+        break-inside: avoid;
+        margin-bottom: 5px;
+      }
+
+      .section-nav a {
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      .section-nav a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body id="preview">
+    <h1 class="code-line" data-line-start="0" data-line-end="1">
+      <a id="SCB_DeepLink_Mobile_API_Developer_Implementation_Guide_0"></a>SCB
+      DeepLink Mobile API - Developer Implementation Guide
+    </h1>
+
+    <h2 class="code-line" data-line-start="1" data-line-end="2">
+      <a id="Overview_1"></a>Overview
+    </h2>
+    <p class="has-line-data" data-line-start="3" data-line-end="4">
+      This guide provides comprehensive implementation details for integrating
+      SCB DeepLink Mobile API. DeepLink is primarily used for mobile payments
+      where customers click a payment link, get redirected to SCB Easy app, and
+      complete payment through the SCB banking system. This approach eliminates
+      the need for QR code scanning by providing direct app-to-app integration.
+    </p>
+
+    <h2 class="code-line" data-line-start="5" data-line-end="6">
+      <a id="1_Database_Schema_5"></a>1. Database Schema
+    </h2>
+
+    <p class="has-line-data" data-line-start="7" data-line-end="8">
+      The DeepLink API system requires a dedicated database table to track
+      transaction lifecycles and payment statuses.
+    </p>
+
+    <h3 class="code-line" data-line-start="9" data-line-end="10">
+      <a id="11_deepLink_transactions_Table_9"></a>1.1 deepLink_transactions
+      Table
+    </h3>
+    <p class="has-line-data" data-line-start="11" data-line-end="12">
+      This table stores all DeepLink transaction records with comprehensive
+      tracking capabilities.
+    </p>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Column Name</th>
+          <th>Data Type</th>
+          <th>Constraints</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>id</td>
+          <td>SERIAL</td>
+          <td>PRIMARY KEY</td>
+          <td>Auto-incrementing unique identifier</td>
+        </tr>
+        <tr>
+          <td>ref1</td>
+          <td>VARCHAR(50)</td>
+          <td>NOT NULL</td>
+          <td>
+            Generated reference ID (REF-xxxxxxxxx format, [0-9a-f] hexadecimal)
+          </td>
+        </tr>
+        <tr>
+          <td>ref2</td>
+          <td>VARCHAR(50)</td>
+          <td>NOT NULL</td>
+          <td>Receiver User ID for tracking</td>
+        </tr>
+        <tr>
+          <td>transaction_id</td>
+          <td>VARCHAR(100)</td>
+          <td>UNIQUE</td>
+          <td>SCB's unique transaction identifier</td>
+        </tr>
+        <tr>
+          <td>transaction_type</td>
+          <td>VARCHAR(20)</td>
+          <td>NOT NULL, DEFAULT 'PURCHASE'</td>
+          <td>Transaction type (always "PURCHASE" for our test)</td>
+        </tr>
+        <tr>
+          <td>payment_amount</td>
+          <td>DECIMAL(15,2)</td>
+          <td>NOT NULL</td>
+          <td>Payment amount with 2 decimal precision</td>
+        </tr>
+        <tr>
+          <td>payment_status</td>
+          <td>VARCHAR(20)</td>
+          <td>NOT NULL, DEFAULT 'NA'</td>
+          <td>Payment status (NA, PENDING, PAID, CANCELLED, etc.)</td>
+        </tr>
+        <tr>
+          <td>paid_time_date</td>
+          <td>TIMESTAMP</td>
+          <td>NULL</td>
+          <td>Timestamp when payment was completed</td>
+        </tr>
+        <tr>
+          <td>deeplink_url</td>
+          <td>TEXT</td>
+          <td>NULL</td>
+          <td>SCB DeepLink URL for payment</td>
+        </tr>
+        <tr>
+          <td>session_validity_period</td>
+          <td>INTEGER</td>
+          <td>DEFAULT 0</td>
+          <td>
+            Session timeout in seconds (60-1800). Optional: 0 = no timeout
+          </td>
+        </tr>
+        <tr>
+          <td>created_at</td>
+          <td>TIMESTAMP</td>
+          <td>DEFAULT CURRENT_TIMESTAMP</td>
+          <td>Record creation timestamp</td>
+        </tr>
+        <tr>
+          <td>updated_at</td>
+          <td>TIMESTAMP</td>
+          <td>DEFAULT CURRENT_TIMESTAMP</td>
+          <td>Record last updated timestamp</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="code-line" data-line-start="9" data-line-end="10">
+      <a id="12_merchants_Table_9"></a>1.2 merchants Table (Referenced)
+    </h3>
+    <p class="has-line-data" data-line-start="11" data-line-end="12">
+      This table stores all SCB-specific financial configuration data for users
+      who act as merchants (payment receivers). The <code>billerId</code> field
+      from this table is used in DeepLink transactions.
+    </p>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th style="text-align: left">Column</th>
+          <th style="text-align: left">Data Type</th>
+          <th style="text-align: left">Description</th>
+          <th style="text-align: left">Constraints / Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: left">
+            <strong><code>id</code></strong>
+          </td>
+          <td style="text-align: left"><code>SERIAL</code></td>
+          <td style="text-align: left">
+            Unique identifier for each merchant record.
+          </td>
+          <td style="text-align: left"><strong>Primary Key</strong></td>
+        </tr>
+        <tr>
+          <td style="text-align: left"><code>user_id</code></td>
+          <td style="text-align: left"><code>INT</code></td>
+          <td style="text-align: left">
+            Links to the user who owns this merchant configuration.
+          </td>
+          <td style="text-align: left">
+            FK to <code>users(id)</code>, <code>UNIQUE</code>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left"><code>merchant_id</code></td>
+          <td style="text-align: left"><code>VARCHAR(50)</code></td>
+          <td style="text-align: left">
+            SCB-assigned merchant identifier for this user's account.
+          </td>
+          <td style="text-align: left">
+            <code>NOT NULL</code>, <code>UNIQUE</code>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left"><code>sub_account_id</code></td>
+          <td style="text-align: left"><code>VARCHAR(50)</code></td>
+          <td style="text-align: left">
+            SCB sub-account identifier for payment processing.
+          </td>
+          <td style="text-align: left"><code>NOT NULL</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: left"><code>biller_id</code></td>
+          <td style="text-align: left"><code>VARCHAR(50)</code></td>
+          <td style="text-align: left">
+            SCB biller identifier for this merchant account.
+            <strong
+              >Used in DeepLink transactions as <code>accountTo</code>.</strong
+            >
+          </td>
+          <td style="text-align: left"><code>NOT NULL</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: left"><code>public_key</code></td>
+          <td style="text-align: left"><code>TEXT</code></td>
+          <td style="text-align: left">
+            SCB public key used for encrypting API requests to SCB.
+          </td>
+          <td style="text-align: left"><code>NOT NULL</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: left"><code>created_at</code></td>
+          <td style="text-align: left"><code>TIMESTAMPTZ</code></td>
+          <td style="text-align: left">
+            Date and time when merchant configuration was created.
+          </td>
+          <td style="text-align: left">
+            <code>NOT NULL</code>, Default: <code>now()</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr />
+
+    <h2 class="code-line" data-line-start="71" data-line-end="72">
+      <a id="2_Authentication_System_71"></a>2. Authentication System
+    </h2>
+
+    <h3 class="code-line" data-line-start="73" data-line-end="74">
+      <a id="21_Request_Headers_73"></a>2.1 Request Headers
+    </h3>
+    <p class="has-line-data" data-line-start="9" data-line-end="10">
+      All SCB DeepLink API requests require specific headers for authentication
+      and request tracking. Use the <code>getHeaders()</code> function to ensure
+      consistent header formatting.
+    </p>
+
+    <pre><code class="language-javascript">function getHeaders(resourceOwnerId) {
+  return {
+    'resourceOwnerId': resourceOwnerId, // Your API Key from environment configs
+    'requestUId': require('crypto').randomUUID(), // UUID v4 for request tracking
+    'accept-language': 'EN',
+    'Content-Type': 'application/json',
+    'channel': 'scbeasy' // Required for DeepLink transactions
+  };
+}</code></pre>
+
+    <p class="has-line-data" data-line-start="17" data-line-end="18">
+      The <code>resourceOwnerId</code> is your SCB API key, and
+      <code>requestUId</code> must be a fresh UUID v4 for each request to ensure
+      proper request tracking and avoid conflicts. The
+      <code>channel</code> parameter is specifically required for DeepLink
+      transactions.
+    </p>
+
+    <h3 class="code-line" data-line-start="15" data-line-end="16">
+      <a id="22_OAuth_Token_Management_15"></a>2.2 OAuth Token Management
+    </h3>
+    <p class="has-line-data" data-line-start="17" data-line-end="18">
+      SCB requires OAuth2 authentication with automatic token refresh
+      capability. The system must handle token expiration transparently and
+      include the access token as a Bearer token in the Authorization header.
+    </p>
+
+    <h4 class="code-line" data-line-start="21" data-line-end="22">
+      <a id="221_Initial_Token_Acquisition_21"></a>2.2.1 Initial Token
+      Acquisition
+    </h4>
+
+    <p class="has-line-data" data-line-start="23" data-line-end="24">
+      Your app's environment configuration contains
+      <code>applicationKey</code> and
+      <code>applicationSecret</code> credentials. Use the
+      <code>applicationKey</code> as <code>resourceOwnerId</code>, and make a
+      POST call with these to obtain both <code>accessToken</code> and
+      <code>refreshToken</code>.
+    </p>
+
+    <p><strong>API Details:</strong></p>
+    <ul>
+      <li>
+        <span class="method-post">POST</span>
+        <code>/v1/oauth/token</code> - Initial token acquisition
+      </li>
+      <li>
+        <strong>Headers:</strong> <code>resourceOwnerId</code>,
+        <code>requestUId</code>, <code>accept-language</code>
+      </li>
+      <li>
+        <strong>Body:</strong> <code>applicationKey</code>,
+        <code>applicationSecret</code>
+      </li>
+      <li>
+        <strong>Response:</strong> <code>accessToken</code>,
+        <code>refreshToken</code>, <code>expiresIn</code>
+      </li>
+    </ul>
+
+    <h4 class="code-line" data-line-start="36" data-line-end="37">
+      <a id="222_Token_Refresh_Implementation_36"></a>2.2.2 Token Refresh
+      Implementation
+    </h4>
+
+    <p class="has-line-data" data-line-start="38" data-line-end="39">
+      Your JavaScript function will be given the current
+      <code>accessToken</code> and <code>refreshToken</code>. Before making any
+      protected API call, check if the <code>accessToken</code> has expired. If
+      expired, you'll need to use the <code>applicationKey</code> and
+      <code>applicationSecret</code> from your app's environment configuration,
+      then call the refresh endpoint using <code>refreshToken</code> to get new
+      tokens.
+    </p>
+
+    <p><strong>Token Refresh API Details:</strong></p>
+    <ul>
+      <li>
+        <span class="method-post">POST</span>
+        <code>/v1/oauth/token/refresh</code> - Token refresh endpoint
+      </li>
+      <li>
+        <strong>Headers:</strong> <code>resourceOwnerId</code>,
+        <code>requestUId</code>, <code>accept-language</code>
+      </li>
+      <li>
+        <strong>Body:</strong> <code>refreshToken</code>,
+        <code>applicationKey</code>, <code>applicationSecret</code>
+      </li>
+      <li>
+        <strong>Response:</strong> New <code>accessToken</code> and
+        <code>refreshToken</code>
+      </li>
+    </ul>
+
+    <p class="has-line-data" data-line-start="53" data-line-end="54">
+      Implement automatic token refresh by checking token expiration before each
+      protected API call. This creates a seamless system where you use
+      <code>refreshToken</code> to get new <code>accessToken</code> and
+      <code>refreshToken</code> without re-authentication.
+    </p>
+
+    <hr />
+
+    <h2 class="code-line" data-line-start="42" data-line-end="43">
+      <a id="3_DeepLink_Transaction_Creation_42"></a>3. DeepLink Transaction
+      Creation
+    </h2>
+
+    <p class="has-line-data" data-line-start="44" data-line-end="45">
+      The DeepLink transaction creation process initiates a mobile payment flow
+      where users are redirected to SCB Easy app to complete payment. This API
+      creates a transaction record and returns a deeplink URL for mobile app
+      integration.
+    </p>
+
+    <h3 class="code-line" data-line-start="46" data-line-end="47">
+      <a id="31_Transaction_Initialization_46"></a>3.1 Transaction
+      Initialization
+    </h3>
+
+    <p class="has-line-data" data-line-start="48" data-line-end="49">
+      Creates a new DeepLink transaction with payment details and generates the
+      redirect URL for mobile payment processing.
+    </p>
+
+    <p><strong>API Details:</strong></p>
+    <ul>
+      <li>
+        <span class="method-post">POST</span>
+        <code>/v3/deeplink/transactions</code> - Create DeepLink transaction
+      </li>
+      <li>
+        <strong>Headers:</strong> Use <code>getHeaders(resourceOwnerId)</code> +
+        <code>Authorization: Bearer {accessToken}</code>
+      </li>
+      <li>
+        <strong>Body:</strong> Transaction details including
+        <code>billPayment</code> object
+      </li>
+    </ul>
+
+    <h4 class="code-line" data-line-start="125" data-line-end="126">
+      <a id="311_Request_Preparation_125"></a>3.1.1 Request Preparation
+    </h4>
+
+    <p class="has-line-data" data-line-start="127" data-line-end="128">
+      When this API is called, you will be given <code>receiverUserId</code> and
+      <code>paymentAmount</code>. The <code>billerId</code> need to be obtained
+      from the merchant table with given receiver <code>userId</code> as key and
+      used directly in the API call without storing in the database. Note that
+      merchant-specific financial configuration data (such as
+      <code>billerId</code>, <code>applicationKey</code>, and
+      <code>applicationSecret</code>) is stored in a separate merchant table
+      rather than the user table to properly segregate financial credentials
+      from general user information. The biller ID validation is not necessary
+      in sandbox environment.
+    </p>
+
+    <ol>
+      <li>
+        Generate unique reference ID using PostgreSQL UUID: <code>REF-</code> +
+        UUID substring (format: [0-9a-f] hexadecimal)
+      </li>
+      <li>
+        Use <code>billerId</code> taken from <code>merchants</code> table based
+        on <code>receiverUserId</code> as <code>accountTo</code> in API call
+      </li>
+      <li>
+        Store initial transaction record in
+        <code>deepLink_transactions</code> table with status "NA"
+      </li>
+      <li>Prepare request body with Bill Payment details</li>
+    </ol>
+
+    <h4 class="code-line" data-line-start="135" data-line-end="136">
+      <a id="312_Transaction_Data_Structure_135"></a>3.1.2 Transaction Data
+      Structure
+    </h4>
+
+    <p class="has-line-data" data-line-start="137" data-line-end="138">
+      Your JavaScript function will be given <code>receiverUserId</code>,
+      <code>paymentAmount</code>, <code>billerId</code>, and optional
+      <code>sessionValidityPeriod</code>. You'll need to generate a unique
+      <code>ref1</code> using PostgreSQL UUID generation. <code>ref2</code> will
+      be set to <code>receiverUserId</code> for tracking purposes.
+    </p>
+
+    <pre><code class="language-javascript">// Generate unique reference ID using PostgreSQL UUID
+const uuidResult = await db.query('SELECT gen_random_uuid() as id');
+const ref1 = 'REF-' + uuidResult.rows[0].id.replace(/-/g, '').substring(0, 18).toUpperCase();
+
+// Store in deepLink_transactions table (billerId not stored, used only for API call)
+await db.query(`
+  INSERT INTO deepLink_transactions (ref1, ref2, transaction_type, payment_amount, payment_status, session_validity_period)
+  VALUES ($1, $2, $3, $4, $5, $6)
+`, [ref1, receiverUserId, 'PURCHASE', paymentAmount, 'NA', sessionValidityPeriod || 0]);
+
+// Prepare data for SCB API
+const requestBody = {
+  transactionType: "PURCHASE",
+  transactionSubType: ["BP"], // Bill Payment
+  sessionValidityPeriod: sessionValidityPeriod || 0, // Optional: 60 to 1800 seconds (30 min max), 0 = no timeout
+  billPayment: {
+    paymentAmount: parseFloat(paymentAmount), // Must be number format
+    accountTo: billerId,                      // Merchant's biller ID (provided as input)
+    ref1: ref1,                              // Generated reference ID
+    ref2: receiverUserId                     // Receiver User ID for tracking
+  }
+};
+
+// Prepare headers using getHeaders() function
+const headers = getHeaders(resourceOwnerId);
+headers['authorization'] = `Bearer ${accessToken}`;
+
+// Make API call to create DeepLink transaction
+const response = await fetch('https://api-sandbox.partners.scb/partners/sandbox/v3/deeplink/transactions', {
+  method: 'POST',
+  headers: headers,
+  body: JSON.stringify(requestBody)
+});
+
+const responseData = await response.json();</code></pre>
+
+    <h4 class="code-line" data-line-start="154" data-line-end="155">
+      <a id="313_Response_Structure_154"></a>3.1.3 Response Structure
+    </h4>
+
+    <p class="has-line-data" data-line-start="156" data-line-end="157">
+      The <code>deeplinkUrl</code> is what we return from our wrapper to other
+      teams for mobile app integration. Users will be redirected to this URL
+      which opens SCB Easy app for payment processing. The API also returns
+      <code>transactionId</code> which must be stored in the database for
+      transaction tracking and status checking.
+    </p>
+
+    <pre><code class="language-javascript">// SCB DeepLink Transaction Creation API Response
+{
+  "status": {
+    "code": 1000,
+    "description": "Deeplink successfully created"
+  },
+  "data": {
+    "transactionId": "a4220ec2-bd0b-441f-b333-7c32d7b6d7f9",
+    "deeplinkUrl": "scbeasysim://purchase/a4220ec2-bd0b-441f-b333-7c32d7b6d7f9",
+    "userRefId": "7b109a37-09ba-4a62-aa56-9ea7ea3e97ab"
+  }
+}
+
+// Response data usage:
+// - status.code: Check if request was successful (1000 = success)
+// - data.transactionId: Store in database for status checking
+// - data.deeplinkUrl: Return to client for mobile app redirection
+// - data.userRefId: SCB's internal user reference
+
+// Implementation example:
+if (response.status.code === 1000) {
+  const { transactionId, deeplinkUrl } = response.data;
+  
+  // Update database with SCB transaction ID and deeplink URL
+  await db.query(`
+    UPDATE deepLink_transactions 
+    SET transaction_id = $1, deeplink_url = $2, payment_status = 'PENDING'
+    WHERE ref1 = $3
+  `, [transactionId, deeplinkUrl, ref1]);
+  
+  // Return deeplink URL to client for mobile redirection
+  return {
+    success: true,
+    ref1: ref1,
+    transactionId: transactionId,
+    deeplinkUrl: deeplinkUrl,
+    message: 'DeepLink transaction created successfully'
+  };
+} else {
+  throw new Error(`Transaction creation failed: ${response.status.description}`);
+}</code></pre>
+
+    <hr />
+
+    <h2 class="code-line" data-line-start="184" data-line-end="185">
+      <a id="4_Payment_Status_Inquiry_184"></a>4. Payment Status Inquiry
+    </h2>
+
+    <h3 class="code-line" data-line-start="217" data-line-end="218">
+      <a id="41_Transaction_Status_Check_217"></a>4.1 Transaction Status Check
+    </h3>
+
+    <p class="has-line-data" data-line-start="219" data-line-end="220">
+      Retrieves the current payment status of a DeepLink transaction using the
+      transaction ID obtained during transaction creation. This API should be
+      polled regularly to track payment completion.
+    </p>
+
+    <p><strong>API Details:</strong></p>
+    <ul>
+      <li>
+        <span class="method-get">GET</span>
+        <code>/v2/transactions/{transactionId}</code> - Check transaction status
+      </li>
+      <li>
+        <strong>Headers:</strong> Use <code>getHeaders(resourceOwnerId)</code> +
+        <code>Authorization: Bearer {accessToken}</code>
+      </li>
+      <li>
+        <strong>URL Parameter:</strong> <code>transactionId</code> from
+        transaction creation response
+      </li>
+      <li>
+        <strong>Response:</strong> Transaction details including
+        <code>statusCode</code> and payment information
+      </li>
+    </ul>
+
+    <h4 class="code-line" data-line-start="234" data-line-end="235">
+      <a id="411_Status_Check_Implementation_234"></a>4.1.1 Status Check
+      Implementation
+    </h4>
+
+    <p class="has-line-data" data-line-start="236" data-line-end="237">
+      Your JavaScript function will be given <code>transactionId</code> to check
+      the payment status. The API returns detailed transaction information
+      including the current status code which maps to specific payment states.
+    </p>
+
+    <pre><code class="language-javascript">// Look up transaction details from PostgreSQL using transactionId
+const transactionResult = await db.query(`
+  SELECT ref1, ref2, payment_amount
+  FROM deepLink_transactions 
+  WHERE transaction_id = $1
+`, [transactionId]);
+
+if (transactionResult.rows.length === 0) {
+  throw new Error('No transaction found for the provided transactionId');
+}
+
+// Make API call to check transaction status
+const headers = getHeaders(resourceOwnerId);
+headers['authorization'] = `Bearer ${accessToken}`;
+
+const statusResponse = await fetch(`https://api-sandbox.partners.scb/partners/sandbox/v2/transactions/${transactionId}`, {
+  method: 'GET',
+  headers: headers
+});
+
+const statusData = await statusResponse.json();</code></pre>
+
+    <h4 class="code-line" data-line-start="244" data-line-end="245">
+      <a id="412_Status_Code_Mapping_244"></a>4.1.2 Status Code Mapping
+    </h4>
+
+    <p class="has-line-data" data-line-start="246" data-line-end="247">
+      The SCB API returns numeric status codes that map to specific payment
+      states. Your system must handle these status codes and update the database
+      accordingly.
+    </p>
+
+    <pre><code class="language-javascript">// Status code mapping for payment states
+const statusMapping = {
+  0: 'PENDING',    // Payment is still being processed
+  1: 'PAID',       // Payment completed successfully
+  2: 'CANCELLED',  // Payment was cancelled by user
+  3: 'INVALID',    // Payment is invalid
+  4: 'PARTIAL',    // Partial payment received
+  5: 'EXPIRED'     // Payment session has expired
+};
+
+// Extract status code from API response
+const statusCode = statusData.data.statusCode;
+const paymentStatus = statusMapping[statusCode] || 'UNKNOWN';
+
+// Update database with current status
+await db.query(`
+  UPDATE deepLink_transactions 
+  SET payment_status = $1, updated_at = CURRENT_TIMESTAMP
+  WHERE transaction_id = $2
+`, [paymentStatus, transactionId]);
+
+// Update paid_time_date if payment is completed
+if (statusCode === 1) { // PAID
+  await db.query(`
+    UPDATE deepLink_transactions 
+    SET paid_time_date = CURRENT_TIMESTAMP
+    WHERE transaction_id = $1
+  `, [transactionId]);
+}</code></pre>
+
+    <h4 class="code-line" data-line-start="275" data-line-end="276">
+      <a id="413_Response_Structure_275"></a>4.1.3 Response Structure
+    </h4>
+
+    <p class="has-line-data" data-line-start="277" data-line-end="278">
+      The transaction status API returns comprehensive payment information
+      including bill payment details, timestamps, and current status.
+    </p>
+
+    <pre><code class="language-javascript">// SCB Transaction Status API Response Structure
+{
+  "status": {
+    "code": 1000,
+    "description": "Success"
+  },
+  "data": {
+    "transactionId": "a4220ec2-bd0b-441f-b333-7c32d7b6d7f9",
+    "userRefId": "7b109a37-09ba-4a62-aa56-9ea7ea3e97ab",
+    "transactionType": "PURCHASE",
+    "transactionSubType": ["BP"],
+    "transactionMethod": "BP",
+    "paidAmount": 3500.00,
+    "billPayment": {
+      "paymentAmount": 3500.00,
+      "accountTo": "001230083",      // Biller ID
+      "ref1": "REF-523863962",       // Generated reference
+      "ref2": "user123",             // Receiver User ID
+      "ref3": "ABC123",
+      "accountFrom": "029470043"     // Customer's account (when paid)
+    },
+    "partnerId": "66900789566433434",
+    "partnerName": "Trusted Partner",
+    "sessionValidityPeriod": 1800,
+    "createdTimestamp": "2022-01-20T13:00:00+07:00",
+    "updatedTimestamp": "2022-01-20T13:41:00+07:00",
+    "fee": 10,
+    "statusCode": 1,               // 0=PENDING, 1=PAID, 2=CANCELLED, 3=INVALID, 4=PARTIAL, 5=EXPIRED
+    "merchantMetaData": {
+      "deeplinkUrl": "scbeasysim://purchase/a4220ec2-bd0b-441f-b333-7c32d7b6d7f9",
+      "paymentInfo": []
+    }
+  }
+}
+
+// Response data usage:
+// - status.code: Check if API call was successful
+// - data.statusCode: Current payment status (0-5)
+// - data.paidAmount: Actual amount paid by customer
+// - data.billPayment.accountFrom: Customer's account number (available when paid)
+// - data.updatedTimestamp: Last status update time
+// - createdTimestamp vs updatedTimestamp: Track payment duration
+
+// Implementation example:
+if (response.status.code === 1000) {
+  const transactionData = response.data;
+  const statusCode = transactionData.statusCode;
+  const paymentStatus = statusMapping[statusCode];
+  
+  // Return status information to wrapper API caller
+  return {
+    success: true,
+    transactionId: transactionData.transactionId,
+    ref1: transactionData.billPayment.ref1,
+    ref2: transactionData.billPayment.ref2,
+    paymentStatus: paymentStatus,
+    statusCode: statusCode,
+    paidAmount: transactionData.paidAmount,
+    paymentAmount: transactionData.billPayment.paymentAmount,
+    createdTimestamp: transactionData.createdTimestamp,
+    updatedTimestamp: transactionData.updatedTimestamp,
+    shouldContinuePolling: ![1, 2, 5].includes(statusCode) // Stop polling on PAID, CANCELLED, or EXPIRED
+  };
+} else {
+  throw new Error(`Status check failed: ${response.status.description}`);
+}</code></pre>
+
+    <h4 class="code-line" data-line-start="325" data-line-end="326">
+      <a id="414_Polling_Strategy_325"></a>4.1.4 Polling Strategy
+    </h4>
+
+    <p class="has-line-data" data-line-start="327" data-line-end="328">
+      Developers should implement regular polling to check payment status until
+      completion. The polling should stop when the transaction reaches a final
+      state.
+    </p>
+
+    <pre><code class="language-javascript">// Polling implementation for payment status
+// We will be polling for 10 minutes (max 60 attempts, 10 seconds interval)
+async function pollPaymentStatus(transactionId, maxAttempts = 60, intervalSeconds = 10) {
+  let attempts = 0;
+  
+  while (attempts < maxAttempts) {
+    try {
+      const statusResult = await checkTransactionStatus(transactionId);
+      
+      // Stop polling on final states: PAID (1), CANCELLED (2), or EXPIRED (5)
+      if ([1, 2, 5].includes(statusResult.statusCode)) {
+        return {
+          success: true,
+          finalStatus: statusResult.paymentStatus,
+          statusCode: statusResult.statusCode,
+          attempts: attempts + 1,
+          data: statusResult
+        };
+      }
+      
+      // Continue polling for PENDING (0), INVALID (3), or PARTIAL (4)
+      attempts++;
+      await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+      
+    } catch (error) {
+      console.error(`Polling attempt ${attempts + 1} failed:`, error.message);
+      attempts++;
+      
+      if (attempts >= maxAttempts) {
+        throw new Error(`Payment status polling failed after ${maxAttempts} attempts`);
+      }
+      
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+    }
+  }
+  
+  return {
+    success: false,
+    message: 'Polling timeout - payment status still pending',
+    attempts: attempts
+  };
+}
+
+// Usage example:
+const pollingResult = await pollPaymentStatus('a4220ec2-bd0b-441f-b333-7c32d7b6d7f9', 60, 5);
+if (pollingResult.success) {
+  console.log(`Payment completed with status: ${pollingResult.finalStatus}`);
+} else {
+  console.log('Payment polling timed out');
+}</code></pre>
+
+    <hr />
+
+    <h2 class="code-line" data-line-start="425" data-line-end="426">
+      <a id="5_Error_Handling_425"></a>5. Error Handling
+    </h2>
+
+    <h3 class="code-line" data-line-start="427" data-line-end="428">
+      <a id="51_Common_Error_Scenarios_427"></a>5.1 Common Error Scenarios
+    </h3>
+
+    <ul>
+      <li>
+        <strong>Authentication Failures:</strong> Invalid or expired access
+        tokens
+      </li>
+      <li>
+        <strong>Transaction Creation Errors:</strong> Invalid biller ID, amount
+        validation failures
+      </li>
+      <li>
+        <strong>Status Check Failures:</strong> Invalid transaction ID, network
+        timeouts
+      </li>
+    </ul>
+
+    <h3 class="code-line" data-line-start="433" data-line-end="434">
+      <a id="52_Status_Code_Handling_433"></a>5.2 Status Code Handling
+    </h3>
+
+    <ul>
+      <li><strong>HTTP 201:</strong> Transaction successfully created</li>
+      <li><strong>HTTP 200:</strong> Status check successful</li>
+      <li><strong>HTTP 401:</strong> Authentication failure - refresh token</li>
+      <li><strong>HTTP 404:</strong> Transaction not found</li>
+      <li><strong>HTTP 501:</strong> Feature not supported</li>
+    </ul>
+
+    <h3 class="code-line" data-line-start="439" data-line-end="440">
+      <a id="53_Business_Logic_Validation_439"></a>5.3 Business Logic Validation
+    </h3>
+
+    <ul>
+      <li>
+        Validate <code>paymentAmount</code> is positive and within acceptable
+        limits
+      </li>
+      <li>Ensure <code>billerId</code> exists in merchant table</li>
+      <li>
+        Check <code>sessionValidityPeriod</code> is within 60-1800 seconds range
+      </li>
+      <li>Verify <code>transactionId</code> exists before status checking</li>
+      <li>Handle database connection failures gracefully</li>
+      <li>Implement retry logic for network timeouts</li>
+      <li>Log all API interactions for debugging and auditing</li>
+      <li>Validate UUID format for generated reference IDs</li>
+      <li>Check for duplicate transaction creation attempts</li>
+      <li>Handle concurrent status check requests properly</li>
+      <li>Implement proper error messaging for different failure scenarios</li>
+      <li>Ensure proper cleanup of failed transactions</li>
+      <li>Validate currency code format and supported currencies</li>
+      <li>Handle edge cases in status code mapping</li>
+      <li>Implement proper logging for audit trails</li>
+      <li>
+        Ensure database transactions are properly committed or rolled back
+      </li>
+      <li>Handle timezone differences in timestamp processing</li>
+      <li>Validate input parameters before API calls</li>
+    </ul>
+
+    <hr />
+
+    <h2 class="code-line" data-line-start="446" data-line-end="447">
+      <a id="6_API_Reference_Links_446"></a>6. API Reference Links
+    </h2>
+
+    <ul>
+      <li>
+        <strong>Authentication APIs:</strong>
+        <ul>
+          <li><code>POST /v1/oauth/token</code> - Initial token acquisition</li>
+          <li><code>POST /v1/oauth/token/refresh</code> - Token refresh</li>
+        </ul>
+      </li>
+      <li>
+        <strong>DeepLink Transaction APIs:</strong>
+        <ul>
+          <li>
+            <code>POST /v3/deeplink/transactions</code> - Create DeepLink
+            transaction
+          </li>
+          <li>
+            <code>GET /v2/transactions/{transactionId}</code> - Check
+            transaction status
+          </li>
+        </ul>
+      </li>
+      <li>
+        <strong>Sandbox Environment:</strong>
+        <ul>
+          <li>
+            Base URL:
+            <code>https://api-sandbox.partners.scb/partners/sandbox</code>
+          </li>
+          <li>All endpoints use HTTPS only</li>
+          <li>Rate limiting applies to all API calls</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Mobile Integration:</strong>
+        <ul>
+          <li>
+            DeepLink URL format:
+            <code>scbeasysim://purchase/{transactionId}</code>
+          </li>
+          <li>
+            Channel parameter: <code>scbeasy</code> for all DeepLink
+            transactions
+          </li>
+          <li>Session validity: Maximum 30 minutes (1800 seconds)</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Database Requirements:</strong>
+        <ul>
+          <li>PostgreSQL with UUID generation support</li>
+          <li>Transaction isolation for concurrent operations</li>
+          <li>
+            Proper indexing on <code>transaction_id</code> and
+            <code>ref1</code> columns
+          </li>
+        </ul>
+      </li>
+      <li>
+        <strong>Polling Guidelines:</strong>
+        <ul>
+          <li>Poll every 5-10 seconds for status updates</li>
+          <li>
+            Stop polling on final states: PAID (1), CANCELLED (2), EXPIRED (5)
+          </li>
+          <li>
+            Maximum polling duration: 30 minutes to match session validity
+          </li>
+        </ul>
+      </li>
+      <li>
+        <strong>Security Considerations:</strong>
+        <ul>
+          <li>Store access tokens securely</li>
+          <li>Use HTTPS for all API communications</li>
+          <li>
+            Implement proper error logging without exposing sensitive data
+          </li>
+          <li>Validate all input parameters before processing</li>
+        </ul>
+      </li>
+    </ul>
+
+    <style>
+      .code-line {
+        position: relative;
+      }
+    </style>
+
+    <!-- Highlight.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>

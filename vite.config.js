@@ -60,8 +60,8 @@ export default defineConfig({
         // Note: 'unsafe-eval' is needed for the coding platform to execute user code safely
         const scriptSrc = `'self' 'nonce-${nonce}' 'unsafe-eval'`;
         const connectSrc = isDev
-          ? `'self' http://localhost:5000 http://localhost:5000/api/*`
-          : `'self' https://feelio-github-io.onrender.com https://feelio-github-io.onrender.com/api/*`;
+          ? `'self' http://localhost:5000 http://localhost:5000/api/* https://cdnjs.cloudflare.com`
+          : `'self' https://feelio-github-io.onrender.com https://feelio-github-io.onrender.com/api/* https://cdnjs.cloudflare.com`;
 
         return html
           .replace(
@@ -70,9 +70,10 @@ export default defineConfig({
             <meta http-equiv="Content-Security-Policy" content="
               default-src 'self'; 
               script-src ${scriptSrc}; 
-              style-src 'self' 'unsafe-inline';
+              style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
               img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com;
               connect-src ${connectSrc};
+              frame-src 'self' https: http:;
               worker-src 'self' blob:;
               form-action 'self';
               base-uri 'self';

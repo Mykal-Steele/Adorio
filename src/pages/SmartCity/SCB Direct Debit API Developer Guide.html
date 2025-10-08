@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SCB Direct Debit API - Developer Implementation Guide</title>
+    <!-- Highlight.js CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+    />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+          'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+          'Helvetica Neue', sans-serif;
+        line-height: 1.6;
+        color: #333333;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #ffffff;
+      }
+
+      h1 {
+        color: #2c3e50;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 10px;
+        font-size: 2.5em;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      h2 {
+        color: #34495e;
+        border-bottom: 2px solid #ecf0f1;
+        padding-bottom: 8px;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        font-size: 1.8em;
+      }
+
+      h3 {
+        color: #2c3e50;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        font-size: 1.4em;
+        font-weight: 600;
+      }
+
+      h4 {
+        color: #34495e;
+        margin-top: 25px;
+        margin-bottom: 12px;
+        font-size: 1.2em;
+        font-weight: 600;
+      }
+
+      p {
+        margin-bottom: 16px;
+        text-align: justify;
+      }
+
+      ul,
+      ol {
+        margin-bottom: 16px;
+        padding-left: 30px;
+      }
+
+      li {
+        margin-bottom: 8px;
+      }
+
+      code {
+        background-color: #f8f9fa;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 0.9em;
+        color: #e74c3c;
+        border: 1px solid #e1e8ed;
+      }
+
+      pre {
+        background-color: #f8f9fa;
+        border: 1px solid #e1e8ed;
+        border-radius: 6px;
+        padding: 16px;
+        overflow-x: auto;
+        margin: 20px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      pre code {
+        background: none;
+        padding: 0;
+        border: none;
+        color: inherit;
+        font-size: 0.85em;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      table thead {
+        background-color: #34495e;
+        color: #ffffff;
+      }
+
+      table th {
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid #2c3e50;
+      }
+
+      table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ecf0f1;
+      }
+
+      table tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+      }
+
+      table tbody tr:hover {
+        background-color: #e8f4fd;
+        transition: background-color 0.3s ease;
+      }
+
+      .table-striped tbody tr:nth-child(odd) {
+        background-color: #ffffff;
+      }
+
+      .table-striped tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+      }
+
+      .table-bordered {
+        border: 1px solid #dee2e6;
+      }
+
+      .table-bordered th,
+      .table-bordered td {
+        border: 1px solid #dee2e6;
+      }
+
+      blockquote {
+        border-left: 4px solid #3498db;
+        margin: 20px 0;
+        padding: 10px 20px;
+        background-color: #f8f9fa;
+        font-style: italic;
+        color: #555555;
+      }
+
+      .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+      }
+
+      .alert-info {
+        color: #31708f;
+        background-color: #d9edf7;
+        border-color: #bce8f1;
+      }
+
+      .alert-warning {
+        color: #8a6d3b;
+        background-color: #fcf8e3;
+        border-color: #faebcc;
+      }
+
+      .alert-danger {
+        color: #a94442;
+        background-color: #f2dede;
+        border-color: #ebccd1;
+      }
+
+      hr {
+        border: none;
+        height: 2px;
+        background: linear-gradient(to right, #3498db, #2ecc71, #3498db);
+        margin: 40px 0;
+        border-radius: 2px;
+      }
+
+      .toc {
+        background-color: #f8f9fa;
+        border: 1px solid #e1e8ed;
+        border-radius: 6px;
+        padding: 20px;
+        margin: 30px 0;
+      }
+
+      .toc h3 {
+        margin-top: 0;
+        color: #2c3e50;
+        border-bottom: 1px solid #bdc3c7;
+        padding-bottom: 10px;
+      }
+
+      .toc ul {
+        list-style-type: none;
+        padding-left: 0;
+      }
+
+      .toc ul li {
+        margin: 8px 0;
+      }
+
+      .toc ul li a {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .toc ul li a:hover {
+        color: #2980b9;
+        text-decoration: underline;
+      }
+
+      .code-header {
+        background-color: #34495e;
+        color: #ffffff;
+        padding: 8px 16px;
+        font-size: 0.9em;
+        font-weight: 600;
+        border-radius: 6px 6px 0 0;
+        margin-bottom: 0;
+      }
+
+      .code-header + pre {
+        margin-top: 0;
+        border-radius: 0 0 6px 6px;
+        border-top: none;
+      }
+
+      strong {
+        color: #2c3e50;
+        font-weight: 600;
+      }
+
+      .highlight {
+        background-color: #fff3cd;
+        padding: 2px 4px;
+        border-radius: 3px;
+        border: 1px solid #ffeaa7;
+      }
+
+      .status-code {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 0.9em;
+        font-weight: 600;
+      }
+
+      .status-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .status-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .status-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+
+      .method-get {
+        background-color: #61affe;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-right: 10px;
+      }
+
+      .method-post {
+        background-color: #49cc90;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-right: 10px;
+      }
+
+      .method-put {
+        background-color: #fca130;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-right: 10px;
+      }
+
+      .method-delete {
+        background-color: #f93e3e;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-right: 10px;
+      }
+
+      .endpoint {
+        background-color: #f8f9fa;
+        border: 1px solid #e1e8ed;
+        border-radius: 4px;
+        padding: 10px;
+        margin: 10px 0;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      }
+
+      .response-example {
+        background-color: #f1f8ff;
+        border-left: 4px solid #0366d6;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 0 4px 4px 0;
+      }
+
+      .response-example h5 {
+        margin-top: 0;
+        color: #0366d6;
+        font-weight: 600;
+      }
+
+      .parameter-table {
+        font-size: 0.9em;
+      }
+
+      .parameter-table th {
+        background-color: #f1f3f4;
+        color: #202124;
+        font-weight: 600;
+      }
+
+      .parameter-required {
+        color: #d73a49;
+        font-weight: 600;
+      }
+
+      .parameter-optional {
+        color: #28a745;
+        font-weight: 600;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+
+        h1 {
+          font-size: 2em;
+        }
+
+        h2 {
+          font-size: 1.5em;
+        }
+
+        table {
+          font-size: 0.8em;
+        }
+
+        pre {
+          padding: 10px;
+          font-size: 0.8em;
+        }
+      }
+
+      .copy-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8em;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .code-block-container {
+        position: relative;
+      }
+
+      .code-block-container:hover .copy-button {
+        opacity: 1;
+      }
+
+      .copy-button:hover {
+        background-color: #5a6268;
+      }
+
+      .section-nav {
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        padding: 15px;
+        margin: 20px 0;
+        border-left: 4px solid #007bff;
+      }
+
+      .section-nav h4 {
+        margin-top: 0;
+        color: #007bff;
+      }
+
+      .section-nav ul {
+        margin-bottom: 0;
+        columns: 2;
+        column-gap: 30px;
+      }
+
+      .section-nav li {
+        break-inside: avoid;
+        margin-bottom: 5px;
+      }
+
+      .section-nav a {
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      .section-nav a:hover {
+        text-decoration: underline;
+      }
+
+    </style>
+  </head>
+  <body id="preview">
+    <h1 class="code-line" data-line-start="0" data-line-end="1">
+      <a id="SCB_Direct_Debit_API_Developer_Implementation_Guide_0"></a>SCB
+      Direct Debit API - Developer Implementation Guide
+    </h1>
+
+    <h2 class="code-line" data-line-start="1" data-line-end="2">
+      <a id="1_Overview_1"></a>1. Overview
+    </h2>
+    <p class="has-line-data" data-line-start="3" data-line-end="4">
+      This guide provides technical implementation details for the Financial
+      Team's SCB Direct Debit wrapper service. It covers authentication,
+      encryption, and the core API integrations required to implement customer
+      registration and payment processing.
+    </p>
+
+    <h2 class="code-line" data-line-start="5" data-line-end="6">
+      <a id="2_Database_Schema_5"></a>2. Database Schema
+    </h2>
+
+    <p class="has-line-data" data-line-start="7" data-line-end="8">
+      The SCB Direct Debit integration requires three main database tables to track merchant configurations, registrations and transactions. Note that merchant-specific financial configuration data (such as <code>merchantId</code>, <code>subAccountId</code>, <code>billerId</code>, and <code>PUBLIC_KEY</code>) is stored in a separate merchant table rather than the user table to properly segregate financial credentials from general user information.
+    </p>
+
+    <h3 class="code-line" data-line-start="9" data-line-end="10">
+      <a id="21_merchants_Table_9"></a>2.1 merchants Table
+    </h3>
+    <p class="has-line-data" data-line-start="11" data-line-end="12">
+      This table stores all SCB-specific financial configuration data for users who act as merchants (payment receivers).
+    </p>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th style="text-align: left">Column</th>
+          <th style="text-align: left">Data Type</th>
+          <th style="text-align: left">Description</th>
+          <th style="text-align: left">Constraints / Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align: left">
+            <strong><code>id</code></strong>
+          </td>
+          <td style="text-align: left"><code>SERIAL</code></td>
+          <td style="text-align: left">
+            Unique identifier for each merchant record.
+          </td>
+          <td style="text-align: left"><strong>Primary Key</strong></td>
+        </tr>
+        <tr>
+          <td style="text-align: left"><code>user_id</code></td>
+          <td style="text-align: left"><code>INT</code></td>
+          <td style="text-align: left">
+            Links to the user who owns this merchant configuration.
+          </td>
+          <td style="text-align: left">FK to <code>users(id)</code>, <code>UNIQUE</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: left"><code>merchant_id</code></td>
+          <td style="text-align: left"><code>VARCHAR(50)</code></td>
+          <td style="text-align: left">
+            SCB-assigned merchant identifier for this user's account.
+          </td>
+          <td style="text-align: left"><code>NOT NULL</code>, <code>UNIQUE</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: left"><code>sub_account_id</code></td>
+          <td style="text-align: left"><code>VARCHAR(50)</code></td>
+          <td style="text-align: left">
+            SCB sub-account identifier for payment processing.
+          </td>
+          <td style="text-align: left"><code>NOT NULL</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: left"><code>biller_id</code></td>
+          <td style="text-align: left"><code>VARCHAR(50)</code></td>
+          <td style="text-align: left">
+            SCB biller identifier for this merchant account.
+          </td>
+          <td style="text-align: left"><code>NOT NULL</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: left"><code>public_key</code></td>
+          <td style="text-align: left"><code>TEXT</code></td>
+          <td style="text-align: left">
+            SCB public key used for encrypting API requests to SCB.
+          </td>
+          <td style="text-align: left"><code>NOT NULL</code></td>
+        </tr>
+        <tr>
+          <td style="text-align: left"><code>created_at</code></td>
+          <td style="text-align: left"><code>TIMESTAMPTZ</code></td>
+          <td style="text-align: left">
+            Date and time when merchant configuration was created.
+          </td>
+          <td style="text-align: left">
+            <code>NOT NULL</code>, Default: <code>now()</code>
+          </td>
+        </tr>
+    
+      </tbody>
+    </table>
+
+    <h3 class="code-line" data-line-start="9" data-line-end="10">
+      <a id="22_scb_registrations_Table_9"></a>2.2 scb_registrations Table
+    </h3>
+    <p class="has-line-data" data-line-start="11" data-line-end="12">
+      This table stores the unique reference ID needed to fetch the customer's bank details from SCB.
+    </p>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>Data Type</th>
+          <th>Description</th>
+          <th>Constraints / Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <strong><code>reg_ref</code></strong>
+          </td>
+          <td><code>VARCHAR(20)</code></td>
+          <td>
+            <strong>Unique identifier created by the Financial Team</strong>
+            that serves as the SCB <code>regRef</code> during customer
+            registration.
+          </td>
+          <td><strong>Primary Key</strong></td>
+        </tr>
+        <tr>
+          <td><code>payer_user_id</code></td>
+          <td><code>INT</code></td>
+          <td>
+            The customer who will make payments (Payer).
+          </td>
+          <td>FK to <code>users(id)</code></td>
+        </tr>
+        <tr>
+          <td><code>receiving_user_id</code></td>
+          <td><code>INT</code></td>
+          <td>
+            The merchant who will receive payments (Receiver).
+          </td>
+          <td>FK to <code>users(id)</code></td>
+        </tr>
+        <tr>
+          <td><code>status</code></td>
+          <td><code>VARCHAR(50)</code></td>
+          <td>
+            Registration status ('pending', 'success', 'failed').
+          </td>
+          <td>
+            <code>NOT NULL</code>, Default: <code>'pending'</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>created_at</code></td>
+          <td><code>TIMESTAMPTZ</code></td>
+          <td>
+            Date and time when registration was started.
+          </td>
+          <td>
+            <code>NOT NULL</code>, Default: <code>now()</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="code-line" data-line-start="27" data-line-end="28">
+      <a id="23_scb_debit_transactions_Table_27"></a>2.3 scb_debit_transactions Table
+    </h3>
+    <p class="has-line-data" data-line-start="29" data-line-end="30">
+      This table tracks individual payment transactions, storing the unique ID (<code>ref_number</code>) for each debit request and its completion status.
+    </p>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>Data Type</th>
+          <th>Description</th>
+          <th>Constraints / Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <strong><code>ref_number</code></strong>
+          </td>
+          <td><code>VARCHAR(20)</code></td>
+          <td>
+            <strong>Unique identifier created by the Financial Team</strong>
+            that serves as the SCB <code>refNumber</code> for payment
+            processing.
+          </td>
+          <td><strong>Primary Key</strong></td>
+        </tr>
+        <tr>
+          <td><code>reg_ref</code></td>
+          <td><code>VARCHAR(20)</code></td>
+          <td>
+            Links to the completed registration record that enables this
+            payment.
+          </td>
+          <td>
+            FK to <code>scb_registrations(reg_ref)</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>ref_date_time</code></td>
+          <td><code>TIMESTAMPTZ</code></td>
+          <td>
+            Date and time stamp sent to SCB as <code>refDateTime</code> for this
+            transaction.
+          </td>
+          <td><code>NOT NULL</code></td>
+        </tr>
+        <tr>
+          <td><code>ref_time_date</code></td>
+          <td><code>VARCHAR(14)</code></td>
+          <td>
+            Transaction reference time and date returned by SCB (<code>refTimeDate</code>).
+          </td>
+          <td>Indexed</td>
+        </tr>
+        <tr>
+          <td><code>customer_ref</code></td>
+          <td><code>VARCHAR(50)</code></td>
+          <td>
+            Customer reference sent to SCB in format "payerId:receiverId" (<code>customerRef</code>).
+          </td>
+          <td>Indexed</td>
+        </tr>
+        <tr>
+          <td><code>amount</code></td>
+          <td><code>NUMERIC(12,2)</code></td>
+          <td>
+            Amount of money to be debited from the customer's account.
+          </td>
+          <td><code>NOT NULL</code></td>
+        </tr>
+        <tr>
+          <td><code>currency</code></td>
+          <td><code>VARCHAR(3)</code></td>
+          <td>
+            Currency code (e.g., USD, THB) for the transaction.
+          </td>
+          <td><code>NOT NULL</code></td>
+        </tr>
+        <tr>
+          <td><code>scb_txn_number</code></td>
+          <td><code>VARCHAR(255)</code></td>
+          <td>
+            Transaction reference number provided by SCB after processing
+            (<code>txnNumber</code>).
+          </td>
+          <td>Indexed</td>
+        </tr>
+        <tr>
+          <td><code>status</code></td>
+          <td><code>VARCHAR(50)</code></td>
+          <td>
+            Final payment status ('confirmed', 'failed', 'refunded').
+          </td>
+          <td>
+            <code>NOT NULL</code>, Default: <code>'pending'</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>created_at</code></td>
+          <td><code>TIMESTAMPTZ</code></td>
+          <td>
+            Date and time when the payment request was submitted.
+          </td>
+          <td>
+            <code>NOT NULL</code>, Default: <code>now()</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr />
+
+    <h2 class="code-line" data-line-start="71" data-line-end="72">
+      <a id="3_Authentication_System_71"></a>3. Authentication System
+    </h2>
+
+    <h3 class="code-line" data-line-start="73" data-line-end="74">
+      <a id="31_Request_Headers_73"></a>3.1 Request Headers
+    </h3>
+    <p class="has-line-data" data-line-start="9" data-line-end="10">
+      Every API call to SCB requires standardized headers with specific
+      parameters. All SCB API calls must include these headers consistently.
+    </p>
+
+    <pre><code class="language-javascript">function getHeaders(resourceOwnerId) {
+  return {
+    'resourceOwnerId': resourceOwnerId, // Your API Key from environment configs
+    'requestUId': require('crypto').randomUUID(), // UUID v4 for request tracking
+    'accept-language': 'EN',
+    'Content-Type': 'application/json'
+  };
+}</code></pre>
+
+    <p class="has-line-data" data-line-start="17" data-line-end="18">
+      The <code>resourceOwnerId</code> is your SCB API key, and
+      <code>requestUId</code> must be a fresh UUID v4 for each request to ensure
+      proper request tracking and avoid conflicts.
+    </p>
+
+    <h3 class="code-line" data-line-start="15" data-line-end="16">
+      <a id="22_OAuth_Token_Management_15"></a>2.2 OAuth Token Management
+    </h3>
+    <p class="has-line-data" data-line-start="17" data-line-end="18">
+      SCB requires OAuth2 authentication with automatic token refresh
+      capability. The system must handle token expiration transparently.
+    </p>
+
+    <h4 class="code-line" data-line-start="21" data-line-end="22">
+      <a id="221_Initial_Token_Acquisition_21"></a>2.2.1 Initial Token
+      Acquisition
+    </h4>
+
+    <p class="has-line-data" data-line-start="23" data-line-end="24">
+      Your app's environment configuration contains <code>applicationKey</code> and
+      <code>applicationSecret</code> credentials. Use the <code>applicationKey</code> as
+      <code>resourceOwnerId</code>, and make a POST call with these to obtain
+      both <code>accessToken</code> and <code>refreshToken</code>.
+    </p>
+
+    <p><strong>API Details:</strong></p>
+    <ul>
+      <li>
+        <span class="method-post">POST</span>
+        <code>/v1/oauth/token</code> - Initial token acquisition
+      </li>
+      <li>
+        <strong>Headers:</strong> <code>resourceOwnerId</code>,
+        <code>requestUId</code>, <code>accept-language</code>
+      </li>
+      <li>
+        <strong>Body:</strong> <code>applicationKey</code>,
+        <code>applicationSecret</code>
+      </li>
+      <li>
+        <strong>Response:</strong> <code>accessToken</code>,
+        <code>refreshToken</code>, <code>expiresIn</code>
+      </li>
+    </ul>
+
+    <h4 class="code-line" data-line-start="36" data-line-end="37">
+      <a id="222_Token_Refresh_Implementation_36"></a>2.2.2 Token Refresh
+      Implementation
+    </h4>
+
+    <p class="has-line-data" data-line-start="38" data-line-end="39">
+      Your JavaScript function will be given the current
+      <code>accessToken</code> and <code>refreshToken</code>. Before making any
+      protected API call, check if the <code>accessToken</code> has expired. If
+      expired, you'll need to use the <code>applicationKey</code> and
+      <code>applicationSecret</code> from your app's environment configuration, then call the refresh endpoint using
+      <code>refreshToken</code> to get new tokens.
+    </p>
+
+    <p><strong>Token Refresh API Details:</strong></p>
+    <ul>
+      <li>
+        <span class="method-post">POST</span>
+        <code>/v1/oauth/token/refresh</code> - Token refresh endpoint
+      </li>
+      <li>
+        <strong>Headers:</strong> <code>resourceOwnerId</code>,
+        <code>requestUId</code>, <code>accept-language</code>
+      </li>
+      <li>
+        <strong>Body:</strong> <code>refreshToken</code>,
+        <code>applicationKey</code>, <code>applicationSecret</code>
+      </li>
+      <li>
+        <strong>Response:</strong> New <code>accessToken</code> and
+        <code>refreshToken</code>
+      </li>
+    </ul>
+
+    <p class="has-line-data" data-line-start="53" data-line-end="54">
+      Implement automatic token refresh by checking token expiration before each
+      protected API call. This creates a seamless system where you use
+      <code>refreshToken</code> to get new <code>accessToken</code> and
+      <code>refreshToken</code> without re-authentication.
+    </p>
+
+    <hr />
+
+    <h2 class="code-line" data-line-start="42" data-line-end="43">
+      <a id="3_Encryption_System_42"></a>3. Encryption System
+    </h2>
+
+    <p class="has-line-data" data-line-start="44" data-line-end="45">
+      All sensitive data exchanges with SCB APIs require RSA public key
+      encryption using PKCS1 padding. The system uses the merchant's <code>PUBLIC_KEY</code>
+      for encryption and decryption operations. You need to get the <code>PUBLIC_KEY</code> from the merchant table using the <code>receiverUserId</code> key.
+    </p>
+
+    <h3 class="code-line" data-line-start="46" data-line-end="47">
+      <a id="31_Encryption_Implementation_46"></a>3.1 Encryption Implementation
+    </h3>
+
+    <p class="has-line-data" data-line-start="48" data-line-end="49">
+      Use the merchant's <code>PUBLIC_KEY</code> to encrypt and decrypt JSON data. The Node.js "crypto"
+      library handles encryption operations. Input is JSON data.
+    </p>
+
+    <pre><code class="language-javascript">import fs from 'fs';
+import crypto from 'crypto';
+
+// ---------------- CONFIG ----------------
+const PUBLIC_KEY_PATH = './public.pub'; // merchant's PUBLIC_KEY
+
+// ---------------- CORE ENCRYPT FUNC ----------------
+function encryptSCB(data) {
+  let publicKey = fs.readFileSync(PUBLIC_KEY_PATH, 'utf8');
+
+  if (!publicKey.includes('BEGIN PUBLIC KEY')) {
+    publicKey = `-----BEGIN PUBLIC KEY-----\n${publicKey}\n-----END PUBLIC KEY-----`;
+  }
+
+  const buffer = Buffer.from(JSON.stringify(data));
+  const encrypted = crypto.publicEncrypt(
+    { key: publicKey, padding: crypto.constants.RSA_PKCS1_PADDING },
+    buffer
+  );
+
+  return encrypted.toString('base64').replace(/\n/g, '');
+}</code></pre>
+
+    <h3 class="code-line" data-line-start="69" data-line-end="70">
+      <a id="32_Decryption_Implementation_69"></a>3.2 Decryption Implementation
+    </h3>
+
+    <p>
+      Response decryption is critical for retrieving payment status and
+      registration data. The SCB API returns encrypted responses that must be
+      decrypted using the public key with PKCS1 padding.
+    </p>
+
+    <pre><code class="language-javascript">import fs from 'fs';
+import crypto from 'crypto';
+// ---------------- CONFIG ----------------
+const PUBLIC_KEY_PATH = './public.pub'; // merchant's PUBLIC_KEY
+
+// ---------------- CORE DECRYPT FUNC ----------------
+function decryptSCBResponse(encryptedValue) {
+
+  // Read the public key file that was used for encryption
+  let publicKey = fs.readFileSync(PUBLIC_KEY_PATH, 'utf8');
+
+  // Ensure proper PEM format for the public key
+  // SCB expects standard PEM wrapper format
+  if (!publicKey.includes('BEGIN PUBLIC KEY')) {
+    publicKey = `-----BEGIN PUBLIC KEY-----\n${publicKey}\n-----END PUBLIC KEY-----`;
+  }
+
+  // Convert base64 encrypted string to buffer for decryption
+  const buffer = Buffer.from(encryptedValue, 'base64');
+  
+  // Decrypt using public key with PKCS1 padding
+  // This matches the encryption method used by SCB
+  const decrypted = crypto.publicDecrypt(
+    {
+      key: publicKey,
+      padding: crypto.constants.RSA_PKCS1_PADDING, // Must match SCB encryption
+    },
+    buffer
+  );
+
+    // Parse the decrypted response
+    return JSON.parse(decrypted.toString('utf8'));
+}</code></pre>
+
+    <hr />
+
+    <h2 class="code-line" data-line-start="96" data-line-end="97">
+      <a id="4_Registration_Implementation_96"></a>4. Registration
+      Implementation
+    </h2>
+
+    <h3 class="code-line" data-line-start="98" data-line-end="99">
+      <a id="41_Registration_Initialization_98"></a>4.1 Registration
+      Initialization
+    </h3>
+
+    <p class="has-line-data" data-line-start="100" data-line-end="101">
+      Initiates customer debit card registration process with SCB banking
+      system.
+    </p>
+
+    <p><strong>API Details:</strong></p>
+    <ul>
+      <li>
+        <span class="method-post">POST</span>
+        <code>/v1/registration/web/init</code> - Initialize customer registration
+      </li>
+      <li>
+        <strong>Headers:</strong> Use <code>getHeaders(resourceOwnerId)</code> +
+        <code>Authorization: Bearer {accessToken}</code>
+      </li>
+      <li>
+        <strong>Body:</strong> <code>merchantId</code>, <code>subAccountId</code>,
+        <code>encryptedValue</code>
+      </li>
+    </ul>
+
+    <h4 class="code-line" data-line-start="125" data-line-end="126">
+      <a id="411_Request_Preparation_125"></a>4.1.1 Request Preparation
+    </h4>
+
+    <p class="has-line-data" data-line-start="127" data-line-end="128">
+      When this API is called, you will be given <code>payerUserId</code> and
+      <code>receiverUserId</code>. You need to get <code>merchantId</code>,
+      <code>subAccountId</code>, and <code>PUBLIC_KEY</code> from the merchant
+      table using the <code>receiverUserId</code>.
+    </p>
+
+    <ol>
+      <li>
+        Retrieve <code>merchantId</code>, <code>subAccountId</code>, and
+        <code>PUBLIC_KEY</code> from merchant table using <code>receiverUserId</code>
+      </li>
+      <li>
+        Use <code>getHeaders()</code> and your <code>accessToken</code> for
+        Authorization Bearer type
+      </li>
+      <li>
+        Generate unique <code>regRef</code> using format
+        <code>REG-xxxxxxxxx</code> ([0-9a-f] hexadecimal)
+      </li>
+      <li>
+        Prepare encrypted data payload using the Encryption section method
+      </li>
+    </ol>
+
+    <h4 class="code-line" data-line-start="135" data-line-end="136">
+      <a id="412_Registration_Data_Structure_135"></a>4.1.2 Registration Data
+      Structure
+    </h4>
+
+    <p class="has-line-data" data-line-start="137" data-line-end="138">
+      Your JavaScript function will be given <code>payerUserId</code>,
+      <code>receiverUserId</code>, and <code>backUrl</code>. You'll need to
+      generate a unique <code>regRef</code> and retrieve the merchant's
+      <code>merchantId</code>, <code>subAccountId</code>, and
+      <code>PUBLIC_KEY</code> from the merchant table using the <code>receiverUserId</code>. When
+      using PostgreSQL, use the database's UUID generation for
+      uniqueness.
+    </p>
+
+    <pre><code class="language-javascript">// Generate unique registration reference using PostgreSQL UUID
+// Execute: SELECT gen_random_uuid() to get a UUID, then format it
+const uuidResult = await db.query('SELECT gen_random_uuid() as id');
+const regRef = 'REG-' + uuidResult.rows[0].id.replace(/-/g, '').substring(0, 18).toUpperCase();
+
+// Store in scb_registrations table
+await db.query(`
+  INSERT INTO scb_registrations (reg_ref, payer_user_id, receiving_user_id, status)
+  VALUES ($1, $2, $3, 'pending')
+`, [regRef, payerUserId, receiverUserId]);
+
+// Prepare data for SCB API
+const regData = {
+  regRef: regRef,
+  ref1: payerUserId,      // Payer User ID
+  ref2: receiverUserId,   // Receiver User ID  
+  remarks: '',            // Optional field
+  backUrl: backUrl        // Redirect URL after bank registration
+};
+
+// Request body for SCB API
+const requestBody = {
+  merchantId: merchantId,      // From merchant configuration
+  subAccountId: subAccountId,  // From merchant configuration  
+  encryptedValue: encryptSCB(regData) // Encrypt the registration data
+};</code></pre>
+
+    <h4 class="code-line" data-line-start="154" data-line-end="155">
+      <a id="413_Response_Structure_154"></a>4.1.3 Response Structure
+    </h4>
+
+    <p class="has-line-data" data-line-start="156" data-line-end="157">
+      The <code>webUrl</code> is what we return from our wrapper to other teams
+      or redirect the user to. User needs to fill in their debit card info and
+      go through the registration process at the bank website, and after
+      registration they will be redirected to <code>backUrl</code>. The API will also
+      return <code>regRef</code> which should be stored in the
+      <code>scb_registrations</code> table for tracking.
+    </p>
+
+    <pre><code class="language-javascript">// SCB Registration Init API Response
+{
+  "status": {
+    "code": 1000,
+    "description": "Success"
+  },
+  "data": {
+    "merchantId": "2020000001",
+    "subAccountId": "1293340504",
+    "registrationResponse": {
+      "webURL": "https://..."  // Bank registration URL - this is what we return to user
+    },
+    "validationMessages": []
+  }
+}
+
+// Response data usage:
+// - status.code: Check if request was successful
+// - registrationResponse.webURL: The URL to redirect user for bank registration
+// - validationMessages: For error handling if needed
+
+// Implementation example:
+if (response.status.code === 1000) {
+  const webURL = response.data.registrationResponse.webURL;
+  
+  // Update database with the webURL for tracking
+  await db.query(`
+    UPDATE scb_registrations 
+    SET web_url = $1, status = 'initiated'
+    WHERE reg_ref = $2
+  `, [webURL, regRef]);
+  
+  // Return webURL to client for user redirection
+  return {
+    success: true,
+    regRef: regRef,
+    webURL: webURL,
+    message: 'Registration initiated successfully'
+  };
+} else {
+  throw new Error(`Registration failed: ${response.status.description}`);
+}</code></pre>
+
+    <h3 class="code-line" data-line-start="151" data-line-end="152">
+      <a id="42_Registration_Status_Inquiry_151"></a>4.2 Registration Status
+      Inquiry
+    </h3>
+
+    <p class="has-line-data" data-line-start="153" data-line-end="154">
+      Monitors registration completion and retrieves customer account
+      information.
+    </p>
+
+    <p><strong>API Details:</strong></p>
+    <ul>
+      <li>
+        <span class="method-post">POST</span>
+        <code>/v1/registration/inquiry</code> - Check registration status
+      </li>
+      <li>
+        <strong>Headers:</strong> Use <code>getHeaders(resourceOwnerId)</code> +
+        <code>Authorization: Bearer {accessToken}</code>
+      </li>
+      <li>
+        <strong>Body:</strong> <code>merchantId</code>,
+        <code>encryptedValue</code> (contains regRef)
+      </li>
+      <li>
+        <strong>Response:</strong> Registration status and customer
+        <code>accountNumber</code> when successful
+      </li>
+    </ul>
+
+    <h4 class="code-line" data-line-start="183" data-line-end="184">
+      <a id="421_Implementation_Logic_183"></a>4.2.1 Implementation Logic
+    </h4>
+
+    <p class="has-line-data" data-line-start="185" data-line-end="186">
+      Your JavaScript function will be given either
+      <code>regRef</code> directly, or <code>payerUserId</code> and
+      <code>receiverUserId</code>. If user IDs are provided, you'll need to
+      query the PostgreSQL <code>scb_registrations</code> table to find the
+      corresponding <code>regRef</code>. You'll also need to retrieve the
+      merchant's <code>merchantId</code> from the merchant table using the <code>receiverUserId</code>.
+    </p>
+
+    <pre><code class="language-javascript">// If regRef not provided, look it up from database
+let lookupRegRef = regRef;
+if (!lookupRegRef && payerUserId && receiverUserId) {
+  const result = await db.query(`
+    SELECT reg_ref FROM scb_registrations 
+    WHERE payer_user_id = $1 AND receiving_user_id = $2
+    ORDER BY created_at DESC LIMIT 1
+  `, [payerUserId, receiverUserId]);
+  
+  if (result.rows.length === 0) {
+    throw new Error('No registration found for these users');
+  }
+  lookupRegRef = result.rows[0].reg_ref;
+}
+
+// Get merchant config and prepare request
+const requestBody = {
+  merchantId: merchantId,  // From merchant configuration
+  encryptedValue: encryptSCB(lookupRegRef) // Encrypt just the regRef string
+};</code></pre>
+
+    <h4 class="code-line" data-line-start="194" data-line-end="195">
+      <a id="422_Response_Structure_and_Decryption_194"></a>4.2.2 Response Structure and Decryption
+    </h4>
+
+    <p class="has-line-data" data-line-start="196" data-line-end="197">
+      The SCB API returns an encrypted response that you must decrypt to get the registration status and account information.
+    </p>
+
+    <pre><code class="language-javascript">// SCB Registration Inquiry API Response Structure
+{
+  "status": {
+    "code": 1000,
+    "description": "Success"
+  },
+  "data": {
+    "merchantId": "2020000001",
+    "encryptedValue": "<Data Encrypt>",  // This contains the actual registration data
+    "validationMessages": []
+  }
+}
+
+// Decrypt the encryptedValue to get registration information:
+const decryptedData = decryptSCBResponse(response.data.encryptedValue);
+// decryptedData contains all these fields:
+{
+  "regRef": "REG-xxxxxxxxxxxxx",     // Registration reference (String 20)
+  "ref1": "12345",                   // Customer reference (payerUserId) (String 20)
+  "ref2": "67890",                   // Other reference (receiverUserId) (String 20)
+  "statusCode": "0002",              // Registration status code (String)
+  "statusDesc": "Registration completed successfully", // Status description (String)
+  "errorCode": "000",                // Registration error code (String) - only if error
+  "accountNo": "1234567890"          // Customer's account number (String) - only when successful
+}
+
+// Response data usage:
+// - status.code: Check if API call was successful
+// - decryptedData.statusCode: Check registration status ("0001" = initiated, "0002" = success)
+// - decryptedData.accountNo: Cache this in Firebase RTDB for payment processing (only available when statusCode = "0002")
+// - decryptedData.regRef, ref1, ref2: For verification and tracking
+// - validationMessages: For error handling
+
+// Implementation example:
+if (response.status.code === 1000) {
+  const decryptedData = decryptSCBResponse(response.data.encryptedValue);
+  
+  // Update database with current status
+  await db.query(`
+    UPDATE scb_registrations 
+    SET status_code = $1, status_desc = $2, last_checked = NOW()
+    WHERE reg_ref = $3
+  `, [decryptedData.statusCode, decryptedData.statusDesc, decryptedData.regRef]);
+  
+  // If registration completed successfully, cache account number
+  if (decryptedData.statusCode === "0002" && decryptedData.accountNo) {
+    // Cache in Firebase RTDB for fast payment processing
+    await firebase.database()
+      .ref(`scb_accounts/${decryptedData.regRef}/accountNumber`)
+      .set(decryptedData.accountNo);
+      
+    // Update PostgreSQL with success status
+    await db.query(`
+      UPDATE scb_registrations 
+      SET status = 'success', account_number = $1
+      WHERE reg_ref = $2
+    `, [decryptedData.accountNo, decryptedData.regRef]);
+    
+    return {
+      success: true,
+      regRef: decryptedData.regRef,
+      statusCode: decryptedData.statusCode,
+      statusDesc: decryptedData.statusDesc,
+      accountNumber: decryptedData.accountNo,
+      message: 'Registration completed successfully'
+    };
+  } else {
+    return {
+      success: false,
+      regRef: decryptedData.regRef,
+      statusCode: decryptedData.statusCode,
+      statusDesc: decryptedData.statusDesc,
+      message: 'Registration still in progress'
+    };
+  }
+} else {
+  throw new Error(`Registration inquiry failed: ${response.status.description}`);
+}</code></pre>
+
+    <p>After decryption, cache the <code>accountNo</code> in Firebase RTDB for future payment processing:</p>
+
+    <pre><code class="language-javascript">// Cache account number in Firebase RTDB when statusCode is "0002"
+if (decryptedData.statusCode === "0002" && decryptedData.accountNo) {
+  await firebase.database()
+    .ref(`scb_accounts/${regRef}/accountNumber`)
+    .set(decryptedData.accountNo);
+    
+  // Update registration status in PostgreSQL
+  await db.query(`
+    UPDATE scb_registrations 
+    SET status = 'success' 
+    WHERE reg_ref = $1
+  `, [regRef]);
+}</code></pre>
+
+    <h4 class="code-line" data-line-start="220" data-line-end="221">
+      <a id="423_Status_Code_Reference_220"></a>4.2.3 Status Code Reference
+    </h4>
+
+    <p class="has-line-data" data-line-start="222" data-line-end="223">
+      For <code>statusCode</code>: <code>0001</code> is after init and <code>0002</code> is after payer successfully validates their debit card. You can only get <code>accountNo</code> at <code>0002</code>.
+    </p>
+
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>Status Code</th>
+          <th>Description</th>
+          <th>Account Number Available</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>0001</code></td>
+          <td>Registration initiated (after init)</td>
+          <td>No</td>
+        </tr>
+        <tr>
+          <td><code>0002</code></td>
+          <td>
+            Registration completed successfully (payer validated debit card)
+          </td>
+          <td>
+            Yes - <code>accountNo</code> available
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr />
+
+    <h2 class="code-line" data-line-start="184" data-line-end="185">
+      <a id="5_Payment_Processing_Implementation_184"></a>5. Payment Processing
+      Implementation
+    </h2>
+
+    <h3 class="code-line" data-line-start="217" data-line-end="218">
+      <a id="51_Direct_Debit_Payment_217"></a>5.1 Direct Debit Payment (Charging
+      Registered User)
+    </h3>
+
+    <p class="has-line-data" data-line-start="219" data-line-end="220">
+      This API charges the registered user. Header will be
+      <code>getHeaders()</code> with <code>accessToken</code>.
+    </p>
+
+    <p><strong>API Details:</strong></p>
+    <ul>
+      <li>
+        <span class="method-post">POST</span>
+        <code>/v1/payment/direct/ddpay</code> - Execute direct debit payment
+      </li>
+      <li>
+        <strong>Headers:</strong> Use <code>getHeaders(resourceOwnerId)</code> +
+        <code>Authorization: Bearer {accessToken}</code>
+      </li>
+      <li>
+        <strong>Body:</strong> <code>merchantId</code>, <code>subAccountId</code>,
+        <code>encryptedValue</code> (contains payment data)
+      </li>
+      <li>
+        <strong>Response:</strong> Payment transaction status and
+        SCB transaction number
+      </li>
+    </ul>
+
+    <h4 class="code-line" data-line-start="234" data-line-end="235">
+      <a id="511_Payment_Data_Preparation_234"></a>5.1.1 Payment Data
+      Preparation
+    </h4>
+
+    <p class="has-line-data" data-line-start="236" data-line-end="237">
+      Your JavaScript function will be given <code>amount</code>,
+      <code>currency</code>, and <code>regRef</code>. You'll need to query the
+      PostgreSQL <code>scb_registrations</code> table to get the payer and
+      receiver IDs, then retrieve the merchant configuration including
+      <code>merchantId</code>, <code>subAccountId</code>, and
+      <code>PUBLIC_KEY</code> from the merchant table using the <code>receiverUserId</code>. The customer's
+      account number should be retrieved from Firebase RTDB where it was cached
+      from the registration inquiry.
+    </p>
+
+    <ol>
+      <li>
+        Query <code>scb_registrations</code> table using <code>regRef</code> to
+        get payer and receiver IDs
+      </li>
+      <li>
+        Retrieve merchant configuration (<code>merchantId</code>,
+        <code>subAccountId</code>, <code>PUBLIC_KEY</code>) from merchant table using <code>receiverUserId</code>
+      </li>
+      <li>Generate unique reference numbers and timestamps</li>
+    </ol>
+
+    <pre><code class="language-javascript">// Look up registration details from PostgreSQL
+const regResult = await db.query(`
+  SELECT payer_user_id, receiving_user_id, status
+  FROM scb_registrations 
+  WHERE reg_ref = $1
+`, [regRef]);
+
+if (regResult.rows.length === 0 || regResult.rows[0].status !== 'success') {
+  throw new Error('No successful registration found for this regRef');
+}
+
+const { payer_user_id: payerId, receiving_user_id: receiverId } = regResult.rows[0];
+
+// Get account number from Firebase RTDB cache first
+let accountNumber = await firebase.database()
+  .ref(`scb_accounts/${regRef}/accountNumber`)
+  .once('value')
+  .then(snapshot => snapshot.val());
+
+// If not cached, call registration inquiry API to get fresh data
+if (!accountNumber) {
+  const inquiryResponse = await callRegistrationInquiry(regRef, merchantId);
+  const decryptedInquiry = decryptSCBResponse(inquiryResponse.data.encryptedValue);
+  
+  if (decryptedInquiry.statusCode === "0002" && decryptedInquiry.accountNo) {
+    accountNumber = decryptedInquiry.accountNo;
+    
+    // Cache it for future use
+    await firebase.database()
+      .ref(`scb_accounts/${regRef}/accountNumber`)
+      .set(accountNumber);
+  } else {
+    throw new Error('Registration not completed or account number not available');
+  }
+}
+
+// Retrieve merchant configuration using receiverId
+const merchantConfig = await getMerchantConfig(receiverId);</code></pre>
+
+    <h4 class="code-line" data-line-start="244" data-line-end="245">
+      <a id="512_Reference_Generation_244"></a>5.1.2 Reference Generation
+    </h4>
+
+    <p class="has-line-data" data-line-start="246" data-line-end="247">
+      You'll need to generate a unique <code>refNumber</code> with
+      <code>RF-xxxxxxxxx</code> format ([0-9a-f] hexadecimal) using PostgreSQL UUID generation for
+      better uniqueness. You'll also need to create <code>refDateTime</code> in
+      <code>YYYYMMDDHHmmss</code> format using dayjs.
+    </p>
+
+    <pre><code class="language-javascript">// Generate unique payment reference using PostgreSQL UUID  
+const uuidResult = await db.query('SELECT gen_random_uuid() as id');
+const refNumber = 'RF-' + uuidResult.rows[0].id.replace(/-/g, '').substring(0, 18).toUpperCase();
+
+// Generate timestamp in required format YYYYMMDDHHmmss
+const refDateTime = dayjs().format('YYYYMMDDHHmmss');
+
+// Create customer reference by concatenating payer:receiver
+const customerRef = `${payerId}:${receiverId}`;
+
+// Store in scb_debit_transactions table for tracking
+await db.query(`
+  INSERT INTO scb_debit_transactions (ref_number, reg_ref, ref_date_time, amount, currency, customer_ref, status)
+  VALUES ($1, $2, $3, $4, $5, $6, 'pending')
+`, [refNumber, regRef, refDateTime, amount, currency, customerRef]);</code></pre>
+
+    <h4 class="code-line" data-line-start="257" data-line-end="258">
+      <a id="513_Payment_Data_Structure_257"></a>5.1.3 Payment Data Structure
+    </h4>
+
+    <p class="has-line-data" data-line-start="259" data-line-end="260">
+      For body you will put <code>merchantId</code>, <code>subAccountId</code>,
+      and <code>encryptedValue</code>. Currency will be code (e.g., THB). Amount
+      with two decimals (x.xx).
+    </p>
+
+    <pre><code class="language-javascript">// encryptedValue contains all payment details
+const paymentData = {
+  refNumber: refNumber,
+  refDateTime: refDateTime,
+  amount: amount.toFixed(2),        // Format with two decimals: "100.00"
+  currency: currency,               // Currency code e.g., "THB"
+  accountNumber: accountNumber,     // From registration inquiry
+  customerRef: customerRef          // "payerId:receiverId" format
+};
+
+// Request body structure
+const requestBody = {
+  merchantId: merchantId,
+  subAccountId: subAccountId,
+  encryptedValue: encryptSCB(paymentData) // Encrypt the payment data
+};</code></pre>
+
+    <h4 class="code-line" data-line-start="275" data-line-end="276">
+      <a id="514_Payment_Response_Handling_275"></a>5.1.4 Payment Response Handling
+    </h4>
+
+    <p class="has-line-data" data-line-start="277" data-line-end="278">
+      After receiving the payment response from SCB, you need to decrypt the response and update your database with the transaction details including the SCB transaction number.
+    </p>
+
+    <pre><code class="language-javascript">// SCB Direct Debit Payment API Response Structure
+const paymentResponse = await callSCBPaymentAPI(requestBody, headers);
+
+// Response structure:
+// {
+//   "status": {
+//     "code": 1000,
+//     "description": "Success"
+//   },
+//   "data": {
+//     "merchantId": "2020000001",
+//     "subAccountId": "1293340504",
+//     "encryptedValue": "<Data Encrypt>",  // Contains payment information
+//     "validationMessages": []
+//   }
+// }
+
+// Decrypt the encryptedValue to get payment information:
+const decryptedPayment = decryptSCBResponse(paymentResponse.data.encryptedValue);
+// decryptedPayment contains all these fields:
+// {
+//   "refNumber": "RF-xxxxxxxxxxxxx",      // Merchant reference number (String)
+//   "refDateTime": "20231007143000",      // Merchant reference date/time (String: yyyyMMddHHmmss)
+//   "amount": 100.00,                     // Transaction amount (Number)
+//   "currency": "THB",                    // Transaction currency (String)
+//   "customerRef": "12345:67890",         // Customer reference (String)
+//   "txnNumber": "SCB202310071234567890", // SCB's unique transaction number (String)
+//   "txnDateTime": "20231007143055",      // SCB transaction date/time (String)
+//   "statusCode": "0000",                 // Transaction status code (String)
+//   "statusDesc": "Success",              // Transaction status description (String)
+//   "responseCode": "00"                  // Response code (String) - only if rejected
+// }
+
+// Response data usage:
+// - status.code: Check if API call was successful
+// - decryptedPayment.txnNumber: Store as scb_txn_number in database
+// - decryptedPayment.statusCode: Determine final transaction status
+// - decryptedPayment.statusDesc: For user feedback
+// - decryptedPayment.responseCode: For error handling if transaction rejected
+// - validationMessages: For error handling
+
+// Update database with SCB transaction number, refTimeDate, and final status
+const finalStatus = decryptedPayment.statusCode === '0000' ? 'confirmed' : 'failed';
+await db.query(`
+  UPDATE scb_debit_transactions 
+  SET scb_txn_number = $1, ref_time_date = $2, status = $3
+  WHERE ref_number = $4
+`, [decryptedPayment.txnNumber, decryptedPayment.txnDateTime, finalStatus, refNumber]);
+
+return {
+  success: decryptedPayment.statusCode === '0000',
+  refNumber: refNumber,
+  scbTxnNumber: decryptedPayment.txnNumber,
+  refTimeDate: decryptedPayment.txnDateTime,
+  amount: decryptedPayment.amount,
+  currency: decryptedPayment.currency,
+  statusDesc: decryptedPayment.statusDesc
+};</code></pre>
+
+    <hr />
+
+    <h2 class="code-line" data-line-start="325" data-line-end="326">
+      <a id="6_Payment_Status_Inquiry_Implementation_325"></a>6. Payment Status Inquiry Implementation
+    </h2>
+
+    <h3 class="code-line" data-line-start="327" data-line-end="328">
+      <a id="61_Payment_Status_Inquiry_327"></a>6.1 Payment Status Inquiry
+    </h3>
+
+    <p class="has-line-data" data-line-start="329" data-line-end="330">
+      This API allows checking the status of a previously submitted payment transaction using the payment reference details.
+    </p>
+
+    <p><strong>API Details:</strong></p>
+    <ul>
+      <li>
+        <span class="method-post">POST</span>
+        <code>/v1/payment/inquiry</code> - Check payment transaction status
+      </li>
+      <li>
+        <strong>Headers:</strong> Use <code>getHeaders(resourceOwnerId)</code> +
+        <code>Authorization: Bearer {accessToken}</code>
+      </li>
+      <li>
+        <strong>Body:</strong> <code>merchantId</code>,
+        <code>encryptedValue</code> (contains inquiry data)
+      </li>
+      <li>
+        <strong>Response:</strong> Payment transaction status and details
+      </li>
+    </ul>
+
+    <h4 class="code-line" data-line-start="345" data-line-end="346">
+      <a id="611_Implementation_Logic_345"></a>6.1.1 Implementation Logic
+    </h4>
+
+    <p class="has-line-data" data-line-start="347" data-line-end="348">
+      Your JavaScript function will be given <code>refNumber</code> and <code>refTimeDate</code>. You need to query the PostgreSQL <code>scb_debit_transactions</code> table to find the corresponding transaction and extract the <code>customerRef</code>. From the <code>customerRef</code> (format: "customerId:merchantId"), you can extract the <code>merchantId</code> needed for the SCB API call.
+    </p>
+
+    <pre><code class="language-javascript">// Look up transaction details from PostgreSQL using refNumber and refTimeDate
+const transactionResult = await db.query(`
+  SELECT customer_ref, reg_ref, ref_date_time, amount, currency
+  FROM scb_debit_transactions 
+  WHERE ref_number = $1 AND ref_time_date = $2
+`, [refNumber, refTimeDate]);
+
+if (transactionResult.rows.length === 0) {
+  throw new Error('No transaction found for the provided refNumber and refTimeDate');
+}
+
+const { customer_ref: customerRef, ref_date_time: refDateTime } = transactionResult.rows[0];
+
+// Extract merchantId from customerRef (format: "customerId:merchantId")
+const [customerId, merchantId] = customerRef.split(':');
+
+if (!merchantId) {
+  throw new Error('Invalid customerRef format - unable to extract merchantId');
+}
+
+// Prepare encrypted data for SCB API
+const inquiryData = {
+  refNumber: refNumber,
+  refDateTime: refDateTime.toISOString().replace(/[-:]/g, '').slice(0, 14), // Format: YYYYMMDDHHmmss
+  customerRef: customerRef
+};
+
+// Request body structure
+const requestBody = {
+  merchantId: merchantId,
+  encryptedValue: encryptSCB(inquiryData) // Encrypt the inquiry data
+};</code></pre>
+
+    <h4 class="code-line" data-line-start="375" data-line-end="376">
+      <a id="612_Response_Structure_and_Decryption_375"></a>6.1.2 Response Structure and Decryption
+    </h4>
+
+    <p class="has-line-data" data-line-start="377" data-line-end="378">
+      The SCB API returns an encrypted response that you must decrypt to get the payment status and transaction details.
+    </p>
+
+    <pre><code class="language-javascript">// SCB Payment Inquiry API Response Structure
+{
+  "status": {
+    "code": 1000,
+    "description": "Success"
+  },
+  "body": {
+    "merchantId": "2020000001",
+    "encryptedValue": "<Encrypt Data>",
+    "validationMessages": []
+  }
+}
+
+// Decrypt the encryptedValue to get payment information:
+const decryptedPayment = decryptSCBResponse(response.body.encryptedValue);
+// decryptedPayment contains all these fields:
+// {
+//   "refNumber": "RF-xxxxxxxxxxxxx",      // Payment reference number (String)
+//   "refDateTime": "20231007143000",      // Payment reference date/time (String: yyyyMMddHHmmss)
+//   "amount": 100.00,                     // Transaction amount (Number)
+//   "currency": "THB",                    // Transaction currency (String)
+//   "customerRef": "12345:67890",         // Customer reference (String)
+//   "txnNumber": "SCB202310071234567890", // SCB's transaction number (String)
+//   "statusCode": "0000",                 // Payment status code (String)
+//   "statusDesc": "Success"               // Payment status description (String)
+// }
+
+// Response data usage:
+// - status.code: Check if API call was successful
+// - decryptedPayment.statusCode: Check payment status
+// - decryptedPayment.statusDesc: Status description for user feedback
+// - decryptedPayment.amount, currency: Transaction details
+// - decryptedPayment.customerRef: Extract customerId and merchantId
+// - validationMessages: For error handling
+
+// Implementation example:
+if (response.status.code === 1000) {
+  const decryptedPayment = decryptSCBResponse(response.body.encryptedValue);
+  
+  // Extract customerId and merchantId from customerRef
+  const [customerId, merchantId] = decryptedPayment.customerRef.split(':');
+  
+  // Return payment status information to wrapper API caller
+  return {
+    success: decryptedPayment.statusCode === '0000',
+    amount: decryptedPayment.amount,
+    currency: decryptedPayment.currency,
+    customerId: customerId,
+    merchantId: merchantId,
+    refDateTime: decryptedPayment.refDateTime,
+    statusCode: decryptedPayment.statusCode,
+    description: decryptedPayment.statusDesc
+  };
+} else {
+  throw new Error(`Payment inquiry failed: ${response.status.description}`);
+}</code></pre>
+
+    <hr />
+
+    <h2 class="code-line" data-line-start="425" data-line-end="426">
+      <a id="7_Error_Handling_and_Best_Practices_425"></a>7. Error Handling and
+      Best Practices
+    </h2>
+
+    <h3 class="code-line" data-line-start="427" data-line-end="428">
+      <a id="71_Token_Management_427"></a>7.1 Token Management
+    </h3>
+
+    <ul>
+      <li>Implement automatic token refresh before expiration</li>
+      <li>Handle 401 Unauthorized responses with immediate token refresh</li>
+      <li>Store tokens securely and avoid exposure in logs</li>
+    </ul>
+
+    <h3 class="code-line" data-line-start="433" data-line-end="434">
+      <a id="72_Encryption_Security_433"></a>7.2 Encryption Security
+    </h3>
+
+    <ul>
+      <li>Validate public key format before encryption operations</li>
+      <li>
+        Handle encryption failures gracefully with appropriate error messages
+      </li>
+      <li>Never log or store decrypted sensitive data</li>
+    </ul>
+
+    <h3 class="code-line" data-line-start="439" data-line-end="440">
+      <a id="73_Reference_Generation_439"></a>7.3 Reference Generation
+    </h3>
+
+    <ul>
+      <li>
+        Use PostgreSQL's <code>gen_random_uuid()</code> for cryptographically
+        secure unique identifiers 
+      </li>
+      <li>
+        Format references consistently: <code>REG-xxxxxxxxx</code> ([0-9a-f] hexadecimal) for
+        registrations, <code>RF-xxxxxxxxx</code> ([0-9a-f] hexadecimal) for payments
+      </li>
+      <li>
+        Store all generated references in PostgreSQL
+        <code>scb_registrations</code> and
+        <code>scb_debit_transactions</code> tables for proper tracking and audit
+        trails
+      </li>
+      <li>
+        Cache frequently accessed data like account numbers in Firebase RTDB for
+        faster retrieval
+      </li>
+    </ul>
+
+    <hr />
+
+    <h2 class="code-line" data-line-start="446" data-line-end="447">
+      <a id="8_API_Reference_Links_446"></a>8. API Reference Links
+    </h2>
+
+    <ul>
+      <li>
+        <a
+          href="https://developer.scb/#/documents/api-reference-index/direct-debit-payment/post-api-pay.html"
+          >Direct Debit Payment API</a
+        >
+      </li>
+      <li>
+        <a
+          href="https://developer.scb/#/documents/api-reference-index/direct-debit-payment/post-registration-inquiry.html"
+          >Registration Inquiry API</a
+        >
+      </li>
+      <li>
+        <a
+          href="https://developer.scb/#/documents/api-reference-index/direct-debit-payment/post-payment-inquiry.html"
+          >Payment Inquiry API</a
+        >
+      </li>
+      <li>
+        <a
+          href="https://developer.scb/#/documents/api-reference-index/authentication/post-oauth-token.html"
+          >OAuth Token API</a
+        >
+      </li>
+      <li>
+        <a
+          href="https://developer.scb/#/documents/api-reference-index/authentication/post-oauth-token-refresh.html"
+          >OAuth Token Refresh API</a
+        >
+      </li>
+      <li>
+        <a
+          href="https://developer.scb/#/documents/api-reference-index/references/example-code-encryption-decryption.html"
+          >Encryption/Decryption Examples</a
+        >
+      </li>
+    </ul>
+
+    <style>
+      table {
+        margin-bottom: 2rem;
+      }
+    </style>
+
+    <!-- Highlight.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>
