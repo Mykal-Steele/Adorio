@@ -59,7 +59,7 @@ jobs:
           echo "CHROMIUM_PATH=$CHROMIUM_PATH" >> $GITHUB_ENV
           export PUPPETEER_EXECUTABLE_PATH=$CHROMIUM_PATH
 
-      - name: Run keep-alive script
-        run: node keep-alive.js
-        env:
-          PUPPETEER_EXECUTABLE_PATH: ${{ env.CHROMIUM_PATH }}
+      # - name: Run keep-alive script
+      #   run: node keep-alive.js
+      #   env:
+      #     PUPPETEER_EXECUTABLE_PATH: ${{ env.CHROMIUM_PATH }}
