@@ -1,0 +1,34 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - MONGO_URI=mongodb+srv://mykalstele:mongomykal@cluster0.snup0wa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      - JWT_SECRET=L0okz8zON2kinGi6qnRwZ82W54RszDBZwoF20XmWG1/qy3Ga451o6c19ihZ1EkRfhJAft0MMYAL4DTC6W8pJ1l1RhplKOqvFy1MxzbAuvubXm8+9FfommlYw7QfekLS3ZwR03IuJC1CT7CGTNhsdZgp4GYlLb2oOoJgYk/imHdI=
+      - CLIENT_URL=http://localhost:8080
+      - CLOUDINARY_NAME=dboeqtx65
+      - CLOUDINARY_KEY=434121358531843
+      - CLOUDINARY_SECRET=wF7BHY_N4wA92MWH_62XVY_VQR4
+    depends_on:
+      - ai-slop
+
+  frontend:
+    build:
+      context: .
+      args:
+        ENV: local
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+      - ai-slop
+
+  ai-slop:
+    build:
+      context: ./ai-slop/AI-Slop-For-CAO-exam
+    ports:
+      - "8081:80"
