@@ -3,18 +3,18 @@ FROM node:18-alpine AS build
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY ./ai-slop/AI-Slop-For-CAO-exam/package*.json ./
 RUN npm ci
 
-COPY . .
+COPY ./ai-slop/AI-Slop-For-CAO-exam/ ./
+COPY .env.development ./
+RUN cp .env.development .env 2>/dev/null || echo "No .env.development"
 RUN npm run build
 
 # Production stage
 FROM nginx:alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
-RUN mkdir -p /usr/share/nginx/html/cao && cp /usr/share/nginx/html/index.html /usr/share/nginx/html/cao/ && cp -r /usr/share/nginx/html/assets /usr/share/nginx/html/cao/
-COPY nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 
