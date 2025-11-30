@@ -6,7 +6,7 @@ const axios = require("axios");
 // spent way too long debugging this stupid issue
 const apiUrl =
   typeof window !== "undefined"
-    ? window.VITE_BACKEND_URL + "/api/"
+    ? (import.meta.env.VITE_BACKEND_URL || "") + "/api/"
     : "https://feelio-github-io.onrender.com/api/";
 
 export const fetchUserData = async () => {
