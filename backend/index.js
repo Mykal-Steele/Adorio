@@ -120,6 +120,20 @@ app.get('/api/stats/visitor/:visitorId', optional, getVisitorDetailsInfo);
 app.get('/api/health', getHealthStatus);
 app.get('/api/stats/system', optional, getSystemStats);
 
+// Test env endpoint
+app.get('/api/test-env', (req, res) => {
+  res.json({
+    NODE_ENV: process.env.NODE_ENV,
+    MONGO_URI: !!process.env.MONGO_URI,
+    JWT_SECRET: !!process.env.JWT_SECRET,
+    CLOUDINARY_NAME: process.env.CLOUDINARY_NAME,
+    CLOUDINARY_KEY: !!process.env.CLOUDINARY_KEY,
+    CLOUDINARY_SECRET: !!process.env.CLOUDINARY_SECRET,
+    CLIENT_URL: process.env.CLIENT_URL,
+    PORT: process.env.PORT,
+  });
+});
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.static(path.join(__dirname, 'dist')));
 
