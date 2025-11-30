@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        ENV: local
+        ENV: development
         VITE_GEMINI_API_KEY: ${VITE_GEMINI_API_KEY}
     ports:
       - "8080:80"
