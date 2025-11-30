@@ -128,7 +128,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // Function to split text into chunks (by --- separator for MD format)
   const chunkText = (text: string): string[] => {
-    return text.split("\n---\n\n").filter((chunk) => chunk.trim().length > 0);
+    return text.split("\n\n---\n\n").filter((chunk) => chunk.trim().length > 0);
   };
 
   // Function to chunk problem into smaller pieces (sentences or small paragraphs)
