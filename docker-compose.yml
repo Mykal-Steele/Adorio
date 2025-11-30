@@ -1,34 +1,22 @@
 services:
-  backend:
-    build:
-      context: ./backend
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-      - PORT=3000
-      - MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-      - JWT_SECRET=***REMOVED***=
-      - CLIENT_URL=http://localhost:8080
-      - CLOUDINARY_NAME=dboeqtx65
-      - CLOUDINARY_KEY=***REMOVED***
-      - CLOUDINARY_SECRET=***REMOVED***
-    depends_on:
-      - ai-slop
-
   frontend:
     build:
       context: .
       args:
         ENV: local
+        VITE_GEMINI_API_KEY: ${VITE_GEMINI_API_KEY}
     ports:
       - "8080:80"
+    env_file: .env.development
     depends_on:
-      - backend
       - ai-slop
 
   ai-slop:
     build:
-      context: ./ai-slop/AI-Slop-For-CAO-exam
+      context: .
+      dockerfile: ./ai-slop/AI-Slop-For-CAO-exam/Dockerfile
+      args:
+        VITE_GEMINI_API_KEY: ${VITE_GEMINI_API_KEY}
     ports:
       - "8081:80"
+    env_file: .env.development
