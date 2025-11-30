@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import { GoogleGenAI } from "@google/genai";
 
 export const streamGeminiResponse = async (
@@ -6,7 +8,7 @@ export const streamGeminiResponse = async (
   onChunk: (text: string) => void,
   useThinking: boolean
 ) => {
-  const apiKey = process.env.API_KEY;
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
     onChunk("Error: API Key not found.");
     return;

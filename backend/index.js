@@ -70,8 +70,8 @@ const configureTrustProxy = () => {
     }
     return 1; // Default for production
   } else {
-    // In development, trust all proxies for flexibility
-    return true;
+    // In development, trust the first proxy (nginx)
+    return 1;
   }
 };
 

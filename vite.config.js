@@ -114,9 +114,7 @@ export default defineConfig({
     'process.env.CLOUDINARY_NAME': JSON.stringify(process.env.CLOUDINARY_NAME),
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     'import.meta.env.VITE_BACKEND_URL': JSON.stringify(
-      process.env.NODE_ENV === 'development'
-        ? 'http://localhost:5000'
-        : 'https://feelio-github-io.onrender.com'
+      process.env.VITE_BACKEND_URL
     ),
   },
 
