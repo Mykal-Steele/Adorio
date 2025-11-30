@@ -1,0 +1,2319 @@
+import { Topic } from "./types";
+
+export const EXAM_DATA: Topic[] = [
+  {
+    id: "isa",
+    title: "Instruction Set Architecture (ISA)",
+    problems: [
+      {
+        id: "isa_calc",
+        title: "Calculating Instruction Space",
+        type: "problem",
+        content: `A computer has 32-bit instructions and 12-bit addresses.
+Suppose there are 250 2-address instructions.
+How many 1-address instructions can be formulated?`,
+        definitions: [
+          {
+            term: "Instruction Length",
+            definition:
+              "The total number of bits available for a single command (e.g., 32 bits).",
+          },
+          {
+            term: "Opcode",
+            definition:
+              "The part of the instruction that tells the CPU what to do (e.g., ADD, SUB).",
+          },
+          {
+            term: "Operand",
+            definition:
+              "The part of the instruction that points to data (e.g., an address in memory).",
+          },
+          {
+            term: "2-Address Instruction",
+            definition:
+              "An instruction format that requires TWO memory addresses (e.g., ADD A, B).",
+          },
+        ],
+        solution: `**Step 1: Calculate the total available space.**
+The instruction length is 32 bits.
+Total unique patterns = 2^(32).
+
+**Step 2: Calculate the space used by the 2-address instructions.**
+A 2-address instruction needs two addresses.
+- Each address is 12 bits.
+- Total address bits = 12 + 12 = 24 bits.
+- The remaining bits for the Opcode are: 32 - 24 = 8 bits.
+- This means normally we could have 2^8 (256) opcodes.
+- However, we are told we are *only using* 250 of them.
+- Space used = 250 * (number of address patterns)
+- Space used = 250 * 2^(24).
+
+**Step 3: Calculate the remaining space.**
+Remaining = Total - Used
+Remaining = 2^(32) - (250 * 2^(24))
+To subtract this easily, express 2^32 as 2^8 * 2^24.
+Remaining = (2^8 * 2^24) - (250 * 2^24)
+Remaining = (256 * 2^24) - (250 * 2^24)
+Remaining = (256 - 250) * 2^24
+Remaining = 6 * 2^24.
+
+**Step 4: Convert remaining space into 1-address instructions.**
+A 1-address instruction only needs ONE address (12 bits).
+- We have 6 * 2^24 "patterns" left.
+- Each 1-address instruction consumes 2^12 patterns (because it has one 12-bit address).
+- Number of instructions = Remaining Patterns / Size of one instruction
+- Number = (6 * 2^24) / 2^12
+- Number = 6 * 2^(24-12)
+- Number = 6 * 2^12
+- Number = 6 * 4096 = 24,576.
+
+**Answer:** You can create 24,576 1-address instructions.`,
+        cheatSheet: [
+          {
+            label: "1. Total Pattern Space",
+            formula: "2^(Instruction Length)",
+            explanation: "The theoretical max number of instructions.",
+          },
+          {
+            label: "2. Calculate Used Space",
+            formula: "Count * 2^(Bits for Operands)",
+            explanation:
+              "How many patterns are already taken by the bigger instructions.",
+          },
+          {
+            label: "3. Divide Remaining",
+            formula: "Remaining / 2^(Target Operand Bits)",
+            explanation:
+              "See how many of the smaller instruction type fit in the leftover space.",
+          },
+        ],
+      },
+      {
+        id: "isa_endian",
+        title: "Endianness (Data Storage)",
+        type: "problem",
+        content: `Show how the value 45 67 89 A1 (hex) would be stored at address 1016.
+a) Little Endian
+b) Big Endian`,
+        definitions: [
+          {
+            term: "MSB (Most Significant Byte)",
+            definition:
+              "The 'biggest' part of the number. In '45 67 89 A1', 45 is the MSB (leftmost).",
+          },
+          {
+            term: "LSB (Least Significant Byte)",
+            definition:
+              "The 'smallest' part of the number. In '45 67 89 A1', A1 is the LSB (rightmost).",
+          },
+          {
+            term: "Big Endian",
+            definition:
+              "The Big End (MSB) gets stored first (at the lowest address).",
+          },
+          {
+            term: "Little Endian",
+            definition:
+              "The Little End (LSB) gets stored first (at the lowest address).",
+          },
+        ],
+        solution: `**The Value:**
+45 (MSB) | 67 | 89 | A1 (LSB)
+
+**a) Little Endian Solution:**
+"Little End First". We take the LSB (A1) and put it at the lowest address (1016).
+Address | Value
+------- | -----
+1016    | A1
+1017    | 89
+1018    | 67
+1019    | 45
+
+**b) Big Endian Solution:**
+"Big End First". We take the MSB (45) and put it at the lowest address (1016).
+Address | Value
+------- | -----
+1016    | 45
+1017    | 67
+1018    | 89
+1019    | A1`,
+        cheatSheet: [
+          {
+            label: "Little Endian Rule",
+            explanation:
+              "Reverse the hex string. Smallest byte -> Lowest Address.",
+          },
+          {
+            label: "Big Endian Rule",
+            explanation:
+              "Keep the hex string as is. Biggest byte -> Lowest Address (Reading order).",
+          },
+        ],
+      },
+      {
+        id: "isa_addr_modes",
+        title: "Addressing Modes & Effective Address",
+        type: "problem",
+        content: `Calculate the Effective Address (EA) and value loaded into Accumulator (AC) for:
+1. Immediate
+2. Direct
+3. Indirect
+4. Indexed (R1 = 200)
+
+Given Instruction: LOAD 500
+Given Memory:
+- Mem[500] = 600
+- Mem[600] = 800
+- Mem[700] = 900`,
+        definitions: [
+          {
+            term: "Effective Address (EA)",
+            definition:
+              "The final, actual memory address where the data lives.",
+          },
+          {
+            term: "Immediate",
+            definition: "The data is the operand itself. No memory lookup.",
+          },
+          {
+            term: "Direct",
+            definition: "The operand IS the address of the data.",
+          },
+          {
+            term: "Indirect",
+            definition:
+              "The operand is an address that points to ANOTHER address.",
+          },
+          {
+            term: "Indexed",
+            definition:
+              "The address is calculated by adding a register value to the operand.",
+          },
+        ],
+        solution: `**1. Immediate Addressing**
+- **Concept:** The operand *is* the data.
+- **Value:** 500. (We just load the number 500).
+- **EA:** N/A (No memory access).
+
+**2. Direct Addressing**
+- **Concept:** Go to address 500.
+- **EA:** 500.
+- **Value:** Mem[500] = 600.
+
+**3. Indirect Addressing**
+- **Concept:** Go to 500 to find a pointer. The pointer is 600. Now go to 600.
+- **EA:** Mem[500] = 600.
+- **Value:** Mem[600] = 800.
+
+**4. Indexed Addressing**
+- **Concept:** Add Register R1 to the operand.
+- **Calculation:** 500 (Operand) + 200 (R1) = 700.
+- **EA:** 700.
+- **Value:** Mem[700] = 900.`,
+        cheatSheet: [
+          {
+            label: "Immediate",
+            explanation: "Value = Operand.",
+          },
+          {
+            label: "Direct",
+            explanation: "Value = Mem[Operand].",
+          },
+          {
+            label: "Indirect",
+            explanation: "Value = Mem[Mem[Operand]]. (Double lookup).",
+          },
+          {
+            label: "Indexed",
+            explanation: "Addr = Operand + Register. Value = Mem[Addr].",
+          },
+        ],
+      },
+      {
+        id: "isa_postfix",
+        title: "Infix to Postfix Conversion",
+        type: "problem",
+        content: `Convert the following expression to Reverse Polish Notation (Postfix):
+(8 - 6) / 2`,
+        definitions: [
+          { term: "Infix", definition: "Standard math notation: A + B" },
+          {
+            term: "Postfix (RPN)",
+            definition: "Operator follows operands: A B +",
+          },
+          {
+            term: "Stack Rule",
+            definition: "Operands are pushed. Operators pop the top two items.",
+          },
+        ],
+        solution: `**Step 1: Handle Parentheses**
+- Look at (8 - 6).
+- In postfix, the numbers come first, then the minus.
+- Result: 8 6 -
+
+**Step 2: Handle Division**
+- The expression is now [Result of Step 1] divided by 2.
+- In postfix, put the divisor (2) next, then the operator (/).
+- Result: 8 6 - 2 /
+
+**Verification (Stack Trace):**
+1. Push 8.
+2. Push 6.
+3. Apply '-': Pop 6, Pop 8. Calc 8-6=2. Push 2.
+4. Push 2.
+5. Apply '/': Pop 2, Pop 2. Calc 2/2=1. Push 1.
+Final Answer: 1.`,
+        cheatSheet: [
+          {
+            label: "Order",
+            explanation:
+              "Keep numbers in original order. Move operators to the right of their operands.",
+          },
+          {
+            label: "Precedence",
+            explanation: "Do parentheses first. Then *, /. Then +, -.",
+          },
+        ],
+      },
+
+      {
+        id: "isa_packed_decimal",
+        title: "Packed Decimal Calculation",
+        type: "problem",
+        content: `Given the packed decimal value 12345678 stored as 12 34 56 78 (hex bytes).
+Calculate the decimal value represented.`,
+        definitions: [
+          {
+            term: "Packed Decimal",
+            definition: "Each byte stores two decimal digits (0-9).",
+          },
+        ],
+        solution: `**Step 1: Convert each hex byte to two decimal digits.**
+- 12 hex = 1 and 2
+- 34 hex = 3 and 4
+- 56 hex = 5 and 6
+- 78 hex = 7 and 8
+
+**Step 2: Concatenate the digits.**
+- 1 2 3 4 5 6 7 8
+
+**Step 3: Form the decimal number.**
+- 12345678
+
+**Answer:** 12345678`,
+        cheatSheet: [
+          {
+            label: "Hex to Decimal Digits",
+            formula: "Each nibble (4 bits) = one digit",
+            explanation: "12 hex means digit 1 and digit 2.",
+          },
+        ],
+      },
+      {
+        id: "isa_bitwise_ops",
+        title: "Bitwise Operations",
+        type: "problem",
+        content: `Given A = 10110101 and B = 01101110 (binary).
+Calculate:
+1. A AND B
+2. A OR B
+3. A XOR B
+4. NOT A`,
+        definitions: [
+          {
+            term: "AND",
+            definition: "1 only if both bits are 1.",
+          },
+          {
+            term: "OR",
+            definition: "1 if either bit is 1.",
+          },
+          {
+            term: "XOR",
+            definition: "1 if bits are different.",
+          },
+          {
+            term: "NOT",
+            definition: "Flip all bits.",
+          },
+        ],
+        solution: `**1. A AND B**
+- 10110101
+- 01101110
+- 00100100
+- Decimal: 36
+
+**2. A OR B**
+- 10110101
+- 01101110
+- 11111111
+- Decimal: 255
+
+**3. A XOR B**
+- 10110101
+- 01101110
+- 11011011
+- Decimal: 219
+
+**4. NOT A**
+- 10110101 -> 01001010
+- Decimal: 74`,
+        cheatSheet: [
+          {
+            label: "AND",
+            explanation: "Bitwise multiplication.",
+          },
+          {
+            label: "OR",
+            explanation: "Bitwise addition.",
+          },
+          {
+            label: "XOR",
+            explanation: "Bitwise difference.",
+          },
+          {
+            label: "NOT",
+            explanation: "Bitwise negation.",
+          },
+        ],
+      },
+      {
+        id: "isa_opcode_calc",
+        title: "Opcode Space Calculation",
+        type: "problem",
+        content: `In a 16-bit instruction format:
+- 4 bits for opcode
+- Remaining bits for operands
+
+If we have 3-address instructions (each address 4 bits), how many unique 3-address instructions can we have?
+How many if we switch to 2-address (each 6 bits)?`,
+        definitions: [
+          {
+            term: "Opcode",
+            definition: "Bits that specify the operation.",
+          },
+          {
+            term: "3-Address Instruction",
+            definition:
+              "Instruction with three operands (e.g., ADD R1, R2, R3).",
+          },
+        ],
+        solution: `**Total Instruction Space (Fixed 16 bits):** 2^16 = 65,536 unique patterns.
+
+**1. For 3-Address Instructions:**
+- **Address Bits Used:** 3 addresses * 4 bits/address = 12 bits.
+- **Opcode Bits Available:** 16 bits - 12 bits = 4 bits.
+
+- **Number of unique Opcode values:** 2^4 = 16 opcodes.
+- **Number of unique Operand combinations:** 2^12 = 4,096 combinations (since the 12 address bits are grouped into three fields, there are $2^4 \times 2^4 \times 2^4$ combinations, which is $2^{12}$).
+
+- **Total Unique Instructions:** (Opcode values) × (Operand combinations)
+- 16 × 4,096 = **65,536 unique instructions.**
+
+**2. For 2-Address Instructions:**
+- **Address Bits Used:** 2 addresses * 6 bits/address = 12 bits.
+- **Opcode Bits Available:** 16 bits - 12 bits = 4 bits.
+
+- **Number of unique Opcode values:** 2^4 = 16 opcodes.
+- **Number of unique Operand combinations:** 2^12 = 4,096 combinations.
+
+- **Total Unique Instructions:** (Opcode values) × (Operand combinations)
+- 16 × 4,096 = **65,536 unique instructions.**
+
+**Conclusion:** For a fixed instruction length (16 bits), the total number of unique instructions (patterns) is always the same, $2^{16}$. The difference is how many bits are allocated to addresses versus the opcode. In this case, since both scenarios use 12 bits for operands, the overall space remains fully utilized in both cases.`,
+        cheatSheet: [
+          {
+            label: "Total Patterns",
+            formula: "2^(Instruction Length)",
+            explanation: "The total space is fixed for a fixed-length ISA.",
+          },
+          {
+            label: "Instruction Space",
+            formula: "2^(Opcode Bits) * 2^(Operand Bits)",
+            explanation:
+              "How the total space is distributed between operations and addresses.",
+          },
+        ],
+      },
+      {
+        id: "isa_field_sizes",
+        title: "Calculate Opcode/Field Sizes",
+        type: "problem",
+        content: `A computer has:
+- 32-bit instructions
+- 64 KB memory (byte-addressable)
+- 16 general-purpose registers
+- 4 addressing modes
+
+Calculate the minimum bits needed for:
+- Address field
+- Register field
+- Mode field
+- Opcode field`,
+        definitions: [
+          {
+            term: "Address Field",
+            definition: "Bits needed to address memory locations.",
+          },
+          {
+            term: "Register Field",
+            definition: "Bits needed to specify registers.",
+          },
+          {
+            term: "Mode Field",
+            definition: "Bits needed for addressing modes.",
+          },
+          {
+            term: "Opcode Field",
+            definition: "Bits for operation codes.",
+          },
+        ],
+        solution: `**Address bits:** Memory = 64 KB = 2^16 bytes, so 16 bits.
+
+**Register bits:** 16 registers = 2^4, so 4 bits.
+
+**Mode bits:** 4 modes = 2^2, so 2 bits.
+
+**Opcode bits:** Total 32 bits. Assuming one address, one register, mode: 16 + 4 + 2 = 22 bits used, so 32 - 22 = 10 bits for opcode (1024 opcodes).
+
+**Note:** This is a simplified example; actual allocation depends on instruction format.`,
+        cheatSheet: [
+          {
+            label: "Address Bits",
+            formula: "log2(Memory Size)",
+            explanation: "For byte-addressable memory.",
+          },
+          {
+            label: "Register Bits",
+            formula: "log2(Number of Registers)",
+            explanation: "To uniquely identify each register.",
+          },
+          {
+            label: "Mode Bits",
+            formula: "log2(Number of Modes)",
+            explanation: "For addressing modes.",
+          },
+          {
+            label: "Opcode Bits",
+            formula: "Total Bits - (Address + Register + Mode + other)",
+            explanation: "Remaining bits for operations.",
+          },
+        ],
+      },
+      {
+        id: "isa_expressions",
+        title: "Implementing Expressions on Different Machines",
+        type: "problem",
+        content: `Write code to implement the expression: A = (B + C) * (D + E)
+on 3-, 2-, 1- and 0-address machines. Computing the expression should not change the values of its operands.`,
+        definitions: [
+          {
+            term: "3-Address Machine",
+            definition:
+              "Instructions can have three operands (e.g., ADD R1, B, C).",
+          },
+          {
+            term: "2-Address Machine",
+            definition: "Instructions have two operands, one is destination.",
+          },
+          {
+            term: "1-Address Machine",
+            definition: "Accumulator-based, one operand implied.",
+          },
+          {
+            term: "0-Address Machine",
+            definition: "Stack-based, operands from stack.",
+          },
+        ],
+        solution: `**3-Address Machine:**
+ADD R1, B, C    ; R1 = B + C
+ADD R2, D, E    ; R2 = D + E
+MUL A, R1, R2   ; A = R1 * R2
+
+**2-Address Machine:**
+MOV R1, B
+ADD R1, C       ; R1 = B + C
+MOV R2, D
+ADD R2, E       ; R2 = D + E
+MUL R1, R2      ; R1 = (B + C) * (D + E)
+MOV A, R1
+
+**1-Address Machine (Accumulator):**
+LOAD B
+ADD C           ; ACC = B + C
+STORE TEMP1     ; TEMP1 = ACC
+LOAD D
+ADD E           ; ACC = D + E
+MUL TEMP1       ; ACC = (D + E) * TEMP1
+STORE A
+
+**0-Address Machine (Stack):**
+PUSH B
+PUSH C
+ADD             ; Stack: [B+C]
+PUSH D
+PUSH E
+ADD             ; Stack: [B+C, D+E]
+MUL             ; Stack: [(B+C)*(D+E)]
+POP A`,
+        cheatSheet: [
+          {
+            label: "3-Address",
+            explanation: "Direct operations on registers.",
+          },
+          {
+            label: "2-Address",
+            explanation: "One operand is destination.",
+          },
+          {
+            label: "1-Address",
+            explanation: "Accumulator implied.",
+          },
+          {
+            label: "0-Address",
+            explanation: "Stack operations.",
+          },
+        ],
+      },
+      {
+        id: "isa_ieee_float",
+        title: "IEEE Single-Precision Floating Point",
+        type: "problem",
+        content: `The 32-bit hexadecimal number 2AC2081B is stored in memory.
+If the machine is big endian, what is the sign, exponent, and mantissa?
+What is the decimal equivalent?`,
+        definitions: [
+          {
+            term: "IEEE 754",
+            definition:
+              "Standard for floating point representation: 1 sign bit, 8 exponent bits, 23 mantissa bits.",
+          },
+          {
+            term: "Bias",
+            definition: "Exponent bias is 127 for single precision.",
+          },
+        ],
+        solution: `**Binary:** 0010 1010 1100 0010 0000 1000 0001 1011
+**Sign:** 0 (positive)
+**Exponent:** 01010101 = 85, 85 - 127 = -42
+**Mantissa:** 1.10000100000100000011011
+**Value:** 1.10000100000100000011011 * 2^-42 ≈ 1.516 * 10^-13`,
+        cheatSheet: [
+          {
+            label: "Exponent",
+            formula: "Binary exp - 127",
+            explanation: "Actual exponent = biased - bias.",
+          },
+          {
+            label: "Mantissa",
+            formula: "1 + fraction",
+            explanation: "Implicit leading 1.",
+          },
+        ],
+      },
+      {
+        id: "isa_2s_complement_endian",
+        title: "2's Complement and Endianness",
+        type: "problem",
+        content: `The first two bytes of a 2M x 16 main memory have the following hex values:
+Byte 0 is FE
+Byte 1 is 01
+If these bytes hold a 16-bit two's complement integer, what is its actual decimal value if:
+a. Memory is big endian?
+b. Memory is little endian?`,
+        definitions: [
+          {
+            term: "Two's Complement",
+            definition:
+              "Binary representation for negative numbers. MSB indicates sign.",
+          },
+          {
+            term: "Big Endian",
+            definition: "MSB stored at lowest address.",
+          },
+          {
+            term: "Little Endian",
+            definition: "LSB stored at lowest address.",
+          },
+        ],
+        solution: `**a. Big Endian:**
+- Byte 0 (MSB) = FE, Byte 1 (LSB) = 01
+- Value: FE01 hex = 1111 1110 0000 0001 binary
+- MSB = 1, negative number.
+- Invert: 0000 0001 1111 1110
+- Add 1: 0000 0001 1111 1111 = 1FF hex = 511 decimal
+- Value: -511
+
+**b. Little Endian:**
+- Byte 0 (LSB) = FE, Byte 1 (MSB) = 01
+- Value: 01FE hex = 0000 0001 1111 1110 binary
+- MSB = 0, positive.
+- Value: 510 decimal`,
+        cheatSheet: [
+          {
+            label: "Big Endian",
+            explanation: "Bytes in order: MSB first.",
+          },
+          {
+            label: "Little Endian",
+            explanation: "Bytes reversed: LSB first.",
+          },
+          {
+            label: "2's Complement",
+            explanation: "If MSB=1, invert and add 1.",
+          },
+        ],
+      },
+      {
+        id: "isa_postfix_to_infix",
+        title: "Postfix to Infix Conversion",
+        type: "problem",
+        content: `Convert the following expressions from reverse Polish notation to infix notation.
+a) W X Y Z - + *
+b) U V W X Y Z + * + * +`,
+        definitions: [
+          {
+            term: "Postfix (RPN)",
+            definition: "Operator follows operands: A B +",
+          },
+          {
+            term: "Infix",
+            definition: "Operator between operands: A + B",
+          },
+          {
+            term: "Stack Method",
+            definition: "Push operands, apply operators to top items.",
+          },
+        ],
+        solution: `**a) W X Y Z - + ***
+- Push W, X, Y, Z
+- Apply -: Y - Z
+- Apply +: X + (Y - Z)
+- Apply *: W * (X + (Y - Z))
+- Result: W * (X + (Y - Z))
+
+**b) U V W X Y Z + * + * +**
+- Push U, V, W, X, Y, Z
+- Apply +: Y + Z
+- Apply *: X * (Y + Z)
+- Apply +: W + (X * (Y + Z))
+- Apply *: V * (W + (X * (Y + Z)))
+- Apply +: U + (V * (W + (X * (Y + Z))))
+- Result: U + (V * (W + (X * (Y + Z))))`,
+        cheatSheet: [
+          {
+            label: "Method",
+            explanation: "Use stack: push operands, pop for operators.",
+          },
+          {
+            label: "Parentheses",
+            explanation: "Add parentheses to preserve order.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "cache",
+    title: "Cache Memory",
+    problems: [
+      {
+        id: "c_format",
+        title: "Cache Address Format",
+        type: "problem",
+        content: `A computer has a 32-bit address space.
+The Cache has 1024 blocks.
+Each Block is 32 words.
+Find the size of the Tag, Block (Index), and Offset fields for Direct Mapping.`,
+        definitions: [
+          {
+            term: "Offset",
+            definition:
+              "Bits used to select a specific byte/word INSIDE a block.",
+          },
+          {
+            term: "Block/Index",
+            definition: "Bits used to select WHICH LINE of the cache to check.",
+          },
+          {
+            term: "Tag",
+            definition:
+              "The remaining bits used to confirm if the cache line actually holds the address we want.",
+          },
+          {
+            term: "Log2",
+            definition:
+              "The number of bits needed to represent N items. 2^x = N.",
+          },
+        ],
+        solution: `**Step 1: Calculate Offset Bits**
+- Block size is 32 words.
+- How many bits to count to 32?
+- log2(32) = 5 bits.
+- **Offset = 5 bits.**
+
+**Step 2: Calculate Block (Index) Bits**
+- There are 1024 blocks in the cache.
+- How many bits to count to 1024?
+- log2(1024) = 10 bits.
+- **Block Index = 10 bits.**
+
+**Step 3: Calculate Tag Bits**
+- The total address is 32 bits.
+- Tag = Total - Index - Offset.
+- Tag = 32 - 10 - 5 = 17 bits.
+- **Tag = 17 bits.**
+
+**Final Format:** Tag(17) | Index(10) | Offset(5).`,
+        cheatSheet: [
+          {
+            label: "1. Offset Formula",
+            formula: "log2(Block Size)",
+            explanation: "Determines bits needed for data width.",
+          },
+          {
+            label: "2. Index Formula",
+            formula: "log2(Number of Blocks)",
+            explanation: "Determines bits needed for cache rows.",
+          },
+          {
+            label: "3. Tag Formula",
+            formula: "Total Bits - Index - Offset",
+            explanation: "Whatever is left over.",
+          },
+        ],
+      },
+      {
+        id: "c_set_assoc_calc",
+        title: "Set Associative Address Format",
+        type: "problem",
+        content: `A computer has 2^16 words of main memory and a cache of 32 blocks.
+Each cache block contains 8 words.
+Find the Tag, Set, and Offset bits if the cache is **2-way Set Associative**.`,
+        definitions: [
+          {
+            term: "Set",
+            definition:
+              "A group of cache lines. A memory block maps to a specific Set.",
+          },
+          {
+            term: "Ways (N)",
+            definition:
+              "Number of blocks per Set (e.g., 2-way = 2 blocks per set).",
+          },
+        ],
+        solution: `**Step 1: Calculate Offset**
+- Block size = 8 words.
+- log2(8) = **3 bits**.
+
+**Step 2: Calculate Number of Sets**
+- Total Blocks = 32.
+- Associativity = 2-way.
+- Number of Sets = Total Blocks / Ways
+- 32 / 2 = 16 Sets.
+- Set bits = log2(16) = **4 bits**.
+
+**Step 3: Calculate Tag**
+- Total Address = 16 bits (from 2^16 words).
+- Tag = Total - Set - Offset
+- Tag = 16 - 4 - 3 = **9 bits**.
+
+**Final Format:** Tag(9) | Set(4) | Offset(3).`,
+        cheatSheet: [
+          {
+            label: "Number of Sets",
+            formula: "Total Cache Blocks / N-way",
+            explanation: "Determines the Set field size.",
+          },
+          {
+            label: "Tag Bits",
+            formula: "Total - Set - Offset",
+            explanation: "Remaining bits are the Tag.",
+          },
+        ],
+      },
+      {
+        id: "c_fully_assoc_format",
+        title: "Fully Associative Address Format",
+        type: "problem",
+        content: `Consider a byte-addressable computer with 24-bit addresses.
+Cache block size is 32 bytes.
+What is the format (Tag, Offset) for a Fully Associative cache?`,
+        definitions: [
+          {
+            term: "Fully Associative",
+            definition:
+              "A memory block can be placed in ANY cache line. No 'Block/Index' field is needed.",
+          },
+        ],
+        solution: `**Step 1: Calculate Offset**
+- Block size = 32 bytes.
+- log2(32) = 5 bits.
+- **Offset = 5 bits.**
+
+**Step 2: Calculate Tag**
+- In Fully Associative, there is no "Index" or "Set" field because data can go anywhere.
+- The remaining bits are all Tag.
+- Total (24) - Offset (5) = 19 bits.
+- **Tag = 19 bits.**
+
+**Final Format:** Tag (19 bits) | Offset (5 bits).`,
+        cheatSheet: [
+          {
+            label: "Fully Associative Format",
+            formula: "Tag | Offset",
+            explanation: "No Index field needed.",
+          },
+          {
+            label: "Tag Bits",
+            formula: "Total Bits - Offset Bits",
+            explanation: "Everything not used for the offset is the tag.",
+          },
+        ],
+      },
+      {
+        id: "c_map",
+        title: "Mapping Address to Cache",
+        type: "problem",
+        content: `Using the format from the previous problem (17 Tag | 10 Index | 5 Offset),
+To which cache block does address 000063FA (Hex) map?`,
+        definitions: [
+          {
+            term: "Hexadecimal",
+            definition: "Base 16. Each character (0-F) represents 4 bits.",
+          },
+          {
+            term: "Mapping",
+            definition:
+              "Extracting the middle bits (Index) to see where data goes.",
+          },
+        ],
+        solution: `**Step 1: Convert Hex to Binary**
+Address: 000063FA
+0    0    0    0    6    3    F    A
+0000 0000 0000 0000 0110 0011 1111 1010
+
+**Step 2: Apply the Fields**
+We need to slice the bits starting from the RIGHT (Least Significant Bit).
+- **Offset (Rightmost 5 bits):** 11010
+- **Index (Next 10 bits):** 11 0001 1111
+- **Tag (Remaining 17 bits):** 0...00
+
+**Step 3: Calculate the Index Value**
+Extract the Index bits: 11 0001 1111
+Convert to decimal:
+1 * 512
+1 * 256
+0
+0
+0
+1 * 16
+1 * 8
+1 * 4
+1 * 2
+1 * 1
+Sum = 512 + 256 + 16 + 8 + 4 + 2 + 1 = 799.
+
+**Answer:** It maps to Cache Block #799.`,
+        cheatSheet: [
+          {
+            label: "1. Expand to Binary",
+            explanation:
+              "Write out the full 32 bits. Do not skip leading zeros.",
+          },
+          {
+            label: "2. Slice from Right",
+            explanation: "Count 5 bits for offset, then 10 bits for index.",
+          },
+          {
+            label: "3. Convert Middle",
+            explanation: "Turn the Index bits back into a decimal number.",
+          },
+        ],
+      },
+      {
+        id: "c_perf",
+        title: "Effective Access Time (EAT)",
+        type: "problem",
+        content: `Hit Rate: 95%.
+Cache Access Time: 10ns.
+Main Memory Access Time: 200ns.
+Calculate the Effective Access Time (EAT) assuming parallel access.`,
+        definitions: [
+          {
+            term: "Hit Rate (H)",
+            definition:
+              "Percentage of time we find data in cache. Convert to decimal for calculations (e.g., 95% = 0.95).",
+          },
+          {
+            term: "Miss Rate (1-H)",
+            definition: "Percentage of time we must go to RAM.",
+          },
+          {
+            term: "Miss Penalty",
+            definition:
+              "Total time wasted if we miss. Usually (RAM Time) or (RAM + Cache) depending on architecture.",
+          },
+        ],
+        solution: `**Formula:**
+EAT = (Hit Rate * Cache Access Time) + ((1 - Hit Rate) * Main Memory Access Time)
+
+**Scenario:**
+- If Hit (95%): We just take Cache Access Time (10ns).
+- If Miss (5%): We assume we access RAM. Since it says "Parallel", we don't add the cache time to the miss penalty, the RAM access dominates. However, usually EAT formulas assume:
+EAT = (Hit Rate * Cache Access Time) + ((1 - Hit Rate) * Main Memory Access Time) (Simple)
+OR
+EAT = Cache Access Time + ((1 - Hit Rate) * (Cache Access Time + Main Memory Access Time)) (If we always check cache first)
+
+Let's use the standard weighted average:
+**Convert percentages to decimals:** Hit Rate = 0.95, Miss Rate = 0.05
+EAT = (0.95 * 10ns) + (0.05 * 200ns)
+
+**Calculation:**
+- Hit part: 9.5ns
+- Miss part: 10ns
+- Total: 19.5ns.
+
+*Note: If the problem said "Look in Cache, THEN look in RAM", the miss penalty would be 210ns (10+200).*`,
+        cheatSheet: [
+          {
+            label: "Formula",
+            formula:
+              "(Hit Rate * Cache Access Time) + ((1-Hit Rate) * Main Memory Access Time)",
+            explanation: "Weighted average of the two speeds.",
+          },
+        ],
+      },
+      {
+        id: "c_hit_ratio",
+        title: "Cache Hit Ratio Calculation",
+        type: "problem",
+        content: `A direct-mapped cache has 8 blocks. Main memory has 4K blocks of 8 bytes each.
+A program accesses blocks 0, 1, 2, 3, 4, 5, 6, 7, 8 and then repeats this sequence (loops) 4 times (total 5 runs).
+Compute the hit ratio based on block accesses.`,
+        definitions: [
+          {
+            term: "Block Access",
+            definition: "A single memory read that fetches one block of data.",
+          },
+          {
+            term: "Hit Ratio",
+            definition: "Hits / Total Accesses.",
+          },
+        ],
+        solution: `**Analysis:**
+- **Cache Blocks (C):** 8 blocks (0-7).
+- **Memory Blocks Accessed (M):** Blocks 0 to 8 (9 total blocks).
+- **Mapping:** Memory Block $m$ maps to Cache Block $m \mod C$.
+  - M-Block 0 maps to C-Block 0
+  - M-Block 1 maps to C-Block 1
+  ...
+  - M-Block 7 maps to C-Block 7
+  - **M-Block 8 maps to C-Block 0** (Collision with M-Block 0)
+
+**Access Sequence (9 blocks per run, 5 total runs):**
+| Run | Access | M-Block | C-Block | Status | Notes |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| 1 | 1 | 0 | 0 | Miss | Load to C-Block 0 |
+| 1 | 2 | 1 | 1 | Miss | |
+| 1 | ... | ... | ... | Miss | Blocks 0-7 are all Misses |
+| 1 | 8 | 7 | 7 | Miss | |
+| 1 | 9 | 8 | 0 | Miss | Overwrites M-Block 0 in C-Block 0 |
+| **Total after Run 1** | 9 | | | **9 Misses, 0 Hits** | |
+| 2 | 10 | 0 | 0 | Miss | M-Block 0 is not in C-Block 0 (M-Block 8 is) |
+| 2 | 11 | 1 | 1 | Hit | Block 1 is still in C-Block 1 |
+| 2 | ... | ... | ... | Hit | Blocks 1-7 are Hits (7 hits) |
+| 2 | 18 | 7 | 7 | Hit | |
+| 2 | 19 | 8 | 0 | Hit | M-Block 8 is in C-Block 0 |
+| **Total after Run 2** | 10 | | | **1 Miss, 8 Hits** | |
+
+**Pattern for Runs 2, 3, 4, 5 (4 runs total):**
+- Accessing M-Block 0 always results in a **Miss** (it was evicted by M-Block 8 in the previous run, or by itself on the first run).
+- Accessing M-Blocks 1-7 always results in a **Hit** (no collision).
+- Accessing M-Block 8 always results in a **Hit** (it evicted M-Block 0 in the previous run).
+- **Per Run:** 1 Miss (Block 0) + 8 Hits (Blocks 1-7, Block 8) = 1 Miss, 8 Hits.
+
+**Total Accesses:** 9 blocks/run * 5 runs = **45 Total Accesses**.
+**Total Misses:** 9 (Run 1) + 4 * 1 (Runs 2-5) = **13 Misses**.
+**Total Hits:** 0 (Run 1) + 4 * 8 (Runs 2-5) = **32 Hits**.
+**Check:** 13 Misses + 32 Hits = 45 Total Accesses.
+
+**Hit Ratio:**
+Hit Ratio = Hits / Total Accesses
+Hit Ratio = $32 / 45$
+Hit Ratio $\approx 0.7111$ or **71.1%**
+
+**Answer:** The Hit Ratio is 32/45 $\approx$ 71.1%.`,
+        cheatSheet: [
+          {
+            label: "Hit Ratio",
+            formula: "Hits / (Hits + Misses)",
+            explanation: "Percentage of block accesses found in cache.",
+          },
+          {
+            label: "Direct Mapping Index",
+            formula: "Memory Block Number $mod$ Number of Cache Blocks",
+            explanation: "Used to determine where a memory block maps.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "vm",
+    title: "Virtual Memory",
+    problems: [
+      {
+        id: "v_bits",
+        title: "Virtual vs Physical Bits",
+        type: "problem",
+        content: `Virtual Address Space: 16MB.
+Physical Memory: 2MB.
+Page Size: 1KB.
+Find:
+a) Bits in Virtual Address
+b) Bits in Physical Address
+c) Number of Page Table Entries`,
+        definitions: [
+          {
+            term: "Virtual Space",
+            definition: "The fake, large memory the program thinks it has.",
+          },
+          {
+            term: "Physical Memory",
+            definition: "The actual RAM chips installed.",
+          },
+          { term: "Page Size", definition: "The size of the chunks we swap." },
+        ],
+        solution: `**a) Virtual Address Bits**
+- Size: 16MB.
+- 16MB = 2^4 * 2^20 = 2^24 bytes.
+- Bits needed: **24 bits**.
+
+**b) Physical Address Bits**
+- Size: 2MB.
+- 2MB = 2^1 * 2^20 = 2^21 bytes.
+- Bits needed: **21 bits**.
+
+**c) Page Table Entries**
+- Entries = Total Virtual Pages.
+- Total Virtual Space / Page Size
+- 2^24 / 1KB (2^10)
+- 2^(24-10) = 2^14.
+- **16,384 entries.**`,
+        cheatSheet: [
+          {
+            label: "1. Convert to Powers of 2",
+            explanation: "1MB = 2^20. 1KB = 2^10.",
+          },
+          {
+            label: "2. Exponent is Bits",
+            explanation: "If Size is 2^N, you need N bits.",
+          },
+          {
+            label: "3. Division subtracts exponents",
+            explanation: "2^24 / 2^10 = 2^14.",
+          },
+        ],
+      },
+      {
+        id: "v_trans",
+        title: "Address Translation (VA to PA)",
+        type: "problem",
+        content: `Page Size: 1024 bytes.
+Page Table:
+- Page 0 -> Frame 5
+- Page 1 -> Frame 2
+- Page 2 -> Frame 9
+
+Translate Virtual Address 1524 to Physical Address.`,
+        definitions: [
+          {
+            term: "VPN (Virtual Page Number)",
+            definition: "The page index. Calculated by Address / PageSize.",
+          },
+          {
+            term: "Offset",
+            definition:
+              "The position inside the page. Calculated by Address % PageSize.",
+          },
+          { term: "Frame", definition: "The physical page number in RAM." },
+        ],
+        solution: `**Step 1: Find the VPN**
+- Address: 1524.
+- Page Size: 1024.
+- VPN = floor(1524 / 1024) = **1**.
+
+**Step 2: Find the Offset**
+- Offset = 1524 % 1024.
+- 1524 - 1024 = **500**.
+
+**Step 3: Lookup in Page Table**
+- We are in Page 1.
+- Look at the table: Page 1 maps to **Frame 2**.
+
+**Step 4: Calculate Physical Address**
+- Formula: (Frame Number * Page Size) + Offset
+- (2 * 1024) + 500
+- 2048 + 500 = **2548**.`,
+        cheatSheet: [
+          {
+            label: "1. Divide",
+            formula: "Virtual Address / Page Size",
+            explanation: "Integer part is VPN.",
+          },
+          {
+            label: "2. Modulo",
+            formula: "Virtual Address % Page Size",
+            explanation: "Remainder is Offset.",
+          },
+          {
+            label: "3. Reassemble",
+            formula: "(Frame * Page Size) + Offset",
+            explanation: "Combine Frame and Offset.",
+          },
+        ],
+      },
+      {
+        id: "v_tlb_cache",
+        title: "TLB and Cache Translation",
+        type: "problem",
+        content: `Virtual address 18 (decimal) in a system with 8-word pages, 2-way set associative cache (8-word blocks), 2-entry TLB.
+Translate to physical address and check cache.`,
+        definitions: [
+          {
+            term: "TLB",
+            definition:
+              "Translation Lookaside Buffer - caches page table entries.",
+          },
+        ],
+        solution: `**VA 18:** Binary 010010
+**Page:** 01 (1), Offset: 0010 (2)
+**TLB:** Page 1 -> Frame 0
+**PA:** (0 * 8) + 2 = 2
+**Cache:** 2-way, 8-word blocks. PA 2: Tag 0, Set 0, Offset 010
+**Check Set 0:** Tag 00 present, data from cache.`,
+        cheatSheet: [
+          {
+            label: "TLB Lookup",
+            explanation: "Check TLB first for VPN to PFN.",
+          },
+          {
+            label: "Cache Check",
+            explanation: "Use PA to find in cache.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "io",
+    title: "I/O & Storage (RAID)",
+    problems: [
+      {
+        id: "raid5_update",
+        title: "RAID 5 Parity Update (RMW)",
+        type: "problem",
+        content: `A system uses RAID 5.
+Old Data Block: 0x7F
+New Data Block: 0x62
+Old Parity Block: 0x84
+Calculate the New Parity.`,
+        definitions: [
+          {
+            term: "RAID 5",
+            definition:
+              "Striping with distributed parity. Can survive 1 disk failure.",
+          },
+          {
+            term: "RMW (Read-Modify-Write)",
+            definition:
+              "A fast way to update parity without reading all other disks.",
+          },
+          {
+            term: "XOR (⊕)",
+            definition: "Exclusive OR. 1 if bits are different, 0 if same.",
+          },
+        ],
+        solution: `**Concept:**
+Instead of reading all disks to recalculate parity, we just remove the "Old" data influence and add the "New" data influence using XOR.
+
+**Formula:**
+New Parity = Old Parity ⊕ Old Data ⊕ New Data
+
+**Step 1: Convert to Binary**
+Old Data (7F):   0111 1111
+New Data (62):   0110 0010
+Old Parity (84): 1000 0100
+
+**Step 2: XOR Calculation**
+  1000 0100 (Old P)
+⊕ 0111 1111 (Old D)
+-----------
+  1111 1011 (Intermediate)
+⊕ 0110 0010 (New D)
+-----------
+  1001 1001
+
+**Step 3: Convert to Hex**
+1001 = 9
+1001 = 9
+**Result: 0x99**`,
+        cheatSheet: [
+          {
+            label: "Formula",
+            formula: "P_new = P_old ⊕ D_old ⊕ D_new",
+            explanation: "XOR cancels out the old data and adds the new.",
+          },
+        ],
+      },
+      {
+        id: "io_disk_access",
+        title: "Disk Access Time",
+        type: "problem",
+        content: `Disk Specs:
+- RPM: 7200
+- Seek Time: 2.5ms
+- Transfer Rate: negligible for this calc.
+Calculate the Average Access Time.`,
+        definitions: [
+          {
+            term: "Seek Time",
+            definition: "Time to move the head to the track.",
+          },
+          {
+            term: "Rotational Latency",
+            definition: "Time to wait for the sector to spin under the head.",
+          },
+          {
+            term: "Average Latency",
+            definition: "On average, we wait for half a rotation.",
+          },
+        ],
+        solution: `**Step 1: Calculate Rotation Time**
+- 7200 Revolutions Per Minute.
+- Revolutions per second = 7200 / 60 = 120 rev/sec.
+- Time for 1 revolution = 1 / 120 = 0.00833 seconds.
+- In ms: 8.33ms per full rotation.
+
+**Step 2: Calculate Average Latency**
+- Average wait is 1/2 a rotation.
+- 8.33ms / 2 = 4.17ms.
+
+**Step 3: Total Access Time**
+- Access = Seek + Latency
+- 2.5ms + 4.17ms = **6.67ms**.`,
+        cheatSheet: [
+          {
+            label: "1. Rev Time",
+            formula: "(60 / RPM) * 1000",
+            explanation: "Milliseconds for one full spin.",
+          },
+          {
+            label: "2. Avg Latency",
+            formula: "Rev Time / 2",
+            explanation: "Average wait.",
+          },
+          {
+            label: "3. Sum",
+            formula: "Seek + Latency",
+            explanation: "Total time.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "pipe",
+    title: "Pipelining & Hazards",
+    problems: [
+      {
+        id: "pipe_speedup",
+        title: "Pipeline Speedup Calculation",
+        type: "problem",
+        content: `Process 200 tasks.
+Non-Pipelined system takes 200ns per task.
+5-Stage Pipeline has a clock cycle of 40ns.
+Calculate the Speedup.`,
+        definitions: [
+          { term: "Speedup", definition: "Old Time / New Time." },
+          { term: "k", definition: "Number of stages (5)." },
+          { term: "n", definition: "Number of tasks (200)." },
+          {
+            term: "tp",
+            definition: "Time per clock cycle in pipeline (40ns).",
+          },
+        ],
+        solution: `**Step 1: Calculate Non-Pipelined Time**
+- Time = n * (Time per task)
+- 200 tasks * 200ns = 40,000ns.
+
+**Step 2: Calculate Pipelined Time**
+- Formula: (k + n - 1) * tp
+- The first task takes 'k' cycles to fill the pipe.
+- The remaining 'n-1' tasks come out 1 per cycle.
+- Time = (5 + 200 - 1) * 40ns
+- Time = 204 * 40ns = 8,160ns.
+
+**Step 3: Calculate Speedup**
+- Speedup = Old Time / New Time
+- 40,000 / 8,160
+- **Speedup = 4.90**
+
+*Note: The max theoretical speedup is 5 (the number of stages). We are close to 5, which is good.*`,
+        cheatSheet: [
+          {
+            label: "Pipeline Time",
+            formula: "(k + n - 1) * tp",
+            explanation: "Time to fill pipe + time to stream rest.",
+          },
+          {
+            label: "Speedup",
+            formula: "SequentialTime / PipelineTime",
+            explanation:
+              "Where SequentialTime = time for non-pipelined system, PipelineTime = time for pipelined system. How many times faster is it?",
+          },
+        ],
+      },
+      {
+        id: "pipe_hazards",
+        title: "Identifying Pipeline Hazards",
+        type: "problem",
+        content: `Identify the hazards in this sequence (4 stages: Fetch, Decode, Exec, Write):
+1. R1 = R2 + X
+2. X = R3 + Y
+3. Z = R1 + X`,
+        definitions: [
+          {
+            term: "Data Hazard (RAW)",
+            definition:
+              "Read After Write. Instruction B needs data that Instruction A hasn't written yet.",
+          },
+          {
+            term: "Structural Hazard",
+            definition:
+              "Hardware conflict. Two instructions need memory/ALU at the exact same cycle.",
+          },
+        ],
+        solution: `**Trace:**
+Inst 1 (R1=R2+X): F D E W
+Inst 2 (X=R3+Y):   F D E W
+Inst 3 (Z=R1+X):     F D E W
+
+**Hazard 1: Data Hazard on X**
+- Inst 2 Writes to X. (Writes at end of its W stage).
+- Inst 3 Reads X. (Reads at Decode stage).
+- Inst 3 tries to read X *before* Inst 2 has written it.
+- **Solution:** Stall Inst 3 or use Forwarding.
+
+**Hazard 2: Data Hazard on R1**
+- Inst 1 Writes to R1.
+- Inst 3 Reads R1.
+- Depends on distance, but usually resolved by forwarding.
+
+**Structural Hazard?**
+- If Inst 1 is Writing (W) and a subsequent instruction is Fetching (F), and they both need memory access, a conflict might occur if memory has only one port.`,
+        cheatSheet: [
+          {
+            label: "RAW",
+            explanation:
+              "Look for: Inst A writes X, Inst B reads X immediately after.",
+          },
+          {
+            label: "Fixes",
+            explanation: "Stalling (Bubbles) or Forwarding (Bypassing).",
+          },
+        ],
+      },
+      {
+        id: "pipe_hazards2",
+        title: "Pipeline Hazards in Code Segments",
+        type: "problem",
+        content: `Explain potential pipeline hazards in this code segment:
+X = R2 + Y
+R4 = R2 + X`,
+        definitions: [
+          {
+            term: "Data Hazard",
+            definition: "Dependency on data not yet available.",
+          },
+          {
+            term: "Structural Hazard",
+            definition: "Hardware resource conflict.",
+          },
+        ],
+        solution: `**Cycle Trace:**
+Cycle 1: Inst1 Fetch
+Cycle 2: Inst1 Decode, Inst2 Fetch
+Cycle 3: Inst1 Execute (fetch Y), Inst2 Decode
+Cycle 4: Inst1 Write (store X), Inst2 Execute (fetch X)
+Cycle 5: Inst2 Write
+
+**Hazards:**
+1. **Data Hazard (RAW):** Inst2 reads X that Inst1 is writing in cycle 4.
+2. **Structural Hazard:** In cycle 4, Inst1 writes to memory, Inst2 fetches from memory - conflict if single memory port.`,
+        cheatSheet: [
+          {
+            label: "Identify Conflicts",
+            explanation: "Check for simultaneous memory/ALU access.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "perf",
+    title: "Performance Measurement and Analysis",
+    problems: [
+      {
+        id: "perf_means",
+        title: "Arithmetic vs Geometric Mean",
+        type: "problem",
+        content: `System A times: 150s, 200s.
+System B times: 200s, 250s.
+1. Which is faster using Arithmetic Mean?
+2. Calculate Geometric Mean relative to B.`,
+        definitions: [
+          {
+            term: "Arithmetic Mean",
+            definition: "Simple average. (A+B)/2. Good for total time.",
+          },
+          {
+            term: "Geometric Mean",
+            definition:
+              "N-th root of products. Good for ratios/normalized numbers.",
+          },
+        ],
+        solution: `**1. Arithmetic Mean**
+- Sys A: (150 + 200) / 2 = 175s.
+- Sys B: (200 + 250) / 2 = 225s.
+- **A is faster.**
+
+**2. Geometric Mean (Normalized to B)**
+- First, normalize A's times to B.
+- Task 1: B took 200, A took 150. Ratio = 150/200 = 0.75.
+- Task 2: B took 250, A took 200. Ratio = 200/250 = 0.80.
+- Geometric Mean = Sqrt(0.75 * 0.80)
+- Sqrt(0.6) = **0.77**.
+- Since 0.77 < 1, System A is faster.`,
+        cheatSheet: [
+          {
+            label: "Arithmetic",
+            formula: "Sum / Count",
+            explanation: "Use for absolute time.",
+          },
+          {
+            label: "Geometric",
+            formula: "(P1 * P2 * ...)^(1/n)",
+            explanation: "Use for normalized ratios.",
+          },
+        ],
+      },
+      {
+        id: "perf_amdahl",
+        title: "Amdahl's Law (Speedup)",
+        type: "problem",
+        content: `A program runs on a single processor. 
+90% of the code can be parallelized (f=0.9), and 10% must run sequentially. 
+What is the maximum theoretical speedup if you use 8 processors (N=8)?
+What if you use infinite processors?`,
+        definitions: [
+          {
+            term: "Amdahl's Law",
+            definition:
+              "Formula to predict theoretical speedup when only part of a system is improved.",
+          },
+          {
+            term: "f (Fraction)",
+            definition:
+              "The percentage of the program that can be made parallel.",
+          },
+        ],
+        solution: `**Formula:**
+Speedup = 1 / ((1 - f) + (f / N))
+
+**Scenario 1: 8 Processors (N=8)**
+- f = 0.9
+- Speedup = 1 / ((1 - 0.9) + (0.9 / 8))
+- Speedup = 1 / (0.1 + 0.1125)
+- Speedup = 1 / 0.2125
+- **Speedup ≈ 4.7**
+
+**Scenario 2: Infinite Processors**
+- As N approaches infinity, (f / N) becomes 0.
+- Speedup = 1 / (1 - f)
+- Speedup = 1 / (1 - 0.9) = 1 / 0.1
+- **Max Speedup = 10x**`,
+        cheatSheet: [
+          {
+            label: "General Formula",
+            formula: "1 / ((1 - f) + (f / N))",
+            explanation: "f = parallel part, N = number of processors.",
+          },
+          {
+            label: "Max Limit",
+            formula: "1 / (1 - f)",
+            explanation: "The speedup limit if you had infinite power.",
+          },
+        ],
+      },
+      {
+        id: "perf_harmonic",
+        title: "Harmonic Mean for Performance",
+        type: "problem",
+        content: `Page fault rates: Before software: 0.35, 0.42, 0.12, 0.20
+After software: 0.45, 0.38, 0.10, 0.22
+What is the average performance improvement? (Use harmonic mean)`,
+        definitions: [
+          {
+            term: "Harmonic Mean",
+            definition: "For rates, harmonic mean = n / Σ(1/rate_i)",
+          },
+        ],
+        solution: `**Before:** Sum = 1.09, Harmonic mean = 4 / 1.09 ≈ 3.67
+**After:** Sum = 1.15, Harmonic mean = 4 / 1.15 ≈ 3.48
+**Improvement:** (3.48 - 3.67) / 3.67 * 100% ≈ -5.22% (decrease)`,
+        cheatSheet: [
+          {
+            label: "Harmonic Mean",
+            formula: "n / Σ(1/x_i)",
+            explanation: "For rates like fault rates.",
+          },
+        ],
+      },
+      {
+        id: "perf_cpi",
+        title: "Calculating Average CPI",
+        type: "problem",
+        content: `A microprocessor requires either 2, 3, 4, 8, or 12 machine cycles to perform various operations.
+Twenty-five percent of its instructions require 2 machine cycles, 20% require 3 machine cycles, 17.5% require 4 machine cycles, 12.5% require 8 machine cycles, and 25% require 12 machine cycles.
+What is the average number of machine cycles per instruction (CPI)?`,
+        definitions: [
+          {
+            term: "CPI",
+            definition:
+              "Cycles Per Instruction - average number of clock cycles per instruction.",
+          },
+        ],
+        solution: `**Weighted Average:**
+CPI = (0.25 * 2) + (0.20 * 3) + (0.175 * 4) + (0.125 * 8) + (0.25 * 12)
+= 0.5 + 0.6 + 0.7 + 1.0 + 3.0 = 5.8 cycles per instruction`,
+        cheatSheet: [
+          {
+            label: "CPI Formula",
+            formula: "Σ (Frequency_i * CPI_i)",
+            explanation:
+              "Sum of each instruction type's frequency times its CPI.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "advanced_cpu",
+    title: "Advanced CPU Architectures",
+    problems: [
+      {
+        id: "risc_cisc",
+        title: "RISC vs CISC Architectures",
+        type: "problem",
+        content: `Compare RISC and CISC architectures in terms of instruction complexity, performance, and design philosophy. Provide examples of each and explain the trade-offs.`,
+        definitions: [
+          {
+            term: "RISC (Reduced Instruction Set Computer)",
+            definition:
+              "Uses simple, fixed-length instructions that execute in one clock cycle. Focuses on efficiency and pipelining.",
+          },
+          {
+            term: "CISC (Complex Instruction Set Computer)",
+            definition:
+              "Uses complex, variable-length instructions that can perform multiple operations. Focuses on reducing program size.",
+          },
+        ],
+        solution: `**RISC Characteristics:**
+- Simple instructions, fixed length.
+- Load-store architecture (memory access only via LOAD/STORE).
+- Emphasis on compiler optimization.
+- Examples: ARM, MIPS.
+- Advantages: Faster execution, easier pipelining, lower power consumption.
+- Disadvantages: More instructions per program.
+
+**CISC Characteristics:**
+- Complex instructions, variable length.
+- Memory-to-memory operations allowed.
+- Emphasis on hardware doing more work.
+- Examples: Intel x86, IBM System/370.
+- Advantages: Fewer instructions, smaller code size.
+- Disadvantages: Slower execution, harder to pipeline.
+
+**Trade-offs:**
+- RISC: Better for performance and embedded systems.
+- CISC: Better for compatibility and ease of programming.
+- Modern CPUs often combine elements of both.`,
+        cheatSheet: [
+          {
+            label: "RISC Focus",
+            explanation: "Simplicity, speed, pipelining.",
+          },
+          {
+            label: "CISC Focus",
+            explanation: "Complexity, code density, compatibility.",
+          },
+        ],
+      },
+      {
+        id: "flynns_taxonomy",
+        title: "Flynn's Taxonomy of Parallel Processing",
+        type: "problem",
+        content: `Explain Flynn's Taxonomy. Classify the following architectures: SISD, SIMD, MIMD, MISD. Provide examples for each.`,
+        definitions: [
+          {
+            term: "SISD (Single Instruction, Single Data)",
+            definition:
+              "Traditional uniprocessor: one instruction stream, one data stream.",
+          },
+          {
+            term: "SIMD (Single Instruction, Multiple Data)",
+            definition:
+              "One instruction applied to multiple data elements simultaneously (e.g., GPUs).",
+          },
+          {
+            term: "MIMD (Multiple Instruction, Multiple Data)",
+            definition:
+              "Multiple processors executing different instructions on different data.",
+          },
+          {
+            term: "MISD (Multiple Instruction, Single Data)",
+            definition: "Rare: multiple instructions on single data stream.",
+          },
+        ],
+        solution: `**Flynn's Taxonomy:**
+- Based on number of instruction streams and data streams.
+- SISD: Classic CPU (e.g., single-core processor).
+- SIMD: Vector processors, GPUs (e.g., NVIDIA CUDA).
+- MIMD: Multicore CPUs, clusters (e.g., supercomputers).
+- MISD: Theoretical, rare (e.g., some fault-tolerant systems).
+
+**Examples:**
+- SISD: Intel i7 single core.
+- SIMD: AVX instructions in x86.
+- MIMD: Distributed systems like MPI clusters.
+- MISD: Limited practical examples.`,
+        cheatSheet: [
+          {
+            label: "SISD",
+            explanation: "Single core, sequential.",
+          },
+          {
+            label: "SIMD",
+            explanation: "Parallel data processing.",
+          },
+          {
+            label: "MIMD",
+            explanation: "Parallel independent tasks.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "parallel",
+    title: "Parallel Processing and Architectures",
+    problems: [
+      {
+        id: "simd_mimd",
+        title: "SIMD vs MIMD Architectures",
+        type: "problem",
+        content: `Compare SIMD and MIMD architectures. Explain their synchronization requirements and use cases.`,
+        definitions: [
+          {
+            term: "SIMD",
+            definition:
+              "Single Instruction, Multiple Data: Same operation on multiple data points.",
+          },
+          {
+            term: "MIMD",
+            definition:
+              "Multiple Instruction, Multiple Data: Different operations on different data.",
+          },
+        ],
+        solution: `**SIMD:**
+- Synchronous: All processing units execute same instruction simultaneously.
+- Low synchronization overhead.
+- Use cases: Graphics, scientific computing (matrix operations).
+- Examples: GPUs, vector processors.
+
+**MIMD:**
+- Asynchronous: Processors can execute different instructions independently.
+- High synchronization needed (locks, barriers).
+- Use cases: General-purpose parallel computing, databases.
+- Examples: Multicore CPUs, clusters.
+
+**Comparison:**
+- SIMD: Efficient for data-parallel tasks.
+- MIMD: Flexible for task-parallel tasks.`,
+        cheatSheet: [
+          {
+            label: "SIMD Sync",
+            explanation: "Automatic, low overhead.",
+          },
+          {
+            label: "MIMD Sync",
+            explanation: "Manual, high overhead.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "io_systems",
+    title: "I/O Systems",
+    problems: [
+      {
+        id: "io_methods",
+        title: "I/O Transfer Methods",
+        type: "problem",
+        content: `Compare Programmed I/O, Interrupt-Driven I/O, and DMA. Explain their mechanisms and trade-offs.`,
+        definitions: [
+          {
+            term: "Programmed I/O",
+            definition: "CPU polls device status and transfers data directly.",
+          },
+          {
+            term: "Interrupt-Driven I/O",
+            definition:
+              "Device interrupts CPU when ready; CPU handles transfer.",
+          },
+          {
+            term: "DMA (Direct Memory Access)",
+            definition:
+              "Dedicated controller transfers data directly to/from memory.",
+          },
+        ],
+        solution: `**Programmed I/O:**
+- CPU busy-waits, polls status.
+- Simple hardware, poor CPU utilization.
+- Use: Simple embedded systems.
+
+**Interrupt-Driven I/O:**
+- CPU starts transfer, device interrupts when done.
+- Better CPU utilization, overhead per byte.
+- Use: Moderate I/O loads.
+
+**DMA:**
+- Controller handles transfer, CPU initializes.
+- Best CPU utilization, complex hardware.
+- Use: High-bandwidth I/O (disks, networks).
+
+**Trade-offs:**
+- Efficiency increases from Programmed -> Interrupt -> DMA.
+- Complexity increases similarly.`,
+        cheatSheet: [
+          {
+            label: "Programmed",
+            explanation: "CPU polls, low efficiency.",
+          },
+          {
+            label: "Interrupt",
+            explanation: "Device interrupts, medium efficiency.",
+          },
+          {
+            label: "DMA",
+            explanation: "Controller transfers, high efficiency.",
+          },
+        ],
+      },
+      {
+        id: "raid_parity",
+        title: "RAID Parity Calculation",
+        type: "problem",
+        content: `In RAID 5, calculate the new parity for a stripe after updating data block D0 from 0x7F to 0x62, with old parity 0x84.`,
+        definitions: [
+          {
+            term: "RAID 5",
+            definition: "Distributed parity across disks for redundancy.",
+          },
+          {
+            term: "XOR Parity",
+            definition: "Parity = XOR of all data blocks in stripe.",
+          },
+        ],
+        solution: `**Formula:** New Parity = Old Parity ⊕ Old Data ⊕ New Data
+**Calculation:** 0x84 ⊕ 0x7F ⊕ 0x62
+- 0x84 ⊕ 0x7F = 0xFB
+- 0xFB ⊕ 0x62 = 0x99
+**Result:** 0x99`,
+        cheatSheet: [
+          {
+            label: "Update Parity",
+            formula: "P_new = P_old ⊕ D_old ⊕ D_new",
+            explanation: "XOR cancels old, adds new.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "memory_hierarchy",
+    title: "Memory Hierarchy and Management",
+    problems: [
+      {
+        id: "cache_associativity",
+        title: "Cache Associativity",
+        type: "problem",
+        content: `Explain direct-mapped, set-associative, and fully associative caches. Discuss their advantages and disadvantages.`,
+        definitions: [
+          {
+            term: "Direct-Mapped",
+            definition: "Each memory block maps to exactly one cache line.",
+          },
+          {
+            term: "Set-Associative",
+            definition: "Each memory block maps to a set of cache lines.",
+          },
+          {
+            term: "Fully Associative",
+            definition: "Each memory block can map to any cache line.",
+          },
+        ],
+        solution: `**Direct-Mapped:**
+- Fast, simple hardware.
+- Conflict misses possible.
+- Good for small caches.
+
+**Set-Associative:**
+- Balance of speed and flexibility.
+- Reduces conflicts.
+- Common (e.g., 4-way).
+
+**Fully Associative:**
+- Maximum flexibility, no conflicts.
+- Slow, complex hardware.
+- Used in small caches (TLB).
+
+**Advantages/Disadvantages:**
+- Direct: Fast lookup, but thrashing.
+- Set: Good performance, moderate complexity.
+- Fully: Best hit rate, highest cost.`,
+        cheatSheet: [
+          {
+            label: "Direct",
+            explanation: "1-to-1 mapping, fast but conflicts.",
+          },
+          {
+            label: "Set",
+            explanation: "N-to-1 mapping, balanced.",
+          },
+          {
+            label: "Fully",
+            explanation: "Any-to-any, flexible but slow.",
+          },
+        ],
+      },
+      {
+        id: "vm_fragmentation",
+        title: "Virtual Memory Fragmentation",
+        type: "problem",
+        content: `Compare internal and external fragmentation in paging vs segmentation.`,
+        definitions: [
+          {
+            term: "Internal Fragmentation",
+            definition: "Unused space within allocated blocks.",
+          },
+          {
+            term: "External Fragmentation",
+            definition: "Scattered free space that can't be used.",
+          },
+        ],
+        solution: `**Paging:**
+- Fixed-size pages.
+- Internal fragmentation: Wasted space in last page.
+- No external fragmentation.
+
+**Segmentation:**
+- Variable-size segments.
+- External fragmentation: Holes between segments.
+- No internal fragmentation.
+
+**Comparison:**
+- Paging: Efficient allocation, some waste.
+- Segmentation: Flexible sizes, but compaction needed.`,
+        cheatSheet: [
+          {
+            label: "Paging",
+            explanation: "Internal frag, no external.",
+          },
+          {
+            label: "Segmentation",
+            explanation: "External frag, no internal.",
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: "adv_arch",
+    title: "Advanced Architecture Concepts",
+    problems: [
+      {
+        id: "adv_reg_windows",
+        title: "Register Windows Calculation",
+        type: "problem",
+        content: `RISC processor with 8 global registers, 10 register windows.
+Each window: 6 input, 6 output, local?
+Total registers?`,
+        definitions: [
+          {
+            term: "Register Windows",
+            definition: "Overlapping register sets for procedure calls.",
+          },
+        ],
+        solution: `**Global:** 8
+**Per Window:** Input 6, Output 6, Local (10*6 - 6*2? Wait, calculate locals.
+Total windowed: 152 - 8 = 144
+I/O: 10*6 + 10*6 = 120
+Local: 144 - 120 = 24 per window? Wait, from attachment: locals = (total - global - I/O)/windows
+From attachment: 152-12=140, 140-60=80, 80/10=8 locals.`,
+        cheatSheet: [
+          {
+            label: "Total Registers",
+            formula: "Global + (Windows * (Input + Local + Output))",
+            explanation: "But output shared as input.",
+          },
+        ],
+      },
+      {
+        id: "adv_simd_mimd",
+        title: "SIMD vs MIMD Comparison",
+        type: "problem",
+        content: `How do SIMD and MIMD differ in processing?`,
+        definitions: [
+          {
+            term: "SIMD",
+            definition:
+              "Single Instruction, Multiple Data - same op on different data.",
+          },
+          {
+            term: "MIMD",
+            definition:
+              "Multiple Instructions, Multiple Data - different ops on different data.",
+          },
+        ],
+        solution: `**Similarity:** Multiple processors working simultaneously.
+**Difference:** SIMD: Same instruction on different data, synchronized.
+MIMD: Different instructions, asynchronous, flexible.`,
+        cheatSheet: [
+          {
+            label: "SIMD",
+            explanation: "Uniform tasks, like vector processing.",
+          },
+          {
+            label: "MIMD",
+            explanation: "General parallel computing.",
+          },
+        ],
+      },
+      {
+        id: "adv_omega",
+        title: "Omega Network Conflicts",
+        type: "problem",
+        content: `In an Omega network for 8 CPUs to 8 memories, do P0->M2, P4->M4, P6->M3 conflict?`,
+        definitions: [
+          {
+            term: "Omega Network",
+            definition: "Interconnection network using switches.",
+          },
+        ],
+        solution: `**P0->M2:** 000->010
+**P4->M4:** 100->100
+**P6->M3:** 110->011
+**Conflict:** P0 and P6 both need Lower Output in Stage 2.`,
+        cheatSheet: [
+          {
+            label: "Routing",
+            explanation: "XOR bits determine switch settings.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "disk_raid",
+    title: "Disk & RAID",
+    problems: [
+      {
+        id: "d_capacity",
+        title: "Disk Capacity & Time",
+        type: "problem",
+        content: `A hard disk has 10 platters, 2 surfaces per platter, 1000 tracks per surface, 100 sectors per track, and 512 bytes per sector.
+
+Calculate:
+
+a) Total disk capacity in GB.
+
+b) Access time if seek time is 10 ms, rotational delay is 5 ms, and transfer rate is 50 MB/s for a 4 KB block.`,
+        definitions: [
+          {
+            term: "Disk Capacity",
+            definition:
+              "Total storage = Platters × Surfaces × Tracks × Sectors × Bytes per sector.",
+          },
+          {
+            term: "Access Time",
+            definition:
+              "Time to read data = Seek time + Rotational delay + Transfer time.",
+          },
+        ],
+        solution: `**a) Total Capacity:**
+
+Capacity = 10 platters × 2 surfaces/platter × 1000 tracks/surface × 100 sectors/track × 512 bytes/sector
+
+= 10 × 2 × 1000 × 100 × 512
+
+= 10,240,000 × 512
+
+= 5,242,880,000 bytes
+
+= 5.24 GB (approximately)
+
+**b) Access Time:**
+
+Seek time = 10 ms
+
+Rotational delay = 5 ms
+
+Transfer time = Block size / Transfer rate = 4096 bytes / 50,000,000 bytes/s = 0.00008192 s = 0.08192 ms
+
+Total = 10 + 5 + 0.08192 = 15.08192 ms`,
+        cheatSheet: [
+          {
+            label: "Capacity Formula",
+            formula: "Platters × Surfaces × Tracks × Sectors × Bytes",
+            explanation: "Multiply all components.",
+          },
+          {
+            label: "Access Time",
+            formula: "Seek + Rotational + Transfer",
+            explanation: "Sum all delays.",
+          },
+        ],
+      },
+      {
+        id: "d_parity",
+        title: "RAID 3/5 Parity Update",
+        type: "problem",
+        content: `In RAID 5, update data block D1 from 1010 to 1110. Old parity P = 0110.
+
+Calculate new parity using XOR.`,
+        definitions: [
+          {
+            term: "XOR",
+            definition: "Exclusive OR: 1 if bits differ, 0 if same.",
+          },
+          {
+            term: "Parity Update",
+            definition: "New P = Old P XOR Old D XOR New D.",
+          },
+        ],
+        solution: `Old D = 1010
+New D = 1110
+Old P = 0110
+
+New P = Old P XOR Old D XOR New D = 0110 XOR 1010 XOR 1110
+
+First, 0110 XOR 1010 = 1100
+Then, 1100 XOR 1110 = 0010
+
+New parity = 0010`,
+        cheatSheet: [
+          {
+            label: "Parity Update",
+            formula: "P_new = P_old XOR D_old XOR D_new",
+            explanation: "XOR all three values.",
+          },
+        ],
+      },
+      {
+        id: "d_reconstruct",
+        title: "Reconstruct on Failure",
+        type: "problem",
+        content: `In RAID 5, disk 1 fails. Data: D0=1010, D2=1100, P=0110.
+
+Reconstruct D1 using XOR.`,
+        definitions: [
+          {
+            term: "Reconstruction",
+            definition: "Failed data = XOR of all other data and parity.",
+          },
+        ],
+        solution: `D1 = D0 XOR D2 XOR P = 1010 XOR 1100 XOR 0110
+
+1010 XOR 1100 = 0110
+0110 XOR 0110 = 0000
+
+D1 = 0000`,
+        cheatSheet: [
+          {
+            label: "Reconstruct",
+            formula: "D_failed = XOR(all other D and P)",
+            explanation: "XOR all surviving blocks.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "pipelining",
+    title: "Pipelining & Performance",
+    problems: [
+      {
+        id: "p_speedup",
+        title: "Speedup Calculation",
+        type: "problem",
+        content: `A non-pipelined processor takes 10 ns per instruction. Pipelined takes 2 ns per stage with 5 stages.
+
+Calculate speedup for 100 instructions.`,
+        definitions: [
+          {
+            term: "Speedup",
+            definition: "Non-pipelined time / Pipelined time.",
+          },
+        ],
+        solution: `Non-pipelined: 100 × 10 = 1000 ns
+
+Pipelined: (5 × 2) + (99 × 2) = 10 + 198 = 208 ns
+
+Speedup = 1000 / 208 ≈ 4.81`,
+        cheatSheet: [
+          {
+            label: "Pipelined Time",
+            formula:
+              "(Stages × Stage time) + ((Instructions - 1) × Stage time)",
+            explanation: "First instruction full, others overlap.",
+          },
+        ],
+      },
+      {
+        id: "p_hazards",
+        title: "Hazards Identification",
+        type: "problem",
+        content: `Instructions: ADD R1, R2, R3; SUB R4, R1, R5.
+
+Identify hazards.`,
+        definitions: [
+          {
+            term: "RAW Hazard",
+            definition: "Read After Write: Using data before it's written.",
+          },
+        ],
+        solution: `RAW hazard: SUB reads R1 before ADD writes it.`,
+        cheatSheet: [
+          {
+            label: "Check Dependencies",
+            explanation: "See if later instruction uses result of earlier.",
+          },
+        ],
+      },
+      {
+        id: "p_cpi",
+        title: "Average CPI",
+        type: "problem",
+        content: `Instruction mix: 50% ALU (1 cycle), 30% Load (2 cycles), 20% Branch (3 cycles).
+
+Calculate average CPI.`,
+        definitions: [
+          {
+            term: "CPI",
+            definition: "Cycles Per Instruction.",
+          },
+        ],
+        solution: `CPI = 0.5 × 1 + 0.3 × 2 + 0.2 × 3 = 0.5 + 0.6 + 0.6 = 1.7`,
+        cheatSheet: [
+          {
+            label: "Average CPI",
+            formula: "Σ (Frequency × CPI)",
+            explanation: "Weighted average.",
+          },
+        ],
+      },
+      {
+        id: "p_geometric",
+        title: "Geometric Mean",
+        type: "problem",
+        content: `System A times: 10, 20, 30. System B: 15, 25, 35.
+
+Compare performance.`,
+        definitions: [
+          {
+            term: "Geometric Mean",
+            definition: "nth root of product.",
+          },
+        ],
+        solution: `A: (10×20×30)^(1/3) ≈ 18.17
+B: (15×25×35)^(1/3) ≈ 24.29
+
+B is faster.`,
+        cheatSheet: [
+          {
+            label: "Geometric Mean",
+            formula: "(∏ times)^(1/n)",
+            explanation: "For normalized comparison.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "advanced",
+    title: "Advanced Architectures",
+    problems: [
+      {
+        id: "a_windows",
+        title: "RISC Register Windows Calculation",
+        type: "problem",
+        content: `A RISC processor has 8 global registers and 10 register windows.
+Each window has 4 input registers, 8 local registers, and 4 output registers.
+(Note: Output registers of one window are shared as the Input registers of the next).
+How many total physical registers are in the CPU?`,
+        definitions: [
+          {
+            term: "Register Windows",
+            definition:
+              "Circular buffer of registers allowing fast parameter passing.",
+          },
+          {
+            term: "Overlap",
+            definition:
+              "Output regs of Window A become Input regs of Window B (Shared).",
+          },
+        ],
+        solution: `**Given:**
+- Global Registers = 8
+- Number of Windows = 10
+- Local Registers = 8
+- Shared Registers (Input/Output overlap) = 4
+
+**Concept:**
+Total Registers = Global + (Windows * Local) + (Windows * Shared)
+*We count the shared registers only once per window connection.*
+
+**Calculation:**
+1. Global = 8
+2. Windowed Local = 10 * 8 = 80
+3. Windowed Shared = 10 * 4 = 40
+
+**Total:**
+8 + 80 + 40 = **128 Registers**`,
+        cheatSheet: [
+          {
+            label: "Total Registers",
+            formula: "Global + (N * Local) + (N * Shared)",
+            explanation:
+              "Where Shared is the size of the Input/Output overlap.",
+          },
+        ],
+      },
+    ],
+  },
+];
