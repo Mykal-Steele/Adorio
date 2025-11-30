@@ -1,5 +1,5 @@
 # Build stage for Adorio
-FROM node:18-alpine AS build-adorio
+FROM node:20-alpine AS build-adorio
 
 WORKDIR /adorio
 
@@ -7,12 +7,12 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN rm -f .env.production
 ENV VITE_BACKEND_URL=
+ENV VITE_GEMINI_API_KEY=
 RUN npm run build
 
 # Build stage for AI-Slop
-FROM node:18-alpine AS build-ai-slop
+FROM node:20-alpine AS build-ai-slop
 
 WORKDIR /ai-slop
 
@@ -23,11 +23,10 @@ COPY ./ai-slop/AI-Slop-For-CAO-exam/package*.json ./
 RUN npm ci
 
 COPY ./ai-slop/AI-Slop-For-CAO-exam ./
-RUN cp .env.development .env 2>/dev/null || echo "No .env.development"
 RUN npm run build
 
 # Production stage
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Install nginx
 RUN apk add --no-cache nginx
@@ -48,7 +47,7 @@ COPY nginx.${ENV}.conf /etc/nginx/nginx.conf
 ENV PORT=3000
 
 # Create start script
-RUN if [ "$ENV" = "production" ] || [ "$ENV" = "local" ]; then \
+RUN if [ "$ENV" = "production" ] || [ "$ENV" = "development" ]; then \
       echo 'npm start &' > /start.sh; \
     else \
       echo '' > /start.sh; \
