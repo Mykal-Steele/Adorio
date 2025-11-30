@@ -4,7 +4,7 @@ import { handleApiError } from "../utils/errorHandling";
 // Create a shared API instance with consistent configuration
 const API = axios.create({
   baseURL:
-    import.meta.env.VITE_BACKEND_URL || "https://feelio-github-io.onrender.com",
+    import.meta.env.VITE_BACKEND_URL || "",
   timeout: 10000, // 10 second timeout like your other API files
 });
 
