@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChatMessage, Problem } from "../types";
 import { streamGeminiResponse } from "../geminiService";
+import mdContent from '../CAOALLMAT_FINAL.md?raw';
 import {
   Send,
   Bot,
@@ -66,41 +67,37 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   }, [isResizing]);
 
   useEffect(() => {
-    fetch("/CAOALLMAT_FINAL.md")
-      .then((res) => res.text())
-      .then((text) => {
-        // Parse the MD file into chunks
-        const rawChunks = text.split("\n---\n\n").filter((ch) => ch.trim());
-        const parsedChunks = rawChunks.map((raw) => {
-          const lines = raw.split("\n");
-          const title = lines[0].startsWith("## ") ? lines[0].substring(3) : "";
-          const keywordsLine = lines.find((l) =>
-            l.startsWith("**Keywords:** ")
-          );
-          const keywords = keywordsLine
-            ? keywordsLine
-                .substring(14)
-                .split(",")
-                .map((k) => k.trim())
-            : [];
-          const contentStart =
-            lines.findIndex((l) => l.startsWith("**Keywords:** ")) + 1;
-          const content = lines.slice(contentStart).join("\n").trim();
-          return { title, keywords, content };
-        });
-        // Use the content as chunks for search, including titles and keywords
-        setLargeInfo(
-          parsedChunks
-            .map(
-              (c) =>
-                `## ${c.title}\n\nKeywords: ${c.keywords.join(", ")}\n\n${
-                  c.content
-                }`
-            )
-            .join("\n\n---\n\n")
-        );
-      })
-      .catch((err) => console.error("Failed to load final text:", err));
+    const text = mdContent;
+    // Parse the MD file into chunks
+    const rawChunks = text.split("---").filter((ch) => ch.trim());
+    const parsedChunks = rawChunks.map((raw) => {
+      const lines = raw.trim().split("\n");
+      const title = lines[0].startsWith("## ") ? lines[0].substring(3) : "";
+      const keywordsLine = lines.find((l) =>
+        l.startsWith("**Keywords:** ")
+      );
+      const keywords = keywordsLine
+        ? keywordsLine
+            .substring(14)
+            .split(",")
+            .map((k) => k.trim())
+        : [];
+      const contentStart =
+        lines.findIndex((l) => l.startsWith("**Keywords:** ")) + 1;
+      const content = lines.slice(contentStart).join("\n").trim();
+      return { title, keywords, content };
+    });
+    // Use the content as chunks for search, including titles and keywords
+    setLargeInfo(
+      parsedChunks
+        .map(
+          (c) =>
+            `## ${c.title}\n\nKeywords: ${c.keywords.join(", ")}\n\n${
+              c.content
+            }`
+        )
+        .join("\n\n---\n\n")
+    );
   }, []);
 
   useEffect(() => {
