@@ -87,7 +87,6 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                 <NavLink
                   to='/coding'
                   text='Coding'
-                  className='hidden sm:block'
                 />
                 <NavLink
                   to='/smartcity'
