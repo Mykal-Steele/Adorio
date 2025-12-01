@@ -65,6 +65,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                   <NavLink to='/coding' text='Coding' />
                   <NavLink to='/smartcity' text='SmartCity' />
                   <NavLink to='/rygame' text='RyGame' />
+                  <ExternalNavLink to='/cao' text='CAO' />
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -88,6 +89,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                   text='SmartCity'
                   className='hidden sm:block'
                 />
+                <ExternalNavLink to='/cao' text='CAO' className='hidden sm:block' />
                 <NavLink to='/login' text='Login' className='hidden sm:block' />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -111,11 +113,13 @@ const Navbar = ({ darkMode, setDarkMode }) => {
             <NavLink to='/coding' text='Coding' />
             <NavLink to='/smartcity' text='SmartCity' />
             <NavLink to='/rygame' text='RyGame' />
+            <ExternalNavLink to='/cao' text='CAO' />
           </div>
         ) : (
           <div className='sm:hidden flex justify-center space-x-4 pb-2'>
             <NavLink to='/coding' text='Coding' />
             <NavLink to='/smartcity' text='SmartCity' />
+            <ExternalNavLink to='/cao' text='CAO' />
             <NavLink to='/login' text='Login' />
             <NavLink to='/register' text='Register' />
           </div>
@@ -136,12 +140,29 @@ const NavLink = ({ to, text, className = '' }) => (
   </motion.div>
 );
 
+const ExternalNavLink = ({ to, text, className = '' }) => (
+  <motion.div whileHover={{ scale: 1.05 }} className={`relative ${className}`}>
+    <a
+      href={to}
+      className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
+    >
+      {text}
+    </a>
+  </motion.div>
+);
+
 Navbar.propTypes = {
   darkMode: PropTypes.bool.isRequired,
   setDarkMode: PropTypes.func.isRequired,
 };
 
 NavLink.propTypes = {
+  to: PropTypes.string.isRequired,
+  text: PropTypes.string.isRequired,
+  className: PropTypes.string,
+};
+
+ExternalNavLink.propTypes = {
   to: PropTypes.string.isRequired,
   text: PropTypes.string.isRequired,
   className: PropTypes.string,
