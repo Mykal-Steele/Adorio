@@ -58,10 +58,10 @@ export default defineConfig({
 
         // csp stuff took me like 3 days to figure out - stackoverflow is my best friend
         // Note: 'unsafe-eval' is needed for the coding platform to execute user code safely
-        const scriptSrc = `'self' 'nonce-${nonce}' 'unsafe-eval'`;
+        const scriptSrc = `'self' 'nonce-${nonce}' 'unsafe-eval' https://static.cloudflareinsights.com https://challenges.cloudflare.com`;
         const connectSrc = isDev
           ? `'self' http://localhost:5000 http://localhost:5000/api/* https://cdnjs.cloudflare.com`
-          : `'self' https://feelio-github-io.onrender.com https://feelio-github-io.onrender.com/api/* https://cdnjs.cloudflare.com`;
+          : `'self' https://adorio.space/* https://www.adorio.space/* https://cdnjs.cloudflare.com https://cloudflareinsights.com https://*.cloudflare.com`;
 
         return html
           .replace(
