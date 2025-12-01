@@ -25,3 +25,7 @@ dist-ssr
 
 .env.*
 jwtGen.js
+
+
+Adorio/adorio.space.*
+Adorio/adorio.space.pem

@@ -43,6 +43,11 @@ RUN npm ci --only=production
 ARG ENV=production
 COPY nginx.${ENV}.conf /etc/nginx/nginx.conf
 
+# Copy SSL certificates
+RUN mkdir -p /etc/nginx/ssl
+COPY adorio.space.pem /etc/nginx/ssl/adorio.space.pem
+COPY adorio.space.key /etc/nginx/ssl/adorio.space.key
+
 # Set backend port
 ENV PORT=3000
 
@@ -55,6 +60,6 @@ RUN if [ "$ENV" = "production" ] || [ "$ENV" = "development" ]; then \
     echo 'nginx -g "daemon off;"' >> /start.sh && \
     chmod +x /start.sh
 
-EXPOSE 80
+EXPOSE 80 443
 
 CMD ["/start.sh"]
