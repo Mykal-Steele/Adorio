@@ -27,8 +27,6 @@ dist-ssr
 jwtGen.js
 
 
-Adorio/adorio.space.*
-Adorio/adorio.space.pem
-Adorio/adorio.space.pem
+
 *.pem
 *.key
