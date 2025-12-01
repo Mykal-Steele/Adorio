@@ -39,6 +39,11 @@ const Navbar = ({ darkMode, setDarkMode }) => {
           </Link>
 
           <div className='flex items-center gap-2 sm:gap-4'>
+            {/* Always visible links */}
+            <div className='hidden sm:flex gap-2 sm:gap-4'>
+              <ExternalNavLink to='/cao' text='CAO' />
+            </div>
+
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -65,7 +70,6 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                   <NavLink to='/coding' text='Coding' />
                   <NavLink to='/smartcity' text='SmartCity' />
                   <NavLink to='/rygame' text='RyGame' />
-                  <ExternalNavLink to='/cao' text='CAO' />
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -89,7 +93,6 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                   text='SmartCity'
                   className='hidden sm:block'
                 />
-                <ExternalNavLink to='/cao' text='CAO' className='hidden sm:block' />
                 <NavLink to='/login' text='Login' className='hidden sm:block' />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -106,24 +109,26 @@ const Navbar = ({ darkMode, setDarkMode }) => {
           </div>
         </div>
 
-        {token ? (
-          <div className='sm:hidden flex justify-center space-x-4 pb-2'>
-            <NavLink to='/home' text='Home' />
-            <NavLink to='/profile' text='Profile' />
-            <NavLink to='/coding' text='Coding' />
-            <NavLink to='/smartcity' text='SmartCity' />
-            <NavLink to='/rygame' text='RyGame' />
-            <ExternalNavLink to='/cao' text='CAO' />
-          </div>
-        ) : (
-          <div className='sm:hidden flex justify-center space-x-4 pb-2'>
-            <NavLink to='/coding' text='Coding' />
-            <NavLink to='/smartcity' text='SmartCity' />
-            <ExternalNavLink to='/cao' text='CAO' />
-            <NavLink to='/login' text='Login' />
-            <NavLink to='/register' text='Register' />
-          </div>
-        )}
+        {/* Mobile navigation - CAO always visible */}
+        <div className='sm:hidden flex justify-center space-x-4 pb-2'>
+          <ExternalNavLink to='/cao' text='CAO' />
+          {token ? (
+            <>
+              <NavLink to='/home' text='Home' />
+              <NavLink to='/profile' text='Profile' />
+              <NavLink to='/coding' text='Coding' />
+              <NavLink to='/smartcity' text='SmartCity' />
+              <NavLink to='/rygame' text='RyGame' />
+            </>
+          ) : (
+            <>
+              <NavLink to='/coding' text='Coding' />
+              <NavLink to='/smartcity' text='SmartCity' />
+              <NavLink to='/login' text='Login' />
+              <NavLink to='/register' text='Register' />
+            </>
+          )}
+        </div>
       </div>
     </motion.nav>
   );
