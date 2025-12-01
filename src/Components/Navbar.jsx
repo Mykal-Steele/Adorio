@@ -39,11 +39,6 @@ const Navbar = ({ darkMode, setDarkMode }) => {
           </Link>
 
           <div className='flex items-center gap-2 sm:gap-4'>
-            {/* Always visible links */}
-            <div className='hidden sm:flex gap-2 sm:gap-4'>
-              <ExternalNavLink to='/cao' text='CAO' />
-            </div>
-
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -70,6 +65,12 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                   <NavLink to='/coding' text='Coding' />
                   <NavLink to='/smartcity' text='SmartCity' />
                   <NavLink to='/rygame' text='RyGame' />
+                  <a
+                    href='https://adorio.space/cao'
+                    className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
+                  >
+                    CAO
+                  </a>
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -93,6 +94,12 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                   text='SmartCity'
                   className='hidden sm:block'
                 />
+                <a
+                  href='https://adorio.space/cao'
+                  className='hidden sm:block text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
+                >
+                  CAO
+                </a>
                 <NavLink to='/login' text='Login' className='hidden sm:block' />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -111,7 +118,6 @@ const Navbar = ({ darkMode, setDarkMode }) => {
 
         {/* Mobile navigation - CAO always visible */}
         <div className='sm:hidden flex justify-center space-x-4 pb-2'>
-          <ExternalNavLink to='/cao' text='CAO' />
           {token ? (
             <>
               <NavLink to='/home' text='Home' />
@@ -119,11 +125,23 @@ const Navbar = ({ darkMode, setDarkMode }) => {
               <NavLink to='/coding' text='Coding' />
               <NavLink to='/smartcity' text='SmartCity' />
               <NavLink to='/rygame' text='RyGame' />
+              <a
+                href='https://adorio.space/cao'
+                className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
+              >
+                CAO
+              </a>
             </>
           ) : (
             <>
               <NavLink to='/coding' text='Coding' />
               <NavLink to='/smartcity' text='SmartCity' />
+              <a
+                href='https://adorio.space/cao'
+                className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
+              >
+                CAO
+              </a>
               <NavLink to='/login' text='Login' />
               <NavLink to='/register' text='Register' />
             </>
