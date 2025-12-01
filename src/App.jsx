@@ -67,15 +67,8 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
         />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
-        <Route
-          path='/coding'
-          element={
-            <ProtectedRoute>
-              <Coding />
-            </ProtectedRoute>
-          }
-        />
         {/* Public pages that don't require login */}
+        <Route path='/coding' element={<Coding />} />
         <Route path='/sendenv' element={<SendEnv />} />
         <Route path='/smartcity' element={<SmartCity />} />
         <Route
