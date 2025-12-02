@@ -108,23 +108,20 @@ const Navbar = ({ darkMode, setDarkMode }) => {
               <NavLink to='/coding' text='Coding' />
               <NavLink to='/smartcity' text='SmartCity' />
               <NavLink to='/rygame' text='RyGame' />
-              <a
-                href='https://adorio.space/cao'
-                className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
-              >
-                CAO
-              </a>
+              <NavLink to='/cao' text='CAO' />
+             
             </>
           ) : (
             <>
               <NavLink to='/coding' text='Coding' />
               <NavLink to='/smartcity' text='SmartCity' />
-              <a
+              <NavLink to="/cao" text='CAO' />
+              {/* <a
                 href='https://adorio.space/cao'
                 className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
               >
                 CAO
-              </a>
+              </a> */}
               <NavLink to='/login' text='Login' />
               <NavLink to='/register' text='Register' />
             </>
