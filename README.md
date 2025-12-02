@@ -76,9 +76,9 @@ Create a `.env` file in the root and backend folder:
 
 ```env
 # Frontend .env
-VITE_BACKEND_URL=http://localhost:5000
+VITE_BACKEND_URL=http://localhost:3000
 # Backend .env
-PORT=5000
+PORT=3000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 CLOUDINARY_NAME=your_cloudinary_name

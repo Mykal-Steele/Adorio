@@ -14,7 +14,7 @@ const normalize = (value) => (typeof value === 'string' ? value.trim() : value);
 
 const environment = {
   nodeEnv: normalize(process.env.NODE_ENV) || 'development',
-  port: normalize(process.env.PORT) || 5000,
+  port: normalize(process.env.PORT) || 3000,
   mongoUri: normalize(process.env.MONGO_URI),
   jwtSecret: normalize(process.env.JWT_SECRET),
   refreshTokenSecret:
@@ -42,6 +42,7 @@ const defaultOrigins = [
   'http://adorio.space',
   'https://www.adorio.space',
   'https://adorio.vercel.app',
+  'http://127.0.0.1:5173',
 ];
 
 const dynamicOrigins = [
