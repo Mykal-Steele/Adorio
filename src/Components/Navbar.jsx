@@ -24,7 +24,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
       className='sticky top-0 z-50 bg-gray-950/95 backdrop-blur-lg border-b border-gray-800/100 shadow-2xl'
     >
       <div className='container mx-auto px-2 sm:px-4'>
-        <div className='flex items-center justify-between h-14 sm:h-16'>
+        <div className='flex items-center justify-between h-14 sm:h-16 relative'>
           {/* logo with gradient effect - looks pretty sick when you hover */}
           <Link
             to='/'
@@ -39,27 +39,10 @@ const Navbar = ({ darkMode, setDarkMode }) => {
           </Link>
 
           <div className='flex items-center gap-2 sm:gap-4'>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setDarkMode(!darkMode)}
-              className='p-1 sm:p-2 rounded-full hover:bg-gray-800/20 transition-colors'
-              aria-label={
-                darkMode ? 'Switch to light mode' : 'Switch to dark mode'
-              }
-            >
-              <div className='bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text'>
-                {darkMode ? (
-                  <SunIcon className='h-5 w-5 sm:h-6 sm:w-6 text-transparent' />
-                ) : (
-                  <MoonIcon className='h-5 w-5 sm:h-6 sm:w-6 text-transparent' />
-                )}
-              </div>
-            </motion.button>
-
-            {token ? (
-              <div className='flex items-center gap-2 sm:gap-4'>
-                <div className='hidden sm:flex gap-2 sm:gap-4'>
+            {/* Navigation Links - Grouped with right side actions */}
+            <div className='hidden sm:flex items-center gap-2 -mr-4'>
+              {token ? (
+                <>
                   <NavLink to='/home' text='Home' />
                   <NavLink to='/profile' text='Profile' />
                   <NavLink to='/coding' text='Coding' />
@@ -67,15 +50,31 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                   <NavLink to='/rygame' text='RyGame' />
                   <a
                     href='https://adorio.space/cao'
-                    className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
+                    className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 flex items-center'
                   >
                     CAO
                   </a>
-                </div>
+                </>
+              ) : (
+                <>
+                  <NavLink to='/coding' text='Coding' />
+                  <NavLink to='/smartcity' text='SmartCity' />
+                  <a
+                    href='https://adorio.space/cao'
+                    className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 flex items-center'
+                  >
+                    CAO
+                  </a>
+                </>
+              )}
+            </div>
+
+            {token ? (
+              <div className='flex items-center gap-2 sm:gap-4'>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className='px-3 py-1.5 sm:px-6 sm:py-3 text-sm sm:text-base rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all relative overflow-hidden group'
+                  className='px-3 py-1.5 sm:px-6 sm:py-3 text-sm sm:text-base rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all relative overflow-hidden group flex items-center justify-center'
                   onClick={handleLogout}
                 >
                   <span className='relative z-10'>Logout</span>
@@ -84,26 +83,11 @@ const Navbar = ({ darkMode, setDarkMode }) => {
               </div>
             ) : (
               <div className='flex items-center gap-2 sm:gap-4'>
-                <NavLink
-                  to='/coding'
-                  text='Coding'
-                />
-                <NavLink
-                  to='/smartcity'
-                  text='SmartCity'
-                  className='hidden sm:block'
-                />
-                <a
-                  href='https://adorio.space/cao'
-                  className='hidden sm:block text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
-                >
-                  CAO
-                </a>
                 <NavLink to='/login' text='Login' className='hidden sm:block' />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className='px-3 py-1.5 sm:px-6 sm:py-3 text-sm sm:text-base rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all relative overflow-hidden group'
+                  className='px-3 py-1.5 sm:px-6 sm:py-3 text-sm sm:text-base rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all relative overflow-hidden group flex items-center justify-center'
                 >
                   <Link to='/register' className='relative z-10'>
                     Get Started
@@ -155,7 +139,7 @@ const NavLink = ({ to, text, className = '' }) => (
   <motion.div whileHover={{ scale: 1.05 }} className={`relative ${className}`}>
     <Link
       to={to}
-      className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
+      className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 flex items-center'
     >
       {text}
     </Link>
