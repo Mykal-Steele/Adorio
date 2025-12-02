@@ -43,10 +43,8 @@ RUN npm ci --only=production
 ARG ENV=production
 COPY nginx.${ENV}.conf /etc/nginx/nginx.conf
 
-# Copy SSL certificates
+# Create SSL directory
 RUN mkdir -p /etc/nginx/ssl
-COPY adorio.space.pem /etc/nginx/ssl/adorio.space.pem
-COPY adorio.space.key /etc/nginx/ssl/adorio.space.key
 
 # Set backend port
 ENV PORT=3000
