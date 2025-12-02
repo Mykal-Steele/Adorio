@@ -10,7 +10,7 @@ Your application is now configured to work seamlessly in both local development 
 
 - **Command**: `npm run skibidi` or `npm run dev`
 - **Frontend**: Runs on `http://localhost:5173` (or 5174 if 5173 is busy)
-- **Backend**: Runs on `http://localhost:5000`
+- **Backend**: Runs on `http://localhost:3000`
 - **Environment File**: `.env.development` for both frontend and backend
 - **Database**: Uses production MongoDB (same as Render)
 
@@ -77,7 +77,7 @@ VITE_CLOUDINARY_NAME=your_cloudinary_name
 
 ### Local Development Files
 
-- **Frontend**: `.env.development` → Points to `http://localhost:5000`
+- **Frontend**: `.env.development` → Points to `http://localhost:3000`
 - **Backend**: `backend/.env.development` → Points to `http://localhost:5173`
 
 > **🔒 Security Note**: The example above shows placeholder values. Your actual environment variables should be kept secure and never committed to version control.
@@ -95,7 +95,7 @@ Your backend automatically allows requests from:
 ### ✅ Local Development Issues
 
 - `npm run skibidi` now starts both frontend and backend
-- Frontend connects to local backend (`localhost:5000`)
+- Frontend connects to local backend (`localhost:3000`)
 - Backend serves frontend requests with proper CORS
 - Environment variables load correctly
 
@@ -134,7 +134,7 @@ Your backend automatically allows requests from:
 
 ### If local development doesn't work:
 
-1. Ensure ports 5000 and 5173 are available
+1. Ensure ports 3000 and 5173 are available
 2. Check that `.env.development` files exist
 3. Run `npm run test-env` to verify environment setup
 
