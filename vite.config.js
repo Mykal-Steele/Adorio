@@ -44,8 +44,8 @@ export default defineConfig({
         // Get the backend URL based on environment
         const isDev = process.env.NODE_ENV === 'development';
         const backendUrl = isDev
-          ? 'http://localhost:5000'
-          : 'https://feelio-github-io.onrender.com';
+          ? 'http://localhost:3000'
+          : 'https://adorio.space';
 
         // First replace the backend URL script with one that has the nonce
         html = html.replace(
@@ -60,7 +60,7 @@ export default defineConfig({
         // Note: 'unsafe-eval' is needed for the coding platform to execute user code safely
         const scriptSrc = `'self' 'nonce-${nonce}' 'unsafe-eval' https://static.cloudflareinsights.com https://challenges.cloudflare.com`;
         const connectSrc = isDev
-          ? `'self' http://localhost:5000 http://localhost:5000/api/* https://cdnjs.cloudflare.com`
+          ? `'self' http://localhost:3000 http://localhost:3000/api/* http://localhost:3000/api/users/login https://cdnjs.cloudflare.com`
           : `'self' https://adorio.space/* https://www.adorio.space/* https://cdnjs.cloudflare.com https://cloudflareinsights.com https://*.cloudflare.com`;
 
         return html

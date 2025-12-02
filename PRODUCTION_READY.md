@@ -17,7 +17,7 @@ Your production setup is fully configured and working correctly. Here's what hap
 ### Environment Configuration ✅
 
 - **NODE_ENV**: `production` (set by Render)
-- **PORT**: `5000` (or Render's assigned port)
+- **PORT**: `3000` (or Render's assigned port)
 - **CLIENT_URL**: `https://your-frontend-url.github.io` ✅
 - **DATABASE**: MongoDB Atlas connection ✅
 - **CLOUDINARY**: Image upload service ✅
@@ -47,7 +47,7 @@ VITE_CLOUDINARY_NAME=your_cloudinary_name
 - `npm run skibidi` - Start both frontend and backend for development
 - `npm run dev` - Same as skibidi
 - Frontend: `http://localhost:5173`
-- Backend: `http://localhost:5000`
+- Backend: `http://localhost:3000`
 
 ### Production (Render)
 
