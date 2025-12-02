@@ -21,7 +21,7 @@ const resolveBaseUrl = () => {
     return stripTrailingSlash(window.location.origin);
   }
 
-  return 'http://localhost:5000';
+  return 'http://localhost:3000';
 };
 
 const API_BASE_URL = `${stripTrailingSlash(resolveBaseUrl())}/api`;
