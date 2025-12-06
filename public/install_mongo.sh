@@ -24,9 +24,11 @@ MONGO_VERSION="8.0"
 # --- Confirmation ---
 echo ""
 echo "(!) WARNING: This will WIPE all existing MongoDB data (/var/lib/mongodb) and configurations."
-echo "    It will then install MongoDB Community Server $MONGO_VERSION."
+echo "    It will then install MongoDB Community Server $MONGO_VERSION." # Cleaned up spacing
 echo ""
-read -p "Are you sure you want to proceed? [y/N] " -n 1 -r
+# FIX: Redirect read to /dev/tty to ensure input works when running via 'curl | bash'
+read -p "Are you sure you want to proceed? [y/N] " -n 1 -r </dev/tty
+echo "" # Ensures a clean newline after user input
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Aborted."
     exit 1
