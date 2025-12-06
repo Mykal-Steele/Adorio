@@ -27,7 +27,6 @@ echo "(!) WARNING: This will WIPE all existing MongoDB data (/var/lib/mongodb) a
 echo "    It will then install MongoDB Community Server $MONGO_VERSION."
 echo ""
 read -p "Are you sure you want to proceed? [y/N] " -n 1 -r
-echo ""
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Aborted."
     exit 1
