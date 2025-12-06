@@ -35,7 +35,7 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 # --- Cleanup ---
-echo "--- Cleaning up old installations ---"
+echo "---  Cleaning up old installations  ---"
 sudo systemctl stop mongod 2>/dev/null || true
 sudo apt-get purge -y "mongodb-org*" 2>/dev/null || true
 sudo rm -rf /var/log/mongodb /var/lib/mongodb
