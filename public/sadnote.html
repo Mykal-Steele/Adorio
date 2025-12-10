@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SAD Final Exam: The Complete Textbook</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: "dark",
+        securityLevel: "loose",
+      });
+    </script>
+  </head>
+  <body class="bg-slate-900 font-sans leading-relaxed text-slate-200">
+    <div
+      class="fixed top-0 left-0 h-screen w-[260px] bg-slate-800 border-r border-slate-700 p-5 overflow-y-auto"
+    >
+      <h2
+        class="text-slate-50 mb-6 text-xl font-bold border-b-2 border-slate-600 pb-2"
+      >
+        SAD Textbook
+      </h2>
+      <a
+        href="#intro"
+        class="block text-slate-400 no-underline py-2.5 border-b border-slate-700 transition-all duration-200 hover:text-slate-100 hover:pl-2 hover:border-l-4 hover:border-blue-500"
+        >Introduction</a
+      >
+      <a
+        href="#ch1"
+        class="block text-slate-400 no-underline py-2.5 border-b border-slate-700 transition-all duration-200 hover:text-slate-100 hover:pl-2 hover:border-l-4 hover:border-blue-500"
+        >Ch 1: Fishbone Diagram</a
+      >
+      <a
+        href="#ch2"
+        class="block text-slate-400 no-underline py-2.5 border-b border-slate-700 transition-all duration-200 hover:text-slate-100 hover:pl-2 hover:border-l-4 hover:border-blue-500"
+        >Ch 2: Activity Diagram</a
+      >
+      <a
+        href="#ch3"
+        class="block text-slate-400 no-underline py-2.5 border-b border-slate-700 transition-all duration-200 hover:text-slate-100 hover:pl-2 hover:border-l-4 hover:border-blue-500"
+        >Ch 3: Use Case Diagram</a
+      >
+      <a
+        href="#ch4"
+        class="block text-slate-400 no-underline py-2.5 border-b border-slate-700 transition-all duration-200 hover:text-slate-100 hover:pl-2 hover:border-l-4 hover:border-blue-500"
+        >Ch 4: Data Flow Diagram</a
+      >
+      <a
+        href="#ch5"
+        class="block text-slate-400 no-underline py-2.5 border-b border-slate-700 transition-all duration-200 hover:text-slate-100 hover:pl-2 hover:border-l-4 hover:border-blue-500"
+        >Ch 5: The"Fragment" Method</a
+      >
+      <a
+        href="#checklist"
+        class="block text-slate-400 no-underline py-2.5 border-b border-slate-700 transition-all duration-200 hover:text-slate-100 hover:pl-2 hover:border-l-4 hover:border-blue-500"
+        >Summary Checklist</a
+      >
+      <a
+        href="#workbook"
+        class="block text-slate-400 no-underline py-2.5 border-b border-slate-700 transition-all duration-200 hover:text-slate-100 hover:pl-2 hover:border-l-4 hover:border-blue-500"
+        >Ch 6: Exam Workbook</a
+      >
+    </div>
+
+    <div class="ml-[260px] p-10 max-w-[1100px]">
+      <div id="intro" class="mb-12">
+        <h1
+          class="text-4xl font-extrabold text-slate-50 mb-6 border-b-4 border-slate-600 pb-2"
+        >
+          Systems Analysis & Design: Final Exam Companion
+        </h1>
+        <p class="text-xl text-slate-400">
+          A comprehensive, study guide focusing on the
+          <strong class="text-slate-100 font-bold">"To-Be"</strong> system
+          modeling phase. Includes restored lecture details and expanded
+          practice answers.
+        </p>
+      </div>
+
+      <!-- CHAPTER 1: FISHBONE -->
+      <div
+        id="ch1"
+        class="bg-slate-800 border border-slate-700 rounded-lg p-8 mb-10 shadow-lg"
+      >
+        <h1
+          class="text-4xl font-extrabold text-slate-50 mb-6 border-b-4 border-slate-600 pb-2"
+        >
+          Chapter 1: Problem Analysis (Fishbone)
+        </h1>
+
+        <p>
+          <strong class="text-slate-100 font-bold">Definition:</strong> Also
+          known as the <em>Ishikawa Diagram</em> or
+          <em>Cause-and-Effect Diagram</em>. It is exclusively used in the
+          <strong class="text-slate-100 font-bold">Analysis Phase</strong> to
+          understand the "As-Is" (current) problem before we design a solution.
+        </p>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          1.1 The "Grouping" Methodology (Lecture Oct 30)
+        </h2>
+        <p>
+          You cannot just draw the fishbone immediately. The lecture emphasized
+          a specific pre-processing step called "Grouping" to organize your
+          thoughts. Without this, your diagram will be messy and illogical.
+        </p>
+        <div
+          class="bg-blue-950 border-l-4 border-blue-500 p-4 my-5 italic text-blue-200"
+        >
+          "We don't draw just for fun. We draw to communicate with ourselves
+          first. Grouping reveals the structure of the problem." - Lecture Oct
+          30
+        </div>
+        <ol class="list-decimal ml-6 mb-4 text-slate-300">
+          <li>
+            <strong class="text-slate-100 font-bold">Brainstorming:</strong>
+            Write down every possible cause messily on the board. (e.g., "Rain",
+            "Lazy", "Sick", "No Bus", "Traffic Jam", "Played Games").
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Grouping:</strong> Draw
+            circles around related items to create logical clusters.
+            <ul class="list-disc ml-6 mb-4 text-slate-300 mt-2">
+              <li>
+                (Traffic Jam, No Bus) &rarr; Group Name:
+                <strong class="text-slate-100 font-bold">Traffic</strong>
+              </li>
+              <li>
+                (Rain, Hot Weather) &rarr; Group Name:
+                <strong class="text-slate-100 font-bold">Weather</strong>
+              </li>
+              <li>
+                (Lazy, Played Games) &rarr; Group Name:
+                <strong class="text-slate-100 font-bold">Habit</strong>
+              </li>
+              <li>
+                (Sick, Stomach Ache) &rarr; Group Name:
+                <strong class="text-slate-100 font-bold">Health</strong>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Drawing:</strong> Only
+            <em>after</em> grouping do you draw the skeleton with main bones
+            corresponding to your groups.
+          </li>
+        </ol>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          1.2 The "6Ms" Framework (Standard Categories)
+        </h2>
+        <p>
+          While the lecture used specific examples like "Traffic" and "Weather",
+          in formal exams you are often expected to use standard
+          manufacturing/business categories (The 6Ms) to ensure you have covered
+          all bases.
+        </p>
+        <ul class="list-disc ml-6 mb-4 text-slate-300">
+          <li>
+            <strong class="text-slate-100 font-bold">Man (People):</strong>
+            Staff skills, training, fatigue, lack of motivation.
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Machine:</strong> Equipment
+            failures, computers, tools, software glitches.
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Material:</strong> Raw
+            supplies, information quality, paperwork, parts.
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Method:</strong> Rules,
+            policies, procedures, workflows, regulations.
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Measurement:</strong> Data
+            accuracy, inspections, calibration of tools.
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold"
+              >Mother Nature (Environment):</strong
+            >
+            Noise, heat, layout, lighting, humidity.
+          </li>
+        </ul>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          1.3 The "5 Whys" Technique
+        </h2>
+        <p>
+          The Fishbone shows the main "Bone," but how do you find the deep
+          sub-bones? The "5 Whys" is the standard technique for finding the root
+          cause.
+        </p>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <strong class="text-slate-100 font-bold">Example:</strong> Late to
+          Class<br />
+          1. Why are you late? Traffic.<br />
+          2. Why was traffic bad? I left the house late.<br />
+          3. Why did you leave late? Alarm didn't go off.<br />
+          4. Why didn't it go off? Battery died.<br />
+          5. Why? I forgot to check the maintenance schedule.<br />
+          <strong class="text-slate-100 font-bold">Root Cause:</strong>
+          Maintenance/Method (Not Traffic).
+        </div>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          1.4 Detailed Diagram: "Going to Class Late"
+        </h2>
+        <div class="bg-slate-800 p-4 rounded border border-slate-700">
+          <!-- Fishbone SVG adapted for Dark Mode -->
+          <svg width="100%" height="350" viewBox="0 0 800 350">
+            <!-- Spine -->
+            <line
+              x1="50"
+              y1="175"
+              x2="650"
+              y2="175"
+              stroke="#60a5fa"
+              stroke-width="4"
+            />
+            <!-- Head -->
+            <path
+              d="M650,175 L750,125 L750,225 Z"
+              fill="#1e3a8a"
+              stroke="#60a5fa"
+              stroke-width="2"
+            />
+            <text
+              x="670"
+              y="180"
+              font-weight="bold"
+              fill="#93c5fd"
+              font-size="14"
+            >
+              LATE TO CLASS
+            </text>
+
+            <!-- Bone 1: Traffic (Top Right) -->
+            <line
+              x1="550"
+              y1="175"
+              x2="500"
+              y2="50"
+              stroke="#3b82f6"
+              stroke-width="3"
+            />
+            <text
+              x="480"
+              y="40"
+              font-weight="bold"
+              fill="#60a5fa"
+              font-size="16"
+            >
+              TRAFFIC
+            </text>
+            <line
+              x1="525"
+              y1="112"
+              x2="560"
+              y2="112"
+              stroke="#94a3b8"
+              stroke-width="2"
+            />
+            <text x="565" y="115" fill="#cbd5e1" font-size="12">Jam</text>
+            <line
+              x1="510"
+              y1="75"
+              x2="545"
+              y2="75"
+              stroke="#94a3b8"
+              stroke-width="2"
+            />
+            <text x="550" y="78" fill="#cbd5e1" font-size="12">No Bus</text>
+
+            <!-- Bone 2: Weather (Top Left) -->
+            <line
+              x1="250"
+              y1="175"
+              x2="200"
+              y2="50"
+              stroke="#3b82f6"
+              stroke-width="3"
+            />
+            <text
+              x="180"
+              y="40"
+              font-weight="bold"
+              fill="#60a5fa"
+              font-size="16"
+            >
+              WEATHER
+            </text>
+            <line
+              x1="225"
+              y1="112"
+              x2="260"
+              y2="112"
+              stroke="#94a3b8"
+              stroke-width="2"
+            />
+            <text x="265" y="115" fill="#cbd5e1" font-size="12">Rain</text>
+            <line
+              x1="210"
+              y1="75"
+              x2="245"
+              y2="75"
+              stroke="#94a3b8"
+              stroke-width="2"
+            />
+            <text x="250" y="78" fill="#cbd5e1" font-size="12">Too Hot</text>
+
+            <!-- Bone 3: Habit (Bottom Right) -->
+            <line
+              x1="550"
+              y1="175"
+              x2="500"
+              y2="300"
+              stroke="#3b82f6"
+              stroke-width="3"
+            />
+            <text
+              x="480"
+              y="320"
+              font-weight="bold"
+              fill="#60a5fa"
+              font-size="16"
+            >
+              HABIT
+            </text>
+            <line
+              x1="525"
+              y1="237"
+              x2="560"
+              y2="237"
+              stroke="#94a3b8"
+              stroke-width="2"
+            />
+            <text x="565" y="240" fill="#cbd5e1" font-size="12">Overslept</text>
+            <line
+              x1="510"
+              y1="275"
+              x2="545"
+              y2="275"
+              stroke="#94a3b8"
+              stroke-width="2"
+            />
+            <text x="550" y="278" fill="#cbd5e1" font-size="12">Gaming</text>
+
+            <!-- Bone 4: Health (Bottom Left) -->
+            <line
+              x1="250"
+              y1="175"
+              x2="200"
+              y2="300"
+              stroke="#3b82f6"
+              stroke-width="3"
+            />
+            <text
+              x="180"
+              y="320"
+              font-weight="bold"
+              fill="#60a5fa"
+              font-size="16"
+            >
+              HEALTH
+            </text>
+            <line
+              x1="225"
+              y1="237"
+              x2="260"
+              y2="237"
+              stroke="#94a3b8"
+              stroke-width="2"
+            />
+            <text x="265" y="240" fill="#cbd5e1" font-size="12">Sick</text>
+          </svg>
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 1.1: Fishbone Diagram Example</span
+          >
+        </div>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          1.5 Managing Expectations (Exam Essay Point)
+        </h2>
+        <p>
+          Why do we draw this? It is a negotiation tool. If you propose a "Smart
+          Alarm Clock" app, the Fishbone diagram proves to the client that your
+          app
+          <strong class="text-slate-100 font-bold"
+            >only solves the "Habit" bone</strong
+          >. It does not solve the "Traffic" or "Weather" bones. This protects
+          you from clients saying "Why am I still late?" after buying your app.
+        </p>
+      </div>
+
+      <!-- CHAPTER 2: ACTIVITY DIAGRAM -->
+      <div
+        id="ch2"
+        class="bg-slate-800 border border-slate-700 rounded-lg p-8 mb-10 shadow-lg"
+      >
+        <h1
+          class="text-4xl font-extrabold text-slate-50 mb-6 border-b-4 border-slate-600 pb-2"
+        >
+          Chapter 2: Process Modeling (Activity Diagram)
+        </h1>
+        <p>
+          Used to describe Business Processes (As-Is or To-Be). It shows the
+          <strong class="text-slate-100 font-bold">Sequence</strong> of actions.
+        </p>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          2.1 The "Indeterministic" Trap (The '5' Problem)
+        </h2>
+        <div
+          class="bg-red-950 border-l-4 border-red-500 p-4 my-5 text-red-300 font-medium"
+        >
+          CRITICAL: Never split an arrow without a Decision Diamond.
+        </div>
+        <p>
+          <strong class="text-slate-100 font-bold">The Scenario:</strong> You
+          have an Input A (Number). You want to branch based on value.
+        </p>
+        <p>
+          <strong class="text-slate-100 font-bold">The Mistake:</strong> Drawing
+          two arrows directly from Activity A. One labeled
+          <code
+            class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+            >[x &lt; 5]</code
+          >
+          and one labeled
+          <code
+            class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+            >[x &gt; 5]</code
+          >.
+        </p>
+        <p>
+          <strong class="text-slate-100 font-bold">The Crash:</strong> If the
+          input is exactly <strong class="text-slate-100 font-bold">5</strong>,
+          the system crashes because it matches neither path (or both, depending
+          on labels). This is an "Indeterministic System".
+        </p>
+        <p>
+          <strong class="text-slate-100 font-bold">The Solution:</strong> Always
+          use a
+          <strong class="text-slate-100 font-bold"
+            >Diamond (Decision Node)</strong
+          >. The diamond forces you to define Mutually Exclusive paths (e.g.,
+          <code
+            class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+            >[x &lt;= 5]</code
+          >
+          vs
+          <code
+            class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+            >[x &gt; 5]</code
+          >).
+        </p>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          2.2 Concurrency (Fork & Join)
+        </h2>
+        <p>
+          The notes so far showed sequential flow. Real systems do things in
+          parallel.
+        </p>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      graph TD
+        Start((Start)) --> Fork[==== FORK ====]
+        style Fork fill:#000,stroke:#000,color:#fff,height:5px
+        
+        Fork --> A[Print Receipt]
+        Fork --> B[Open Gate]
+        
+        A --> Join[==== JOIN ====]
+        B --> Join
+        style Join fill:#000,stroke:#000,color:#fff,height:5px
+        
+        Join --> End((End))
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 2.1: Fork and Join Nodes</span
+          >
+        </div>
+        <ul class="list-disc ml-6 mb-4 text-slate-300">
+          <li>
+            <strong class="text-slate-100 font-bold"
+              >Fork (Black Bar, 1 In, Multiple Out):</strong
+            >
+            Splits flow into parallel threads. (e.g., "Print Receipt" AND "Open
+            Gate" happen at the same time).
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold"
+              >Join (Black Bar, Multiple In, 1 Out):</strong
+            >
+            Waits for
+            <strong class="text-slate-100 font-bold">ALL</strong> parallel
+            threads to finish before moving on.
+          </li>
+        </ul>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          2.3 Object Nodes
+        </h2>
+        <p>
+          Activities are Verbs. Sometimes you need to show the Data (Noun)
+          moving between them.
+        </p>
+        <p>
+          <strong class="text-slate-100 font-bold">Notation:</strong> A
+          rectangle (not rounded) placed between activities.
+        </p>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      flowchart LR
+        A(Fill Form) --> B[Application Form]
+        B --> C(Review Form)
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 2.2: Object Node Notation</span
+          >
+        </div>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          2.4 Detailed Example: Homework Submission (To-Be)
+        </h2>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+flowchart TD
+  subgraph Student
+  direction TB
+  S_Start((Start)) --> S_Submit[Submit Homework]
+  S_Correct[Correct Homework]
+  end
+
+  subgraph System ["System (Moodle)"]
+  direction TB
+  S_Submit --> Sys_Record[Record Submission]
+  Sys_Record --> Sys_Notify[Notify Teacher]
+  end
+
+  subgraph Teacher
+  direction TB
+  Sys_Notify --> T_Login[Log In]
+  T_Login --> T_Grade[Grade Homework]
+  T_Grade --> T_Decide{"Pass?"}
+  T_Decide -- Yes --> T_Record[Record Grade]
+  T_Decide -- No --> T_Return[Return to Student]
+  end
+
+  T_Return --> S_Correct
+  S_Correct --> S_Submit
+  T_Record --> S_End((End))
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 2.3: Activity Diagram with Swimlanes</span
+          >
+        </div>
+        <p>
+          <strong class="text-slate-100 font-bold">Loop Logic:</strong> Notice
+          the "Return to Student" arrow goes back to "Correct Homework" then
+          back to "Submit". This creates a loop until the condition "Pass" is
+          met.
+        </p>
+      </div>
+
+      <!-- CHAPTER 3: USE CASE -->
+      <div
+        id="ch3"
+        class="bg-slate-800 border border-slate-700 rounded-lg p-8 mb-10 shadow-lg"
+      >
+        <h1
+          class="text-4xl font-extrabold text-slate-50 mb-6 border-b-4 border-slate-600 pb-2"
+        >
+          Chapter 3: Functional Modeling (Use Case)
+        </h1>
+        <p>
+          Describes
+          <strong class="text-slate-100 font-bold"
+            >Functional Requirements</strong
+          >. "Who uses the system to do WHAT?"
+        </p>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          3.1 The "Purpose" Concept
+        </h2>
+        <p>
+          A Use Case is a user's
+          <strong class="text-slate-100 font-bold">goal</strong>, not a small
+          step. "Log In" is a Use Case, but "Click Button" is NOT.
+        </p>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          3.2 Relationships: The "OTP Story" (Nov 13)
+        </h2>
+        <p>
+          Why do we use
+          <code
+            class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+            >&lt;&lt; include &gt;&gt;</code
+          >? The lecturer gave a specific example.
+        </p>
+        <ul class="list-disc ml-6 mb-4 text-slate-300">
+          <li>
+            <strong class="text-slate-100 font-bold">Scenario:</strong> You have
+            20 Use Cases (Submit HW, Grade HW, View Report...). All of them
+            require Login.
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Bad Design:</strong> You
+            write the "Login" steps inside all 20 descriptions.
+          </li>
+        </ul>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <h4 class="text-xl font-semibold text-slate-400 mt-6 mb-2">
+            Bad Design (Duplication)
+          </h4>
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      graph TD
+        User((User))
+        subgraph System
+        A(Submit HW\nIncludes Login Steps)
+        B(Grade HW\nIncludes Login Steps)
+        C(View Report\nIncludes Login Steps)
+        end
+        User --> A
+        User --> B
+        User --> C
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 3.1: Bad Design (Duplication)</span
+          >
+        </div>
+        <ul class="list-disc ml-6 mb-4 text-slate-300">
+          <li>
+            <strong class="text-slate-100 font-bold">The Problem:</strong> The
+            system changes from "Password" to "OTP" (One Time Password). You now
+            have to edit 20 documents.
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold"
+              >The Solution (Include):</strong
+            >
+            Extract "Login" as a separate Use Case. The other 20 Use Cases point
+            to it. Now you only update the "Login" description once.
+          </li>
+        </ul>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <h4 class="text-xl font-semibold text-slate-400 mt-6 mb-2">
+            Good Design (Reuse)
+          </h4>
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      graph TD
+        User((User))
+  subgraph System
+    A(Submit HW)
+    B(Grade HW)
+    C(View Report)
+    L(Login)
+  end
+  User --> A
+  User --> B
+  User --> C
+  A -.->|"&lt; include &gt;"| L
+  B -.->|"&lt; include &gt;"| L
+  C -.->|"&lt; include &gt;"| L
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 3.2: Good Design (Include)</span
+          >
+        </div>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          3.3 Include vs Extend (Crucial Exam Distinction)
+        </h2>
+
+        <h3 class="text-2xl font-semibold text-slate-300 mt-8 mb-4">
+          3.3.1 Include Relationship
+        </h3>
+        <p>
+          <strong class="text-slate-100 font-bold">Logic:</strong>
+          <strong class="text-slate-100 font-bold">Mandatory.</strong> The base
+          case <em>cannot</em> finish without executing the included case. It is
+          like a subroutine call that happens 100% of the time.
+        </p>
+        <p>
+          <strong class="text-slate-100 font-bold">Example:</strong> "Withdraw
+          Cash" includes "Verify PIN". (You cannot withdraw without PIN).
+        </p>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      graph LR
+        A(Withdraw Cash) -.->|&quot;&lt;&lt; include &gt;&gt;&quot;| B(Verify PIN)
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 3.3: Include Relationship</span
+          >
+        </div>
+
+        <h3 class="text-2xl font-semibold text-slate-300 mt-8 mb-4">
+          3.3.2 Extend Relationship
+        </h3>
+        <p>
+          <strong class="text-slate-100 font-bold">Logic:</strong>
+          <strong class="text-slate-100 font-bold">Optional.</strong> The base
+          case works fine on its own. The extension only runs if a specific
+          condition is met.
+        </p>
+        <p>
+          <strong class="text-slate-100 font-bold">Example:</strong> "Withdraw
+          Cash" extended by "Print Receipt". (User might say No).
+        </p>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      graph LR
+        B(Print Receipt) -.->|&quot;&lt;&lt; extend &gt;&gt;&quot;| A(Withdraw Cash)
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 3.4: Extend Relationship</span
+          >
+        </div>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          3.4 Generalization (Inheritance)
+        </h2>
+        <p class="text-slate-300 mb-4">
+          Just like classes, Actors and Use Cases can inherit properties.
+        </p>
+        <ul class="list-disc ml-6 mb-4 text-slate-300">
+          <li>
+            <strong class="text-slate-100 font-bold"
+              >Actor Generalization:</strong
+            >
+            A "Manager" is a child of "Staff". The Manager can do everything
+            "Staff" can do, plus more. Draw an arrow with a hollow triangle from
+            Manager pointing TO Staff.
+          </li>
+        </ul>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      classDiagram
+        class Staff
+        class Manager
+        Staff <|-- Manager
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 3.5: Actor Generalization</span
+          >
+        </div>
+        <ul class="list-disc ml-6 mb-4 text-slate-300">
+          <li>
+            <strong class="text-slate-100 font-bold"
+              >Use Case Generalization:</strong
+            >
+            "Pay Bill" is the parent. "Pay by Credit Card" and "Pay by Cash" are
+            children that inherit the general behavior.
+          </li>
+        </ul>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      classDiagram
+        class PayBill
+        class CreditCard
+        class Cash
+        PayBill <|-- CreditCard
+        PayBill <|-- Cash
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 3.6: Use Case Generalization</span
+          >
+        </div>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          3.5 The System Boundary
+        </h2>
+        <p>
+          The notes mention "System" in text, but in the diagram, you must draw
+          a <strong class="text-slate-100 font-bold">Box</strong> around the Use
+          Cases.
+        </p>
+        <div
+          class="bg-red-950 border-l-4 border-red-500 p-4 my-5 text-red-300 font-medium"
+        >
+          Rule: Actors go OUTSIDE the box. Use Cases go INSIDE the box. This
+          visualizes the scope of your software.
+        </div>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      graph TD
+        User((User))
+        subgraph "System Boundary (The Box)"
+        A(Login)
+        B(View Dashboard)
+        end
+        User --> A
+        User --> B
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 3.7: System Boundary</span
+          >
+        </div>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          3.6 Use Case Scenarios (The Textual Part)
+        </h2>
+        <p>
+          The diagram is only the summary. The "Meat" is the textual
+          description.
+        </p>
+        <ul class="list-disc ml-6 mb-4 text-slate-300">
+          <li>
+            <strong class="text-slate-100 font-bold">Pre-condition:</strong>
+            What must be true before starting? (e.g., User is logged in).
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Post-condition:</strong>
+            What is true after finishing? (e.g., Database is updated).
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold"
+              >Main Success Scenario:</strong
+            >
+            The "Happy Path" steps (1, 2, 3...).
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Alternative Flows:</strong>
+            What happens if something goes wrong (errors)?
+          </li>
+        </ul>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <h4 class="text-xl font-semibold text-slate-400 mt-6 mb-2">
+            Visualizing the Scenario (Sequence Diagram)
+          </h4>
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      sequenceDiagram
+        actor User
+        participant System
+        participant Database
+        
+        Note over User, System: Pre-condition: User is logged in
+        
+        User->>System: 1. Request Report
+        System->>Database: 2. Query Data
+        Database-->>System: 3. Return Data
+        System-->>User: 4. Display Report
+        
+        Note over User, System: Post-condition: Report is displayed
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 3.8: Sequence Diagram for Scenario</span
+          >
+        </div>
+      </div>
+
+      <!-- CHAPTER 4: DFD -->
+      <div
+        id="ch4"
+        class="bg-slate-800 border border-slate-700 rounded-lg p-8 mb-10 shadow-lg"
+      >
+        <h1
+          class="text-4xl font-extrabold text-slate-50 mb-6 border-b-4 border-slate-600 pb-2"
+        >
+          Chapter 4: Data Flow Diagrams (DFD)
+        </h1>
+        <p>
+          Describes the
+          <strong class="text-slate-100 font-bold">Logical Flow</strong> of
+          data. It does NOT show physical actions (like "walking to the desk").
+        </p>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          4.1 The 4 Critical Rules (Exam Traps)
+        </h2>
+        <div
+          class="bg-red-950 border-l-4 border-red-500 p-4 my-5 text-red-300 font-medium"
+        >
+          1. No Miracles: Process with output but NO input. (Impossible to
+          create data from thin air).<br />
+          2. No Black Holes: Process with input but NO output. (Useless
+          process).<br />
+          3. No Entity-to-Entity: External entities cannot talk directly. (Out
+          of scope).<br />
+          4. No Entity-to-Store: Entities cannot touch the database directly
+          (Must go through a process).
+        </div>
+
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <h4 class="text-xl font-semibold text-slate-400 mt-6 mb-2">
+            1. Miracle (No Input)
+          </h4>
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+        flowchart TD
+          P1((Process)) -- Data --> E1[Entity]
+      </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 4.1a: Miracle (Incorrect)</span
+          >
+          <p class="mt-2 text-red-300">
+            <strong class="text-slate-100 font-bold">Why it is wrong:</strong> A
+            process cannot generate data from nothing. It must have at least one
+            input arrow.
+          </p>
+        </div>
+
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <h4 class="text-xl font-semibold text-slate-400 mt-6 mb-2">
+            2. Black Hole (No Output)
+          </h4>
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+        flowchart TD
+          E2[Entity] -- Data --> P2((Process))
+      </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 4.1b: Black Hole (Incorrect)</span
+          >
+          <p class="mt-2 text-red-300">
+            <strong class="text-slate-100 font-bold">Why it is wrong:</strong> A
+            process that takes data but produces nothing is useless. It must
+            have at least one output arrow.
+          </p>
+        </div>
+
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <h4 class="text-xl font-semibold text-slate-400 mt-6 mb-2">
+            3. Entity-to-Entity (Direct)
+          </h4>
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+        flowchart LR
+          E3[Entity A] -- Data --> E4[Entity B]
+      </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 4.1c: Entity-to-Entity (Incorrect)</span
+          >
+          <p class="mt-2 text-red-300">
+            <strong class="text-slate-100 font-bold">Why it is wrong:</strong>
+            DFD models the SYSTEM. If two external people talk to each other
+            without using the system, it is out of scope.
+          </p>
+        </div>
+
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <h4 class="text-xl font-semibold text-slate-400 mt-6 mb-2">
+            4. Entity-to-Store (Direct)
+          </h4>
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+        flowchart LR
+          E5[Entity] -- Data --> D1[(Data Store)]
+      </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 4.1d: Entity-to-Store (Incorrect)</span
+          >
+          <p class="mt-2 text-red-300">
+            <strong class="text-slate-100 font-bold">Why it is wrong:</strong>
+            External entities cannot magically teleport data into the database.
+            They must use a system process (like "Save Data") to do it.
+          </p>
+        </div>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          4.2 Context Diagram vs. Level 0
+        </h2>
+        <p>
+          The notes often jump to Diagram 0, but you must know the difference.
+        </p>
+        <ul class="list-disc ml-6 mb-4 text-slate-300">
+          <li>
+            <strong class="text-slate-100 font-bold">Context Diagram:</strong>
+            Has only ONE Process box (labeled "0: The System"). It shows all
+            external entities and main data flows. NO Data Stores are usually
+            shown here.
+          </li>
+        </ul>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      flowchart LR
+        E1[Customer]
+        P0((0. Food Ordering System))
+        E2[Kitchen]
+        E1 -- Order --> P0
+        P0 -- Receipt --> E1
+        P0 -- Ticket --> E2
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 4.2: Context Diagram</span
+          >
+        </div>
+        <ul class="list-disc ml-6 mb-4 text-slate-300">
+          <li>
+            <strong class="text-slate-100 font-bold">Level 0:</strong> This is
+            the "Zoom in" version. It breaks the one big process into major
+            sub-processes (1.0, 2.0, 3.0). Data Stores appear here.
+          </li>
+        </ul>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      flowchart LR
+        E1[Customer]
+        P1((1.0 Receive Order))
+        P2((2.0 Send to Kitchen))
+        D1[(Orders DB)]
+        E2[Kitchen]
+        
+        E1 -- Order --> P1
+        P1 -- Receipt --> E1
+        P1 -- Order Details --> D1
+        D1 -- Order Details --> P2
+        P2 -- Ticket --> E2
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 4.3: Level 0 Diagram</span
+          >
+        </div>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          4.3 Balancing (Consistency)
+        </h2>
+        <p>
+          This is a major exam check. The inputs and outputs on the
+          <strong class="text-slate-100 font-bold">Context Diagram</strong> must
+          match the inputs and outputs on the
+          <strong class="text-slate-100 font-bold">Level 0 Diagram</strong>
+          exactly. You cannot suddenly add a new data flow from an external
+          entity in Level 0 that wasn't in the Context Diagram.
+        </p>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      flowchart TD
+        subgraph "Context Diagram"
+        E1[Entity] -- Input A --> P0((System))
+        P0 -- Output B --> E1
+        end
+        
+        subgraph "Level 0 Diagram (Balanced)"
+        E2[Entity] -- Input A --> P1((1.0))
+        P1 -- Internal Data --> P2((2.0))
+        P2 -- Output B --> E2
+        end
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 4.4: Balancing Example</span
+          >
+          <p class="mt-2 text-sm text-slate-400">
+            Notice: "Input A" and "Output B" exist in BOTH layers. This is
+            Balanced.
+          </p>
+        </div>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          4.4 The Data Dictionary
+        </h2>
+        <p>
+          DFD arrows only show the "packet" name. A Data Dictionary explains
+          what is inside.
+        </p>
+        <div
+          class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+        >
+          <pre
+            class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+          >
+      classDiagram
+        class PatientInfo {
+          +String Name
+          +String Address
+          +String Phone
+          +Date DOB
+        }
+     </pre
+          >
+          <span
+            class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+            >Fig 4.5: Data Dictionary Definition</span
+          >
+          <p class="mt-2">
+            <strong class="text-slate-100 font-bold">Note:</strong> This defines
+            the data structure inside the "Patient Info" flow arrow.
+          </p>
+        </div>
+      </div>
+
+      <!-- CHAPTER 5: THE FRAGMENT METHOD -->
+      <div
+        id="ch5"
+        class="bg-slate-800 border border-slate-700 rounded-lg p-8 mb-10 shadow-lg"
+      >
+        <h1
+          class="text-4xl font-extrabold text-slate-50 mb-6 border-b-4 border-slate-600 pb-2"
+        >
+          Chapter 5: The "Fragment Method" (Advanced DFD)
+        </h1>
+        <p>
+          This technique from the Nov 27 lecture explains how to build a complex
+          DFD from scratch.
+        </p>
+
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          5.1 The Workflow
+        </h2>
+        <ol class="list-decimal ml-6">
+          <li>
+            <strong class="text-slate-100 font-bold"
+              >Start with Use Cases:</strong
+            >
+            Take one Use Case (e.g., "Create Order").
+            <div class="example-box mt-2 mb-4">
+              <pre
+                class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+              >
+          graph LR
+            Actor((User)) -- Uses --> UC(Create Order)
+        </pre
+              >
+              <span
+                class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+                >Fig 5.1: Step 1 - Identify Use Case</span
+              >
+            </div>
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Create a Fragment:</strong>
+            Turn that Use Case into a single DFD Process.
+            <ul class="list-disc ml-6 mb-4 text-slate-300">
+              <li class="text-slate-300 mb-4">Actor &rarr; External Entity.</li>
+              <li class="text-slate-300 mb-4">Use Case &rarr; Process Box.</li>
+              <li class="text-slate-300 mb-4">
+                Association &rarr; Data Flow Arrows (Input/Output).
+              </li>
+            </ul>
+            <div class="example-box mt-2 mb-4">
+              <pre
+                class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+              >
+          flowchart LR
+            E[User] -- Order Details --> P((Create Order))
+            P -- Confirmation --> E
+        </pre
+              >
+              <span
+                class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+                >Fig 5.2: Step 2 - Create Process Fragment</span
+              >
+            </div>
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold"
+              >Add Data Stores (The "Missing" Link):</strong
+            >
+            Use Cases don't show data stores. You must ask: "Does this process
+            need to remember data?" If yes, add a Data Store.
+            <div class="example-box mt-2 mb-4">
+              <pre
+                class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+              >
+          flowchart LR
+            E[User] -- Order Details --> P((Create Order))
+            P -- Save Order --> D[(Orders DB)]
+        </pre
+              >
+              <span
+                class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+                >Fig 5.3: Step 3 - Add Data Store</span
+              >
+            </div>
+          </li>
+          <li class="text-slate-300 mb-4">
+            <strong class="text-slate-100 font-bold">Combine:</strong> Merge all
+            fragments into Diagram 0.
+          </li>
+        </ol>
+      </div>
+
+      <!-- SUMMARY CHECKLIST -->
+      <div
+        id="checklist"
+        class="bg-slate-800 border border-blue-800 rounded-lg p-8 mb-10 shadow-lg"
+      >
+        <h2 class="text-3xl font-bold text-slate-200 mt-12 mb-6">
+          Summary Checklist for Exam Prep
+        </h2>
+        <p class="text-slate-300 mb-4">
+          To feel fully prepared, ensure you can answer these questions:
+        </p>
+        <ul class="list-disc ml-6 mb-4 text-slate-300 text-blue-200">
+          <li>
+            <strong class="text-slate-100 font-bold">Definitions:</strong> Can I
+            define the SDLC and where these diagrams fit? (Analysis vs Design).
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Fishbone:</strong> Can I
+            categorize causes using the 6Ms?
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Activity:</strong> Can I
+            draw a process where two things happen at the same time (Fork/Join)?
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">Use Case:</strong> Can I
+            write the "Main Success Scenario" text for a Use Case?
+          </li>
+          <li>
+            <strong class="text-slate-100 font-bold">DFD:</strong> Do I know the
+            difference between a Context Diagram and a Level 0 Diagram?
+          </li>
+        </ul>
+      </div>
+
+      <!-- CHAPTER 6: EXAM WORKBOOK -->
+      <div
+        id="workbook"
+        class="bg-slate-800 border border-red-900 rounded-lg p-8 mb-10 shadow-lg"
+      >
+        <h1
+          class="text-4xl font-extrabold text-slate-50 mb-6 border-b-4 border-slate-600 pb-2 text-red-400"
+        >
+          Chapter 6: Exam Workbook
+        </h1>
+        <p>
+          <em
+            >Click on "Show Answer" to see detailed explanations and
+            diagrams.</em
+          >
+        </p>
+
+        <h2 class="text-xl font-bold mt-4 mb-2 text-slate-300">
+          Part 1: Short Essay Questions (Theory & Justification)
+        </h2>
+
+        <div class="bg-slate-800 border border-slate-600 p-5 mt-4 rounded-md">
+          <strong class="text-red-300"
+            >Q1. The "Indeterministic" Trap (Activity Diagrams)</strong
+          ><br />
+          Explain why specifically defining conditions in a Decision Diamond is
+          critical. Use example input X = 10 where branches are
+          <code
+            class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+            >[X &lt; 10]</code
+          >
+          and
+          <code
+            class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+            >[X &gt; 10]</code
+          >.
+          <details
+            class="mt-2 bg-slate-900 p-4 rounded-md border border-slate-700 mt-4"
+          >
+            <summary
+              class="cursor-pointer text-blue-400 font-bold hover:underline"
+            >
+              Show Answer
+            </summary>
+            <p>
+              <strong class="text-slate-100 font-bold">Answer:</strong> Defining
+              precise conditions is critical for system stability because
+              indeterminate logic causes system crashes. In the example where
+              X=10, the branches
+              <code
+                class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+                >[X &lt; 10]</code
+              >
+              and
+              <code
+                class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+                >[X &gt; 10]</code
+              >
+              fail to cover the input value. The system does not know which path
+              to take, leading to a hang or crash. This is called a
+              "Non-Mutually Exclusive" or "Indeterministic" error. A correct
+              design must cover all possibilities, for example using
+              <code
+                class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+                >[X &lt;= 10]</code
+              >.
+            </p>
+          </details>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-600 p-5 mt-4 rounded-md">
+          <strong class="text-red-300"
+            >Q2. Managing Client Expectations (Fishbone)</strong
+          ><br />
+          You are building a "Diet Tracking App" for a client to solve "Rising
+          Obesity Rates." How do you use Fishbone to limit scope?
+          <details
+            class="mt-2 bg-slate-900 p-4 rounded-md border border-slate-700 mt-4"
+          >
+            <summary
+              class="cursor-pointer text-blue-400 font-bold hover:underline"
+            >
+              Show Answer
+            </summary>
+            <p>
+              <strong class="text-slate-100 font-bold">Answer:</strong> The
+              Fishbone diagram helps manage expectations by visually separating
+              root causes into categories. While "Rising Obesity" is the main
+              problem, the app can only address specific "Bones" like
+              <strong class="text-slate-100 font-bold">Method</strong> (Tracking
+              calories) or
+              <strong class="text-slate-100 font-bold">Measurement</strong>
+              (Weight logging). The diagram proves to the client that causes
+              under
+              <strong class="text-slate-100 font-bold">Man</strong> (Willpower),
+              <strong class="text-slate-100 font-bold">Mother Nature</strong>
+              (Food availability), or
+              <strong class="text-slate-100 font-bold">Health</strong>
+              (Genetics) are outside the software's control, preventing the
+              client from blaming the app for user failure.
+            </p>
+          </details>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-600 p-5 mt-4 rounded-md">
+          <strong class="text-red-300"
+            >Q3. Data Flow Integrity (DFD Rules)</strong
+          ><br />
+          Define "Miracle" and "Black Hole". Why must a process produce output?
+          <details
+            class="mt-2 bg-slate-900 p-4 rounded-md border border-slate-700 mt-4"
+          >
+            <summary
+              class="cursor-pointer text-blue-400 font-bold hover:underline"
+            >
+              Show Answer
+            </summary>
+            <p>
+              <strong class="text-slate-100 font-bold">Answer:</strong> A
+              "Miracle" is a process that creates output with no input (data
+              from thin air). A "Black Hole" is a process that takes input but
+              produces no output. A process MUST produce output because, in an
+              information system, if data enters a process and absolutely
+              nothing happens to it or leaves it, the process served no purpose
+              and is redundant.
+            </p>
+          </details>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-600 p-5 mt-4 rounded-md">
+          <strong class="text-slate-100 font-bold text-red-300"
+            >Q4. Use Case Relationships</strong
+          ><br />
+          Explain the difference between
+          <code
+            class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+            >&lt;&lt; extend &gt;&gt;</code
+          >
+          and
+          <code
+            class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+            >&lt;&lt; include &gt;&gt;</code
+          >
+          regarding execution logic.
+          <details
+            class="mt-2 bg-slate-900 p-4 rounded-md border border-slate-700 mt-4"
+          >
+            <summary
+              class="cursor-pointer text-blue-400 font-bold hover:underline"
+            >
+              Show Answer
+            </summary>
+            <p>
+              <strong class="text-slate-100 font-bold">Answer:</strong> The
+              fundamental difference is necessity. The
+              <code
+                class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+                >&lt;&lt; include &gt;&gt;</code
+              >
+              relationship is
+              <strong class="text-slate-100 font-bold">mandatory</strong>; the
+              base use case is incomplete without the included use case and will
+              fail if it doesn't run. The
+              <code
+                class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+                >&lt;&lt; extend &gt;&gt;</code
+              >
+              relationship is
+              <strong class="text-slate-100 font-bold"
+                >optional/conditional</strong
+              >; the base use case is complete on its own, and the extension
+              only runs if a specific condition is met.
+            </p>
+            <p>
+              <strong class="text-slate-100 font-bold">Example:</strong> "Cook
+              Pasta"
+              <code
+                class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+                >&lt;&lt; include &gt;&gt;</code
+              >
+              "Boil Water" (Mandatory). "Cook Pasta"
+              <code
+                class="bg-slate-700 px-1.5 py-0.5 rounded text-slate-200 font-mono text-sm"
+                >&lt;&lt; extend &gt;&gt;</code
+              >
+              "Add Spicy Sauce" (Optional).
+            </p>
+          </details>
+        </div>
+
+        <h2 class="text-xl font-bold mt-8 mb-2 text-slate-300">
+          Part 2: Diagramming Scenarios (Application)
+        </h2>
+
+        <div class="bg-slate-800 border border-slate-600 p-5 mt-4 rounded-md">
+          <strong class="text-red-300"
+            >Q5. Fishbone Construction (The 6Ms)</strong
+          ><br />
+          Scenario: Bakery burning croissants. Categorize: Broken oven dial,
+          Tired baker, Cheap flour, Typo in recipe, Humid kitchen.
+          <details
+            class="mt-2 bg-slate-900 p-4 rounded-md border border-slate-700 mt-4"
+          >
+            <summary
+              class="cursor-pointer text-blue-400 font-bold hover:underline"
+            >
+              Show Diagram Answer
+            </summary>
+            <p class="text-slate-300 mb-4">
+              <strong class="text-slate-100 font-bold">Logic:</strong>
+            </p>
+            <ul class="list-disc ml-6 mb-4 text-slate-300">
+              <li class="text-slate-300 mb-4">
+                Broken dial ->
+                <strong class="text-slate-100 font-bold">Machine</strong>
+                (Equipment issue)
+              </li>
+              <li class="text-slate-300 mb-4">
+                Tired baker ->
+                <strong class="text-slate-100 font-bold">Man</strong> (People
+                issue)
+              </li>
+              <li class="text-slate-300 mb-4">
+                Cheap flour ->
+                <strong class="text-slate-100 font-bold">Material</strong>
+                (Supply issue)
+              </li>
+              <li>
+                Typo in recipe ->
+                <strong class="text-slate-100 font-bold">Method</strong>
+                (Procedure issue)
+              </li>
+              <li>
+                Humid kitchen ->
+                <strong class="text-slate-100 font-bold">Mother Nature</strong>
+                (Environment)
+              </li>
+            </ul>
+            <div
+              class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+            >
+              <svg width="100%" height="200" viewBox="0 0 600 200">
+                <line
+                  x1="50"
+                  y1="100"
+                  x2="500"
+                  y2="100"
+                  stroke="#60a5fa"
+                  stroke-width="3"
+                />
+                <text x="510" y="105" fill="#93c5fd" font-weight="bold">
+                  Burnt Croissants
+                </text>
+
+                <!-- Machine -->
+                <line
+                  x1="150"
+                  y1="100"
+                  x2="120"
+                  y2="30"
+                  stroke="#3b82f6"
+                  stroke-width="2"
+                />
+                <text x="100" y="25" fill="#60a5fa" font-size="12">
+                  MACHINE
+                </text>
+                <line x1="135" y1="65" x2="160" y2="65" stroke="#94a3b8" />
+                <text x="165" y="68" fill="#cbd5e1" font-size="10">
+                  Broken Dial
+                </text>
+
+                <!-- Man -->
+                <line
+                  x1="300"
+                  y1="100"
+                  x2="270"
+                  y2="30"
+                  stroke="#3b82f6"
+                  stroke-width="2"
+                />
+                <text x="260" y="25" fill="#60a5fa" font-size="12">MAN</text>
+                <line x1="285" y1="65" x2="310" y2="65" stroke="#94a3b8" />
+                <text x="315" y="68" fill="#cbd5e1" font-size="10">
+                  Tired Baker
+                </text>
+
+                <!-- Material -->
+                <line
+                  x1="150"
+                  y1="100"
+                  x2="120"
+                  y2="170"
+                  stroke="#3b82f6"
+                  stroke-width="2"
+                />
+                <text x="100" y="185" fill="#60a5fa" font-size="12">
+                  MATERIAL
+                </text>
+                <line x1="135" y1="135" x2="160" y2="135" stroke="#94a3b8" />
+                <text x="165" y="138" fill="#cbd5e1" font-size="10">
+                  Cheap Flour
+                </text>
+              </svg>
+              <span
+                class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+                >Fig 6.1: Fishbone Diagram Solution</span
+              >
+            </div>
+          </details>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-600 p-5 mt-4 rounded-md">
+          <strong class="text-red-300"
+            >Q6. Activity Diagram (Fork & Join)</strong
+          ><br />
+          Scenario: "Order Fulfillment". When approved, Print Packing Slip AND
+          Send Email simultaneously. Order cannot complete until BOTH are done.
+          <details
+            class="mt-2 bg-slate-900 p-4 rounded-md border border-slate-700 mt-4"
+          >
+            <summary
+              class="cursor-pointer text-blue-400 font-bold hover:underline"
+            >
+              Show Diagram Answer
+            </summary>
+            <div
+              class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+            >
+              <pre
+                class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+              >
+        graph TD
+          Start((Start)) --> Approve[Approve Order]
+          Approve --> Fork[==== FORK ====]
+          Fork --> Print[Print Packing Slip]
+          Fork --> Email[Send Email]
+          Print --> Join[==== JOIN ====]
+          Email --> Join
+          Join --> Complete[Mark Completed]
+          Complete --> End((End))
+        </pre
+              >
+              <span
+                class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+                >Fig 6.2: Activity Diagram with Fork/Join</span
+              >
+            </div>
+            <p>
+              <strong class="text-slate-100 font-bold">Explanation:</strong> Use
+              a Heavy Black Bar (Fork) to split the flow. This indicates true
+              parallelism. Both paths must merge into another Heavy Black Bar
+              (Join) which acts as a "Wait" state. The process cannot proceed to
+              "Mark Completed" until both tokens arrive at the Join.
+            </p>
+          </details>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-600 p-5 mt-4 rounded-md">
+          <strong class="text-red-300"
+            >Q7. Use Case Diagram (Generalization & Include)</strong
+          ><br />
+          Scenario: Library. Students and Professors borrow books. "Borrow"
+          always requires "Check Fines". Professors can "Request Inter-library
+          Loan".
+          <details
+            class="mt-2 bg-slate-900 p-4 rounded-md border border-slate-700 mt-4"
+          >
+            <summary
+              class="cursor-pointer text-blue-400 font-bold hover:underline"
+            >
+              Show Diagram Answer
+            </summary>
+            <div
+              class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+            >
+              <pre
+                class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+              >
+        graph TD
+          Student((Student))
+          Prof((Professor))
+          
+          %% Generalization: Professor IS A Student (in terms of capability)
+          Prof -- "is a" --> Student
+
+          subgraph "Library System"
+            Borrow(Borrow Books)
+            Check(Check Fines)
+            Loan(Request Inter-library Loan)
+          end
+
+          Student --- Borrow
+          Borrow -.->|"&lt;&lt; include &gt;&gt;"| Check
+          
+          %% Only Prof can do this
+          Prof --- Loan
+        </pre
+              >
+              <span
+                class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+                >Fig 6.3: Use Case Generalization & Include</span
+              >
+            </div>
+            <p>
+              <strong class="text-slate-100 font-bold">Explanation:</strong> The
+              Professor inherits from Student (triangle arrow), so we don't need
+              to draw the line to "Borrow" again for the Professor. "Borrow"
+              includes "Check Fines" because it is mandatory.
+            </p>
+          </details>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-600 p-5 mt-4 rounded-md">
+          <strong class="text-red-300">Q8. DFD Context Diagram (Scope)</strong
+          ><br />
+          Scenario: Fast Food Kiosk. Customer sends Order. System talks to Bank
+          API (Payment/Confirm). System sends Ticket to Kitchen. System gives
+          Receipt to Customer. Draw the Context Diagram.
+          <details
+            class="mt-2 bg-slate-900 p-4 rounded-md border border-slate-700 mt-4"
+          >
+            <summary
+              class="cursor-pointer text-blue-400 font-bold hover:underline"
+            >
+              Show Diagram Answer
+            </summary>
+            <div
+              class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+            >
+              <pre
+                class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+              >
+        flowchart LR
+          Cust[Customer]
+          Bank[Bank API]
+          Kitchen[Kitchen Staff]
+          Sys((0. Kiosk System))
+
+          Cust -- Order --> Sys
+          Sys -- Receipt --> Cust
+          
+          Sys -- Payment Req --> Bank
+          Bank -- Confirmation --> Sys
+          
+          Sys -- Ticket --> Kitchen
+        </pre
+              >
+              <span
+                class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+                >Fig 6.4: Context Diagram Solution</span
+              >
+            </div>
+            <p>
+              <strong class="text-slate-100 font-bold">Key Check:</strong> Only
+              ONE process box (0). No Data Stores. All external entities are
+              present.
+            </p>
+          </details>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-600 p-5 mt-4 rounded-md">
+          <strong class="text-red-300">Q9. DFD Level 0 (Balancing)</strong
+          ><br />
+          Decompose Q8 into 1.0 Process Payment, 2.0 Record Order, 3.0 Notify
+          Kitchen. Add Data Store D1.
+          <details
+            class="mt-2 bg-slate-900 p-4 rounded-md border border-slate-700 mt-4"
+          >
+            <summary
+              class="cursor-pointer text-blue-400 font-bold hover:underline"
+            >
+              Show Diagram Answer
+            </summary>
+            <div
+              class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+            >
+              <pre
+                class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+              >
+        flowchart TD
+          Cust[Customer]
+          Bank[Bank API]
+          Kitchen[Kitchen Staff]
+          
+          P1((1.0 Process Payment))
+          P2((2.0 Record Order))
+          P3((3.0 Notify Kitchen))
+          D1[(D1 Sales History)]
+
+          Cust -- Order --> P1
+          P1 -- Payment Req --> Bank
+          Bank -- Confirmation --> P1
+          P1 -- Receipt --> Cust
+          
+          P1 -- Valid Order Data --> P2
+          P2 -- Save Order --> D1
+          
+          P2 -- Order Details --> P3
+          P3 -- Ticket --> Kitchen
+        </pre
+              >
+              <span
+                class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+                >Fig 6.5: Level 0 Diagram Solution</span
+              >
+            </div>
+            <p>
+              <strong class="text-slate-100 font-bold">Balancing Check:</strong>
+              Compare with Q8. Does "Kitchen" still get "Ticket"? Yes. Does
+              "Customer" still give "Order" and get "Receipt"? Yes. The external
+              inputs/outputs match exactly.
+            </p>
+          </details>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-600 p-5 mt-4 rounded-md">
+          <strong class="text-red-300">Q10. The"Missing Actor" DFD Trap</strong
+          ><br />
+          Scenario: "Weekly Payroll" runs automatically Friday at 5 PM. Reads
+          Employee Hours from DB, sends Slip to Employee. Should "HR Manager" or
+          "Timer" be in the DFD?
+          <details
+            class="mt-2 bg-slate-900 p-4 rounded-md border border-slate-700 mt-4"
+          >
+            <summary
+              class="cursor-pointer text-blue-400 font-bold hover:underline"
+            >
+              Show Diagram Answer
+            </summary>
+            <div
+              class="bg-emerald-950 border border-emerald-600 p-5 mt-4 rounded-md text-emerald-200"
+            >
+              <pre
+                class="mermaid bg-slate-900 p-4 rounded-md border border-slate-700 overflow-x-auto"
+              >
+        flowchart LR
+          D1[("D1 Hours DB")]
+          P1(("1.0 Calculate Pay"))
+          Emp[Employee]
+
+          D1 -- Read Hours --> P1
+          P1 -- Pay Slip --> Emp
+        </pre
+              >
+              <span
+                class="block text-center text-sm text-emerald-400 mt-2 font-bold"
+                >Fig 6.6: Missing Actor Trap Solution</span
+              >
+            </div>
+            <p>
+              <strong class="text-slate-100 font-bold">Explanation:</strong> NO.
+              Do NOT draw a "Timer" or "HR Manager" if they only trigger the
+              process. DFD shows the flow of data. If the HR Manager provides no
+              data (input) and receives no data (output), they do not exist in
+              this diagram.
+            </p>
+          </details>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
