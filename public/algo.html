@@ -356,13 +356,15 @@
         </div>
       </section>
 
-      <!-- Section: Permutation -->
+      <!-- Section: Permutation (Johnson-Trotter) -->
       <section
         id="permutation"
         class="mx-auto max-w-5xl mb-24 border-t border-slate-800 pt-12"
       >
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-white">Permutation</h2>
+          <h2 class="text-2xl font-bold text-white">
+            Permutation (Johnson-Trotter)
+          </h2>
           <a
             href="https://www.youtube.com/watch?v=GuTPwotSdYw"
             target="_blank"
@@ -371,59 +373,79 @@
           >
         </div>
         <p class="text-slate-400 mb-4 text-sm">
-          DFS on decision tree. Each path from Root to Leaf is one permutation.
+          Generates permutations by swapping adjacent elements. An element is
+          "mobile" if it points to a smaller adjacent element.
         </p>
 
-        <div class="bg-slate-800 p-4 rounded border border-slate-700">
-          <div class="flex flex-col md:flex-row gap-4 mb-4 items-start">
-            <div>
-              <label class="block text-xs text-slate-500 mb-1"
-                >Input (Max 4 chars)</label
+        <div class="bg-slate-800 p-6 rounded border border-slate-700">
+          <div class="flex flex-col md:flex-row gap-8 mb-6">
+            <div class="w-full md:w-1/3 space-y-4">
+              <div>
+                <label class="block text-xs text-slate-500 mb-1"
+                  >Number of Elements (N)</label
+                >
+                <div class="flex gap-2">
+                  <input
+                    type="number"
+                    id="jtInput"
+                    value="4"
+                    min="2"
+                    max="5"
+                    class="bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded font-mono w-20"
+                  />
+                  <button
+                    onclick="initJT()"
+                    class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded font-bold text-sm flex-1"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button
+                  onclick="stepJT()"
+                  class="flex-1 bg-blue-600 hover:bg-blue-500 text-white px-4 py-3 rounded font-bold text-sm shadow-lg shadow-blue-900/20"
+                >
+                  Next Step
+                </button>
+                <button
+                  onclick="runAllJT()"
+                  class="flex-1 bg-purple-600 hover:bg-purple-500 text-white px-4 py-3 rounded font-bold text-sm shadow-lg shadow-purple-900/20"
+                >
+                  Generate All
+                </button>
+              </div>
+              <div
+                class="bg-slate-900 p-3 rounded border border-slate-700 min-h-[80px]"
               >
-              <input
-                type="text"
-                id="permInput"
-                value="ABC"
-                maxlength="4"
-                class="bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded font-mono w-32 uppercase"
-              />
+                <div class="text-xs text-slate-500 uppercase mb-1">Status</div>
+                <div
+                  id="jt-status"
+                  class="text-yellow-400 text-sm font-mono leading-tight"
+                >
+                  Ready.
+                </div>
+              </div>
             </div>
-            <button
-              onclick="drawPermTree()"
-              class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-bold text-sm mt-5"
+
+            <div
+              class="flex-1 bg-slate-900 rounded border border-slate-700 p-8 flex flex-col items-center justify-center min-h-[200px]"
             >
-              Generate Tree
-            </button>
-            <button
-              onclick="showPermResults()"
-              id="perm-show-btn"
-              class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded font-bold text-sm mt-5 hidden"
-            >
-              Trace Paths (Result)
-            </button>
+              <div id="jt-visual" class="flex gap-4 mb-8">
+                <!-- Blocks go here -->
+              </div>
+              <div class="text-slate-500 text-xs">Current Permutation</div>
+            </div>
           </div>
 
-          <div class="flex gap-4">
+          <div class="bg-slate-900 rounded border border-slate-700 p-4">
+            <h4 class="text-xs text-slate-500 uppercase mb-2">
+              History (<span id="jt-count">0</span>)
+            </h4>
             <div
-              class="flex-1 overflow-x-auto bg-slate-900 rounded border border-slate-700 p-4"
-            >
-              <svg
-                id="perm-svg"
-                width="1200"
-                height="500"
-                class="mx-auto"
-              ></svg>
-            </div>
-            <div
-              id="perm-list-container"
-              class="w-48 bg-slate-900 border border-slate-700 p-4 rounded hidden overflow-y-auto max-h-[500px]"
-            >
-              <h4 class="text-xs text-slate-500 uppercase mb-2">Results</h4>
-              <div
-                id="perm-list"
-                class="space-y-1 font-mono text-sm text-emerald-400"
-              ></div>
-            </div>
+              id="jt-history"
+              class="flex flex-col gap-1 font-mono text-sm text-emerald-400 max-h-64 overflow-y-auto p-2"
+            ></div>
           </div>
         </div>
       </section>
@@ -1364,105 +1386,180 @@
         drawTopo();
       }
 
-      // === PERMUTATION TREE ===
-      let permPaths = [];
-      function drawPermTree() {
-        const input = document
-          .getElementById("permInput")
-          .value.toUpperCase()
-          .slice(0, 4);
-        if (!input) return;
-        const svg = document.getElementById("perm-svg");
-        svg.innerHTML = "";
-        permPaths = [];
-        const startX = 600;
-        const startY = 40;
-        const levelH = 80;
-        let html = "";
-        function build(
-          currentStr,
-          remainingStr,
-          x,
-          y,
-          level,
-          parentX,
-          parentY,
-          pathId
-        ) {
-          if (parentX !== null) {
-            html += `<line x1="${parentX}" y1="${parentY}" x2="${x}" y2="${y}" stroke="#475569" stroke-width="1" class="perm-line-${pathId}" />`;
-          }
-          const isLeaf = remainingStr.length === 0;
-          let circleClass = isLeaf ? `perm-leaf-${pathId}` : "";
-          html += `<circle cx="${x}" cy="${y}" r="12" fill="#1e293b" stroke="#3b82f6" stroke-width="2" class="${circleClass}"/>`;
-          html += `<text x="${x}" y="${y}" dy="4" text-anchor="middle" fill="white" font-size="9" font-weight="bold">${
-            currentStr || "R"
-          }</text>`;
-          if (isLeaf) {
-            permPaths.push({ id: pathId, val: "TODO" });
-            return;
-          }
-          let spread = 0;
-          if (input.length === 4) {
-            if (level === 0) spread = 280;
-            if (level === 1) spread = 80;
-            if (level === 2) spread = 30;
-          } else {
-            if (level === 0) spread = 200;
-            if (level === 1) spread = 60;
-          }
-          remainingStr.split("").forEach((char, idx) => {
-            const nextRem =
-              remainingStr.slice(0, idx) + remainingStr.slice(idx + 1);
-            const startX_local = x - ((remainingStr.length - 1) * spread) / 2;
-            const childX = startX_local + idx * spread;
-            build(
-              char,
-              nextRem,
-              childX,
-              y + levelH,
-              level + 1,
-              x,
-              y,
-              pathId + char
-            );
-          });
+      // === PERMUTATION (JOHNSON-TROTTER) ===
+      let jtState = {
+        n: 4,
+        p: [], // { val: 1, dir: -1 (left) or 1 (right) }
+        permutationsFound: [],
+        finished: false,
+        stepDesc: "Ready",
+        mobileIndex: -1,
+        swappedIndices: [],
+      };
+
+      function initJT() {
+        const nInput = document.getElementById("jtInput");
+        let n = parseInt(nInput.value);
+        if (isNaN(n) || n < 2) n = 4;
+        if (n > 5) n = 5; // Cap at 5 for UI sanity
+        nInput.value = n;
+
+        jtState.n = n;
+        jtState.p = [];
+        for (let i = 1; i <= n; i++) {
+          jtState.p.push({ val: i, dir: -1 }); // -1 = LEFT, 1 = RIGHT
         }
-        build("", input, startX, startY, 0, null, null, "R");
-        svg.innerHTML = html;
-        document.getElementById("perm-show-btn").classList.remove("hidden");
-        document.getElementById("perm-list-container").classList.add("hidden");
+        jtState.permutationsFound = [getPermString()];
+        jtState.finished = false;
+        jtState.stepDesc = "Initial Permutation. All pointing LEFT.";
+        jtState.mobileIndex = -1;
+        jtState.swappedIndices = [];
+
+        // Find initial mobile element for visualization
+        jtState.mobileIndex = getMobileIndex();
+
+        renderJT();
       }
 
-      async function showPermResults() {
-        const input = document
-          .getElementById("permInput")
-          .value.toUpperCase()
-          .slice(0, 4);
-        const listDiv = document.getElementById("perm-list");
-        const container = document.getElementById("perm-list-container");
-        listDiv.innerHTML = "";
-        container.classList.remove("hidden");
-        function getPerms(str) {
-          if (str.length < 2) return str.length === 1 ? [str] : [];
-          let perms = [];
-          for (let i = 0; i < str.length; i++) {
-            let char = str[i];
-            let remaining = str.slice(0, i) + str.slice(i + 1, str.length);
-            for (let subPerm of getPerms(remaining)) perms.push(char + subPerm);
+      function runAllJT() {
+        initJT();
+        while (!jtState.finished) {
+          stepJT(false); // false = don't render every step for speed
+        }
+        renderJT();
+      }
+
+      function getPermString() {
+        return jtState.p.map((x) => x.val).join("");
+      }
+
+      function getMobileIndex() {
+        let maxMobile = -1;
+        let idx = -1;
+        for (let i = 0; i < jtState.n; i++) {
+          const item = jtState.p[i];
+          // Check if mobile
+          // Pointing left (-1) and i > 0 and val > neighbor
+          if (item.dir === -1 && i > 0 && item.val > jtState.p[i - 1].val) {
+            if (item.val > maxMobile) {
+              maxMobile = item.val;
+              idx = i;
+            }
           }
-          return perms;
+          // Pointing right (1) and i < n-1 and val > neighbor
+          if (
+            item.dir === 1 &&
+            i < jtState.n - 1 &&
+            item.val > jtState.p[i + 1].val
+          ) {
+            if (item.val > maxMobile) {
+              maxMobile = item.val;
+              idx = i;
+            }
+          }
         }
-        const results = getPerms(input);
-        for (let res of results) {
-          const item = document.createElement("div");
-          item.innerText = res;
-          item.className =
-            "border-b border-slate-800 py-1 opacity-0 transition-opacity duration-300";
-          listDiv.appendChild(item);
-          requestAnimationFrame(() => item.classList.remove("opacity-0"));
-          await new Promise((r) => setTimeout(r, 200));
+        return idx;
+      }
+
+      function stepJT(render = true) {
+        if (jtState.finished) return;
+
+        const mIdx = getMobileIndex();
+        if (mIdx === -1) {
+          jtState.finished = true;
+          jtState.stepDesc = "No mobile elements left. Algorithm Finished.";
+          if (render) renderJT();
+          return;
         }
+
+        const mobileItem = jtState.p[mIdx];
+        const swapIdx = mIdx + mobileItem.dir;
+
+        // Swap
+        const temp = jtState.p[swapIdx];
+        jtState.p[swapIdx] = jtState.p[mIdx];
+        jtState.p[mIdx] = temp;
+
+        jtState.swappedIndices = [mIdx, swapIdx];
+
+        // Reverse direction of all elements > mobileItem.val
+        let reversed = [];
+        for (let i = 0; i < jtState.n; i++) {
+          if (jtState.p[i].val > mobileItem.val) {
+            jtState.p[i].dir *= -1;
+            reversed.push(jtState.p[i].val);
+          }
+        }
+
+        jtState.permutationsFound.push(getPermString());
+
+        let revText =
+          reversed.length > 0
+            ? ` Reversed directions of elements > ${
+                mobileItem.val
+              } (${reversed.join(",")}).`
+            : "";
+        jtState.stepDesc = `Largest mobile is ${mobileItem.val}. Swapped with ${temp.val}.${revText}`;
+
+        // Prepare next mobile index for highlighting
+        jtState.mobileIndex = getMobileIndex();
+        if (jtState.mobileIndex === -1) {
+          jtState.stepDesc += " Done.";
+          jtState.finished = true;
+        }
+
+        if (render) renderJT();
+      }
+
+      function renderJT() {
+        const container = document.getElementById("jt-visual");
+        const status = document.getElementById("jt-status");
+        const history = document.getElementById("jt-history");
+        const count = document.getElementById("jt-count");
+
+        status.innerText = jtState.stepDesc;
+        count.innerText = jtState.permutationsFound.length;
+
+        // Render Blocks
+        let html = "";
+        jtState.p.forEach((item, idx) => {
+          const isMobile = idx === jtState.mobileIndex;
+          const isSwapped = jtState.swappedIndices.includes(idx);
+
+          let bgClass = "bg-slate-800 border-slate-600";
+          if (isMobile)
+            bgClass =
+              "bg-blue-900 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]";
+          else if (isSwapped) bgClass = "bg-emerald-900 border-emerald-500";
+
+          const arrow = item.dir === -1 ? "←" : "→";
+
+          html += `
+                <div class="flex flex-col items-center transition-all duration-300">
+                    <div class="text-slate-400 text-lg font-bold mb-1 ${
+                      isMobile ? "text-blue-400 animate-bounce" : ""
+                    }">${arrow}</div>
+                    <div class="w-16 h-16 flex items-center justify-center rounded-lg border-2 text-2xl font-bold text-white ${bgClass}">
+                        ${item.val}
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+
+        // Render History
+        history.innerHTML = jtState.permutationsFound
+          .map(
+            (p, i) =>
+              `<div class="flex items-center gap-2 w-full border-b border-slate-800 py-1">
+                  <span class="text-slate-500 w-8 text-right">${i + 1}.</span>
+                  <span class="text-emerald-400 font-bold tracking-widest">${p}</span>
+               </div>`
+          )
+          .join("");
+
+        // Scroll history to bottom
+        history.scrollTop = history.scrollHeight;
       }
 
       // === HORNER'S RULE ===
@@ -1996,6 +2093,7 @@
         initBFS();
         initDFS();
         initTopo();
+        initJT();
         updatePolynomial();
         initHorner();
         calcRussian();
