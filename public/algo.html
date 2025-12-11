@@ -112,6 +112,16 @@
           class="block px-3 py-2 rounded hover:bg-slate-800 text-sm hover:text-white transition"
           >Dijkstra</a
         >
+        <a
+          href="#floyd"
+          class="block px-3 py-2 rounded hover:bg-slate-800 text-sm hover:text-white transition"
+          >Floyd-Warshall</a
+        >
+        <a
+          href="#knapsack"
+          class="block px-3 py-2 rounded hover:bg-slate-800 text-sm hover:text-white transition"
+          >Knapsack (DP)</a
+        >
       </nav>
     </aside>
 
@@ -864,6 +874,240 @@
                 id="dijkstra-log"
                 class="mt-2 text-xs text-yellow-400 font-mono h-5"
               ></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Floyd-Warshall -->
+      <section
+        id="floyd"
+        class="mx-auto max-w-5xl mb-32 border-t border-slate-800 pt-12"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-white">
+            Floyd-Warshall (All-Pairs Shortest Path)
+          </h2>
+          <div class="flex items-center gap-4">
+            <button
+              onclick="generateRandomFloyd()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-sm font-bold"
+            >
+              Randomize Graph
+            </button>
+            <a
+              href="https://www.youtube.com/watch?v=4OQeCuLYj-4"
+              target="_blank"
+              class="text-blue-400 hover:text-blue-300 text-sm"
+              >Watch Youtube Video Explanation</a
+            >
+          </div>
+        </div>
+
+        <div class="bg-slate-800 p-6 rounded border border-slate-700 mb-6">
+          <h3 class="font-bold text-white mb-2">How it works:</h3>
+          <ul class="list-disc list-inside text-sm text-slate-300 space-y-2">
+            <li>
+              Initialize distance matrix D with edge weights (∞ if no edge, 0
+              diagonal).
+            </li>
+            <li>
+              Iterate through every node <strong>k</strong> (as an intermediate
+              node).
+            </li>
+            <li>For every pair (i, j), check if going through k is shorter:</li>
+            <li>
+              <code class="bg-slate-900 px-1 text-yellow-400"
+                >D[i][j] = min(D[i][j], D[i][k] + D[k][j])</code
+              >
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-800 p-6 rounded border border-slate-700">
+          <div class="flex flex-col lg:flex-row gap-8">
+            <div class="flex-1">
+              <svg
+                id="floyd-svg"
+                width="100%"
+                height="300"
+                class="bg-slate-900 rounded border border-slate-700 select-none"
+              ></svg>
+            </div>
+            <div class="flex-1 flex flex-col">
+              <div class="flex gap-2 mb-4">
+                <button
+                  onclick="floydNext()"
+                  class="bg-blue-600 hover:bg-blue-500 text-white flex-1 py-2 rounded font-bold"
+                >
+                  Next Step
+                </button>
+                <button
+                  onclick="runAllFloyd()"
+                  class="bg-purple-600 hover:bg-purple-500 text-white px-4 rounded font-bold"
+                >
+                  Run All
+                </button>
+                <button
+                  onclick="initFloyd()"
+                  class="bg-slate-700 text-white px-4 rounded"
+                >
+                  Reset
+                </button>
+              </div>
+
+              <div
+                class="bg-slate-900 p-4 rounded border border-slate-700 mb-4"
+              >
+                <div class="flex justify-between text-xs text-slate-500 mb-2">
+                  <span>Distance Matrix (D)</span>
+                  <span id="floyd-step-info" class="text-yellow-400"
+                    >k=-1 (Init)</span
+                  >
+                </div>
+                <div
+                  id="floyd-matrix"
+                  class="grid gap-1 font-mono text-sm text-center"
+                >
+                  <!-- Matrix injected here -->
+                </div>
+              </div>
+
+              <div
+                id="floyd-log"
+                class="mt-2 text-xs text-yellow-400 font-mono h-10 overflow-y-auto"
+              >
+                Ready.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Knapsack -->
+      <section
+        id="knapsack"
+        class="mx-auto max-w-5xl mb-32 border-t border-slate-800 pt-12"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-white">Knapsack Problem (DP)</h2>
+          <div class="flex items-center gap-4">
+            <button
+              onclick="generateRandomKnapsack()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-sm font-bold"
+            >
+              Randomize Items
+            </button>
+            <a
+              href="https://www.youtube.com/watch?v=nLmhmB6NzcM"
+              target="_blank"
+              class="text-blue-400 hover:text-blue-300 text-sm"
+              >Watch Youtube Video Explanation</a
+            >
+          </div>
+        </div>
+
+        <div class="bg-slate-800 p-6 rounded border border-slate-700 mb-6">
+          <h3 class="font-bold text-white mb-2">How it works:</h3>
+          <ul class="list-disc list-inside text-sm text-slate-300 space-y-2">
+            <li>
+              Create a table where rows are items and columns are capacities (0
+              to Max Capacity).
+            </li>
+            <li>For each cell <code>dp[i][w]</code>:</li>
+            <li>
+              If item weight > w: <code>dp[i][w] = dp[i-1][w]</code> (Skip item)
+            </li>
+            <li>
+              Else:
+              <code>max(dp[i-1][w], value[i] + dp[i-1][w - weight[i]])</code>
+              (Take or Skip)
+            </li>
+            <li>
+              After filling, backtrack from bottom-right to find selected items.
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-800 p-6 rounded border border-slate-700">
+          <div class="flex flex-col gap-6">
+            <!-- Controls -->
+            <div class="flex flex-wrap gap-4 items-end">
+              <div>
+                <label class="block text-xs text-slate-500 mb-1"
+                  >Capacity</label
+                >
+                <input
+                  type="number"
+                  id="ksCapacity"
+                  value="5"
+                  min="1"
+                  max="10"
+                  class="bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded font-mono w-20"
+                  onchange="initKnapsack()"
+                />
+              </div>
+              <div class="flex-1">
+                <label class="block text-xs text-slate-500 mb-1"
+                  >Items (Weight, Value)</label
+                >
+                <div
+                  id="ks-items-display"
+                  class="flex gap-2 overflow-x-auto pb-2"
+                >
+                  <!-- Items injected here -->
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-2">
+              <button
+                onclick="knapsackStep()"
+                class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-bold"
+              >
+                Next Step
+              </button>
+              <button
+                onclick="runAllKnapsack()"
+                class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded font-bold"
+              >
+                Run All
+              </button>
+              <button
+                onclick="initKnapsack()"
+                class="bg-slate-700 text-white px-4 py-2 rounded"
+              >
+                Reset
+              </button>
+            </div>
+
+            <!-- Table -->
+            <div
+              class="overflow-x-auto bg-slate-900 rounded border border-slate-700 p-4"
+            >
+              <div
+                id="ks-table"
+                class="grid gap-1 font-mono text-sm text-center"
+              >
+                <!-- Table injected here -->
+              </div>
+            </div>
+
+            <div
+              class="bg-slate-900 p-3 rounded border border-slate-700 min-h-[60px]"
+            >
+              <div class="text-xs text-slate-500 uppercase mb-1">Log</div>
+              <div id="ks-log" class="text-yellow-400 text-sm font-mono">
+                Ready.
+              </div>
+            </div>
+
+            <div
+              id="ks-result"
+              class="hidden bg-emerald-900/30 border border-emerald-500 p-4 rounded"
+            >
+              <h4 class="text-emerald-400 font-bold mb-2">Selected Items:</h4>
+              <div id="ks-selected-items" class="flex gap-2"></div>
             </div>
           </div>
         </div>
@@ -2088,6 +2332,531 @@
         logDijkstraRow(minNode);
       }
 
+      // === FLOYD-WARSHALL ===
+      let fNodes = [];
+      let fEdges = [];
+      let fState = {
+        n: 0,
+        dist: [],
+        k: 0,
+        i: 0,
+        j: 0,
+        finished: false,
+        running: false,
+      };
+
+      function generateRandomFloyd() {
+        const nodeIds = ["A", "B", "C", "D"];
+        // Default 4 nodes.
+        const numNodes = 4;
+        const activeNodes = nodeIds.slice(0, numNodes);
+
+        // Layout in a circle or square
+        const width = 400;
+        const height = 300;
+        const cx = width / 2;
+        const cy = height / 2;
+        const r = 100;
+
+        fNodes = activeNodes.map((id, idx) => {
+          const angle = (idx / numNodes) * 2 * Math.PI - Math.PI / 2;
+          return {
+            id,
+            x: cx + r * Math.cos(angle),
+            y: cy + r * Math.sin(angle),
+          };
+        });
+
+        // Generate edges
+        // Default roughly 6 edges for 4 nodes. Max 7.
+        const maxEdges = 7;
+        const minEdges = 4;
+        const numEdges =
+          Math.floor(Math.random() * (maxEdges - minEdges + 1)) + minEdges;
+
+        fEdges = [];
+        let attempts = 0;
+        while (fEdges.length < numEdges && attempts < 100) {
+          attempts++;
+          const u = fNodes[Math.floor(Math.random() * fNodes.length)];
+          const v = fNodes[Math.floor(Math.random() * fNodes.length)];
+          if (u.id === v.id) continue;
+          if (fEdges.find((e) => e.u === u.id && e.v === v.id)) continue;
+
+          fEdges.push({
+            u: u.id,
+            v: v.id,
+            w: Math.floor(Math.random() * 9) + 1, // 1-9 weight
+          });
+        }
+
+        initFloyd();
+      }
+
+      function drawFloydGraph() {
+        const svg = document.getElementById("floyd-svg");
+        let html = `<defs><marker id="f-arrow" markerWidth="10" markerHeight="10" refX="28" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748b" /></marker></defs>`;
+
+        fEdges.forEach((e) => {
+          const u = fNodes.find((n) => n.id === e.u);
+          const v = fNodes.find((n) => n.id === e.v);
+
+          // Curve if bidirectional edge exists or just for style
+          const isBi = fEdges.find((ed) => ed.u === e.v && ed.v === e.u);
+
+          let pathD = "";
+          let labelX = 0;
+          let labelY = 0;
+
+          // Always curve slightly to avoid overlap and look nice
+          // Calculate normal vector
+          const dx = v.x - u.x;
+          const dy = v.y - u.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const nx = -dy / dist;
+          const ny = dx / dist;
+
+          const curveAmt = 30;
+          const midX = (u.x + v.x) / 2 + nx * curveAmt;
+          const midY = (u.y + v.y) / 2 + ny * curveAmt;
+
+          pathD = `M ${u.x} ${u.y} Q ${midX} ${midY} ${v.x} ${v.y}`;
+
+          // Label at peak
+          labelX = 0.25 * u.x + 0.5 * midX + 0.25 * v.x;
+          labelY = 0.25 * u.y + 0.5 * midY + 0.25 * v.y;
+
+          let stroke = "#475569";
+          let width = "2";
+
+          html += `<path d="${pathD}" stroke="${stroke}" stroke-width="${width}" fill="none" marker-end="url(#f-arrow)" />`;
+
+          html += `<rect x="${labelX - 8}" y="${
+            labelY - 8
+          }" width="16" height="16" fill="#0f172a" rx="4" />
+                   <text x="${labelX}" y="${labelY}" dy="4" text-anchor="middle" fill="#facc15" font-size="10" font-weight="bold">${
+            e.w
+          }</text>`;
+        });
+
+        fNodes.forEach((n) => {
+          let fill = "#1e293b";
+          let stroke = "#94a3b8";
+
+          // Highlight k, i, j
+          if (fState.running && !fState.finished) {
+            const kNode = fNodes[fState.k];
+            const iNode = fNodes[fState.i];
+            const jNode = fNodes[fState.j];
+
+            if (n.id === kNode.id) {
+              fill = "#eab308";
+              stroke = "white";
+            } // K is Yellow
+            else if (n.id === iNode.id) {
+              fill = "#ef4444";
+              stroke = "white";
+            } // I is Red
+            else if (n.id === jNode.id) {
+              fill = "#3b82f6";
+              stroke = "white";
+            } // J is Blue
+          }
+
+          html += `<g><circle cx="${n.x}" cy="${n.y}" r="18" fill="${fill}" stroke="${stroke}" stroke-width="2" />
+                   <text x="${n.x}" y="${n.y}" dy="5" text-anchor="middle" fill="white" font-weight="bold">${n.id}</text></g>`;
+        });
+        svg.innerHTML = html;
+      }
+
+      function initFloyd() {
+        if (fNodes.length === 0) generateRandomFloyd(); // Ensure init
+
+        const n = fNodes.length;
+        fState = {
+          n: n,
+          dist: Array(n)
+            .fill(0)
+            .map(() => Array(n).fill(Infinity)),
+          k: 0,
+          i: 0,
+          j: 0,
+          finished: false,
+          running: false,
+        };
+
+        // Init distances
+        for (let i = 0; i < n; i++) fState.dist[i][i] = 0;
+        fEdges.forEach((e) => {
+          const uIdx = fNodes.findIndex((node) => node.id === e.u);
+          const vIdx = fNodes.findIndex((node) => node.id === e.v);
+          fState.dist[uIdx][vIdx] = e.w;
+        });
+
+        drawFloydGraph();
+        renderFloydMatrix();
+        document.getElementById("floyd-log").innerText =
+          "Initialized D matrix. Ready.";
+        document.getElementById("floyd-step-info").innerText = "Start";
+      }
+
+      function renderFloydMatrix() {
+        const container = document.getElementById("floyd-matrix");
+        const n = fState.n;
+
+        // Grid template cols
+        container.style.gridTemplateColumns = `auto repeat(${n}, 1fr)`;
+
+        let html = `<div class="p-1"></div>`; // Corner
+        fNodes.forEach(
+          (node) =>
+            (html += `<div class="p-1 font-bold text-slate-500">${node.id}</div>`)
+        );
+
+        for (let r = 0; r < n; r++) {
+          html += `<div class="p-1 font-bold text-slate-500 flex items-center justify-center">${fNodes[r].id}</div>`;
+          for (let c = 0; c < n; c++) {
+            const val = fState.dist[r][c];
+            const valStr = val === Infinity ? "∞" : val;
+
+            let bg = "bg-slate-800";
+            let border = "border-slate-700";
+
+            // Highlight logic
+            if (fState.running && !fState.finished) {
+              // We are checking D[i][j] vs D[i][k] + D[k][j]
+              // Highlight i,j cell
+              if (r === fState.i && c === fState.j) {
+                bg = "bg-blue-900";
+                border = "border-blue-500";
+              }
+              // Highlight i,k and k,j
+              if (
+                (r === fState.i && c === fState.k) ||
+                (r === fState.k && c === fState.j)
+              ) {
+                bg = "bg-yellow-900/50";
+                border = "border-yellow-500";
+              }
+            }
+
+            html += `<div class="p-2 border ${border} ${bg} rounded flex items-center justify-center transition-colors duration-200">${valStr}</div>`;
+          }
+        }
+        container.innerHTML = html;
+      }
+
+      function floydNext() {
+        if (fState.finished) return;
+        fState.running = true;
+
+        const { n, k, i, j, dist } = fState;
+        const kNode = fNodes[k].id;
+        const iNode = fNodes[i].id;
+        const jNode = fNodes[j].id;
+
+        // Logic
+        const distIK = dist[i][k];
+        const distKJ = dist[k][j];
+        const currentDist = dist[i][j];
+        const newDist = distIK + distKJ;
+
+        let log = `k=${kNode}, i=${iNode}, j=${jNode}. Check ${iNode}->${jNode}. `;
+        log += `D[${iNode}][${jNode}] = ${
+          currentDist === Infinity ? "∞" : currentDist
+        }. `;
+        log += `Via ${kNode}: ${distIK === Infinity ? "∞" : distIK} + ${
+          distKJ === Infinity ? "∞" : distKJ
+        } = ${newDist === Infinity ? "∞" : newDist}. `;
+
+        if (newDist < currentDist) {
+          dist[i][j] = newDist;
+          log += `Update! New shortest path found via ${kNode}.`;
+        } else {
+          log += `No update.`;
+        }
+
+        document.getElementById("floyd-log").innerText = log;
+        document.getElementById("floyd-step-info").innerText = `k=${kNode} (${
+          k + 1
+        }/${n})`;
+
+        drawFloydGraph();
+        renderFloydMatrix();
+
+        // Increment
+        fState.j++;
+        if (fState.j >= n) {
+          fState.j = 0;
+          fState.i++;
+          if (fState.i >= n) {
+            fState.i = 0;
+            fState.k++;
+            if (fState.k >= n) {
+              fState.finished = true;
+              fState.running = false;
+              document.getElementById("floyd-log").innerText =
+                "Finished! All pairs shortest paths computed.";
+              document.getElementById("floyd-step-info").innerText = "Done";
+              drawFloydGraph(); // Clear highlights
+              renderFloydMatrix(); // Clear highlights
+            }
+          }
+        }
+      }
+
+      function runAllFloyd() {
+        if (fState.finished) return;
+        while (!fState.finished) {
+          floydNext();
+        }
+      }
+
+      // === KNAPSACK (DP) ===
+      let ksState = {
+        capacity: 5,
+        items: [], // {w, v, id}
+        dp: [],
+        i: 0, // current item index (1-based for DP logic)
+        w: 0, // current weight index
+        phase: "fill", // 'fill' or 'backtrack'
+        finished: false,
+        selected: [],
+        backtrackI: 0,
+        backtrackW: 0,
+      };
+
+      function generateRandomKnapsack() {
+        const numItems = 4;
+        const items = [];
+        for (let i = 0; i < numItems; i++) {
+          items.push({
+            id: i + 1,
+            w: Math.floor(Math.random() * 3) + 1, // 1-3 weight
+            v: Math.floor(Math.random() * 10) + 5, // 5-15 value
+          });
+        }
+        ksState.items = items;
+        document.getElementById("ksCapacity").value = 5;
+        initKnapsack();
+      }
+
+      function initKnapsack() {
+        if (ksState.items.length === 0) generateRandomKnapsack();
+
+        const cap = parseInt(document.getElementById("ksCapacity").value) || 5;
+        const n = ksState.items.length;
+
+        // Initialize DP table (n+1 rows, cap+1 cols)
+        // Fill with -1 to show "uncalculated"
+        const dp = Array(n + 1)
+          .fill(0)
+          .map(() => Array(cap + 1).fill(null));
+
+        // Base case: row 0 and col 0 are 0
+        for (let i = 0; i <= n; i++) dp[i][0] = 0;
+        for (let w = 0; w <= cap; w++) dp[0][w] = 0;
+
+        ksState = {
+          capacity: cap,
+          items: ksState.items,
+          dp: dp,
+          i: 1, // Start at first item
+          w: 1, // Start at weight 1
+          phase: "fill",
+          finished: false,
+          selected: [],
+          backtrackI: n,
+          backtrackW: cap,
+        };
+
+        document.getElementById("ks-result").classList.add("hidden");
+        renderKnapsack();
+        document.getElementById("ks-log").innerText =
+          "Table initialized. Row 0 and Col 0 set to 0.";
+      }
+
+      function renderKnapsack() {
+        // Render Items List
+        const itemsDiv = document.getElementById("ks-items-display");
+        itemsDiv.innerHTML = ksState.items
+          .map((item, idx) => {
+            const isCurrent = ksState.phase === "fill" && idx + 1 === ksState.i;
+            const isSelected = ksState.selected.includes(item.id);
+            let border = "border-slate-600";
+            let bg = "bg-slate-900";
+
+            if (isCurrent) {
+              border = "border-blue-500";
+              bg = "bg-blue-900/30";
+            }
+            if (isSelected) {
+              border = "border-emerald-500";
+              bg = "bg-emerald-900/50";
+            }
+
+            return `
+                <div class="flex flex-col items-center p-2 border ${border} ${bg} rounded min-w-[60px]">
+                    <div class="text-xs text-slate-400">Item ${item.id}</div>
+                    <div class="font-bold text-white">W:${item.w}</div>
+                    <div class="font-bold text-yellow-400">V:${item.v}</div>
+                </div>
+              `;
+          })
+          .join("");
+
+        // Render Table
+        const tableDiv = document.getElementById("ks-table");
+        const cols = ksState.capacity + 1;
+        tableDiv.style.gridTemplateColumns = `auto repeat(${cols}, 1fr)`;
+
+        let html = `<div class="p-2 text-slate-500 text-xs">Item \\ Cap</div>`;
+        for (let c = 0; c <= ksState.capacity; c++)
+          html += `<div class="p-2 text-slate-500 font-bold text-xs bg-slate-800">${c}</div>`;
+
+        for (let r = 0; r <= ksState.items.length; r++) {
+          const label =
+            r === 0
+              ? "0"
+              : `Item ${r} (w:${ksState.items[r - 1].w}, v:${
+                  ksState.items[r - 1].v
+                })`;
+          html += `<div class="p-2 text-slate-400 text-xs bg-slate-800 flex items-center">${label}</div>`;
+
+          for (let c = 0; c <= ksState.capacity; c++) {
+            const val = ksState.dp[r][c];
+            const valStr = val === null ? "" : val;
+
+            let bg = "bg-slate-900";
+            let border = "border-slate-700";
+
+            // Highlight current cell being calculated
+            if (
+              ksState.phase === "fill" &&
+              r === ksState.i &&
+              c === ksState.w
+            ) {
+              bg = "bg-blue-600";
+              border = "border-white";
+            }
+            // Highlight backtrack path
+            if (
+              ksState.phase === "backtrack" &&
+              r === ksState.backtrackI &&
+              c === ksState.backtrackW
+            ) {
+              bg = "bg-emerald-600";
+              border = "border-white";
+            }
+            // Highlight cells involved in calculation (prev row)
+            if (
+              ksState.phase === "fill" &&
+              r === ksState.i &&
+              c === ksState.w
+            ) {
+              // Just visual aid, maybe too complex to highlight parents here without clutter
+            }
+
+            html += `<div class="h-8 flex items-center justify-center border ${border} ${bg} text-sm">${valStr}</div>`;
+          }
+        }
+        tableDiv.innerHTML = html;
+
+        // Render Result
+        if (ksState.finished) {
+          const resDiv = document.getElementById("ks-result");
+          const selDiv = document.getElementById("ks-selected-items");
+          resDiv.classList.remove("hidden");
+          selDiv.innerHTML =
+            ksState.selected.length > 0
+              ? ksState.selected
+                  .map((id) => {
+                    const item = ksState.items.find((x) => x.id === id);
+                    return `<div class="bg-emerald-600 text-white px-3 py-1 rounded font-bold">Item ${id} (V:${item.v})</div>`;
+                  })
+                  .join("")
+              : '<div class="text-slate-400">No items selected</div>';
+        }
+      }
+
+      function knapsackStep() {
+        if (ksState.finished) return;
+
+        if (ksState.phase === "fill") {
+          const { i, w, items, dp } = ksState;
+          const item = items[i - 1]; // 0-based index for items array
+
+          let val = 0;
+          let log = "";
+
+          if (item.w > w) {
+            val = dp[i - 1][w];
+            log = `Item ${i} weight (${item.w}) > capacity ${w}. Copy from above: ${val}.`;
+          } else {
+            const valSkip = dp[i - 1][w];
+            const valTake = item.v + dp[i - 1][w - item.w];
+            val = Math.max(valSkip, valTake);
+            log = `Item ${i} (w:${item.w}, v:${
+              item.v
+            }). Skip: ${valSkip}. Take: ${item.v} + dp[${i - 1}][${
+              w - item.w
+            }](${dp[i - 1][w - item.w]}) = ${valTake}. Max is ${val}.`;
+          }
+
+          dp[i][w] = val;
+          document.getElementById("ks-log").innerText = log;
+
+          // Advance
+          ksState.w++;
+          if (ksState.w > ksState.capacity) {
+            ksState.w = 1;
+            ksState.i++;
+            if (ksState.i > ksState.items.length) {
+              ksState.phase = "backtrack";
+              document.getElementById("ks-log").innerText =
+                "Table filled. Starting backtrack to find items.";
+            }
+          }
+        } else if (ksState.phase === "backtrack") {
+          let { backtrackI, backtrackW, dp, items } = ksState;
+
+          if (backtrackI === 0 || backtrackW === 0) {
+            ksState.finished = true;
+            document.getElementById("ks-log").innerText = "Backtrack complete.";
+            renderKnapsack();
+            return;
+          }
+
+          const currentVal = dp[backtrackI][backtrackW];
+          const prevVal = dp[backtrackI - 1][backtrackW];
+
+          if (currentVal === prevVal) {
+            document.getElementById(
+              "ks-log"
+            ).innerText = `Value ${currentVal} equals value above. Item ${backtrackI} NOT selected. Move up.`;
+            ksState.backtrackI--;
+          } else {
+            const item = items[backtrackI - 1];
+            document.getElementById(
+              "ks-log"
+            ).innerText = `Value ${currentVal} != value above. Item ${backtrackI} SELECTED. Move to dp[${
+              backtrackI - 1
+            }][${backtrackW - item.w}].`;
+            ksState.selected.push(item.id);
+            ksState.backtrackI--;
+            ksState.backtrackW -= item.w;
+          }
+        }
+
+        renderKnapsack();
+      }
+
+      function runAllKnapsack() {
+        while (!ksState.finished) {
+          knapsackStep();
+        }
+      }
+
       // Global Init
       window.onload = function () {
         initBFS();
@@ -2100,6 +2869,8 @@
         calcCounting();
         initHorspool();
         initDijkstra();
+        initFloyd();
+        initKnapsack();
       };
     </script>
   </body>
