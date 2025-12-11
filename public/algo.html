@@ -123,15 +123,23 @@
       </div>
 
       <!-- Section: BFS & DFS -->
-      <section id="bfs-dfs" class="max-w-6xl mb-24">
+      <section id="bfs-dfs" class="mx-auto max-w-6xl mb-24">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-3xl font-bold text-white">BFS and DFS</h2>
-          <a
-            href="https://www.youtube.com/watch?v=pcKY4hjDrxk"
-            target="_blank"
-            class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
-            >Watch Video</a
-          >
+          <div class="flex items-center gap-4">
+            <button
+              onclick="generateRandomTree()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-sm font-bold"
+            >
+              Randomize Tree
+            </button>
+            <a
+              href="https://www.youtube.com/watch?v=pcKY4hjDrxk"
+              target="_blank"
+              class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+              >Watch Youtube Video Explanation</a
+            >
+          </div>
         </div>
 
         <div class="grid xl:grid-cols-2 gap-8 mb-8">
@@ -178,6 +186,14 @@
                 []
               </div>
               <div id="bfs-log" class="text-slate-300">Ready.</div>
+            </div>
+            <div
+              class="bg-slate-900 p-2 rounded border border-slate-700 text-xs font-mono mt-2"
+            >
+              <div class="text-slate-500">VISITED ORDER:</div>
+              <div id="bfs-visited-display" class="text-green-400 font-bold">
+                []
+              </div>
             </div>
 
             <div
@@ -234,6 +250,14 @@
               </div>
               <div id="dfs-log" class="text-slate-300">Ready.</div>
             </div>
+            <div
+              class="bg-slate-900 p-2 rounded border border-slate-700 text-xs font-mono mt-2"
+            >
+              <div class="text-slate-500">VISITED ORDER:</div>
+              <div id="dfs-visited-display" class="text-green-400 font-bold">
+                []
+              </div>
+            </div>
 
             <div
               class="mt-4 text-xs text-slate-400 bg-slate-900/50 p-3 rounded"
@@ -253,16 +277,24 @@
       <!-- Section: Topological Sort -->
       <section
         id="topological"
-        class="max-w-5xl mb-24 border-t border-slate-800 pt-12"
+        class="mx-auto max-w-5xl mb-24 border-t border-slate-800 pt-12"
       >
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-2xl font-bold text-white">Topological Sort</h2>
-          <a
-            href="https://www.youtube.com/watch?v=7J3GadLzydI"
-            target="_blank"
-            class="text-blue-400 hover:text-blue-300 text-sm"
-            >Video</a
-          >
+          <div class="flex items-center gap-4">
+            <button
+              onclick="generateRandomDAG()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-sm font-bold"
+            >
+              Randomize Graph
+            </button>
+            <a
+              href="https://www.youtube.com/watch?v=7J3GadLzydI"
+              target="_blank"
+              class="text-blue-400 hover:text-blue-300 text-sm"
+              >Watch Youtube Video Explanation</a
+            >
+          </div>
         </div>
 
         <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
@@ -327,7 +359,7 @@
       <!-- Section: Permutation -->
       <section
         id="permutation"
-        class="max-w-5xl mb-24 border-t border-slate-800 pt-12"
+        class="mx-auto max-w-5xl mb-24 border-t border-slate-800 pt-12"
       >
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-2xl font-bold text-white">Permutation</h2>
@@ -335,7 +367,7 @@
             href="https://www.youtube.com/watch?v=GuTPwotSdYw"
             target="_blank"
             class="text-blue-400 hover:text-blue-300 text-sm"
-            >Video</a
+            >Watch Youtube Video Explanation</a
           >
         </div>
         <p class="text-slate-400 mb-4 text-sm">
@@ -399,16 +431,24 @@
       <!-- Section: Horner's Rule -->
       <section
         id="horner"
-        class="max-w-5xl mb-24 border-t border-slate-800 pt-12"
+        class="mx-auto max-w-5xl mb-24 border-t border-slate-800 pt-12"
       >
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-2xl font-bold text-white">Horner's Rule</h2>
-          <a
-            href="https://www.youtube.com/watch?v=Z393AcN_Gz0"
-            target="_blank"
-            class="text-blue-400 hover:text-blue-300 text-sm"
-            >Video</a
-          >
+          <div class="flex items-center gap-4">
+            <button
+              onclick="randomizeHorner()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-sm font-bold"
+            >
+              Randomize Input
+            </button>
+            <a
+              href="https://www.youtube.com/watch?v=Z393AcN_Gz0"
+              target="_blank"
+              class="text-blue-400 hover:text-blue-300 text-sm"
+              >Watch Youtube Video Explanation</a
+            >
+          </div>
         </div>
 
         <div
@@ -488,16 +528,24 @@
       <!-- Section: Russian Multiplication -->
       <section
         id="russian"
-        class="max-w-5xl mb-24 border-t border-slate-800 pt-12"
+        class="mx-auto max-w-5xl mb-24 border-t border-slate-800 pt-12"
       >
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-2xl font-bold text-white">Russian Multiplication</h2>
-          <a
-            href="https://www.youtube.com/watch?v=xrUCL7tGKaI"
-            target="_blank"
-            class="text-blue-400 hover:text-blue-300 text-sm"
-            >Video</a
-          >
+          <div class="flex items-center gap-4">
+            <button
+              onclick="randomizeRussian()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-sm font-bold"
+            >
+              Randomize Input
+            </button>
+            <a
+              href="https://www.youtube.com/watch?v=xrUCL7tGKaI"
+              target="_blank"
+              class="text-blue-400 hover:text-blue-300 text-sm"
+              >Watch Youtube Video Explanation</a
+            >
+          </div>
         </div>
 
         <div class="flex flex-col md:flex-row gap-8">
@@ -539,16 +587,24 @@
       <!-- Section: Counting Sort -->
       <section
         id="counting"
-        class="max-w-5xl mb-24 border-t border-slate-800 pt-12"
+        class="mx-auto max-w-5xl mb-24 border-t border-slate-800 pt-12"
       >
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-2xl font-bold text-white">Counting Sort</h2>
-          <a
-            href="https://www.youtube.com/watch?v=OKd534EWcdk"
-            target="_blank"
-            class="text-blue-400 hover:text-blue-300 text-sm"
-            >Video</a
-          >
+          <div class="flex items-center gap-4">
+            <button
+              onclick="randomizeCounting()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-sm font-bold"
+            >
+              Randomize Input
+            </button>
+            <a
+              href="https://www.youtube.com/watch?v=OKd534EWcdk"
+              target="_blank"
+              class="text-blue-400 hover:text-blue-300 text-sm"
+              >Watch Youtube Video Explanation</a
+            >
+          </div>
         </div>
 
         <div class="grid md:grid-cols-2 gap-8 mb-6 text-sm text-slate-300">
@@ -594,7 +650,7 @@
       <!-- Section: Horspool -->
       <section
         id="horspool"
-        class="max-w-5xl mb-24 border-t border-slate-800 pt-12"
+        class="mx-auto max-w-5xl mb-24 border-t border-slate-800 pt-12"
       >
         <h2 class="text-2xl font-bold text-white mb-6">Horspool Algorithm</h2>
 
@@ -685,16 +741,24 @@
       <!-- Section: Dijkstra -->
       <section
         id="dijkstra"
-        class="max-w-5xl mb-32 border-t border-slate-800 pt-12"
+        class="mx-auto max-w-5xl mb-32 border-t border-slate-800 pt-12"
       >
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-2xl font-bold text-white">Dijkstra</h2>
-          <a
-            href="https://www.youtube.com/watch?v=XB4MIexjvY0"
-            target="_blank"
-            class="text-blue-400 hover:text-blue-300 text-sm"
-            >Video</a
-          >
+          <div class="flex items-center gap-4">
+            <button
+              onclick="generateRandomWeightedGraph()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-sm font-bold"
+            >
+              Randomize Graph
+            </button>
+            <a
+              href="https://www.youtube.com/watch?v=XB4MIexjvY0"
+              target="_blank"
+              class="text-blue-400 hover:text-blue-300 text-sm"
+              >Watch Youtube Video Explanation</a
+            >
+          </div>
         </div>
 
         <div class="bg-slate-800 p-6 rounded border border-slate-700 mb-6">
@@ -782,7 +846,7 @@
 
     <script>
       // === BFS/DFS GRAPH DATA ===
-      const nodesData = [
+      let nodesData = [
         { id: "A", x: 200, y: 30, children: ["B", "C"] },
         { id: "B", x: 120, y: 100, children: ["D", "E"] },
         { id: "C", x: 280, y: 100, children: ["F"] },
@@ -790,6 +854,96 @@
         { id: "E", x: 160, y: 180, children: [] },
         { id: "F", x: 320, y: 180, children: [] },
       ];
+
+      function generateRandomTree() {
+        const nodeIds = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+        const numNodes = Math.floor(Math.random() * 5) + 6; // 6 to 10 nodes
+        const activeNodes = nodeIds.slice(0, numNodes);
+
+        // Simple tree generation:
+        // 1. Start with A
+        // 2. For each subsequent node, pick a random parent from already added nodes
+        // 3. Ensure max children per node is limited (e.g., 3)
+
+        let tree = activeNodes.map((id) => ({ id, children: [], x: 0, y: 0 }));
+        let added = [tree[0]]; // Start with A
+
+        for (let i = 1; i < tree.length; i++) {
+          const node = tree[i];
+          // Find potential parents (nodes in 'added' with < 3 children)
+          const potentialParents = added.filter((n) => n.children.length < 3);
+          if (potentialParents.length === 0) break; // Should not happen with these limits
+
+          const parent =
+            potentialParents[
+              Math.floor(Math.random() * potentialParents.length)
+            ];
+          parent.children.push(node.id);
+          added.push(node);
+        }
+
+        // Layout (Improved Layered to avoid crossing)
+        // Assign depths
+        let depths = { A: 0 };
+        let parents = { A: null };
+        let maxDepth = 0;
+
+        // BFS to assign depths and track parents
+        let q = ["A"];
+        while (q.length > 0) {
+          const currId = q.shift();
+          const currNode = tree.find((n) => n.id === currId);
+          const d = depths[currId];
+          maxDepth = Math.max(maxDepth, d);
+
+          currNode.children.forEach((childId) => {
+            depths[childId] = d + 1;
+            parents[childId] = currNode;
+            q.push(childId);
+          });
+        }
+
+        // Assign X, Y based on depth and position in layer
+        const width = 400;
+        const height = 250;
+        const layerHeight = height / (maxDepth + 2);
+
+        // Group by depth
+        let nodesByDepth = {};
+        tree.forEach((n) => {
+          const d = depths[n.id];
+          if (!nodesByDepth[d]) nodesByDepth[d] = [];
+          nodesByDepth[d].push(n);
+        });
+
+        // Process layers from top to bottom
+        Object.keys(nodesByDepth)
+          .sort((a, b) => a - b)
+          .forEach((d) => {
+            const depth = parseInt(d);
+            let nodesInLayer = nodesByDepth[depth];
+
+            if (depth > 0) {
+              // Sort nodes based on parent's X position to minimize crossing
+              nodesInLayer.sort((a, b) => {
+                const parA = parents[a.id];
+                const parB = parents[b.id];
+                if (parA === parB) return 0; // Same parent, keep order
+                return parA.x - parB.x;
+              });
+            }
+
+            const layerWidth = width / (nodesInLayer.length + 1);
+            nodesInLayer.forEach((n, idx) => {
+              n.y = 30 + depth * layerHeight;
+              n.x = (idx + 1) * layerWidth;
+            });
+          });
+
+        nodesData = tree;
+        initBFS();
+        initDFS();
+      }
 
       let bfsState = {
         queue: [],
@@ -844,12 +998,14 @@
         bfsState = {
           queue: ["A"],
           visited: new Set(["A"]),
+          visitedOrder: [],
           current: null,
           finished: false,
         };
         drawGraph("bfs-svg", nodesData);
         document.getElementById("bfs-log").innerText = "Ready. Start at A.";
         document.getElementById("bfs-queue-display").innerText = "[A]";
+        document.getElementById("bfs-visited-display").innerText = "[]";
         highlightNodeGraph("bfs-svg", "A", "queue");
       }
 
@@ -862,6 +1018,10 @@
         }
         const curr = bfsState.queue.shift();
         bfsState.current = curr;
+        bfsState.visitedOrder.push(curr);
+        document.getElementById(
+          "bfs-visited-display"
+        ).innerText = `[${bfsState.visitedOrder.join(", ")}]`;
         highlightNodeGraph("bfs-svg", curr, "active");
         document.getElementById(
           "bfs-log"
@@ -909,12 +1069,14 @@
         dfsState = {
           stack: ["A"],
           visited: new Set(["A"]),
+          visitedOrder: [],
           current: null,
           finished: false,
         };
         drawGraph("dfs-svg", nodesData);
         document.getElementById("dfs-log").innerText = "Ready. Start at A.";
         document.getElementById("dfs-stack-display").innerText = "[A]";
+        document.getElementById("dfs-visited-display").innerText = "[]";
         highlightNodeGraph("dfs-svg", "A", "queue");
       }
 
@@ -927,6 +1089,10 @@
         }
         const curr = dfsState.stack.pop();
         dfsState.current = curr;
+        dfsState.visitedOrder.push(curr);
+        document.getElementById(
+          "dfs-visited-display"
+        ).innerText = `[${dfsState.visitedOrder.join(", ")}]`;
         highlightNodeGraph("dfs-svg", curr, "active");
         document.getElementById(
           "dfs-log"
@@ -970,7 +1136,7 @@
       }
 
       // === TOPO SORT ===
-      const topoNodes = [
+      let topoNodes = [
         { id: "A", x: 50, y: 125, next: ["B", "C"] },
         { id: "B", x: 150, y: 50, next: ["D"] },
         { id: "C", x: 150, y: 200, next: ["D", "E"] },
@@ -978,6 +1144,123 @@
         { id: "E", x: 250, y: 220, next: ["F"] },
         { id: "F", x: 350, y: 125, next: [] },
       ];
+
+      function generateRandomDAG() {
+        const nodeIds = ["A", "B", "C", "D", "E", "F", "G"];
+
+        // Structured Layout Generation (Layer-based)
+        // We define a fixed structure of layers to ensure no overlaps.
+        // This mimics the clean BFS/DFS tree look but allows for DAG connections.
+
+        // Randomize number of nodes (4 to 7)
+        const minNodes = 4;
+        const maxNodes = 7;
+        const totalNodes =
+          Math.floor(Math.random() * (maxNodes - minNodes + 1)) + minNodes;
+
+        // Generate random layer structure
+        let structure = [1]; // Always start with 1 node (Root)
+        let remaining = totalNodes - 1;
+
+        while (remaining > 0) {
+          // Max 3 nodes per layer to keep it readable within width
+          const maxInLayer = Math.min(remaining, 3);
+          // Bias towards 2 nodes if possible for better shape
+          let count = Math.floor(Math.random() * maxInLayer) + 1;
+
+          // If we have exactly 2 remaining, often nice to just do 2
+          if (remaining === 2 && Math.random() > 0.3) count = 2;
+
+          structure.push(count);
+          remaining -= count;
+        }
+
+        let currentIdIndex = 0;
+        let nodes = [];
+        let nodesByLayer = [];
+
+        const width = 400;
+        const height = 250;
+        const layerHeight = height / (structure.length + 1);
+
+        // 1. Create Nodes in Layers
+        structure.forEach((count, layerIdx) => {
+          let layerNodes = [];
+          const layerY = 40 + layerIdx * 60;
+          const layerWidth = width / (count + 1);
+
+          for (let i = 0; i < count; i++) {
+            if (currentIdIndex >= nodeIds.length) break;
+            const id = nodeIds[currentIdIndex++];
+            const x = (i + 1) * layerWidth;
+            const node = { id, x, y: layerY, next: [], layer: layerIdx };
+            nodes.push(node);
+            layerNodes.push(node);
+          }
+          nodesByLayer.push(layerNodes);
+        });
+
+        // 2. Generate Edges (Strictly Adjacent Layers)
+        // This prevents long lines crossing over nodes.
+        for (let i = 0; i < nodesByLayer.length - 1; i++) {
+          const currentLayer = nodesByLayer[i];
+          const nextLayer = nodesByLayer[i + 1];
+
+          // A. Ensure every node in Next Layer has at least one parent
+          nextLayer.forEach((target) => {
+            // Connect to the "closest" parent in X to minimize crossing
+            // or just a random one. Let's try closest X.
+            let bestParent = currentLayer[0];
+            let minDist = Math.abs(target.x - bestParent.x);
+
+            currentLayer.forEach((p) => {
+              const d = Math.abs(target.x - p.x);
+              if (d < minDist) {
+                minDist = d;
+                bestParent = p;
+              }
+            });
+
+            if (!bestParent.next.includes(target.id)) {
+              bestParent.next.push(target.id);
+            }
+          });
+
+          // B. Ensure every node in Current Layer has at least one child
+          currentLayer.forEach((source) => {
+            if (source.next.length === 0) {
+              // Connect to closest child
+              let bestChild = nextLayer[0];
+              let minDist = Math.abs(source.x - bestChild.x);
+
+              nextLayer.forEach((c) => {
+                const d = Math.abs(source.x - c.x);
+                if (d < minDist) {
+                  minDist = d;
+                  bestChild = c;
+                }
+              });
+
+              source.next.push(bestChild.id);
+            }
+          });
+
+          // C. Add a few random extra edges between adjacent layers for complexity
+          // But only if they don't cross too wildly (simple check: don't cross from far left to far right)
+          if (Math.random() > 0.3) {
+            const s =
+              currentLayer[Math.floor(Math.random() * currentLayer.length)];
+            const t = nextLayer[Math.floor(Math.random() * nextLayer.length)];
+            // Allow if distance isn't huge
+            if (Math.abs(s.x - t.x) < 150 && !s.next.includes(t.id)) {
+              s.next.push(t.id);
+            }
+          }
+        }
+
+        topoNodes = nodes;
+        initTopo();
+      }
 
       let topoStack = [];
       let topoVisited = new Set();
@@ -988,12 +1271,15 @@
       function drawTopo() {
         const svg = document.getElementById("topo-svg");
         let html = `<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="28" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748b" /></marker></defs>`;
+
         topoNodes.forEach((n) => {
           n.next.forEach((targetId) => {
             const t = topoNodes.find((x) => x.id === targetId);
+            // Straight line with arrow
             html += `<line x1="${n.x}" y1="${n.y}" x2="${t.x}" y2="${t.y}" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />`;
           });
         });
+
         topoNodes.forEach((n) => {
           let colorClass = "fill-[#1e293b] stroke-[#94a3b8]";
           if (topoVisited.has(n.id))
@@ -1209,6 +1495,19 @@
           "Click Next Step to start.";
       }
 
+      function randomizeHorner() {
+        const numCoeffs = Math.floor(Math.random() * 4) + 3; // 3 to 6 coeffs
+        const coeffs = Array.from(
+          { length: numCoeffs },
+          () => Math.floor(Math.random() * 20) - 10
+        );
+        const x = Math.floor(Math.random() * 10) - 5;
+
+        document.getElementById("hornerCoeffs").value = coeffs.join(" ");
+        document.getElementById("hornerX").value = x;
+        initHorner();
+      }
+
       function hornerStep() {
         if (hornerState.step >= hornerState.coeffs.length - 1) {
           document.getElementById("horner-explanation").innerText =
@@ -1260,6 +1559,14 @@
       }
 
       // === RUSSIAN PEASANT ===
+      function randomizeRussian() {
+        const a = Math.floor(Math.random() * 50) + 10;
+        const b = Math.floor(Math.random() * 50) + 10;
+        document.getElementById("russianA").value = a;
+        document.getElementById("russianB").value = b;
+        calcRussian();
+      }
+
       function calcRussian() {
         let a = parseInt(document.getElementById("russianA").value);
         let b = parseInt(document.getElementById("russianB").value);
@@ -1295,6 +1602,15 @@
       }
 
       // === COUNTING SORT ===
+      function randomizeCounting() {
+        const len = Math.floor(Math.random() * 5) + 5; // 5 to 9 numbers
+        const arr = Array.from({ length: len }, () =>
+          Math.floor(Math.random() * 6)
+        ); // 0 to 5
+        document.getElementById("countInput").value = arr.join(", ");
+        calcCounting();
+      }
+
       function calcCounting() {
         const inputStr = document.getElementById("countInput").value;
         const arr = inputStr
@@ -1426,14 +1742,14 @@
       }
 
       // === DIJKSTRA ===
-      const dNodes = [
+      let dNodes = [
         { id: "A", x: 50, y: 150 },
         { id: "B", x: 150, y: 50 },
         { id: "C", x: 150, y: 250 },
         { id: "D", x: 250, y: 150 },
         { id: "E", x: 350, y: 150 },
       ];
-      const dEdges = [
+      let dEdges = [
         { u: "A", v: "B", w: 4 },
         { u: "A", v: "C", w: 2 },
         { u: "B", v: "C", w: 1 },
@@ -1442,29 +1758,113 @@
         { u: "C", v: "E", w: 10 },
         { u: "D", v: "E", w: 2 },
       ];
-      const adj = {};
-      dNodes.forEach((n) => (adj[n.id] = []));
-      dEdges.forEach((e) => {
-        adj[e.u].push({ to: e.v, w: e.w });
-      });
+      let adj = {};
+
+      function buildAdj() {
+        adj = {};
+        dNodes.forEach((n) => (adj[n.id] = []));
+        dEdges.forEach((e) => {
+          adj[e.u].push({ to: e.v, w: e.w });
+        });
+      }
+      buildAdj();
+
+      function generateRandomWeightedGraph() {
+        const nodeIds = ["A", "B", "C", "D", "E", "F"];
+        const numNodes = Math.floor(Math.random() * 2) + 4; // 4 to 5 nodes
+        const activeNodes = nodeIds.slice(0, numNodes);
+
+        // Create nodes with structured positions (3 Lanes)
+        // Keep A at start, others distributed
+        const width = 400;
+        const height = 250;
+        const stepX = (width - 80) / (numNodes - 1);
+        const lanes = [70, 125, 180]; // Top, Mid, Bot
+
+        dNodes = activeNodes.map((id, idx) => {
+          if (idx === 0) return { id, x: 40, y: 125 }; // A is Mid-Left
+          if (idx === numNodes - 1) return { id, x: width - 40, y: 125 }; // Last is Mid-Right
+
+          const x = 40 + idx * stepX;
+          // Assign lane based on index to zigzag: Top, Bot, Top...
+          const laneIdx = idx % 2 === 1 ? 0 : 2;
+          const y = lanes[laneIdx];
+          return { id, x, y };
+        });
+
+        // Create edges
+        dEdges = [];
+        // Ensure connectivity: each node (except last) connects to at least one future node
+        for (let i = 0; i < dNodes.length - 1; i++) {
+          const u = dNodes[i].id;
+          // Connect to next node guaranteed
+          const v = dNodes[i + 1].id;
+          const w = Math.floor(Math.random() * 9) + 1;
+          dEdges.push({ u, v, w });
+
+          // Random extra connections (Skip 1 node max to keep it clean)
+          if (i + 2 < dNodes.length && Math.random() > 0.5) {
+            const v2 = dNodes[i + 2].id;
+            const w2 = Math.floor(Math.random() * 9) + 1;
+            dEdges.push({ u, v: v2, w: w2 });
+          }
+        }
+
+        buildAdj();
+        initDijkstra();
+      }
 
       let dState = { table: {}, queue: [], curr: null, history: [] };
 
       function drawDijkstraGraph() {
         const svg = document.getElementById("dijkstra-svg");
         let html = `<defs><marker id="d-arrow" markerWidth="10" markerHeight="10" refX="28" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748b" /></marker></defs>`;
+
         dEdges.forEach((e) => {
           const u = dNodes.find((n) => n.id === e.u);
           const v = dNodes.find((n) => n.id === e.v);
-          const mx = (u.x + v.x) / 2;
-          const my = (u.y + v.y) / 2;
-          html += `<line x1="${u.x}" y1="${u.y}" x2="${v.x}" y2="${v.y}" stroke="#475569" stroke-width="2" marker-end="url(#d-arrow)" />`;
-          html += `<rect x="${mx - 10}" y="${
-            my - 10
-          }" width="20" height="20" fill="#0f172a" /><text x="${mx}" y="${my}" dy="5" text-anchor="middle" fill="#facc15" font-size="12" font-weight="bold">${
+
+          // Determine if we need a curve
+          // If nodes are far apart (skip > 1 index) or same Y but not adjacent
+          const dx = Math.abs(v.x - u.x);
+          const dy = Math.abs(v.y - u.y);
+          let pathD = "";
+          let labelX = 0;
+          let labelY = 0;
+
+          if (dx > 100 || (Math.abs(u.y - v.y) < 10 && dx > 60)) {
+            // Curve it
+            // Direction depends on Y position.
+            // If Top lane (y < 100), curve Up. If Bot lane (y > 150), curve Down.
+            // If Mid, curve Up.
+            const curveDir = u.y < 125 ? -1 : 1;
+            const midX = (u.x + v.x) / 2;
+            const midY = (u.y + v.y) / 2 + curveDir * 40; // Control point offset
+
+            pathD = `M ${u.x} ${u.y} Q ${midX} ${midY} ${v.x} ${v.y}`;
+
+            // Label position (approx at peak of curve)
+            // Bezier mid point is at t=0.5: (1-t)^2*P0 + 2(1-t)t*P1 + t^2*P2
+            // 0.25*P0 + 0.5*P1 + 0.25*P2
+            labelX = 0.25 * u.x + 0.5 * midX + 0.25 * v.x;
+            labelY = 0.25 * u.y + 0.5 * midY + 0.25 * v.y;
+          } else {
+            // Straight line
+            pathD = `M ${u.x} ${u.y} L ${v.x} ${v.y}`;
+            labelX = (u.x + v.x) / 2;
+            labelY = (u.y + v.y) / 2;
+          }
+
+          html += `<path d="${pathD}" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#d-arrow)" />`;
+
+          // Weight Label with background
+          html += `<rect x="${labelX - 10}" y="${
+            labelY - 10
+          }" width="20" height="20" fill="#0f172a" rx="4" /><text x="${labelX}" y="${labelY}" dy="5" text-anchor="middle" fill="#facc15" font-size="12" font-weight="bold">${
             e.w
           }</text>`;
         });
+
         dNodes.forEach((n) => {
           const info = dState.table[n.id];
           const isCurr = dState.curr === n.id;
