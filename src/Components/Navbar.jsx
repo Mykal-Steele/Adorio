@@ -1,10 +1,10 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Link, useNavigate } from 'react-router-dom';
-import { SparklesIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../redux/userSlice';
-import { motion } from 'framer-motion';
+import React from "react";
+import PropTypes from "prop-types";
+import { Link, useNavigate } from "react-router-dom";
+import { SparklesIcon, SunIcon, MoonIcon } from "@heroicons/react/24/outline";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/userSlice";
+import { motion } from "framer-motion";
 
 const Navbar = ({ darkMode, setDarkMode }) => {
   const { token } = useSelector((state) => state.user);
@@ -13,14 +13,14 @@ const Navbar = ({ darkMode, setDarkMode }) => {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className='sticky top-0 z-50 bg-gray-950/95 backdrop-blur-lg border-b border-gray-800/100 shadow-2xl'
     >
       <div className='container mx-auto px-2 sm:px-4'>
@@ -40,7 +40,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
 
           <div className='flex items-center gap-2 sm:gap-4'>
             {/* Navigation Links - Grouped with right side actions */}
-            <div className='hidden sm:flex items-center gap-2 -mr-4'>
+            <div className='hidden sm:flex items-center gap-2 -mr-4 mr-1'>
               {token ? (
                 <>
                   <NavLink to='/home' text='Home' />
@@ -48,23 +48,17 @@ const Navbar = ({ darkMode, setDarkMode }) => {
                   <NavLink to='/coding' text='Coding' />
                   <NavLink to='/smartcity' text='SmartCity' />
                   <NavLink to='/rygame' text='RyGame' />
-                  <a
-                    href='https://adorio.space/cao'
-                    className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 flex items-center'
-                  >
-                    CAO
-                  </a>
+                  <NavLink to='/cao' text='CAO' />
+                  <NavLink to='/algo' text='Algorithms' />
                 </>
               ) : (
                 <>
                   <NavLink to='/coding' text='Coding' />
                   <NavLink to='/smartcity' text='SmartCity' />
-                  <a
-                    href='https://adorio.space/cao'
-                    className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 flex items-center'
-                  >
-                    CAO
-                  </a>
+
+                  <NavLink to='/cao' text='CAO' />
+
+                  <NavLink to='/algo' text='Algorithms' />
                 </>
               )}
             </div>
@@ -109,13 +103,12 @@ const Navbar = ({ darkMode, setDarkMode }) => {
               <NavLink to='/smartcity' text='SmartCity' />
               <NavLink to='/rygame' text='RyGame' />
               <NavLink to='/cao' text='CAO' />
-             
             </>
           ) : (
             <>
               <NavLink to='/coding' text='Coding' />
               <NavLink to='/smartcity' text='SmartCity' />
-              <NavLink to="/cao" text='CAO' />
+              <NavLink to='/cao' text='CAO' />
               {/* <a
                 href='https://adorio.space/cao'
                 className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
@@ -132,7 +125,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
   );
 };
 
-const NavLink = ({ to, text, className = '' }) => (
+const NavLink = ({ to, text, className = "" }) => (
   <motion.div whileHover={{ scale: 1.05 }} className={`relative ${className}`}>
     <Link
       to={to}
@@ -143,7 +136,7 @@ const NavLink = ({ to, text, className = '' }) => (
   </motion.div>
 );
 
-const ExternalNavLink = ({ to, text, className = '' }) => (
+const ExternalNavLink = ({ to, text, className = "" }) => (
   <motion.div whileHover={{ scale: 1.05 }} className={`relative ${className}`}>
     <a
       href={to}

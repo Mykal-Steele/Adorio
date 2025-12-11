@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Algo Cheat Sheet v5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1f2937;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4b5563;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #6b7280;
+      }
+
+      .node {
+        transition: all 0.3s ease;
+      }
+      .active-node {
+        fill: #ef4444 !important;
+        stroke: #fff !important;
+      }
+      .visited-node {
+        fill: #3b82f6 !important;
+      }
+      .queue-node {
+        stroke: #eab308 !important;
+        stroke-width: 3px !important;
+      }
+
+      .strike-through {
+        text-decoration: line-through;
+        color: #6b7280;
+      }
+      .highlight-coeff {
+        border: 2px solid #34d399;
+        background: #064e3b;
+      }
+      .highlight-result {
+        border: 2px solid #facc15;
+        background: #713f12;
+      }
+
+      /* Permutation path highlight */
+      .perm-path {
+        stroke: #ef4444;
+        stroke-width: 3px;
+      }
+      .perm-leaf {
+        fill: #ef4444 !important;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-slate-900 text-slate-200 font-mono flex h-screen overflow-hidden"
+  >
+    <!-- Sidebar -->
+    <aside
+      class="w-64 bg-slate-950 border-r border-slate-800 flex-shrink-0 flex flex-col overflow-y-auto hidden md:flex"
+    >
+      <div class="p-6 border-b border-slate-800">
+        <h1 class="text-xl font-bold text-white tracking-tighter">
+          ALGO_REF_v5
+        </h1>
+        <p class="text-xs text-slate-500 mt-1">Exam Prep Edition</p>
+      </div>
+      <nav class="flex-1 p-4 space-y-1">
+        <a
+          href="#bfs-dfs"
+          class="block px-3 py-2 rounded hover:bg-slate-800 text-sm hover:text-white transition"
+          >BFS & DFS</a
+        >
+        <a
+          href="#topological"
+          class="block px-3 py-2 rounded hover:bg-slate-800 text-sm hover:text-white transition"
+          >Topological Sort</a
+        >
+        <a
+          href="#permutation"
+          class="block px-3 py-2 rounded hover:bg-slate-800 text-sm hover:text-white transition"
+          >Permutation Tree</a
+        >
+        <a
+          href="#horner"
+          class="block px-3 py-2 rounded hover:bg-slate-800 text-sm hover:text-white transition"
+          >Horner's Rule</a
+        >
+        <a
+          href="#russian"
+          class="block px-3 py-2 rounded hover:bg-slate-800 text-sm hover:text-white transition"
+          >Russian Multiplication</a
+        >
+        <a
+          href="#counting"
+          class="block px-3 py-2 rounded hover:bg-slate-800 text-sm hover:text-white transition"
+          >Counting Sort</a
+        >
+        <a
+          href="#horspool"
+          class="block px-3 py-2 rounded hover:bg-slate-800 text-sm hover:text-white transition"
+          >Horspool Match</a
+        >
+        <a
+          href="#dijkstra"
+          class="block px-3 py-2 rounded hover:bg-slate-800 text-sm hover:text-white transition"
+          >Dijkstra</a
+        >
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-6 md:p-12 relative scroll-smooth">
+      <!-- Mobile Header -->
+      <div class="md:hidden mb-8 border-b border-slate-700 pb-4">
+        <h1 class="text-2xl font-bold text-white">ALGO_REF_v5</h1>
+      </div>
+
+      <!-- Section: BFS & DFS -->
+      <section id="bfs-dfs" class="max-w-6xl mb-24">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-3xl font-bold text-white">BFS and DFS</h2>
+          <a
+            href="https://www.youtube.com/watch?v=pcKY4hjDrxk"
+            target="_blank"
+            class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+            >Watch Video</a
+          >
+        </div>
+
+        <div class="grid xl:grid-cols-2 gap-8 mb-8">
+          <!-- BFS COLUMN -->
+          <div
+            class="bg-slate-800 rounded-lg p-4 border border-slate-700 shadow-lg flex flex-col"
+          >
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold text-blue-400">BFS (Queue)</h3>
+              <div class="flex gap-2">
+                <button
+                  onclick="stepBFS()"
+                  class="bg-blue-600 hover:bg-blue-500 text-white py-1 px-3 rounded text-xs font-bold"
+                >
+                  Step
+                </button>
+                <button
+                  onclick="initBFS()"
+                  class="bg-slate-700 hover:bg-slate-600 text-white py-1 px-3 rounded text-xs"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+            <div
+              class="bg-slate-900 rounded border border-slate-700 mb-4 h-64 relative"
+            >
+              <svg
+                id="bfs-svg"
+                width="100%"
+                height="100%"
+                class="select-none"
+                viewBox="0 0 400 250"
+              ></svg>
+            </div>
+            <div
+              class="bg-slate-900 p-2 rounded border border-slate-700 text-xs font-mono h-20 overflow-y-auto"
+            >
+              <div class="text-slate-500">QUEUE:</div>
+              <div
+                id="bfs-queue-display"
+                class="text-yellow-400 font-bold mb-1"
+              >
+                []
+              </div>
+              <div id="bfs-log" class="text-slate-300">Ready.</div>
+            </div>
+
+            <div
+              class="mt-4 text-xs text-slate-400 bg-slate-900/50 p-3 rounded"
+            >
+              <strong class="text-blue-400 block mb-1">How to do:</strong>
+              <ul class="list-disc list-inside space-y-1">
+                <li>Start at node A, put in Queue.</li>
+                <li>Take front node, visit children.</li>
+                <li>Add unvisited children to Queue.</li>
+                <li>Cross out/finish node. Repeat.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- DFS COLUMN -->
+          <div
+            class="bg-slate-800 rounded-lg p-4 border border-slate-700 shadow-lg flex flex-col"
+          >
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold text-purple-400">DFS (Stack)</h3>
+              <div class="flex gap-2">
+                <button
+                  onclick="stepDFS()"
+                  class="bg-purple-600 hover:bg-purple-500 text-white py-1 px-3 rounded text-xs font-bold"
+                >
+                  Step
+                </button>
+                <button
+                  onclick="initDFS()"
+                  class="bg-slate-700 hover:bg-slate-600 text-white py-1 px-3 rounded text-xs"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+            <div
+              class="bg-slate-900 rounded border border-slate-700 mb-4 h-64 relative"
+            >
+              <svg
+                id="dfs-svg"
+                width="100%"
+                height="100%"
+                class="select-none"
+                viewBox="0 0 400 250"
+              ></svg>
+            </div>
+            <div
+              class="bg-slate-900 p-2 rounded border border-slate-700 text-xs font-mono h-20 overflow-y-auto"
+            >
+              <div class="text-slate-500">STACK (Top is right):</div>
+              <div id="dfs-stack-display" class="text-pink-400 font-bold mb-1">
+                []
+              </div>
+              <div id="dfs-log" class="text-slate-300">Ready.</div>
+            </div>
+
+            <div
+              class="mt-4 text-xs text-slate-400 bg-slate-900/50 p-3 rounded"
+            >
+              <strong class="text-purple-400 block mb-1">How to do:</strong>
+              <ul class="list-disc list-inside space-y-1">
+                <li>Push start to Stack.</li>
+                <li>Pop top, visit ONE child. Push child.</li>
+                <li>Dive deep until stuck (dead end).</li>
+                <li>Backtrack (pop) until new path found.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Topological Sort -->
+      <section
+        id="topological"
+        class="max-w-5xl mb-24 border-t border-slate-800 pt-12"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-white">Topological Sort</h2>
+          <a
+            href="https://www.youtube.com/watch?v=7J3GadLzydI"
+            target="_blank"
+            class="text-blue-400 hover:text-blue-300 text-sm"
+            >Video</a
+          >
+        </div>
+
+        <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+          <div class="flex flex-col md:flex-row gap-6">
+            <div
+              class="flex-1 relative bg-slate-900 rounded border border-slate-700"
+            >
+              <svg
+                id="topo-svg"
+                width="100%"
+                height="250"
+                class="select-none"
+                viewBox="0 0 400 250"
+              ></svg>
+            </div>
+            <div class="w-full md:w-64 space-y-4">
+              <button
+                onclick="topoNextStep()"
+                class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded font-bold"
+              >
+                Next Step
+              </button>
+              <button
+                onclick="initTopo()"
+                class="w-full bg-slate-700 text-slate-300 py-2 rounded"
+              >
+                Reset
+              </button>
+
+              <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                <h4 class="text-xs text-slate-500 uppercase mb-2">
+                  Dead-End Stack
+                </h4>
+                <div
+                  id="topo-stack"
+                  class="flex flex-wrap gap-2 text-emerald-400 font-bold min-h-[30px] text-xs"
+                ></div>
+              </div>
+
+              <!-- Final Result Container -->
+              <div
+                class="bg-black p-3 rounded border border-emerald-500 hidden"
+                id="topo-result-box"
+              >
+                <h4 class="text-xs text-emerald-500 uppercase mb-1">
+                  Final Result (Stack Reversed)
+                </h4>
+                <div
+                  id="topo-final-order"
+                  class="text-white font-bold text-sm tracking-widest"
+                ></div>
+              </div>
+
+              <div id="topo-log" class="text-xs text-yellow-400 font-mono h-10">
+                Ready.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Permutation -->
+      <section
+        id="permutation"
+        class="max-w-5xl mb-24 border-t border-slate-800 pt-12"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-white">Permutation</h2>
+          <a
+            href="https://www.youtube.com/watch?v=GuTPwotSdYw"
+            target="_blank"
+            class="text-blue-400 hover:text-blue-300 text-sm"
+            >Video</a
+          >
+        </div>
+        <p class="text-slate-400 mb-4 text-sm">
+          DFS on decision tree. Each path from Root to Leaf is one permutation.
+        </p>
+
+        <div class="bg-slate-800 p-4 rounded border border-slate-700">
+          <div class="flex flex-col md:flex-row gap-4 mb-4 items-start">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1"
+                >Input (Max 4 chars)</label
+              >
+              <input
+                type="text"
+                id="permInput"
+                value="ABC"
+                maxlength="4"
+                class="bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded font-mono w-32 uppercase"
+              />
+            </div>
+            <button
+              onclick="drawPermTree()"
+              class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-bold text-sm mt-5"
+            >
+              Generate Tree
+            </button>
+            <button
+              onclick="showPermResults()"
+              id="perm-show-btn"
+              class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded font-bold text-sm mt-5 hidden"
+            >
+              Trace Paths (Result)
+            </button>
+          </div>
+
+          <div class="flex gap-4">
+            <div
+              class="flex-1 overflow-x-auto bg-slate-900 rounded border border-slate-700 p-4"
+            >
+              <svg
+                id="perm-svg"
+                width="1200"
+                height="500"
+                class="mx-auto"
+              ></svg>
+            </div>
+            <div
+              id="perm-list-container"
+              class="w-48 bg-slate-900 border border-slate-700 p-4 rounded hidden overflow-y-auto max-h-[500px]"
+            >
+              <h4 class="text-xs text-slate-500 uppercase mb-2">Results</h4>
+              <div
+                id="perm-list"
+                class="space-y-1 font-mono text-sm text-emerald-400"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Horner's Rule -->
+      <section
+        id="horner"
+        class="max-w-5xl mb-24 border-t border-slate-800 pt-12"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-white">Horner's Rule</h2>
+          <a
+            href="https://www.youtube.com/watch?v=Z393AcN_Gz0"
+            target="_blank"
+            class="text-blue-400 hover:text-blue-300 text-sm"
+            >Video</a
+          >
+        </div>
+
+        <div
+          class="mb-6 bg-slate-800 p-4 rounded text-sm text-slate-300 border border-slate-700"
+        >
+          <h4 class="font-bold text-white mb-2">Steps:</h4>
+          <ol class="list-decimal list-inside space-y-1">
+            <li>Pull down first coefficient</li>
+            <li>Multiply by x → Add to next value</li>
+            <li>Repeat. The last number is your result.</li>
+          </ol>
+        </div>
+
+        <div class="bg-slate-800 p-6 rounded border border-slate-700">
+          <div class="grid md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1"
+                >Coefficients</label
+              >
+              <input
+                type="text"
+                id="hornerCoeffs"
+                value="-3 0 2 -5 9 29"
+                class="w-full bg-slate-900 border border-slate-600 px-3 py-2 rounded text-white font-mono"
+                onkeyup="updatePolynomial()"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">X Value</label>
+              <div class="flex gap-2">
+                <input
+                  type="number"
+                  id="hornerX"
+                  value="5"
+                  class="w-24 bg-slate-900 border border-slate-600 px-3 py-2 rounded text-white font-mono"
+                />
+                <button
+                  onclick="initHorner()"
+                  class="bg-slate-700 hover:bg-slate-600 text-white px-4 rounded text-xs font-bold"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="poly-display"
+            class="mb-4 text-emerald-400 font-mono text-sm border-b border-slate-700 pb-2"
+          >
+            <!-- Polynomial formula will appear here -->
+          </div>
+
+          <div class="overflow-x-auto mb-4">
+            <div
+              id="horner-container"
+              class="min-w-[600px] flex flex-col gap-2 font-mono text-lg"
+            ></div>
+          </div>
+
+          <div
+            class="flex items-center justify-between bg-slate-900 p-3 rounded border border-slate-700"
+          >
+            <div id="horner-explanation" class="text-yellow-400 text-sm">
+              Click Start to begin.
+            </div>
+            <button
+              onclick="hornerStep()"
+              class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded font-bold"
+            >
+              Next Step
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Russian Multiplication -->
+      <section
+        id="russian"
+        class="max-w-5xl mb-24 border-t border-slate-800 pt-12"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-white">Russian Multiplication</h2>
+          <a
+            href="https://www.youtube.com/watch?v=xrUCL7tGKaI"
+            target="_blank"
+            class="text-blue-400 hover:text-blue-300 text-sm"
+            >Video</a
+          >
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-8">
+          <div class="w-full md:w-64 space-y-4">
+            <p class="text-sm text-slate-400">
+              Halve left side, double right side. Take only rows where left side
+              is ODD.
+            </p>
+            <div class="bg-slate-800 p-4 rounded border border-slate-700">
+              <div class="flex gap-2 mb-2">
+                <input
+                  type="number"
+                  id="russianA"
+                  value="12"
+                  class="w-1/2 bg-slate-900 border border-slate-600 px-2 py-1 rounded text-white"
+                />
+                <input
+                  type="number"
+                  id="russianB"
+                  value="23"
+                  class="w-1/2 bg-slate-900 border border-slate-600 px-2 py-1 rounded text-white"
+                />
+              </div>
+              <button
+                onclick="calcRussian()"
+                class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded font-bold"
+              >
+                Visualize
+              </button>
+            </div>
+          </div>
+          <div
+            id="russianOutput"
+            class="flex-1 bg-slate-900 border border-slate-700 p-6 rounded font-mono"
+          ></div>
+        </div>
+      </section>
+
+      <!-- Section: Counting Sort -->
+      <section
+        id="counting"
+        class="max-w-5xl mb-24 border-t border-slate-800 pt-12"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-white">Counting Sort</h2>
+          <a
+            href="https://www.youtube.com/watch?v=OKd534EWcdk"
+            target="_blank"
+            class="text-blue-400 hover:text-blue-300 text-sm"
+            >Video</a
+          >
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-6 text-sm text-slate-300">
+          <div class="bg-slate-800 p-4 rounded border border-slate-700">
+            <h4 class="font-bold text-white mb-2">Step 1: Count Freq</h4>
+            <p>Count how many times each number appears.</p>
+            <div class="bg-slate-900 p-2 mt-2 font-mono text-xs">
+              0=1, 1=3, 2=0, 3=2...
+            </div>
+          </div>
+          <div class="bg-slate-800 p-4 rounded border border-slate-700">
+            <h4 class="font-bold text-white mb-2">Step 2: Cumulative</h4>
+            <p>
+              Add counts cumulatively:
+              <code class="bg-slate-900 px-1">count[i] + count[i-1]</code>
+            </p>
+            <h4 class="font-bold text-white mt-2 mb-1">Step 3: Shift Right</h4>
+            <p>
+              Shift the cumulative table right by 1 to get STARTING indices.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-slate-800 p-6 rounded border border-slate-700">
+          <div class="flex gap-4 mb-6">
+            <input
+              type="text"
+              id="countInput"
+              value="1, 0, 3, 1, 3, 1"
+              class="flex-1 bg-slate-900 border border-slate-600 text-white px-3 py-2 rounded font-mono"
+            />
+            <button
+              onclick="calcCounting()"
+              class="bg-blue-600 px-6 rounded text-white font-bold"
+            >
+              Sort
+            </button>
+          </div>
+          <div id="countingSteps" class="space-y-8"></div>
+        </div>
+      </section>
+
+      <!-- Section: Horspool -->
+      <section
+        id="horspool"
+        class="max-w-5xl mb-24 border-t border-slate-800 pt-12"
+      >
+        <h2 class="text-2xl font-bold text-white mb-6">Horspool Algorithm</h2>
+
+        <div class="grid md:grid-cols-2 gap-8 mb-6">
+          <div class="space-y-4 text-sm text-slate-300">
+            <h3 class="font-bold text-emerald-400">
+              Step 1: Build Shift Table
+            </h3>
+            <p>
+              Formula:
+              <code class="bg-slate-800 px-1 text-white"
+                >length - index - 1</code
+              >
+            </p>
+            <p>
+              Use the right-most occurrence of a char (except the very last
+              one). If char not in pattern, shift = length.
+            </p>
+          </div>
+          <div class="space-y-4 text-sm text-slate-300">
+            <h3 class="font-bold text-emerald-400">Step 2: Matching</h3>
+            <ul class="list-disc list-inside">
+              <li>Align Pattern with Text</li>
+              <li>Check <strong>last character</strong> first</li>
+              <li>Mismatch? Look at char in TEXT. Shift by table value.</li>
+              <li>Repeat until match or end.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+          <div class="space-y-4">
+            <div class="bg-slate-800 p-4 rounded border border-slate-700">
+              <label class="block text-xs text-slate-500 mb-1">Text</label>
+              <input
+                type="text"
+                id="horspoolText"
+                value="JIM_SAW_ME_IN_BARBERSHOP"
+                class="w-full bg-slate-900 border border-slate-600 px-2 py-1 rounded text-white font-mono text-sm mb-2 uppercase"
+              />
+              <label class="block text-xs text-slate-500 mb-1">Pattern</label>
+              <input
+                type="text"
+                id="horspoolPattern"
+                value="BARBER"
+                class="w-full bg-slate-900 border border-slate-600 px-2 py-1 rounded text-white font-mono text-sm uppercase"
+              />
+
+              <div class="flex gap-2 mt-4">
+                <button
+                  onclick="initHorspool()"
+                  class="bg-slate-600 px-3 py-1 rounded text-white text-sm"
+                >
+                  Reset
+                </button>
+                <button
+                  onclick="horspoolStep()"
+                  class="bg-purple-600 hover:bg-purple-500 px-4 py-1 rounded text-white font-bold text-sm flex-1"
+                >
+                  Next Step
+                </button>
+              </div>
+            </div>
+            <div
+              id="horspool-table-display"
+              class="bg-slate-800 p-4 rounded border border-slate-700"
+            >
+              <div class="text-xs text-slate-500 mb-2">SHIFT TABLE</div>
+              <div id="h-table-content" class="flex flex-wrap gap-2"></div>
+            </div>
+          </div>
+
+          <div
+            class="bg-slate-900 border border-slate-700 p-4 rounded overflow-x-auto relative min-h-[200px] flex items-center"
+          >
+            <div
+              id="horspool-vis-container"
+              class="font-mono text-xl whitespace-nowrap"
+            ></div>
+          </div>
+        </div>
+        <div
+          id="horspool-log"
+          class="mt-4 text-center text-yellow-400 font-mono text-sm h-6"
+        ></div>
+      </section>
+
+      <!-- Section: Dijkstra -->
+      <section
+        id="dijkstra"
+        class="max-w-5xl mb-32 border-t border-slate-800 pt-12"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-white">Dijkstra</h2>
+          <a
+            href="https://www.youtube.com/watch?v=XB4MIexjvY0"
+            target="_blank"
+            class="text-blue-400 hover:text-blue-300 text-sm"
+            >Video</a
+          >
+        </div>
+
+        <div class="bg-slate-800 p-6 rounded border border-slate-700 mb-6">
+          <h3 class="font-bold text-white mb-2">How it works:</h3>
+          <ul class="list-disc list-inside text-sm text-slate-300 space-y-2">
+            <li>
+              Pick <strong>start node</strong> (A), set distance to 0, all
+              others to Infinity (∞).
+            </li>
+            <li>Look at neighbors of current node.</li>
+            <li>
+              Calculate new distance:
+              <code class="bg-slate-900 px-1 text-yellow-400"
+                >current_dist + edge_weight</code
+              >.
+            </li>
+            <li>
+              If new distance is <strong>smaller</strong> than old distance,
+              update it.
+            </li>
+            <li>Mark current node as visited.</li>
+            <li>
+              Pick the <strong>smallest unvisited node</strong> as the next
+              current node.
+            </li>
+            <li>Repeat until all nodes are visited.</li>
+          </ul>
+        </div>
+
+        <div class="bg-slate-800 p-6 rounded border border-slate-700">
+          <div class="flex flex-col lg:flex-row gap-8">
+            <div class="flex-1">
+              <svg
+                id="dijkstra-svg"
+                width="100%"
+                height="300"
+                class="bg-slate-900 rounded border border-slate-700 select-none"
+              ></svg>
+            </div>
+            <div class="flex-1 flex flex-col">
+              <div class="flex gap-2 mb-4">
+                <button
+                  onclick="dijkstraNext()"
+                  class="bg-blue-600 hover:bg-blue-500 text-white flex-1 py-2 rounded font-bold"
+                >
+                  Next Step
+                </button>
+                <button
+                  onclick="initDijkstra()"
+                  class="bg-slate-700 text-white px-4 rounded"
+                >
+                  Reset
+                </button>
+              </div>
+              <div
+                class="bg-white text-slate-900 rounded overflow-hidden shadow-lg flex-1 overflow-x-auto max-h-[300px]"
+              >
+                <table
+                  id="dijkstra-table"
+                  class="w-full text-sm font-mono text-center border-collapse"
+                >
+                  <thead
+                    class="bg-slate-200 border-b border-slate-300 sticky top-0 shadow"
+                  >
+                    <tr>
+                      <!-- Injected by JS -->
+                    </tr>
+                  </thead>
+                  <tbody id="dijkstra-table-body"></tbody>
+                </table>
+              </div>
+              <div
+                id="dijkstra-log"
+                class="mt-2 text-xs text-yellow-400 font-mono h-5"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="text-center text-slate-600 text-xs pb-12">
+        Good luck on the exam.
+      </footer>
+    </main>
+
+    <script>
+      // === BFS/DFS GRAPH DATA ===
+      const nodesData = [
+        { id: "A", x: 200, y: 30, children: ["B", "C"] },
+        { id: "B", x: 120, y: 100, children: ["D", "E"] },
+        { id: "C", x: 280, y: 100, children: ["F"] },
+        { id: "D", x: 60, y: 180, children: [] },
+        { id: "E", x: 160, y: 180, children: [] },
+        { id: "F", x: 320, y: 180, children: [] },
+      ];
+
+      let bfsState = {
+        queue: [],
+        visited: new Set(),
+        current: null,
+        finished: false,
+      };
+      let dfsState = {
+        stack: [],
+        visited: new Set(),
+        current: null,
+        finished: false,
+      };
+
+      function drawGraph(svgId, nodes) {
+        const svg = document.getElementById(svgId);
+        let html = "";
+        // Edges
+        nodes.forEach((n) => {
+          n.children.forEach((childId) => {
+            const child = nodes.find((x) => x.id === childId);
+            if (child)
+              html += `<line x1="${n.x}" y1="${n.y}" x2="${child.x}" y2="${child.y}" stroke="#475569" stroke-width="2" />`;
+          });
+        });
+        // Nodes
+        nodes.forEach((n) => {
+          html += `
+                    <g class="node-group" id="${svgId}-node-${n.id}">
+                        <circle cx="${n.x}" cy="${n.y}" r="15" fill="#1e293b" stroke="#94a3b8" stroke-width="2" class="node" />
+                        <text x="${n.x}" y="${n.y}" dy="5" text-anchor="middle" fill="white" font-weight="bold" font-size="12">${n.id}</text>
+                    </g>
+                `;
+        });
+        svg.innerHTML = html;
+      }
+
+      function highlightNodeGraph(svgId, id, type) {
+        const el = document.querySelector(`#${svgId}-node-${id} circle`);
+        if (!el) return;
+        if (type === "reset") {
+          el.setAttribute("class", "node");
+          return;
+        }
+        if (type === "active") el.setAttribute("class", "node active-node");
+        if (type === "visited") el.setAttribute("class", "node visited-node");
+        if (type === "queue") el.setAttribute("class", "node queue-node");
+      }
+
+      // BFS LOGIC
+      function initBFS() {
+        bfsState = {
+          queue: ["A"],
+          visited: new Set(["A"]),
+          current: null,
+          finished: false,
+        };
+        drawGraph("bfs-svg", nodesData);
+        document.getElementById("bfs-log").innerText = "Ready. Start at A.";
+        document.getElementById("bfs-queue-display").innerText = "[A]";
+        highlightNodeGraph("bfs-svg", "A", "queue");
+      }
+
+      function stepBFS() {
+        if (bfsState.finished) return;
+        if (bfsState.queue.length === 0) {
+          bfsState.finished = true;
+          document.getElementById("bfs-log").innerText = "Queue empty. Done.";
+          return;
+        }
+        const curr = bfsState.queue.shift();
+        bfsState.current = curr;
+        highlightNodeGraph("bfs-svg", curr, "active");
+        document.getElementById(
+          "bfs-log"
+        ).innerText = `Visiting ${curr}. Adding unvisited children...`;
+        document.getElementById(
+          "bfs-queue-display"
+        ).innerText = `[${bfsState.queue.join(", ")}]`;
+
+        const nodeObj = nodesData.find((n) => n.id === curr);
+        let added = [];
+        nodeObj.children.forEach((child) => {
+          if (!bfsState.visited.has(child)) {
+            bfsState.visited.add(child);
+            bfsState.queue.push(child);
+            added.push(child);
+            highlightNodeGraph("bfs-svg", child, "queue");
+          }
+        });
+        document.getElementById(
+          "bfs-queue-display"
+        ).innerText = `[${bfsState.queue.join(", ")}]`;
+        if (added.length > 0)
+          document.getElementById("bfs-log").innerText += ` Added ${added.join(
+            ", "
+          )}.`;
+        else
+          document.getElementById("bfs-log").innerText += ` No new children.`;
+
+        nodesData.forEach((n) => {
+          if (
+            bfsState.visited.has(n.id) &&
+            n.id !== curr &&
+            !bfsState.queue.includes(n.id)
+          ) {
+            highlightNodeGraph("bfs-svg", n.id, "visited");
+          }
+          if (bfsState.queue.includes(n.id))
+            highlightNodeGraph("bfs-svg", n.id, "queue");
+        });
+        highlightNodeGraph("bfs-svg", curr, "active");
+      }
+
+      // DFS LOGIC
+      function initDFS() {
+        dfsState = {
+          stack: ["A"],
+          visited: new Set(["A"]),
+          current: null,
+          finished: false,
+        };
+        drawGraph("dfs-svg", nodesData);
+        document.getElementById("dfs-log").innerText = "Ready. Start at A.";
+        document.getElementById("dfs-stack-display").innerText = "[A]";
+        highlightNodeGraph("dfs-svg", "A", "queue");
+      }
+
+      function stepDFS() {
+        if (dfsState.finished) return;
+        if (dfsState.stack.length === 0) {
+          dfsState.finished = true;
+          document.getElementById("dfs-log").innerText = "Stack empty. Done.";
+          return;
+        }
+        const curr = dfsState.stack.pop();
+        dfsState.current = curr;
+        highlightNodeGraph("dfs-svg", curr, "active");
+        document.getElementById(
+          "dfs-log"
+        ).innerText = `Popped ${curr}. Checking children...`;
+
+        const nodeObj = nodesData.find((n) => n.id === curr);
+        const children = [...nodeObj.children].reverse();
+        let added = [];
+        children.forEach((child) => {
+          if (!dfsState.visited.has(child)) {
+            dfsState.visited.add(child);
+            dfsState.stack.push(child);
+            added.push(child);
+            highlightNodeGraph("dfs-svg", child, "queue");
+          }
+        });
+        document.getElementById(
+          "dfs-stack-display"
+        ).innerText = `[${dfsState.stack.join(", ")}]`;
+        if (added.length > 0)
+          document.getElementById("dfs-log").innerText += ` Pushed ${added.join(
+            ", "
+          )}.`;
+        else
+          document.getElementById(
+            "dfs-log"
+          ).innerText += ` Dead end or all visited.`;
+
+        nodesData.forEach((n) => {
+          if (
+            dfsState.visited.has(n.id) &&
+            n.id !== curr &&
+            !dfsState.stack.includes(n.id)
+          ) {
+            highlightNodeGraph("dfs-svg", n.id, "visited");
+          }
+          if (dfsState.stack.includes(n.id))
+            highlightNodeGraph("dfs-svg", n.id, "queue");
+        });
+        highlightNodeGraph("dfs-svg", curr, "active");
+      }
+
+      // === TOPO SORT ===
+      const topoNodes = [
+        { id: "A", x: 50, y: 125, next: ["B", "C"] },
+        { id: "B", x: 150, y: 50, next: ["D"] },
+        { id: "C", x: 150, y: 200, next: ["D", "E"] },
+        { id: "D", x: 250, y: 125, next: ["F"] },
+        { id: "E", x: 250, y: 220, next: ["F"] },
+        { id: "F", x: 350, y: 125, next: [] },
+      ];
+
+      let topoStack = [];
+      let topoVisited = new Set();
+      let topoActivePath = [];
+      let topoState = "idle";
+      let topoDfsStack = [];
+
+      function drawTopo() {
+        const svg = document.getElementById("topo-svg");
+        let html = `<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="28" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748b" /></marker></defs>`;
+        topoNodes.forEach((n) => {
+          n.next.forEach((targetId) => {
+            const t = topoNodes.find((x) => x.id === targetId);
+            html += `<line x1="${n.x}" y1="${n.y}" x2="${t.x}" y2="${t.y}" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />`;
+          });
+        });
+        topoNodes.forEach((n) => {
+          let colorClass = "fill-[#1e293b] stroke-[#94a3b8]";
+          if (topoVisited.has(n.id))
+            colorClass = "fill-emerald-600 stroke-white";
+          if (topoActivePath.includes(n.id))
+            colorClass = "fill-red-500 stroke-white";
+          html += `<g><circle cx="${n.x}" cy="${n.y}" r="18" class="${colorClass}" stroke-width="2" /><text x="${n.x}" y="${n.y}" dy="5" text-anchor="middle" fill="white" font-weight="bold" font-size="12">${n.id}</text></g>`;
+        });
+        svg.innerHTML = html;
+      }
+
+      function initTopo() {
+        topoStack = [];
+        topoVisited = new Set();
+        topoActivePath = [];
+        topoState = "idle";
+        topoDfsStack = ["A"];
+        document.getElementById("topo-stack").innerHTML = "";
+        document.getElementById("topo-log").innerText = "Ready. Start at A.";
+        document.getElementById("topo-result-box").classList.add("hidden");
+        drawTopo();
+      }
+
+      function topoNextStep() {
+        if (topoState === "finished") return;
+        if (topoDfsStack.length === 0) {
+          const left = topoNodes.find((n) => !topoVisited.has(n.id));
+          if (left) {
+            topoDfsStack.push(left.id);
+          } else {
+            topoState = "finished";
+            document.getElementById("topo-log").innerText = "DFS Complete.";
+            const reversed = [...topoStack].reverse();
+            document
+              .getElementById("topo-result-box")
+              .classList.remove("hidden");
+            document.getElementById("topo-final-order").innerText =
+              reversed.join(" -> ");
+            return;
+          }
+        }
+        const curr = topoDfsStack[topoDfsStack.length - 1];
+        if (!curr) return;
+        topoActivePath = [...topoDfsStack];
+        const nodeObj = topoNodes.find((n) => n.id === curr);
+        const hasWork = nodeObj.next.some(
+          (childId) => !topoVisited.has(childId)
+        );
+        if (hasWork) {
+          const nextC = nodeObj.next.find(
+            (childId) => !topoVisited.has(childId)
+          );
+          if (nextC) {
+            topoDfsStack.push(nextC);
+            document.getElementById(
+              "topo-log"
+            ).innerText = `Visiting child ${nextC}...`;
+          }
+        } else {
+          const doneNode = topoDfsStack.pop();
+          topoVisited.add(doneNode);
+          topoStack.push(doneNode);
+          const stackHtml = topoStack
+            .map(
+              (n) =>
+                `<span class="border border-emerald-500 px-2 rounded">${n}</span>`
+            )
+            .join(" ");
+          document.getElementById("topo-stack").innerHTML = stackHtml;
+          document.getElementById(
+            "topo-log"
+          ).innerText = `${doneNode} is dead end. Push to stack. Backtrack.`;
+        }
+        drawTopo();
+      }
+
+      // === PERMUTATION TREE ===
+      let permPaths = [];
+      function drawPermTree() {
+        const input = document
+          .getElementById("permInput")
+          .value.toUpperCase()
+          .slice(0, 4);
+        if (!input) return;
+        const svg = document.getElementById("perm-svg");
+        svg.innerHTML = "";
+        permPaths = [];
+        const startX = 600;
+        const startY = 40;
+        const levelH = 80;
+        let html = "";
+        function build(
+          currentStr,
+          remainingStr,
+          x,
+          y,
+          level,
+          parentX,
+          parentY,
+          pathId
+        ) {
+          if (parentX !== null) {
+            html += `<line x1="${parentX}" y1="${parentY}" x2="${x}" y2="${y}" stroke="#475569" stroke-width="1" class="perm-line-${pathId}" />`;
+          }
+          const isLeaf = remainingStr.length === 0;
+          let circleClass = isLeaf ? `perm-leaf-${pathId}` : "";
+          html += `<circle cx="${x}" cy="${y}" r="12" fill="#1e293b" stroke="#3b82f6" stroke-width="2" class="${circleClass}"/>`;
+          html += `<text x="${x}" y="${y}" dy="4" text-anchor="middle" fill="white" font-size="9" font-weight="bold">${
+            currentStr || "R"
+          }</text>`;
+          if (isLeaf) {
+            permPaths.push({ id: pathId, val: "TODO" });
+            return;
+          }
+          let spread = 0;
+          if (input.length === 4) {
+            if (level === 0) spread = 280;
+            if (level === 1) spread = 80;
+            if (level === 2) spread = 30;
+          } else {
+            if (level === 0) spread = 200;
+            if (level === 1) spread = 60;
+          }
+          remainingStr.split("").forEach((char, idx) => {
+            const nextRem =
+              remainingStr.slice(0, idx) + remainingStr.slice(idx + 1);
+            const startX_local = x - ((remainingStr.length - 1) * spread) / 2;
+            const childX = startX_local + idx * spread;
+            build(
+              char,
+              nextRem,
+              childX,
+              y + levelH,
+              level + 1,
+              x,
+              y,
+              pathId + char
+            );
+          });
+        }
+        build("", input, startX, startY, 0, null, null, "R");
+        svg.innerHTML = html;
+        document.getElementById("perm-show-btn").classList.remove("hidden");
+        document.getElementById("perm-list-container").classList.add("hidden");
+      }
+
+      async function showPermResults() {
+        const input = document
+          .getElementById("permInput")
+          .value.toUpperCase()
+          .slice(0, 4);
+        const listDiv = document.getElementById("perm-list");
+        const container = document.getElementById("perm-list-container");
+        listDiv.innerHTML = "";
+        container.classList.remove("hidden");
+        function getPerms(str) {
+          if (str.length < 2) return str.length === 1 ? [str] : [];
+          let perms = [];
+          for (let i = 0; i < str.length; i++) {
+            let char = str[i];
+            let remaining = str.slice(0, i) + str.slice(i + 1, str.length);
+            for (let subPerm of getPerms(remaining)) perms.push(char + subPerm);
+          }
+          return perms;
+        }
+        const results = getPerms(input);
+        for (let res of results) {
+          const item = document.createElement("div");
+          item.innerText = res;
+          item.className =
+            "border-b border-slate-800 py-1 opacity-0 transition-opacity duration-300";
+          listDiv.appendChild(item);
+          requestAnimationFrame(() => item.classList.remove("opacity-0"));
+          await new Promise((r) => setTimeout(r, 200));
+        }
+      }
+
+      // === HORNER'S RULE ===
+      let hornerState = { coeffs: [], x: 0, step: 0, result: 0 };
+      function updatePolynomial() {
+        const cStr = document.getElementById("hornerCoeffs").value;
+        const coeffs = cStr
+          .trim()
+          .split(/\s+/)
+          .map(Number)
+          .filter((n) => !isNaN(n));
+        if (coeffs.length === 0) return;
+        let html = "f(x) = ";
+        const degree = coeffs.length - 1;
+        coeffs.forEach((c, i) => {
+          const power = degree - i;
+          if (c === 0) return;
+          if (i > 0 && c > 0) html += " + ";
+          if (c < 0) html += " - ";
+          const val = Math.abs(c);
+          if (val !== 1 || power === 0) html += val;
+          if (power > 0) html += "x";
+          if (power > 1) html += `<sup>${power}</sup>`;
+        });
+        document.getElementById("poly-display").innerHTML = html;
+      }
+
+      function initHorner() {
+        const cStr = document.getElementById("hornerCoeffs").value;
+        const xVal = parseFloat(document.getElementById("hornerX").value);
+        hornerState.coeffs = cStr.trim().split(/\s+/).map(Number);
+        hornerState.x = xVal;
+        hornerState.step = 0;
+        hornerState.result = hornerState.coeffs[0];
+        renderHornerTable();
+        updatePolynomial();
+        document.getElementById("horner-explanation").innerText =
+          "Click Next Step to start.";
+      }
+
+      function hornerStep() {
+        if (hornerState.step >= hornerState.coeffs.length - 1) {
+          document.getElementById("horner-explanation").innerText =
+            "Finished. Final Answer: " + hornerState.result;
+          return;
+        }
+        hornerState.step++;
+        const prev = hornerState.result;
+        const mult = prev * hornerState.x;
+        const currCoeff = hornerState.coeffs[hornerState.step];
+        hornerState.result = mult + currCoeff;
+        renderHornerTable();
+        document.getElementById(
+          "horner-explanation"
+        ).innerText = `Step ${hornerState.step}: ${prev} × ${hornerState.x} = ${mult}. Then ${mult} + ${currCoeff} = ${hornerState.result}`;
+      }
+
+      function renderHornerTable() {
+        const container = document.getElementById("horner-container");
+        const { coeffs, x, step, result } = hornerState;
+        let row1 = `<div class="flex"><div class="w-24 text-slate-500 text-sm p-2">Coeffs:</div>`;
+        let row2 = `<div class="flex"><div class="w-24 text-slate-500 text-sm p-2">Multiply:</div>`;
+        let row3 = `<div class="flex"><div class="w-24 text-slate-500 text-sm p-2">Sum:</div>`;
+        coeffs.forEach((c, i) => {
+          row1 += `<div class="w-20 p-2 text-center border border-slate-700 ${
+            i === step ? "highlight-coeff text-white" : "text-slate-300"
+          }">${c}</div>`;
+          if (i === 0) {
+            row2 += `<div class="w-20 p-2 text-center border border-slate-800 text-slate-600">↓</div>`;
+            row3 += `<div class="w-20 p-2 text-center border border-slate-700 font-bold bg-slate-800">${coeffs[0]}</div>`;
+          } else if (i <= step) {
+            let tempR = coeffs[0];
+            for (let k = 1; k < i; k++) tempR = tempR * x + coeffs[k];
+            let valMult = tempR * x;
+            let valSum = valMult + c;
+            row2 += `<div class="w-20 p-2 text-center border border-slate-800 text-slate-400 text-sm">${valMult}</div>`;
+            row3 += `<div class="w-20 p-2 text-center border border-slate-700 font-bold text-white ${
+              i === step ? "highlight-result" : "bg-slate-800"
+            }">${valSum}</div>`;
+          } else {
+            row2 += `<div class="w-20 p-2 text-center border border-slate-800"></div>`;
+            row3 += `<div class="w-20 p-2 text-center border border-slate-800"></div>`;
+          }
+        });
+        row1 += `</div>`;
+        row2 += `</div>`;
+        row3 += `</div>`;
+        container.innerHTML = row1 + row2 + row3;
+      }
+
+      // === RUSSIAN PEASANT ===
+      function calcRussian() {
+        let a = parseInt(document.getElementById("russianA").value);
+        let b = parseInt(document.getElementById("russianB").value);
+        let sum = 0;
+        let html = `
+                <div class="grid grid-cols-4 gap-4 text-right mb-2 border-b border-slate-700 pb-2 font-bold text-slate-400 text-sm">
+                    <div>Halve</div><div>Double</div><div>Check</div><div>Add to Sum</div>
+                </div>`;
+        while (a >= 1) {
+          let keep = a % 2 !== 0;
+          if (keep) sum += b;
+          html += `
+                    <div class="grid grid-cols-4 gap-4 text-right items-center p-2 rounded transition hover:bg-slate-800 ${
+                      keep
+                        ? "border-l-4 border-green-500 bg-green-900/20"
+                        : "opacity-50 strike-through"
+                    }">
+                        <div>${a}</div><div>${b}</div>
+                        <div class="text-xs">${keep ? "ODD" : "EVEN"}</div>
+                        <div class="${
+                          keep ? "text-green-400 font-bold" : ""
+                        }">${keep ? "+ " + b : "-"}</div>
+                    </div>`;
+          a = Math.floor(a / 2);
+          b = b * 2;
+        }
+        html += `
+                <div class="grid grid-cols-4 gap-4 text-right mt-4 pt-4 border-t-2 border-slate-600">
+                    <div></div><div></div><div class="font-bold text-white">TOTAL:</div>
+                    <div class="font-bold text-green-400 text-xl">${sum}</div>
+                </div>`;
+        document.getElementById("russianOutput").innerHTML = html;
+      }
+
+      // === COUNTING SORT ===
+      function calcCounting() {
+        const inputStr = document.getElementById("countInput").value;
+        const arr = inputStr
+          .split(",")
+          .map((n) => parseInt(n.trim()))
+          .filter((n) => !isNaN(n));
+        if (arr.length === 0) return;
+        const max = Math.max(...arr);
+        const counts = new Array(max + 1).fill(0);
+        arr.forEach((x) => counts[x]++);
+        const cum = [...counts];
+        for (let i = 1; i < cum.length; i++) cum[i] += cum[i - 1];
+        const starts = [0, ...cum.slice(0, -1)];
+        let html = `
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-slate-900 p-4 rounded border border-slate-700">
+                        <h3 class="text-sm font-bold text-blue-400 mb-3 uppercase">1. Count Frequencies</h3>
+                        <div class="grid grid-cols-2 gap-px bg-slate-700 border border-slate-700">
+                            <div class="bg-slate-800 p-2 text-xs text-slate-400 font-bold">Value</div>
+                            <div class="bg-slate-800 p-2 text-xs text-slate-400 font-bold">Count</div>
+                            ${counts
+                              .map(
+                                (c, i) =>
+                                  `<div class="bg-slate-900 p-2 text-sm text-center">${i}</div><div class="bg-slate-900 p-2 text-sm text-center text-blue-300 font-bold">${c}</div>`
+                              )
+                              .join("")}
+                        </div>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded border border-slate-700">
+                        <h3 class="text-sm font-bold text-purple-400 mb-3 uppercase">2. Starting Positions</h3>
+                        <div class="grid grid-cols-2 gap-px bg-slate-700 border border-slate-700">
+                            <div class="bg-slate-800 p-2 text-xs text-slate-400 font-bold">Value</div>
+                            <div class="bg-slate-800 p-2 text-xs text-slate-400 font-bold">Start Index</div>
+                            ${starts
+                              .map(
+                                (s, i) =>
+                                  `<div class="bg-slate-900 p-2 text-sm text-center">${i}</div><div class="bg-slate-900 p-2 text-sm text-center text-purple-300 font-bold">${s}</div>`
+                              )
+                              .join("")}
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-black p-4 rounded border-l-4 border-emerald-500">
+                    <h3 class="text-sm font-bold text-emerald-400 mb-2 uppercase">3. Final Sorted Array</h3>
+                    <div class="text-xl font-mono tracking-widest">[ ${arr
+                      .sort((a, b) => a - b)
+                      .join(", ")} ]</div>
+                </div>
+            `;
+        document.getElementById("countingSteps").innerHTML = html;
+      }
+
+      // === HORSPOOL ===
+      let hsState = { text: "", pattern: "", table: {}, shift: 0, index: 0 };
+      function initHorspool() {
+        const t = document.getElementById("horspoolText").value.toUpperCase();
+        const p = document
+          .getElementById("horspoolPattern")
+          .value.toUpperCase();
+        if (!t || !p) return;
+        const len = p.length;
+        const table = {};
+        const unique = [...new Set(p.split(""))];
+        unique.forEach((c) => (table[c] = len));
+        for (let i = 0; i < len - 1; i++) table[p[i]] = len - 1 - i;
+        hsState = { text: t, pattern: p, table, shift: 0, index: p.length - 1 };
+        const tableHtml =
+          Object.entries(table)
+            .map(
+              ([char, val]) =>
+                `<div class="bg-slate-900 border border-slate-600 px-2 py-1 rounded text-center min-w-[30px]"><div class="text-xs text-slate-500">${char}</div><div class="font-bold text-white">${val}</div></div>`
+            )
+            .join("") +
+          `<div class="bg-slate-900 border border-slate-600 px-2 py-1 rounded text-center min-w-[30px] opacity-70"><div class="text-xs text-slate-500">*</div><div class="font-bold text-white">${len}</div></div>`;
+        document.getElementById("h-table-content").innerHTML = tableHtml;
+        document.getElementById("horspool-log").innerText =
+          "Ready. Pattern aligns at 0.";
+        renderHorspoolVis();
+      }
+      function renderHorspoolVis() {
+        const { text, pattern, shift } = hsState;
+        let tHtml = `<div>`;
+        for (let i = 0; i < text.length; i++)
+          tHtml += `<span class="inline-block w-8 text-center border border-transparent text-slate-400" id="hp-t-${i}">${text[i]}</span>`;
+        tHtml += `</div>`;
+        let pHtml = `<div class="mt-1 transition-all duration-300" style="margin-left: ${
+          shift * 32
+        }px">`;
+        for (let i = 0; i < pattern.length; i++)
+          pHtml += `<span class="inline-block w-8 text-center border border-blue-500 bg-blue-900/30 text-white font-bold" id="hp-p-${i}">${pattern[i]}</span>`;
+        pHtml += `</div>`;
+        document.getElementById("horspool-vis-container").innerHTML =
+          tHtml + pHtml;
+      }
+      function horspoolStep() {
+        const { text, pattern, shift } = hsState;
+        if (shift > text.length - pattern.length) {
+          document.getElementById("horspool-log").innerText = "End of text.";
+          return;
+        }
+        let m = pattern.length - 1;
+        let matchLen = 0;
+        document
+          .querySelectorAll('[id^="hp-p-"]')
+          .forEach((el) => el.classList.remove("bg-green-500", "bg-red-500"));
+        while (m >= 0) {
+          const textChar = text[shift + m];
+          const pattChar = pattern[m];
+          if (textChar === pattChar) {
+            document.getElementById(`hp-p-${m}`).classList.add("bg-green-500");
+            m--;
+            matchLen++;
+          } else {
+            document.getElementById(`hp-p-${m}`).classList.add("bg-red-500");
+            const lastTextChar = text[shift + pattern.length - 1];
+            const jump = hsState.table[lastTextChar] || pattern.length;
+            document.getElementById(
+              "horspool-log"
+            ).innerText = `Mismatch! Last text char '${lastTextChar}' says shift ${jump}.`;
+            hsState.shift += jump;
+            setTimeout(renderHorspoolVis, 1000);
+            return;
+          }
+        }
+        if (matchLen === pattern.length) {
+          document.getElementById("horspool-log").innerText = "MATCH FOUND!";
+          hsState.shift += 1;
+        }
+      }
+
+      // === DIJKSTRA ===
+      const dNodes = [
+        { id: "A", x: 50, y: 150 },
+        { id: "B", x: 150, y: 50 },
+        { id: "C", x: 150, y: 250 },
+        { id: "D", x: 250, y: 150 },
+        { id: "E", x: 350, y: 150 },
+      ];
+      const dEdges = [
+        { u: "A", v: "B", w: 4 },
+        { u: "A", v: "C", w: 2 },
+        { u: "B", v: "C", w: 1 },
+        { u: "B", v: "D", w: 5 },
+        { u: "C", v: "D", w: 8 },
+        { u: "C", v: "E", w: 10 },
+        { u: "D", v: "E", w: 2 },
+      ];
+      const adj = {};
+      dNodes.forEach((n) => (adj[n.id] = []));
+      dEdges.forEach((e) => {
+        adj[e.u].push({ to: e.v, w: e.w });
+      });
+
+      let dState = { table: {}, queue: [], curr: null, history: [] };
+
+      function drawDijkstraGraph() {
+        const svg = document.getElementById("dijkstra-svg");
+        let html = `<defs><marker id="d-arrow" markerWidth="10" markerHeight="10" refX="28" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748b" /></marker></defs>`;
+        dEdges.forEach((e) => {
+          const u = dNodes.find((n) => n.id === e.u);
+          const v = dNodes.find((n) => n.id === e.v);
+          const mx = (u.x + v.x) / 2;
+          const my = (u.y + v.y) / 2;
+          html += `<line x1="${u.x}" y1="${u.y}" x2="${v.x}" y2="${v.y}" stroke="#475569" stroke-width="2" marker-end="url(#d-arrow)" />`;
+          html += `<rect x="${mx - 10}" y="${
+            my - 10
+          }" width="20" height="20" fill="#0f172a" /><text x="${mx}" y="${my}" dy="5" text-anchor="middle" fill="#facc15" font-size="12" font-weight="bold">${
+            e.w
+          }</text>`;
+        });
+        dNodes.forEach((n) => {
+          const info = dState.table[n.id];
+          const isCurr = dState.curr === n.id;
+          const isDone = info && info.visited;
+          let fill = "#1e293b";
+          let stroke = "#94a3b8";
+          if (isDone) {
+            fill = "#3b82f6";
+            stroke = "white";
+          }
+          if (isCurr) {
+            fill = "#ef4444";
+            stroke = "white";
+          }
+          html += `<g><circle cx="${n.x}" cy="${n.y}" r="20" fill="${fill}" stroke="${stroke}" stroke-width="2" /><text x="${n.x}" y="${n.y}" dy="5" text-anchor="middle" fill="white" font-weight="bold">${n.id}</text></g>`;
+        });
+        svg.innerHTML = html;
+      }
+
+      function initDijkstra() {
+        dState.table = {};
+        dState.curr = null;
+        dState.step = 0;
+        dNodes.forEach((n) => {
+          dState.table[n.id] = { cost: Infinity, parent: "-", visited: false };
+        });
+        dState.table["A"].cost = 0;
+
+        // Clear and Setup Table Header
+        const thead = document.querySelector("#dijkstra-table thead tr");
+        thead.innerHTML =
+          '<th class="p-2 border-r bg-slate-300 w-16 sticky left-0 z-10">Step</th>';
+        dNodes.forEach((n) => {
+          thead.innerHTML += `<th class="p-2 border-r min-w-[80px]">${n.id}</th>`;
+        });
+
+        document.getElementById("dijkstra-table-body").innerHTML = "";
+
+        drawDijkstraGraph();
+        logDijkstraRow("Init");
+        document.getElementById("dijkstra-log").innerText =
+          "Start at A (Cost 0).";
+      }
+
+      function logDijkstraRow(label) {
+        const tbody = document.getElementById("dijkstra-table-body");
+        const tr = document.createElement("tr");
+        tr.className = "border-b border-slate-200 hover:bg-slate-50";
+
+        let labelHtml = `<td class="p-2 border-r font-bold bg-slate-100 sticky left-0 z-10">${label}</td>`;
+        tr.innerHTML += labelHtml;
+
+        dNodes.forEach((n) => {
+          const data = dState.table[n.id];
+          let val = data.cost === Infinity ? "∞" : data.cost;
+          let par = data.parent === "-" ? "" : `(${data.parent})`;
+          let cellClass = "";
+          let content = `${val} ${par}`;
+
+          if (label === n.id)
+            cellClass =
+              "bg-red-100 text-red-700 font-bold border-2 border-red-500";
+
+          // Logic: If already visited in a PREVIOUS step, don't show value (make empty).
+          // "label" is the node currently being visited.
+          // If data.visited is true, and n.id is NOT label, then it was visited before.
+          // Exception: 'Init' row shows everything.
+          if (label !== "Init" && data.visited && label !== n.id) {
+            content = "";
+            cellClass = "bg-slate-50";
+          }
+
+          tr.innerHTML += `<td class="p-2 border-r ${cellClass}">${content}</td>`;
+        });
+
+        tbody.appendChild(tr);
+        // Scroll to bottom
+        const container =
+          document.querySelector("#dijkstra-table").parentElement;
+        if (container) container.scrollTop = container.scrollHeight;
+      }
+
+      function dijkstraNext() {
+        let minNode = null;
+        let minVal = Infinity;
+        dNodes.forEach((n) => {
+          const t = dState.table[n.id];
+          if (!t.visited && t.cost < minVal) {
+            minVal = t.cost;
+            minNode = n.id;
+          }
+        });
+
+        if (!minNode) {
+          document.getElementById("dijkstra-log").innerText = "Done.";
+          dState.curr = null;
+          drawDijkstraGraph();
+          return;
+        }
+
+        dState.curr = minNode;
+        dState.table[minNode].visited = true;
+
+        const neighbors = adj[minNode];
+        let logMsg = `Visited ${minNode}. `;
+        neighbors.forEach((edge) => {
+          const neighborId = edge.to;
+          const newDist = dState.table[minNode].cost + edge.w;
+          if (newDist < dState.table[neighborId].cost) {
+            dState.table[neighborId].cost = newDist;
+            dState.table[neighborId].parent = minNode;
+          }
+        });
+
+        drawDijkstraGraph();
+        logDijkstraRow(minNode);
+      }
+
+      // Global Init
+      window.onload = function () {
+        initBFS();
+        initDFS();
+        initTopo();
+        updatePolynomial();
+        initHorner();
+        calcRussian();
+        calcCounting();
+        initHorspool();
+        initDijkstra();
+      };
+    </script>
+  </body>
+</html>

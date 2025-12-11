@@ -1,28 +1,35 @@
 //src\App.jsx
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
-} from 'react-router-dom';
+} from "react-router-dom";
 
-import Home from './pages/Home';
-import RyGame from './pages/RyGame';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Profile from './pages/Profile';
-import Coding from './pages/Coding';
-import DataLookup from './pages/DataLookup';
-import SmartCity from './pages/SmartCity';
-import Navbar from '@components/Navbar';
-import NotFound from '@components/NotFound';
-import ErrorBoundary from './Components/ErrorBoundary';
-import ProtectedRoute from './Components/ProtectedRoute';
-import SendEnv from './pages/SendEnv';
-import useAuthBootstrap from './hooks/useAuthBootstrap';
-import usePageTracking from './hooks/usePageTracking';
+import Home from "./pages/Home";
+import RyGame from "./pages/RyGame";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Profile from "./pages/Profile";
+import Coding from "./pages/Coding";
+import DataLookup from "./pages/DataLookup";
+import SmartCity from "./pages/SmartCity";
+import Navbar from "@components/Navbar";
+import NotFound from "@components/NotFound";
+import ErrorBoundary from "./Components/ErrorBoundary";
+import ProtectedRoute from "./Components/ProtectedRoute";
+import SendEnv from "./pages/SendEnv";
+import useAuthBootstrap from "./hooks/useAuthBootstrap";
+import usePageTracking from "./hooks/usePageTracking";
+
+const ExternalRedirect = ({ to }) => {
+  React.useEffect(() => {
+    window.location.replace(to);
+  }, [to]);
+  return null;
+};
 
 const AppShell = ({ darkMode, setDarkMode, token }) => {
   usePageTracking();
@@ -41,6 +48,7 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
             )
           }
         />
+        <Route path='/algo' element={<ExternalRedirect to='/algo.html' />} />
         <Route
           path='/home'
           element={
@@ -111,7 +119,7 @@ const App = () => {
 
   return (
     <ErrorBoundary>
-      <div className={darkMode ? 'dark' : ''}>
+      <div className={darkMode ? "dark" : ""}>
         <Router>
           <AppShell
             darkMode={darkMode}
