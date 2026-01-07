@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Carousel Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="carouselUtil.js"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      /* Hide scrollbar for IE, Edge and Firefox */
+      .scrollbar-hide {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+      }
+
+      /* Smooth glass effect */
+      .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      /* Gradient overlays stay fixed */
+      .carousel-gradient-left,
+      .carousel-gradient-right {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 8rem;
+        z-index: 10;
+        pointer-events: none;
+      }
+      .carousel-gradient-left {
+        left: 0;
+        background: linear-gradient(
+          to right,
+          rgb(249 250 251) 0%,
+          transparent 100%
+        );
+      }
+      .carousel-gradient-right {
+        right: 0;
+        background: linear-gradient(
+          to left,
+          rgb(249 250 251) 0%,
+          transparent 100%
+        );
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gray-50 text-gray-900 selection:bg-indigo-500 selection:text-white"
+  >
+    <!-- Navigation -->
+    <nav
+      class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100"
+    >
+      <div class="px-6 sm:px-8 lg:px-12">
+        <div class="flex justify-between items-center h-24">
+          <div class="flex items-center">
+            <span class="font-bold text-4xl tracking-tight" style="width: 256px"
+              >Adorio Ideas
+            </span>
+          </div>
+          <div class="hidden md:flex items-center space-x-10">
+            <a
+              href="#"
+              class="text-lg font-medium text-gray-700 hover:text-indigo-600 transition-colors"
+              >Products</a
+            >
+            <a
+              href="#"
+              class="text-lg font-medium text-gray-700 hover:text-indigo-600 transition-colors"
+              >Solutions</a
+            >
+            <a
+              href="#"
+              class="text-lg font-medium text-gray-700 hover:text-indigo-600 transition-colors"
+              >Pricing</a
+            >
+            <a
+              href="#"
+              class="text-lg font-medium text-gray-700 hover:text-indigo-600 transition-colors"
+              >About</a
+            >
+          </div>
+          <div class="flex items-center gap-6">
+            <a
+              href="#"
+              class="hidden md:block text-lg font-medium text-gray-600 hover:text-gray-900"
+              >Sign in</a
+            >
+            <a
+              href="#"
+              class="px-6 py-3 bg-gray-900 text-white text-lg font-medium rounded-full hover:bg-gray-800 transition-colors"
+              >Get Started</a
+            >
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-32 pb-16">
+      <!-- Carousel Controls -->
+      <div class="px-6 sm:px-8 lg:px-12 mb-6 flex justify-end">
+        <div class="flex gap-3">
+          <button
+            id="prevBtn"
+            class="w-14 h-14 rounded-full border border-gray-200 flex items-center justify-center hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition-all active:scale-95"
+          >
+            <i data-lucide="arrow-left" class="w-6 h-6"></i>
+          </button>
+          <button
+            id="nextBtn"
+            class="w-14 h-14 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-gray-900/20"
+          >
+            <i data-lucide="arrow-right" class="w-6 h-6"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Carousel Section -->
+      <div class="relative w-full py-4">
+        <!-- Fade Gradients on sides - OUTSIDE the scroll container -->
+        <div class="carousel-gradient-left hidden md:block"></div>
+        <div class="carousel-gradient-right hidden md:block"></div>
+
+        <!-- Scrollable Track -->
+        <div
+          id="carouselTrack"
+          class="overflow-x-auto scrollbar-hide"
+          style="scroll-behavior: auto"
+        >
+          <div
+            id="carousel"
+            class="flex gap-8 py-8 items-center pl-4"
+            style="width: max-content"
+          >
+            <!-- Card 1 -->
+            <div class="carousel-card shrink-0 w-[400px] md:w-[500px] group">
+              <div
+                class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-indigo-500/10"
+              >
+                <div
+                  class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100"
+                >
+                  <img
+                    src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop"
+                    alt="Abstract Art"
+                    class="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div
+                    class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-semibold text-gray-900"
+                  >
+                    New
+                  </div>
+                </div>
+                <div class="p-6">
+                  <div class="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 class="text-xl font-bold text-gray-900">
+                        Abstract Waves
+                      </h3>
+                      <p class="text-gray-500 text-base">3D Render</p>
+                    </div>
+                    <div class="flex items-center gap-1 text-amber-500">
+                      <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                      <span class="text-base font-medium text-gray-700"
+                        >4.9</span
+                      >
+                    </div>
+                  </div>
+                  <div class="mt-5 flex items-center justify-between">
+                    <span class="text-2xl font-bold text-gray-900">$240</span>
+                    <button
+                      class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-900 hover:bg-indigo-600 hover:text-white transition-colors"
+                    >
+                      <i data-lucide="arrow-up-right" class="w-6 h-6"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="carousel-card shrink-0 w-[400px] md:w-[500px] group">
+              <div
+                class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-indigo-500/10"
+              >
+                <div
+                  class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100"
+                >
+                  <img
+                    src="https://images.unsplash.com/photo-1633511090164-b43840ea1607?q=80&w=1000&auto=format&fit=crop"
+                    alt="Abstract Art"
+                    class="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
+                  />
+                </div>
+                <div class="p-6">
+                  <div class="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 class="text-xl font-bold text-gray-900">Neon Flux</h3>
+                      <p class="text-gray-500 text-base">Digital Art</p>
+                    </div>
+                    <div class="flex items-center gap-1 text-amber-500">
+                      <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                      <span class="text-base font-medium text-gray-700"
+                        >4.8</span
+                      >
+                    </div>
+                  </div>
+                  <div class="mt-5 flex items-center justify-between">
+                    <span class="text-2xl font-bold text-gray-900">$180</span>
+                    <button
+                      class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-900 hover:bg-indigo-600 hover:text-white transition-colors"
+                    >
+                      <i data-lucide="arrow-up-right" class="w-6 h-6"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="carousel-card shrink-0 w-[400px] md:w-[500px] group">
+              <div
+                class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-indigo-500/10"
+              >
+                <div
+                  class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100"
+                >
+                  <img
+                    src="https://images.unsplash.com/photo-1614850523060-8da1d56ae167?q=80&w=1000&auto=format&fit=crop"
+                    alt="Abstract Art"
+                    class="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div
+                    class="absolute top-4 right-4 bg-indigo-600 px-4 py-2 rounded-full text-sm font-semibold text-white"
+                  >
+                    Best Seller
+                  </div>
+                </div>
+                <div class="p-6">
+                  <div class="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 class="text-xl font-bold text-gray-900">
+                        Cyber Prism
+                      </h3>
+                      <p class="text-gray-500 text-base">Illustration</p>
+                    </div>
+                    <div class="flex items-center gap-1 text-amber-500">
+                      <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                      <span class="text-base font-medium text-gray-700"
+                        >5.0</span
+                      >
+                    </div>
+                  </div>
+                  <div class="mt-5 flex items-center justify-between">
+                    <span class="text-2xl font-bold text-gray-900">$320</span>
+                    <button
+                      class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-900 hover:bg-indigo-600 hover:text-white transition-colors"
+                    >
+                      <i data-lucide="arrow-up-right" class="w-6 h-6"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="carousel-card shrink-0 w-[400px] md:w-[500px] group">
+              <div
+                class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-indigo-500/10"
+              >
+                <div
+                  class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100"
+                >
+                  <img
+                    src="https://images.unsplash.com/photo-1633511090164-b43840ea1607?q=80&w=1000&auto=format&fit=crop"
+                    alt="Abstract Art"
+                    class="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
+                  />
+                </div>
+                <div class="p-6">
+                  <div class="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 class="text-xl font-bold text-gray-900">
+                        Void Walker
+                      </h3>
+                      <p class="text-gray-500 text-base">Photography</p>
+                    </div>
+                    <div class="flex items-center gap-1 text-amber-500">
+                      <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                      <span class="text-base font-medium text-gray-700"
+                        >4.7</span
+                      >
+                    </div>
+                  </div>
+                  <div class="mt-5 flex items-center justify-between">
+                    <span class="text-2xl font-bold text-gray-900">$150</span>
+                    <button
+                      class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-900 hover:bg-indigo-600 hover:text-white transition-colors"
+                    >
+                      <i data-lucide="arrow-up-right" class="w-6 h-6"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="carousel-card shrink-0 w-[400px] md:w-[500px] group">
+              <div
+                class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-indigo-500/10"
+              >
+                <div
+                  class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100"
+                >
+                  <img
+                    src="https://images.unsplash.com/photo-1618172193763-c511deb635ca?q=80&w=1000&auto=format&fit=crop"
+                    alt="Abstract Art"
+                    class="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
+                  />
+                </div>
+                <div class="p-6">
+                  <div class="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 class="text-xl font-bold text-gray-900">
+                        Solar Flare
+                      </h3>
+                      <p class="text-gray-500 text-base">Abstract</p>
+                    </div>
+                    <div class="flex items-center gap-1 text-amber-500">
+                      <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                      <span class="text-base font-medium text-gray-700"
+                        >4.6</span
+                      >
+                    </div>
+                  </div>
+                  <div class="mt-5 flex items-center justify-between">
+                    <span class="text-2xl font-bold text-gray-900">$290</span>
+                    <button
+                      class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-900 hover:bg-indigo-600 hover:text-white transition-colors"
+                    >
+                      <i data-lucide="arrow-up-right" class="w-6 h-6"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-100 py-12 mt-12">
+      <div
+        class="px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6"
+      >
+        <div class="flex items-center">
+          <span class="font-bold text-2xl text-gray-900">Adorio </span>
+        </div>
+        <p class="text-gray-500 text-base">
+          © 2026 Adorio Design. All rights reserved.
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      // Initialize Icons
+      lucide.createIcons();
+
+      // Initialize the carousel using the utility
+      // The HTML cards are already in place, so we just need to init the behavior
+      const carouselController = initCarousel({
+        trackId: "carouselTrack",
+        carouselId: "carousel",
+        prevBtnId: "prevBtn",
+        nextBtnId: "nextBtn",
+        pauseOnHover: false,
+        autoScrollSpeed: 0.8,
+        gap: 32,
+      });
+
+      // Example: You can also create a carousel from data using createCarousel()
+      // const cardData = [
+      //   { image: 'url', title: 'Title', subtitle: 'Subtitle', rating: 4.9, price: '$240', badge: 'New' },
+      //   ...
+      // ];
+      // const controller = createCarousel('containerId', cardData);
+    </script>
+  </body>
+</html>
