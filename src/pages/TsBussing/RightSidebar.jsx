@@ -7,7 +7,7 @@ const RightSidebar = () => {
   return (
     <aside className='w-full z-30 shadow-[-4px_0_24px_rgba(0,0,0,0.5)] h-auto md:h-auto overflow-y-auto border-l-0 md:border-l-0 border-t-8 md:border-t-8 border-amber-900 cork-pattern md:col-start-1 md:row-start-2 ts-right-sidebar'>
       <div className='p-6 flex flex-col gap-6 relative'>
-        {/* Note - feels handwritten */}
+        {/* Note */}
         <div className='bg-yellow-100 text-yellow-900 p-4 shadow-md rotate-[2.5deg] transform relative'>
           <div className='absolute -top-3 mt-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-red-500 shadow-md'></div>
           <p className='font-handwriting text-base leading-relaxed'>
