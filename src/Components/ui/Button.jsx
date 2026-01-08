@@ -1,5 +1,3 @@
-// feelio/src/components/ui/Button.jsx
-import React from "react";
 import { motion } from "framer-motion";
 
 const Button = ({ children, className, ...props }) => {
