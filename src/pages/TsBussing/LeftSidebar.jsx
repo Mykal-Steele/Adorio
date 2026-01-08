@@ -26,7 +26,7 @@ const LeftSidebar = () => {
             <div className='absolute top-0 right-0 w-full h-full bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none'></div>
           </div>
           <div className='text-center mt-4'>
-            <h1 className='text-2xl font-black text-amber-100 drop-shadow-md font-handwriting tracking-widest '>
+            <h1 className='text-2xl font-black text-amber-100 drop-shadow-md font-poppins tracking-widest '>
               Oakar Oo
             </h1>
             <p className='text-amber-400/80 text-sm font-main'>Student</p>
