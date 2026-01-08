@@ -60,10 +60,9 @@ const Shelf = React.memo(({ category, iconName, speed, items }) => {
 
   const IconComponent = Icons[iconName] || Icons.Code;
 
-  // Random tilt logic (10% chance) - calculated initially to avoid jump
+  // Random tilt logic (10% chance)
   const [tiltStyle] = useState(() => {
     if (Math.random() < 0.1) {
-      // Very slight tilt between -1deg and 1deg
       return { transform: `rotate(${Math.random() * 2 - 1}deg)` };
     }
     return {};
