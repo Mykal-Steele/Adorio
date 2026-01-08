@@ -60,10 +60,10 @@ export default defineConfig({
 
         // csp stuff took me like 3 days to figure out - stackoverflow is my best friend
         // Note: 'unsafe-eval' is needed for the coding platform to execute user code safely
-        const scriptSrc = `'self' 'nonce-${nonce}' 'unsafe-eval' https://static.cloudflareinsights.com https://challenges.cloudflare.com https://pagead2.googlesyndication.com`;
+        const scriptSrc = `'self' 'nonce-${nonce}' 'unsafe-eval' https://static.cloudflareinsights.com https://challenges.cloudflare.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://www.googletagservices.com https://adservice.google.com`;
         const connectSrc = isDev
           ? `'self' http: https: ws: wss: data: blob:`
-          : `'self' https://adorio.space https://www.adorio.space wss://adorio.space wss://www.adorio.space https://cdnjs.cloudflare.com https://cloudflareinsights.com https://*.cloudflare.com https://pagead2.googlesyndication.com`;
+          : `'self' https://adorio.space https://www.adorio.space wss://adorio.space wss://www.adorio.space https://cdnjs.cloudflare.com https://cloudflareinsights.com https://*.cloudflare.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://ep1.adtrafficquality.google`;
 
         return html
           .replace(
@@ -76,7 +76,7 @@ export default defineConfig({
               font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:;
               img-src 'self' data: blob: https:;
               connect-src ${connectSrc};
-              frame-src 'self' https: http:;
+              frame-src 'self' https: http: https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com;
               worker-src 'self' blob:;
               form-action 'self';
               base-uri 'self';
