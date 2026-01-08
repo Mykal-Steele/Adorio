@@ -6,6 +6,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 
 import Home from "./pages/Home";
@@ -21,6 +22,8 @@ import NotFound from "@components/NotFound";
 import ErrorBoundary from "./Components/ErrorBoundary";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import SendEnv from "./pages/SendEnv";
+import TempBeforeReal from "./pages/tempBeforeReal";
+import TsBussing from "./pages/TsBussing";
 import useAuthBootstrap from "./hooks/useAuthBootstrap";
 import usePageTracking from "./hooks/usePageTracking";
 
@@ -33,10 +36,13 @@ const ExternalRedirect = ({ to }) => {
 
 const AppShell = ({ darkMode, setDarkMode, token }) => {
   usePageTracking();
+  const location = useLocation();
 
   return (
     <>
-      <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+      {location.pathname !== "/tsbussing" && (
+        <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+      )}
       <Routes>
         <Route
           path='/'
@@ -79,6 +85,8 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
         <Route path='/coding' element={<Coding />} />
         <Route path='/sendenv' element={<SendEnv />} />
         <Route path='/smartcity' element={<SmartCity />} />
+        <Route path='/tempBeforeReal' element={<TempBeforeReal />} />
+        <Route path='/tsbussing' element={<TsBussing />} />
         <Route
           path='/data-lookup'
           element={
