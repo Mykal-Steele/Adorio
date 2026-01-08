@@ -97,3 +97,30 @@ body {
   background-color: rgba(10, 10, 12, 0.9);
   border-right: 1px solid rgba(75, 85, 99, 0.4);
 }
+
+/* TsBussing Layout - Breakpoint Variable: 1220px */
+@media (min-width: 1220px) {
+  .ts-bussing-layout {
+    grid-template-columns: 320px 1fr 288px !important;
+    overflow: hidden !important;
+  }
+  
+  .ts-left-sidebar {
+    height: 100vh !important;
+  }
+
+  .ts-main-content {
+    height: 100vh !important;
+    overflow-y: auto !important;
+    grid-row: span 1 !important;
+    grid-column-start: 2 !important;
+  }
+  
+  .ts-right-sidebar {
+    height: 100vh !important;
+    border-left-width: 8px !important;
+    border-top-width: 0 !important;
+    grid-column-start: 3 !important;
+    grid-row-start: 1 !important;
+  }
+}
