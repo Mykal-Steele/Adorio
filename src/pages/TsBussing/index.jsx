@@ -663,8 +663,30 @@ const Icons = {
 };
 
 // Carousel Card Component
+const getStatusProps = (status) => {
+  const s = String(status).toLowerCase();
+  if (
+    s === "live" ||
+    s === "playable" ||
+    s === "gallery" ||
+    s.startsWith("$")
+  ) {
+    return "text-red-300 bg-red-900/50 border-red-500/50 shadow-[0_0_5px_rgba(248,113,113,0.2)]";
+  }
+  if (s === "beta" || s === "demo") {
+    return "text-blue-300 bg-blue-900/50 border-blue-500/50 shadow-[0_0_5px_rgba(59,130,246,0.2)]";
+  }
+  if (s === "proto") {
+    return "text-amber-300 bg-amber-900/50 border-amber-500/50 shadow-[0_0_5px_rgba(251,191,36,0.2)]";
+  }
+  if (s === "archived") {
+    return "text-green-300 bg-green-900/50 border-green-500/50 shadow-[0_0_5px_rgba(34,197,94,0.2)]";
+  }
+  return "text-green-300 bg-green-900/50 border-green-500/50 shadow-[0_0_5px_rgba(34,197,94,0.2)]";
+};
+
 const CarouselCard = React.memo(({ card }) => (
-  <div className='carousel-card shrink-0 w-[180px] group'>
+  <div className='carousel-card shrink-0 w-[260px] group'>
     <div className='bg-green-900/30 border border-green-500/40 rounded-lg p-2 transition-all duration-300 group-hover:bg-green-900/50 group-hover:border-green-400/60'>
       <div className='relative aspect-[4/3] overflow-hidden rounded bg-black/50 border border-green-800/50'>
         <img
@@ -683,21 +705,25 @@ const CarouselCard = React.memo(({ card }) => (
       <div className='p-2'>
         <div className='flex justify-between items-start mb-1'>
           <div>
-            <h3 className='text-green-400 font-mono text-sm font-bold leading-tight group-hover:text-green-300'>
+            <h3 className='text-green-400 font-main text-sm font-bold leading-tight group-hover:text-green-300'>
               {card.title}
             </h3>
-            <p className='text-green-600/70 text-[10px] font-mono'>
+            <p className='text-green-600/70 text-[10px] font-main'>
               {card.subtitle}
             </p>
           </div>
         </div>
-        <div className='mt-1 flex items-center justify-between'>
-          <span className='text-green-400 font-mono text-sm font-bold'>
+        <div className='mt-2 flex items-center justify-between'>
+          <span
+            className={`px-2 py-0.5 rounded text-xs font-main font-bold uppercase tracking-wider border ${getStatusProps(
+              card.price
+            )}`}
+          >
             {card.price}
           </span>
-          <div className='flex items-center gap-0.5 text-amber-500'>
-            <Icons.Star className='w-3 h-3' />
-            <span className='text-[10px] font-mono text-green-500'>
+          <div className='flex items-center gap-1 text-amber-400'>
+            <Icons.Star className='w-3.5 h-3.5 fill-amber-400/20' />
+            <span className='text-xs font-main font-bold text-green-200'>
               {card.rating}
             </span>
           </div>
@@ -934,10 +960,10 @@ const Shelf = React.memo(({ category, iconName, speed, items }) => {
     <div className='mb-16 relative' style={tiltStyle}>
       <div className='relative z-10 flex items-end'>
         {/* CRT Monitor with Carousel */}
-        <div className='mx-auto relative w-full max-w-2xl'>
+        <div className='mx-auto relative w-full max-w-[1200px]'>
           <div className='bg-neutral-800 rounded-3xl p-4 pb-8 border-t-4 border-neutral-600 shadow-2xl relative'>
             <div className='bg-black rounded-2xl overflow-hidden p-1 relative'>
-              <div className='relative screen-glow overflow-hidden'>
+              <div className='relative screen-glow overflow-hidden min-h-[320px] flex flex-col justify-center'>
                 {/* Scanlines */}
                 <div
                   className='pointer-events-none absolute inset-0 z-20'
@@ -1001,7 +1027,7 @@ const Shelf = React.memo(({ category, iconName, speed, items }) => {
         </div>
       </div>
       {/* Shelf */}
-      <div className='h-8 w-full mt-[-2px] relative shadow-2xl rounded-sm wood-pattern-light'>
+      <div className='h-8 w-[120%] -ml-[10%] mt-[-2px] relative shadow-2xl rounded-sm wood-pattern-light'>
         <div className='absolute top-0 left-0 w-full h-2 bg-black/20'></div>
         {/* Category Label */}
         <div
@@ -1047,7 +1073,7 @@ const CalendarWidget = () => {
           {currentTime.toLocaleString("default", { month: "long" })}{" "}
           {currentTime.getFullYear()}
         </div>
-        <div className='mt-2 text-neutral-400 text-xs font-mono border-t pt-2'>
+        <div className='mt-2 text-neutral-400 text-xs font-main border-t pt-2'>
           {currentTime.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -1061,13 +1087,13 @@ const CalendarWidget = () => {
 // Main Page Component
 const TsBussing = () => {
   return (
-    <div className='min-h-screen text-neutral-200 font-sans selection:bg-amber-900 selection:text-white grid grid-cols-1 md:grid-cols-[320px_1fr] lg:grid-cols-[320px_1fr_288px] md:overflow-y-auto lg:overflow-hidden bg-[#2e2e2e]'>
+    <div className='min-h-screen text-neutral-200 font-main selection:bg-amber-900 selection:text-white grid grid-cols-1 md:grid-cols-[320px_1fr] lg:grid-cols-[320px_1fr_288px] md:overflow-y-auto lg:overflow-hidden bg-[#2e2e2e]'>
       {/* Custom styles */}
       <style>{`
-        @import url("https://fonts.googleapis.com/css2?family=Permanent+Marker&family=JetBrains+Mono:wght@400;700&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Poppins:wght@400;600;700&display=swap");
 
         .font-handwriting { font-family: "Permanent Marker", cursive; }
-        .font-mono { font-family: "JetBrains Mono", monospace; }
+        .font-main { font-family: "Poppins", sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -1137,7 +1163,7 @@ const TsBussing = () => {
             "url('https://images.unsplash.com/photo-1585773818428-b50bebdc2344?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8d29vZCUyMHdhbGx8ZW58MHx8MHx8fDA%3D')",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          opacity: 0.65, // Lower opacity to blend with dark theme, or strip this if user wants full brightness
+          opacity: 0.55, // Lower opacity to blend with dark theme, or strip this if user wants full brightness
         }}
       ></div>
 
@@ -1164,10 +1190,10 @@ const TsBussing = () => {
               <div className='absolute top-0 right-0 w-full h-full bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none'></div>
             </div>
             <div className='text-center mt-4'>
-              <h1 className='text-2xl font-black text-amber-100 drop-shadow-md font-serif tracking-widest '>
+              <h1 className='text-2xl font-black text-amber-100 drop-shadow-md font-handwriting tracking-widest '>
                 Oakar Oo
               </h1>
-              <p className='text-amber-400/80 text-sm font-mono'>Student</p>
+              <p className='text-amber-400/80 text-sm font-main'>Student</p>
             </div>
           </div>
 
@@ -1306,11 +1332,11 @@ const TsBussing = () => {
       {/* Main Content */}
       <main className='h-auto lg:h-screen overflow-visible lg:overflow-y-auto overflow-x-hidden relative z-10 md:row-span-2 lg:row-span-1 md:col-start-2 lg:col-start-2 custom-scrollbar'>
         <div className='relative z-10 max-w-4xl mx-auto pt-12 pb-24 px-4 md:px-12'>
-          <div className='mb-12 text-center md:text-left md:pl-4'>
-            <h2 className='text-4xl md:text-5xl font-handwriting font-bold mt-4 text-white drop-shadow-[0_4px_0_rgba(0,0,0,1)]'>
+          <div className='mb-10 text-center md:text-left md:pl-4'>
+            <h2 className='text-4xl md:text-[340%] font-main font-bold mt-4 text-white drop-shadow-[0_4px_0_rgba(0,0,0,1)]'>
               Projects
             </h2>
-            <p className='text-neutral-500 mt-3 font-mono text-white text-xs tracking-wide'>
+            <p className='text-neutral-500 mt-3 font-main text-white text-s tracking-wide'>
               Click on the card to go to the project page!
             </p>
           </div>
@@ -1348,7 +1374,7 @@ const TsBussing = () => {
               <br />
               <span className='text-amber-700 font-bold'>Golang!</span>
             </p>
-            <p className='text-[10px] font-mono text-yellow-700/60 mt-2 -rotate-1'>
+            <p className='text-[10px] font-main text-yellow-700/60 mt-2 -rotate-1'>
               — pinned Jan 7 2026
             </p>
           </div>
@@ -1365,7 +1391,7 @@ const TsBussing = () => {
                   Mykal-Steele
                 </span>
               </div>
-              <span className='text-[10px] text-neutral-500 font-mono mt-1 block'>
+              <span className='text-[10px] text-neutral-500 font-main mt-1 block'>
                 - check my codes here
               </span>
             </a>
@@ -1380,7 +1406,7 @@ const TsBussing = () => {
                   oakar@adorio.space
                 </span>
               </div>
-              <span className='text-[10px] text-neutral-500 font-mono mt-1 block'>
+              <span className='text-[10px] text-neutral-500 font-main mt-1 block'>
                 - sadly, i can't email you back with this email, but i WILL
                 reply you back!
               </span>
@@ -1396,7 +1422,7 @@ const TsBussing = () => {
             <p className='font-handwriting text-neutral-800 text-sm leading-relaxed'>
               There is an easier egg! :D
               <br />
-              <span className='text-neutral-500 text-xs font-mono ml-2'>
+              <span className='text-neutral-500 text-xs font-main ml-2'>
                 (hint: tilt)
               </span>
             </p>
