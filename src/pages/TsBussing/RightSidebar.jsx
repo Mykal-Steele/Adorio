@@ -10,7 +10,7 @@ const RightSidebar = () => {
         {/* Note */}
         <div className='bg-yellow-100 text-yellow-900 p-4 shadow-md rotate-[2.5deg] transform relative'>
           <div className='absolute -top-3 mt-1 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-red-500 shadow-md'></div>
-          <p className='font-handwriting text-base leading-relaxed'>
+          <p className='font-poppins text-base leading-relaxed'>
             Currently Learning
             <br />
             <span className='text-amber-700 font-bold'>Golang!</span>
@@ -28,7 +28,7 @@ const RightSidebar = () => {
             <div className='absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-yellow-500 shadow-md z-10'></div>
             <div className='flex items-center gap-3'>
               <Icons.Github />
-              <span className='font-handwriting font-bold hover:underline'>
+              <span className='font-poppins font-bold hover:underline'>
                 Mykal-Steele
               </span>
             </div>
@@ -43,7 +43,7 @@ const RightSidebar = () => {
             <div className='absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-red-500 shadow-sm z-10'></div>
             <div className='flex items-center gap-2'>
               <Icons.Mail />
-              <span className='font-handwriting font-bold text-sm hover:underline'>
+              <span className='font-poppins font-bold text-sm hover:underline'>
                 oakar@adorio.space
               </span>
             </div>
@@ -60,7 +60,7 @@ const RightSidebar = () => {
         {/* Hint Sticky Note */}
         <div className='bg-amber-50 p-4 shadow-md rotate-[-1.5deg] transform relative mt-4 hover:rotate-[0.5deg] transition-all duration-300'>
           <div className='absolute -top-3 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-blue-500 shadow-md'></div>
-          <p className='font-handwriting text-neutral-800 text-sm leading-relaxed'>
+          <p className='font-poppins text-neutral-800 text-sm leading-relaxed'>
             There is an easier egg! :D
             <br />
             <span className='text-neutral-500 text-xs font-main ml-2'>
