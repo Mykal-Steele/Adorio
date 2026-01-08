@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Star, ArrowUpRight } from "lucide-react";
+import AdSenseScript from "../../Components/AdSenseScript";
 
 const cardsData = [
   {
@@ -462,6 +463,7 @@ export default function TempBeforeReal() {
       className='bg-gray-50 text-gray-900 selection:bg-indigo-500 selection:text-white min-h-screen'
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
+      <AdSenseScript />
       {/* Navigation */}
       <nav className='fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100'>
         <div className='px-6 sm:px-8 lg:px-12'>

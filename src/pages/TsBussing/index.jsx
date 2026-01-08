@@ -4,11 +4,13 @@ import { shelfItems } from "./data";
 import LeftSidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
 import Shelf from "./Shelf";
+import AdSenseScript from "../../Components/AdSenseScript";
 
 // Main Page Component
 const TsBussing = () => {
   return (
     <div className='min-h-screen text-neutral-200 font-main selection:bg-amber-900 selection:text-white grid grid-cols-1 md:grid-cols-[320px_1fr] md:overflow-y-auto bg-[#2e2e2e] ts-bussing-layout'>
+      <AdSenseScript />
       {/* Background Image */}
       <div
         className='fixed inset-0 pointer-events-none z-0'
