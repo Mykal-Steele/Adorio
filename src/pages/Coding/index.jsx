@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { CodeBracketIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { CodeBracketIcon } from "@heroicons/react/24/outline";
+import AdSenseScript from "../../Components/AdSenseScript";
 
 // Components
-import ProblemList from './components/ProblemList.jsx';
-import ProblemDetails from './components/ProblemDetails.jsx';
-import CodeEditor from './components/CodeEditor.jsx';
-import ResultsPanel from './components/ResultsPanel.jsx';
-import TestResults from './components/TestResults.jsx';
+import ProblemList from "./components/ProblemList.jsx";
+import ProblemDetails from "./components/ProblemDetails.jsx";
+import CodeEditor from "./components/CodeEditor.jsx";
+import ResultsPanel from "./components/ResultsPanel.jsx";
+import TestResults from "./components/TestResults.jsx";
 
 // Services and Data
-import { getAllProblems, getProblem } from './problems.js';
-import { CodeRunner } from './CodeRunner.js';
-import { ProblemStorage } from './utils/problemStorage.js';
+import { getAllProblems, getProblem } from "./problems.js";
+import { CodeRunner } from "./CodeRunner.js";
+import { ProblemStorage } from "./utils/problemStorage.js";
 
 const getProblemMeta = (problem) => ({
   functionName: problem?.functionName || null,
@@ -24,7 +25,7 @@ const getProblemMeta = (problem) => ({
 const Coding = () => {
   // State management with problem isolation
   const [activeProblemId, setActiveProblemId] = useState(null);
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState("");
   const [results, setResults] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -127,11 +128,11 @@ const Coding = () => {
     };
 
     // Save on page unload
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     // Cleanup function to save on component unmount
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       if (activeProblem && code !== activeProblem.starterCode) {
         ProblemStorage.saveProblemState(activeProblem.id, {
           code,
@@ -155,7 +156,7 @@ const Coding = () => {
       }
 
       // Clear current state to prevent contamination
-      setCode('');
+      setCode("");
       setResults(null);
       setIsRunning(false);
 
@@ -253,6 +254,7 @@ const Coding = () => {
 
   return (
     <div className='min-h-screen bg-gray-950 text-gray-100 py-8 px-4'>
+      <AdSenseScript />
       <div className='max-w-6xl mx-auto'>
         {/* Header */}
         <header className='mb-8'>
