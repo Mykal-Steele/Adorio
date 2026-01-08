@@ -1,0 +1,101 @@
+/* TsBussing Styles */
+@import url("https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Poppins:wght@400;600;700&display=swap");
+
+.font-handwriting {
+  font-family: "Permanent Marker", cursive;
+}
+.font-main {
+  font-family: "Poppins", sans-serif;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.wood-pattern-dark {
+  background-color: #3e2723;
+  background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.02) 0px,
+      rgba(255, 255, 255, 0.02) 2px,
+      transparent 2px,
+      transparent 8px
+    ),
+    linear-gradient(to bottom, #2d1b18, #3e2723);
+}
+
+.wood-pattern-light {
+  background-color: #795548;
+  background-image: repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.05) 0px,
+      rgba(0, 0, 0, 0.05) 1px,
+      transparent 1px,
+      transparent 10px
+    ),
+    linear-gradient(to bottom, #8e6f64ff, #7a574aff);
+}
+
+.cork-pattern {
+  background-color: #d7c49e;
+  background-image: linear-gradient(
+      rgba(214, 196, 158, 0.5),
+      rgba(215, 196, 158, 0.5)
+    ),
+    url("https://media.istockphoto.com/id/517699927/photo/corkboard-texture.jpg?s=612x612&w=0&k=20&c=gVkDdfbmPLkz029sAj4T_L7aGgCmCjfpXJ8caGVyZi8=");
+  background-size: 400px;
+  background-repeat: repeat;
+}
+
+.screen-glow {
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6),
+    0 0 10px rgba(100, 255, 100, 0.2);
+  background: linear-gradient(to bottom, #1a1a1a, #0d0d0d);
+}
+
+/* Wood Scrollbar Theme */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 16px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #4c3131ff;
+  border-left: 1px solid #4e342e;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.8);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #5d4037;
+  border-radius: 2px;
+  border: 1px solid #3e2723;
+  /* Wood grain simulation */
+  background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 12px
+    ),
+    linear-gradient(to right, #77483dff, #aa7260ff, #4a2c25);
+  box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.2),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 12px
+    ),
+    linear-gradient(to right, #5d4037, #795548, #5d4037);
+}
+
+/* Corner for when both scrollbars meet */
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background: #261a15;
+}
