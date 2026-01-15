@@ -5,10 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var Router = gin.Default()
-
-func InitializeRoutes() {
-	publicRoutes := Router.Group("v1/")
+func InitializeRoutes() *gin.Engine {
+	r := gin.Default()
+	publicRoutes := r.Group("v1/")
 	publicRoutes.GET("health", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{"status": "Golang backend running"})
 
@@ -16,6 +15,8 @@ func InitializeRoutes() {
 	publicRoutes.GET("users", controllers.GetUsers)
 	publicRoutes.GET("user/:id", controllers.GetUser)
 
+	publicRoutes.GET("posts", controllers.GetPagPost)
 	publicRoutes.GET("/post/:id", controllers.GetPost)
 
+	return r
 }

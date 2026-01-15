@@ -1,8 +1,8 @@
-import asyncHandler from '../utils/asyncHandler.js';
+import asyncHandler from "../utils/asyncHandler.js";
 import {
   createSecretMessage,
   retrieveSecretMessage,
-} from '../services/secretEnvService.js';
+} from "../services/secretEnvService.js";
 
 const storeSecretMessage = asyncHandler(async (req, res) => {
   const { message, password } = req.body;
@@ -15,8 +15,8 @@ const storeSecretMessage = asyncHandler(async (req, res) => {
   });
 
   res.status(201).json({
-    message: 'Secret message stored successfully',
-    retrievalCommand: `curl -H "Authorization: ${realPassword}" https://feelio-github-io.onrender.com/api/secretenv`,
+    message: "Secret message stored successfully",
+    retrievalCommand: `curl -H "Authorization: ${realPassword}" https://adorio.space/api/secretenv`,
   });
 });
 
@@ -24,12 +24,12 @@ const retrieveSecretMessageHandler = asyncHandler(async (req, res) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    res.status(401).json({ message: 'Authorization header is required' });
+    res.status(401).json({ message: "Authorization header is required" });
     return;
   }
 
   const decryptedMessage = await retrieveSecretMessage(authHeader);
-  res.setHeader('Content-Type', 'text/plain');
+  res.setHeader("Content-Type", "text/plain");
   res.send(decryptedMessage);
 });
 
