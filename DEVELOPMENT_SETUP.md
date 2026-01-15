@@ -88,7 +88,6 @@ Your backend automatically allows requests from:
 
 - `https://your-frontend-url.github.io` (your Render frontend)
 - `http://localhost:5173` & `http://localhost:5174` (local development)
-- Your domain variants (`adorio.space`, `feelio.space`, etc.)
 
 ## 📈 What's Fixed
 

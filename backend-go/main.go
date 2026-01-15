@@ -13,6 +13,6 @@ func main() {
 		log.Fatal("Failed to connect to database:", err)
 	}
 
-	routes.InitializeRoutes()
-	routes.Router.Run(":3001")
+	router := routes.InitializeRoutes()
+	router.Run(":3001")
 }
