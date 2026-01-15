@@ -1,19 +1,19 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 // Load environment variables as early as possible
 // For cloud platforms like Render, environment variables are injected directly
 // For local development, load from .env files
-if (process.env.NODE_ENV === 'development') {
-  dotenv.config({ path: '.env.development' });
+if (process.env.NODE_ENV === "development") {
+  dotenv.config({ path: ".env.development" });
 } else if (!process.env.MONGO_URI) {
   // Only load .env file if environment variables aren't already set (local production testing)
-  dotenv.config({ path: '.env' });
+  dotenv.config({ path: ".env" });
 }
 
-const normalize = (value) => (typeof value === 'string' ? value.trim() : value);
+const normalize = (value) => (typeof value === "string" ? value.trim() : value);
 
 const environment = {
-  nodeEnv: normalize(process.env.NODE_ENV) || 'development',
+  nodeEnv: normalize(process.env.NODE_ENV) || "development",
   port: normalize(process.env.PORT) || 3000,
   mongoUri: normalize(process.env.MONGO_URI),
   jwtSecret: normalize(process.env.JWT_SECRET),
@@ -29,20 +29,19 @@ const environment = {
   },
 };
 
-const isProduction = environment.nodeEnv === 'production';
+const isProduction = environment.nodeEnv === "production";
 
 const defaultOrigins = [
-  'https://mykal-steele.github.io',
-  'https://www.mykal-steele.github.io',
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'http://localhost:5174', // In case vite uses alternate port
-  'https://feelio.space',
-  'https://adorio.space',
-  'http://adorio.space',
-  'https://www.adorio.space',
-  'https://adorio.vercel.app',
-  'http://127.0.0.1:5173',
+  "https://mykal-steele.github.io",
+  "https://www.mykal-steele.github.io",
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:5174", // In case vite uses alternate port
+  "https://adorio.space",
+  "http://adorio.space",
+  "https://www.adorio.space",
+  "https://adorio.vercel.app",
+  "http://127.0.0.1:5173",
 ];
 
 const dynamicOrigins = [
