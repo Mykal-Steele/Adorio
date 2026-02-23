@@ -34,7 +34,43 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
-# --- Cleanup ---
+# --- OS Detection ---
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS_ID=$ID
+    OS_LIKE=$ID_LIKE
+else
+    OS_ID="unknown"
+    OS_LIKE="unknown"
+fi
+
+# --- Arch Linux Support ---
+if [[ "$OS_ID" == "arch" || "$OS_LIKE" =~ "arch" ]]; then
+    echo "--- Detected Arch Linux / derivative ---"
+    
+    # Check for AUR helper
+    if command -v yay >/dev/null; then
+        AUR_HELPER="yay"
+    elif command -v paru >/dev/null; then
+        AUR_HELPER="paru"
+    else
+        echo "Error: No AUR helper found (yay/paru). Please install one or install mongodb-bin manually."
+        exit 1
+    fi
+
+    echo "--- Installing mongodb-bin using $AUR_HELPER ---"
+    $AUR_HELPER -S --needed mongodb-bin mongodb-tools-bin mongodb-mongosh-bin
+
+    echo "--- Starting Service ---"
+    sudo systemctl enable mongodb
+    sudo systemctl start mongodb
+    
+    echo "Done. Status:"
+    sudo systemctl status mongodb --no-pager | grep "Active:"
+    exit 0
+fi
+
+# --- Debian/Ubuntu Installation ---
 echo "--- Cleaning up old installations ---"
 sudo systemctl stop mongod 2>/dev/null || true
 sudo apt-get purge -y "mongodb-org*" 2>/dev/null || true
