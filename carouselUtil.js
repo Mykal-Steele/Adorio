@@ -354,7 +354,7 @@ function createCarousel(containerId, cards, options = {}) {
   });
 }
 
-// for if someone uses this with node or whatever
+// Node/CommonJS export support
 if (typeof module !== "undefined" && module.exports) {
   module.exports = { initCarousel, generateCarouselCards, createCarousel };
 }

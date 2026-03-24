@@ -27,7 +27,6 @@ const storage = new CloudinaryStorage({
   },
 });
 
-// gotta make sure users don't upload weird files or viruses
 const fileFilter = (req, file, cb) => {
   if (
     ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(

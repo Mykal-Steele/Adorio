@@ -1,14 +1,14 @@
-# 🚀 Adorio Development & Production Setup Guide
+# Adorio Development and Production Setup Guide
 
-## 📋 Overview
+## Overview
 
-Your application is now configured to work seamlessly in both local development and Render production environments.
+This project is configured to work in local development and on Render.
 
-## 🔧 Environment Configuration
+## Environment Configuration
 
 ### Development Environment
 
-- **Command**: `npm run skibidi` or `npm run dev`
+- **Command**: `npm run dev`
 - **Frontend**: Runs on `http://localhost:5173` (or 5174 if 5173 is busy)
 - **Backend**: Runs on `http://localhost:3000`
 - **Environment File**: `.env.development` for both frontend and backend
@@ -21,13 +21,12 @@ Your application is now configured to work seamlessly in both local development 
 - **Environment**: Render injects environment variables directly
 - **Database**: Production MongoDB cluster
 
-## 🎮 Available Commands
+## Available Commands
 
 ### Development Commands
 
 ```bash
-npm run skibidi     # Start both frontend and backend in development
-npm run dev         # Same as skibidi
+npm run dev         # Start both frontend and backend in development
 npm run frontend    # Start only frontend (Vite dev server)
 npm run backend     # Start only backend (nodemon)
 npm run test-env    # Test environment configuration
@@ -43,7 +42,7 @@ npm run test-prod   # Test production environment configuration
 npm run prod        # Run in production mode locally (testing)
 ```
 
-## 🔒 Protected Routes Setup
+## Protected Routes Setup
 
 ### Authentication Requirements
 
@@ -52,14 +51,14 @@ npm run prod        # Run in production mode locally (testing)
   - `/register` - Registration page
   - `/sendenv` - Special utility page (kept unprotected as requested)
 
-### Smart Redirects
+### Redirect behavior
 
 - When accessing protected routes without login → redirects to `/login`
 - After successful login → redirects to originally requested page
 - Login/Register forms remember intended destination
 - Cross-navigation between login/register preserves destination
 
-## 🌐 Environment Variables
+## Environment Variables
 
 ### Render Backend Environment (Example)
 
@@ -82,40 +81,40 @@ VITE_CLOUDINARY_NAME=your_cloudinary_name
 
 > **🔒 Security Note**: The example above shows placeholder values. Your actual environment variables should be kept secure and never committed to version control.
 
-## 🔍 CORS Configuration
+## CORS Configuration
 
 Your backend automatically allows requests from:
 
 - `https://your-frontend-url.github.io` (your Render frontend)
 - `http://localhost:5173` & `http://localhost:5174` (local development)
 
-## 📈 What's Fixed
+## What is configured
 
-### ✅ Local Development Issues
+### Local development
 
-- `npm run skibidi` now starts both frontend and backend
+- `npm run dev` starts both frontend and backend
 - Frontend connects to local backend (`localhost:3000`)
 - Backend serves frontend requests with proper CORS
 - Environment variables load correctly
 
-### ✅ Production Compatibility
+### Production
 
 - Render deployment continues to work normally
 - Environment detection works for cloud platforms
 - No impact on existing production setup
 - All your Render environment variables are properly handled
 
-### ✅ Route Protection
+### Route protection
 
 - Every page requires authentication except SendEnv
 - Smart redirects preserve user's intended destination
-- Login/Register flow works seamlessly with protected routes
+- Login/Register flow works with protected routes
 
-## 🚨 Important Notes
+## Important Notes
 
 1. **Render Deployment**: Your production environment uses `npm start` and will continue working exactly as before. The environment loading logic detects when running on Render and uses the injected environment variables.
 
-2. **Local Development**: Use `npm run skibidi` for the full development experience with both frontend and backend running.
+2. **Local Development**: Use `npm run dev` to run frontend and backend together.
 
 3. **Production Testing**: Run `npm run test-prod` to verify your production environment configuration is correct.
 
@@ -123,7 +122,7 @@ Your backend automatically allows requests from:
 
 5. **Database**: Both development and production use the same MongoDB cluster. Consider setting up a separate development database if needed.
 
-## 🛠 Troubleshooting
+## Troubleshooting
 
 ### If Render deployment fails:
 
@@ -145,4 +144,4 @@ Your backend automatically allows requests from:
 
 ---
 
-🎉 **You're all set!** Your application now works perfectly in both development and production environments with proper authentication protection on all routes except SendEnv.
+Your application should now run in both development and production with route protection enabled (except SendEnv).

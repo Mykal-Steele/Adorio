@@ -1,6 +1,6 @@
 # Adorio - Social Media Project
 
-A social platform I built with React, Node, and MongoDB. Basically trying to make something that doesn't suck for my portfolio lol
+A social platform built with React, Node, and MongoDB.
 
 ## Check It Out
 
@@ -17,7 +17,7 @@ Live demo: [adorio.space](https://www.adorio.space)
 - **Image Uploads** - Cloudinary integration for storage
 - **Animations** - Smooth transitions using Framer Motion
 - **Emoji Picker** - Add emojis to comments
-- **404 Page** - That sick cyberpunk page with the spotlight effect
+- **404 Page** - Cyberpunk-style page with spotlight effect
 - **Security** - CSP implementation to prevent XSS attacks
 
 ## Tech Stack
@@ -27,7 +27,7 @@ Live demo: [adorio.space](https://www.adorio.space)
 - React (with Hooks, Context)
 - Redux Toolkit for state management
 - Vite for blazing fast builds
-- Tailwind CSS for styling (no more CSS files everywhere)
+- Tailwind CSS for styling
 - Framer-Motion for animations
 - Axios for API calls
 - Moment.js for time formatting
@@ -42,7 +42,7 @@ Live demo: [adorio.space](https://www.adorio.space)
 - Compression for better performance
 - Rate limiting to prevent spam
 
-## How to Run This Thing
+## How to Run
 
 ### Frontend:
 
@@ -50,7 +50,7 @@ Live demo: [adorio.space](https://www.adorio.space)
 # Install deps
 npm install
 # Dev server with hot reload
-npm run skibidi
+npm run dev
 # Build for production
 npm run build
 # Build + deploy
@@ -159,18 +159,18 @@ The app includes built-in analytics with:
 
 ## Contributing
 
-This is mostly my personal project but if you wanna contribute for some reason:
+This is primarily a personal project, but contributions are welcome:
 
 1. Fork the repo
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create your feature branch (`git checkout -b feature/my-change`)
+3. Commit your changes (`git commit -m 'Describe your change'`)
+4. Push to the branch (`git push origin feature/my-change`)
 5. Open a Pull Request
 
 ## License
 
 This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 
-Basically, you can use this, change it, or share it - but if you modify it and run it as a service, you gotta share those changes. Just don't steal it and say you made it lol.
+You can use, modify, and share this project. If you modify it and run it as a network service, you must share those changes under AGPL-3.0 terms.
 
 [Full license details](https://www.gnu.org/licenses/agpl-3.0.en.html)

@@ -1,4 +1,4 @@
-// just keeping this around in case i need to reference it later - should prob delete
+// Temporary login component kept for reference.
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setUser } from "../redux/userSlice";
@@ -6,11 +6,8 @@ import { login } from "../api";
 import { Link, useNavigate } from "react-router-dom";
 import { SparklesIcon } from "@heroicons/react/24/outline";
 
-// story time: this file exists because I had a mental breakdown at 3am when react router
-// decided to stop working out of nowhere. I remade the entire login component here to see
-// if I was going insane. I wasn't... there was a typo in the import path. FML.
-// now this file is left as a piece of history.
-// if you found this comment, you're now legally obligated to tell me your worst debugging story
+// This file was used to isolate a router issue during debugging.
+// It is currently kept as a fallback reference implementation.
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -138,7 +135,7 @@ const Login = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </button>
 
-          {/* error box shows up when shit breaks */}
+          {/* Show an inline error when login fails. */}
           {error && (
             <p className="text-red-500 text-sm mt-4 text-center bg-red-900/20 p-2 rounded-lg">
               {error}

@@ -21,102 +21,99 @@ const Navbar = ({ darkMode, setDarkMode }) => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className='sticky top-0 z-50 bg-gray-950/95 backdrop-blur-lg border-b border-gray-800/100 shadow-2xl'
+      className="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-lg border-b border-gray-800/100 shadow-2xl"
     >
-      <div className='container mx-auto px-2 sm:px-4'>
-        <div className='flex items-center justify-between h-14 sm:h-16 relative'>
-          {/* logo with gradient effect - looks pretty sick when you hover */}
+      <div className="container mx-auto px-2 sm:px-4">
+        <div className="flex items-center justify-between h-14 sm:h-16 relative">
           <Link
-            to='/'
-            className='flex items-center space-x-1 sm:space-x-2 group ml-1'
+            to="/"
+            className="flex items-center space-x-1 sm:space-x-2 group ml-1"
           >
             <motion.div whileHover={{ rotate: 15 }} whileTap={{ scale: 0.95 }}>
-              <SparklesIcon className='h-6 w-6 sm:h-7 sm:w-7 text-purple-400 transition-transform' />
+              <SparklesIcon className="h-6 w-6 sm:h-7 sm:w-7 text-purple-400 transition-transform" />
             </motion.div>
-            <span className='text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent'>
+            <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Adorio
             </span>
           </Link>
 
-          <div className='flex items-center gap-2 sm:gap-4'>
-            {/* Navigation Links - Grouped with right side actions */}
-            <div className='hidden sm:flex items-center gap-2 -mr-4 mr-1'>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="hidden sm:flex items-center gap-2 -mr-4 mr-1">
               {token ? (
                 <>
-                  <NavLink to='/home' text='Home' />
-                  <NavLink to='/profile' text='Profile' />
-                  <NavLink to='/coding' text='Coding' />
-                  <NavLink to='/smartcity' text='SmartCity' />
-                  <NavLink to='/rygame' text='RyGame' />
-                  <NavLink to='/cao' text='CAO' />
-                  <NavLink to='/algo' text='Algorithms' />
+                  <NavLink to="/home" text="Home" />
+                  <NavLink to="/profile" text="Profile" />
+                  <NavLink to="/coding" text="Coding" />
+                  <NavLink to="/smartcity" text="SmartCity" />
+                  <NavLink to="/rygame" text="RyGame" />
+                  <NavLink to="/cao" text="CAO" />
+                  <NavLink to="/algo" text="Algorithms" />
                 </>
               ) : (
                 <>
-                  <NavLink to='/coding' text='Coding' />
-                  <NavLink to='/smartcity' text='SmartCity' />
+                  <NavLink to="/coding" text="Coding" />
+                  <NavLink to="/smartcity" text="SmartCity" />
 
-                  <NavLink to='/cao' text='CAO' />
+                  <NavLink to="/cao" text="CAO" />
 
-                  <NavLink to='/algo' text='Algorithms' />
+                  <NavLink to="/algo" text="Algorithms" />
                 </>
               )}
             </div>
 
             {token ? (
-              <div className='flex items-center gap-2 sm:gap-4'>
+              <div className="flex items-center gap-2 sm:gap-4">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className='px-3 py-1.5 sm:px-6 sm:py-3 text-sm sm:text-base rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all relative overflow-hidden group flex items-center justify-center'
+                  className="px-3 py-1.5 sm:px-6 sm:py-3 text-sm sm:text-base rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all relative overflow-hidden group flex items-center justify-center"
                   onClick={handleLogout}
                 >
-                  <span className='relative z-10'>Logout</span>
-                  <div className='absolute inset-0 bg-gradient-to-r from-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity' />
+                  <span className="relative z-10">Logout</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </motion.button>
               </div>
             ) : (
-              <div className='flex items-center gap-2 sm:gap-4'>
-                <NavLink to='/login' text='Login' className='hidden sm:block' />
+              <div className="flex items-center gap-2 sm:gap-4">
+                <NavLink to="/login" text="Login" className="hidden sm:block" />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className='px-3 py-1.5 sm:px-6 sm:py-3 text-sm sm:text-base rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all relative overflow-hidden group flex items-center justify-center'
+                  className="px-3 py-1.5 sm:px-6 sm:py-3 text-sm sm:text-base rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all relative overflow-hidden group flex items-center justify-center"
                 >
-                  <Link to='/register' className='relative z-10'>
+                  <Link to="/register" className="relative z-10">
                     Get Started
                   </Link>
-                  <div className='absolute inset-0 bg-gradient-to-r from-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity' />
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </motion.button>
               </div>
             )}
           </div>
         </div>
 
-        {/* Mobile navigation - CAO always visible */}
-        <div className='sm:hidden flex justify-center space-x-4 pb-2'>
+        <div className="sm:hidden flex justify-center space-x-4 pb-2">
           {token ? (
             <>
-              <NavLink to='/home' text='Home' />
-              <NavLink to='/profile' text='Profile' />
-              <NavLink to='/coding' text='Coding' />
-              <NavLink to='/smartcity' text='SmartCity' />
-              <NavLink to='/rygame' text='RyGame' />
-              <NavLink to='/cao' text='CAO' />
+              <NavLink to="/home" text="Home" />
+              <NavLink to="/profile" text="Profile" />
+              <NavLink to="/coding" text="Coding" />
+              <NavLink to="/smartcity" text="SmartCity" />
+              <NavLink to="/rygame" text="RyGame" />
+              <NavLink to="/cao" text="CAO" />
             </>
           ) : (
             <>
-              <NavLink to='/coding' text='Coding' />
-              <NavLink to='/smartcity' text='SmartCity' />
-              <NavLink to='/cao' text='CAO' />
+              <NavLink to="/coding" text="Coding" />
+              <NavLink to="/smartcity" text="SmartCity" />
+              <NavLink to="/cao" text="CAO" />
               {/* <a
                 href='https://adorio.space/cao'
                 className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
               >
                 CAO
               </a> */}
-              <NavLink to='/login' text='Login' />
-              <NavLink to='/register' text='Register' />
+              <NavLink to="/login" text="Login" />
+              <NavLink to="/register" text="Register" />
             </>
           )}
         </div>
@@ -129,7 +126,7 @@ const NavLink = ({ to, text, className = "" }) => (
   <motion.div whileHover={{ scale: 1.05 }} className={`relative ${className}`}>
     <Link
       to={to}
-      className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 flex items-center'
+      className="text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 flex items-center"
     >
       {text}
     </Link>
@@ -140,7 +137,7 @@ const ExternalNavLink = ({ to, text, className = "" }) => (
   <motion.div whileHover={{ scale: 1.05 }} className={`relative ${className}`}>
     <a
       href={to}
-      className='text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300'
+      className="text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300"
     >
       {text}
     </a>

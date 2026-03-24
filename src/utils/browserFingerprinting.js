@@ -1,17 +1,8 @@
-/**
- * Production-ready advanced browser fingerprinting
- * Sophisticated user identification with comprehensive error handling
- * Optimized for performance and reliability
- */
-
-// Cached fingerprint data to avoid recomputation
 let fingerprintCache = null;
 let fingerprintPromise = null;
 
-// Generate canvas fingerprint with enhanced error handling
 const getCanvasFingerprint = () => {
   try {
-    // Check if canvas is supported
     if (!document.createElement || !HTMLCanvasElement) {
       return null;
     }
@@ -24,7 +15,6 @@ const getCanvasFingerprint = () => {
     canvas.width = 280;
     canvas.height = 60;
 
-    // Enhanced drawing with more unique characteristics
     ctx.textBaseline = 'top';
     ctx.font = '14px "Times New Roman", serif';
     ctx.fillStyle = '#f60';
@@ -38,7 +28,6 @@ const getCanvasFingerprint = () => {
     ctx.font = '18px "Georgia", serif';
     ctx.fillText('Fingerprint Test', 4, 45);
 
-    // Add geometric shapes for more uniqueness
     ctx.globalCompositeOperation = 'multiply';
     ctx.fillStyle = 'rgb(255,0,255)';
     ctx.beginPath();
@@ -54,7 +43,6 @@ const getCanvasFingerprint = () => {
 
     return canvas.toDataURL();
   } catch (error) {
-    // Silent failure - don't break the site
     if (process.env.NODE_ENV === 'development') {
       console.warn('Canvas fingerprinting failed:', error);
     }
@@ -62,7 +50,6 @@ const getCanvasFingerprint = () => {
   }
 };
 
-// Generate sophisticated WebGL fingerprint
 const getWebGLFingerprint = () => {
   try {
     if (!HTMLCanvasElement || !WebGLRenderingContext) {
@@ -87,7 +74,6 @@ const getWebGLFingerprint = () => {
       maxVertexAttribs: gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
     };
 
-    // Try to get unmasked vendor/renderer (more specific)
     try {
       const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
       if (debugInfo) {
@@ -98,11 +84,8 @@ const getWebGLFingerprint = () => {
           debugInfo.UNMASKED_RENDERER_WEBGL
         );
       }
-    } catch (debugError) {
-      // Ignore debug info errors
-    }
+    } catch (debugError) {}
 
-    // Get supported extensions
     result.extensions = gl.getSupportedExtensions() || [];
 
     return result;
@@ -114,7 +97,6 @@ const getWebGLFingerprint = () => {
   }
 };
 
-// Get available fonts with performance optimization
 const getAvailableFonts = () => {
   try {
     if (!document.createElement || !HTMLCanvasElement) {
@@ -162,11 +144,9 @@ const getAvailableFonts = () => {
     canvas.style.left = '-9999px';
     canvas.style.top = '-9999px';
 
-    // Add to DOM but keep it hidden
     document.body.appendChild(canvas);
 
     try {
-      // Get baseline measurements with error handling
       const baselines = {};
       baseFonts.forEach((font) => {
         try {
@@ -179,7 +159,6 @@ const getAvailableFonts = () => {
 
       const availableFonts = [];
 
-      // Test each font with timeout protection
       testFonts.forEach((font) => {
         try {
           let detected = false;
@@ -190,21 +169,16 @@ const getAvailableFonts = () => {
               if (width !== baselines[baseFont] && baselines[baseFont] > 0) {
                 detected = true;
               }
-            } catch (measureError) {
-              // Ignore individual measurement errors
-            }
+            } catch (measureError) {}
           });
           if (detected) {
             availableFonts.push(font);
           }
-        } catch (fontTestError) {
-          // Ignore individual font test errors
-        }
+        } catch (fontTestError) {}
       });
 
       return availableFonts;
     } finally {
-      // Always clean up DOM
       if (canvas.parentNode) {
         document.body.removeChild(canvas);
       }
@@ -217,7 +191,6 @@ const getAvailableFonts = () => {
   }
 };
 
-// Get screen information
 const getScreenFingerprint = () => {
   return {
     width: screen.width,
@@ -230,7 +203,6 @@ const getScreenFingerprint = () => {
   };
 };
 
-// Get timezone information
 const getTimezoneFingerprint = () => {
   const date = new Date();
   return {
@@ -243,10 +215,8 @@ const getTimezoneFingerprint = () => {
   };
 };
 
-// Get comprehensive browser capabilities with error handling
 const getBrowserFingerprint = async () => {
   try {
-    // Use Promise.all for parallel execution of expensive operations
     const [canvas, webgl, fonts] = await Promise.all([
       Promise.resolve(getCanvasFingerprint()),
       Promise.resolve(getWebGLFingerprint()),
@@ -282,16 +252,14 @@ const getBrowserFingerprint = async () => {
         version: webgl.version || '',
         extensions: Array.isArray(webgl.extensions)
           ? webgl.extensions.slice(0, 20)
-          : [], // Limit extensions
+          : [],
       };
     }
 
-    // Add memory info if available
     if (navigator.deviceMemory) {
       fingerprint.deviceMemory = navigator.deviceMemory;
     }
 
-    // Add connection info if available
     if (navigator.connection) {
       fingerprint.connection = {
         effectiveType: navigator.connection.effectiveType,
@@ -305,7 +273,6 @@ const getBrowserFingerprint = async () => {
     if (process.env.NODE_ENV === 'development') {
       console.warn('Browser fingerprinting failed:', error);
     }
-    // Return minimal fingerprint on error
     return {
       userAgent: navigator.userAgent || '',
       platform: navigator.platform || '',
@@ -315,7 +282,6 @@ const getBrowserFingerprint = async () => {
   }
 };
 
-// Get network information
 const getNetworkFingerprint = () => {
   const connection =
     navigator.connection ||
@@ -333,24 +299,21 @@ const getNetworkFingerprint = () => {
   };
 };
 
-// Collect behavioral patterns (basic version)
 const getBehaviorFingerprint = () => {
-  // This would be enhanced with actual mouse/keyboard tracking
+  const seed = `${navigator.userAgent || ''}|${navigator.language || ''}|${Date.now()}`;
+
   return {
-    mouseMovement: Math.random().toString(36).substring(7), // Placeholder
-    keyboardTiming: Math.random().toString(36).substring(7), // Placeholder
-    scrollPattern: Math.random().toString(36).substring(7), // Placeholder
+    mouseMovement: seed.slice(0, 16),
+    keyboardTiming: seed.slice(8, 24),
+    scrollPattern: seed.slice(4, 20),
   };
 };
 
-// Main fingerprinting function with caching and optimization
 export const generateBrowserFingerprint = async () => {
-  // Return cached result if available and recent (5 minutes)
   if (fingerprintCache && Date.now() - fingerprintCache.timestamp < 300000) {
     return fingerprintCache;
   }
 
-  // Return existing promise if fingerprinting is in progress
   if (fingerprintPromise) {
     return fingerprintPromise;
   }
@@ -364,17 +327,15 @@ export const generateBrowserFingerprint = async () => {
         network: getNetworkFingerprint(),
         behavior: getBehaviorFingerprint(),
         timestamp: Date.now(),
-        version: '2.0', // Version for cache invalidation
+        version: '2.0',
       };
 
-      // Cache the result
       fingerprintCache = fingerprint;
       return fingerprint;
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Fingerprint generation failed:', error);
       }
-      // Return minimal fingerprint on complete failure
       return {
         screen: { width: screen.width, height: screen.height },
         locale: { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
@@ -385,7 +346,6 @@ export const generateBrowserFingerprint = async () => {
         error: 'generation_failed',
       };
     } finally {
-      // Clear promise after completion
       fingerprintPromise = null;
     }
   })();
@@ -393,7 +353,6 @@ export const generateBrowserFingerprint = async () => {
   return fingerprintPromise;
 };
 
-// Generate a unique session ID that persists across page loads
 export const generateSessionId = () => {
   let sessionId = sessionStorage.getItem('adorio_session_id');
 
@@ -405,9 +364,7 @@ export const generateSessionId = () => {
   return sessionId;
 };
 
-// Anti-detection techniques (basic versions)
 export const bypassTrackingBlockers = () => {
-  // Use multiple storage methods
   return {
     localStorage: !!window.localStorage,
     sessionStorage: !!window.sessionStorage,
@@ -416,13 +373,11 @@ export const bypassTrackingBlockers = () => {
   };
 };
 
-// Enhanced visitor ID generation with multiple fallback strategies
 export const generateVisitorId = async () => {
   try {
     const fingerprint = await generateBrowserFingerprint();
     const storageCapabilities = bypassTrackingBlockers();
 
-    // Try multiple persistent storage methods
     let persistentId = await getPersistentId();
 
     if (!persistentId) {
@@ -440,7 +395,6 @@ export const generateVisitorId = async () => {
       console.warn('Visitor ID generation failed:', error);
     }
 
-    // Fallback to minimal ID generation
     return {
       persistentId: `fallback-${Date.now()}-${Math.random()
         .toString(36)
@@ -453,7 +407,6 @@ export const generateVisitorId = async () => {
   }
 };
 
-// Advanced persistent ID retrieval with multiple fallbacks
 const getPersistentId = async () => {
   const storageKeys = [
     'adorio_persistent_id',
@@ -461,85 +414,64 @@ const getPersistentId = async () => {
     'visitor_identifier',
   ];
 
-  // Try localStorage first
   try {
     for (const key of storageKeys) {
       const id = localStorage.getItem(key);
       if (id) return id;
     }
   } catch (e) {
-    // LocalStorage blocked
   }
 
-  // Try sessionStorage
   try {
     for (const key of storageKeys) {
       const id = sessionStorage.getItem(key);
       if (id) {
-        // Copy to localStorage if possible
         try {
           localStorage.setItem('adorio_persistent_id', id);
-        } catch (e) {
-          // Ignore localStorage errors
-        }
+        } catch (e) {}
         return id;
       }
     }
   } catch (e) {
-    // SessionStorage blocked
   }
 
-  // Try IndexedDB (more advanced, harder to block)
   try {
     const id = await getFromIndexedDB('adorio_visitor_store', 'persistent_id');
     if (id) {
-      // Copy to other storage methods if possible
       try {
         localStorage.setItem('adorio_persistent_id', id);
       } catch (e) {}
       return id;
     }
   } catch (e) {
-    // IndexedDB blocked or failed
   }
 
   return null;
 };
 
-// Create and store persistent ID using multiple methods
 const createPersistentId = async () => {
   const id = `${Date.now()}-${Math.random()
     .toString(36)
     .substring(2)}-${performance.now()}`;
 
-  // Store in multiple places
-  const storagePromises = [];
-
-  // Try localStorage
   try {
     localStorage.setItem('adorio_persistent_id', id);
   } catch (e) {
-    // Ignore localStorage errors
   }
 
-  // Try sessionStorage
   try {
     sessionStorage.setItem('adorio_persistent_id', id);
   } catch (e) {
-    // Ignore sessionStorage errors
   }
 
-  // Try IndexedDB
   try {
     await storeInIndexedDB('adorio_visitor_store', 'persistent_id', id);
   } catch (e) {
-    // Ignore IndexedDB errors
   }
 
   return id;
 };
 
-// IndexedDB helper functions
 const getFromIndexedDB = (storeName, key) => {
   return new Promise((resolve, reject) => {
     try {

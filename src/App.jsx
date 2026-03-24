@@ -1,4 +1,3 @@
-//src\App.jsx
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import {
@@ -40,23 +39,14 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
 
   return (
     <>
-      {location.pathname !== "/tsbussing" && (
+      {location.pathname !== "/" && (
         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
       )}
       <Routes>
+        <Route path="/" element={<TsBussing />} />
+        <Route path="/algo" element={<ExternalRedirect to="/algo.html" />} />
         <Route
-          path='/'
-          element={
-            token ? (
-              <Navigate to='/home' replace />
-            ) : (
-              <Navigate to='/login' replace />
-            )
-          }
-        />
-        <Route path='/algo' element={<ExternalRedirect to='/algo.html' />} />
-        <Route
-          path='/home'
+          path="/home"
           element={
             <ProtectedRoute>
               <Home />
@@ -64,7 +54,7 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
           }
         />
         <Route
-          path='/rygame'
+          path="/rygame"
           element={
             <ProtectedRoute>
               <RyGame />
@@ -72,23 +62,22 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
           }
         />
         <Route
-          path='/profile'
+          path="/profile"
           element={
             <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
           }
         />
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
-        {/* Public pages that don't require login */}
-        <Route path='/coding' element={<Coding />} />
-        <Route path='/sendenv' element={<SendEnv />} />
-        <Route path='/smartcity' element={<SmartCity />} />
-        <Route path='/tempBeforeReal' element={<TempBeforeReal />} />
-        <Route path='/tsbussing' element={<TsBussing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/coding" element={<Coding />} />
+        <Route path="/sendenv" element={<SendEnv />} />
+        <Route path="/smartcity" element={<SmartCity />} />
+        <Route path="/tempBeforeReal" element={<TempBeforeReal />} />
+        <Route path="/tsbussing" element={<TsBussing />} />
         <Route
-          path='/data-lookup'
+          path="/data-lookup"
           element={
             <ProtectedRoute>
               <DataLookup />
@@ -96,7 +85,7 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
           }
         />
         <Route
-          path='*'
+          path="*"
           element={
             <ProtectedRoute>
               <NotFound />
@@ -108,7 +97,6 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
   );
 };
 
-// Handles high-level route wiring and theme toggling.
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
   const isLoading = useAuthBootstrap();
@@ -116,10 +104,10 @@ const App = () => {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen bg-gray-950 flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-500 border-r-transparent mb-4'></div>
-          <p className='text-gray-300 text-lg'>Loading Adorio...</p>
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-500 border-r-transparent mb-4"></div>
+          <p className="text-gray-300 text-lg">Loading Adorio...</p>
         </div>
       </div>
     );

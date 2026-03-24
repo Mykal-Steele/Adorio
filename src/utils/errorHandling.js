@@ -1,4 +1,3 @@
-// centralized error handling so we don't repeat ourselves everywhere
 export class AbortError extends Error {
   constructor(message = "request was cancelled") {
     super(message);
@@ -6,7 +5,6 @@ export class AbortError extends Error {
   }
 }
 
-// checks if the user bailed on a request - happens all the time when ppl scroll fast
 export const isAbortError = (error) => {
   return (
     error?.name === "AbortError" ||
@@ -17,20 +15,16 @@ export const isAbortError = (error) => {
   );
 };
 
-// our main error handler that every api call should use
 export const handleApiError = (error, customMessage, context = {}) => {
-  // don't need to handle abort errors, they're expected
   if (isAbortError(error)) {
     return new AbortError();
   }
 
-  // network is down or backend unreachable
   if (!error.response) {
     console.warn("network error while making api request", { context });
-    return new Error("can't reach the server. ur wifi good?");
+    return new Error("Unable to reach the server. Please check your connection.");
   }
 
-  // log details for debugging (only in development)
   if (process.env.NODE_ENV !== "production") {
     console.error(customMessage || "api error", {
       status: error.response?.status,
@@ -40,14 +34,12 @@ export const handleApiError = (error, customMessage, context = {}) => {
     });
   }
 
-  // whatever error message looks least terrible
   const clientError = new Error(
     error.response?.data?.message ||
       customMessage ||
-      "something broke lol. try again in a bit."
+      "Something went wrong. Please try again."
   );
 
-  // preserve status code and other useful info
   clientError.statusCode = error.response?.status;
   clientError.context = context;
 

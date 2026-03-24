@@ -3,19 +3,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MAX_PREVIEW_LENGTH } from "../constants";
 import DOMPurify from "dompurify";
 
-// handles the main post text and that cool expand/collapse thing
 const PostContent = ({ title, content = "", isExpanded, onToggleExpand }) => {
-  // making sure content isn't null or undefined
   const safeContent = content || "";
   const shouldShowExpand = safeContent.length > MAX_PREVIEW_LENGTH;
 
-  // truncate long posts so the feed doesn't get super cluttered
   const displayContent =
     isExpanded || !shouldShowExpand
       ? safeContent
       : safeContent.slice(0, MAX_PREVIEW_LENGTH) + "...";
 
-  // gotta sanitize this shit or we'll get hacked lmao
   const sanitizedTitle = DOMPurify.sanitize(title || "Untitled");
   const sanitizedDisplayContent = DOMPurify.sanitize(displayContent);
 
@@ -32,7 +28,6 @@ const PostContent = ({ title, content = "", isExpanded, onToggleExpand }) => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            {/*  render sanitized content using dangerouslySetInnerHTML */}
             <p
               className="text-gray-300 whitespace-pre-line break-words"
               dangerouslySetInnerHTML={{ __html: sanitizedDisplayContent }}
@@ -40,7 +35,6 @@ const PostContent = ({ title, content = "", isExpanded, onToggleExpand }) => {
           </motion.div>
         </AnimatePresence>
 
-        {/* only show this button for long posts */}
         {shouldShowExpand && !isExpanded && (
           <button
             onClick={onToggleExpand}

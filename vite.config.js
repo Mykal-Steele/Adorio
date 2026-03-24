@@ -29,10 +29,6 @@ export default defineConfig({
             "camera=(), microphone=(), geolocation=()"
           );
 
-          // look at me being all security conscious lol
-          // meanwhile my actual password was in a .env.example file i accidentally pushed to github
-          // (don't worry i changed it... eventually)
-
           next();
         });
       },
@@ -49,16 +45,14 @@ export default defineConfig({
           ? `window.location.protocol + "//" + window.location.hostname + ":3000"`
           : `"https://adorio.space"`;
 
-        // First replace the backend URL script with one that has the nonce
         html = html.replace(
           /<script>\s*\/\/\s*hardcoding the backend url here so i can change it without rebuilding\s*window\.VITE_BACKEND_URL\s*=\s*"[^"]+"\s*;\s*<\/script>/,
           `<script nonce="${nonce}">
-            // hardcoding the backend url here so i can change it without rebuilding
+            // Backend URL is injected at runtime.
             window.VITE_BACKEND_URL = ${backendScript};
           </script>`
         );
 
-        // csp stuff took me like 3 days to figure out - stackoverflow is my best friend
         // Note: 'unsafe-eval' is needed for the coding platform to execute user code safely
         const scriptSrc = `'self' 'nonce-${nonce}' 'unsafe-eval' https://static.cloudflareinsights.com https://challenges.cloudflare.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://www.googletagservices.com https://adservice.google.com`;
         const connectSrc = isDev
