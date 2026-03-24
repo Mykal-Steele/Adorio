@@ -2,18 +2,64 @@ const axios = require('axios');
 const puppeteer = require('puppeteer');
 const { execSync } = require('child_process');
 
+const safeExec = command => {
+  try {
+    return execSync(command, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  } catch (error) {
+    const stdout = error?.stdout ? String(error.stdout).trim() : '';
+    const stderr = error?.stderr ? String(error.stderr).trim() : '';
+    return [stdout, stderr].filter(Boolean).join('\n').trim() || 'No output';
+  }
+};
+
+const collectDockerDebugInfo = () => {
+  const ps = safeExec('docker ps --format "{{.Names}}\t{{.Status}}"');
+  const composeServices = safeExec('docker compose -f docker-compose.yml ps --all');
+  const composeProdServices = safeExec('docker compose -f docker-compose.prod.yml ps --all');
+
+  return [
+    '--- docker ps ---',
+    ps || 'No running containers',
+    '--- docker compose (dev) ps ---',
+    composeServices || 'No compose services (dev)',
+    '--- docker compose (prod) ps ---',
+    composeProdServices || 'No compose services (prod)'
+  ].join('\n');
+};
+
 // Helper to wait for the backend to be ready
 const waitForBackend = async (url, retries = 30, interval = 2000) => {
+  let lastErrorMessage = 'No response received from backend';
+
   for (let i = 0; i < retries; i++) {
     try {
       const response = await axios.get(`${url}/api/health`);
       if (response.status === 200) return true;
     } catch (err) {
-      // Ignore errors and wait
+      lastErrorMessage = err?.message || 'Unknown request error';
     }
     await new Promise(resolve => setTimeout(resolve, interval));
   }
-  throw new Error(`Backend at ${url} did not become ready in time.`);
+
+  const dockerInfo = collectDockerDebugInfo();
+  throw new Error(
+    `Backend at ${url} did not become ready in time. Last request error: ${lastErrorMessage}\n${dockerInfo}`
+  );
+};
+
+const getWithRetry = async (url, retries = 5, interval = 1000) => {
+  let lastError = null;
+
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await axios.get(url);
+    } catch (error) {
+      lastError = error;
+      await new Promise(resolve => setTimeout(resolve, interval));
+    }
+  }
+
+  throw new Error(`Failed after ${retries} retries for ${url}: ${lastError?.message || 'Unknown request error'}`);
 };
 
 describe('Adorio Integration Tests', () => {
@@ -99,6 +145,7 @@ describe('Adorio Integration Tests', () => {
   test('Frontend loads correctly without Console Errors', async () => {
     const page = await browser.newPage();
     const consoleErrors = [];
+    const failedResourceResponses = [];
     
     // Listen for console errors to catch hidden crashes
     page.on('console', msg => {
@@ -106,6 +153,14 @@ describe('Adorio Integration Tests', () => {
     });
     page.on('pageerror', err => {
       consoleErrors.push(err.toString());
+    });
+    page.on('response', response => {
+      if (response.status() >= 500) {
+        failedResourceResponses.push({
+          status: response.status(),
+          url: response.url(),
+        });
+      }
     });
 
     await page.goto(baseUrl, { waitUntil: 'networkidle0' });
@@ -116,6 +171,9 @@ describe('Adorio Integration Tests', () => {
     // Fail if there were critical JS errors
     if (consoleErrors.length > 0) {
       console.warn('Frontend Console Errors:', consoleErrors);
+    }
+    if (failedResourceResponses.length > 0) {
+      console.warn('Frontend 5xx Resources:', failedResourceResponses);
     }
     // We expect 0 errors, but sometimes 3rd party scripts (ads/analytics) fail. 
     // Uncomment this line to enforce 0 errors:
@@ -134,9 +192,9 @@ describe('Adorio Integration Tests', () => {
     await page.close();
   });
 
-  // --- SIDECAR (AI-SLOP) TESTS ---
+  // --- SIDECAR TESTS ---
 
-  test('AI-Slop sidecar is mounted and serving content', async () => {
+  test('Sidecar is mounted and serving content', async () => {
     const page = await browser.newPage();
     const consoleErrors = [];
     
@@ -167,7 +225,7 @@ describe('Adorio Integration Tests', () => {
     
     // Fail if there were console errors on the /cao page
     if (consoleErrors.length > 0) {
-      console.warn('AI-Slop Console Errors:', consoleErrors);
+      console.warn('Sidecar console errors:', consoleErrors);
       // Uncomment to enforce 0 errors:
       // expect(consoleErrors.length).toBe(0);
     }
@@ -175,7 +233,7 @@ describe('Adorio Integration Tests', () => {
     await page.close();
   });
 
-  test('AI-Slop has API key embedded', async () => {
+  test('Sidecar has API key embedded', async () => {
     const page = await browser.newPage();
     await page.goto(`${baseUrl}/cao/`);
     
@@ -194,14 +252,14 @@ describe('Adorio Integration Tests', () => {
   // --- BACKEND API TESTS ---
 
   test('Backend health check passes', async () => {
-    const response = await axios.get(`${baseUrl}/api/health`);
+    const response = await getWithRetry(`${baseUrl}/api/health`, 8, 750);
     expect(response.status).toBe(200);
     expect(response.data).toHaveProperty('isHealthy');
     expect(response.data.isHealthy).toBe(true);
   });
 
   test('Backend can retrieve posts (DB connectivity)', async () => {
-    const response = await axios.get(`${baseUrl}/api/posts`);
+    const response = await getWithRetry(`${baseUrl}/api/posts`, 8, 750);
     expect(response.status).toBe(200);
     expect(Array.isArray(response.data.posts)).toBe(true);
     
@@ -235,15 +293,15 @@ describe('Adorio Integration Tests', () => {
     }
   });
 
-  test('AI-Slop volume mount/copy verification', () => {
+  test('Sidecar volume mount/copy verification', () => {
     try {
       if (nodeEnv === 'production') {
-        // In prod, /cao is copied into the Nginx image. 
-        // We exec into the frontend container to verify file existence.
+        // In prod, /cao is copied into the Nginx image.
+        // Exec into the frontend container to verify file existence.
         const output = execSync('docker exec adorio-frontend-1 ls /usr/share/nginx/html/cao/index.html', { encoding: 'utf8' });
         expect(output.trim()).toContain('index.html');
       } else {
-        // In dev, ai-slop is separate and volume mounted
+        // In dev, the sidecar is separate and volume mounted.
         const output = execSync('docker exec adorio-ai-slop-1 ls /usr/share/nginx/html/index.html', { encoding: 'utf8' });
         expect(output.trim()).toContain('index.html');
       }

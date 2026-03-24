@@ -17,16 +17,9 @@ class ErrorBoundary extends React.Component {
       errorInfo: errorInfo,
     });
 
-    // dump the error info to console so i can fix it later
     console.error("uncaught error:", error, errorInfo);
     console.error("error stack:", error?.stack);
     console.error("component stack:", errorInfo?.componentStack);
-
-    // maybe i'll add sentry here someday but who has money for that lol
-
-    // if you're reading this and you work at sentry, i'd love a free account
-    // i'll put your logo in the footer and tell everyone how amazing you are
-    // my email is on github... just saying...
   }
 
   render() {
@@ -42,13 +35,13 @@ class ErrorBoundary extends React.Component {
               Something went wrong
             </h2>
             <p className="text-gray-300 mb-6">
-              something broke bad 💀 try refreshing or something idk
+              An unexpected error occurred. Please refresh the page.
             </p>
             <button
               onClick={() => window.location.reload()}
               className="py-2 px-4 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors"
             >
-              try turning it off and on again
+              Reload page
             </button>
           </motion.div>
         </div>

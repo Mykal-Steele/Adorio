@@ -1,15 +1,9 @@
 import crypto from 'crypto';
 
-/**
- * Advanced visitor fingerprinting to distinguish users on same network
- * Uses multiple data points to create unique identifiers
- */
-
-// Generate a hash from multiple fingerprint components
 const generateFingerprint = (components) => {
   const normalized = components
-    .filter(Boolean) // Remove null/undefined values
-    .map(String) // Ensure all are strings
+    .filter(Boolean)
+    .map(String)
     .join('|');
 
   return crypto
@@ -19,7 +13,6 @@ const generateFingerprint = (components) => {
     .substring(0, 16);
 };
 
-// Extract screen characteristics
 const extractScreenFingerprint = (screenData) => {
   if (!screenData) return null;
 
@@ -36,7 +29,6 @@ const extractScreenFingerprint = (screenData) => {
   return `${width}x${height}|${availWidth}x${availHeight}|${colorDepth}|${pixelDepth}|${devicePixelRatio}`;
 };
 
-// Extract timezone and locale fingerprint
 const extractLocaleFingerprint = (localeData) => {
   if (!localeData) return null;
 
@@ -48,7 +40,6 @@ const extractLocaleFingerprint = (localeData) => {
   )}|${country}|${dateFormat}`;
 };
 
-// Extract browser capabilities fingerprint
 const extractBrowserFingerprint = (browserData) => {
   if (!browserData) return null;
 
@@ -70,7 +61,6 @@ const extractBrowserFingerprint = (browserData) => {
   )}`;
 };
 
-// Extract network fingerprint (more subtle indicators)
 const extractNetworkFingerprint = (networkData) => {
   if (!networkData) return null;
 
@@ -80,7 +70,6 @@ const extractNetworkFingerprint = (networkData) => {
   return `${connectionType}|${effectiveType}|${downlink}|${rtt}|${saveData}`;
 };
 
-// Create comprehensive visitor fingerprint
 export const createVisitorFingerprint = (fingerprintData) => {
   const { screen, locale, browser, network, ipAddress, behavior } =
     fingerprintData || {};
@@ -90,7 +79,7 @@ export const createVisitorFingerprint = (fingerprintData) => {
     extractLocaleFingerprint(locale),
     extractBrowserFingerprint(browser),
     extractNetworkFingerprint(network),
-    ipAddress, // Still use IP as one component
+    ipAddress,
     behavior?.mouseMovement,
     behavior?.keyboardTiming,
     behavior?.scrollPattern,
@@ -99,19 +88,14 @@ export const createVisitorFingerprint = (fingerprintData) => {
   return generateFingerprint(components);
 };
 
-// Create a stable visitor ID that combines cookie and fingerprint
 export const createStableVisitorId = (cookieId, fingerprint, ipAddress) => {
-  // If we have a cookie and fingerprint matches previous sessions, use cookie
-  // Otherwise, create new ID based on fingerprint
   const components = [cookieId, fingerprint, ipAddress].filter(Boolean);
   return generateFingerprint(components);
 };
 
-// Analyze if two fingerprints likely belong to same person
 export const isSameVisitor = (fp1, fp2, threshold = 0.8) => {
   if (!fp1 || !fp2) return false;
 
-  // Simple similarity check - in production you'd want more sophisticated matching
   const similarity = calculateSimilarity(fp1, fp2);
   return similarity >= threshold;
 };
