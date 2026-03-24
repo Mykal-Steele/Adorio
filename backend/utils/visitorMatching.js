@@ -1,6 +1,5 @@
 /**
- * Advanced visitor matching and deduplication algorithms
- * Production-ready user classification system
+ * Visitor matching and deduplication helpers.
  */
 
 import crypto from 'crypto';
