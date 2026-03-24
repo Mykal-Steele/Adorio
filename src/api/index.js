@@ -1,4 +1,3 @@
-// my api setup file - finally got axios working right
 import axios from 'axios';
 import { API_BASE_URL } from '../config/apiConfig';
 import { isAbortError, handleApiError } from '../utils/errorHandling';
@@ -9,18 +8,15 @@ const API = axios.create({
   withCredentials: true,
 });
 
-// adding token to every request cuz security and stuff
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem('token');
   if (token) req.headers.Authorization = `Bearer ${token}`;
   return req;
 });
 
-// simplified this cuz it was doing too much duplicate stuff
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    // no need to log aborted requests, they're not real errors
     if (!isAbortError(error) && process.env.NODE_ENV !== 'production') {
       console.error('api error:', error.config?.url, error.response?.status);
     }
@@ -29,7 +25,6 @@ API.interceptors.response.use(
   }
 );
 
-// all my user stuff
 export const register = async (userData) => {
   try {
     const response = await API.post('/users/register', userData);
@@ -39,7 +34,6 @@ export const register = async (userData) => {
   }
 };
 
-// login function - took me 3 tries to get this right lol
 export const login = async (userData) => {
   try {
     const response = await API.post('/users/login', userData);
@@ -63,7 +57,6 @@ export const fetchUserData = async () => {
   }
 };
 
-// Store a secret message
 export const storeSecret = async (message, password) => {
   try {
     const response = await API.post('/secretenv', { message, password });
@@ -73,7 +66,6 @@ export const storeSecret = async (message, password) => {
   }
 };
 
-// moved all the post api calls to their own file cuz this one was getting huge
 export {
   getPosts,
   createPost,

@@ -591,7 +591,7 @@ const getVisitorDetails = async (visitorId) => {
       latestVisit.fingerprint
     );
 
-    // Calculate comprehensive stats
+    // Calculate summary stats
     const totalVisits = visits.length;
     const totalDuration = visits.reduce(
       (sum, v) => sum + (v.durationMs || 0),

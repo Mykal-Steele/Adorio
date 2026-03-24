@@ -42,7 +42,7 @@ const trackPageView = withPerformanceTracking(
         return;
       }
 
-      // Generate comprehensive visitor fingerprint with timeout protection
+      // Generate fingerprint data with a timeout so page tracking stays fast.
       const fingerprintPromise = Promise.race([
         generateBrowserFingerprint(),
         new Promise((resolve) => setTimeout(() => resolve(null), 2000)), // 2 second timeout

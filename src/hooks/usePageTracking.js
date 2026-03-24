@@ -40,6 +40,8 @@ const usePageTracking = () => {
   const location = useLocation();
   const user = useSelector((state) => state.user.user);
   const userId = user?._id || user?.id || null;
+  const isAutomatedBrowser =
+    typeof navigator !== 'undefined' && navigator.webdriver === true;
 
   const visitorIdRef = useRef(null);
   const sessionIdRef = useRef(null);
@@ -54,12 +56,20 @@ const usePageTracking = () => {
       return;
     }
 
+    if (isAutomatedBrowser) {
+      return;
+    }
+
+    if (isAutomatedBrowser) {
+      return;
+    }
+
     const local = window.localStorage ?? null;
     const session = window.sessionStorage ?? null;
 
     visitorIdRef.current = ensurePersistentId(local, VISITOR_STORAGE_KEY);
     sessionIdRef.current = ensurePersistentId(session, SESSION_STORAGE_KEY);
-  }, []);
+  }, [isAutomatedBrowser]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -125,10 +135,14 @@ const usePageTracking = () => {
       path: fullPath,
       startedAt: nowPerformance,
     };
-  }, [location.pathname, location.search, location.hash, userId]);
+  }, [location.pathname, location.search, location.hash, userId, isAutomatedBrowser]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    if (isAutomatedBrowser) {
       return undefined;
     }
 
@@ -168,7 +182,7 @@ const usePageTracking = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [userId]);
+  }, [userId, isAutomatedBrowser]);
 };
 
 export default usePageTracking;
