@@ -1,0 +1,1109 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import { CheckCircle2, XCircle, AlertTriangle, ArrowRight, ArrowLeft, RotateCcw, BrainCircuit, BarChart3, ChevronDown } from 'lucide-react';
+
+const quizData = [
+  // --- CHAPTER 1: DATA & STATISTICAL THINKING ---
+  {
+    id: 1,
+    chapter: "Chapter 1: Data & Statistical Thinking",
+    question: "A database query optimizer cannot afford to scan a massive 2-billion-row table to count null values. Instead, it randomly scans 15,000 pages and calculates a null rate of 4.2%. Statistically speaking, what does the value 4.2% represent?",
+    options: [
+      "A parameter, because it acts as the final decision value for the optimizer.",
+      "A qualitative metric, because it fundamentally describes data quality.",
+      "A continuous variable, because computed percentages allow infinite decimals.",
+      "A statistic, because it is mathematically derived from a sample subset."
+    ],
+    correctAnswer: 3,
+    explanation: "The true population is the 2-billion-row table. Because calculating the exact metric (the parameter) is computationally prohibitive, the optimizer uses a sample (15,000 pages). Any numerical descriptor calculated from a sample is, by definition, a statistic.",
+    trap: "Students often mistake 'important' numbers or rates as parameters. Remember: if it comes from a sample, it's a statistic."
+  },
+  {
+    id: 2,
+    chapter: "Chapter 1: Data & Statistical Thinking",
+    question: "A DevOps engineer is analyzing server logs. They extract the HTTP Status Codes (e.g., 200, 404, 500) returned over the last hour. How should this specific data type be classified?",
+    options: [
+      "Qualitative (Categorical) Data",
+      "Quantitative Continuous Data",
+      "Quantitative Discrete Data",
+      "Sequential Ordinal Data"
+    ],
+    correctAnswer: 0,
+    explanation: "Even though HTTP codes are numbers, they are arbitrary labels defining categories (Success, Not Found, Server Error). You cannot perform arithmetic on them (e.g., averaging a 404 and a 200 has no physical meaning).",
+    trap: "Just because data consists of numbers does not make it quantitative. Always ask: 'Does doing math on these numbers make logical sense?'"
+  },
+  {
+    id: 3,
+    chapter: "Chapter 1: Data & Statistical Thinking",
+    question: "A developer sends an email survey to 10,000 users asking about UI satisfaction. Only 85 users respond, and 80 of them are heavily criticizing a recent crash loop. The developer uses this to claim 94% of all users hate the app. What is the fundamental statistical flaw?",
+    options: [
+      "The sample size is too small to calculate a valid standard deviation.",
+      "Non-response bias has severely skewed the sample representativeness.",
+      "The data was collected observationally rather than from a published source.",
+      "The population parameter cannot be compared to a qualitative survey."
+    ],
+    correctAnswer: 1,
+    explanation: "This is a classic case of Non-response Bias (a form of Selection Bias). The sample is no longer representative of the 10,000 population because only a polarized, angry subset chose to answer. The math is right, but the logic is invalid.",
+    trap: "Assuming that a randomly distributed survey yields a randomly collected sample. Who actually responds matters."
+  },
+  {
+    id: 4,
+    chapter: "Chapter 1: Data & Statistical Thinking",
+    question: "A cybersecurity script logs the exact IP addresses of incoming connection attempts. From a statistical perspective, what type of variable is an IP address?",
+    options: [
+      "Quantitative Continuous Data",
+      "Quantitative Discrete Data",
+      "Qualitative Categorical Data",
+      "Population Parameter Metric"
+    ],
+    correctAnswer: 2,
+    explanation: "An IP address is a numerical label used to identify a device on a network. It acts as a category or name. You cannot meaningfully add, subtract, or average IP addresses.",
+    trap: "Seeing numbers separated by decimals and instinctively assuming it is continuous quantitative data."
+  },
+  {
+    id: 5,
+    chapter: "Chapter 1: Data & Statistical Thinking",
+    question: "A machine learning engineer divides their dataset into three specific groups based on user subscription tiers: Free, Pro, and Enterprise. They then randomly select 10% of the users from within each specific tier. What sampling method is this?",
+    options: [
+      "Simple Random Sampling",
+      "Stratified Random Sampling",
+      "Cluster Random Sampling",
+      "Observational Selection"
+    ],
+    correctAnswer: 1,
+    explanation: "Stratified Random Sampling involves dividing the population into logical subgroups (strata) and taking a random sample proportionally from each one to ensure representation.",
+    trap: "Confusing Stratified with Cluster sampling. Cluster samples whole groups at random, Stratified samples randomly *within* every group."
+  },
+  {
+    id: 6,
+    chapter: "Chapter 1: Data & Statistical Thinking",
+    question: "A task manager application records the number of active background threads currently running on a CPU. How is this variable classified?",
+    options: [
+      "Qualitative Categorical Data",
+      "Quantitative Continuous Data",
+      "Quantitative Discrete Data",
+      "Sequential Ordinal Data"
+    ],
+    correctAnswer: 2,
+    explanation: "The number of threads is generated by a counting process. You can have 4 threads or 5 threads, but not 4.3 threads. Therefore, it is discrete.",
+    trap: "Confusing discrete (counted, integers) with continuous (measured, infinite fractions)."
+  },
+  {
+    id: 7,
+    chapter: "Chapter 1: Data & Statistical Thinking",
+    question: "To test a new sorting algorithm, you run it on 500 identical arrays on an isolated machine, controlling the RAM allocation to ensure no background processes interfere. What is the data collection method?",
+    options: [
+      "Data from a Published Source",
+      "Data from a Designed Experiment",
+      "Data from an Observational Study",
+      "Data from Stratified Sampling"
+    ],
+    correctAnswer: 1,
+    explanation: "Because you are strictly controlling external variables (RAM, isolated machine) and observing the outcome of a specific treatment, this is a Designed Experiment.",
+    trap: "Assuming computer code execution is automatically an 'observational' study because you are watching the output."
+  },
+  {
+    id: 8,
+    chapter: "Chapter 1: Data & Statistical Thinking",
+    question: "An automated script evaluates every single hard drive currently installed in an AWS datacenter and finds the exact average temperature is 38 degrees Celsius. The value 38 is a:",
+    options: [
+      "Statistic, because it is an average value.",
+      "Parameter, because it describes the entire population.",
+      "Qualitative descriptor of system hardware health.",
+      "Discrete metric of thermal energy output."
+    ],
+    correctAnswer: 1,
+    explanation: "Because the script evaluated 'every single' hard drive in the target environment, the collection is the exhaustive Population. A numerical descriptor of a population is a Parameter.",
+    trap: "Assuming that an average is always a statistic. Parameters can also be averages, provided they include 100% of the population."
+  },
+  {
+    id: 9,
+    chapter: "Chapter 1: Data & Statistical Thinking",
+    question: "A developer logs the execution time of an API endpoint, measured down to the nanosecond. This measurement is an example of:",
+    options: [
+      "Quantitative Discrete Data",
+      "Qualitative Categorical Data",
+      "Quantitative Continuous Data",
+      "Sequential Frequency Data"
+    ],
+    correctAnswer: 2,
+    explanation: "Time is measured, not counted. Because it can be broken down into infinitely smaller fractional increments (milliseconds, nanoseconds, picoseconds), it is continuous.",
+    trap: "Thinking that because a computer rounds a number at some point, it becomes discrete. Time and physical measurements are inherently continuous."
+  },
+  {
+    id: 10,
+    chapter: "Chapter 1: Data & Statistical Thinking",
+    question: "An app developer uses a script that automatically reports memory usage, but due to a bug, it only triggers when the app crashes. Using this data to estimate average memory usage introduces what flaw?",
+    options: [
+      "Selection Bias",
+      "Non-response Bias",
+      "Measurement Error",
+      "Stratification Error"
+    ],
+    correctAnswer: 0,
+    explanation: "The sample is unrepresentative. By only collecting data during crashes (which are likely caused by high memory), the developer is explicitly selecting a skewed subset of the population.",
+    trap: "Choosing non-response bias. Non-response requires a unit to *choose* not to answer a survey. Here, the collection mechanism itself is flawed."
+  },
+
+  // --- CHAPTER 2: GRAPHICAL METHODS ---
+  {
+    id: 11,
+    chapter: "Chapter 2: Graphical Methods",
+    question: "You are building a dashboard histogram to visualize the exact packet transmission latencies (in milliseconds) of an API. Why MUST the bars of this histogram be contiguous (touching)?",
+    options: [
+      "To adhere to the Pareto principle of highlighting the vital few issues.",
+      "Because latency is a Quantitative Continuous variable with no gaps.",
+      "Because the X-axis represents discrete qualitative categories.",
+      "It is simply a modern UI convention to save space on mobile displays."
+    ],
+    correctAnswer: 1,
+    explanation: "Histograms represent continuous quantitative data. Time (latency) is continuous. Inserting a visual gap between bars falsely implies to the user that a value cannot exist in that gap space.",
+    trap: "Confusing a Bar Chart (qualitative, gaps allowed) with a Histogram (quantitative continuous, contiguous)."
+  },
+  {
+    id: 12,
+    chapter: "Chapter 2: Graphical Methods",
+    question: "You need to construct a histogram for query response times. The fastest query took 10ms and the slowest took 210ms. If you are required to use exactly 8 class intervals, what is the class width?",
+    options: [
+      "20",
+      "25",
+      "30",
+      "40"
+    ],
+    correctAnswer: 1,
+    explanation: "Class Width = (Maximum - Minimum) / Number of Intervals. (210 - 10) / 8 = 200 / 8 = 25.",
+    trap: "Forgetting to subtract the minimum value from the maximum before dividing."
+  },
+  {
+    id: 13,
+    chapter: "Chapter 2: Graphical Methods",
+    question: "A QA manager prepares a Pareto chart detailing software bugs. What specific formatting rule fundamentally defines a Pareto chart compared to a standard bar chart?",
+    options: [
+      "The bars must be ordered alphabetically by category name.",
+      "The bars must touch each other continuously with no gaps.",
+      "The bars must be arranged in descending order of frequency.",
+      "A scatter plot must be overlaid to show data correlation."
+    ],
+    correctAnswer: 2,
+    explanation: "A Pareto chart is designed to highlight the most critical issues (the vital few). Enforcing a descending frequency order on the x-axis instantly isolates the dominant factors.",
+    trap: "Choosing touching bars (which is the rule for histograms, not Pareto charts)."
+  },
+  {
+    id: 14,
+    chapter: "Chapter 2: Graphical Methods",
+    question: "An engineer wants to determine if an increase in simultaneous users on a server directly correlates with higher CPU temperature. Which graphical method is appropriate?",
+    options: [
+      "Time Series Graph",
+      "Scatter Plot",
+      "Histogram",
+      "Contingency Table"
+    ],
+    correctAnswer: 1,
+    explanation: "A scatter plot plots bivariate quantitative data (Users on X, Temperature on Y) to visually assess if a linear correlation exists between the two variables.",
+    trap: "Choosing Time Series. While time is often tracked, we are comparing two specific numeric variables against each other, not strictly against a chronological timeline."
+  },
+  {
+    id: 15,
+    chapter: "Chapter 2: Graphical Methods",
+    question: "A scatter plot analyzing 'Lines of Code Written' vs 'Number of Syntax Errors' shows a dense cluster of points forming a downward sloping line. This indicates:",
+    options: [
+      "A strong positive correlation between the variables.",
+      "A strong negative correlation between the variables.",
+      "Strict mathematical causation between the variables.",
+      "That absolutely no linear relationship exists."
+    ],
+    correctAnswer: 1,
+    explanation: "A downward slope indicates that as the X variable increases, the Y variable decreases. This defines a negative correlation.",
+    trap: "Assuming negative correlation means 'no correlation'. Negative correlation is still a strong relationship, just an inverse one."
+  },
+  {
+    id: 16,
+    chapter: "Chapter 2: Graphical Methods",
+    question: "A network administrator logs the total bandwidth consumed by a server farm every hour over a 7-day period to spot usage trends. Which graph is most appropriate?",
+    options: [
+      "Time Series Graph",
+      "Pareto Chart",
+      "Pie Chart",
+      "Stem-and-Leaf Display"
+    ],
+    correctAnswer: 0,
+    explanation: "When data is collected sequentially over regular intervals and the goal is to visualize trends over that specific chronology, a Time Series graph is the mathematical standard.",
+    trap: "Using a histogram. A histogram aggregates the frequencies, completely destroying the chronological timeline needed to spot trends."
+  },
+  {
+    id: 17,
+    chapter: "Chapter 2: Graphical Methods",
+    question: "Which of the following graphical techniques actually preserves the original raw data values in its display?",
+    options: [
+      "Histogram",
+      "Stem-and-Leaf Display",
+      "Pareto Chart",
+      "Pie Chart"
+    ],
+    correctAnswer: 1,
+    explanation: "A Stem-and-Leaf display uses the actual digits of the data points to construct the visual shape, allowing you to read the exact original numbers. Histograms group data into bins, losing the exact values.",
+    trap: "Assuming histograms keep data intact. Once data goes into a 'bin', the specific original value is lost to the aggregate."
+  },
+  {
+    id: 18,
+    chapter: "Chapter 2: Graphical Methods",
+    question: "A pie chart is used to display the market share of four different operating systems. What is the fundamental requirement for the data in a pie chart?",
+    options: [
+      "The categories must represent quantitative continuous data.",
+      "The relative frequencies of the categories must sum to exactly 100%.",
+      "The data must be ordered chronologically around the circle.",
+      "It must display the statistical variance of each specific category."
+    ],
+    correctAnswer: 1,
+    explanation: "A pie chart represents parts of a whole. Therefore, the relative frequencies of all mutually exclusive categories plotted must equal exactly 1 (or 100%).",
+    trap: "Using a pie chart for data where users can select multiple options (e.g., 'Check all that apply'), which causes the sum to exceed 100%."
+  },
+  {
+    id: 19,
+    chapter: "Chapter 2: Graphical Methods",
+    question: "When plotting a scatter plot to determine if adding more RAM (cause) reduces query latency (effect), on which axis should the RAM metric be plotted?",
+    options: [
+      "The vertical Y-axis.",
+      "The horizontal X-axis.",
+      "Either axis is statistically valid.",
+      "The standardized Z-axis."
+    ],
+    correctAnswer: 1,
+    explanation: "In bivariate statistics, the independent variable (the presumed cause or predictor, here RAM) is plotted on the horizontal X-axis, while the dependent variable (the effect, Latency) is on the Y-axis.",
+    trap: "Assuming axis placement is arbitrary. The X-axis is strictly reserved for the independent variable."
+  },
+  {
+    id: 20,
+    chapter: "Chapter 2: Graphical Methods",
+    question: "A cross-tabulation (Contingency Table) is primarily used to investigate the relationship between:",
+    options: [
+      "Two quantitative continuous variables.",
+      "Two qualitative categorical variables.",
+      "A population parameter and a sample statistic.",
+      "Chronological time and data frequency."
+    ],
+    correctAnswer: 1,
+    explanation: "Contingency tables summarize the frequencies of two qualitative variables simultaneously (e.g., Operating System type vs. Success/Failure status).",
+    trap: "Confusing it with a scatter plot, which compares two quantitative variables."
+  },
+
+  // --- CHAPTER 3: NUMERICAL MEASURES ---
+  {
+    id: 21,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "A microservice's analytics dashboard shows that the Mean buffering time is 4.5 seconds, while the Median buffering time is 0.5 seconds. What is the shape of this distribution and what does it imply?",
+    options: [
+      "Left-skewed; the majority of users experience severe buffering.",
+      "Symmetric; the standard deviation naturally compensates for variance.",
+      "Uniform; the data is evenly distributed between 0.5 and 4.5.",
+      "Right-skewed; extreme outliers are dragging the mean heavily upward."
+    ],
+    correctAnswer: 3,
+    explanation: "Because Mean (4.5) > Median (0.5), the distribution is Right-Skewed. The physical middle (Median) shows most users have almost no buffering, but massive lag for a tiny fraction of users is pulling the mean heavily to the right.",
+    trap: "The tail always follows the mean. If Mean > Median, it's skewed right."
+  },
+  {
+    id: 22,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "A software testing class scored very well on an exam. The mean score was 81, the median was 88, and the mode was 92. What is the shape of this distribution?",
+    options: [
+      "Right-Skewed Distribution",
+      "Symmetric Distribution",
+      "Left-Skewed Distribution",
+      "Bimodal Distribution"
+    ],
+    correctAnswer: 2,
+    explanation: "Because Mean (81) < Median (88), the tail is being dragged to the left by a few extremely low scores, making it Left-Skewed.",
+    trap: "Assuming high scores mean 'right skewed'. Skewness is dictated by the direction of the tail, which follows the mean."
+  },
+  {
+    id: 23,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "Which of the following measures of central tendency is considered 'resistant' because it is NOT mathematically influenced by extreme outlier values?",
+    options: [
+      "The Arithmetic Mean",
+      "The Median",
+      "The Sample Variance",
+      "The Inter-range"
+    ],
+    correctAnswer: 1,
+    explanation: "The median strictly relies on the physical position of the data points in an ordered array. Changing the highest value from 100 to 1,000,000 does not shift the middle position.",
+    trap: "Selecting the mean, which factors every single numerical value into its arithmetic calculation."
+  },
+  {
+    id: 24,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "When calculating the Sample Variance (s²), why does the formula divide the sum of squared deviations by (n - 1) instead of simply by n?",
+    options: [
+      "To mathematically convert the variance back into its original units.",
+      "To apply Bessel's correction, preventing the underestimation of population variation.",
+      "To accurately account for the median being excluded from the dataset.",
+      "To explicitly satisfy the core requirements of the Empirical Rule."
+    ],
+    correctAnswer: 1,
+    explanation: "Dividing by n systematically underestimates the true variation of the overall population. Dividing by (n - 1), known as Bessel's correction, mathematically adjusts the sample variance to be an unbiased estimator.",
+    trap: "Assuming n-1 is just arbitrary algebra. It is a strict mathematical correction for sampling bias."
+  },
+  {
+    id: 25,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "A network engineer calculates the variance of packet transmission times to be 144 squared-milliseconds. Why is the Standard Deviation usually preferred in final reports over the variance?",
+    options: [
+      "Because variance cannot accurately handle negative data values.",
+      "Because standard deviation is strictly resistant to extreme outliers.",
+      "Because standard deviation restores the measurement to the original units.",
+      "Because variance requires knowing the true population parameter first."
+    ],
+    correctAnswer: 2,
+    explanation: "Variance is mathematically expressed in squared units (e.g., ms²). Standard deviation takes the square root, returning the metric to the original, interpretable units (ms).",
+    trap: "Thinking Standard Deviation resists outliers. It relies heavily on the mean, so it is highly sensitive to outliers."
+  },
+  {
+    id: 26,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "A server farm's CPU execution times have a mean of 200ms and a standard deviation of 20ms. The prompt explicitly states 'assuming nothing is known about the shape of this distribution'. What is the maximum percentage of requests that take longer than 240ms or shorter than 160ms?",
+    options: [
+      "Approximately 5%",
+      "At most 11%",
+      "At most 25%",
+      "At least 75%"
+    ],
+    correctAnswer: 2,
+    explanation: "Since the shape is unknown, you CANNOT use the Empirical Rule. You must use Chebyshev's Theorem. The bounds 160 and 240 are exactly 2 standard deviations away (k=2). Chebyshev states at least (1 - 1/2²) = 75% falls INSIDE. Therefore, at most 25% falls OUTSIDE.",
+    trap: "Using the Empirical Rule (which would give 5% outside) when the prompt strictly forbids assuming a normal distribution."
+  },
+  {
+    id: 27,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "If a dataset of latency logs is explicitly described as having a 'symmetric, bell-shaped distribution', approximately what percentage of the logs will fall within ONE standard deviation of the mean?",
+    options: [
+      "68%",
+      "75%",
+      "95%",
+      "99.7%"
+    ],
+    correctAnswer: 0,
+    explanation: "The keywords 'symmetric, bell-shaped' authorize the use of the Empirical Rule. The rule mathematically defines the intervals as ~68% (1 std dev), ~95% (2 std devs), and ~99.7% (3 std devs).",
+    trap: "Confusing the values. 95% belongs to two standard deviations, not one."
+  },
+  {
+    id: 28,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "According to Chebyshev's Theorem, what is the minimum percentage of data that must fall within k = 3 standard deviations of the mean, regardless of the distribution's shape?",
+    options: [
+      "75.00%",
+      "88.89%",
+      "95.00%",
+      "99.70%"
+    ],
+    correctAnswer: 1,
+    explanation: "Chebyshev's formula is 1 - (1/k²). For k=3, this is 1 - (1/9) = 8/9, which equals exactly 88.89%.",
+    trap: "Applying the Empirical Rule value (99.7%) to a question asking for Chebyshev's mathematical limit."
+  },
+  {
+    id: 29,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "An intrusion detection system tracks the byte size of outgoing network packets. Normal traffic has a mean of 1200 bytes and a standard deviation of 100 bytes. A packet is flagged with a size of 1520 bytes. According to the Z-score method, how should this be classified?",
+    options: [
+      "An invalid data point due to negative variance.",
+      "A normal observation within the 99th percentile.",
+      "A suspect outlier, as its Z-score is +2.5.",
+      "An extreme outlier, as its Z-score is +3.2."
+    ],
+    correctAnswer: 3,
+    explanation: "Z-score = (Value - Mean) / Standard Deviation = (1520 - 1200) / 100 = 320 / 100 = 3.2. Any Z-score extending beyond the ±3.0 boundary is statistically defined as an extreme outlier.",
+    trap: "Failing to calculate the exact Z-score and guessing based purely on intuition."
+  },
+  {
+    id: 30,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "A student scored a 65 on a Data Structures exam where the class mean was 80 and the standard deviation was 5. What is their exact Z-score?",
+    options: [
+      "-3.0",
+      "-1.5",
+      "3.0",
+      "15.0"
+    ],
+    correctAnswer: 0,
+    explanation: "Z = (X - Mean) / SD. Z = (65 - 80) / 5 = -15 / 5 = -3.0.",
+    trap: "Subtracting the value from the mean (80 - 65) resulting in a positive Z-score. The value must always come first."
+  },
+  {
+    id: 31,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "A database query returned 50 execution times. The 75th percentile (Q3) was calculated as 400ms. What is the strict statistical interpretation of this value?",
+    options: [
+      "75% of the queries executed in exactly 400ms.",
+      "25% of the queries executed in 400ms or less.",
+      "75% of the queries executed in 400ms or less.",
+      "The average execution time of the top 75% was 400ms."
+    ],
+    correctAnswer: 2,
+    explanation: "A percentile explicitly defines the value below which a certain percentage of the data falls. Q3 (75th percentile) means 75% of the data is less than or equal to that value.",
+    trap: "Assuming percentiles represent exact clusters or arithmetic averages."
+  },
+  {
+    id: 32,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "Given a dataset of server loads where Q1 = 20% and Q3 = 60%, what is the Interquartile Range (IQR) and what does it represent?",
+    options: [
+      "40%; It represents the spread of the middle 50% of the data.",
+      "40%; It represents the absolute standard deviation of the dataset.",
+      "80%; It represents the total range excluding extreme outliers.",
+      "20%; It represents the calculated mathematical distance to the median."
+    ],
+    correctAnswer: 0,
+    explanation: "IQR = Q3 - Q1 = 60 - 20 = 40. The IQR explicitly measures the spread of the middle 50% of an ordered dataset, making it highly resistant to outliers.",
+    trap: "Confusing IQR with standard deviation or total range."
+  },
+  {
+    id: 33,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "Using the Box Plot method for identifying outliers, how is the Lower Inner Fence mathematically calculated?",
+    options: [
+      "Mean - (3 * Standard Deviation)",
+      "Q1 - (1.5 * IQR)",
+      "Q3 + (3 * IQR)",
+      "Median - 1.5"
+    ],
+    correctAnswer: 1,
+    explanation: "The Inner Fences establish the boundaries for 'suspect' outliers. The lower inner fence is strictly calculated by subtracting 1.5 times the IQR from the first quartile (Q1).",
+    trap: "Confusing inner fences (1.5 multiplier) with outer fences (3.0 multiplier), or mixing IQR rules with Z-score rules."
+  },
+  {
+    id: 34,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "In a standard Box Plot diagram, what does the vertical line drawn inside the main box represent?",
+    options: [
+      "The Arithmetic Mean",
+      "The Mode",
+      "The Median (Q2)",
+      "The Midrange"
+    ],
+    correctAnswer: 2,
+    explanation: "A box plot visually represents the 5-number summary. The box is formed by Q1 and Q3, and the line dividing the box is strictly the Median (the 50th percentile).",
+    trap: "Assuming the line inside the box represents the arithmetic mean."
+  },
+  {
+    id: 35,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "A database administrator calculates the Pearson Correlation Coefficient (r) between the 'Volume of Cached Data' and the 'Query Execution Time', resulting in an r = -0.96. What is the statistically sound interpretation?",
+    options: [
+      "There is a strong negative linear correlation between the variables.",
+      "Caching data strictly causes the database to execute queries faster.",
+      "The variables are almost completely independent of each other.",
+      "The variance of the query execution time is precisely 0.96."
+    ],
+    correctAnswer: 0,
+    explanation: "An r-value close to -1.0 indicates a very strong negative linear correlation. While caching likely IS the cause, statistical correlation alone cannot mathematically prove strict causality.",
+    trap: "The deadliest trap in statistics: Assuming correlation definitively proves causation."
+  },
+  {
+    id: 36,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "A machine learning algorithm evaluates two features and returns a correlation coefficient of r = 0.02. What does this mean?",
+    options: [
+      "The variables share a perfect non-linear relationship.",
+      "An increase in X directly causes a 2% increase in Y.",
+      "There is virtually zero linear relationship between the variables.",
+      "The calculation suffered from a mathematical divide-by-zero error."
+    ],
+    correctAnswer: 2,
+    explanation: "A correlation coefficient near 0 proves that there is no meaningful *linear* relationship between the two variables. (Note: A non-linear relationship might still exist, but r doesn't measure that).",
+    trap: "Assuming r=0 means the variables have zero relationship whatsoever. It specifically means zero *linear* correlation."
+  },
+  {
+    id: 37,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "Which of the following values for the Pearson Correlation Coefficient (r) indicates the strongest linear relationship?",
+    options: [
+      "0.85",
+      "-0.91",
+      "0.00",
+      "-0.05"
+    ],
+    correctAnswer: 1,
+    explanation: "The strength of the correlation is determined by its absolute distance from 0. An r of -0.91 is physically closer to a perfect line (-1.0) than 0.85 is to 1.0.",
+    trap: "Looking only at the positive numbers and selecting the highest one. Negative correlation can be mathematically stronger than positive."
+  },
+  {
+    id: 38,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "What is the primary mathematical limitation of Covariance that makes the Pearson Correlation Coefficient necessary?",
+    options: [
+      "Covariance cannot detect negatively trending linear relationships.",
+      "Covariance only functions correctly on qualitative categorical data.",
+      "Covariance is unbounded and depends heavily on the units of measurement.",
+      "Covariance cannot be squared without losing its absolute structural meaning."
+    ],
+    correctAnswer: 2,
+    explanation: "Covariance tells you the direction of the relationship (positive/negative), but its magnitude is unbounded. The Pearson Coefficient standardizes covariance by dividing it by the standard deviations, strictly bounding it between -1 and 1.",
+    trap: "Assuming covariance is inherently flawed. It is mathematically sound but visually uninterpretable without standardizing."
+  },
+  {
+    id: 39,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "You are analyzing the salaries of 50 junior developers. If the CEO's salary is accidentally added to the dataset, which metric will be the LEAST affected?",
+    options: [
+      "The Mean",
+      "The Sample Variance",
+      "The Range",
+      "The Median"
+    ],
+    correctAnswer: 3,
+    explanation: "The Median is a resistant measure based entirely on positional ranking. Adding one massive extreme value at the top only shifts the median position by half a step, barely altering the value.",
+    trap: "Picking Mean or Variance, which mathematically ingest the massive number directly into their numerators."
+  },
+  {
+    id: 40,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "A load balancer distributes requests with a bell-shaped variation. If the mean latency is 50ms and the standard deviation is 5ms, what interval contains approximately 99.7% of all requests?",
+    options: [
+      "45ms to 55ms",
+      "40ms to 60ms",
+      "35ms to 65ms",
+      "0ms to 100ms"
+    ],
+    correctAnswer: 2,
+    explanation: "Under the Empirical Rule, 99.7% corresponds to 3 standard deviations. Mean ± 3(SD) = 50 ± 15. The interval is 35ms to 65ms.",
+    trap: "Applying k=2 (which yields 40 to 60) instead of k=3."
+  },
+
+  // --- CHAPTER 4: PROBABILITY ---
+  {
+    id: 41,
+    chapter: "Chapter 4: Probability",
+    question: "In probability theory, what is the strict definition of an 'Experiment'?",
+    options: [
+      "A test conducted in a heavily controlled laboratory environment.",
+      "A process of observation that leads to an outcome with no predictive certainty.",
+      "The exhaustive collection of all items currently under consideration.",
+      "A subset of the population utilized strictly for calculating statistics."
+    ],
+    correctAnswer: 1,
+    explanation: "In stats, an experiment is simply any action that yields a measurable result where the specific outcome cannot be perfectly predicted in advance (e.g., flipping a coin, pinging a server).",
+    trap: "Assuming the word 'experiment' requires physical manipulation (like in chemistry or Chapter 1's Designed Experiment)."
+  },
+  {
+    id: 42,
+    chapter: "Chapter 4: Probability",
+    question: "A QA engineer tests a login system. It can output exactly three statuses: Success, Locked, or Error. The set S = {Success, Locked, Error} represents the:",
+    options: [
+      "Distribution Parameter",
+      "Specific Event",
+      "Sample Space",
+      "Probability Intersection"
+    ],
+    correctAnswer: 2,
+    explanation: "The Sample Space (S) is the exhaustive list of every single possible basic outcome (sample point) of an experiment.",
+    trap: "Confusing it with an 'Event'. An event is a specific *subset* of the sample space."
+  },
+  {
+    id: 43,
+    chapter: "Chapter 4: Probability",
+    question: "In a git repository, 40% of the files contain a logic error, 30% contain a syntax warning, and 10% contain BOTH simultaneously. If a file is pulled at random, what is the probability it contains a logic error OR a syntax warning?",
+    options: [
+      "10%",
+      "60%",
+      "70%",
+      "80%"
+    ],
+    correctAnswer: 1,
+    explanation: "The keyword 'OR' dictates the Addition Rule: P(A ∪ B) = P(A) + P(B) - P(A ∩ B). So, 0.40 + 0.30 - 0.10 = 0.60 (or 60%).",
+    trap: "Simply adding 40% and 30% to get 70%. If you don't subtract the intersection, you mathematically double-count files with both issues."
+  },
+  {
+    id: 44,
+    chapter: "Chapter 4: Probability",
+    question: "Let Event A be 'The HTTP response is 200 OK'. Let Event B be 'The HTTP response is 404 Not Found'. Because a single response cannot be both, what mathematical statement must be true?",
+    options: [
+      "P(A ∩ B) = 1",
+      "P(A | B) = P(A)",
+      "P(A ∩ B) = 0",
+      "P(A ∪ B) = 1"
+    ],
+    correctAnswer: 2,
+    explanation: "If two events cannot happen simultaneously, they are Mutually Exclusive. By definition, their intersection is empty, so the probability of both happening at once is 0.",
+    trap: "Confusing mutually exclusive with independent (P(A|B) = P(A)). They are fundamentally different concepts."
+  },
+  {
+    id: 45,
+    chapter: "Chapter 4: Probability",
+    question: "Suppose Event A is 'Server 1 fails' and Event B is 'Server 2 fails'. If P(B | A) is exactly equal to P(B), what does this mathematically prove?",
+    options: [
+      "The events are Mutually Exclusive.",
+      "The events are Independent.",
+      "The events are Perfectly Correlated.",
+      "The events are Highly Dependent."
+    ],
+    correctAnswer: 1,
+    explanation: "The equation P(B | A) = P(B) translates to: 'The chance of B happening, given A already happened, is just the baseline chance of B'. Event A did not alter the probability, proving they are Independent.",
+    trap: "Assuming that if events are independent, they can't happen together. They absolutely can; they just don't influence *each other's* chances."
+  },
+  {
+    id: 46,
+    chapter: "Chapter 4: Probability",
+    question: "A cloud provider has two independent data centers. Center A has a 10% chance of downtime. Center B has a 20% chance of downtime. What is the probability that BOTH centers go down simultaneously?",
+    options: [
+      "2%",
+      "10%",
+      "30%",
+      "0%"
+    ],
+    correctAnswer: 0,
+    explanation: "The keyword 'BOTH' (Intersection) triggers the Multiplication Rule. Because the prompt explicitly states they are independent, P(A ∩ B) = P(A) * P(B) = 0.10 * 0.20 = 0.02 (2%).",
+    trap: "Adding the probabilities (which yields 30%) instead of multiplying them."
+  },
+  {
+    id: 47,
+    chapter: "Chapter 4: Probability",
+    question: "If two events are established as Mutually Exclusive, how does the standard Addition Rule formula simplify?",
+    options: [
+      "You strictly multiply the probabilities instead of adding them.",
+      "The probability of the union becomes exactly 1.0.",
+      "The intersection term P(A ∩ B) is dropped from the equation.",
+      "You must divide the result by the total sample space."
+    ],
+    correctAnswer: 2,
+    explanation: "The standard rule is P(A ∪ B) = P(A) + P(B) - P(A ∩ B). Because mutually exclusive events have an intersection of 0, the formula elegantly collapses to just P(A) + P(B).",
+    trap: "Thinking the rule fundamentally changes. It doesn't change; one variable simply becomes zero."
+  },
+  {
+    id: 48,
+    chapter: "Chapter 4: Probability",
+    question: "A cloud architect is running a Chaos test on a cluster of 6 identical load-balancing servers. The script randomly pulls the plug on exactly 2 servers simultaneously. How many distinct failure states can be generated?",
+    options: [
+      "12",
+      "15",
+      "30",
+      "36"
+    ],
+    correctAnswer: 1,
+    explanation: "Because shutting down Server A then B results in the exact same offline state as shutting down Server B then A, order does NOT matter. We use Combinations: 6! / (2! * 4!) = (6 * 5) / 2 = 15.",
+    trap: "Using Permutations (which would yield 30) when the sequence of selection has no impact on the final physical state."
+  },
+  {
+    id: 49,
+    chapter: "Chapter 4: Probability",
+    question: "A cybersecurity protocol generates a 4-digit PIN using numbers 0-9 without repeating any digits. Because the PIN '1234' is fundamentally different from '4321', which counting rule must be applied to find total possibilities?",
+    options: [
+      "The Addition Rule",
+      "Combinations",
+      "Permutations",
+      "The Empirical Rule"
+    ],
+    correctAnswer: 2,
+    explanation: "When dealing with passwords, arrays, or hierarchies, the specific arrangement (order) of the elements drastically changes the outcome. When order matters, you strictly use Permutations.",
+    trap: "Choosing Combinations. Combinations are for generic groups (like a committee) where internal order is irrelevant."
+  },
+  {
+    id: 50,
+    chapter: "Chapter 4: Probability",
+    question: "To test a multi-stage pipeline, a developer must select 3 separate testing scripts to run from a pool of 8. The scripts must run in a specific Sequence (Primary, Secondary, Tertiary). How many possible test sequences exist?",
+    options: [
+      "24",
+      "56",
+      "336",
+      "512"
+    ],
+    correctAnswer: 2,
+    explanation: "Because the execution sequence matters, we use Permutations. P = n! / (n - r)! = 8! / (8 - 3)! = 8! / 5! = 8 * 7 * 6 = 336.",
+    trap: "Using Combinations (which yields 56) by ignoring the explicit keyword 'Sequence'."
+  },
+  {
+    id: 51,
+    chapter: "Chapter 4: Probability",
+    question: "If a software installation process requires 3 independent configuration choices (A, B, C), where A has 2 options, B has 4 options, and C has 3 options, how many totally unique installation configurations exist?",
+    options: [
+      "9",
+      "12",
+      "24",
+      "36"
+    ],
+    correctAnswer: 2,
+    explanation: "This uses the fundamental counting principle. If independent events occur in sequence, you simply multiply their possibilities. 2 * 4 * 3 = 24 distinct configurations.",
+    trap: "Adding the options together (2 + 4 + 3 = 9)."
+  },
+  {
+    id: 52,
+    chapter: "Chapter 4: Probability",
+    question: "A project manager must choose a 'Task Force' of 4 developers from a pool of 10. Every developer on the task force will have the exact same title and responsibilities. How many possible teams can be formed?",
+    options: [
+      "40",
+      "210",
+      "5040",
+      "10000"
+    ],
+    correctAnswer: 1,
+    explanation: "Since all members share the identical title and responsibility, the internal arrangement of the group doesn't matter. We use Combinations. C = 10! / (4! * 6!) = (10*9*8*7) / (4*3*2*1) = 210.",
+    trap: "Using permutations (5040). That would assume assigning specific unique roles to each of the 4 developers."
+  },
+  {
+    id: 53,
+    chapter: "Chapter 4: Probability",
+    question: "Which of the following values is mathematically IMPOSSIBLE for the probability of a specific sample point event to hold?",
+    options: [
+      "0.0001",
+      "0.9999",
+      "1.0000",
+      "1.0500"
+    ],
+    correctAnswer: 3,
+    explanation: "A fundamental axiom of probability is that the probability of any event must strictly lie between 0 (impossible) and 1 (absolute certainty).",
+    trap: "Overthinking the math. Probabilities are strictly bounded decimals/fractions."
+  },
+  {
+    id: 54,
+    chapter: "Chapter 4: Probability",
+    question: "If Event A is 'App crashes' and Event B is 'User is on iOS'. The notation P(A | B) is read as:",
+    options: [
+      "The probability the app crashes OR the user is on iOS.",
+      "The probability the app crashes AND the user is on iOS.",
+      "The probability the app crashes, GIVEN THAT the user is already known to be on iOS.",
+      "The probability the user is on iOS divided by the crash probability."
+    ],
+    correctAnswer: 2,
+    explanation: "The vertical bar '|' denotes conditional probability. The event on the right (B) is the condition that has already been fulfilled or is assumed true.",
+    trap: "Confusing the condition bar '|' with the union 'U' or intersection '∩' symbols."
+  },
+  {
+    id: 55,
+    chapter: "Chapter 4: Probability",
+    question: "You flip a fair coin and it lands on Heads three times in a row. What is the probability that the next flip will also be Heads?",
+    options: [
+      "0.0625",
+      "0.1250",
+      "0.5000",
+      "0.2500"
+    ],
+    correctAnswer: 2,
+    explanation: "Coin flips are inherently Independent Events. The coin has no memory of previous flips. The probability of Heads on any single isolated flip is always 0.5.",
+    trap: "Falling for the 'Gambler's Fallacy' and calculating the probability of a specific 4-sequence outcome (0.0625)."
+  },
+  {
+    id: 56,
+    chapter: "Chapter 4: Probability",
+    question: "If the probability of a server successfully rebooting within 5 minutes is 0.85, what is the probability of the complement of this event?",
+    options: [
+      "0.85",
+      "1.85",
+      "0.00",
+      "0.15"
+    ],
+    correctAnswer: 3,
+    explanation: "The complement of an event A (denoted A') is the event that A does *not* occur. P(A') = 1 - P(A). 1.00 - 0.85 = 0.15.",
+    trap: "Misunderstanding the term 'complement' as a matching or identical variable."
+  },
+  {
+    id: 57,
+    chapter: "Chapter 4: Probability",
+    question: "A system requires EITHER a valid SSH key OR a valid physical token to grant access. Which probability rule is used to find the chance of a user gaining access?",
+    options: [
+      "The Multiplication Rule",
+      "The Addition Rule",
+      "Bayes Theorem",
+      "Combinatorics Theory"
+    ],
+    correctAnswer: 1,
+    explanation: "The logical operator 'OR' natively triggers the Addition rule (Union), calculating the probability of at least one of the conditions being met.",
+    trap: "Seeing 'system requires' and instinctively thinking of the multiplication rule for sequences."
+  },
+  {
+    id: 58,
+    chapter: "Chapter 4: Probability",
+    question: "Can two events be simultaneously Mutually Exclusive AND Independent?",
+    options: [
+      "Yes, always.",
+      "Yes, but only under specific probability conditions.",
+      "No, because if they are mutually exclusive, the occurrence of one strictly dictates the other cannot occur, meaning they are dependent.",
+      "No, because independent events must always sum to exactly 1.0."
+    ],
+    correctAnswer: 2,
+    explanation: "If A and B are mutually exclusive, knowing A happened tells you with 100% certainty that B did NOT happen. Because knowing A drastically changed your knowledge of B, they are fundamentally dependent.",
+    trap: "Students often merge the concepts of 'mutually exclusive' and 'independent' in their heads as meaning 'separate'. In stats, they contradict each other."
+  },
+  {
+    id: 59,
+    chapter: "Chapter 3: Numerical Descriptive Measures",
+    question: "In a dataset of transaction amounts, an observation lies exactly on the Upper Outer Fence. Statistically, this point is classified as:",
+    options: [
+      "A normal maximum value.",
+      "A suspect outlier.",
+      "An extreme outlier.",
+      "An anomaly error."
+    ],
+    correctAnswer: 2,
+    explanation: "Any value that falls on or beyond the Outer Fences (Q3 + 3*IQR or Q1 - 3*IQR) is mathematically classified as an Extreme Outlier.",
+    trap: "Classifying it as a suspect outlier. Suspect outliers lie between the inner and outer fences."
+  },
+  {
+    id: 60,
+    chapter: "Chapter 2: Graphical Methods",
+    question: "When creating a Time Series graph, what specific axis mapping is strictly required by statistical standards?",
+    options: [
+      "Time must be mapped to the vertical Y-axis.",
+      "Time must be mapped to the horizontal X-axis.",
+      "Frequencies must be plotted as contiguous bars.",
+      "The line must form a cumulative percentage trend."
+    ],
+    correctAnswer: 1,
+    explanation: "In a Time Series, time is the independent variable measuring the sequential progression. Independent variables are always plotted on the horizontal X-axis.",
+    trap: "Assuming axis placement doesn't matter as long as the line connects the dots."
+  }
+];
+
+export default function App() {
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [userAnswers, setUserAnswers] = useState({}); 
+  const [showResults, setShowResults] = useState(false);
+
+  // Derive chapter starting indexes for the dropdown
+  const chapterStarts = useMemo(() => {
+    return quizData.reduce((acc, q, index) => {
+      if (!acc.some(c => c.name === q.chapter)) {
+        acc.push({ name: q.chapter, index: index });
+      }
+      return acc;
+    }, []);
+  }, []);
+
+  // Scroll to top whenever the question changes for better mobile UX
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentQuestion, showResults]);
+
+  const hasAnswered = userAnswers[currentQuestion] !== undefined;
+  const selectedOption = userAnswers[currentQuestion];
+  const currentQ = quizData[currentQuestion];
+
+  const handleOptionClick = (index) => {
+    if (hasAnswered) return;
+    setUserAnswers(prev => ({ ...prev, [currentQuestion]: index }));
+  };
+
+  const handleNextQuestion = () => {
+    if (currentQuestion + 1 < quizData.length) {
+      setCurrentQuestion(currentQuestion + 1);
+    } else {
+      setShowResults(true);
+    }
+  };
+
+  const handlePrevQuestion = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+    }
+  };
+
+  const handleChapterSelect = (e) => {
+    const targetIndex = Number(e.target.value);
+    setCurrentQuestion(targetIndex);
+  };
+
+  const restartQuiz = () => {
+    setCurrentQuestion(0);
+    setUserAnswers({});
+    setShowResults(false);
+  };
+
+  const calculateScore = () => {
+    return Object.entries(userAnswers).reduce((total, [qIndex, ans]) => {
+      if (quizData[qIndex].correctAnswer === ans) {
+        return total + 1;
+      }
+      return total;
+    }, 0);
+  };
+
+  const getOptionStyles = (index) => {
+    if (!hasAnswered) {
+      return "bg-white border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none";
+    }
+    if (index === currentQ.correctAnswer) {
+      return "bg-green-50 border-green-500 text-green-800";
+    }
+    if (index === selectedOption) {
+      return "bg-red-50 border-red-500 text-red-800";
+    }
+    return "bg-slate-50 border-slate-200 text-slate-400 opacity-60";
+  };
+
+  if (showResults) {
+    const finalScore = calculateScore();
+    const answeredCount = Object.keys(userAnswers).length;
+    
+    return (
+      <main className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
+        <section className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-2xl w-full text-center border border-slate-100">
+          <BarChart3 className="w-16 h-16 text-blue-600 mx-auto mb-4" aria-hidden="true" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">Full Diagnostic Complete</h1>
+          <p className="text-slate-500 mb-8">CSC 261: Statistics for Scientists (60-Question Protocol)</p>
+          
+          <div className="text-5xl sm:text-6xl font-black text-blue-600 mb-4" aria-live="polite">
+            {answeredCount > 0 ? Math.round((finalScore / answeredCount) * 100) : 0}%
+          </div>
+          <p className="text-base sm:text-lg text-slate-700 mb-8">
+            You scored {finalScore} out of {answeredCount} correctly.
+          </p>
+
+          <div className="bg-blue-50 text-blue-800 p-4 rounded-xl mb-8 text-sm sm:text-base text-left">
+            <h3 className="font-bold flex items-center gap-2 mb-2">
+              <BrainCircuit className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" /> Instructor Note:
+            </h3>
+            <p className="leading-relaxed">
+              Remember the core structural rule of this exam: always map the mathematical theory back to its logical computer science application. Beware of the traps (like confusing parameters with statistics, or assuming correlation guarantees causation). Excellent work surviving this extensive battery.
+            </p>
+          </div>
+
+          <button 
+            onClick={restartQuiz}
+            className="flex items-center justify-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-xl font-semibold hover:bg-slate-700 transition-all focus-visible:ring-4 focus-visible:ring-slate-300 focus-visible:outline-none w-full sm:w-auto mx-auto active:scale-95"
+          >
+            <RotateCcw className="w-5 h-5" aria-hidden="true" /> Retake Diagnostic
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-slate-50 py-6 sm:py-8 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-3xl mx-auto">
+        
+        {/* Header / Progress */}
+        <header className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-800 truncate">CSC 261 Midterm Simulator</h1>
+              
+              {/* Chapter Navigation Dropdown */}
+              <div className="relative inline-flex items-center mt-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm focus-within:ring-2 ring-blue-500 w-full sm:w-auto">
+                <select 
+                  className="appearance-none bg-transparent text-sm sm:text-base font-semibold text-blue-700 outline-none cursor-pointer pr-8 w-full truncate"
+                  value={chapterStarts.slice().reverse().find(c => currentQuestion >= c.index)?.index || 0}
+                  onChange={handleChapterSelect}
+                  aria-label="Navigate to specific chapter"
+                >
+                  {chapterStarts.map((c) => (
+                    <option key={c.index} value={c.index}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-blue-600 absolute right-3 pointer-events-none" aria-hidden="true" />
+              </div>
+
+            </div>
+            <div className="text-slate-500 text-sm sm:text-base font-medium bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm whitespace-nowrap self-start sm:self-auto">
+              Question {currentQuestion + 1} of {quizData.length}
+            </div>
+          </div>
+          
+          {/* Progress Bar */}
+          <div 
+            className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden"
+            role="progressbar"
+            aria-valuenow={Math.round(((currentQuestion + 1) / quizData.length) * 100)}
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-label="Quiz progress"
+          >
+            <div 
+              className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out" 
+              style={{ width: `${((currentQuestion + 1) / quizData.length) * 100}%` }}
+            ></div>
+          </div>
+        </header>
+
+        {/* Question Card */}
+        <section className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+          <div className="p-5 sm:p-8 bg-slate-800 text-white">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-medium leading-relaxed">
+              {currentQ.question}
+            </h2>
+          </div>
+          
+          <div className="p-4 sm:p-8 space-y-3 bg-white" role="radiogroup" aria-label="Question options">
+            {currentQ.options.map((option, index) => (
+              <button
+                key={index}
+                onClick={() => handleOptionClick(index)}
+                disabled={hasAnswered}
+                aria-pressed={selectedOption === index}
+                className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 flex items-start gap-3 sm:gap-4 ${getOptionStyles(index)}`}
+              >
+                <div className="flex-shrink-0 mt-0.5">
+                  {hasAnswered && index === currentQ.correctAnswer ? (
+                    <CheckCircle2 className="w-5 h-5 text-green-500" aria-hidden="true" />
+                  ) : hasAnswered && index === selectedOption ? (
+                    <XCircle className="w-5 h-5 text-red-500" aria-hidden="true" />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full border-2 border-slate-300" aria-hidden="true"></div>
+                  )}
+                </div>
+                <span className="font-medium text-sm sm:text-base leading-snug">{option}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Explanation Block */}
+        {hasAnswered && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500" aria-live="polite">
+            <div className={`p-5 sm:p-6 rounded-2xl mb-6 border shadow-sm ${selectedOption === currentQ.correctAnswer ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="flex-shrink-0 mt-1">
+                  {selectedOption === currentQ.correctAnswer ? 
+                    <CheckCircle2 className="w-6 h-6 text-green-600" aria-hidden="true" /> : 
+                    <XCircle className="w-6 h-6 text-red-600" aria-hidden="true" />
+                  }
+                </div>
+                <div>
+                  <h3 className={`font-bold text-base sm:text-lg mb-2 ${selectedOption === currentQ.correctAnswer ? 'text-green-800' : 'text-red-800'}`}>
+                    {selectedOption === currentQ.correctAnswer ? 'Correct Execution' : 'Logic Error'}
+                  </h3>
+                  <p className="text-slate-700 text-sm sm:text-base leading-relaxed mb-4">
+                    {currentQ.explanation}
+                  </p>
+                  
+                  <div className="bg-white/60 rounded-xl p-4 text-sm flex gap-3 border border-black/5 shadow-sm">
+                    <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" aria-hidden="true" />
+                    <p className="text-slate-800 leading-relaxed">
+                      <strong className="font-bold">The Trap: </strong> {currentQ.trap}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Action Bar */}
+        <nav className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-4" aria-label="Quiz navigation">
+          <button 
+            onClick={handlePrevQuestion}
+            disabled={currentQuestion === 0}
+            aria-label="Go to previous question"
+            className={`flex items-center justify-center gap-2 px-6 py-3.5 sm:py-3 rounded-xl font-bold transition-all focus-visible:ring-4 focus-visible:outline-none ${
+              currentQuestion === 0 
+                ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-transparent' 
+                : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus-visible:ring-slate-200 active:scale-95 shadow-sm'
+            }`}
+          >
+            <ArrowLeft className="w-5 h-5" aria-hidden="true" /> Previous
+          </button>
+
+          {hasAnswered && (
+            <button 
+              onClick={handleNextQuestion}
+              className="flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-3.5 sm:py-3 rounded-xl font-bold hover:bg-blue-700 transition-all focus-visible:ring-4 focus-visible:ring-blue-300 focus-visible:outline-none active:scale-95 shadow-md shadow-blue-600/20"
+            >
+              {currentQuestion + 1 === quizData.length ? 'Calculate Final Results' : 'Next Execution'}
+              <ArrowRight className="w-5 h-5" aria-hidden="true" />
+            </button>
+          )}
+        </nav>
+
+      </div>
+    </main>
+  );
+}
