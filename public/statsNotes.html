@@ -25,6 +25,7 @@
         .why-box { background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 1rem 1.25rem; margin: 1rem 0; border-radius: 0 0.25rem 0.25rem 0; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
         .how-box { background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 1rem 1.25rem; margin: 1rem 0; border-radius: 0 0.25rem 0.25rem 0; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
         .trap-box { background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 1rem 1.25rem; margin: 1rem 0; border-radius: 0 0.25rem 0.25rem 0; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
+        .diagram-placeholder { background-color: #f8fafc; border: 2px dashed #cbd5e1; padding: 2rem; margin: 1.5rem 0; border-radius: 0.5rem; text-align: center; color: #64748b; font-style: italic; }
         table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-family: 'Inter', sans-serif; font-size: 0.9rem; }
         th, td { border: 1px solid #cbd5e1; padding: 0.75rem; text-align: left; }
         th { background-color: #f8fafc; font-weight: 700; color: #0f172a; }
@@ -77,7 +78,6 @@
                     </div>
                 </section>
 
-                <!-- Chapter 1 -->
                 <section id="ch1" class="mb-16 scroll-mt-8">
                     <h2 class="text-3xl font-bold text-primary mb-6">Chapter 1: Data and Statistical Thinking</h2>
                     <div class="textbook-text space-y-6">
@@ -160,7 +160,6 @@
                     </div>
                 </section>
 
-                <!-- Chapter 2 -->
                 <section id="ch2" class="mb-16 scroll-mt-8">
                     <h2 class="text-3xl font-bold text-primary mb-6">Chapter 2: Methods for Describing Sets of Data</h2>
                     <div class="textbook-text space-y-6">
@@ -168,6 +167,11 @@
 
                         <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 2.1: Histograms vs. Bar Charts</h3>
                         <p>A <strong>Bar Chart</strong> is utilized for qualitative data, where the length of the bar represents frequency. A <strong>Histogram</strong> is utilized for quantitative continuous data, constructed by grouping data into <strong>Class Intervals</strong> (bins).</p>
+
+                        <div class="diagram-placeholder">
+                            
+                            <p class="text-xs mt-2">Diagram showing a Bar Chart with distinct gaps between categories and a Histogram with contiguous (touching) bars for continuous intervals.</p>
+                        </div>
 
                         <div class="why-box"><strong>The 'Why' (CS Application):</strong> Histograms are critical in image processing (computer vision) to represent the tonal distribution of pixels, allowing algorithms to automatically adjust brightness and contrast.</div>
                         <div class="how-box"><strong>The 'How':</strong> <br>To build a histogram, determine class width: <br>\( \text{Class Width} = \frac{\text{Maximum Value} - \text{Minimum Value}}{\text{Number of Bins}} \)</div>
@@ -180,7 +184,7 @@
                             <div class="bg-white p-4 rounded border border-indigo-100 mb-4 overflow-x-auto text-left">
                                 <p class="font-mono text-sm text-slate-700 mb-1">Step 1: Formula -> Class Width = (Max - Min) / Number of Bins</p>
                                 <p class="font-mono text-sm text-slate-700 mb-1">Step 2: Plug in -> Class Width = (162 - 12) / 5</p>
-                                <p class="font-mono text-sm text-slate-700">Step 3: Solve   -> Class Width = 150 / 5 = <strong>30ms</strong></p>
+                                <p class="font-mono text-sm text-slate-700">Step 3: Solve    -> Class Width = 150 / 5 = <strong>30ms</strong></p>
                             </div>
                             <p class="text-slate-800 mb-3 mt-4"><strong>Exam Application 2 (Theory Verification):</strong> When the data architect renders this histogram on the screen, they must ensure the visual bars are contiguous (touching with zero space between them). What statistical justification mandates this?</p>
                             <p class="text-slate-700 text-sm mb-1 ml-4">A) Because latency is a Qualitative variable.<br>B) To adhere to the Pareto 80/20 principle.<br>C) Because latency is a Quantitative Continuous variable.<br>D) To visually compress the dashboard space.</p>
@@ -192,6 +196,11 @@
                         <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 2.2: The Pareto Chart</h3>
                         <p>A <strong>Pareto Chart</strong> is a specific type of bar chart for qualitative data where categories are arranged in descending order of frequency, overlaid with a cumulative percentage line graph.</p>
                         
+                        <div class="diagram-placeholder">
+                            
+                            <p class="text-xs mt-2">Example showing bug types in code. Bars are sorted from highest frequency to lowest, with a secondary line axis showing the percentage growth towards 100%.</p>
+                        </div>
+
                         <div class="why-box"><strong>The 'Why' (CS Application):</strong> Used extensively in Software Quality Assurance (QA). It visually implements the "80/20 Rule", helping developers identify the "vital few" bugs that cause 80% of system crashes, rather than wasting time on the "trivial many".</div>
                         <div class="how-box"><strong>Additional Example (CS Context):</strong> AWS Cloud Cost Optimization. A DevOps engineer plots cloud expenditure categories (EC2, S3, RDS, Lambda). Sorted by cost, the Pareto chart immediately visually identifies that targeting EC2 compute optimization will yield the fastest reduction in the monthly bill.</div>
 
@@ -206,6 +215,16 @@
 
                         <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 2.3: Exploring Bivariate Data (Scatter Plots and Time Series)</h3>
                         <p>When investigating the relationship between two different variables simultaneously (bivariate data), we utilize specific coordinate-based graphs.</p>
+
+                        <div class="diagram-placeholder">
+                            
+                            <p class="text-xs mt-2">Visualization of X-Y coordinates where dots form an upward slope (positive), downward slope (negative), or a random cloud (no correlation).</p>
+                        </div>
+
+                        <div class="diagram-placeholder">
+                            
+                            <p class="text-xs mt-2">A line chart with time on the X-axis showing the progression and trends of a variable sequentially.</p>
+                        </div>
 
                         <div class="why-box"><strong>The 'Why' (CS Application):</strong> System Administrators rely on <strong>Time Series Graphs</strong> (data plotted sequentially over time) to monitor server health over a 24-hour cycle. They rely on <strong>Scatter Plots</strong> (two numerical variables plotted on X and Y axes) to identify correlations, such as whether increasing Thread Count (X) definitively causes Higher CPU Utilization (Y).</div>
                         <div class="how-box"><strong>The 'How':</strong> In a Scatter Plot, the independent variable (cause) is typically placed on the horizontal X-axis, and the dependent variable (effect) is placed on the vertical Y-axis. If the dots form an upward slope, the correlation is positive.</div>
@@ -222,7 +241,6 @@
                     </div>
                 </section>
 
-                <!-- Chapter 3 -->
                 <section id="ch3" class="mb-16 scroll-mt-8">
                     <h2 class="text-3xl font-bold text-primary mb-6">Chapter 3: Numerical Descriptive Measures</h2>
                     <div class="textbook-text space-y-6">
@@ -231,6 +249,11 @@
                         <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 3.1: Central Tendency and Skewness</h3>
                         <p>The <strong>Mean</strong> (\(\bar{x}\)) is the arithmetic average. The <strong>Median</strong> is the exact physical middle value of an ordered array. The <strong>Mode</strong> is the most frequent value.</p>
                         
+                        <div class="diagram-placeholder">
+                            [Image showing Symmetric, Right-Skewed, and Left-Skewed frequency distributions with Mean and Median positions labeled]
+                            <p class="text-xs mt-2">Diagram highlighting how the Mean is pulled toward the long tail in skewed data, while the Median remains more central.</p>
+                        </div>
+
                         <table>
                             <thead>
                                 <tr>
@@ -310,6 +333,14 @@
                         <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 3.3: Interpreting Standard Deviation</h3>
                         <p>Once calculated, we map standard deviations onto rules to determine data probability. The choice of rule strictly depends on the distribution's shape.</p>
 
+                        <div class="diagram-placeholder">
+                            
+
+[Image of the Empirical Rule 68-95-99.7 on a Normal Distribution curve]
+
+                            <p class="text-xs mt-2">A bell curve showing how 68% of data falls within 1 standard deviation, 95% within 2, and 99.7% within 3.</p>
+                        </div>
+
                         <table>
                             <thead>
                                 <tr>
@@ -362,6 +393,12 @@
                             $$z = \frac{x - \bar{x}}{s}$$
                         </div>
                         <p><strong>Quartiles</strong> divide an ordered dataset into four equal segments. The <strong>Interquartile Range (IQR)</strong> = \(Q_3 - Q_1\), representing the middle 50% spread. The IQR is used to define Box Plot outlier fences:</p>
+
+                        <div class="diagram-placeholder">
+                            
+                            <p class="text-xs mt-2">Visual showing the 'box' (IQR), the median line, and the 'whiskers' extending to the fences.</p>
+                        </div>
+
                         <ul class="list-disc pl-8">
                             <li><strong>Inner Fences (Suspect):</strong> \(Q_1 - 1.5(IQR)\) and \(Q_3 + 1.5(IQR)\)</li>
                             <li><strong>Outer Fences (Extreme):</strong> \(Q_1 - 3(IQR)\) and \(Q_3 + 3(IQR)\)</li>
@@ -403,13 +440,18 @@
                     </div>
                 </section>
 
-                <!-- Chapter 4 -->
                 <section id="ch4" class="mb-16 scroll-mt-8">
                     <h2 class="text-3xl font-bold text-primary mb-6">Chapter 4: Probability</h2>
                     <div class="textbook-text space-y-6">
                         <p>An <strong>Experiment</strong> yields an outcome with predictive uncertainty. A <strong>Sample Space (S)</strong> lists all basic outcomes (sample points). An <strong>Event</strong> is a specific collection of those points.</p>
 
                         <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 4.1: The Addition and Multiplication Rules</h3>
+                        
+                        <div class="diagram-placeholder">
+                            
+                            <p class="text-xs mt-2">Diagram showing two overlapping circles. The overlap is the Intersection (AND) and the combined area of both circles is the Union (OR).</p>
+                        </div>
+
                         <table>
                             <thead>
                                 <tr>
@@ -513,7 +555,7 @@
 
                             <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
                                 <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-calculator mr-2"></i>Theory-to-Execution: Math Application</h4>
-                                <p class="text-slate-800 mb-3"><strong>Exam Scenario (Bayes' Theorem):</strong> A QA automated test suite detects bugs in new code commits. Historically, only 5% of all code commits contain a critical bug (\(P(\text{Bug}) = 0.05\)). If a bug genuinely exists, the test suite successfully catches it 90% of the time (\(P(\text{Fail} | \text{Bug}) = 0.90\)). However, the suite is imperfect and has a 10% false-positive rate, meaning it will incorrectly fail 10% of perfectly good commits (\(P(\text{Fail} | \text{No Bug}) = 0.10\)).<br><br>The alarm just rang—the test suite failed. What is the exact mathematical probability that a bug actually exists in this specific commit? Calculate \(P(\text{Bug} | \text{Fail})\).</p>
+                                <p class="text-slate-800 mb-3"><strong>Exam Scenario (Bayes' Theorem):</strong> A QA automated test suite detects bugs in new code commits. Historically, only 5% of all code commits contain a critical bug (\(P(\text{Bug}) = 0.05\)). If a bug genuinely exists, the test suite successfully catches it 90% of the time (\(P(\text{Fail} | \text{Bug}) = 0.90\)). However, the suite is imperfect and has a 10% false-positive rate, meaning it will incorrectly fail 10% of perfectly good commits (\(P(\text{Fail} | \text{No Bug}) = 0.10\)).<br><br>The alarm just rang; the test suite failed. What is the exact mathematical probability that a bug actually exists in this specific commit? Calculate \(P(\text{Bug} | \text{Fail})\).</p>
                                 <div class="bg-white p-4 rounded border border-indigo-100 mb-4 overflow-x-auto text-left">
                                     <p class="font-semibold text-slate-800 mb-1">Step 1: Define the required variables</p>
                                     <ul class="list-disc pl-5 mb-3 text-sm font-mono text-slate-700">
@@ -545,13 +587,11 @@
                     </div>
                 </section>
 
-                <!-- Practice Problems -->
                 <section id="practice-session" class="mb-16 scroll-mt-8">
                     <h2 class="text-3xl font-bold text-primary mb-6 border-b-4 border-accent pb-2">Practice Session #1: Master Solutions</h2>
                     <div class="textbook-text space-y-8">
                         <p class="text-slate-600 italic">The following problems have been extracted directly from your course materials, enhanced with deep structural logic proofs tailored for your MCQ midterm.</p>
 
-                        <!-- Problem 1 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
                             <h4 class="font-bold text-slate-800 mb-2">Question 1</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">As part of an economics class project, students were asked to randomly select 500 New York Stock Exchange (NYSE) stocks from the Wall Street Journal. As part of the project, students were asked to summarize the current prices (also referred to as the closing price of the stock for a particular trading date) of the collected stocks using graphical and numerical techniques. Identify the data collection method used in this study.<br>
@@ -563,7 +603,6 @@
                             <p class="text-sm mt-2"><strong>Logical Proof:</strong> The Wall Street Journal is a secondary financial publication. The students did not physically execute an experiment (manipulating variables) nor did they conduct an observational survey (watching units in a natural setting). They simply retrieved pre-existing, published data records.</p>
                         </div>
 
-                        <!-- Problem 2 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
                             <h4 class="font-bold text-slate-800 mb-2">Question 2</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">Gender is one variable of interest in a study of the effectiveness of a new medication. For data entry purposes, the researcher conducting the study assigns 1 for Male and 2 for Female. Is the gender data quantitative or qualitative? Explain.</p>
@@ -572,7 +611,6 @@
                             <p class="text-sm mt-2"><strong>Logical Proof:</strong> The integers 1 and 2 are functioning solely as <strong>categorical labels</strong> (enums in programming) to facilitate database entry. They possess no numerical magnitude. You cannot perform arithmetic (e.g., 1 + 2 = 3 does not yield a valid physical meaning). Therefore, it fundamentally remains qualitative data.</p>
                         </div>
 
-                        <!-- Problem 3 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
                             <h4 class="font-bold text-slate-800 mb-2">Question 3</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">A postal worker counts the number of complaint letters received by the Thailand Postal Service in a given day. Identify the type of data collected.<br>
@@ -583,7 +621,6 @@
                             <p class="text-sm mt-2"><strong>Logical Proof:</strong> The data represents a definitive magnitude derived from a <em>counting</em> process (e.g., 5 letters, 10 letters). Specifically, it is quantitative discrete data.</p>
                         </div>
 
-                        <!-- Problem 4 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
                             <h4 class="font-bold text-slate-800 mb-2">Question 4</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">Parking at a university has become a problem. University administrators are interested in determining the average time it takes a student to find a parking spot. An administrator inconspicuously followed 140 students and recorded how long it took each of them to find a parking spot. Identify the population, sample, and variable of interest to the administrators.</p>
@@ -595,7 +632,6 @@
                             </div>
                         </div>
 
-                        <!-- Problem 5 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
                             <h4 class="font-bold text-slate-800 mb-2">Question 5</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">The following data represent the scores of 50 students on a statistics exam.<br>
@@ -609,6 +645,11 @@
                             c. In a box plot for the data, which scores, if any, would be outside the outer fences? Which scores, if any, would be outside the inner fences but inside the outer fences?
                             </p>
                             
+                            <div class="diagram-placeholder">
+                                
+                                <p class="text-xs mt-2">Diagram showing a Box Plot with the median at 81, Q1 at 73, and Q3 at 89, with 39 marked as an outlier.</p>
+                            </div>
+
                             <div class="text-sm mt-2 space-y-4">
                                 <div>
                                     <span class="font-bold text-accent">Part A: Median and Quartiles</span>
@@ -639,7 +680,6 @@
                             </div>
                         </div>
 
-                        <!-- Problem 6 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
                             <h4 class="font-bold text-slate-800 mb-2">Question 6</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">The amount of television viewed by today’s youth is of primary concern to Parents Against Watching Television (PAWT). Three hundred parents of elementary school-aged children were asked to estimate the number of hours per week that their child watches television. The upper quartile for the distribution was given as 20 hours. Interpret this value.</p>
@@ -648,7 +688,6 @@
                             <p class="text-sm mt-2"><strong>Logical Proof:</strong> The upper quartile mathematically equates to the 75th percentile. By definition, percentiles mark the value below which a given percentage of observations fall. Therefore, <strong>75%</strong> of the surveyed children watch 20 hours or less of television per week, which inherently means the remaining <strong>25%</strong> watch more than 20 hours per week.</p>
                         </div>
 
-                        <!-- Problem 7 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
                             <h4 class="font-bold text-slate-800 mb-2">Question 7</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">At the U.S. Open Tennis Championship a statistician keeps track of every serve that a player hits during the tournament. The statistician reported that the mean serve speed of a particular player was 103 miles per hour (mph) and the standard deviation of the serve speeds was 11 mph. Using the z-score approach for detecting outliers, which of the following serve speeds would represent outliers in the distribution of the player’s serve speeds?<br>
@@ -667,7 +706,6 @@
                             </ul>
                         </div>
 
-                        <!-- Problem 8 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
                             <h4 class="font-bold text-slate-800 mb-2">Question 8</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">The amount spent on textbooks for the fall term was recorded for a sample of five hundred university students. It was determined that the 75th percentile was the value $500. Which of the following interpretations of the 75th percentile is correct?<br>
@@ -680,7 +718,6 @@
                             <p class="text-sm mt-2"><strong>Logical Proof:</strong> The 75th percentile dictates that 75% of the data array is situated <em>below or at</em> the target value ($500). Subtracting this from the absolute total (100%), the remaining 25% of observations must reside <em>above</em> the threshold.</p>
                         </div>
 
-                        <!-- Problem 9 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
                             <h4 class="font-bold text-slate-800 mb-2">Question 9</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">Test scores for a history class had a mean of 79 with a standard deviation of 4.5. Test scores for a physics class had a mean of 69 with a standard deviation of 3.7. One student earned a 58 on the history test and a 92 on the physics test. Calculate the z-score for each test. On which test did the student perform better?</p>
@@ -693,7 +730,6 @@
                             </ul>
                         </div>
 
-                        <!-- Problem 10 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
                             <h4 class="font-bold text-slate-800 mb-2">Question 10</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">Many firms use on-the-job training to teach their employees computer programming. Suppose you work in the personnel department of a firm that just finished training a group of its employees to program, and you have been requested to review the performance of one of the trainees on the final test that was given to all trainees. The mean and standard deviation of the test scores are 74 and 5, respectively. Assuming nothing is known about the distribution, what percentage of test-takers scored above 89?<br>
@@ -710,7 +746,6 @@
                             Since scores "above 89" represent only one side of this extreme outer region, it must be bounded by the maximum total outer capacity. Therefore, at most 11% scored above 89. (Note: option C is a trap for students erroneously applying the Empirical Rule).</p>
                         </div>
 
-                        <!-- NEW Problem 11 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6 border-l-4 border-l-accent">
                             <h4 class="font-bold text-slate-800 mb-2">Question 11 (Covariance)</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">A software engineer plots the number of gigabytes written to an SSD per day (X) against the remaining lifespan percentage of the drive (Y). Upon calculating the Pearson Correlation Coefficient, they receive a value of \( r = -0.92 \). Which of the following conclusions is mathematically sound?<br>
@@ -730,7 +765,6 @@
                             </details>
                         </div>
 
-                        <!-- NEW Problem 12 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6 border-l-4 border-red-400 opacity-75">
                             <h4 class="font-bold text-slate-800 mb-2">Question 12 (Conditional Probability) <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide ml-2 inline-block border border-red-200"><i class="fas fa-exclamation-triangle mr-1"></i> Not on Midterm</span></h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">An intrusion detection system (IDS) flags network anomalies. Let Event A be "The network is actually under attack." Let Event B be "The IDS sounds an alarm." If the system has a known false-positive rate, which probabilistic statement strictly calculates the probability that an alarm sounds, GIVEN that the network is under attack?<br>
@@ -750,7 +784,6 @@
                             </details>
                         </div>
 
-                        <!-- NEW Problem 13 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6 border-l-4 border-l-accent">
                             <h4 class="font-bold text-slate-800 mb-2">Question 13 (Combinatorics)</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">A cloud architecture team has 12 distinct Amazon EC2 instances running. To test load balancing resilience, an automated script will randomly select 4 of these instances and shut them down simultaneously. How many different distinct failure states (groups of 4 downed instances) can the script generate?<br>
@@ -764,7 +797,6 @@
                             \( _{12}C_4 = \frac{12!}{4!(12-4)!} = \frac{12 \times 11 \times 10 \times 9}{4 \times 3 \times 2 \times 1} = \frac{11,880}{24} = 495 \).</p>
                         </div>
 
-                        <!-- NEW Problem 14 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6 border-l-4 border-l-accent">
                             <h4 class="font-bold text-slate-800 mb-2">Question 14 (Chart Analysis)</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">A data scientist tracks the daily CPU utilization percentages of a web server over the course of a year and plots it. She wants to visually confirm if CPU utilization spikes are correlated with the time of day. Which graphical technique should she employ to best visualize this temporal relationship?<br>
@@ -777,7 +809,6 @@
                             <p class="text-sm mt-2"><strong>Logical Proof:</strong> Time Series graphs are specifically designed for bivariate data where one variable is strictly time (chronological). A Histogram or Pie chart would aggregate the data, completely destroying the chronological sequence and hiding any temporal correlation.</p>
                         </div>
 
-                        <!-- NEW Problem 15 -->
                         <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6 border-l-4 border-l-accent">
                             <h4 class="font-bold text-slate-800 mb-2">Question 15 (Sampling Bias)</h4>
                             <p class="mb-4 text-sm bg-white p-3 rounded border">To determine the average RAM consumption of an IDE, developers insert a telemetry script that triggers only when the software crashes. The collected data is used to estimate the memory usage across the entire user base. Which critical statistical flaw is present in this study?<br>
