@@ -22,6 +22,7 @@ import postRoutes from "./routes/postRoutes.js";
 import gameRoutes from "./routes/gameRoutes.js";
 import secretEnvRoutes from "./routes/secretEnvRoutes.js";
 import visitorIdentifier from "./middleware/visitorIdentifier.js";
+import requestLogger from "./middleware/requestLogger.js";
 import { optional, protect } from "./middleware/verifyToken.js";
 import {
   trackVisit,
@@ -77,6 +78,7 @@ const configureTrustProxy = () => {
 
 const trustProxyValue = configureTrustProxy();
 app.set("trust proxy", trustProxyValue);
+app.use(requestLogger);
 
 // Log proxy configuration in production for debugging
 if (process.env.NODE_ENV === "production") {

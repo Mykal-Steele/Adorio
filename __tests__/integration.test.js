@@ -1,6 +1,9 @@
+// cspell:ignore adorio nosniff networkidle domcontentloaded
 const axios = require('axios');
 const puppeteer = require('puppeteer');
 const { execSync } = require('child_process');
+
+jest.setTimeout(240000); // ensure CI can wait for containers to start
 
 const safeExec = command => {
   try {
@@ -60,6 +63,18 @@ const getWithRetry = async (url, retries = 5, interval = 1000) => {
   }
 
   throw new Error(`Failed after ${retries} retries for ${url}: ${lastError?.message || 'Unknown request error'}`);
+};
+
+// cspell:ignore adorio nosniff networkidle domcontentloaded
+const validateContainerName = (containers, patterns) => containers.some(name => patterns.some(p => name.includes(p)));
+
+const skipWhenDockerUnavailable = fn => {
+  try {
+    return fn();
+  } catch (err) {
+    console.warn("Skipping Docker CLI test: docker command missing or no permissions.", err);
+    return null;
+  }
 };
 
 describe('Adorio Integration Tests', () => {
@@ -166,18 +181,17 @@ describe('Adorio Integration Tests', () => {
     await page.goto(baseUrl, { waitUntil: 'networkidle0' });
     
     const title = await page.title();
-    expect(title).toBe('Adorio | Social Media Platform | Connect & Share');
+    expect(title).toBe('Adorio | Project Hub');
 
-    // Fail if there were critical JS errors
+    // Fail on any console errors or 5xx static resource responses to keep errors visible.
     if (consoleErrors.length > 0) {
-      console.warn('Frontend Console Errors:', consoleErrors);
+      console.error('Frontend Console Errors:', consoleErrors);
     }
     if (failedResourceResponses.length > 0) {
-      console.warn('Frontend 5xx Resources:', failedResourceResponses);
+      console.error('Frontend 5xx Resources:', failedResourceResponses);
     }
-    // We expect 0 errors, but sometimes 3rd party scripts (ads/analytics) fail. 
-    // Uncomment this line to enforce 0 errors:
-    // expect(consoleErrors.length).toBe(0);
+    expect(consoleErrors).toEqual([]);
+    expect(failedResourceResponses).toEqual([]);
 
     // Check if the frontend can make an API call (Smoke test)
     const apiOk = await page.evaluate(async () => {
@@ -223,12 +237,11 @@ describe('Adorio Integration Tests', () => {
     expect(content).toContain('ArchMaster'); // Assuming the title or header is in the content
     expect(content).not.toContain('Adorio | Social Media Platform'); // Ensure it's not the main app
     
-    // Fail if there were console errors on the /cao page
+    // Fail on any sidecar console errors.
     if (consoleErrors.length > 0) {
-      console.warn('Sidecar console errors:', consoleErrors);
-      // Uncomment to enforce 0 errors:
-      // expect(consoleErrors.length).toBe(0);
+      console.error('Sidecar console errors:', consoleErrors);
     }
+    expect(consoleErrors).toEqual([]);
 
     await page.close();
   });
@@ -262,11 +275,41 @@ describe('Adorio Integration Tests', () => {
     const response = await getWithRetry(`${baseUrl}/api/posts`, 8, 750);
     expect(response.status).toBe(200);
     expect(Array.isArray(response.data.posts)).toBe(true);
-    
-    // Optional: Check structure of first post if exists
+
     if (response.data.posts.length > 0) {
-      expect(response.data.posts[0]).toHaveProperty('_id');
+      const post = response.data.posts[0];
+      expect(post).toEqual(
+        expect.objectContaining({
+          _id: expect.any(String),
+          title: expect.any(String),
+          content: expect.any(String),
+          user: expect.objectContaining({
+            _id: expect.any(String),
+            username: expect.any(String),
+          }),
+        })
+      );
+
+      expect(post).toHaveProperty('image');
+      expect(Array.isArray(post.likes)).toBe(true);
     }
+  });
+
+  test('Backend can retrieve single post by id when present', async () => {
+    const allPosts = await getWithRetry(`${baseUrl}/api/posts`, 8, 750);
+    if (allPosts.data.posts.length === 0) {
+      return;
+    }
+
+    const id = allPosts.data.posts[0]._id;
+    const single = await getWithRetry(`${baseUrl}/api/posts/${id}`, 8, 750);
+    expect(single.status).toBe(200);
+    expect(single.data).toEqual(expect.objectContaining({ _id: id }));
+  });
+
+  test('Unknown API endpoint returns 404', async () => {
+    const response = await axios.get(`${baseUrl}/api/not-real-route`).catch(err => err.response);
+    expect(response.status).toBe(404);
   });
 
   // --- INFRASTRUCTURE / DOCKER TESTS ---
@@ -274,39 +317,29 @@ describe('Adorio Integration Tests', () => {
   test('Inter-service connectivity: Docker containers are running', () => {
     // NOTE: This test assumes we are running ON the host machine that has Docker CLI access.
     // If running inside a CI container, this might fail without socket binding.
-    try {
+    skipWhenDockerUnavailable(() => {
       const output = execSync('docker ps --format "{{.Names}}"', { encoding: 'utf8' });
       const containers = output.trim().split('\n');
-      
-      // In PROD (Docker Compose), names are usually prefixed with folder name "adorio"
-      // We check for partial match to be safe against folder name changes
-      const frontendRunning = containers.some(name => name.includes('frontend') || name.includes('adorio-frontend'));
+
+      const frontendRunning = validateContainerName(containers, ['frontend', 'adorio-frontend']);
       expect(frontendRunning).toBe(true);
 
       if (nodeEnv !== 'production') {
-        // In DEV, sidecar is a separate container
-        const sidecarRunning = containers.some(name => name.includes('ai-slop') || name.includes('adorio-ai-slop'));
+        const sidecarRunning = validateContainerName(containers, ['ai-slop', 'adorio-ai-slop']);
         expect(sidecarRunning).toBe(true);
       }
-    } catch (err) {
-      console.warn("Skipping Docker CLI test: 'docker' command not found or no permission.");
-    }
+    });
   });
 
   test('Sidecar volume mount/copy verification', () => {
-    try {
+    skipWhenDockerUnavailable(() => {
       if (nodeEnv === 'production') {
-        // In prod, /cao is copied into the Nginx image.
-        // Exec into the frontend container to verify file existence.
         const output = execSync('docker exec adorio-frontend-1 ls /usr/share/nginx/html/cao/index.html', { encoding: 'utf8' });
         expect(output.trim()).toContain('index.html');
       } else {
-        // In dev, the sidecar is separate and volume mounted.
         const output = execSync('docker exec adorio-ai-slop-1 ls /usr/share/nginx/html/index.html', { encoding: 'utf8' });
         expect(output.trim()).toContain('index.html');
       }
-    } catch (err) {
-       console.warn("Skipping Volume Verification: Docker CLI access required.");
-    }
+    });
   });
 });
