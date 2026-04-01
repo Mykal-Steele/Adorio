@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSC 261: Statistics for Scientists - Ultimate Study Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#0f172a', secondary: '#334155', accent: '#2563eb', light: '#f8fafc' },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], serif: ['Merriweather', 'serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; line-height: 1.7; color: #1e293b; }
+        .textbook-text { font-family: 'Merriweather', serif; font-size: 1.05rem; }
+        .math-block { overflow-x: auto; padding: 1.25rem; margin: 1.5rem 0; background: #f1f5f9; border-radius: 0.5rem; text-align: center; border: 1px solid #cbd5e1; font-family: 'Inter', sans-serif;}
+        .why-box { background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 1rem 1.25rem; margin: 1rem 0; border-radius: 0 0.25rem 0.25rem 0; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
+        .how-box { background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 1rem 1.25rem; margin: 1rem 0; border-radius: 0 0.25rem 0.25rem 0; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
+        .trap-box { background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 1rem 1.25rem; margin: 1rem 0; border-radius: 0 0.25rem 0.25rem 0; font-family: 'Inter', sans-serif; font-size: 0.95rem; }
+        .diagram-placeholder { background-color: #f8fafc; border: 2px dashed #cbd5e1; padding: 2rem; margin: 1.5rem 0; border-radius: 0.5rem; text-align: center; color: #64748b; font-style: italic; }
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-family: 'Inter', sans-serif; font-size: 0.9rem; }
+        th, td { border: 1px solid #cbd5e1; padding: 0.75rem; text-align: left; }
+        th { background-color: #f8fafc; font-weight: 700; color: #0f172a; }
+        .code-snippet { background: #1e293b; color: #e2e8f0; padding: 0.5rem; border-radius: 0.25rem; font-family: monospace; display: block; margin-top: 0.5rem; }
+    </style>
+</head>
+<body class="bg-slate-50 antialiased selection:bg-blue-200 selection:text-blue-900">
+
+    <div class="lg:hidden fixed top-4 right-4 z-50">
+        <button id="mobile-menu-btn" class="bg-primary text-white p-3 rounded shadow-lg"><i class="fas fa-bars"></i></button>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        <aside id="sidebar" class="w-72 bg-white border-r border-slate-200 h-full flex-shrink-0 flex flex-col transition-transform duration-300 transform -translate-x-full lg:translate-x-0 absolute lg:relative z-40 shadow-xl lg:shadow-none">
+            <div class="p-6 border-b border-slate-100 bg-primary text-white">
+                <h1 class="text-2xl font-bold tracking-tight">CSC 261</h1>
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-300 mt-1">Statistics for Scientists</p>
+            </div>
+            <nav class="flex-1 overflow-y-auto p-4 space-y-2 text-sm font-medium">
+                <a href="#exam-info" class="block px-3 py-2 rounded text-slate-700 hover:bg-slate-100"><i class="fas fa-info-circle w-5"></i> Exam Briefing</a>
+                <a href="#ch1" class="block px-3 py-2 rounded text-slate-700 hover:bg-slate-100"><i class="fas fa-database w-5"></i> Ch 1: Data & Thinking</a>
+                <a href="#ch2" class="block px-3 py-2 rounded text-slate-700 hover:bg-slate-100"><i class="fas fa-chart-bar w-5"></i> Ch 2: Graphical Methods</a>
+                <a href="#ch3" class="block px-3 py-2 rounded text-slate-700 hover:bg-slate-100"><i class="fas fa-calculator w-5"></i> Ch 3: Numerical Measures</a>
+                <a href="#ch4" class="block px-3 py-2 rounded text-slate-700 hover:bg-slate-100"><i class="fas fa-dice w-5"></i> Ch 4: Probability</a>
+                <div class="pt-4 mt-2 border-t border-slate-200">
+                    <p class="px-3 text-xs text-slate-400 uppercase tracking-wider mb-2">Assessments</p>
+                    <a href="#practice-session" class="block px-3 py-2 rounded text-accent hover:bg-blue-50 bg-blue-50/50 font-bold"><i class="fas fa-file-alt w-5"></i> Practice Session #1</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="flex-1 h-full overflow-y-auto bg-white scroll-smooth" id="main-scroll">
+            <div class="max-w-4xl mx-auto p-8 lg:p-12 pb-32">
+
+                <header class="mb-12 border-b-4 border-primary pb-8">
+                    <span class="inline-block py-1 px-3 rounded bg-blue-100 text-accent text-xs font-bold mb-4 tracking-widest uppercase">Master Study Guide</span>
+                    <h2 class="text-4xl font-extrabold text-primary mb-4 tracking-tight">CSC 261: Structural Review</h2>
+                    <p class="text-lg text-slate-600 textbook-text">A rigorous, academic synthesis of Chapters 1-4. This document maps theoretical statistical principles directly to computer science architecture, ensuring deep conceptual mastery required for the midterm examination.</p>
+                </header>
+
+                <section id="exam-info" class="mb-16 scroll-mt-8">
+                    <div class="bg-slate-50 rounded-xl p-8 border border-slate-200 shadow-sm">
+                        <h3 class="text-2xl font-bold text-primary mb-4 border-b pb-2"><i class="fas fa-gavel text-accent"></i> Midterm Examination Logistics</h3>
+                        <ul class="textbook-text space-y-3">
+                            <li><strong>Date:</strong> 31st March 2026. (Venue based on SIT announcement).</li>
+                            <li><strong>Format:</strong> 100 Marks, <strong>Multiple Choice Questions (MCQ)</strong>.</li>
+                            <li><strong>Protocol:</strong> Open Book. <strong>Only physical copies</strong> of class notes or handwritten notes are permitted. Electronic devices are strictly prohibited.</li>
+                            <li><strong>Scope:</strong> Chapters 1, 2, 3 (Complete), and Chapter 4 (Up to Combinations). Topics taught until 24th March 2026.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="ch1" class="mb-16 scroll-mt-8">
+                    <h2 class="text-3xl font-bold text-primary mb-6">Chapter 1: Data and Statistical Thinking</h2>
+                    <div class="textbook-text space-y-6">
+                        <p>Statistics is the mathematical foundation of data science. We divide the field into <strong>Descriptive Statistics</strong> (summarizing collected data) and <strong>Inferential Statistics</strong> (making predictions about a larger group based on a smaller subset).</p>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 1.1: Populations, Samples, Parameters, and Statistics</h3>
+                        <p>A <strong>Population</strong> is the exhaustive collection of all items under consideration. Its numerical descriptor is a <strong>Parameter</strong>. A <strong>Sample</strong> is a selected subset of the population, and its descriptor is a <strong>Statistic</strong>.</p>
+                        
+                        <div class="why-box"><strong>The 'Why' (CS Application):</strong> In big data systems, processing a true population (e.g., computing the exact mean latency of 500 billion daily API requests) is computationally prohibitive. Computer scientists rely on random sampling to compute a <em>Statistic</em> that accurately estimates the system <em>Parameter</em> without crashing the server.</div>
+                        <div class="how-box"><strong>The 'How':</strong> <br>To estimate the population mean (\(\mu\)), we draw an array of memory logs and compute the sample mean (\(\bar{x}\)).<span class="code-snippet">sample_mean = sum(server_logs_sample) / len(server_logs_sample)</span></div>
+                        <div class="how-box"><strong>Additional Example (CS Context):</strong> Database Query Optimization. A database engine cannot afford to read 10 million rows (the Population) to check how many null values exist before executing a join. Instead, the Query Optimizer samples 10,000 pages (the Sample) to calculate a selectivity estimate (the Statistic) to guess the true null count (the Parameter).</div>
+                        <div class="trap-box"><strong>The 'Trap':</strong> A common exam trick asks you to identify a value given in a problem. If the problem states "we surveyed 140 students and found their average time is 5 minutes", 5 minutes is a <strong>Statistic</strong>, not a parameter, because it derived from the sample.</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-pencil-alt mr-2"></i>Theory-to-Execution: Concept Check</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Application:</strong> A cybersecurity firm wants to evaluate the average password strength of all 3.2 million users currently registered on their platform. Because calculating this directly would heavily tax the production servers, the firm randomly selects 15,000 user accounts and discovers their average password length is 9 characters. What does the value "9" represent?</p>
+                            <p class="text-slate-700 text-sm mb-1 ml-4">A) The Target Population<br>B) A Parameter<br>C) A Statistic<br>D) The Defined Sample</p>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution & Logic:</strong> <span class="text-sm text-slate-700">The correct answer is <strong>C) A Statistic</strong>. The true population is all 3.2 million users, making the subset of 15,000 the sample. Because the number 9 is a mathematical descriptor strictly calculated from that smaller sample subset, it is a statistic, used to infer the actual parameter.</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 1.2: Variable Classification</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data Type</th>
+                                    <th>Definition</th>
+                                    <th>Computer Science / Algorithmic Equivalent</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Qualitative (Categorical)</strong></td>
+                                    <td>Values that classify items into distinct categories. Numbers used are arbitrary labels.</td>
+                                    <td>Booleans, Enums, Strings. (e.g., <code>{"male": 1, "female": 2}</code>). Requires One-Hot Encoding for machine learning.</td>
+                                </tr>
+                                <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                    <td class="p-4 font-bold text-slate-800">Combinations</td>
+                                    <td class="p-4"><div class="math-block !my-0 !p-2 !bg-transparent !border-none">$$_{n}C_{r} = \frac{n!}{r!(n-r)!}$$</div></td>
+                                    <td class="p-4"><span class="bg-yellow-100 text-yellow-900 font-semibold px-1 rounded">"Order does NOT matter"</span>, <span class="bg-yellow-100 text-yellow-900 font-semibold px-1 rounded">"Subsets"</span></td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 opacity-75">
+                                    <td class="p-4 font-bold text-slate-800">Bayes' Theorem <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide ml-2 inline-block border border-red-200"><i class="fas fa-exclamation-triangle mr-1"></i> Not on Midterm</span></td>
+                                    <td class="p-4"><div class="math-block !my-0 !p-2 !bg-transparent !border-none">$$P(A|B) = \frac{P(B|A)P(A)}{P(B)}$$</div></td>
+                                    <td class="p-4"><span class="bg-yellow-100 text-yellow-900 font-semibold px-1 rounded">"GIVEN that..."</span>, <span class="bg-yellow-100 text-yellow-900 font-semibold px-1 rounded">"Reverse conditional"</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="why-box"><strong>The 'Why' (CS Application):</strong> Defining the variable type is the prerequisite for memory allocation in software and determines which statistical algorithms can be executed. You cannot calculate the standard deviation of qualitative Enums.</div>
+                        <div class="how-box"><strong>The 'How':</strong> Evaluate the generation mechanism. Did a human or sensor <em>measure</em> it with an instrument (Continuous), <em>count</em> it mentally (Discrete), or <em>label</em> it (Qualitative)?</div>
+                        <div class="how-box"><strong>Additional Example (CS Context):</strong> Analyzing a Web Server. <br>• <strong>Qualitative:</strong> The HTTP Status Code returned (e.g., 404, 500). Even though it is a number, you cannot "average" error codes.<br>• <strong>Quantitative Discrete:</strong> The number of active WebSocket connections currently maintained by the server.<br>• <strong>Quantitative Continuous:</strong> The exact amount of RAM consumed in Gigabytes (e.g., 2.345GB).</div>
+                        <div class="trap-box"><strong>The 'Trap':</strong> Exam questions will assign numbers to qualitative data (e.g., "Zip Code 10450"). Do not be fooled into calling this quantitative. A zip code is a categorical label indicating a geographical area; you do not add or average zip codes.</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-pencil-alt mr-2"></i>Theory-to-Execution: Concept Check</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Application:</strong> A DevOps engineer compiles a dashboard tracking three metrics on a cloud server instance: 1) The geographical region of the server (e.g., us-east-1, eu-central-1), 2) The number of failed login attempts per minute, and 3) The physical temperature of the CPU in degrees Celsius. How should these variables be statistically classified respectively?</p>
+                            <p class="text-slate-700 text-sm mb-1 ml-4">A) Qualitative, Quantitative Continuous, Quantitative Discrete<br>B) Qualitative, Quantitative Discrete, Quantitative Continuous<br>C) Quantitative Discrete, Quantitative Discrete, Quantitative Continuous<br>D) Qualitative, Qualitative, Quantitative Continuous</p>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution & Logic:</strong> <span class="text-sm text-slate-700">The correct answer is <strong>B</strong>. Geographic regions are arbitrary labels (Qualitative). Failed login attempts are generated by a counting process and have no fractional values (Quantitative Discrete). CPU temperature is measured by an instrument across a continuous spectrum with infinite fractional possibilities (Quantitative Continuous).</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 1.3: Data Collection Methods and Bias</h3>
+                        <p>How data is collected fundamentally restricts what we can claim about that data. The major methods include <strong>Published Sources</strong> (secondary data), <strong>Designed Experiments</strong> (strict control/manipulation of variables), and <strong>Observational Studies</strong> (surveys/polls without interference).</p>
+
+                        <div class="why-box"><strong>The 'Why' (CS Application):</strong> In Machine Learning, if your training data is collected with Selection Bias (e.g., training a facial recognition system primarily on one demographic), the algorithmic model will inherently perform poorly on the omitted demographics. The statistics will be mathematically sound, but logically invalid.</div>
+                        <div class="how-box"><strong>The 'How':</strong> To minimize bias, engineers rely on specific randomized sampling methods, such as <strong>Simple Random Sampling</strong> (every unit has an equal chance) or <strong>Stratified Sampling</strong> (dividing a database into logical partitions, like user age, and randomly sampling proportionally from each partition).</div>
+                        <div class="trap-box"><strong>The 'Trap':</strong> A survey is sent out to 1,000 app users, but only 20 angry users respond. An exam question might ask if this data is reliable. It is not. This is <strong>Non-response Bias</strong>. The sample is no longer representative of the population because only a polarized subset chose to answer.</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-pencil-alt mr-2"></i>Theory-to-Execution: Concept Check</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Application:</strong> To test the efficiency of a new pathfinding algorithm, a computer scientist runs the new algorithm on exactly 100 randomly generated mazes, and immediately runs a legacy algorithm on the identical set of 100 mazes. They strictly control the CPU and RAM available during the test to ensure no external hardware variations affect the runtimes. What type of data collection method is this?</p>
+                            <p class="text-slate-700 text-sm mb-1 ml-4">A) Data collected observationally<br>B) Data from a designed experiment<br>C) Stratified Random Sampling<br>D) Data from a published source</p>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution & Logic:</strong> <span class="text-sm text-slate-700">The correct answer is <strong>B) Data from a designed experiment</strong>. Because the researcher is actively manipulating the treatment (Algorithm A vs Algorithm B) and strictly controlling external hardware variables, they are actively designing an experiment rather than passively observing natural phenomena.</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="ch2" class="mb-16 scroll-mt-8">
+                    <h2 class="text-3xl font-bold text-primary mb-6">Chapter 2: Methods for Describing Sets of Data</h2>
+                    <div class="textbook-text space-y-6">
+                        <p>Raw datasets (e.g., a `.csv` with a million rows) are uninterpretable by humans. Graphical methods compress this data into visual structures, revealing the underlying distribution shape.</p>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 2.1: Histograms vs. Bar Charts</h3>
+                        <p>A <strong>Bar Chart</strong> is utilized for qualitative data, where the length of the bar represents frequency. A <strong>Histogram</strong> is utilized for quantitative continuous data, constructed by grouping data into <strong>Class Intervals</strong> (bins).</p>
+
+                        <div class="diagram-placeholder">
+                            
+                            <p class="text-xs mt-2">Diagram showing a Bar Chart with distinct gaps between categories and a Histogram with contiguous (touching) bars for continuous intervals.</p>
+                        </div>
+
+                        <div class="why-box"><strong>The 'Why' (CS Application):</strong> Histograms are critical in image processing (computer vision) to represent the tonal distribution of pixels, allowing algorithms to automatically adjust brightness and contrast.</div>
+                        <div class="how-box"><strong>The 'How':</strong> <br>To build a histogram, determine class width: <br>\( \text{Class Width} = \frac{\text{Maximum Value} - \text{Minimum Value}}{\text{Number of Bins}} \)</div>
+                        <div class="how-box"><strong>Additional Example (CS Context):</strong> APM (Application Performance Monitoring). If you want to visualize how many times the API threw a "Timeout Error" versus an "Auth Error", you use a <strong>Bar Chart</strong> (Categorical). If you want to visualize the exact response times of 10,000 successful API calls clustered in 50ms intervals, you use a <strong>Histogram</strong> (Continuous Numerical).</div>
+                        <div class="trap-box"><strong>The 'Trap':</strong> In an MCQ, if you see gaps between the bars of a chart measuring quantitative continuous data, the chart is technically flawed. Histograms must have <em>contiguous</em> (touching) bars because the underlying continuous number line has no gaps.</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-calculator mr-2"></i>Theory-to-Execution: Math & Concept</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Application 1 (Math Execution):</strong> A data architect is building a histogram to visualize packet transmission latencies. The fastest packet took 12ms (Minimum) and the slowest took 162ms (Maximum). If the visual dashboard strictly requires the data to be grouped into exactly 5 equal intervals (bins), what must the Class Width be?</p>
+                            <div class="bg-white p-4 rounded border border-indigo-100 mb-4 overflow-x-auto text-left">
+                                <p class="font-mono text-sm text-slate-700 mb-1">Step 1: Formula -> Class Width = (Max - Min) / Number of Bins</p>
+                                <p class="font-mono text-sm text-slate-700 mb-1">Step 2: Plug in -> Class Width = (162 - 12) / 5</p>
+                                <p class="font-mono text-sm text-slate-700">Step 3: Solve    -> Class Width = 150 / 5 = <strong>30ms</strong></p>
+                            </div>
+                            <p class="text-slate-800 mb-3 mt-4"><strong>Exam Application 2 (Theory Verification):</strong> When the data architect renders this histogram on the screen, they must ensure the visual bars are contiguous (touching with zero space between them). What statistical justification mandates this?</p>
+                            <p class="text-slate-700 text-sm mb-1 ml-4">A) Because latency is a Qualitative variable.<br>B) To adhere to the Pareto 80/20 principle.<br>C) Because latency is a Quantitative Continuous variable.<br>D) To visually compress the dashboard space.</p>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution & Logic:</strong> <span class="text-sm text-slate-700">The correct answer is <strong>C</strong>. Latency represents measured time. Because time is mathematically continuous, there are infinite possible fractional values between the bins. Inserting a visual gap would falsely imply to a user that a latency cannot exist in that gap space.</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 2.2: The Pareto Chart</h3>
+                        <p>A <strong>Pareto Chart</strong> is a specific type of bar chart for qualitative data where categories are arranged in descending order of frequency, overlaid with a cumulative percentage line graph.</p>
+                        
+                        <div class="diagram-placeholder">
+                            
+                            <p class="text-xs mt-2">Example showing bug types in code. Bars are sorted from highest frequency to lowest, with a secondary line axis showing the percentage growth towards 100%.</p>
+                        </div>
+
+                        <div class="why-box"><strong>The 'Why' (CS Application):</strong> Used extensively in Software Quality Assurance (QA). It visually implements the "80/20 Rule", helping developers identify the "vital few" bugs that cause 80% of system crashes, rather than wasting time on the "trivial many".</div>
+                        <div class="how-box"><strong>Additional Example (CS Context):</strong> AWS Cloud Cost Optimization. A DevOps engineer plots cloud expenditure categories (EC2, S3, RDS, Lambda). Sorted by cost, the Pareto chart immediately visually identifies that targeting EC2 compute optimization will yield the fastest reduction in the monthly bill.</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-pencil-alt mr-2"></i>Theory-to-Execution: Concept Check</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Application:</strong> An IT manager is preparing a quarterly report analyzing the reasons for employee help-desk tickets (e.g., Password Resets, VPN Issues, Hardware Failure). They utilize a Pareto Chart to present this qualitative data. In order to construct a valid Pareto Chart, what structural rule must they strictly obey?</p>
+                            <p class="text-slate-700 text-sm mb-1 ml-4">A) The bars must be ordered alphabetically by the category name.<br>B) The bars must touch each other continuously.<br>C) The bars must be ordered from highest frequency on the left to lowest frequency on the right.<br>D) A scatter plot must be overlaid on the bars.</p>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution & Logic:</strong> <span class="text-sm text-slate-700">The correct answer is <strong>C</strong>. A Pareto chart is fundamentally designed to highlight the most dominant factors instantly. By enforcing a descending frequency order on the x-axis, the chart explicitly isolates the "vital few" categories driving the majority of the volume.</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 2.3: Exploring Bivariate Data (Scatter Plots and Time Series)</h3>
+                        <p>When investigating the relationship between two different variables simultaneously (bivariate data), we utilize specific coordinate-based graphs.</p>
+
+                        <div class="diagram-placeholder">
+                            
+                            <p class="text-xs mt-2">Visualization of X-Y coordinates where dots form an upward slope (positive), downward slope (negative), or a random cloud (no correlation).</p>
+                        </div>
+
+                        <div class="diagram-placeholder">
+                            
+                            <p class="text-xs mt-2">A line chart with time on the X-axis showing the progression and trends of a variable sequentially.</p>
+                        </div>
+
+                        <div class="why-box"><strong>The 'Why' (CS Application):</strong> System Administrators rely on <strong>Time Series Graphs</strong> (data plotted sequentially over time) to monitor server health over a 24-hour cycle. They rely on <strong>Scatter Plots</strong> (two numerical variables plotted on X and Y axes) to identify correlations, such as whether increasing Thread Count (X) definitively causes Higher CPU Utilization (Y).</div>
+                        <div class="how-box"><strong>The 'How':</strong> In a Scatter Plot, the independent variable (cause) is typically placed on the horizontal X-axis, and the dependent variable (effect) is placed on the vertical Y-axis. If the dots form an upward slope, the correlation is positive.</div>
+                        <div class="trap-box"><strong>The 'Trap':</strong> Examining a scatter plot might reveal a perfect positive linear trend between "Number of Cyber Attacks" and "Ice Cream Sales" during July. The trap is assuming <strong>Causation</strong>. A scatter plot only proves <strong>Correlation</strong>. (Both metrics likely spiked simply due to summer seasonality).</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-pencil-alt mr-2"></i>Theory-to-Execution: Concept Check</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Application:</strong> A security analyst plots the number of active firewalls (X-axis) against the number of successful data breaches (Y-axis) occurring at various branches of a tech company. The resulting scatter plot shows a dense cluster of points forming a distinct, downward sloping line from the top-left to the bottom-right. How should this graphical output be statistically interpreted?</p>
+                            <p class="text-slate-700 text-sm mb-1 ml-4">A) The variables share a strong positive linear correlation.<br>B) The variables share a strong negative linear correlation.<br>C) Firewalls directly and exclusively cause the prevention of data breaches.<br>D) The variables are completely independent and un-correlated.</p>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution & Logic:</strong> <span class="text-sm text-slate-700">The correct answer is <strong>B</strong>. A downward slope clearly dictates a negative correlation (as X increases, Y decreases). Option C is the deadly trap: while it sounds logically appealing, a scatter plot can <em>never</em> mathematically prove strict causation on its own, it can only prove that correlation exists.</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="ch3" class="mb-16 scroll-mt-8">
+                    <h2 class="text-3xl font-bold text-primary mb-6">Chapter 3: Numerical Descriptive Measures</h2>
+                    <div class="textbook-text space-y-6">
+                        <p>Visuals are subjective. Numerical measures provide objective mathematical definitions of a dataset's center (Central Tendency) and spread (Variation).</p>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 3.1: Central Tendency and Skewness</h3>
+                        <p>The <strong>Mean</strong> (\(\bar{x}\)) is the arithmetic average. The <strong>Median</strong> is the exact physical middle value of an ordered array. The <strong>Mode</strong> is the most frequent value.</p>
+                        
+                        <div class="diagram-placeholder">
+                            [Image showing Symmetric, Right-Skewed, and Left-Skewed frequency distributions with Mean and Median positions labeled]
+                            <p class="text-xs mt-2">Diagram highlighting how the Mean is pulled toward the long tail in skewed data, while the Median remains more central.</p>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Distribution Shape</th>
+                                    <th>Mathematical Relationship</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Symmetric (Bell-shaped)</strong></td>
+                                    <td>Mean = Median = Mode</td>
+                                    <td>The data is perfectly balanced.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Right-Skewed (Positive)</strong></td>
+                                    <td>Mean > Median > Mode</td>
+                                    <td>A few extreme high values stretch the tail to the right, dragging the mean upward.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Left-Skewed (Negative)</strong></td>
+                                    <td>Mean < Median < Mode</td>
+                                    <td>A few extreme low values stretch the tail to the left, dragging the mean downward.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="why-box"><strong>The 'Why' (CS Application):</strong> If a database queries response times, 99% might be 10ms, but a network failure causes 1% to be 5,000ms. The Mean will be artificially dragged up (Right-Skewed). Engineers use the Median (P50 latency) because it is strictly resistant to outliers, providing a truer reflection of standard user experience.</div>
+                        <div class="how-box"><strong>Additional Example (CS Context):</strong> Video Streaming Buffering. An analytics dashboard shows the Mean buffering time is 4 seconds. However, the Mode is 0 seconds. This right-skewed data implies the vast majority of users experience zero buffering, but a tiny subset of users on terrible network connections are stuck buffering for minutes, vastly inflating the arithmetic mean.</div>
+                        <div class="trap-box"><strong>The 'Trap':</strong> Exam questions will give you a mean of 50 and a median of 40 and ask for the shape. Because Mean (50) > Median (40), it is Right-Skewed. The tail always follows the mean.</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-calculator mr-2"></i>Theory-to-Execution: Math Application</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Scenario (Mean, Median & Skew):</strong> A microservice records the following five query execution times in milliseconds: <strong>10, 15, 12, 10, 103</strong>. As a system reliability engineer, you must calculate the exact mean and median, and determine the distribution's skewness to configure alerts.</p>
+                            <div class="bg-white p-4 rounded border border-indigo-100 mb-4 overflow-x-auto text-left">
+                                <p class="font-semibold text-slate-800 mb-1">Step 1: Calculate the Mean (\(\bar{x}\))</p>
+                                <p class="text-sm font-mono text-slate-700 mb-3">\(\bar{x} = (10 + 15 + 12 + 10 + 103) / 5 = 150 / 5 = \mathbf{30}\)</p>
+                                <p class="font-semibold text-slate-800 mb-1">Step 2: Calculate the Median</p>
+                                <p class="text-sm font-mono text-slate-700 mb-1">First, you MUST sort the array: 10, 10, <strong>12</strong>, 15, 103.</p>
+                                <p class="text-sm font-mono text-slate-700 mb-3">Position = (n+1)/2 = (5+1)/2 = 3rd value. The Median = \(\mathbf{12}\).</p>
+                                <p class="font-semibold text-slate-800 mb-1">Step 3: Analyze the Mathematical Relationship</p>
+                                <p class="text-sm font-mono text-slate-700">Mean (30) > Median (12).</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution MCQ Check:</strong> <span class="text-sm text-slate-700">Based strictly on these calculations, what is the shape of this network latency distribution?<br>A) Left-Skewed<br>B) Symmetric<br>C) Right-Skewed<br><br><strong>Answer: C) Right-Skewed</strong>. The single massive network failure outlier (103ms) exerted a massive gravitational pull on the arithmetic mean, dragging it far above the median. Because the mean is greater than the median, the tail points right.</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 3.2: Variance and Standard Deviation</h3>
+                        <p><strong>Sample Variance</strong> (\(s^2\)) measures the average squared deviation of each data point from the mean. <strong>Standard Deviation</strong> (\(s\)) is the square root of the variance, restoring the original units.</p>
+                        <div class="math-block">
+                            $$s^2 = \frac{\sum_{i=1}^{n} (x_i - \bar{x})^2}{n - 1} \quad \quad s = \sqrt{s^2}$$
+                        </div>
+
+                        <div class="how-box"><strong>The 'How':</strong> <br>Notice we divide by \(n - 1\) instead of \(n\). This is called Bessel's correction. It mathematically compensates for the fact that a sample tends to underestimate the true variation of a population.</div>
+                        <div class="how-box"><strong>Additional Example (CS Context):</strong> Load Balancer Distribution. If you have 5 web servers, you want traffic distributed equally. If you calculate the standard deviation of 'Active Sessions per Server', a low standard deviation proves your Round-Robin load balancer is working perfectly. A high standard deviation means traffic is wildly erratic and clustering on specific machines.</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-calculator mr-2"></i>Theory-to-Execution: Math Application</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Scenario (Variance Math):</strong> A test-driven development suite is run three times, yielding the following error counts per run: <strong>2, 4, 6</strong>. To assess the stability of the software build, compute the sample standard deviation (\(s\)) step-by-step.</p>
+                            <div class="bg-white p-4 rounded border border-indigo-100 mb-4 overflow-x-auto text-left">
+                                <p class="font-semibold text-slate-800 mb-1">Step 1: Find the Mean (\(\bar{x}\))</p>
+                                <p class="text-sm font-mono text-slate-700 mb-3">\(\bar{x} = (2 + 4 + 6) / 3 = 12 / 3 = \mathbf{4}\)</p>
+                                <p class="font-semibold text-slate-800 mb-1">Step 2: Sum the Squared Deviations (Numerator)</p>
+                                <p class="text-sm font-mono text-slate-700 mb-1">\(\sum(x_i - \bar{x})^2 = (2-4)^2 + (4-4)^2 + (6-4)^2\)</p>
+                                <p class="text-sm font-mono text-slate-700 mb-3">\(\sum = (-2)^2 + (0)^2 + (2)^2 = 4 + 0 + 4 = \mathbf{8}\)</p>
+                                <p class="font-semibold text-slate-800 mb-1">Step 3: Apply the Formula for Variance (\(s^2\))</p>
+                                <p class="text-sm font-mono text-slate-700 mb-3">\(s^2 = 8 / (n - 1) = 8 / (3 - 1) = 8 / 2 = \mathbf{4}\)</p>
+                                <p class="font-semibold text-slate-800 mb-1">Step 4: Find the Standard Deviation (\(s\))</p>
+                                <p class="text-sm font-mono text-slate-700">\(s = \sqrt{s^2} = \sqrt{4} = \mathbf{2}\)</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution & Logic:</strong> <span class="text-sm text-slate-700">On an exam, if you forget to divide by \(n - 1\) and incorrectly divide by \(n\) (which is 3), your variance would be 2.66 instead of 4. This will always be one of the wrong multiple-choice options designed to trick you.</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 3.3: Interpreting Standard Deviation</h3>
+                        <p>Once calculated, we map standard deviations onto rules to determine data probability. The choice of rule strictly depends on the distribution's shape.</p>
+
+                        <div class="diagram-placeholder">
+                            
+
+[Image of the Empirical Rule 68-95-99.7 on a Normal Distribution curve]
+
+                            <p class="text-xs mt-2">A bell curve showing how 68% of data falls within 1 standard deviation, 95% within 2, and 99.7% within 3.</p>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rule</th>
+                                    <th>Condition for Use</th>
+                                    <th>The Mathematical Law</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>The Empirical Rule</strong></td>
+                                    <td>Distribution <strong>MUST</strong> be symmetric/bell-shaped (Normal).</td>
+                                    <td>
+                                        ~68% of data is within \(\bar{x} \pm 1s\)<br>
+                                        ~95% of data is within \(\bar{x} \pm 2s\)<br>
+                                        ~99.7% of data is within \(\bar{x} \pm 3s\)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Chebyshev's Theorem</strong></td>
+                                    <td>Distribution is skewed, or shape is <strong>UNKNOWN</strong>.</td>
+                                    <td>At least \(1 - \frac{1}{k^2}\) of the data lies within \(k\) standard deviations. (For \(k=2\), at least 75%; for \(k=3\), at least 88.89%).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="how-box"><strong>Additional Example (CS Context):</strong> Service Level Agreements (SLAs). If a cloud provider guarantees "Four Nines" (99.99%) uptime, they use the Empirical rule. Their acceptable server response variation must be engineered so strictly that any downtime incident falls more than 3 standard deviations outside the mean of expected operational parameters.</div>
+                        <div class="trap-box"><strong>The 'Trap':</strong> If an exam question explicitly says "assuming nothing is known about the distribution", you <strong>cannot</strong> use the 68/95/99.7% rule. You must apply Chebyshev's \(1 - 1/k^2\) formula.</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-calculator mr-2"></i>Theory-to-Execution: Math Application</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Scenario (Empirical Rule):</strong> Analytics on a massive server farm demonstrate that CPU request execution times follow a strictly <strong>symmetric, bell-shaped distribution</strong>. The mean execution time is \(\bar{x} = 200\text{ms}\) with a standard deviation of \(s = 20\text{ms}\). Approximately what percentage of all server requests are processed between 160ms and 240ms?</p>
+                            <div class="bg-white p-4 rounded border border-indigo-100 mb-4 overflow-x-auto text-left">
+                                <p class="font-semibold text-slate-800 mb-1">Step 1: Identify the bounds</p>
+                                <p class="text-sm font-mono text-slate-700 mb-3">Lower Bound = 160ms. Upper Bound = 240ms.</p>
+                                <p class="font-semibold text-slate-800 mb-1">Step 2: Determine 'k' (Standard Deviations away from mean)</p>
+                                <p class="text-sm font-mono text-slate-700 mb-1">Mean is 200. Distance to 240 is 40.</p>
+                                <p class="text-sm font-mono text-slate-700 mb-3">\(40\text{ms} / 20\text{ms (the std dev)} = 2\) standard deviations.</p>
+                                <p class="font-semibold text-slate-800 mb-1">Step 3: Apply the specific theorem</p>
+                                <p class="text-sm font-mono text-slate-700">Because the prompt explicitly stated "symmetric, bell-shaped", we are mathematically permitted to use the Empirical Rule. The Empirical Rule states that exactly 2 standard deviations (\(\pm 2s\)) envelops <strong>~95%</strong> of the data.</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution & Logic:</strong> <span class="text-sm text-slate-700">If the question had omitted the phrase "symmetric, bell-shaped", you would be forced to use Chebyshev (\(1 - 1/2^2 = 75\%\)). Finding those specific keywords in the prompt dictates which mathematical law you are legally allowed to invoke.</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 3.4: Relative Standing (Z-Scores & Quartiles)</h3>
+                        <p>A <strong>Z-score</strong> dictates exactly how many standard deviations a value is from the mean. Z-scores standardise variables so they can be compared across different scales. A Z-score > 3 or < -3 is deemed an outlier.</p>
+                        <div class="math-block">
+                            $$z = \frac{x - \bar{x}}{s}$$
+                        </div>
+                        <p><strong>Quartiles</strong> divide an ordered dataset into four equal segments. The <strong>Interquartile Range (IQR)</strong> = \(Q_3 - Q_1\), representing the middle 50% spread. The IQR is used to define Box Plot outlier fences:</p>
+
+                        <div class="diagram-placeholder">
+                            
+                            <p class="text-xs mt-2">Visual showing the 'box' (IQR), the median line, and the 'whiskers' extending to the fences.</p>
+                        </div>
+
+                        <ul class="list-disc pl-8">
+                            <li><strong>Inner Fences (Suspect):</strong> \(Q_1 - 1.5(IQR)\) and \(Q_3 + 1.5(IQR)\)</li>
+                            <li><strong>Outer Fences (Extreme):</strong> \(Q_1 - 3(IQR)\) and \(Q_3 + 3(IQR)\)</li>
+                        </ul>
+                        <div class="how-box"><strong>Additional Example (CS Context):</strong> Anomaly Detection. A cybersecurity firewall dynamically tracks the byte size of outgoing network packets. If a specific user suddenly sends a packet cluster generating a Z-score of +4.5 relative to normal network traffic, the system automatically flags it as a potential data exfiltration attempt (an extreme outlier).</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-calculator mr-2"></i>Theory-to-Execution: Math Application</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Scenario (Z-Score Analytics):</strong> A data engineering class has an average final project grade of \(\bar{x} = 50\) points, with a standard deviation of \(s = 10\). A student writes an exceptional neural network and receives a grade of \(x = 85\). Calculate their Z-score and theoretically interpret the result.</p>
+                            <div class="bg-white p-4 rounded border border-indigo-100 mb-4 overflow-x-auto text-left">
+                                <p class="font-semibold text-slate-800 mb-1">Step 1: Plug into the Z-Score Formula</p>
+                                <p class="text-sm font-mono text-slate-700 mb-1">\(z = (x - \bar{x}) / s\)</p>
+                                <p class="text-sm font-mono text-slate-700 mb-1">\(z = (85 - 50) / 10\)</p>
+                                <p class="text-sm font-mono text-slate-700">\(z = 35 / 10 = \mathbf{3.5}\)</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution MCQ Check:</strong> <span class="text-sm text-slate-700">Based on the calculated Z-score of 3.5, which statistical classification should be assigned to this student's grade?<br>A) A median result.<br>B) A suspect outlier.<br>C) An extreme outlier.<br>D) An invalid data point.<br><br><strong>Answer: C) Extreme Outlier.</strong> Any Z-score extending beyond the \(\pm 3.0\) boundary is statistically universally defined as an outlier.</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 3.5: Covariance and Correlation Coefficient</h3>
+                        <p>When analyzing bivariate quantitative data, we measure the exact numerical strength and direction of their linear relationship. <strong>Covariance</strong> determines the direction (positive or negative). The <strong>Pearson Correlation Coefficient (\(r\))</strong> standardizes this covariance into a bounded scale between -1.0 and +1.0.</p>
+
+                        <div class="why-box"><strong>The 'Why' (CS Application):</strong> In Machine Learning, feature selection algorithms compute correlation matrices. If two features (e.g., 'Square Footage' and 'Number of Bedrooms') possess a correlation coefficient of \(r = 0.95\), they are highly collinear. The algorithm can drop one feature to optimize memory allocation without losing predictive power.</div>
+                        <div class="math-block">
+                            $$r = \frac{s_{xy}}{s_x s_y}$$
+                        </div>
+                        <div class="how-box"><strong>The 'How':</strong> <br>An \(r\) value near 0 implies no linear relationship. An \(r\) value near +1 is a strong positive relationship (as X increases, Y increases). An \(r\) value near -1 is a strong negative relationship (as X increases, Y decreases).</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-pencil-alt mr-2"></i>Theory-to-Execution: Concept Check</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Application:</strong> A database administrator computes the correlation coefficient between the "Volume of Cached Data (GB)" (X) and the "Number of Milliseconds Required to Execute a Query" (Y). The resulting \(r\) statistic is <strong>-0.99</strong>. What is the precise statistical interpretation of this output?</p>
+                            <p class="text-slate-700 text-sm mb-1 ml-4">A) The query execution time is nearly independent of the cached data.<br>B) There is a weak negative linear relationship.<br>C) There is a near-perfect inverse linear relationship; as cache volume increases, execution time heavily drops.<br>D) Caching data directly causes the system to speed up.</p>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution & Logic:</strong> <span class="text-sm text-slate-700">The correct answer is <strong>C</strong>. The value -0.99 is extremely close to the lower bound limit of -1.0, signifying a massive negative correlation. Option D is a trap; while caching likely *is* the cause, the \(r\) statistic itself solely measures correlation, not strict causality.</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <section id="ch4" class="mb-16 scroll-mt-8">
+                    <h2 class="text-3xl font-bold text-primary mb-6">Chapter 4: Probability</h2>
+                    <div class="textbook-text space-y-6">
+                        <p>An <strong>Experiment</strong> yields an outcome with predictive uncertainty. A <strong>Sample Space (S)</strong> lists all basic outcomes (sample points). An <strong>Event</strong> is a specific collection of those points.</p>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 4.1: The Addition and Multiplication Rules</h3>
+                        
+                        <div class="diagram-placeholder">
+                            
+                            <p class="text-xs mt-2">Diagram showing two overlapping circles. The overlap is the Intersection (AND) and the combined area of both circles is the Union (OR).</p>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rule</th>
+                                    <th>Trigger Keyword</th>
+                                    <th>Formula</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Addition Rule (Union)</strong></td>
+                                    <td>"OR" (\(\cup\))</td>
+                                    <td>\(P(A \cup B) = P(A) + P(B) - P(A \cap B)\)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Multiplication Rule (Intersection)</strong></td>
+                                    <td>"AND" (\(\cap\))</td>
+                                    <td>\(P(A \cap B) = P(A) \times P(B|A)\)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="why-box"><strong>The 'Why' (CS Application):</strong> If Server A has a 10% chance of failing and Server B has a 10% chance of failing, architects use the Multiplication Rule to prove that the probability of BOTH failing simultaneously (the system crashing) is \(0.10 \times 0.10 = 0.01\) (1%). This justifies adding redundant hardware.</div>
+                        <div class="how-box"><strong>Additional Example (CS Context):</strong> Database Query Locks. Suppose a transaction requires a Read lock (Event A) or a Write lock (Event B). The scheduler uses the Addition Rule to find the probability of needing <em>either</em> lock: \(P(A \cup B) = P(A) + P(B) - P(A \cap B)\), preventing deadlocks by estimating resource contention.</div>
+                        <div class="trap-box"><strong>The 'Trap':</strong> Forgetting to subtract the intersection \(P(A \cap B)\) in the Addition Rule. If you want the probability of drawing a King OR a Heart, adding \(4/52 + 13/52\) counts the King of Hearts twice. You must subtract \(1/52\).</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-calculator mr-2"></i>Theory-to-Execution: Math Application</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Scenario (Addition Rule):</strong> A software engineering department analyzes bugs in their repository. They determine that 40% of the code files contain a logic error (\(P(L) = 0.4\)), 50% contain a syntax warning (\(P(S) = 0.5\)), and 10% contain BOTH a logic error and a syntax warning simultaneously (\(P(L \cap S) = 0.1\)).<br><br>If a developer opens a random file, what is the probability it contains a logic error <strong>OR</strong> a syntax warning?</p>
+                            <div class="bg-white p-4 rounded border border-indigo-100 mb-4 overflow-x-auto text-left">
+                                <p class="font-semibold text-slate-800 mb-1">Step 1: Identify the Keyword</p>
+                                <p class="text-sm font-mono text-slate-700 mb-3">The prompt explicitly asks for Event L "OR" Event S. This dictates the Addition Rule.</p>
+                                <p class="font-semibold text-slate-800 mb-1">Step 2: State the Formula</p>
+                                <p class="text-sm font-mono text-slate-700 mb-3">\(P(L \cup S) = P(L) + P(S) - P(L \cap S)\)</p>
+                                <p class="font-semibold text-slate-800 mb-1">Step 3: Plug in and Solve</p>
+                                <p class="text-sm font-mono text-slate-700">\(P(L \cup S) = 0.4 + 0.5 - 0.1 = \mathbf{0.8}\) (or 80%)</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution & Logic:</strong> <span class="text-sm text-slate-700">If you fell for the trap and simply added 0.4 + 0.5, you would arrive at 0.9. This mathematically double-counts the 10% of files that sit precisely in the overlapping Venn diagram intersection.</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 4.2: Mutually Exclusive vs. Independent Events</h3>
+                        <p><strong>Mutually Exclusive:</strong> Two events cannot happen simultaneously. (e.g., A coin landing on Heads and Tails). Therefore, the intersection is zero: <strong>\(P(A \cap B) = 0\)</strong>.</p>
+                        <p><strong>Independent:</strong> The occurrence of Event A has absolutely zero mathematical effect on the probability of Event B. (e.g., Two separate coin tosses). Therefore, the conditional probability collapses: <strong>\(P(B|A) = P(B)\)</strong>.</p>
+
+                        <div class="how-box"><strong>Additional Example (CS Context):</strong> Network Protocols. <br>• <strong>Mutually Exclusive:</strong> A single data transmission is either UDP or TCP. It cannot be both. \(P(\text{TCP} \cap \text{UDP}) = 0\). <br>• <strong>Independent:</strong> Dropping packet 101 on a router does not influence the probability of dropping packet 405. The events are independent (assuming no network saturation cascade).</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-pencil-alt mr-2"></i>Theory-to-Execution: Concept Check</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Application:</strong> Let Event A be the event that a user clicks a specific banner ad. Let Event B be the event that the user purchases the product. An analyst calculates the conditional probability and finds that \( P(B | A) \) is exactly equal to \( P(B) \). Based on this isolated mathematical finding, what must be true about the relationship between clicking the ad and purchasing the product?</p>
+                            <p class="text-slate-700 text-sm mb-1 ml-4">A) The events are Mutually Exclusive.<br>B) The events are Dependent.<br>C) The events are Independent.<br>D) The intersection of the events equals 1.</p>
+                            <div class="mt-4 pt-3 border-t border-indigo-200">
+                                <strong class="text-indigo-800 text-sm">Execution & Logic:</strong> <span class="text-sm text-slate-700">The correct answer is <strong>C</strong>. The mathematical statement \(P(B | A) = P(B)\) literally translates to: "The probability of purchasing the product, GIVEN that the ad was clicked, is identical to the baseline probability of purchasing the product." Because the occurrence of A did not shift the needle on B, they act completely independently.</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 4.3: Counting Rules</h3>
+                        <p>When an experiment's sample space is too large to manually list, we use combinatorics.</p>
+                        <ul class="list-disc pl-8">
+                            <li><strong>Permutations (Order Matters):</strong> Picking a President, VP, and Secretary. \(_{n}P_{r} = \frac{n!}{(n-r)!}\)</li>
+                            <li><strong>Combinations (Order Does NOT Matter):</strong> Picking a 3-person committee. \(_{n}C_{r} = \frac{n!}{r!(n-r)!}\)</li>
+                        </ul>
+                        <div class="how-box"><strong>Additional Example (CS Context):</strong> Cryptography vs Distributed Systems. <br>• Generating a 4-digit PIN code involves <strong>Permutations</strong> because the sequence [1,2,3,4] unlocks the phone, but [4,3,2,1] fails. Order strictly matters. <br>• Selecting 3 out of 10 microservices to intentionally disable during a Chaos Engineering test involves <strong>Combinations</strong>. Killing nodes A, B, and C creates the identical fault state as killing C, B, and A. Order is irrelevant.</div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                            <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-calculator mr-2"></i>Theory-to-Execution: Math Application</h4>
+                            <p class="text-slate-800 mb-3"><strong>Exam Scenario (Combinatorics):</strong> An IT department maintains a cluster of 5 load-balancing servers. To execute routine physical maintenance, the network architect must completely shut down exactly 2 of these servers simultaneously tonight. How many distinct possible failure-state combinations can the architect generate?</p>
+                            <div class="bg-white p-4 rounded border border-indigo-100 mb-4 overflow-x-auto text-left">
+                                <p class="font-semibold text-slate-800 mb-1">Step 1: Determine if Order Matters</p>
+                                <p class="text-sm font-mono text-slate-700 mb-3">If they shut down Server A then Server B, the offline group is {A, B}. If they shut down B then A, the offline group is {A, B}. Order is totally irrelevant. We must use the Combination formula (\(_{n}C_r\)).</p>
+                                <p class="font-semibold text-slate-800 mb-1">Step 2: Plug into the Formula</p>
+                                <p class="text-sm font-mono text-slate-700 mb-1">\(n = 5\) (total servers), \(r = 2\) (servers chosen).</p>
+                                <p class="text-sm font-mono text-slate-700 mb-1">\(_{5}C_{2} = 5! / [2! \times (5-2)!] = 5! / [2! \times 3!]\)</p>
+                                <p class="text-sm font-mono text-slate-700">\(_{5}C_{2} = (5 \times 4) / (2 \times 1) = 20 / 2 = \mathbf{10}\)</p>
+                            </div>
+                            <details class="group mt-4 cursor-pointer">
+                                <summary class="font-bold text-slate-700 bg-slate-200 hover:bg-slate-300 p-2 rounded select-none transition-colors shadow-sm inline-block">
+                                    👁️ Reveal Answer & Proof
+                                </summary>
+                                <div class="mt-3 p-4 bg-slate-100 rounded border border-slate-200">
+                                    <strong class="text-indigo-800 text-sm">Execution MCQ Check:</strong> <span class="text-sm text-slate-700">If the question had instead stated they were selecting a "Primary" maintenance target and a "Secondary" backup target, <span class="bg-yellow-200 text-yellow-900 font-semibold px-1 rounded">order would suddenly matter</span>. You would use Permutations (\(_{5}P_{2}\)), yielding \(5 \times 4 = 20\) distinct arrangements.</span>
+                                </div>
+                            </details>
+                        </div>
+
+                        <div class="opacity-75">
+                            <h3 class="text-xl font-bold text-slate-800 mt-8">Concept 4.4: Conditional Probability and Bayes' Theorem <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide ml-2 align-middle border border-red-200"><i class="fas fa-exclamation-triangle mr-1"></i> Not on Midterm</span></h3>
+                            
+                            <div class="bg-red-50 border-l-4 border-red-500 p-4 my-4 text-sm text-red-900 rounded-r-lg font-sans">
+                                <strong><i class="fas fa-info-circle mr-1"></i> Exam Scope Warning:</strong> Based on the March 24th lecture transcript, the midterm covers Chapter 4 <em>only up to Combinations</em>. Bayes' Theorem and advanced Conditional Probability fall strictly outside the scope of the March 31st exam. You can safely skip this section for now.
+                            </div>
+
+                            <p><strong>Conditional Probability</strong> represents the likelihood of an event occurring given that another event has <em>already occurred</em>. <strong>Bayes' Theorem</strong> is the advanced expansion of this, allowing us to mathematically "reverse" conditional probabilities.</p>
+
+                            <div class="why-box"><strong>The 'Why' (CS Application):</strong> This is the fundamental engine of AI Spam Filters (Naive Bayes Classifiers). A software engineer knows the probability that the word "Viagra" appears <em>given</em> that an email is spam. But Bayes' theorem reverses it, calculating the probability that the email is spam <em>given</em> that the word "Viagra" appeared.</div>
+                            <div class="math-block">
+                                $$P(A|B) = \frac{P(A \cap B)}{P(B)} \quad \quad \text{Bayes' Formula: } P(A|B) = \frac{P(B|A)P(A)}{P(B)}$$
+                            </div>
+                            <div class="trap-box"><strong>The 'Trap':</strong> Confusing \(P(A|B)\) with \(P(A \cap B)\). \(P(\text{Cancer | Positive Test})\) is the chance you have cancer knowing the test is positive. \(P(\text{Cancer } \cap \text{ Positive Test})\) is the overall baseline probability of a random person walking in off the street, having cancer, AND getting a positive test simultaneously.</div>
+
+                            <div class="bg-indigo-50 border-l-4 border-indigo-600 p-5 my-6 rounded-r-lg shadow-sm font-sans">
+                                <h4 class="font-bold text-indigo-900 mb-2 text-lg"><i class="fas fa-calculator mr-2"></i>Theory-to-Execution: Math Application</h4>
+                                <p class="text-slate-800 mb-3"><strong>Exam Scenario (Bayes' Theorem):</strong> A QA automated test suite detects bugs in new code commits. Historically, only 5% of all code commits contain a critical bug (\(P(\text{Bug}) = 0.05\)). If a bug genuinely exists, the test suite successfully catches it 90% of the time (\(P(\text{Fail} | \text{Bug}) = 0.90\)). However, the suite is imperfect and has a 10% false-positive rate, meaning it will incorrectly fail 10% of perfectly good commits (\(P(\text{Fail} | \text{No Bug}) = 0.10\)).<br><br>The alarm just rang; the test suite failed. What is the exact mathematical probability that a bug actually exists in this specific commit? Calculate \(P(\text{Bug} | \text{Fail})\).</p>
+                                <div class="bg-white p-4 rounded border border-indigo-100 mb-4 overflow-x-auto text-left">
+                                    <p class="font-semibold text-slate-800 mb-1">Step 1: Define the required variables</p>
+                                    <ul class="list-disc pl-5 mb-3 text-sm font-mono text-slate-700">
+                                        <li>\(P(\text{Bug}) = 0.05\)</li>
+                                        <li>\(P(\text{No Bug}) = 1 - 0.05 = 0.95\)</li>
+                                        <li>\(P(\text{Fail} | \text{Bug}) = 0.90\)</li>
+                                        <li>\(P(\text{Fail} | \text{No Bug}) = 0.10\)</li>
+                                    </ul>
+                                    <p class="font-semibold text-slate-800 mb-1">Step 2: Calculate the Denominator (Total Probability of a Failure)</p>
+                                    <p class="text-sm font-mono text-slate-700 mb-1">The test fails in two parallel universes: when there IS a bug, and when there IS NOT a bug.</p>
+                                    <p class="text-sm font-mono text-slate-700 mb-1">\(P(\text{Fail}) = [P(\text{Fail} | \text{Bug}) \times P(\text{Bug})] + [P(\text{Fail} | \text{No Bug}) \times P(\text{No Bug})]\)</p>
+                                    <p class="text-sm font-mono text-slate-700 mb-1">\(P(\text{Fail}) = [0.90 \times 0.05] + [0.10 \times 0.95]\)</p>
+                                    <p class="text-sm font-mono text-slate-700 mb-3">\(P(\text{Fail}) = 0.045 + 0.095 = \mathbf{0.140}\)</p>
+                                    <p class="font-semibold text-slate-800 mb-1">Step 3: Apply Bayes' Theorem</p>
+                                    <p class="text-sm font-mono text-slate-700 mb-1">\(P(\text{Bug} | \text{Fail}) = [P(\text{Fail} | \text{Bug}) \times P(\text{Bug})] \ / \ P(\text{Fail})\)</p>
+                                    <p class="text-sm font-mono text-slate-700">\(P(\text{Bug} | \text{Fail}) = 0.045 \ / \ 0.140 \approx \mathbf{0.3214} \text{ (or } 32.14\%)\)</p>
+                                </div>
+                                <details class="group mt-4 cursor-pointer">
+                                    <summary class="font-bold text-slate-700 bg-slate-200 hover:bg-slate-300 p-2 rounded select-none transition-colors shadow-sm inline-block">
+                                        👁️ Reveal Answer & Proof
+                                    </summary>
+                                    <div class="mt-3 p-4 bg-slate-100 rounded border border-slate-200">
+                                        <strong class="text-indigo-800 text-sm">Execution & Logic:</strong> <span class="text-sm text-slate-700">Notice the brutal logic trap! Even though the testing system is technically "90% accurate" at catching bugs, when it throws an error, there is only a <strong>32.14%</strong> chance a real bug is present. Because bugs are statistically rare (only 5% of code), the sheer volume of <span class="bg-yellow-200 text-yellow-900 font-semibold px-1 rounded">false positives</span> generated by the 95% of good code completely overwhelms the true positives. This counter-intuitive mathematical reversal is the exact reason Bayes' Theorem is heavily tested in computer science.</span>
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <section id="practice-session" class="mb-16 scroll-mt-8">
+                    <h2 class="text-3xl font-bold text-primary mb-6 border-b-4 border-accent pb-2">Practice Session #1: Master Solutions</h2>
+                    <div class="textbook-text space-y-8">
+                        <p class="text-slate-600 italic">The following problems have been extracted directly from your course materials, enhanced with deep structural logic proofs tailored for your MCQ midterm.</p>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 1</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">As part of an economics class project, students were asked to randomly select 500 New York Stock Exchange (NYSE) stocks from the Wall Street Journal. As part of the project, students were asked to summarize the current prices (also referred to as the closing price of the stock for a particular trading date) of the collected stocks using graphical and numerical techniques. Identify the data collection method used in this study.<br>
+                            A) data from a published source<br>
+                            B) data from a designed experiment<br>
+                            C) data collected observationally</p>
+                            
+                            <p class="font-bold text-accent">Answer: A) data from a published source</p>
+                            <p class="text-sm mt-2"><strong>Logical Proof:</strong> The Wall Street Journal is a secondary financial publication. The students did not physically execute an experiment (manipulating variables) nor did they conduct an observational survey (watching units in a natural setting). They simply retrieved pre-existing, published data records.</p>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 2</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">Gender is one variable of interest in a study of the effectiveness of a new medication. For data entry purposes, the researcher conducting the study assigns 1 for Male and 2 for Female. Is the gender data quantitative or qualitative? Explain.</p>
+                            
+                            <p class="font-bold text-accent">Answer: Qualitative</p>
+                            <p class="text-sm mt-2"><strong>Logical Proof:</strong> The integers 1 and 2 are functioning solely as <strong>categorical labels</strong> (enums in programming) to facilitate database entry. They possess no numerical magnitude. You cannot perform arithmetic (e.g., 1 + 2 = 3 does not yield a valid physical meaning). Therefore, it fundamentally remains qualitative data.</p>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 3</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">A postal worker counts the number of complaint letters received by the Thailand Postal Service in a given day. Identify the type of data collected.<br>
+                            A) quantitative<br>
+                            B) qualitative</p>
+                            
+                            <p class="font-bold text-accent">Answer: A) quantitative</p>
+                            <p class="text-sm mt-2"><strong>Logical Proof:</strong> The data represents a definitive magnitude derived from a <em>counting</em> process (e.g., 5 letters, 10 letters). Specifically, it is quantitative discrete data.</p>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 4</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">Parking at a university has become a problem. University administrators are interested in determining the average time it takes a student to find a parking spot. An administrator inconspicuously followed 140 students and recorded how long it took each of them to find a parking spot. Identify the population, sample, and variable of interest to the administrators.</p>
+                            
+                            <div class="text-sm mt-2">
+                                <p><strong>Population:</strong> All students who drive and park at the university. (The entire overarching group of interest).</p>
+                                <p><strong>Sample:</strong> The specific subset of 140 students who were tracked and recorded by the administrator.</p>
+                                <p><strong>Variable of Interest:</strong> The continuous quantitative value representing the <em>time</em> (e.g., in minutes) it takes a student to secure a spot.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 5</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">The following data represent the scores of 50 students on a statistics exam.<br>
+                            39 51 59 63 66 68 68 69 70 71<br>
+                            71 71 73 74 76 76 76 77 78 79<br>
+                            79 79 79 80 80 82 83 83 83 85<br>
+                            85 86 86 88 88 88 88 89 89 89<br>
+                            90 90 91 91 92 95 96 97 97 98<br><br>
+                            a. Find the lower quartile, the upper quartile, and the median of the scores.<br>
+                            b. Find the interquartile range of the data and use it to identify potential outliers.<br>
+                            c. In a box plot for the data, which scores, if any, would be outside the outer fences? Which scores, if any, would be outside the inner fences but inside the outer fences?
+                            </p>
+                            
+                            <div class="diagram-placeholder">
+                                
+                                <p class="text-xs mt-2">Diagram showing a Box Plot with the median at 81, Q1 at 73, and Q3 at 89, with 39 marked as an outlier.</p>
+                            </div>
+
+                            <div class="text-sm mt-2 space-y-4">
+                                <div>
+                                    <span class="font-bold text-accent">Part A: Median and Quartiles</span>
+                                    <p><strong>Median (Q2):</strong> \(n=50\). The median lies between the 25th and 26th values. In the sorted array, the 25th value is 80 and the 26th is 82. \( (80+82)/2 = 81 \).</p>
+                                    <p><strong>Lower Quartile (Q1):</strong> Position = \( 0.25 \times 50 = 12.5 \). Round up to the 13th position. The 13th value is <strong>73</strong>.</p>
+                                    <p><strong>Upper Quartile (Q3):</strong> Position = \( 0.75 \times 50 = 37.5 \). Round up to the 38th position. The 38th value is <strong>89</strong>.</p>
+                                </div>
+                                <div class="border-t pt-3">
+                                    <span class="font-bold text-accent">Part B: IQR & Potential Outliers</span>
+                                    <p><strong>IQR:</strong> \( Q_3 - Q_1 = 89 - 73 = 16 \).</p>
+                                    <p>Inner fences establish the threshold for potential outliers:</p>
+                                    <ul class="list-disc pl-5">
+                                        <li>Lower Inner Fence = \( Q_1 - 1.5(\text{IQR}) = 73 - 1.5(16) = 73 - 24 = 49 \)</li>
+                                        <li>Upper Inner Fence = \( Q_3 + 1.5(\text{IQR}) = 89 + 1.5(16) = 89 + 24 = 113 \)</li>
+                                    </ul>
+                                    <p>Any score below 49 is a potential outlier. Scanning the array, the score <strong>39</strong> qualifies.</p>
+                                </div>
+                                <div class="border-t pt-3">
+                                    <span class="font-bold text-accent">Part C: Fence Boundary Analysis</span>
+                                    <p>First, compute the Outer Fences (Extreme Outlier thresholds):</p>
+                                    <ul class="list-disc pl-5">
+                                        <li>Lower Outer Fence = \( Q_1 - 3(\text{IQR}) = 73 - 3(16) = 73 - 48 = 25 \)</li>
+                                        <li>Upper Outer Fence = \( Q_3 + 3(\text{IQR}) = 89 + 3(16) = 89 + 48 = 137 \)</li>
+                                    </ul>
+                                    <p><strong>Outside Outer Fences:</strong> None. The lowest value (39) does not fall below 25.</p>
+                                    <p><strong>Outside Inner but Inside Outer:</strong> The score <strong>39</strong>. It falls between 25 and 49, marking it as a suspect outlier, but not an extreme one.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 6</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">The amount of television viewed by today’s youth is of primary concern to Parents Against Watching Television (PAWT). Three hundred parents of elementary school-aged children were asked to estimate the number of hours per week that their child watches television. The upper quartile for the distribution was given as 20 hours. Interpret this value.</p>
+                            
+                            <p class="font-bold text-accent">Answer Interpretation:</p>
+                            <p class="text-sm mt-2"><strong>Logical Proof:</strong> The upper quartile mathematically equates to the 75th percentile. By definition, percentiles mark the value below which a given percentage of observations fall. Therefore, <strong>75%</strong> of the surveyed children watch 20 hours or less of television per week, which inherently means the remaining <strong>25%</strong> watch more than 20 hours per week.</p>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 7</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">At the U.S. Open Tennis Championship a statistician keeps track of every serve that a player hits during the tournament. The statistician reported that the mean serve speed of a particular player was 103 miles per hour (mph) and the standard deviation of the serve speeds was 11 mph. Using the z-score approach for detecting outliers, which of the following serve speeds would represent outliers in the distribution of the player’s serve speeds?<br>
+                            Speeds: 65 mph, 114 mph, and 125 mph<br>
+                            A) 65 is the only outlier.<br>
+                            B) 65 and 114 are both outliers, but 125 is not.<br>
+                            C) 65, 114, and 125 are all outliers.<br>
+                            D) None of the three speeds is an outlier.</p>
+                            
+                            <p class="font-bold text-accent">Answer: A) 65 is the only outlier.</p>
+                            <p class="text-sm mt-2"><strong>Logical Proof:</strong> Under standard statistical heuristics, an observation is an outlier if its Z-score exceeds +3 or falls below -3. <br>We compute \( z = (x - \mu) / \sigma \):</p>
+                            <ul class="list-disc pl-5 text-sm">
+                                <li>x = 65: \( z = (65 - 103) / 11 = -38 / 11 \approx -3.45 \). <strong>(Outlier: < -3)</strong></li>
+                                <li>x = 114: \( z = (114 - 103) / 11 = 11 / 11 = 1.0 \). (Normal)</li>
+                                <li>x = 125: \( z = (125 - 103) / 11 = 22 / 11 = 2.0 \). (Normal)</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 8</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">The amount spent on textbooks for the fall term was recorded for a sample of five hundred university students. It was determined that the 75th percentile was the value $500. Which of the following interpretations of the 75th percentile is correct?<br>
+                            A) The average of the 500 textbook costs was $500.<br>
+                            B) 75% of the students sampled had textbook costs that exceeded $500.<br>
+                            C) 75% of the students sampled had textbook costs equal to $500.<br>
+                            D) 25% of the students sampled had textbook costs that exceeded $500.</p>
+                            
+                            <p class="font-bold text-accent">Answer: D) 25% of the students sampled had textbook costs that exceeded $500.</p>
+                            <p class="text-sm mt-2"><strong>Logical Proof:</strong> The 75th percentile dictates that 75% of the data array is situated <em>below or at</em> the target value ($500). Subtracting this from the absolute total (100%), the remaining 25% of observations must reside <em>above</em> the threshold.</p>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 9</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">Test scores for a history class had a mean of 79 with a standard deviation of 4.5. Test scores for a physics class had a mean of 69 with a standard deviation of 3.7. One student earned a 58 on the history test and a 92 on the physics test. Calculate the z-score for each test. On which test did the student perform better?</p>
+                            
+                            <p class="font-bold text-accent">Answer Calculation & Conclusion:</p>
+                            <ul class="list-none text-sm mt-2 space-y-2">
+                                <li><strong>History Z-score:</strong> \( z = (58 - 79) / 4.5 = -21 / 4.5 \approx -4.67 \)</li>
+                                <li><strong>Physics Z-score:</strong> \( z = (92 - 69) / 3.7 = 23 / 3.7 \approx +6.22 \)</li>
+                                <li class="pt-2"><strong>Conclusion:</strong> The student performed vastly better on the <strong>Physics test</strong>. Z-scores measure relative standing. A +6.22 signifies performance more than 6 standard deviations above the mean (extraordinarily high relative to peers), while a -4.67 represents failure drastically below the class average.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 10</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">Many firms use on-the-job training to teach their employees computer programming. Suppose you work in the personnel department of a firm that just finished training a group of its employees to program, and you have been requested to review the performance of one of the trainees on the final test that was given to all trainees. The mean and standard deviation of the test scores are 74 and 5, respectively. Assuming nothing is known about the distribution, what percentage of test-takers scored above 89?<br>
+                            A) at most 11%<br>
+                            B) at least 89%<br>
+                            C) approximately 0.15%<br>
+                            D) approximately 99.85%</p>
+                            
+                            <p class="font-bold text-accent">Answer: A) at most 11%</p>
+                            <p class="text-sm mt-2"><strong>Logical Proof (The Trap executed):</strong> The clause "assuming nothing is known about the distribution" strictly mandates the use of <strong>Chebyshev's Theorem</strong>, disabling the Empirical Rule. <br>
+                            1. Calculate standard deviations from mean: \( k = (89 - 74) / 5 = 3 \).<br>
+                            2. Chebyshev states that <em>at least</em> \( 1 - (1/3^2) = 1 - 1/9 = 8/9 \approx 88.89\% \) of data falls <em>inside</em> \(\pm 3\) standard deviations (between 59 and 89).<br>
+                            3. Consequently, the maximum proportion of data falling <em>outside</em> this boundary (both above 89 and below 59) is \(1/9 \approx 11.11\%\).<br>
+                            Since scores "above 89" represent only one side of this extreme outer region, it must be bounded by the maximum total outer capacity. Therefore, at most 11% scored above 89. (Note: option C is a trap for students erroneously applying the Empirical Rule).</p>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6 border-l-4 border-l-accent">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 11 (Covariance)</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">A software engineer plots the number of gigabytes written to an SSD per day (X) against the remaining lifespan percentage of the drive (Y). Upon calculating the Pearson Correlation Coefficient, they receive a value of \( r = -0.92 \). Which of the following conclusions is mathematically sound?<br>
+                            A) Writing more data strictly causes the SSD lifespan to decrease.<br>
+                            B) There is a strong negative linear correlation between data written and lifespan.<br>
+                            C) The variance of the lifespan data is 0.92.<br>
+                            D) There is virtually no linear relationship between the variables.</p>
+                            
+                            <details class="group mt-4 cursor-pointer">
+                                <summary class="font-bold text-slate-700 bg-slate-200 hover:bg-slate-300 p-2 rounded select-none transition-colors shadow-sm inline-block">
+                                    👁️ Reveal Answer & Proof
+                                </summary>
+                                <div class="mt-3 p-4 bg-slate-100 rounded border border-slate-200">
+                                    <p class="font-bold text-accent">Answer: B) There is a strong negative linear correlation between data written and lifespan.</p>
+                                    <p class="text-sm mt-2"><strong>Logical Proof:</strong> The correlation coefficient \(r\) measures the <span class="bg-yellow-200 text-yellow-900 font-semibold px-1 rounded">strength and direction</span> of a linear relationship, scaling from -1 to 1. A value of -0.92 is extremely close to -1, indicating a <span class="bg-yellow-200 text-yellow-900 font-semibold px-1 rounded">strong negative linear correlation</span> (as X increases, Y linearly decreases). Option A is the classic trap: <span class="bg-yellow-200 text-yellow-900 font-semibold px-1 rounded">correlation alone does not mathematically prove causation</span>. Option C misidentifies \(r\) as variance.</p>
+                                </div>
+                            </details>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6 border-l-4 border-red-400 opacity-75">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 12 (Conditional Probability) <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide ml-2 inline-block border border-red-200"><i class="fas fa-exclamation-triangle mr-1"></i> Not on Midterm</span></h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">An intrusion detection system (IDS) flags network anomalies. Let Event A be "The network is actually under attack." Let Event B be "The IDS sounds an alarm." If the system has a known false-positive rate, which probabilistic statement strictly calculates the probability that an alarm sounds, GIVEN that the network is under attack?<br>
+                            A) \(P(A \cap B)\)<br>
+                            B) \(P(A \cup B)\)<br>
+                            C) \(P(B | A)\)<br>
+                            D) \(P(A | B)\)</p>
+                            
+                            <details class="group mt-4 cursor-pointer">
+                                <summary class="font-bold text-slate-700 bg-slate-200 hover:bg-slate-300 p-2 rounded select-none transition-colors shadow-sm inline-block">
+                                    👁️ Reveal Answer & Proof
+                                </summary>
+                                <div class="mt-3 p-4 bg-slate-100 rounded border border-slate-200">
+                                    <p class="font-bold text-accent">Answer: C) P(B | A)</p>
+                                    <p class="text-sm mt-2"><strong>Logical Proof:</strong> The keyword "<span class="bg-yellow-200 text-yellow-900 font-semibold px-1 rounded">GIVEN</span>" triggers a <span class="bg-yellow-200 text-yellow-900 font-semibold px-1 rounded">Conditional Probability</span> structure. The condition that is known to have already occurred is placed to the right of the vertical bar. Since we know "the network is under attack" (Event A), A must be the given condition. We seek the probability of the alarm (Event B). Thus, it is written as \( P(B | A) \).</p>
+                                </div>
+                            </details>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6 border-l-4 border-l-accent">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 13 (Combinatorics)</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">A cloud architecture team has 12 distinct Amazon EC2 instances running. To test load balancing resilience, an automated script will randomly select 4 of these instances and shut them down simultaneously. How many different distinct failure states (groups of 4 downed instances) can the script generate?<br>
+                            A) 495<br>
+                            B) 11,880<br>
+                            C) 48<br>
+                            D) 20,736</p>
+                            
+                            <p class="font-bold text-accent">Answer: A) 495</p>
+                            <p class="text-sm mt-2"><strong>Logical Proof:</strong> Shutting down instances {A, B, C, D} results in the exact same system failure state as shutting down {D, B, A, C}. Because the <em>sequence or order of selection</em> does not matter, this is a <strong>Combination</strong> problem, not a Permutation.<br>
+                            \( _{12}C_4 = \frac{12!}{4!(12-4)!} = \frac{12 \times 11 \times 10 \times 9}{4 \times 3 \times 2 \times 1} = \frac{11,880}{24} = 495 \).</p>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6 border-l-4 border-l-accent">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 14 (Chart Analysis)</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">A data scientist tracks the daily CPU utilization percentages of a web server over the course of a year and plots it. She wants to visually confirm if CPU utilization spikes are correlated with the time of day. Which graphical technique should she employ to best visualize this temporal relationship?<br>
+                            A) Pareto Chart<br>
+                            B) Pie Chart<br>
+                            C) Time Series Graph<br>
+                            D) Single-Variable Histogram</p>
+                            
+                            <p class="font-bold text-accent">Answer: C) Time Series Graph</p>
+                            <p class="text-sm mt-2"><strong>Logical Proof:</strong> Time Series graphs are specifically designed for bivariate data where one variable is strictly time (chronological). A Histogram or Pie chart would aggregate the data, completely destroying the chronological sequence and hiding any temporal correlation.</p>
+                        </div>
+
+                        <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mt-6 border-l-4 border-l-accent">
+                            <h4 class="font-bold text-slate-800 mb-2">Question 15 (Sampling Bias)</h4>
+                            <p class="mb-4 text-sm bg-white p-3 rounded border">To determine the average RAM consumption of an IDE, developers insert a telemetry script that triggers only when the software crashes. The collected data is used to estimate the memory usage across the entire user base. Which critical statistical flaw is present in this study?<br>
+                            A) The sample size is inherently quantitative.<br>
+                            B) Selection Bias; the sample is not representative of the population.<br>
+                            C) The parameter is less than the statistic.<br>
+                            D) It fails to use a stem-and-leaf plot.</p>
+                            
+                            <p class="font-bold text-accent">Answer: B) Selection Bias; the sample is not representative of the population.</p>
+                            <p class="text-sm mt-2"><strong>Logical Proof:</strong> The Target Population is "the entire user base." However, the sampling mechanism exclusively captures data from users who experience crashes (a polarized subset). Since crashes are often caused by memory leaks, this sample will artificially inflate the calculated mean RAM consumption statistic, rendering it invalid for generalizing the true system parameter.</p>
+                        </div>
+
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            mobileBtn.addEventListener('click', () => sidebar.classList.toggle('-translate-x-full'));
+        });
+    </script>
+</body>
+</html>
