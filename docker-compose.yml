@@ -6,7 +6,9 @@ services:
         ENV: development
         VITE_GEMINI_API_KEY: ${VITE_GEMINI_API_KEY}
     ports:
-      - "8080:80"
+      - "${HOST_PORT:-18080}:80"
+    environment:
+      CLIENT_URL: "http://localhost:${HOST_PORT:-18080}"
     env_file: .env.development
     depends_on:
       - ai-slop

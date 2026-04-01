@@ -46,20 +46,20 @@ Live demo: [adorio.space](https://www.adorio.space)
 ### Frontend:
 
 ```bash
-pnpm install
-pnpm run dev
+bun install
+bun run dev
 # Build for production
-pnpm run build
-# Build + deploy
-pnpm run smt
+bun run build
+# Reset all local installs
+bun run deps:reset
 ```
 
 ### Backend:
 
 ```bash
 cd backend
-pnpm install
-npm run dev
+bun install
+bun run dev
 ```
 
 ## Environment Variables

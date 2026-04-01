@@ -5,14 +5,16 @@ const timeoutMs = Number(process.argv[3] || 120000);
 const intervalMs = Number(process.argv[4] || 1000);
 
 if (!targetUrl) {
-  console.error('Usage: node scripts/wait-for-url.cjs <url> [timeoutMs] [intervalMs]');
+  console.error(
+    "Usage: bun scripts/wait-for-url.cjs <url> [timeoutMs] [intervalMs]",
+  );
   process.exit(1);
 }
 
 const startedAt = Date.now();
 
 async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function probe(url) {
