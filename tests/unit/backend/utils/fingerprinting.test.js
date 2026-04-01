@@ -61,8 +61,16 @@ describe("fingerprinting helpers", () => {
   });
 
   test("createStableVisitorId changes when inputs change", () => {
-    const first = createStableVisitorId("cookie-a", "fingerprint-a", "127.0.0.1");
-    const second = createStableVisitorId("cookie-a", "fingerprint-b", "127.0.0.1");
+    const first = createStableVisitorId(
+      "cookie-a",
+      "fingerprint-a",
+      "127.0.0.1",
+    );
+    const second = createStableVisitorId(
+      "cookie-a",
+      "fingerprint-b",
+      "127.0.0.1",
+    );
 
     expect(first).not.toBe(second);
     expect(first).toHaveLength(16);

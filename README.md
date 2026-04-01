@@ -1,5 +1,3 @@
-<!-- cspell:ignore Adorio adorio -->
-
 # Adorio
 
 A portfolio site and showcase of different project collections and a place to host my works and make tools I need for myself and my friends

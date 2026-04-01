@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { validateFingerprint, validateVisitorId } from "../../../../backend/utils/monitoring.js";
+import {
+  validateFingerprint,
+  validateVisitorId,
+} from "../../../../backend/utils/monitoring.js";
 
 describe("analytics validation helpers", () => {
   test("validateVisitorId rejects malformed ids", () => {

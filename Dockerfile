@@ -1,5 +1,4 @@
 FROM oven/bun:1.3.11-alpine AS build-adorio
-# cspell:ignore adorio VITE gemini newkey keyout nosniff
 
 WORKDIR /adorio
 # install deps before copying full source to keep layer cache valid

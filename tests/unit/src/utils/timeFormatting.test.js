@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { formatCompactNumber, formatDuration } from "../../../../src/utils/timeFormatting";
+import {
+  formatCompactNumber,
+  formatDuration,
+} from "../../../../src/utils/timeFormatting";
 
 describe("time formatting helpers", () => {
   test("formatDuration handles invalid and short durations", () => {

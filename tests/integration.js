@@ -3,8 +3,6 @@ import puppeteer from "puppeteer";
 import { execSync } from "node:child_process";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 
-// cspell:ignore adorio domcontentloaded
-
 const safeExec = (command) => {
   try {
     return execSync(command, {
@@ -51,6 +49,13 @@ const shouldStubRequest = (requestUrl) => {
     return false;
   }
 };
+
+const ignoredConsoleErrorPatterns = [
+  /^Failed to load resource: net::ERR_NETWORK_CHANGED$/i,
+];
+
+const isIgnoredConsoleError = (message) =>
+  ignoredConsoleErrorPatterns.some((pattern) => pattern.test(message));
 
 const stubNonCriticalRequests = async (page) => {
   await page.setRequestInterception(true);
@@ -124,6 +129,8 @@ describe("Adorio Integration Tests", () => {
     baseUrl = process.env.TEST_TARGET_URL || `http://localhost:${hostPort}`;
     console.log(`Waiting for backend at ${baseUrl}...`);
     await waitForBackend(baseUrl);
+    console.log("Waiting for network to settle...");
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     try {
       const response = await axios.get(`${baseUrl}/api/test-env`);
@@ -168,15 +175,26 @@ describe("Adorio Integration Tests", () => {
       consoleErrors.push(err.toString());
     });
 
-    await page.goto(baseUrl, { waitUntil: "networkidle0" });
+    await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+
+    await page.waitForSelector(".ts-left-sidebar h1", { visible: true });
+
+    const profileName = await page.$eval(".ts-left-sidebar h1", (element) =>
+      element.textContent.trim(),
+    );
+    expect(profileName).toBe("Oakar Oo");
 
     const title = await page.title();
     expect(title.length).toBeGreaterThan(0);
 
-    if (consoleErrors.length > 0) {
-      console.error("Frontend Console Errors:", consoleErrors);
+    const filteredConsoleErrors = consoleErrors.filter(
+      (message) => !isIgnoredConsoleError(message),
+    );
+
+    if (filteredConsoleErrors.length > 0) {
+      console.error("Frontend Console Errors:", filteredConsoleErrors);
     }
-    expect(consoleErrors).toEqual([]);
+    expect(filteredConsoleErrors).toEqual([]);
 
     const apiOk = await page.evaluate(async () => {
       try {
@@ -208,6 +226,8 @@ describe("Adorio Integration Tests", () => {
     const response = await page.goto(`${baseUrl}/cao/`, {
       waitUntil: "domcontentloaded",
     });
+
+    await page.waitForSelector("body", { visible: true });
 
     expect(response.status()).toBe(200);
     const currentUrl = page.url();
