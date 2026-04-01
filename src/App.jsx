@@ -124,10 +124,7 @@ const App = () => {
     <ErrorBoundary>
       <div className={darkMode ? "dark" : ""}>
         <Router>
-          <AppShell
-            darkMode={darkMode}
-            setDarkMode={setDarkMode}
-          />
+          <AppShell darkMode={darkMode} setDarkMode={setDarkMode} />
         </Router>
       </div>
     </ErrorBoundary>
