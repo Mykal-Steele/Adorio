@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import PropTypes from "prop-types";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
   useLocation,
 } from "react-router-dom";
 
@@ -33,7 +32,11 @@ const ExternalRedirect = ({ to }) => {
   return null;
 };
 
-const AppShell = ({ darkMode, setDarkMode, token }) => {
+ExternalRedirect.propTypes = {
+  to: PropTypes.string.isRequired,
+};
+
+const AppShell = ({ darkMode, setDarkMode }) => {
   usePageTracking();
   const location = useLocation();
 
@@ -97,10 +100,14 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
   );
 };
 
+AppShell.propTypes = {
+  darkMode: PropTypes.bool.isRequired,
+  setDarkMode: PropTypes.func.isRequired,
+};
+
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
   const isLoading = useAuthBootstrap();
-  const { token } = useSelector((state) => state.user);
 
   if (isLoading) {
     return (
@@ -120,7 +127,6 @@ const App = () => {
           <AppShell
             darkMode={darkMode}
             setDarkMode={setDarkMode}
-            token={token}
           />
         </Router>
       </div>

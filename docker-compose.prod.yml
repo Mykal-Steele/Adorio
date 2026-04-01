@@ -2,11 +2,17 @@ services:
   frontend:
     build:
       context: .
+      target: frontend
       args:
         ENV: production
         VITE_GEMINI_API_KEY: ${VITE_GEMINI_API_KEY}
     ports:
-      - "${HOST_PORT:-18080}:80"
-    environment:
-      CLIENT_URL: "http://localhost:${HOST_PORT:-18080}"
+      - "${HOST_PORT:-8080}:8080"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: .
+      target: backend
     env_file: .env.production

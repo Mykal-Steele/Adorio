@@ -1,7 +1,43 @@
 const { spawnSync } = require("node:child_process");
+const net = require("node:net");
 
 const mode = process.argv[2] || "dev";
-const hostPort = process.env.HOST_PORT || "18080";
+
+const isPortFree = (port) =>
+  new Promise((resolve) => {
+    const server = net.createServer();
+
+    server.once("error", (error) => {
+      if (error.code === "EADDRINUSE") {
+        resolve(false);
+        return;
+      }
+      resolve(false);
+    });
+
+    server.once("listening", () => {
+      server.close(() => resolve(true));
+    });
+
+    server.listen(port, "0.0.0.0");
+  });
+
+const resolveHostPort = async () => {
+  if (process.env.HOST_PORT) {
+    return process.env.HOST_PORT;
+  }
+
+  const candidatePorts = [8080, 18080, 38080];
+  for (const port of candidatePorts) {
+    if (await isPortFree(port)) {
+      return String(port);
+    }
+  }
+
+  throw new Error(
+    "No free host port found. Set HOST_PORT to an available port and retry.",
+  );
+};
 
 const configByMode = {
   dev: {
@@ -29,15 +65,12 @@ const run = (command, args, options = {}) => {
   });
 
   if (result.status !== 0 && !options.allowFailure) {
-    process.exit(result.status || 1);
+    const error = new Error(`Command failed: ${command} ${args.join(" ")}`);
+    error.exitCode = result.status || 1;
+    throw error;
   }
 
   return result.status || 0;
-};
-
-const env = {
-  ...process.env,
-  HOST_PORT: hostPort,
 };
 
 const downArgs = [
@@ -68,17 +101,79 @@ const upArgs = [
   "--remove-orphans",
 ];
 
-try {
-  run("bun", ["run", "docker:preflight"]);
+let testError;
+let cleanupRan = false;
+
+const cleanupCompose = (env) => {
+  if (cleanupRan || !env) {
+    return;
+  }
+
+  cleanupRan = true;
   run("docker", downWithEnvArgs, { env, allowFailure: true });
-  run("docker", upArgs, { env });
-  run("bun", [
-    "scripts/wait-for-url.cjs",
-    `http://localhost:${hostPort}/api/health`,
-    config.waitTimeoutMs,
-    "1000",
-  ]);
-  run("bun", ["run", "test:integration"], { env });
-} finally {
-  run("docker", downWithEnvArgs, { env, allowFailure: true });
-}
+};
+
+const registerCleanupHandlers = (env) => {
+  const onSignal = (signal) => {
+    cleanupCompose(env);
+    process.exit(1);
+  };
+
+  process.once("SIGINT", () => onSignal("SIGINT"));
+  process.once("SIGTERM", () => onSignal("SIGTERM"));
+
+  process.once("uncaughtException", (error) => {
+    cleanupCompose(env);
+    throw error;
+  });
+
+  process.once("unhandledRejection", (reason) => {
+    cleanupCompose(env);
+    throw reason;
+  });
+};
+
+const main = async () => {
+  const hostPort = await resolveHostPort();
+  const env = {
+    ...process.env,
+    HOST_PORT: hostPort,
+  };
+
+  registerCleanupHandlers(env);
+
+  console.log(`Using HOST_PORT=${hostPort}`);
+
+  try {
+    run("bun", ["run", "docker:preflight"]);
+    run("docker", downWithEnvArgs, { env, allowFailure: true });
+    run("docker", upArgs, { env });
+    run("bun", [
+      "scripts/wait-for-url.cjs",
+      `http://localhost:${hostPort}/api/health`,
+      config.waitTimeoutMs,
+      "1000",
+    ]);
+    run(
+      "bun",
+      ["test", "--timeout", "240000", "./tests/integration.js"],
+      {
+        env,
+      },
+    );
+  } catch (error) {
+    testError = error;
+  } finally {
+    cleanupCompose(env);
+  }
+
+  if (testError) {
+    console.error(testError.message);
+    process.exitCode = testError.exitCode || 1;
+  }
+};
+
+main().catch((error) => {
+  console.error(error.message);
+  process.exitCode = 1;
+});

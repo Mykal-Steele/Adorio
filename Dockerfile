@@ -23,40 +23,35 @@ RUN bun install --frozen-lockfile
 COPY ./ai-slop/AI-Slop-For-CAO-exam ./
 RUN bun run build
 
-# Final runtime image
-FROM oven/bun:1.3.11-alpine
+# Frontend runtime target (nginx only)
+FROM nginx:alpine AS frontend
 
-# Nginx + openssl for static delivery + optional local cert fallback
-RUN apk add --no-cache nginx openssl
+RUN addgroup -S adorio && adduser -S -G adorio adorio
 
-# Deploy content into Nginx web root:
-COPY --from=build-adorio /adorio/dist /usr/share/nginx/html/
-COPY --from=build-ai-slop /ai-slop/dist /usr/share/nginx/html/cao/
+COPY --from=build-adorio --chown=adorio:adorio /adorio/dist /usr/share/nginx/html/
+COPY --from=build-ai-slop --chown=adorio:adorio /ai-slop/dist /usr/share/nginx/html/cao/
 
-# Backend service lives in /app
-COPY ./backend /app
-WORKDIR /app
-RUN bun install --production --frozen-lockfile
-
-# Use runtime nginx config path from `ENV` build arg
 ARG ENV=production
 COPY nginx.${ENV}.conf /etc/nginx/nginx.conf
 
-# Prevent runtime failure when certs are not mounted (local / edge fallback)
-RUN mkdir -p /etc/nginx/ssl && \
-  openssl req -x509 -nodes -newkey rsa:2048 \
-  -keyout /etc/nginx/ssl/adorio.space.key \
-  -out /etc/nginx/ssl/adorio.space.pem \
-  -subj "/CN=localhost" \
-  -days 3650
+RUN mkdir -p /run/nginx /var/cache/nginx /var/log/nginx && \
+  chown -R adorio:adorio /run/nginx /var/cache/nginx /var/log/nginx /etc/nginx /usr/share/nginx/html
 
-# backend listens on 3000 
+EXPOSE 8080
+USER adorio
+CMD ["nginx", "-g", "daemon off;"]
+
+# Backend runtime target (bun only)
+FROM oven/bun:1.3.11-alpine AS backend
+
+RUN addgroup -S adorio && adduser -S -G adorio adorio
+
+COPY --chown=adorio:adorio ./backend /app
+WORKDIR /app
+RUN bun install --production --frozen-lockfile
+
 ENV PORT=3000
 
-# Start backend + nginx in same container
-RUN echo 'bun run start &' > /start.sh && \
-  echo 'nginx -g "daemon off;"' >> /start.sh && \
-  chmod +x /start.sh
-
-EXPOSE 80 443
-CMD ["/start.sh"]
+EXPOSE 3000
+USER adorio
+CMD ["bun", "run", "start"]
