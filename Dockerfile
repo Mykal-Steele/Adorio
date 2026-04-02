@@ -25,45 +25,32 @@ RUN npm ci
 COPY ./ai-slop/AI-Slop-For-CAO-exam ./
 RUN npm run build
 
-# Production stage
-FROM node:20-alpine
+# Install backend dependencies once and reuse in runtime image
+FROM node:20-alpine AS backend-deps
 
-# Install nginx and openssl for fallback self-signed cert generation
-RUN apk add --no-cache nginx openssl
+WORKDIR /app
+COPY ./backend/package*.json ./
+RUN npm ci --only=production
+
+# Final runtime image (frontend + backend)
+FROM node:20-alpine AS runtime
+
+RUN apk add --no-cache nginx
 
 COPY --from=build-adorio /adorio/dist /usr/share/nginx/html/
 COPY --from=build-ai-slop /ai-slop/dist /usr/share/nginx/html/cao/
 
-# Copy backend
-COPY ./backend /app
 WORKDIR /app
-RUN npm ci --only=production
+COPY ./backend ./
+COPY --from=backend-deps /app/node_modules ./node_modules
 
-# Copy nginx config
-ARG ENV=production
+ARG ENV=northflank
 COPY nginx.${ENV}.conf /etc/nginx/nginx.conf
 
-# Create SSL directory and generate fallback certs for environments
-# where deployment certificates are not mounted into the container.
-RUN mkdir -p /etc/nginx/ssl && \
-  openssl req -x509 -nodes -newkey rsa:2048 \
-  -keyout /etc/nginx/ssl/adorio.space.key \
-  -out /etc/nginx/ssl/adorio.space.pem \
-  -subj "/CN=localhost" \
-  -days 3650
-
-# Set backend port
 ENV PORT=3000
 
-# Create start script
-RUN if [ "$ENV" = "production" ] || [ "$ENV" = "development" ]; then \
-  echo 'npm start &' > /start.sh; \
-  else \
-  echo '' > /start.sh; \
-  fi && \
-  echo 'nginx -g "daemon off;"' >> /start.sh && \
-  chmod +x /start.sh
+RUN printf '%s\n' '#!/bin/sh' 'set -e' 'npm start &' 'exec nginx -g "daemon off;"' > /start.sh && chmod +x /start.sh
 
-EXPOSE 80 443
+EXPOSE 8080
 
 CMD ["/start.sh"]
