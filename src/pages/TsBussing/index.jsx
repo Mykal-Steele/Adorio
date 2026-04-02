@@ -26,13 +26,13 @@ const TsBussing = () => {
       <LeftSidebar />
 
       {/* Main Content */}
-      <main className="h-auto overflow-visible overflow-x-hidden relative z-10 md:row-span-2 md:col-start-2 custom-scrollbar ts-main-content">
+      <div className="h-auto overflow-visible overflow-x-hidden relative z-10 md:row-span-2 md:col-start-2 custom-scrollbar ts-main-content">
         <div className="relative z-10 max-w-4xl mx-auto pt-12 pb-24 px-4 md:px-12">
           <div className="mb-10 text-center md:text-left md:pl-4">
             <h2 className="text-4xl md:text-[340%] font-main font-bold mt-4 text-amber-100 drop-shadow-[0_4px_0_rgba(0,0,0,1)]">
               Projects
             </h2>
-            <p className=" mt-3 font-main  text-amber-400/80 text-s tracking-wide">
+            <p className=" mt-3 font-main  text-amber-400/80 text-sm tracking-wide">
               Social is live. Other cards are demos.
             </p>
           </div>
@@ -61,7 +61,7 @@ const TsBussing = () => {
 
       {/* Right Sidebar */}
       <RightSidebar />
-    </main>
+    </div>
   );
 };
 
