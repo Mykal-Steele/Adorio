@@ -78,7 +78,9 @@ const waitForBackend = async (url, retries = 30, interval = 2000) => {
 
   for (let i = 0; i < retries; i++) {
     try {
-      const response = await axios.get(`${url}/api/health`);
+      const response = await axios.get(`${url}/api/health`, {
+        timeout: 5000,
+      });
       if (response.status === 200) return true;
     } catch (err) {
       lastErrorMessage = err?.message || "Unknown request error";
@@ -97,7 +99,9 @@ const getWithRetry = async (url, retries = 5, interval = 1000) => {
 
   for (let i = 0; i < retries; i++) {
     try {
-      return await axios.get(url);
+      return await axios.get(url, {
+        timeout: Math.max(1000, Math.min(interval - 100, 5000)),
+      });
     } catch (error) {
       lastError = error;
       await new Promise((resolve) => setTimeout(resolve, interval));

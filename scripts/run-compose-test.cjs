@@ -138,6 +138,7 @@ const main = async () => {
   const env = {
     ...process.env,
     HOST_PORT: hostPort,
+    ENABLE_TEST_ENDPOINT: "true",
   };
 
   registerCleanupHandlers(env);

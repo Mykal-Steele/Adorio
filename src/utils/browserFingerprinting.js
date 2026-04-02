@@ -360,11 +360,23 @@ export const generateBrowserFingerprint = async () => {
 };
 
 export const generateSessionId = () => {
-  let sessionId = sessionStorage.getItem("adorio_session_id");
+  let sessionId;
+
+  try {
+    sessionId = sessionStorage.getItem("adorio_session_id");
+  } catch (error) {
+    // Storage unavailable in restricted contexts (private browsing, iframes, etc.)
+    sessionId = null;
+  }
 
   if (!sessionId) {
     sessionId = `${Date.now()}-${Math.random().toString(36).substring(2)}`;
-    sessionStorage.setItem("adorio_session_id", sessionId);
+
+    try {
+      sessionStorage.setItem("adorio_session_id", sessionId);
+    } catch (error) {
+      // Storage write failed; continue with in-memory sessionId
+    }
   }
 
   return sessionId;
