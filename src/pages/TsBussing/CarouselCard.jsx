@@ -32,7 +32,7 @@ const CarouselCard = React.memo(({ card }) => (
       <div className="relative aspect-[4/3] overflow-hidden rounded bg-black/50 border border-green-800/50">
         <img
           src={card.image}
-          alt={card.alt || card.title}
+          alt={card.alt || card.title || ""}
           loading="lazy"
           className="object-cover w-full h-full transition-all duration-500 group-hover:scale-110 mix-blend-luminosity group-hover:mix-blend-normal opacity-70 group-hover:opacity-90"
           style={{
