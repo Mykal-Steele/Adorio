@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>OS Exam II: Exhaustive Quiz</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .option-card { transition: all 0.2s ease; }
+        .option-card:active { transform: scale(0.98); }
+        
+        /* Custom Scrollbar for review mode */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+    </head>
+    <body
+        class="bg-slate-100 text-slate-800 min-h-screen font-sans selection:bg-blue-200 selection:text-blue-900">
+
+        <div id="app"
+            class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 min-h-screen flex flex-col">
+            <!-- Content will be dynamically injected here via JavaScript -->
+        </div>
+
+        <script>
+        function randomizeQuizOptions(data) {
+            data.forEach(question => {
+                const options = question.options;
+
+                // Fisher-Yates shuffle
+                for (let i = options.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [options[i], options[j]] = [options[j], options[i]];
+                }
+            });
+
+            return data;
+        }
+
+        // --- 1. QUIZ DATA (All 51 Exhaustive Questions) ---
+       const quizData = [
+    {
+        id: 1,
+        text: "According to the 'Checkbox Rule' grading scheme for this exam, which of the following outcomes will result in ZERO points for a question?",
+        isMultiSelect: true,
+        options: [
+            { text: "Selecting 1 correct option and 1 incorrect option.", isCorrect: true },
+            { text: "Selecting exactly all the correct options and nothing else.", isCorrect: false },
+            { text: "Selecting all 3 correct options, plus 1 incorrect option.", isCorrect: true },
+            { text: "Selecting 2 out of 3 correct options, with no incorrect options selected.", isCorrect: false }
+        ]
+    },
+    {
+        id: 2,
+        text: "Trace the 'Grand Storyline' of a system overload. Which sequence accurately describes the cascading failure starting from the process scheduler down to the physical disk?",
+        isMultiSelect: false,
+        options: [
+            { text: "Race condition -> Deadlock -> TLB Flush -> Frame fighting -> Hard Drive Thrashing -> MMU halts translation -> Complete System Failure", isCorrect: false },
+            { text: "Hard Drive Thrashing -> MMU flushes TLB -> Context Switch -> CPU utilization drops -> Deadlock -> User intervention required to kill processes", isCorrect: false },
+            { text: "High Page Faults -> Frame Fighting -> TLB Flush -> Hard Drive Thrashing -> CPU utilization drops -> Process scheduler invokes the Banker's Algorithm", isCorrect: false },
+            { text: "Context Switch -> MMU flushes TLB -> Too many processes load -> Frame fighting -> Page Faults skyrocket -> Hard Drive Thrashing -> CPU utilization drops", isCorrect: true }
+        ]
+    },
+    {
+        id: 3,
+        text: "What is the strict definition of a Race Condition?",
+        isMultiSelect: false,
+        options: [
+            { text: "When two or more distinct processes are completely deadlocked because they are waiting indefinitely for the exact same hardware resource.", isCorrect: false },
+            { text: "Concurrent access to shared data where the final outcome depends entirely on the execution order.", isCorrect: true },
+            { text: "When a highly critical, high-priority process is perpetually starved by a continuous stream of low-priority processes dominating the CPU scheduler.", isCorrect: false },
+            { text: "When a computer system actively thrashes because it spends significantly more time paging memory than actually executing useful application instructions.", isCorrect: false }
+        ]
+    },
+    {
+        id: 4,
+        text: "In high-level code, a statement like balance++ is not atomic. What are the actual machine-level steps where an interruption could cause data corruption?",
+        isMultiSelect: true,
+        options: [
+            { text: "Add 1 to the register.", isCorrect: true },
+            { text: "Store the register value back to memory.", isCorrect: true },
+            { text: "Flush the TLB.", isCorrect: false },
+            { text: "Load the value from memory into a register.", isCorrect: true }
+        ]
+    },
+    {
+        id: 5,
+        text: "Which scenario accurately describes a violation of the 'Bounded Waiting' requirement for the Critical Section, even if 'Progress' is being met?",
+        isMultiSelect: false,
+        options: [
+            { text: "The system continuously allows Process A and Process B to alternate entering the critical section, but Process C has been waiting in line indefinitely and never gets a turn.", isCorrect: true },
+            { text: "No process is currently executing in the critical section, but two distinct processes are completely stuck in their remainder sections refusing to ever enter.", isCorrect: false },
+            { text: "Two concurrent processes are fundamentally deadlocked, so the overarching operating system forcefully halts and refuses to make any scheduling choices.", isCorrect: false },
+            { text: "A user process crashes unexpectedly while deep inside the critical section, leaving the lock engaged and permanently locking every other process out of the resource.", isCorrect: false }
+        ]
+    },
+    {
+        id: 6,
+        text: "Why is the 'brute force' legacy fix of simply disabling timer interrupts an unacceptable solution for modern process synchronization?",
+        isMultiSelect: true,
+        options: [
+            { text: "Multi-core failure: Disabling interrupts on Core 1 does not stop processes executing concurrently on Core 2.", isCorrect: true },
+            { text: "Trust problem: A malicious program could enter a while(true); loop with interrupts disabled, permanently freezing the entire system.", isCorrect: true },
+            { text: "It causes an automatic and unrecoverable flush of the Translation Lookaside Buffer (TLB) across all processing cores.", isCorrect: false },
+            { text: "Clock drift: The system clock relies on timer interrupts to maintain the correct time.", isCorrect: true }
+        ]
+    },
+    {
+        id: 7,
+        text: "Which of the following best describes the purpose of a 'Memory Barrier' (or Fence) at the hardware level?",
+        isMultiSelect: false,
+        options: [
+            { text: "It rapidly evaluates complex 'If X, change to Y, else do nothing' conditional logic in exactly a single indivisible clock cycle.", isCorrect: false },
+            { text: "It strictly prevents a running user process from accidentally or maliciously accessing memory locations residing outside its designated Base and Limit registers.", isCorrect: false },
+            { text: "It directly tests a shared boolean variable's state in memory and simultaneously sets it to true to prevent condition race scenarios.", isCorrect: false },
+            { text: "It forces the CPU to execute reads and writes strictly in order, counteracting modern CPUs' tendency to aggressively reorder instructions.", isCorrect: true }
+        ]
+    },
+    {
+        id: 8,
+        text: "Regarding Peterson's Solution, which of the following statements are TRUE?",
+        isMultiSelect: true,
+        options: [
+            { 
+  text: "If Process A sets its intent flag to true and then crashes before clearing it, Process B will evaluate the while-loop and spin forever, resulting in a liveness failure (starvation).", 
+  isCorrect: true 
+},
+            { text: "It relies on an integer turn variable which serves as the ultimate tie-breaker.", isCorrect: true },
+            { text: "It can easily and safely scale to handle up to 10 concurrent processes without any significant degradation in performance or risk of race conditions.", isCorrect: false },
+            { text: "It requires memory barriers to function reliably on modern CPUs due to instruction reordering.", isCorrect: true },
+            { text: "It is mathematically proven to work perfectly on modern multi-core architectures without ever requiring any additional hardware support or specialized atomic instructions.", isCorrect: false }
+        ]
+    },
+    {
+        id: 9,
+        text: "Which of the following statements about Mutex Locks (Spinlocks) are accurate?",
+        isMultiSelect: true,
+        options: [
+            { text: "They waste 100% of CPU cycles while a process is busy-waiting in its while(!available) loop.", isCorrect: true },
+            { text: "They should NEVER be used on a single-core CPU because the spinning process will infinitely block the process that currently holds the lock.", isCorrect: true },
+            { text: "They utilize a dedicated wait queue system to gracefully put processes to sleep if the requested lock is currently unavailable.", isCorrect: false },
+            { text: "They are optimized for situations where the expected wait time is shorter than the time it takes to perform a context switch.", isCorrect: true }
+        ]
+    },
+    {
+        id: 10,
+        text: "If a Semaphore S currently has an internal integer value of -4, what does this specifically indicate?",
+        isMultiSelect: false,
+        options: [
+            { text: "The system has encountered a critical deadlock condition involving precisely 4 distinct user processes.", isCorrect: false },
+            { text: "There are exactly 4 processes currently asleep in the semaphore's waiting queue.", isCorrect: true },
+            { text: "There are exactly 4 instances of a hardware resource currently available for immediate allocation.", isCorrect: false },
+            { text: "The shared semaphore has been successfully signaled 4 times consecutively without being waited on.", isCorrect: false }
+        ]
+    },
+    {
+        id: 11,
+        text: "What is the fundamental 'Ownership Difference' between a Mutex and a Semaphore?",
+        isMultiSelect: false,
+        options: [
+            { text: "A Semaphore can only be heavily utilized by the OS kernel, while a Mutex is exclusively restricted to user processes operating in non-privileged rings.", isCorrect: false },
+            { text: "There is absolutely no functional or theoretical difference; they are implemented exactly the same way under the hood in all modern operating systems.", isCorrect: false },
+            { text: "A Mutex can be easily shared across a network interface, whereas a Semaphore is strictly localized to the system's physical RAM boundaries.", isCorrect: false },
+            { text: "A Mutex requires strict ownership (the thread that locks it MUST be the thread that unlocks it), whereas a Semaphore has no ownership (Thread A can wait, and Thread B can signal).", isCorrect: true }
+        ]
+    },
+    {
+        id: 12,
+        text: "In a Monitor, what happens if x.signal() is called on a condition variable, but NO processes are currently waiting in the queue for x?",
+        isMultiSelect: false,
+        options: [
+            { text: "The monitor unexpectedly crashes, dumps core memory, and forcefully throws an unhandled concurrency exception.", isCorrect: false },
+            { text: "The signal is securely remembered (like incrementing an integer), and the next process to call x.wait() will immediately pass through.", isCorrect: false },
+            { text: "The monitor intelligently and automatically converts the existing condition variable into a standard counting semaphore.", isCorrect: false },
+            { text: "The signal is lost forever.", isCorrect: true }
+        ]
+    },
+    {
+        id: 13,
+        text: "A system experiences a 'Priority Inversion' where a high-priority process is waiting on a lock held by a low-priority process, but a medium-priority process steals the CPU. What is the standard OS fix for this?",
+        isMultiSelect: false,
+        options: [
+            { text: "The Priority-Inheritance Protocol (the low-priority process temporarily inherits the high priority until it drops the lock).", isCorrect: true },
+            { text: "The Banker's Algorithm, which forces the medium-priority process to surrender its allocated resources.", isCorrect: false },
+            { text: "The Copy-on-Write (COW) mechanism, which duplicates the low-priority process so the lock can be released.", isCorrect: false },
+            { text: "Flushing the TLB and triggering a mandatory system-wide context switch to recalculate thread weights.", isCorrect: false }
+        ]
+    },
+    {
+        id: 14,
+        text: "In the Bounded-Buffer (Producer-Consumer) problem utilizing three semaphores (mutex, empty, full), what happens if the Producer accidentally swaps the order of its wait calls to wait(mutex) followed by wait(empty)?",
+        isMultiSelect: false,
+        options: [
+            { text: "Immediate Deadlock will occur if the buffer is currently full.", isCorrect: true },
+            { text: "The producer will unintentionally overwrite unread data before the consumer can access it.", isCorrect: false },
+            { text: "The program will compile perfectly but eventually suffer from severe external fragmentation.", isCorrect: false },
+            { text: "The consumer will accidentally read duplicate data entries from the buffer.", isCorrect: false }
+        ]
+    },
+    {
+        id: 15,
+        text: "What is the primary vulnerability (Trap) of the original 'First Readers-Writers Problem' algorithm?",
+        isMultiSelect: false,
+        options: [
+            { text: "It mistakenly allows multiple simultaneous writers to bypass the lock and enter the critical section.", isCorrect: false },
+            { text: "If two competing writers arrive simultaneously at the exact same clock cycle, they will irreparably corrupt the shared data.", isCorrect: false },
+            { text: "It heavily relies on unoptimized spinlocks, inevitably crashing any system that operates on a single-core processor.", isCorrect: false },
+            { text: "An endless stream of arriving readers can keep read_count > 0, holding the rw_mutex forever and causing Writer Starvation.", isCorrect: true }
+        ]
+    },
+    {
+        id: 16,
+        text: "In the Dining-Philosophers problem (5 philosophers, 5 chopsticks), a deadlock occurs if everyone grabs their left chopstick simultaneously. Which of the following are standard OS solutions to fix this?",
+        isMultiSelect: true,
+        options: [
+            { text: "Force philosophers to use an atomic pickup (pick up both chopsticks simultaneously or pick up none at all).", isCorrect: true },
+            { text: "Limit the room to a maximum of 4 philosophers.", isCorrect: true },
+            { text: "Provide an infinite, dynamic number of chopsticks allocated upon request by the OS.", isCorrect: false },
+            { text: "Use an asymmetric solution where odd philosophers pick up Left then Right, and even philosophers pick up Right then Left.", isCorrect: true }
+        ]
+    },
+    {
+        id: 17,
+        text: "Which of the following are considered alternative synchronization tools to locks and semaphores?",
+        isMultiSelect: true,
+        options: [
+            { text: "Memory Transactions (atomic { S } blocks where hardware guarantees a single read-write unit).", isCorrect: true },
+            { text: "Globally disabling all timer interrupts across every single core in a multi-core processor to physically prevent the OS scheduler from triggering context switches.", isCorrect: false },
+            { text: "Functional Programming languages (like Erlang/Scala) which use immutable variables, making race conditions mathematically impossible.", isCorrect: true },
+            { text: "OpenMP compiler directives (e.g., #pragma omp critical).", isCorrect: true }
+        ]
+    },
+    {
+        id: 18,
+        text: "Which of the following represent the 4 Necessary Conditions that MUST be present simultaneously for a deadlock to occur?",
+        isMultiSelect: true,
+        options: [
+            { text: "Circular Wait (closed chain of waiting processes).", isCorrect: true },
+            { text: "Preemption (OS can forcibly snatch resources at any time).", isCorrect: false },
+            { text: "No Preemption (OS cannot snatch resources; process must voluntarily release).", isCorrect: true },
+            { text: "Hold and Wait (process holds a resource, refuses to drop it, waits for another).", isCorrect: true },
+            { text: "Mutual Exclusion (at least one resource is non-sharable).", isCorrect: true }
+        ]
+    },
+    {
+        id: 19,
+        text: "Evaluate the following semaphore code for two processes:\nP0: wait(S1); wait(S2);\nP1: wait(S2); wait(S1);\nWhat happens if the OS scheduler performs a context switch immediately after P0 executes its first instruction and P1 executes its first instruction?",
+        isMultiSelect: false,
+        options: [
+            { text: "Priority Inversion", isCorrect: false },
+            { text: "Starvation", isCorrect: false },
+            { text: "Deadlock", isCorrect: true },
+            { text: "Race Condition", isCorrect: false }
+        ]
+    },
+    {
+        id: 20,
+        text: "When analyzing a Resource Allocation Graph (RAG), which of the following rules apply?",
+        isMultiSelect: true,
+        options: [
+            { text: "If there is a cycle involving only Single-Instance resources, deadlock is GUARANTEED.", isCorrect: true },
+            { text: "If there are no cycles, there is definitely no deadlock.", isCorrect: true },
+            { text: "If there is a cycle involving Multi-Instance resources, deadlock is mathematically impossible.", isCorrect: false },
+            { text: "If there is a cycle involving Multi-Instance resources, deadlock is POSSIBLE, but not guaranteed.", isCorrect: true }
+        ]
+    },
+    {
+        id: 21,
+        text: "Deadlock Prevention alters OS rules so one condition is physically impossible. Which of the following is the most practical way to break the 'Circular Wait' condition?",
+        isMultiSelect: false,
+        options: [
+            { text: "Strictly enforce the use of immutable variables for all shared memory segments.", isCorrect: false },
+            { text: "Assign unique integer IDs to all resources, and require processes to request resources in strictly increasing numerical order.", isCorrect: true },
+            { text: "Force all user processes to statically request and lock all necessary resources simultaneously during initial startup.", isCorrect: false },
+            { text: "Allow the OS to forcibly and randomly snatch heavily used resources from running processes at will.", isCorrect: false }
+        ]
+    },
+    {
+        id: 22,
+        text: "In the context of Deadlock Avoidance (Banker's Algorithm), what does an 'Unsafe State' actually mean?",
+        isMultiSelect: false,
+        options: [
+            { text: "The entire underlying system has experienced a kernel panic, crashed, and requires an immediate manual reboot.", isCorrect: false },
+            { text: "A user process has flagrantly attempted to access private memory located far outside its assigned limit register.", isCorrect: false },
+            { text: "A hard deadlock condition is demonstrably happening right now within the system's core architecture.", isCorrect: false },
+            { text: "The OS has lost the mathematical guarantee to prevent a deadlock if every process suddenly asks for its maximum remaining resources.", isCorrect: true }
+        ]
+    },
+    {
+        id: 23,
+        text: "Banker's Algorithm Calculation Lab: Thread T1 has a Max need of 5 instances of Resource X. It currently has an Allocation of 2 instances. How many instances does T1 Need, and what is the rule for T1 to be allowed to run?",
+        isMultiSelect: false,
+        options: [
+            { text: "Need = 3. It can run only if Need (3) is <= Available for EVERY SINGLE resource type.", isCorrect: true },
+            { text: "Need = 0. It can run immediately without checking the Available pool.", isCorrect: false },
+            { text: "Need = 7. It can run if Available <= 7.", isCorrect: false },
+            { text: "Need = 3. It can run immediately as long as Need (3) > Available.", isCorrect: false }
+        ]
+    },
+    {
+        id: 24,
+        text: "Banker's Resource-Request Algorithm: If a sudden request comes in from a thread, what are the temporary math adjustments the OS makes before re-running the Banker's simulation to check for safety?",
+        isMultiSelect: false,
+        options: [
+            { text: "Available + 1, Allocation + 1, Need - 1", isCorrect: false },
+            { text: "Need = Max - Allocation", isCorrect: false },
+            { text: "Available - 1, Allocation + 1, Need - 1", isCorrect: true },
+            { text: "Available + 1, Allocation - 1, Need + 1", isCorrect: false }
+        ]
+    },
+    {
+        id: 25,
+        text: "If deadlock prevention/avoidance is turned off, the OS must rely on Detection & Recovery via Preemption. What is the highly testable 'Trap' regarding Preemption?",
+        isMultiSelect: false,
+        options: [
+            { text: "The operating system will immediately and permanently delete the preempted process's execution code from the hard drive.", isCorrect: false },
+            { text: "Preemption mathematically requires exactly 3 dedicated counting semaphores to execute without causing an immediate fault.", isCorrect: false },
+            { text: "The OS must track rollback history; otherwise, the same low-priority process will be repeatedly chosen as the victim forever, resulting in Starvation.", isCorrect: true },
+            { text: "Executing a preemption routine forces the TLB to permanently lock, destroying subsequent address translations.", isCorrect: false }
+        ]
+    },
+    {
+        id: 26,
+        text: "Using the 'Chef Analogy' to describe the memory hierarchy, match the components correctly:",
+        isMultiSelect: false,
+        options: [
+            { text: "Registers = Hands, Cache = Cutting Board, RAM = Fridge, HDD = Supermarket", isCorrect: true },
+            { text: "Registers = Cutting Board, Cache = Hands, RAM = Supermarket, HDD = Fridge", isCorrect: false },
+            { text: "Registers = Fridge, Cache = Supermarket, RAM = Hands, HDD = Cutting Board", isCorrect: false },
+            { text: "Registers = Supermarket, Cache = Fridge, RAM = Cutting Board, HDD = Hands", isCorrect: false }
+        ]
+    },
+    {
+        id: 27,
+        text: "The Address Binding Lifecycle relies on different stages. Which of the following match the correct stage to its definition?",
+        isMultiSelect: true,
+        options: [
+            { text: "Load Time: Relocatable code; OS calculates physical address when loading into RAM.", isCorrect: true },
+            { text: "Execution Time: Absolute code generated directly by the C compiler.", isCorrect: false },
+            { text: "Compile Time: Absolute code (hardcoded physical address); requires recompile if moved.", isCorrect: true },
+            { text: "Execution Time (Modern): Delayed until exact millisecond code runs; requires the MMU (Physical = Logical + Relocation Register).", isCorrect: true }
+        ]
+    },
+    {
+        id: 28,
+        text: "What is the difference between Dynamic Loading and Dynamic Linking?",
+        isMultiSelect: false,
+        options: [
+            { text: "Dynamic Loading strictly requires the Banker's algorithm to ensure safety before allocating memory, while Dynamic Linking bypasses security checks to maximize the throughput of interconnected networks.", isCorrect: false },
+            { text: "Dynamic Loading loads routines only when explicitly called to save RAM; Dynamic Linking uses 'stubs' to share exactly ONE copy of a library (like printf) among many running programs.", isCorrect: true },
+            { text: "Dynamic Loading utilizes shared libraries (.dll) to merge multiple executables into one, whereas Dynamic Linking writes raw binary code directly to the hard drive to prevent memory leaks.", isCorrect: false },
+            { text: "They are effectively two different terminologies for the exact same underlying operating system process, developed independently by Microsoft and UNIX developers during the early 1990s.", isCorrect: false }
+        ]
+    },
+    {
+        id: 29,
+        text: "Contiguous Allocation Lab: You have a series of memory holes of the following sizes in order: [300KB, 600KB, 350KB, 200KB, 750KB, 125KB]. A new process arrives requiring 358KB. Where will the Best-Fit and Worst-Fit algorithms place this process, respectively?",
+        isMultiSelect: false,
+        options: [
+            { text: "Best-Fit: 600KB hole / Worst-Fit: 750KB hole", isCorrect: true },
+            { text: "Best-Fit: 750KB hole / Worst-Fit: 600KB hole", isCorrect: false },
+            { text: "Best-Fit: 350KB hole / Worst-Fit: 750KB hole", isCorrect: false },
+            { text: "Best-Fit: 600KB hole / Worst-Fit: 600KB hole", isCorrect: false }
+        ]
+    },
+    {
+        id: 30,
+        text: "Which memory management scheme completely solves the issue of External Fragmentation?",
+        isMultiSelect: false,
+        options: [
+            { text: "Disabling all hardware timer Interrupts to halt process swapping entirely.", isCorrect: false },
+            { text: "Contiguous Allocation utilizing the highly optimized Best-Fit scheduling algorithm.", isCorrect: false },
+            { text: "Paging (breaking physical memory into fixed-size frames and logical memory into pages)", isCorrect: true },
+            { text: "Swapping entire memory-heavy processes to mechanical magnetic tape drives.", isCorrect: false }
+        ]
+    },
+    {
+        id: 31,
+        text: "In Address Translation Math (Logical Address = Page Number p + Page Offset d), what happens to the Page Offset (d) during translation by the MMU?",
+        isMultiSelect: true,
+        options: [
+            { text: "It is subtracted from the Base Register.", isCorrect: false },
+            { text: "It is multiplied by the Limit Register.", isCorrect: false },
+            { text: "It NEVER changes during translation because a Page and a Frame are the exact same physical size.", isCorrect: true },
+            { text: "It is added directly to the page number to find the hit ratio.", isCorrect: false }
+        ]
+    },
+    {
+        id: 32,
+        text: "Address Translation Calculation Lab: If a logical address space has 64 pages (6 bits) and the page offset is 1024 words (10 bits), how large is the logical address?",
+        isMultiSelect: false,
+        options: [
+            { text: "60 bits", isCorrect: false },
+            { text: "16 bits", isCorrect: true },
+            { text: "1024 bits", isCorrect: false },
+            { text: "64 bits", isCorrect: false }
+        ]
+    },
+    {
+        id: 33,
+        text: "What is the specific hardware consequence to the TLB (Translation Lookaside Buffer) when the CPU performs a Context Switch?",
+        isMultiSelect: false,
+        options: [
+            { text: "The TLB automatically writes and copies its complete contents to the system hard drive.", isCorrect: false },
+            { text: "The TLB MUST be completely flushed/invalidated because the new process has a different page table.", isCorrect: true },
+            { text: "The internal physical size of the TLB is dynamically doubled to prevent impending page faults.", isCorrect: false },
+            { text: "The TLB is deeply compressed in real-time to aggressively save available physical RAM.", isCorrect: false }
+        ]
+    },
+    {
+        id: 34,
+        text: "Effective Access Time (EAT) Lab: Given a TLB lookup time of 20ns, a RAM access time of 100ns, and a TLB hit ratio of 80%. What is the EAT? (Hint: Remember a TLB miss requires 2 RAM accesses).",
+        isMultiSelect: false,
+        options: [
+            { text: "120ns", isCorrect: false },
+            { text: "140ns", isCorrect: true },
+            { text: "220ns", isCorrect: false },
+            { text: "100ns", isCorrect: false }
+        ]
+    },
+    {
+        id: 35,
+        text: "Regarding real-world Page Table Architectures, which of the following are TRUE?",
+        isMultiSelect: true,
+        options: [
+            { text: "ARMv8 architecture uses two levels of TLBs, where the inner level separates 'micro TLBs' for Data and Instructions.", isCorrect: true },
+            { text: "Intel x86-64 utilizes a 4-level hierarchical paging structure to implement 48-bit addressing, avoiding gigabyte-sized flat tables.", isCorrect: true },
+            { text: "Modern CPUs use contiguous memory allocation instead of page tables to increase speed.", isCorrect: false },
+            { text: "Inverted Page Tables have one entry per physical frame (using the Process ID) rather than one per logical page, saving massive space but resulting in slower lookups.", isCorrect: true }
+        ]
+    },
+    {
+        id: 36,
+        text: "What is the correct sequence of the 6 core steps of a Page Fault?",
+        isMultiSelect: true,
+        options: [
+            { text: "OS locates a free physical frame.", isCorrect: true },
+            { text: "MMU traps to OS (Page Fault).", isCorrect: true },
+            { text: "The CPU restarts the exact instruction that caused the trap.", isCorrect: true },
+            { text: "OS schedules a slow disk read to swap the page from disk to RAM.", isCorrect: true },
+            { text: "OS updates the page table Valid bit to 'v'.", isCorrect: true },
+            { text: "OS saves process context and checks if the memory request is valid.", isCorrect: true }
+        ]
+    },
+    {
+        id: 37,
+        text: "Page Fault EAT Math Lab: A system has a RAM access time of 200ns and a Page Fault processing time of 8,000,000ns. What is the maximum acceptable page fault probability (p) if we want the Effective Access Time (EAT) to remain under 210ns?",
+        isMultiSelect: false,
+        options: [
+            { text: "p ≈ 0.05", isCorrect: false },
+            { text: "p ≈ 0.125", isCorrect: false },
+            { text: "p ≈ 0.0002", isCorrect: false },
+            { text: "p ≈ 0.00000125", isCorrect: true }
+        ]
+    },
+    {
+        id: 38,
+        text: "How does Copy-on-Write (COW) make process creation (fork()) nearly instantaneous?",
+        isMultiSelect: false,
+        options: [
+            { text: "It aggressively bypasses main memory and copies all parent process data directly into the L1 cache, prioritizing speed over capacity and risking cache eviction for other processes.", isCorrect: false },
+            { text: "The child process is mapped to the exact same physical memory frames as the parent; the OS only intercepts and makes a physical copy if one of the processes tries to WRITE/MODIFY that specific page.", isCorrect: true },
+            { text: "It transparently compresses the parent process's memory footprint and temporarily stores the entire compressed state inside the Translation Lookaside Buffer (TLB) until the child process terminates.", isCorrect: false },
+            { text: "It forces the CPU to completely turn off the MMU during process creation, ensuring that the new child process has exclusive access to the system's unmapped physical memory.", isCorrect: false }
+        ]
+    },
+    {
+        id: 39,
+        text: "Which of the following statements about Page Replacement Algorithms are TRUE?",
+        isMultiSelect: true,
+        options: [
+            { text: "Optimal (OPT) evicts the page that will not be used for the longest time in the future, making it impossible to implement in reality (used only for benchmarking).", isCorrect: true },
+            { text: "FIFO simply evicts the oldest page, resulting in poor performance.", isCorrect: true },
+            { text: "Belady's Anomaly proves that giving a system MORE frames will ALWAYS decrease the number of page faults.", isCorrect: false },
+            { text: "The Second-Chance (Clock) algorithm relies on a hardware reference bit; if 1, it is cleared to 0 and given a second chance before eviction.", isCorrect: true }
+        ]
+    },
+    {
+        id: 40,
+        text: "What is 'Belady's Anomaly' and which algorithm suffers from it?",
+        isMultiSelect: false,
+        options: [
+            { text: "The anomaly where TLB hits take significantly longer than TLB misses due to cache invalidation. Suffered by OPT.", isCorrect: false },
+            { text: "The anomaly where hardware memory barriers fail to prevent instruction reordering on multi-core CPUs. Suffered by Clock.", isCorrect: false },
+            { text: "The anomaly where giving the system MORE frames actually causes MORE page faults. Suffered by FIFO.", isCorrect: true },
+            { text: "The anomaly where higher priority processes execute slower than low-priority processes. Suffered by LRU.", isCorrect: false }
+        ]
+    },
+    {
+        id: 41,
+        text: "Page Replacement Trace Lab: Given the trace string [1, 2, 3, 4, 2, 1, 5, 6] and a physical memory of exactly 3 frames. When page 5 arrives, memory contains [4, 2, 1]. Which page is evicted by the LRU algorithm, and which is evicted by the FIFO algorithm?",
+        isMultiSelect: false,
+        options: [
+            { text: "LRU evicts 4; FIFO evicts 2", isCorrect: false },
+            { text: "LRU evicts 4; FIFO evicts 3", isCorrect: true },
+            { text: "LRU evicts 2; FIFO evicts 4", isCorrect: false },
+            { text: "LRU evicts 3; FIFO evicts 2", isCorrect: false }
+        ]
+    },
+    {
+        id: 42,
+        text: "How does modern Memory Compression (used in macOS/Windows 10) help avoid using the slow hard drive during high memory pressure?",
+        isMultiSelect: false,
+        options: [
+            { text: "It automatically and forcefully reduces the disk sector size formatting to mathematically pack more user data per physical platter.", isCorrect: false },
+            { text: "It forces the core CPU to continuously under-volt and run at a significantly lower clock speed to passively save power.", isCorrect: false },
+            { text: "It selectively deletes unused or older log files from the C: drive root directory to clear space for a larger pagefile.", isCorrect: false },
+            { text: "It takes (for example) 3 modified RAM frames, compresses them via software, and stores them in 1 RAM frame, instantly freeing up 2 frames without touching the disk.", isCorrect: true }
+        ]
+    },
+    {
+        id: 43,
+        text: "Trace the 'Death Spiral' of system Thrashing. Which sequence is correct?",
+        isMultiSelect: false,
+        options: [
+            { text: "CPU utilization hits 100% -> OS stops the disk drive -> running processes immediately crash -> MMU completely flushes all TLB entries.", isCorrect: false },
+            { text: "Extensive TLB misses -> OS permanently disables hardware interrupts -> Banker's algorithm automatically denies all incoming process memory requests.", isCorrect: false },
+            { text: "High faults -> processes block for disk I/O -> CPU utilization drops -> OS scheduler adds more processes to increase CPU util -> new processes steal more frames -> fault rate skyrockets -> system halt.", isCorrect: true },
+            { text: "Low faults -> Core CPU processing temperature gets dangerously hot -> OS drastically limits the number of running processes -> RAM empties out prematurely.", isCorrect: false }
+        ]
+    },
+    {
+        id: 44,
+        text: "According to the Working-Set Model, if the Total Demand (D, the sum of all working set sizes) is strictly greater than the total amount of Physical Memory, what is guaranteed to happen, and what is the OS's most direct action to fix it?",
+        isMultiSelect: false,
+        options: [
+            { text: "A physical Head Crash will occur; the OS must immediately spin down the HDD platters.", isCorrect: false },
+            { text: "Belady's Anomaly will heavily occur; the OS sequentially clears all internal Reference Bits.", isCorrect: false },
+            { text: "A hard Deadlock will occur; the OS must aggressively preempt resources from all background tasks.", isCorrect: false },
+            { text: "Thrashing will occur; the OS must Suspend (swap out) entire processes to reduce the degree of multiprogramming.", isCorrect: true }
+        ]
+    },
+    {
+        id: 45,
+        text: "For mechanical Hard Disk Drives (HDDs), the Positioning Time (Random Access time) is calculated using a specific formula. Which of the following statements are TRUE?",
+        isMultiSelect: true,
+        options: [
+            { text: "Positioning Time = Seek Time + Rotational Latency.", isCorrect: true },
+            { text: "Seek Time is generally the slowest physical operation in a modern computer system.", isCorrect: true },
+            { text: "Rotational Latency is the time spent waiting for the desired sector to spin under the head.", isCorrect: true },
+            { text: "A 'Head Crash' occurs when the read-write head physically scrapes the magnetic platter, destroying data.", isCorrect: true },
+            { text: "Seek Time is the time it takes to move the physical arm to the correct cylinder.", isCorrect: true }
+        ]
+    },
+    {
+        id: 46,
+        text: "Which of the following terms and constraints apply uniquely to Solid State Drives (SSDs / NAND Flash)?",
+        isMultiSelect: true,
+        options: [
+            { text: "Wear Leveling is used to spread writes evenly across cells so they degrade at the same rate.", isCorrect: true },
+            { text: "FTL (Flash Translation Layer) is the controller logic mapping logical blocks to physical pages.", isCorrect: true },
+            { text: "Garbage Collection is required because you cannot simply overwrite data on an SSD; valid data must be moved and an entire block must be erased in the background.", isCorrect: true },
+            { text: "They have zero Seek Time because there are no physical moving arms.", isCorrect: true }
+        ]
+    },
+    {
+        id: 47,
+        text: "Why are Disk Scheduling algorithms like SCAN and C-SCAN considered completely useless for Solid State Drives (SSDs)?",
+        isMultiSelect: false,
+        options: [
+            { text: "SSDs are fundamentally built upon magnetic tape ribbons instead of traditional spinning platters.", isCorrect: false },
+            { text: "SSDs suffer extensively from Belady's anomaly, rendering predictive algorithm movements entirely inaccurate.", isCorrect: false },
+            { text: "SSDs natively bypass and do not utilize standard hierarchical file systems managed by the OS.", isCorrect: false },
+            { text: "SSDs have no physical arm to move, meaning Seek Time is inherently 0, so optimizing head movement is mathematically pointless.", isCorrect: true }
+        ]
+    },
+    {
+        id: 48,
+        text: "Disk Scheduling Calculation Lab: Given a queue of requests: [98, 183, 37, 122, 14, 124, 65, 67]. The disk head starts at 53 and is currently moving toward 199. What is the exact service sequence path using the C-SCAN (Circular SCAN) algorithm?",
+        isMultiSelect: false,
+        options: [
+            { text: "53 -> 65 -> 67 -> 98 -> 122 -> 124 -> 183 -> 199 -> 0 -> 14 -> 37", isCorrect: true },
+            { text: "53 -> 37 -> 14 -> 0 -> 65 -> 67 -> 98 -> 122 -> 124 -> 183", isCorrect: false },
+            { text: "53 -> 65 -> 67 -> 98 -> 122 -> 124 -> 183 -> 37 -> 14", isCorrect: false },
+            { text: "53 -> 65 -> 67 -> 98 -> 122 -> 124 -> 183 -> 199 -> 183 -> 124 -> 122", isCorrect: false }
+        ]
+    },
+    {
+        id: 49,
+        text: "Match the Network/Object storage type to its correct functional description:",
+        isMultiSelect: false,
+        options: [
+            { text: "NAS = Distributed Hadoop cluster optimized for big data analytics; SAN = Direct-attached USB storage for consumer-grade file sharing; Object Storage = iSCSI block protocol specifically designed for isolated virtual machines.", isCorrect: false },
+            { text: "NAS = Block-level interface utilizing iSCSI protocols for raw data access; SAN = File-level interface restricted to SMB sharing; Object Storage = Highly structured relational SQL Database used for strict transactional integrity.", isCorrect: false },
+            { text: "NAS = Extended CPU Cache memory utilized for rapid instruction fetching; SAN = Local NVMe SSD partition formatted for swap space; Object Storage = Volatile RAM allocation managed exclusively by the core OS kernel.", isCorrect: false },
+            { text: "NAS = Local network File-level interface (NFS/SMB) 'Ask for a file'; SAN = Dedicated high-speed fiber Block-level interface (iSCSI) 'OS thinks it's a raw drive'; Object Storage = Unstructured giant pool using Object IDs, highly scalable (e.g., Hadoop).", isCorrect: true }
+        ]
+    },
+    {
+        id: 50,
+        text: "Which of the following mechanisms are utilized for Error Detection and Storage Management at the disk hardware level?",
+        isMultiSelect: true,
+        options: [
+            { text: "The Boot Block (MBR) which is tiny code stored at the very first sector to bootstrap the OS.", isCorrect: true },
+            { text: "TLB Flushing to explicitly correct severely corrupted or heavily fragmented hardware sectors.", isCorrect: false },
+            { text: "ECC / CRC (Error Correcting Codes / Cyclic Redundancy Checks) to detect bit flips.", isCorrect: true },
+            { text: "Sector Sparing, where the disk controller hides physically damaged bad blocks and silently remaps the logical address to a hidden spare physical sector without the OS ever knowing.", isCorrect: true }
+        ]
+    },
+    {
+        id: 51,
+        text: "Regarding Swap Space Management for Virtual Memory, why is it significantly faster to put swap space on a dedicated raw partition rather than in a standard file (like pagefile.sys)?",
+        isMultiSelect: false,
+        options: [
+            { text: "Raw disk partitions natively and automatically run the Banker's avoidance algorithm on every sector.", isCorrect: false },
+            { text: "A raw partition bypasses the file system's metadata overhead entirely, allowing for raw, contiguous block access that maximizes I/O speed.", isCorrect: true },
+            { text: "Raw partitions utilize built-in hardware processors that automatically compress and encrypt stored swap data.", isCorrect: false },
+            { text: "Standard files created by the OS simply cannot be physically accessed or translated by the MMU hardware.", isCorrect: false }
+        ]
+    },
+    {
+        id: 52,
+        text: "Which scenario violates Progress for the Critical Section problem?",
+        isMultiSelect: false,
+        options: [
+            { text: "No process is in the critical section, but outside processes keep postponing the decision of who enters next indefinitely.", isCorrect: true },
+            { text: "A process has been bypassed many times while others keep entering the critical section, but the system still makes a decision each time.", isCorrect: false },
+            { text: "Two processes are permanently deadlocked and the core OS scheduler has completely stopped making any execution choices at all.", isCorrect: false },
+            { text: "A process crashes immediately after releasing the lock and before it can re-enter the remainder section.", isCorrect: false }
+        ]
+    },
+    {
+        id: 53,
+        text: "What does atomic mean in the context of a hardware synchronization instruction?",
+        isMultiSelect: false,
+        options: [
+            { text: "The designated operation automatically and reliably prevents any subsequent page faults from occurring during its runtime.", isCorrect: false },
+            { text: "The execution runs noticeably faster and is heavily prioritized over every other standard instruction in the system queue.", isCorrect: false },
+            { text: "The operation happens as one indivisible unit, with no interruption visible to other processes.", isCorrect: true },
+            { text: "The operation is strictly limited and uniquely optimized to work exclusively on older single-core hardware systems.", isCorrect: false }
+        ]
+    },
+    {
+        id: 54,
+        text: "Which statement best describes the TestAndSet instruction?",
+        isMultiSelect: false,
+        options: [
+            { text: "It directly compares two distinct CPU registers and securely stores the larger numeric value into shared memory.", isCorrect: false },
+            { text: "It tests a memory value and sets it to true in one atomic step.", isCorrect: true },
+            { text: "It mathematically functions solely for counting semaphores and is entirely incompatible with basic mutex locks.", isCorrect: false },
+            { text: "It comprehensively disables all physical timer interrupts worldwide until the current background instruction finishes.", isCorrect: false }
+        ]
+    },
+    {
+        id: 55,
+        text: "Which statement best describes CompareAndSwap (CAS)?",
+        isMultiSelect: false,
+        options: [
+            { text: "It is an outdated, legacy software-only trick that completely lacks any modern silicon hardware implementation support.", isCorrect: false },
+            { text: "It aggressively and unconditionally always swaps the two target memory values even when the expected comparison explicitly fails.", isCorrect: false },
+            { text: "If the current value matches the expected value, it changes to a new value; otherwise it does nothing.", isCorrect: true },
+            { text: "It is a highly specialized algorithm utilized strictly for advanced magnetic disk scheduling and drive optimization.", isCorrect: false }
+        ]
+    },
+    {
+        id: 56,
+        text: "What is the purpose of a memory barrier or fence?",
+        isMultiSelect: false,
+        options: [
+            { text: "It strictly guarantees that absolutely no user process running in the system can ever suffer from continuous starvation.", isCorrect: false },
+            { text: "It immediately and completely blocks the MMU from attempting any further logical to physical address translations.", isCorrect: false },
+            { text: "It forces reads and writes to occur in the intended order instead of being aggressively reordered by the CPU.", isCorrect: true },
+            { text: "It securely and automatically converts a standard counting semaphore into a deeply isolated binary mutex structure.", isCorrect: false }
+        ]
+    },
+    {
+        id: 57,
+        text: "How do the Base and Limit registers protect memory access?",
+        isMultiSelect: false,
+        options: [
+            { text: "Base stores the smallest legal physical address and Limit stores the size of the allowed range.", isCorrect: true },
+            { text: "Base permanently stores the largest legal logical page number and Limit explicitly stores the maximum number of TLB entries.", isCorrect: false },
+            { text: "They entirely replace the complex necessity of deploying and maintaining a comprehensive virtual memory mapping architecture.", isCorrect: false },
+            { text: "They are highly specific processor registers utilized exclusively to maximize the efficiency of aggressive disk caching mechanisms.", isCorrect: false }
+        ]
+    },
+    {
+        id: 58,
+        text: "What is the Progress requirement for the Critical Section problem?",
+        isMultiSelect: false,
+        options: [
+            { text: "If no process is in the critical section, the choice of who enters next cannot be postponed indefinitely by processes outside the critical section.", isCorrect: true },
+            { text: "Every process must eventually enter the critical section in the exact same order every time.", isCorrect: false },
+            { text: "A process may wait forever as long as the system overall continues to make choices.", isCorrect: false },
+            { text: "The OS must always pick the highest-priority process regardless of fairness.", isCorrect: false }
+        ]
+    },
+    {
+        id: 59,
+        text: "What does the First-Fit contiguous allocation algorithm do?",
+        isMultiSelect: false,
+        options: [
+            { text: "It always explicitly searches for and chooses the absolutely largest contiguous memory hole currently available in RAM.", isCorrect: false },
+            { text: "It completely and permanently removes the persistent issue of external memory fragmentation within the operating system.", isCorrect: false },
+            { text: "It always meticulously scans memory and chooses the smallest possible viable hole that can barely fit the process.", isCorrect: false },
+            { text: "It places a process in the first hole that is large enough.", isCorrect: true }
+        ]
+    },
+    {
+        id: 60,
+        text: "What is internal fragmentation?",
+        isMultiSelect: true,
+        options: [
+            { text: "The excessive computational overhead and extra time spent explicitly flushing the Translation Lookaside Buffer.", isCorrect: false },
+            { text: "Memory allocated to a process that remains functionally unusable by the system until that process terminates.", isCorrect: false },
+            { text: "Free memory scattered into tiny non-contiguous pieces across the entire physical address space, requiring compaction.", isCorrect: false },
+            { text: "Wasted space inside an allocated block that is larger than the process actually needs.", isCorrect: true }
+        ]
+    },
+    {
+        id: 61,
+        text: "In demand paging, what does the Valid-Invalid bit tell the OS?",
+        isMultiSelect: false,
+        options: [
+            { text: "Valid indicates the swap space on the disk is completely full; invalid indicates the CPU is currently overloaded with too many process threads.", isCorrect: false },
+            { text: "It only strictly applies to mechanical hard drives and solid state memory controllers, not to volatile physical RAM allocations.", isCorrect: false },
+            { text: "Valid indicates the memory page is fully encrypted by the OS; invalid indicates the page has been compressed by the memory controller.", isCorrect: false },
+            { text: "Valid means the page is in memory and can be used; invalid means a reference to it triggers a page fault or is not yet permitted.", isCorrect: true }
+        ]
+    },
+    {
+        id: 62,
+        text: "Which statement correctly describes page aliasing and copy-on-write?",
+        isMultiSelect: true,
+        options: [
+            { text: "Page aliasing strictly ensures that every single virtual page always maps to an entirely different and unique physical frame in RAM.", isCorrect: false },
+            { text: "Copy-on-write is a legacy optimization that aggressively copies all physical pages immediately at the exact moment the fork() system call is executed.", isCorrect: false },
+            { text: "Two virtual page table entries can point to the same physical frame until a write forces a private copy to be made.", isCorrect: true },
+            { text: "Page aliasing allows multiple processes to safely share the exact same physical memory block for reading without requiring redundant duplication.", isCorrect: true }
+        ]
+    },
+    {
+        id: 63,
+        text: "What is the main property guaranteed by a monitor?",
+        isMultiSelect: true,
+        options: [
+            { text: "It completely replaces the architectural need for using any condition variables or traditional locking mechanisms in modern software.", isCorrect: false },
+            { text: "Only one process can be active inside the monitor at a time.", isCorrect: true },
+            { text: "It automatically and unconditionally prevents the possibility of a deadlock occurring in absolutely every single multi-threaded situation.", isCorrect: false },
+            { text: "It provides a high-level synchronization construct that heavily encapsulates shared data and the operations heavily relying on that data.", isCorrect: true }
+        ]
+    },
+    {
+        id: 64,
+        text: "What does x.wait() do inside a monitor?",
+        isMultiSelect: true,
+        options: [
+            { text: "It permanently stores the condition signal state forever until the specific user process explicitly wakes up from its prolonged sleep.", isCorrect: false },
+            { text: "It explicitly places the executing thread directly into the condition variable's dedicated waiting queue until a signal is broadcasted.", isCorrect: true },
+            { text: "It forcefully causes the CPU to explicitly flush the entire TLB and mathematically increment a background OS semaphore counter.", isCorrect: false },
+            { text: "It suspends the calling process and releases the monitor lock so another process can enter.", isCorrect: true }
+        ]
+    },
+    {
+        id: 65,
+        text: "What is the difference between global and local frame replacement?",
+        isMultiSelect: false,
+        options: [
+            { text: "Global replacement can steal a frame from another process, while local replacement can evict only the process's own frames.", isCorrect: true },
+            { text: "Global replacement exclusively functions natively for modern SSDs, while local replacement only operates strictly for legacy magnetic HDDs.", isCorrect: false },
+            { text: "Local replacement is mathematically proven to always be significantly faster because it inherently relies on direct network-attached storage mechanisms.", isCorrect: false },
+            { text: "They are functionally identical replacement algorithms that invariably generate the exact same performance characteristics and side effects on the system.", isCorrect: false }
+        ]
+    },
+    {
+        id: 66,
+        text: "According to the Working-Set Model, what happens when total demand is greater than physical memory?",
+        isMultiSelect: true,
+        options: [
+            { text: "Thrashing occurs and the OS should suspend some processes to reduce the degree of multiprogramming.", isCorrect: true },
+            { text: "The Translation Lookaside Buffer (TLB) automatically and rapidly grows much larger to accommodate the massive influx of continuous page requests.", isCorrect: false },
+            { text: "The entire system is virtually guaranteed to spend significantly more time paging memory blocks than executing useful application instructions.", isCorrect: true },
+            { text: "The underlying system becomes permanently deadlocked almost immediately, requiring the Banker's algorithm to forcefully intervene and terminate all applications.", isCorrect: false }
+        ]
+    },
+    {
+        id: 67,
+        text: "Which statements about HDD structure are true?",
+        isMultiSelect: true,
+        options: [
+            { text: "A cylinder is the set of tracks at the same arm position across platters.", isCorrect: true },
+            { text: "Sectors are wedge-shaped slices of a track.", isCorrect: true },
+            { text: "Platters are the spinning disks that store the data.", isCorrect: true },
+            { text: "Tracks are concentric circles on a platter.", isCorrect: true }
+        ]
+    },
+    {
+        id: 68,
+        text: "What is the correct formula for HDD positioning time?",
+        isMultiSelect: true,
+        options: [
+            { text: "Transfer Time + Cache Hit Time + Hardware Memory Barrier Verification Step", isCorrect: false },
+            { text: "Seek Time + Rotational Latency", isCorrect: true },
+            { text: "Rotational Latency + Page Fault Servicing Time + Hardware TLB Hit Delay", isCorrect: false },
+            { text: "The total duration to physically move the mechanical arm to the correct cylinder and passively wait for the target sector to rotate.", isCorrect: true }
+        ]
+    },
+    {
+        id: 69,
+        text: "Which statements about disk scheduling algorithms are true?",
+        isMultiSelect: true,
+        options: [
+            { text: "FCFS is fair but can move the head a lot and perform poorly.", isCorrect: true },
+            { text: "C-SCAN moves to one end and then jumps back to the other end without servicing requests on the return trip.", isCorrect: true },
+            { text: "Disk scheduling is highly useful and aggressively optimized for modern SSDs because they natively possess seek time identical to traditional HDDs.", isCorrect: false },
+            { text: "SCAN moves the head to one physical end and then reverses direction.", isCorrect: true }
+        ]
+    },
+    {
+        id: 70,
+        text: "Match the storage type to its description.",
+        isMultiSelect: true,
+        options: [
+            { text: "NAS provides file-level access over a network using protocols like NFS or SMB.", isCorrect: true },
+            { text: "Host-attached storage uses local ports such as SATA or USB.", isCorrect: true },
+            { text: "SAN provides block-level access over a dedicated network and often looks like a raw drive to the OS.", isCorrect: true },
+            { text: "Object storage is an extremely small local hardware cache strictly optimized for rapid CPU instruction fetching.", isCorrect: false }
+        ]
+    },
+    {
+        id: 71,
+        text: "Which mechanisms are used for disk error detection or integrity checking?",
+        isMultiSelect: true,
+        options: [
+            { text: "Parity bits", isCorrect: true },
+            { text: "ECC", isCorrect: true },
+            { text: "TLB flushing", isCorrect: false },
+            { text: "CRC", isCorrect: true }
+        ]
+    },
+    {
+        id: 72,
+        text: "What is the boot block or MBR used for?",
+        isMultiSelect: true,
+        options: [
+            { text: "It is tiny code in the first sector that helps bootstrap the operating system.", isCorrect: true },
+            { text: "It is a highly specialized hardware cache specifically designed by manufacturers to store all inverted page tables permanently for the machine.", isCorrect: false },
+            { text: "It houses the crucial initial bootloader program necessary to pull and load the core OS kernel directly from the disk into physical memory.", isCorrect: true },
+            { text: "It permanently stores the dynamically generated real-time working set data utilized by all of the currently active background system processes.", isCorrect: false }
+        ]
+    },
+    {
+        id: 73,
+        text: "What is sector sparing used for?",
+        isMultiSelect: true,
+        options: [
+            { text: "The disk controller hides a bad physical sector and remaps the logical address to a spare sector so the OS does not need to know.", isCorrect: true },
+            { text: "It allows a modern hard drive to completely and transparently replace physically damaged disk blocks with hidden reserve blocks built securely into the drive.", isCorrect: true },
+            { text: "It inherently and fundamentally reduces the total overall number of complex hardware memory barriers strictly required by the central processing unit.", isCorrect: false },
+            { text: "The underlying operating system aggressively stores extra memory pages in RAM to dramatically increase the processing speed of continuous demand paging.", isCorrect: false }
+        ]
+    },
+    {
+        id: 74,
+        text: "Which statements about page table structures and address translation hardware are true?",
+        isMultiSelect: true,
+        options: [
+            { text: "A flat 64-bit page table would be enormous and waste huge amounts of memory.", isCorrect: true },
+            { text: "Intel x86-64 uses a hierarchical multi-level page table structure.", isCorrect: true },
+            { text: "Hierarchical paging strictly requires 100% contiguous physical memory allocated simultaneously for every single background process running on the system.", isCorrect: false },
+            { text: "An inverted page table has one entry per physical frame rather than one per logical page.", isCorrect: true },
+            { text: "ARMv8 uses two levels of TLBs, including micro TLBs separated for instructions and data.", isCorrect: true }
+        ]
+    },
+    {
+        id: 75,
+        text: "Which factors are commonly used by the OS when choosing a deadlock recovery victim?",
+        isMultiSelect: true,
+        options: [
+            { text: "Resources used", isCorrect: true },
+            { text: "Interactive versus batch process type", isCorrect: true },
+            { text: "Priority", isCorrect: true },
+            { text: "How long the process has already computed", isCorrect: true },
+            { text: "Resources still needed", isCorrect: true }
+        ]
+    },
+    {
+        id: 76,
+        text: "What is a wait-for graph used for in deadlock detection?",
+        isMultiSelect: true,
+        options: [
+            { text: "It is a highly complex page replacement algorithm that heavily relies on the hardware reference bit to systematically evict extremely stale memory frames.", isCorrect: false },
+            { text: "It is a simplified resource allocation graph that removes resource nodes and shows which process is waiting for which other process.", isCorrect: true },
+            { text: "It is specifically utilized in single-instance resource environments to mathematically identify circular process dependencies indicating a true system deadlock.", isCorrect: true },
+            { text: "It is merely an alternative, modern architectural naming convention for the Translation Lookaside Buffer used exclusively inside enterprise solid-state drives.", isCorrect: false }
+        ]
+    }
+];
+
+    randomizeQuizOptions(quizData);
+
+        const questionExplanations = {
+            1: `Checkbox-rule grading gives zero points whenever a wrong option is selected, so the zero-point cases are the choices that mix correct and incorrect answers. Selecting only the correct options earns credit; selecting any incorrect option destroys the score for that question.`,
+            2: `A context switch flushes the TLB, then too many processes create frame fighting, which triggers page faults and hard drive thrashing. The final result is lower CPU utilization because the system spends its time paging instead of running useful work.`,
+            3: `A race condition happens when shared data is accessed concurrently and the result depends on the order of execution. The key idea is timing, not deadlock, starvation, or thrashing.`,
+            4: `balance++ is really a load, add, and store sequence. If a process is interrupted between those steps, another process can use stale data and the final value can be wrong.`,
+            5: `Bounded waiting is violated when one process keeps waiting while other processes keep getting into the critical section again and again. Progress can still exist, but fairness is broken because there is no upper bound on the wait.`,
+            6: `Disabling interrupts is not a real synchronization solution on modern systems. It fails on multicore machines, can be abused by a bad loop that never yields, and timer interrupts are also needed for keeping time.`,
+            7: `A memory barrier forces the CPU to keep memory operations in order instead of reordering them for speed. That is why it is used to make concurrent code behave predictably on modern hardware.`,
+            8: `Peterson's solution uses intent flags plus a turn variable to break ties between two processes. On modern CPUs it also needs memory ordering support, and if one process crashes while holding its flag true, the other can spin forever.`,
+            9: `Spinlocks busy-wait instead of sleeping, so they burn CPU cycles while the lock is unavailable. They are a bad choice on a single-core CPU if the lock holder cannot run, but they are useful when the expected wait is shorter than a context switch.`,
+            10: `A semaphore value of -4 means four processes are waiting in its queue. The negative count reflects how many threads are blocked, not how many resources exist.`,
+            11: `A mutex has ownership: the thread that locks it must unlock it. A semaphore does not have ownership, so one thread can wait and a different thread can signal.`,
+            12: `If nobody is waiting on a condition variable, x.signal() has no effect. Condition variables do not remember signals for later, so the signal is lost.`,
+            13: `Priority inversion is normally fixed with priority inheritance. The low-priority thread holding the lock temporarily inherits the higher priority until it releases the lock.`,
+            14: `If the producer locks the mutex before waiting for empty, it can block while holding the mutex when the buffer is full. That creates the deadlock condition.`,
+            15: `The original readers-writers solution lets readers keep arriving and keep read_count above zero. That can hold rw_mutex forever and starve writers.`,
+            16: `The standard fixes are to make pickup atomic, limit the room to four philosophers, or break symmetry with an odd/even pickup order. Each one removes the deadlock cycle caused by everyone grabbing the left chopstick first.`,
+            17: `Other synchronization tools include transactional memory, immutable functional programming styles, and OpenMP critical sections. They reduce or control shared-state conflicts without relying only on basic locks and semaphores.`,
+            18: `The four deadlock conditions are mutual exclusion, hold and wait, no preemption, and circular wait. All four must exist at the same time for deadlock to be possible.`,
+            19: `P0 takes S1 and P1 takes S2, then each waits for the resource the other already holds. That is the classic circular wait pattern, so the result is deadlock.`,
+            20: `With a single-instance resource cycle, deadlock is guaranteed. With multi-instance resources, a cycle means deadlock is possible but not guaranteed, and no cycle means no deadlock.`,
+            21: `Ordering resources by unique IDs and forcing requests in increasing order breaks circular wait. If every process follows the same order, a cycle cannot form.`,
+            22: `An unsafe state means the OS can no longer prove it will avoid deadlock for every future maximum-request scenario. It is not a deadlock yet, but it has lost the safety guarantee.`,
+            23: `Need is Max minus Allocation, so T1 needs 3 more instances. It can run only if Available is at least 3 for every resource type, otherwise the system is unsafe to grant the request.`,
+            24: `The resource-request test pretends the request is granted first, so Available goes down, Allocation goes up, and Need goes down by the same amount. Then the OS checks whether the state is still safe.`,
+            25: `Preemption recovery needs rollback history so the same process is not chosen as the victim over and over. Without that record, the OS can repeatedly punish the same low-priority process and create starvation.`,
+            26: `The chef analogy maps hands to registers, cutting board to cache, fridge to RAM, and supermarket to HDD. It shows the speed and size tradeoff across the memory hierarchy.`,
+            27: `Compile-time binding uses absolute addresses and must be recompiled if the program moves. Load-time binding is resolved when the program is loaded, and execution-time binding uses the MMU and relocation register while the program runs.`,
+            28: `Dynamic loading waits until a routine is actually called before bringing it into memory. Dynamic linking uses stubs and shared libraries so many programs can share one copy of the library code.`,
+            29: `Best-fit chooses the smallest hole that can still fit the process, which is 600KB here. Worst-fit chooses the largest available hole, which is 750KB here.`,
+            30: `Paging removes external fragmentation because memory is split into fixed-size frames and pages. Since pages can go into any free frame, the OS does not need one large contiguous hole.`,
+            31: `The page offset never changes during translation. The MMU replaces the page number with a frame number, but the offset stays the same because pages and frames have the same size.`,
+            32: `A 64-page logical space needs 6 bits for the page number, and a 1024-word page needs 10 bits for the offset. Together that makes a 16-bit logical address.`,
+            33: `A context switch normally invalidates or flushes the TLB because the new process has a different page table. Old translations cannot be reused safely without causing wrong address mappings.`,
+            34: `The EAT is 0.8 times the hit path plus 0.2 times the miss path: 0.8 * 120ns + 0.2 * 220ns = 140ns. The answer matches the weighted average of hits and misses.`,
+            35: `ARMv8 uses two TLB levels with separate micro-TLBs for instructions and data, x86-64 uses a 4-level hierarchical page table, and inverted page tables store one entry per physical frame. Those are the real-world architectures described here.`,
+            36: `A page fault is handled by trapping to the OS, validating the request, finding or freeing a frame, reading the page from disk, updating the page table valid bit, and then restarting the faulting instruction. All six listed steps belong to that flow.`,
+            37: `The acceptable fault probability is tiny because a page fault costs millions of nanoseconds. Solving EAT < 210ns with an 8,000,000ns fault penalty gives p of about 0.00000125.`,
+            38: `Copy-on-write shares the parent's physical pages with the child after fork. A real copy is made only if one of them writes to the page, which keeps process creation fast.`,
+            39: `OPT is the benchmark algorithm because it evicts the page used farthest in the future. FIFO evicts the oldest page, and the second-chance algorithm uses a reference bit to skip recently used pages once.`,
+            40: `Belady's anomaly is the counterintuitive case where more frames can cause more page faults. FIFO is the classic algorithm that suffers from it.`,
+            41: `When page 5 arrives, LRU removes 4 because 4 was used least recently among the three frames, while FIFO removes 3 because 3 entered memory first. That is why the answer is LRU 4 and FIFO 3.`,
+            42: `Memory compression keeps modified pages in RAM by compressing several frames into fewer frames. That frees memory without forcing the system to page out to disk immediately.`,
+            43: `Thrashing starts with many page faults, which forces disk I/O and lowers CPU utilization. The scheduler then adds more processes, which steals even more frames and drives the fault rate even higher.`,
+            44: `If total working-set demand exceeds physical memory, the system thrashes. The direct fix is to suspend or swap out processes so the degree of multiprogramming drops to a sustainable level.`,
+            45: `For an HDD, positioning time is seek time plus rotational latency. Seek time moves the arm to the track, rotational latency waits for the sector to spin under the head, and a head crash is the head scraping the platter.`,
+            46: `SSDs need wear leveling, an FTL to map logical to physical pages, garbage collection because pages cannot simply be overwritten in place, and they have zero seek time because there is no moving arm.`,
+            47: `SCAN-style algorithms optimize head movement, but SSDs have no moving head, so seek time is effectively zero. That makes head-movement scheduling pointless on flash storage.`,
+            48: `C-SCAN services requests in the current direction, goes to the end, jumps back to the start, and continues. That is why the path is 53 -> 65 -> 67 -> 98 -> 122 -> 124 -> 183 -> 199 -> 0 -> 14 -> 37.`,
+            49: `NAS is file-level storage over a network, SAN is block-level storage that looks like a raw drive, and object storage is a large object-ID-based pool. That is the standard functional split between the three.`,
+            50: `The boot block or MBR is the tiny first-sector code that starts bootstrapping the OS. ECC/CRC detect data errors, and sector sparing hides bad blocks by remapping them to spare sectors.`,
+            51: `A raw partition avoids file-system metadata overhead and gives direct contiguous block access. That is why swap on a raw partition is faster than swap stored as a normal file.`,
+            52: `Progress is violated when no process is in the critical section but the decision of who enters next keeps getting postponed indefinitely. The system is not making a fair forward decision.`,
+            53: `Atomic means the whole operation happens as one indivisible unit. Other processes never observe a half-finished intermediate state.`,
+            54: `TestAndSet reads a memory value and sets it to true in one atomic step. That is why it is useful for simple locking.`,
+            55: `CompareAndSwap checks whether the current value matches the expected value, and only then writes the new value. If the comparison fails, nothing changes.`,
+            56: `A memory barrier/fence keeps reads and writes in the intended order instead of letting the CPU reorder them for performance. It is a control tool for concurrency correctness.`,
+            57: `Base stores the lowest legal physical address and Limit stores the size of the allowed range. Together they define the protected address window for the process.`,
+            58: `Progress means that if the critical section is empty, the OS cannot postpone the choice of the next entrant forever. The system must keep moving forward instead of stalling the decision.`,
+            59: `First-fit simply places the process in the first hole that is big enough. It does not search for the largest or smallest hole, just the first usable one.`,
+            60: `Internal fragmentation is wasted space inside an allocated block. The process gets the whole block, but part of that block remains unused.`,
+            61: `The valid-invalid bit tells the OS whether a page is present and usable in memory. Invalid means a reference will fault or is not yet permitted.`,
+            62: `Two virtual page table entries can point to the same physical frame until a write happens. That shared-frame behavior is the basis of copy-on-write and safe page aliasing for reads.`,
+            63: `A monitor guarantees mutual exclusion, so only one process can be active inside it at a time. It also wraps the shared data and the operations that use that data into one synchronization unit.`,
+            64: `x.wait() suspends the calling thread, releases the monitor lock, and places the thread into the condition queue. That allows another thread to enter the monitor and change the condition.`,
+            65: `Global replacement can evict frames from another process, while local replacement can evict only the process's own frames. That is the difference between shared and private frame pools.`,
+            66: `When total working-set demand exceeds memory, thrashing happens and the OS should suspend some processes. The goal is to reduce multiprogramming so pages can stay resident long enough to be useful.`,
+            67: `An HDD uses tracks on platters, sectors as track slices, and cylinders as the set of same-position tracks across platters. Those are the core structural terms for disk geometry.`,
+            68: `HDD positioning time is seek time plus rotational latency. The arm has to move first, and then the platter has to rotate the target sector into place.`,
+            69: `FCFS is fair but can move the head a lot, C-SCAN services one direction and then jumps back, and SCAN reverses direction at the end. Those are the true properties of the classic disk algorithms.`,
+            70: `NAS gives file-level access over a network, host-attached storage uses local connections like SATA or USB, and SAN gives block-level access over a dedicated network. That matches the standard storage categories.`,
+            71: `Parity bits, ECC, and CRC are all used for integrity checking and error detection. TLB flushing has nothing to do with disk error detection.`,
+            72: `The boot block or MBR contains tiny startup code in the first sector, and that code loads the bootloader or helps bootstrap the operating system. It is the starting point of the boot process.`,
+            73: `Sector sparing hides a bad physical sector and remaps the logical address to a spare sector. The OS keeps working without needing to know the drive has remapped the block.`,
+            74: `A flat 64-bit page table would be enormous, x86-64 uses multi-level paging, an inverted table uses one entry per physical frame, and ARMv8 uses multiple TLB levels with micro-TLBs. Those are the correct hardware facts.`,
+            75: `Deadlock recovery victim selection usually considers how many resources a process uses, whether it is interactive or batch, its priority, how long it has computed, and how many more resources it still needs. The OS tries to minimize damage.`,
+            76: `A wait-for graph removes the resource nodes and shows which process is waiting for which other process. In a single-instance environment, a cycle in that graph is the deadlock signal.`,
+        };
+
+        function attachQuestionExplanations(data) {
+            data.forEach((question) => {
+                question.explanation = questionExplanations[question.id] || '';
+            });
+        }
+
+        attachQuestionExplanations(quizData);
+
+        // --- 2. STATE MANAGEMENT ---
+        let currentStage = 'start'; // 'start', 'quiz', 'results'
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; // { questionId: [selectedOptionIndices...] }
+        let confirmedQuestions = {}; // { questionId: feedbackObject }
+        let flaggedQuestions = {}; // { questionId: true }
+
+        function getCorrectIndices(question) {
+            const correct = [];
+            question.options.forEach((opt, idx) => {
+                if (opt.isCorrect) correct.push(idx);
+            });
+            return correct;
+        }
+
+        function isExactMatch(selected, correct) {
+            const sortedSelected = [...selected].sort((a, b) => a - b);
+            const sortedCorrect = [...correct].sort((a, b) => a - b);
+            return sortedSelected.length === sortedCorrect.length &&
+                sortedSelected.every((val, index) => val === sortedCorrect[index]);
+        }
+
+        function getQuestionFeedback(question, selectedOptions) {
+            const correctIndices = getCorrectIndices(question);
+            const hasWrongSelection = selectedOptions.some((idx) => !question.options[idx].isCorrect);
+            const missedCorrect = correctIndices.some((idx) => !selectedOptions.includes(idx));
+            const exact = isExactMatch(selectedOptions, correctIndices);
+
+            return {
+                correctIndices,
+                hasWrongSelection,
+                missedCorrect,
+                exact
+            };
+        }
+
+        function toggleFlag(questionId) {
+            if (flaggedQuestions[questionId]) {
+                delete flaggedQuestions[questionId];
+            } else {
+                flaggedQuestions[questionId] = true;
+            }
+            renderQuizScreen(false);
+        }
+
+        function goToQuestion(questionIndex) {
+            if (questionIndex < 0 || questionIndex >= quizData.length) {
+                return;
+            }
+
+            currentQuestionIndex = questionIndex;
+            render();
+            window.scrollTo(0, 0);
+        }
+
+        // --- 3. DOM ELEMENTS & RENDER FUNCTIONS ---
+        const app = document.getElementById('app');
+
+        function render() {
+            app.innerHTML = '';
+            if (currentStage === 'start') {
+                renderStartScreen();
+            } else if (currentStage === 'quiz') {
+                renderQuizScreen(true);
+            } else if (currentStage === 'results') {
+                renderResultsScreen();
+            }
+        }
+
+        function renderStartScreen() {
+            app.innerHTML = `
+                <div class="flex-grow flex items-center justify-center fade-in">
+                    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl text-center border-t-4 border-blue-600">
+                        <div class="mb-6 flex justify-center">
+                            <svg class="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                        </div>
+                        <h1 class="text-3xl font-extrabold text-gray-900 mb-4">Operating Systems Exam II</h1>
+                        <h2 class="text-xl font-semibold text-gray-600 mb-6">Complete Exhaustive Quiz</h2>
+                        <div class="bg-blue-50 text-blue-800 rounded-lg p-4 mb-8 text-left text-sm space-y-2">
+                            <p><strong>Scope:</strong> Chapters 6 - 11 (Stopping before RAID)</p>
+                            <p><strong>Questions:</strong> ${quizData.length} Comprehensive Items</p>
+                            <p><strong>Warning (The Checkbox Rule):</strong> This exam utilizes multi-select questions. You must select ALL correct answers. Selecting a correct answer alongside an incorrect one = ZERO points.</p>
+                        </div>
+                        <button onclick="startQuiz()" class="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition transform hover:-translate-y-1 text-lg">
+                            Begin Exam Simulation
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderQuizScreen(animate = false) {
+            const question = quizData[currentQuestionIndex];
+            const selectedOptions = userAnswers[question.id] || [];
+            const confirmedFeedback = confirmedQuestions[question.id] || null;
+            const isFlagged = !!flaggedQuestions[question.id];
+
+            const progressPct = ((currentQuestionIndex) / quizData.length) * 100;
+
+            let optionsHtml = '';
+            question.options.forEach((opt, idx) => {
+                const isSelected = selectedOptions.includes(idx);
+                const inputType = question.isMultiSelect ? 'checkbox' : 'radio';
+                let cardClass = 'border-gray-200 hover:border-blue-300 hover:bg-gray-50';
+
+                if (confirmedFeedback && opt.isCorrect) {
+                    cardClass = 'border-green-500 bg-green-50';
+                } else if (confirmedFeedback && isSelected && !opt.isCorrect) {
+                    cardClass = 'border-red-500 bg-red-50';
+                } else if (isSelected) {
+                    cardClass = 'border-blue-500 bg-blue-50';
+                }
+
+                const resultChip = confirmedFeedback
+                    ? (opt.isCorrect
+                        ? '<span class="ml-2 inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-bold uppercase">Correct</span>'
+                        : (isSelected
+                            ? '<span class="ml-2 inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-bold uppercase">Incorrect</span>'
+                            : ''))
+                    : '';
+
+                optionsHtml += `
+                    <label class="option-card flex items-start p-4 border-2 rounded-xl cursor-pointer ${cardClass} mb-3">
+                        <div class="flex-shrink-0 mt-0.5">
+                            <input type="${inputType}" name="q${question.id}" value="${idx}"
+                                ${isSelected ? 'checked' : ''}
+                                onchange="toggleOption(${question.id}, ${idx}, ${question.isMultiSelect})"
+                                class="w-5 h-5 text-blue-600 border-gray-300 ${question.isMultiSelect ? 'rounded' : 'rounded-full'} focus:ring-blue-500">
+                        </div>
+                        <div class="ml-3 text-base text-gray-700 font-medium">
+                            ${opt.text}${resultChip}
+                        </div>
+                    </label>
+                `;
+            });
+
+            let feedbackHtml = '';
+            if (confirmedFeedback) {
+                const feedbackClass = confirmedFeedback.exact
+                    ? 'bg-green-50 border-green-300 text-green-900'
+                    : 'bg-amber-50 border-amber-300 text-amber-900';
+                const feedbackTitle = confirmedFeedback.exact
+                    ? 'Correct for scoring'
+                    : 'Not fully correct yet';
+                const feedbackMessage = confirmedFeedback.exact
+                    ? (question.isMultiSelect
+                        ? 'Great job. You selected all correct options and no wrong options.'
+                        : 'Great job. Your selected option is correct.')
+                    : (question.isMultiSelect
+                        ? 'For multi-select questions, you must select every correct option and avoid all incorrect ones.'
+                        : 'That selected option is incorrect.');
+
+                const correctAnswersText = confirmedFeedback.correctIndices
+                    .map((idx) => question.options[idx].text)
+                    .join(' | ');
+
+                feedbackHtml = `
+                    <div class="mt-5 p-4 border rounded-xl ${feedbackClass}">
+                        <h3 class="font-bold mb-1">${feedbackTitle}</h3>
+                        <p class="text-sm mb-2">${feedbackMessage}</p>
+                        <p class="text-sm mb-2"><span class="font-semibold">Correct answer${confirmedFeedback.correctIndices.length > 1 ? 's' : ''}:</span> ${correctAnswersText}</p>
+                        <p class="text-sm"><span class="font-semibold">Why:</span> ${question.explanation}</p>
+                    </div>
+                `;
+            }
+
+            const sidebarItems = quizData.map((item, index) => {
+                const itemId = item.id;
+                const isCurrent = index === currentQuestionIndex;
+                const isAnswered = Array.isArray(userAnswers[itemId]) && userAnswers[itemId].length > 0;
+                const isConfirmed = !!confirmedQuestions[itemId];
+                const isItemFlagged = !!flaggedQuestions[itemId];
+
+                const buttonClass = isCurrent
+                    ? 'border-blue-600 bg-blue-50 text-blue-900'
+                    : isConfirmed
+                        ? 'border-green-200 bg-white text-gray-700 hover:border-green-400'
+                        : isAnswered
+                            ? 'border-amber-200 bg-white text-gray-700 hover:border-amber-400'
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300';
+
+                return `
+                    <button type="button" onclick="goToQuestion(${index})" class="w-full flex items-center justify-between px-3 py-2 rounded-lg border text-left transition ${buttonClass}">
+                        <span class="flex items-center gap-2 min-w-0">
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${isCurrent ? 'bg-blue-600 text-white' : isConfirmed ? 'bg-green-100 text-green-700' : isAnswered ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'}">${index + 1}</span>
+                            <span class="truncate">Q${index + 1}</span>
+                        </span>
+                        <span class="flex items-center gap-2 text-xs">
+                            ${isConfirmed ? '<span class="text-green-600 font-semibold">Checked</span>' : ''}
+                            ${isItemFlagged ? '<span class="text-amber-600 font-semibold">Flagged</span>' : ''}
+                        </span>
+                    </button>
+                `;
+            }).join('');
+
+            app.innerHTML = `
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6 shadow-inner">
+                    <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-6 flex-grow">
+                    <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 ${animate ? 'fade-in' : ''} flex flex-col min-w-0">
+                        <div class="flex justify-between items-center mb-6 gap-3">
+                            <span class="text-sm font-bold text-gray-500 uppercase tracking-wider">Question ${currentQuestionIndex + 1} of ${quizData.length}</span>
+                            <div class="flex items-center gap-2 flex-wrap justify-end">
+                                ${question.isMultiSelect
+                                    ? `<span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg> Select ALL that apply</span>`
+                                    : `<span class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Single Choice</span>`
+                                }
+                                <button type="button" onclick="toggleFlag(${question.id})" class="px-3 py-1.5 rounded-full border text-xs font-bold transition ${isFlagged ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-amber-50 hover:border-amber-300'}">
+                                    ${isFlagged ? 'Unflag' : 'Flag'}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4 flex items-center justify-between gap-3 text-sm text-gray-600">
+                            <span>${confirmedFeedback ? 'Answer checked for this question.' : 'Select your answer, then click Confirm Answer.'}</span>
+                            ${confirmedFeedback ? '<span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold">Confirmed</span>' : ''}
+                        </div>
+
+                        <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 mb-8 leading-relaxed">
+                            ${question.text}
+                        </h2>
+
+                        <div class="flex-grow">
+                            ${optionsHtml}
+                            ${feedbackHtml}
+                        </div>
+
+                        <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-100 gap-3 flex-wrap">
+                            <button type="button" onclick="prevQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''} class="px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg transition ${currentQuestionIndex === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50'}">
+                                Previous
+                            </button>
+
+                            <button type="button" onclick="confirmQuestion()" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow transition">
+                                Confirm Answer
+                            </button>
+
+                            ${currentQuestionIndex === quizData.length - 1
+                                ? `<button type="button" onclick="nextQuestion()" ${confirmedFeedback ? '' : 'disabled'} class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow transition flex items-center ${confirmedFeedback ? '' : 'opacity-40 cursor-not-allowed'}">Submit Exam</button>`
+                                : `<button type="button" onclick="nextQuestion()" ${confirmedFeedback ? '' : 'disabled'} class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition flex items-center ${confirmedFeedback ? '' : 'opacity-40 cursor-not-allowed'}">Next <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>`
+                            }
+                        </div>
+                    </div>
+
+                    <aside class="bg-white rounded-2xl shadow-lg p-4 sm:p-5 lg:sticky lg:top-6 h-fit">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-gray-900">Questions</h3>
+                            <span class="text-xs font-semibold text-gray-500">${Object.keys(flaggedQuestions).length} flagged</span>
+                        </div>
+                        <div class="space-y-2 max-h-[70vh] overflow-y-auto pr-1">
+                            ${sidebarItems}
+                        </div>
+                    </aside>
+                </div>
+            `;
+        }
+
+        function renderResultsScreen() {
+            let score = 0;
+            let resultsHtml = '';
+
+            quizData.forEach((q, idx) => {
+                const userSelected = userAnswers[q.id] || [];
+                const correctIndices = [];
+                q.options.forEach((opt, i) => { if(opt.isCorrect) correctIndices.push(i); });
+                
+                // Sorting arrays to compare easily
+                userSelected.sort();
+                correctIndices.sort();
+                
+                // Checkbox Rule enforcement: Array contents must match perfectly
+                const isPerfectMatch = userSelected.length === correctIndices.length && 
+                                       userSelected.every((val, index) => val === correctIndices[index]);
+
+                if (isPerfectMatch) {
+                    score++;
+                }
+
+                // Generate Review UI
+                let optsReviewHtml = '';
+                q.options.forEach((opt, i) => {
+                    const wasSelected = userSelected.includes(i);
+                    const isCorrect = opt.isCorrect;
+                    
+                    let styleClass = "text-gray-600";
+                    let icon = '';
+                    
+                    if (wasSelected && isCorrect) {
+                        styleClass = "bg-green-100 text-green-800 font-medium p-2 rounded";
+                        icon = '✅';
+                    } else if (wasSelected && !isCorrect) {
+                        styleClass = "bg-red-100 text-red-800 font-medium p-2 rounded";
+                        icon = '❌';
+                    } else if (!wasSelected && isCorrect) {
+                        styleClass = "bg-yellow-100 text-yellow-800 font-medium p-2 rounded border border-yellow-300";
+                        icon = '⚠️ (Missed)';
+                    } else {
+                        styleClass = "p-2";
+                    }
+
+                    optsReviewHtml += `<div class="${styleClass} text-sm mb-1">${icon} ${opt.text}</div>`;
+                });
+
+                resultsHtml += `
+                    <div class="mb-6 p-4 border rounded-lg ${isPerfectMatch ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}">
+                        <div class="flex items-start">
+                            <div class="mr-3 mt-1">
+                                ${isPerfectMatch 
+                                    ? '<span class="text-green-600 font-bold text-xl">✓</span>' 
+                                    : '<span class="text-red-600 font-bold text-xl">✗</span>'}
+                            </div>
+                            <div class="w-full">
+                                <h4 class="font-semibold text-gray-800 mb-2">${idx + 1}. ${q.text}</h4>
+                                <div class="space-y-1">
+                                    ${optsReviewHtml}
+                                </div>
+                                <p class="mt-3 text-sm text-gray-700 bg-blue-50 border border-blue-100 rounded p-3">
+                                    <span class="font-semibold">Explanation:</span> ${q.explanation}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const percentage = Math.round((score / quizData.length) * 100);
+            let message = '';
+            if (percentage >= 90) message = "Outstanding! You are fully prepared for the exam.";
+            else if (percentage >= 70) message = "Good job! Review the traps and tricky questions.";
+            else message = "Keep studying! The hardware connections and deadlock math need review.";
+
+            app.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-xl p-8 fade-in w-full">
+                    <div class="text-center mb-10 pb-8 border-b border-gray-200">
+                        <h2 class="text-4xl font-extrabold text-gray-900 mb-2">Exam Results</h2>
+                        <div class="text-6xl font-black ${percentage >= 70 ? 'text-green-600' : 'text-orange-600'} my-4">
+                            ${percentage}%
+                        </div>
+                        <p class="text-xl text-gray-600 font-medium">You scored ${score} out of ${quizData.length}</p>
+                        <p class="text-md text-gray-500 mt-2 italic">${message}</p>
+                        <button onclick="restartQuiz()" class="mt-6 px-6 py-2 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-lg shadow transition">
+                            Retake Exam
+                        </button>
+                    </div>
+                    
+                    <div class="h-96 overflow-y-auto pr-4">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4 sticky top-0 bg-white py-2 shadow-sm">Detailed Review</h3>
+                        ${resultsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- 4. LOGIC FUNCTIONS ---
+        function startQuiz() {
+            currentStage = 'quiz';
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            confirmedQuestions = {};
+            flaggedQuestions = {};
+            render();
+        }
+
+        function toggleOption(questionId, optionIndex, isMultiSelect) {
+            if (!userAnswers[questionId]) {
+                userAnswers[questionId] = [];
+            }
+
+            delete confirmedQuestions[questionId];
+            
+            if (isMultiSelect) {
+                const index = userAnswers[questionId].indexOf(optionIndex);
+                if (index > -1) {
+                    userAnswers[questionId].splice(index, 1); // Remove if already selected
+                } else {
+                    userAnswers[questionId].push(optionIndex); // Add if not selected
+                }
+            } else {
+                userAnswers[questionId] = [optionIndex]; // Replace completely
+            }
+            renderQuizScreen(false); // Update option state without replaying the card animation
+        }
+
+        function confirmQuestion() {
+            const question = quizData[currentQuestionIndex];
+            const selectedOptions = userAnswers[question.id] || [];
+            confirmedQuestions[question.id] = getQuestionFeedback(question, selectedOptions);
+            renderQuizScreen(false);
+        }
+
+        function nextQuestion() {
+            const currentQuestion = quizData[currentQuestionIndex];
+            if (!confirmedQuestions[currentQuestion.id]) {
+                return;
+            }
+
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                render();
+                window.scrollTo(0, 0);
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                render();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function finishQuiz() {
+            const confirmSubmit = confirm("Are you sure you want to submit your exam?");
+            if (confirmSubmit) {
+                currentStage = 'results';
+                render();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function restartQuiz() {
+            currentStage = 'start';
+            userAnswers = {};
+            confirmedQuestions = {};
+            flaggedQuestions = {};
+            render();
+        }
+
+        // --- 5. INITIALIZE ---
+        render();
+
+    </script>
+    </body>
+</html>
