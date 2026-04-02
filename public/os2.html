@@ -13,19 +13,24 @@
         }
         .option-card { transition: all 0.2s ease; }
         .option-card:active { transform: scale(0.98); }
+        .panel-shadow { box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08); }
         
         /* Custom Scrollbar for review mode */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        @media (max-width: 640px) {
+            ::-webkit-scrollbar { width: 6px; }
+        }
     </style>
     </head>
     <body
-        class="bg-slate-100 text-slate-800 min-h-screen font-sans selection:bg-blue-200 selection:text-blue-900">
+        class="min-h-screen font-sans text-slate-800 selection:bg-blue-200 selection:text-blue-900 bg-slate-100 bg-gradient-to-b from-slate-50 via-slate-100 to-slate-200">
 
         <div id="app"
-            class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 min-h-screen flex flex-col">
+            class="max-w-6xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 min-h-screen flex flex-col w-full">
             <!-- Content will be dynamically injected here via JavaScript -->
         </div>
 
@@ -44,7 +49,25 @@
             return data;
         }
 
-       const quizData = [
+        function cloneQuizData(data) {
+            return JSON.parse(JSON.stringify(data));
+        }
+
+        function buildQuizData(data) {
+            const cloned = cloneQuizData(data);
+            randomizeQuizOptions(cloned);
+            return cloned;
+        }
+
+        function isValidQuizData(data) {
+            return Array.isArray(data) && data.length > 0 && data.every((question) => {
+                return question && typeof question.id !== 'undefined' && Array.isArray(question.options);
+            });
+        }
+
+        const STORAGE_KEY = 'os-exam-ii-quiz-state-v1';
+
+       const quizDataSource = [
     {
         id: 2,
         text: "Trace the 'Grand Storyline' of a system overload. Which sequence accurately describes the cascading failure starting from the process scheduler down to the physical disk?",
@@ -882,8 +905,6 @@
     }
 ];
 
-    randomizeQuizOptions(quizData);
-
         const questionExplanations = {
             2: `A context switch means the processor stops one program and starts another, so old address translations in the Translation Lookaside Buffer, or TLB, are no longer valid. If too many programs are loaded at once, memory fills up, pages start moving between RAM and disk, and the system slows down because it spends time waiting on the disk instead of doing useful work.`,
             3: `A race condition happens when two or more threads use shared data and the result depends on which one runs first. The issue is timing, not a permanent blockage; different execution orders can produce different final answers.`,
@@ -968,14 +989,337 @@
             });
         }
 
-        attachQuestionExplanations(quizData);
-
-        // --- 2. STATE MANAGEMENT ---
+        let quizData = [];
         let currentStage = 'start'; // 'start', 'quiz', 'results'
         let currentQuestionIndex = 0;
         let userAnswers = {}; // { questionId: [selectedOptionIndices...] }
         let confirmedQuestions = {}; // { questionId: feedbackObject }
         let flaggedQuestions = {}; // { questionId: true }
+        let sidebarScrollTop = 0;
+        let shouldAutoScrollSidebarToCurrentQuestion = false;
+
+        function getDefaultQuizState() {
+            return {
+                currentStage: 'start',
+                currentQuestionIndex: 0,
+                userAnswers: {},
+                confirmedQuestions: {},
+                flaggedQuestions: {},
+                quizData: buildQuizData(quizDataSource)
+            };
+        }
+
+        function loadQuizState() {
+            try {
+                const savedState = window.localStorage.getItem(STORAGE_KEY);
+                if (!savedState) {
+                    return null;
+                }
+
+                const parsedState = JSON.parse(savedState);
+                if (!parsedState || !isValidQuizData(parsedState.quizData)) {
+                    return null;
+                }
+
+                return parsedState;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function saveQuizState() {
+            if (!quizData.length) {
+                return;
+            }
+
+            try {
+                window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    currentStage,
+                    currentQuestionIndex,
+                    userAnswers,
+                    confirmedQuestions,
+                    flaggedQuestions,
+                    quizData
+                }));
+            } catch (error) {
+                // Ignore storage failures and keep the quiz usable.
+            }
+        }
+
+        function clearQuizState() {
+            try {
+                window.localStorage.removeItem(STORAGE_KEY);
+            } catch (error) {
+                // Ignore storage failures.
+            }
+        }
+
+        function resetAllUserData() {
+            clearQuizState();
+            applyQuizState(getDefaultQuizState());
+            sidebarScrollTop = 0;
+            shouldAutoScrollSidebarToCurrentQuestion = false;
+            render();
+        }
+
+        function getCorrectIndices(question) {
+            const correct = [];
+            question.options.forEach((opt, idx) => {
+                if (opt.isCorrect) correct.push(idx);
+            });
+            return correct;
+        }
+
+        function isExactMatch(selected, correct) {
+            const sortedSelected = [...selected].sort((a, b) => a - b);
+            const sortedCorrect = [...correct].sort((a, b) => a - b);
+            return sortedSelected.length === sortedCorrect.length &&
+                sortedSelected.every((val, index) => val === sortedCorrect[index]);
+        }
+
+        function getQuestionFeedback(question, selectedOptions) {
+            const correctIndices = getCorrectIndices(question);
+            const hasWrongSelection = selectedOptions.some((idx) => !question.options[idx].isCorrect);
+            const missedCorrect = correctIndices.some((idx) => !selectedOptions.includes(idx));
+            const exact = isExactMatch(selectedOptions, correctIndices);
+
+            return {
+                correctIndices,
+                hasWrongSelection,
+                missedCorrect,
+                exact
+            };
+        }
+
+        function getOptionCardClass(question, option, isSelected, confirmedFeedback) {
+            let cardClass = 'border-gray-200 hover:border-blue-300 hover:bg-gray-50';
+
+            if (confirmedFeedback && option.isCorrect) {
+                cardClass = 'border-green-500 bg-green-50';
+            } else if (confirmedFeedback && isSelected && !option.isCorrect) {
+                cardClass = 'border-red-500 bg-red-50';
+            } else if (isSelected) {
+                cardClass = 'border-blue-500 bg-blue-50';
+            }
+
+            return cardClass;
+        }
+
+        function getSidebarButtonClass(isCurrent, isAnswered, isConfirmed) {
+            return isCurrent
+                ? 'border-blue-600 bg-blue-50 text-blue-900'
+                : isConfirmed
+                    ? 'border-green-200 bg-white text-gray-700 hover:border-green-400'
+                    : isAnswered
+                        ? 'border-amber-200 bg-white text-gray-700 hover:border-amber-400'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300';
+        }
+
+        function getSidebarBadgeClass(isCurrent, isConfirmed, isAnswered) {
+            return isCurrent ? 'bg-blue-600 text-white' : isConfirmed ? 'bg-green-100 text-green-700' : isAnswered ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500';
+        }
+
+        function buildFeedbackHtml(question, confirmedFeedback) {
+            if (!confirmedFeedback) {
+                return '';
+            }
+
+            const feedbackClass = confirmedFeedback.exact
+                ? 'bg-green-50 border-green-300 text-green-900'
+                : 'bg-amber-50 border-amber-300 text-amber-900';
+            const feedbackTitle = confirmedFeedback.exact
+                ? 'Correct for scoring'
+                : 'Not fully correct yet';
+            const feedbackMessage = confirmedFeedback.exact
+                ? (question.isMultiSelect
+                    ? 'Great job. You selected all correct options and no wrong options.'
+                    : 'Great job. Your selected option is correct.')
+                : (question.isMultiSelect
+                    ? 'For multi-select questions, you must select every correct option and avoid all incorrect ones.'
+                    : 'That selected option is incorrect.');
+
+            const correctAnswersText = confirmedFeedback.correctIndices
+                .map((idx) => question.options[idx].text)
+                .join(' | ');
+
+            return `
+                <div class="mt-5 p-4 border rounded-xl ${feedbackClass}" id="feedback-panel">
+                    <h3 class="font-bold mb-1">${feedbackTitle}</h3>
+                    <p class="text-sm mb-2">${feedbackMessage}</p>
+                    <p class="text-sm mb-2"><span class="font-semibold">Correct answer${confirmedFeedback.correctIndices.length > 1 ? 's' : ''}:</span> ${correctAnswersText}</p>
+                    <p class="text-sm"><span class="font-semibold">Why this is correct:</span> ${question.explanation}</p>
+                </div>
+            `;
+        }
+
+        function applyQuizState(state) {
+            quizData = state.quizData;
+            currentStage = state.currentStage || 'start';
+            currentQuestionIndex = Number.isInteger(state.currentQuestionIndex) ? Math.min(Math.max(state.currentQuestionIndex, 0), quizData.length - 1) : 0;
+            userAnswers = state.userAnswers || {};
+            confirmedQuestions = state.confirmedQuestions || {};
+            flaggedQuestions = state.flaggedQuestions || {};
+            attachQuestionExplanations(quizData);
+        }
+
+        const restoredQuizState = loadQuizState();
+        if (restoredQuizState) {
+            applyQuizState(restoredQuizState);
+            shouldAutoScrollSidebarToCurrentQuestion = currentStage === 'quiz';
+        } else {
+            applyQuizState(getDefaultQuizState());
+            saveQuizState();
+        }
+
+        window.addEventListener('beforeunload', saveQuizState);
+
+        function updateSidebarState() {
+            const flaggedCount = document.getElementById('flagged-count');
+            if (flaggedCount) {
+                flaggedCount.textContent = `${Object.keys(flaggedQuestions).length} flagged`;
+            }
+
+            quizData.forEach((item, index) => {
+                const sidebarButton = document.getElementById(`sidebar-question-${item.id}`);
+                if (!sidebarButton) {
+                    return;
+                }
+
+                const isCurrent = index === currentQuestionIndex;
+                const isAnswered = Array.isArray(userAnswers[item.id]) && userAnswers[item.id].length > 0;
+                const isConfirmed = !!confirmedQuestions[item.id];
+                const isItemFlagged = !!flaggedQuestions[item.id];
+
+                sidebarButton.className = `w-full flex items-center justify-between px-3 py-2 rounded-lg border text-left transition ${getSidebarButtonClass(isCurrent, isAnswered, isConfirmed)}`;
+                sidebarButton.innerHTML = `
+                    <span class="flex items-center gap-2 min-w-0">
+                        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${getSidebarBadgeClass(isCurrent, isConfirmed, isAnswered)}">${index + 1}</span>
+                        <span class="truncate">Q${index + 1}</span>
+                    </span>
+                    <span class="flex items-center gap-2 text-xs">
+                        ${isConfirmed ? '<span class="text-green-600 font-semibold">Checked</span>' : ''}
+                        ${isItemFlagged ? '<span class="text-amber-600 font-semibold">Flagged</span>' : ''}
+                    </span>
+                `;
+            });
+        }
+
+        function updateCurrentQuestionDom() {
+            if (currentStage !== 'quiz') {
+                return;
+            }
+
+            const question = quizData[currentQuestionIndex];
+            const selectedOptions = userAnswers[question.id] || [];
+            const confirmedFeedback = confirmedQuestions[question.id] || null;
+            const isFlagged = !!flaggedQuestions[question.id];
+
+            const progressFill = document.getElementById('quiz-progress-fill');
+            if (progressFill) {
+                progressFill.style.width = `${(currentQuestionIndex / quizData.length) * 100}%`;
+            }
+
+            const questionCounter = document.getElementById('question-counter');
+            if (questionCounter) {
+                questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+            }
+
+            const questionTypeBadge = document.getElementById('question-type-badge');
+            if (questionTypeBadge) {
+                questionTypeBadge.innerHTML = question.isMultiSelect
+                    ? '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg> Select ALL that apply'
+                    : 'Single Choice';
+            }
+
+            const flagButton = document.getElementById('flag-question-button');
+            if (flagButton) {
+                flagButton.textContent = isFlagged ? 'Unflag' : 'Flag';
+                flagButton.className = `px-3 py-1.5 rounded-full border text-xs font-bold transition ${isFlagged ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-amber-50 hover:border-amber-300'}`;
+            }
+
+            const statusText = document.getElementById('question-status-text');
+            if (statusText) {
+                statusText.textContent = confirmedFeedback ? 'Answer checked for this question.' : 'Select your answer, then click Confirm Answer.';
+            }
+
+            const confirmedBadge = document.getElementById('confirmed-status-badge');
+            if (confirmedBadge) {
+                confirmedBadge.innerHTML = confirmedFeedback ? '<span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold">Confirmed</span>' : '';
+            }
+
+            const questionText = document.getElementById('question-text');
+            if (questionText) {
+                questionText.textContent = question.text;
+            }
+
+            question.options.forEach((option, idx) => {
+                const isSelected = selectedOptions.includes(idx);
+                const optionLabel = document.getElementById(`option-card-${question.id}-${idx}`);
+                const optionInput = document.getElementById(`option-input-${question.id}-${idx}`);
+                const optionChip = document.getElementById(`option-chip-${question.id}-${idx}`);
+
+                if (optionInput) {
+                    optionInput.checked = isSelected;
+                }
+
+                if (optionLabel) {
+                    optionLabel.className = `option-card flex items-start p-4 border-2 rounded-xl cursor-pointer ${getOptionCardClass(question, option, isSelected, confirmedFeedback)} mb-3`;
+                }
+
+                if (optionChip) {
+                    if (confirmedFeedback) {
+                        optionChip.classList.remove('hidden');
+                        if (option.isCorrect) {
+                            optionChip.className = 'ml-2 inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-bold uppercase';
+                            optionChip.textContent = 'Correct';
+                        } else if (isSelected) {
+                            optionChip.className = 'ml-2 inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-bold uppercase';
+                            optionChip.textContent = 'Incorrect';
+                        } else {
+                            optionChip.className = 'hidden';
+                            optionChip.textContent = '';
+                        }
+                    } else {
+                        optionChip.className = 'hidden';
+                        optionChip.textContent = '';
+                    }
+                }
+            });
+
+            const feedbackContainer = document.getElementById('feedback-container');
+            if (feedbackContainer) {
+                feedbackContainer.innerHTML = buildFeedbackHtml(question, confirmedFeedback);
+            }
+
+            const previousButton = document.getElementById('previous-question-button');
+            if (previousButton) {
+                previousButton.disabled = currentQuestionIndex === 0;
+                previousButton.className = `px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg transition ${currentQuestionIndex === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50'}`;
+            }
+
+            const nextButton = document.getElementById('next-question-button');
+            const submitButton = document.getElementById('submit-exam-button');
+            const canAdvance = !!confirmedFeedback;
+
+            if (nextButton) {
+                nextButton.disabled = !canAdvance;
+                nextButton.className = `px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition flex items-center ${canAdvance ? '' : 'opacity-40 cursor-not-allowed'}`;
+            }
+
+            if (submitButton) {
+                submitButton.disabled = !canAdvance;
+                submitButton.className = `px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow transition flex items-center ${canAdvance ? '' : 'opacity-40 cursor-not-allowed'}`;
+            }
+
+            updateSidebarState();
+            saveQuizState();
+        }
+
+        function syncQuizScreen() {
+            updateCurrentQuestionDom();
+        }
+
+        // --- 2. STATE MANAGEMENT ---
 
         function getCorrectIndices(question) {
             const correct = [];
@@ -1012,7 +1356,32 @@
             } else {
                 flaggedQuestions[questionId] = true;
             }
-            renderQuizScreen(false);
+            syncQuizScreen();
+        }
+
+        function saveSidebarScrollPosition() {
+            const sidebarList = document.getElementById('quiz-sidebar-list');
+            if (sidebarList) {
+                sidebarScrollTop = sidebarList.scrollTop;
+            }
+        }
+
+        function restoreSidebarScrollPosition() {
+            const sidebarList = document.getElementById('quiz-sidebar-list');
+            if (!sidebarList) {
+                return;
+            }
+
+            if (shouldAutoScrollSidebarToCurrentQuestion) {
+                const currentSidebarItem = document.getElementById(`sidebar-question-${quizData[currentQuestionIndex].id}`);
+                if (currentSidebarItem) {
+                    currentSidebarItem.scrollIntoView({ block: 'center' });
+                }
+                shouldAutoScrollSidebarToCurrentQuestion = false;
+                return;
+            }
+
+            sidebarList.scrollTop = sidebarScrollTop;
         }
 
         function goToQuestion(questionIndex) {
@@ -1020,8 +1389,10 @@
                 return;
             }
 
+            saveSidebarScrollPosition();
             currentQuestionIndex = questionIndex;
             render();
+            saveQuizState();
             window.scrollTo(0, 0);
         }
 
@@ -1034,6 +1405,7 @@
                 renderStartScreen();
             } else if (currentStage === 'quiz') {
                 renderQuizScreen(true);
+                restoreSidebarScrollPosition();
             } else if (currentStage === 'results') {
                 renderResultsScreen();
             }
@@ -1041,19 +1413,19 @@
 
         function renderStartScreen() {
             app.innerHTML = `
-                <div class="flex-grow flex items-center justify-center fade-in">
-                    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl text-center border-t-4 border-blue-600">
-                        <div class="mb-6 flex justify-center">
-                            <svg class="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                <div class="flex-grow flex items-center justify-center fade-in py-3 sm:py-6">
+                    <div class="bg-white rounded-2xl panel-shadow p-5 sm:p-6 md:p-8 max-w-3xl w-full text-center border border-slate-200 border-t-4 border-blue-600">
+                        <div class="mb-5 sm:mb-6 flex justify-center">
+                            <svg class="w-14 h-14 sm:w-16 sm:h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
                         </div>
-                        <h1 class="text-3xl font-extrabold text-gray-900 mb-4">Operating Systems Exam II</h1>
-                        <h2 class="text-xl font-semibold text-gray-600 mb-6">Complete Exhaustive Quiz</h2>
-                        <div class="bg-blue-50 text-blue-800 rounded-lg p-4 mb-8 text-left text-sm space-y-2">
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 sm:mb-4 leading-tight">Operating Systems Exam II</h1>
+                        <h2 class="text-base sm:text-xl font-semibold text-gray-600 mb-5 sm:mb-6">Complete Exhaustive Quiz</h2>
+                        <div class="bg-blue-50 text-blue-800 rounded-xl p-4 sm:p-5 mb-6 sm:mb-8 text-left text-sm space-y-2">
                             <p><strong>Scope:</strong> Chapters 6 - 11 (Stopping before RAID)</p>
                             <p><strong>Questions:</strong> ${quizData.length} Comprehensive Items</p>
                             <p><strong>Warning (The Checkbox Rule):</strong> This exam utilizes multi-select questions. You must select ALL correct answers. Selecting a correct answer alongside an incorrect one = ZERO points.</p>
                         </div>
-                        <button onclick="startQuiz()" class="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition transform hover:-translate-y-1 text-lg">
+                        <button onclick="startQuiz()" class="w-full sm:w-auto px-6 sm:px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition transform hover:-translate-y-1 text-base sm:text-lg">
                             Begin Exam Simulation
                         </button>
                     </div>
@@ -1062,6 +1434,8 @@
         }
 
         function renderQuizScreen(animate = false) {
+            saveSidebarScrollPosition();
+
             const question = quizData[currentQuestionIndex];
             const selectedOptions = userAnswers[question.id] || [];
             const confirmedFeedback = confirmedQuestions[question.id] || null;
@@ -1069,72 +1443,39 @@
 
             const progressPct = ((currentQuestionIndex) / quizData.length) * 100;
 
-            let optionsHtml = '';
-            question.options.forEach((opt, idx) => {
+            const optionsHtml = question.options.map((opt, idx) => {
                 const isSelected = selectedOptions.includes(idx);
                 const inputType = question.isMultiSelect ? 'checkbox' : 'radio';
-                let cardClass = 'border-gray-200 hover:border-blue-300 hover:bg-gray-50';
-
-                if (confirmedFeedback && opt.isCorrect) {
-                    cardClass = 'border-green-500 bg-green-50';
-                } else if (confirmedFeedback && isSelected && !opt.isCorrect) {
-                    cardClass = 'border-red-500 bg-red-50';
-                } else if (isSelected) {
-                    cardClass = 'border-blue-500 bg-blue-50';
-                }
-
-                const resultChip = confirmedFeedback
+                const cardClass = getOptionCardClass(question, opt, isSelected, confirmedFeedback);
+                const chipClass = confirmedFeedback
                     ? (opt.isCorrect
-                        ? '<span class="ml-2 inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-bold uppercase">Correct</span>'
+                        ? 'ml-2 inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-bold uppercase'
                         : (isSelected
-                            ? '<span class="ml-2 inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-bold uppercase">Incorrect</span>'
-                            : ''))
+                            ? 'ml-2 inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-bold uppercase'
+                            : 'hidden'))
+                    : 'hidden';
+                const chipText = confirmedFeedback
+                    ? (opt.isCorrect
+                        ? 'Correct'
+                        : (isSelected ? 'Incorrect' : ''))
                     : '';
 
-                optionsHtml += `
-                    <label class="option-card flex items-start p-4 border-2 rounded-xl cursor-pointer ${cardClass} mb-3">
+                return `
+                    <label id="option-card-${question.id}-${idx}" class="option-card flex items-start p-4 border-2 rounded-xl cursor-pointer ${cardClass} mb-3">
                         <div class="flex-shrink-0 mt-0.5">
-                            <input type="${inputType}" name="q${question.id}" value="${idx}"
+                            <input id="option-input-${question.id}-${idx}" type="${inputType}" name="q${question.id}" value="${idx}"
                                 ${isSelected ? 'checked' : ''}
                                 onchange="toggleOption(${question.id}, ${idx}, ${question.isMultiSelect})"
                                 class="w-5 h-5 text-blue-600 border-gray-300 ${question.isMultiSelect ? 'rounded' : 'rounded-full'} focus:ring-blue-500">
                         </div>
                         <div class="ml-3 text-base text-gray-700 font-medium">
-                            ${opt.text}${resultChip}
+                            ${opt.text}<span id="option-chip-${question.id}-${idx}" class="${chipClass}">${chipText}</span>
                         </div>
                     </label>
                 `;
-            });
+            }).join('');
 
-            let feedbackHtml = '';
-            if (confirmedFeedback) {
-                const feedbackClass = confirmedFeedback.exact
-                    ? 'bg-green-50 border-green-300 text-green-900'
-                    : 'bg-amber-50 border-amber-300 text-amber-900';
-                const feedbackTitle = confirmedFeedback.exact
-                    ? 'Correct for scoring'
-                    : 'Not fully correct yet';
-                const feedbackMessage = confirmedFeedback.exact
-                    ? (question.isMultiSelect
-                        ? 'Great job. You selected all correct options and no wrong options.'
-                        : 'Great job. Your selected option is correct.')
-                    : (question.isMultiSelect
-                        ? 'For multi-select questions, you must select every correct option and avoid all incorrect ones.'
-                        : 'That selected option is incorrect.');
-
-                const correctAnswersText = confirmedFeedback.correctIndices
-                    .map((idx) => question.options[idx].text)
-                    .join(' | ');
-
-                feedbackHtml = `
-                    <div class="mt-5 p-4 border rounded-xl ${feedbackClass}">
-                        <h3 class="font-bold mb-1">${feedbackTitle}</h3>
-                        <p class="text-sm mb-2">${feedbackMessage}</p>
-                        <p class="text-sm mb-2"><span class="font-semibold">Correct answer${confirmedFeedback.correctIndices.length > 1 ? 's' : ''}:</span> ${correctAnswersText}</p>
-                        <p class="text-sm"><span class="font-semibold">Why this is correct:</span> ${question.explanation}</p>
-                    </div>
-                `;
-            }
+            const feedbackHtml = buildFeedbackHtml(question, confirmedFeedback);
 
             const sidebarItems = quizData.map((item, index) => {
                 const itemId = item.id;
@@ -1143,18 +1484,10 @@
                 const isConfirmed = !!confirmedQuestions[itemId];
                 const isItemFlagged = !!flaggedQuestions[itemId];
 
-                const buttonClass = isCurrent
-                    ? 'border-blue-600 bg-blue-50 text-blue-900'
-                    : isConfirmed
-                        ? 'border-green-200 bg-white text-gray-700 hover:border-green-400'
-                        : isAnswered
-                            ? 'border-amber-200 bg-white text-gray-700 hover:border-amber-400'
-                            : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300';
-
                 return `
-                    <button type="button" onclick="goToQuestion(${index})" class="w-full flex items-center justify-between px-3 py-2 rounded-lg border text-left transition ${buttonClass}">
+                    <button id="sidebar-question-${item.id}" type="button" onclick="goToQuestion(${index})" class="w-full flex items-center justify-between px-3 py-2 rounded-lg border text-left transition ${getSidebarButtonClass(isCurrent, isAnswered, isConfirmed)}">
                         <span class="flex items-center gap-2 min-w-0">
-                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${isCurrent ? 'bg-blue-600 text-white' : isConfirmed ? 'bg-green-100 text-green-700' : isAnswered ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'}">${index + 1}</span>
+                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${getSidebarBadgeClass(isCurrent, isConfirmed, isAnswered)}">${index + 1}</span>
                             <span class="truncate">Q${index + 1}</span>
                         </span>
                         <span class="flex items-center gap-2 text-xs">
@@ -1167,65 +1500,69 @@
 
             app.innerHTML = `
                 <div class="w-full bg-gray-200 rounded-full h-2.5 mb-6 shadow-inner">
-                    <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
+                    <div id="quiz-progress-fill" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-6 flex-grow">
-                    <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8 ${animate ? 'fade-in' : ''} flex flex-col min-w-0">
-                        <div class="flex justify-between items-center mb-6 gap-3">
-                            <span class="text-sm font-bold text-gray-500 uppercase tracking-wider">Question ${currentQuestionIndex + 1} of ${quizData.length}</span>
-                            <div class="flex items-center gap-2 flex-wrap justify-end">
-                                ${question.isMultiSelect
-                                    ? `<span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg> Select ALL that apply</span>`
-                                    : `<span class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Single Choice</span>`
-                                }
-                                <button type="button" onclick="toggleFlag(${question.id})" class="px-3 py-1.5 rounded-full border text-xs font-bold transition ${isFlagged ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-amber-50 hover:border-amber-300'}">
+                <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-4 sm:gap-5 lg:gap-6 flex-grow items-start">
+                    <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 ${animate ? 'fade-in' : ''} flex flex-col min-w-0">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-5 sm:mb-6">
+                            <span id="question-counter" class="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-wider">Question ${currentQuestionIndex + 1} of ${quizData.length}</span>
+                            <div class="flex items-center gap-2 flex-wrap justify-start sm:justify-end">
+                                <span id="question-type-badge" class="${question.isMultiSelect ? 'bg-yellow-100 text-yellow-800 flex items-center' : 'bg-gray-100 text-gray-600'} text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">${question.isMultiSelect ? '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg> Select ALL that apply' : 'Single Choice'}</span>
+                                <button id="flag-question-button" type="button" onclick="toggleFlag(${question.id})" class="px-3 py-1.5 rounded-full border text-xs font-bold transition ${isFlagged ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-white border-gray-300 text-gray-600 hover:bg-amber-50 hover:border-amber-300'}">
                                     ${isFlagged ? 'Unflag' : 'Flag'}
                                 </button>
                             </div>
                         </div>
 
-                        <div class="mb-4 flex items-center justify-between gap-3 text-sm text-gray-600">
-                            <span>${confirmedFeedback ? 'Answer checked for this question.' : 'Select your answer, then click Confirm Answer.'}</span>
-                            ${confirmedFeedback ? '<span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold">Confirmed</span>' : ''}
+                        <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-gray-600">
+                            <span id="question-status-text">${confirmedFeedback ? 'Answer checked for this question.' : 'Select your answer, then click Confirm Answer.'}</span>
+                            <span id="confirmed-status-badge">${confirmedFeedback ? '<span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold">Confirmed</span>' : ''}</span>
                         </div>
 
-                        <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 mb-8 leading-relaxed">
+                        <h2 id="question-text" class="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-6 sm:mb-8 leading-relaxed">
                             ${question.text}
                         </h2>
 
-                        <div class="flex-grow">
+                        <div class="flex-grow" id="question-options-container">
                             ${optionsHtml}
-                            ${feedbackHtml}
+                            <div id="feedback-container">${feedbackHtml}</div>
                         </div>
 
-                        <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-100 gap-3 flex-wrap">
-                            <button type="button" onclick="prevQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''} class="px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg transition ${currentQuestionIndex === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50'}">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center mt-8 pt-6 border-t border-gray-100">
+                            <button id="previous-question-button" type="button" onclick="prevQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''} class="w-full px-5 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg transition ${currentQuestionIndex === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50'}">
                                 Previous
                             </button>
 
-                            <button type="button" onclick="confirmQuestion()" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow transition">
+                            <button id="confirm-question-button" type="button" onclick="confirmQuestion()" class="w-full px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow transition">
                                 Confirm Answer
                             </button>
 
                             ${currentQuestionIndex === quizData.length - 1
-                                ? `<button type="button" onclick="nextQuestion()" ${confirmedFeedback ? '' : 'disabled'} class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow transition flex items-center ${confirmedFeedback ? '' : 'opacity-40 cursor-not-allowed'}">Submit Exam</button>`
-                                : `<button type="button" onclick="nextQuestion()" ${confirmedFeedback ? '' : 'disabled'} class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition flex items-center ${confirmedFeedback ? '' : 'opacity-40 cursor-not-allowed'}">Next <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>`
+                                ? `<button id="submit-exam-button" type="button" onclick="nextQuestion()" ${confirmedFeedback ? '' : 'disabled'} class="w-full px-5 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow transition flex items-center justify-center ${confirmedFeedback ? '' : 'opacity-40 cursor-not-allowed'}">Submit Exam</button>`
+                                : `<button id="next-question-button" type="button" onclick="nextQuestion()" ${confirmedFeedback ? '' : 'disabled'} class="w-full px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition flex items-center justify-center ${confirmedFeedback ? '' : 'opacity-40 cursor-not-allowed'}">Next <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>`
                             }
                         </div>
                     </div>
 
-                    <aside class="bg-white rounded-2xl shadow-lg p-4 sm:p-5 lg:sticky lg:top-6 h-fit">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-bold text-gray-900">Questions</h3>
-                            <span class="text-xs font-semibold text-gray-500">${Object.keys(flaggedQuestions).length} flagged</span>
+                    <aside class="bg-white rounded-2xl shadow-lg p-4 sm:p-5 lg:p-6 xl:sticky xl:top-6 h-fit">
+                        <div class="flex items-start sm:items-center justify-between mb-4 gap-3 flex-col sm:flex-row">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-gray-900">Questions</h3>
+                                <span id="flagged-count" class="text-xs font-semibold text-gray-500">${Object.keys(flaggedQuestions).length} flagged</span>
+                            </div>
+                            <button type="button" onclick="resetAllUserData()" class="w-full sm:w-auto px-3 py-2 rounded-lg border border-red-300 text-red-700 text-xs font-bold uppercase tracking-wide hover:bg-red-50 transition">
+                                Reset Data
+                            </button>
                         </div>
-                        <div class="space-y-2 max-h-[70vh] overflow-y-auto pr-1">
+                        <div id="quiz-sidebar-list" class="grid grid-cols-1 gap-2 max-h-[42vh] sm:max-h-[48vh] lg:max-h-[60vh] overflow-y-auto pr-1">
                             ${sidebarItems}
                         </div>
                     </aside>
                 </div>
             `;
+
+            restoreSidebarScrollPosition();
         }
 
         function renderResultsScreen() {
@@ -1304,16 +1641,21 @@
 
             app.innerHTML = `
                 <div class="bg-white rounded-2xl shadow-xl p-8 fade-in w-full">
-                    <div class="text-center mb-10 pb-8 border-b border-gray-200">
-                        <h2 class="text-4xl font-extrabold text-gray-900 mb-2">Exam Results</h2>
-                        <div class="text-6xl font-black ${percentage >= 70 ? 'text-green-600' : 'text-orange-600'} my-4">
+                    <div class="text-center mb-8 sm:mb-10 pb-8 border-b border-gray-200">
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2">Exam Results</h2>
+                        <div class="text-5xl sm:text-6xl font-black ${percentage >= 70 ? 'text-green-600' : 'text-orange-600'} my-4">
                             ${percentage}%
                         </div>
-                        <p class="text-xl text-gray-600 font-medium">You scored ${score} out of ${quizData.length}</p>
+                        <p class="text-lg sm:text-xl text-gray-600 font-medium">You scored ${score} out of ${quizData.length}</p>
                         <p class="text-md text-gray-500 mt-2 italic">${message}</p>
-                        <button onclick="restartQuiz()" class="mt-6 px-6 py-2 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-lg shadow transition">
+                        <div class="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+                            <button onclick="restartQuiz()" class="px-6 py-2 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-lg shadow transition">
                             Retake Exam
-                        </button>
+                            </button>
+                            <button onclick="resetAllUserData()" class="px-6 py-2 border border-red-300 text-red-700 font-semibold rounded-lg transition hover:bg-red-50">
+                            Reset Saved Data
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="h-96 overflow-y-auto pr-4">
@@ -1326,11 +1668,13 @@
 
         // --- 4. LOGIC FUNCTIONS ---
         function startQuiz() {
+            saveSidebarScrollPosition();
             currentStage = 'quiz';
             currentQuestionIndex = 0;
             userAnswers = {};
             confirmedQuestions = {};
             flaggedQuestions = {};
+            saveQuizState();
             render();
         }
 
@@ -1351,14 +1695,14 @@
             } else {
                 userAnswers[questionId] = [optionIndex]; // Replace completely
             }
-            renderQuizScreen(false); // Update option state without replaying the card animation
+            syncQuizScreen(); // Update option state without replaying the card animation
         }
 
         function confirmQuestion() {
             const question = quizData[currentQuestionIndex];
             const selectedOptions = userAnswers[question.id] || [];
             confirmedQuestions[question.id] = getQuestionFeedback(question, selectedOptions);
-            renderQuizScreen(false);
+            syncQuizScreen();
         }
 
         function nextQuestion() {
@@ -1368,8 +1712,10 @@
             }
 
             if (currentQuestionIndex < quizData.length - 1) {
+                saveSidebarScrollPosition();
                 currentQuestionIndex++;
                 render();
+                saveQuizState();
                 window.scrollTo(0, 0);
             } else {
                 finishQuiz();
@@ -1378,8 +1724,10 @@
 
         function prevQuestion() {
             if (currentQuestionIndex > 0) {
+                saveSidebarScrollPosition();
                 currentQuestionIndex--;
                 render();
+                saveQuizState();
                 window.scrollTo(0, 0);
             }
         }
@@ -1387,17 +1735,21 @@
         function finishQuiz() {
             const confirmSubmit = confirm("Are you sure you want to submit your exam?");
             if (confirmSubmit) {
+                saveSidebarScrollPosition();
                 currentStage = 'results';
+                saveQuizState();
                 render();
                 window.scrollTo(0, 0);
             }
         }
 
         function restartQuiz() {
+            clearQuizState();
             currentStage = 'start';
             userAnswers = {};
             confirmedQuestions = {};
             flaggedQuestions = {};
+            currentQuestionIndex = 0;
             render();
         }
 
