@@ -44,8 +44,7 @@ WORKDIR /app
 COPY ./backend ./
 COPY --from=backend-deps /app/node_modules ./node_modules
 
-ARG ENV=northflank
-COPY nginx.${ENV}.conf /etc/nginx/nginx.conf
+COPY nginx.northflank.conf /etc/nginx/nginx.conf
 
 ENV PORT=3000
 
