@@ -2,14 +2,23 @@ services:
   frontend:
     build:
       context: .
+      target: frontend
       args:
         ENV: development
         VITE_GEMINI_API_KEY: ${VITE_GEMINI_API_KEY}
     ports:
-      - "8080:80"
-    env_file: .env.development
+      - "${HOST_PORT:-8080}:8080"
     depends_on:
+      - backend
       - ai-slop
+
+  backend:
+    build:
+      context: .
+      target: backend
+    env_file: .env.development
+    environment:
+      CLIENT_URL: "${CLIENT_URL:-http://localhost:${HOST_PORT:-8080}}"
 
   ai-slop:
     build:
@@ -17,6 +26,3 @@ services:
       dockerfile: ./ai-slop/AI-Slop-For-CAO-exam/Dockerfile
       args:
         VITE_GEMINI_API_KEY: ${VITE_GEMINI_API_KEY}
-    ports:
-      - "8081:80"
-    env_file: .env.development

@@ -22,6 +22,7 @@ import postRoutes from "./routes/postRoutes.js";
 import gameRoutes from "./routes/gameRoutes.js";
 import secretEnvRoutes from "./routes/secretEnvRoutes.js";
 import visitorIdentifier from "./middleware/visitorIdentifier.js";
+import requestLogger from "./middleware/requestLogger.js";
 import { optional, protect } from "./middleware/verifyToken.js";
 import {
   trackVisit,
@@ -77,6 +78,7 @@ const configureTrustProxy = () => {
 
 const trustProxyValue = configureTrustProxy();
 app.set("trust proxy", trustProxyValue);
+app.use(requestLogger);
 
 // Log proxy configuration in production for debugging
 if (process.env.NODE_ENV === "production") {
@@ -120,19 +122,21 @@ app.get("/api/stats/visitor/:visitorId", optional, getVisitorDetailsInfo);
 app.get("/api/health", getHealthStatus);
 app.get("/api/stats/system", optional, getSystemStats);
 
-// Test env endpoint
-app.get("/api/test-env", (req, res) => {
-  res.json({
-    NODE_ENV: process.env.NODE_ENV,
-    MONGO_URI: !!process.env.MONGO_URI,
-    JWT_SECRET: !!process.env.JWT_SECRET,
-    CLOUDINARY_NAME: process.env.CLOUDINARY_NAME,
-    CLOUDINARY_KEY: !!process.env.CLOUDINARY_KEY,
-    CLOUDINARY_SECRET: !!process.env.CLOUDINARY_SECRET,
-    CLIENT_URL: process.env.CLIENT_URL,
-    PORT: process.env.PORT,
+// Test env endpoint (only enabled when explicitly configured for testing)
+if (process.env.ENABLE_TEST_ENDPOINT === "true") {
+  app.get("/api/test-env", (req, res) => {
+    res.json({
+      NODE_ENV: process.env.NODE_ENV,
+      MONGO_URI: !!process.env.MONGO_URI,
+      JWT_SECRET: !!process.env.JWT_SECRET,
+      CLOUDINARY_NAME: process.env.CLOUDINARY_NAME,
+      CLOUDINARY_KEY: !!process.env.CLOUDINARY_KEY,
+      CLOUDINARY_SECRET: !!process.env.CLOUDINARY_SECRET,
+      CLIENT_URL: process.env.CLIENT_URL,
+      PORT: process.env.PORT,
+    });
   });
-});
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.static(path.join(__dirname, "dist")));

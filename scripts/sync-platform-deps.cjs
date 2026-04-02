@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 
-const fs = require('fs/promises');
-const path = require('path');
-const { spawn } = require('child_process');
+const fs = require("fs/promises");
+const path = require("path");
+const { spawn } = require("child_process");
 
-const rootDir = path.resolve(__dirname, '..');
-const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const rootDir = path.resolve(__dirname, "..");
+const bunCmd = process.platform === "win32" ? "bun.exe" : "bun";
 
 const projects = [
-  { name: 'root', dir: rootDir },
-  { name: 'backend', dir: path.join(rootDir, 'backend') },
-  { name: 'ai-slop', dir: path.join(rootDir, 'ai-slop', 'AI-Slop-For-CAO-exam') }
+  { name: "root", dir: rootDir },
+  { name: "backend", dir: path.join(rootDir, "backend") },
+  {
+    name: "ai-slop",
+    dir: path.join(rootDir, "ai-slop", "AI-Slop-For-CAO-exam"),
+  },
 ];
 
 async function pathExists(targetPath) {
@@ -26,26 +29,27 @@ function runCommand(command, args, cwd) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       cwd,
-      stdio: 'inherit',
-      shell: process.platform === 'win32'
+      stdio: "inherit",
+      shell: process.platform === "win32",
     });
 
-    child.on('error', reject);
-    child.on('close', (code) => {
+    child.on("error", reject);
+    child.on("close", (code) => {
       if (code === 0) {
         resolve();
         return;
       }
 
-      reject(new Error(`Command failed (${code}): ${command} ${args.join(' ')}`));
+      reject(
+        new Error(`Command failed (${code}): ${command} ${args.join(" ")}`),
+      );
     });
   });
 }
 
 async function reinstallProject(project) {
-  const packageJsonPath = path.join(project.dir, 'package.json');
-  const lockFilePath = path.join(project.dir, 'package-lock.json');
-  const nodeModulesPath = path.join(project.dir, 'node_modules');
+  const packageJsonPath = path.join(project.dir, "package.json");
+  const nodeModulesPath = path.join(project.dir, "node_modules");
 
   if (!(await pathExists(packageJsonPath))) {
     console.log(`- Skipping ${project.name}: package.json not found`);
@@ -55,32 +59,33 @@ async function reinstallProject(project) {
   console.log(`\n==> ${project.name}`);
 
   if (await pathExists(nodeModulesPath)) {
-    console.log('Removing node_modules...');
+    console.log("Removing node_modules...");
     await fs.rm(nodeModulesPath, {
       recursive: true,
       force: true,
       maxRetries: 5,
-      retryDelay: 250
+      retryDelay: 250,
     });
   }
 
-  const installArgs = (await pathExists(lockFilePath)) ? ['ci'] : ['install'];
-  console.log(`Running ${npmCmd} ${installArgs.join(' ')}...`);
-  await runCommand(npmCmd, installArgs, project.dir);
+  console.log(`Running ${bunCmd} install...`);
+  await runCommand(bunCmd, ["install"], project.dir);
 }
 
 async function main() {
-  console.log(`Platform dependency sync for ${process.platform}/${process.arch}`);
+  console.log(
+    `Platform dependency sync for ${process.platform}/${process.arch}`,
+  );
 
   for (const project of projects) {
     await reinstallProject(project);
   }
 
-  console.log('\nDone. Dependencies are now aligned with this OS/CPU.');
+  console.log("\nDone. Dependencies are now aligned with this OS/CPU.");
 }
 
 main().catch((error) => {
-  console.error('\nPlatform dependency sync failed.');
+  console.error("\nPlatform dependency sync failed.");
   console.error(error.message);
   process.exit(1);
 });
