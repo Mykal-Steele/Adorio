@@ -7,35 +7,35 @@ const getCanvasFingerprint = () => {
       return null;
     }
 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
 
     if (!ctx) return null;
 
     canvas.width = 280;
     canvas.height = 60;
 
-    ctx.textBaseline = 'top';
+    ctx.textBaseline = "top";
     ctx.font = '14px "Times New Roman", serif';
-    ctx.fillStyle = '#f60';
+    ctx.fillStyle = "#f60";
     ctx.fillRect(125, 1, 62, 20);
 
-    ctx.fillStyle = '#069';
+    ctx.fillStyle = "#069";
     ctx.font = '11px "Arial", sans-serif';
-    ctx.fillText('Adorio Analytics 🎨📊', 2, 15);
+    ctx.fillText("Adorio Analytics 🎨📊", 2, 15);
 
-    ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+    ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
     ctx.font = '18px "Georgia", serif';
-    ctx.fillText('Fingerprint Test', 4, 45);
+    ctx.fillText("Fingerprint Test", 4, 45);
 
-    ctx.globalCompositeOperation = 'multiply';
-    ctx.fillStyle = 'rgb(255,0,255)';
+    ctx.globalCompositeOperation = "multiply";
+    ctx.fillStyle = "rgb(255,0,255)";
     ctx.beginPath();
     ctx.arc(50, 50, 50, 0, Math.PI * 2, true);
     ctx.closePath();
     ctx.fill();
 
-    ctx.fillStyle = 'rgba(255, 165, 0, 0.5)';
+    ctx.fillStyle = "rgba(255, 165, 0, 0.5)";
     ctx.beginPath();
     ctx.arc(100, 25, 25, 0, Math.PI * 2, true);
     ctx.closePath();
@@ -43,8 +43,8 @@ const getCanvasFingerprint = () => {
 
     return canvas.toDataURL();
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('Canvas fingerprinting failed:', error);
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Canvas fingerprinting failed:", error);
     }
     return null;
   }
@@ -56,11 +56,11 @@ const getWebGLFingerprint = () => {
       return null;
     }
 
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     const gl =
-      canvas.getContext('webgl') ||
-      canvas.getContext('experimental-webgl') ||
-      canvas.getContext('webgl2');
+      canvas.getContext("webgl") ||
+      canvas.getContext("experimental-webgl") ||
+      canvas.getContext("webgl2");
 
     if (!gl) return null;
 
@@ -75,23 +75,25 @@ const getWebGLFingerprint = () => {
     };
 
     try {
-      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
       if (debugInfo) {
         result.unmaskedVendor = gl.getParameter(
-          debugInfo.UNMASKED_VENDOR_WEBGL
+          debugInfo.UNMASKED_VENDOR_WEBGL,
         );
         result.unmaskedRenderer = gl.getParameter(
-          debugInfo.UNMASKED_RENDERER_WEBGL
+          debugInfo.UNMASKED_RENDERER_WEBGL,
         );
       }
-    } catch (debugError) {}
+    } catch (debugError) {
+      void debugError;
+    }
 
     result.extensions = gl.getSupportedExtensions() || [];
 
     return result;
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('WebGL fingerprinting failed:', error);
+    if (process.env.NODE_ENV === "development") {
+      console.warn("WebGL fingerprinting failed:", error);
     }
     return null;
   }
@@ -104,45 +106,45 @@ const getAvailableFonts = () => {
     }
 
     const testFonts = [
-      'Arial',
-      'Times New Roman',
-      'Helvetica',
-      'Georgia',
-      'Verdana',
-      'Courier New',
-      'Comic Sans MS',
-      'Impact',
-      'Trebuchet MS',
-      'Palatino',
-      'Tahoma',
-      'Geneva',
-      'Lucida Console',
-      'Calibri',
-      'Cambria',
-      'Times',
-      'Arial Black',
-      'Franklin Gothic Medium',
-      'Segoe UI',
-      'Roboto',
-      'Open Sans',
-      'Montserrat',
-      'Lato',
+      "Arial",
+      "Times New Roman",
+      "Helvetica",
+      "Georgia",
+      "Verdana",
+      "Courier New",
+      "Comic Sans MS",
+      "Impact",
+      "Trebuchet MS",
+      "Palatino",
+      "Tahoma",
+      "Geneva",
+      "Lucida Console",
+      "Calibri",
+      "Cambria",
+      "Times",
+      "Arial Black",
+      "Franklin Gothic Medium",
+      "Segoe UI",
+      "Roboto",
+      "Open Sans",
+      "Montserrat",
+      "Lato",
     ];
 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
 
     if (!ctx) return [];
 
-    const baseFonts = ['monospace', 'sans-serif', 'serif'];
-    const testString = 'mmmmmmmmmmlli';
-    const testSize = '72px';
+    const baseFonts = ["monospace", "sans-serif", "serif"];
+    const testString = "mmmmmmmmmmlli";
+    const testSize = "72px";
 
     canvas.width = 400;
     canvas.height = 60;
-    canvas.style.position = 'absolute';
-    canvas.style.left = '-9999px';
-    canvas.style.top = '-9999px';
+    canvas.style.position = "absolute";
+    canvas.style.left = "-9999px";
+    canvas.style.top = "-9999px";
 
     document.body.appendChild(canvas);
 
@@ -169,12 +171,16 @@ const getAvailableFonts = () => {
               if (width !== baselines[baseFont] && baselines[baseFont] > 0) {
                 detected = true;
               }
-            } catch (measureError) {}
+            } catch (measureError) {
+              void measureError;
+            }
           });
           if (detected) {
             availableFonts.push(font);
           }
-        } catch (fontTestError) {}
+        } catch (fontTestError) {
+          void fontTestError;
+        }
       });
 
       return availableFonts;
@@ -184,8 +190,8 @@ const getAvailableFonts = () => {
       }
     }
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('Font detection failed:', error);
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Font detection failed:", error);
     }
     return [];
   }
@@ -224,22 +230,22 @@ const getBrowserFingerprint = async () => {
     ]);
 
     const fingerprint = {
-      userAgent: navigator.userAgent || '',
-      platform: navigator.platform || '',
-      language: navigator.language || '',
+      userAgent: navigator.userAgent || "",
+      platform: navigator.platform || "",
+      language: navigator.language || "",
       languages: Array.isArray(navigator.languages) ? navigator.languages : [],
       cookieEnabled: navigator.cookieEnabled || false,
       doNotTrack: navigator.doNotTrack || null,
       hardwareConcurrency: navigator.hardwareConcurrency || 0,
       maxTouchPoints: navigator.maxTouchPoints || 0,
-      vendor: navigator.vendor || '',
-      productSub: navigator.productSub || '',
-      buildID: navigator.buildID || '',
-      oscpu: navigator.oscpu || '',
-      appCodeName: navigator.appCodeName || '',
-      appName: navigator.appName || '',
-      appVersion: navigator.appVersion || '',
-      product: navigator.product || '',
+      vendor: navigator.vendor || "",
+      productSub: navigator.productSub || "",
+      buildID: navigator.buildID || "",
+      oscpu: navigator.oscpu || "",
+      appCodeName: navigator.appCodeName || "",
+      appName: navigator.appName || "",
+      appVersion: navigator.appVersion || "",
+      product: navigator.product || "",
       canvas: canvas ? canvas.substring(0, 100) : null,
       fonts: fonts || [],
     };
@@ -247,9 +253,9 @@ const getBrowserFingerprint = async () => {
     // Add WebGL info in a structured way
     if (webgl) {
       fingerprint.webgl = {
-        vendor: webgl.vendor || webgl.unmaskedVendor || '',
-        renderer: webgl.renderer || webgl.unmaskedRenderer || '',
-        version: webgl.version || '',
+        vendor: webgl.vendor || webgl.unmaskedVendor || "",
+        renderer: webgl.renderer || webgl.unmaskedRenderer || "",
+        version: webgl.version || "",
         extensions: Array.isArray(webgl.extensions)
           ? webgl.extensions.slice(0, 20)
           : [],
@@ -270,14 +276,14 @@ const getBrowserFingerprint = async () => {
 
     return fingerprint;
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('Browser fingerprinting failed:', error);
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Browser fingerprinting failed:", error);
     }
     return {
-      userAgent: navigator.userAgent || '',
-      platform: navigator.platform || '',
-      language: navigator.language || '',
-      error: 'fingerprinting_failed',
+      userAgent: navigator.userAgent || "",
+      platform: navigator.platform || "",
+      language: navigator.language || "",
+      error: "fingerprinting_failed",
     };
   }
 };
@@ -300,7 +306,7 @@ const getNetworkFingerprint = () => {
 };
 
 const getBehaviorFingerprint = () => {
-  const seed = `${navigator.userAgent || ''}|${navigator.language || ''}|${Date.now()}`;
+  const seed = `${navigator.userAgent || ""}|${navigator.language || ""}|${Date.now()}`;
 
   return {
     mouseMovement: seed.slice(0, 16),
@@ -327,14 +333,14 @@ export const generateBrowserFingerprint = async () => {
         network: getNetworkFingerprint(),
         behavior: getBehaviorFingerprint(),
         timestamp: Date.now(),
-        version: '2.0',
+        version: "2.0",
       };
 
       fingerprintCache = fingerprint;
       return fingerprint;
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Fingerprint generation failed:', error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Fingerprint generation failed:", error);
       }
       return {
         screen: { width: screen.width, height: screen.height },
@@ -343,7 +349,7 @@ export const generateBrowserFingerprint = async () => {
         network: null,
         behavior: null,
         timestamp: Date.now(),
-        error: 'generation_failed',
+        error: "generation_failed",
       };
     } finally {
       fingerprintPromise = null;
@@ -354,11 +360,23 @@ export const generateBrowserFingerprint = async () => {
 };
 
 export const generateSessionId = () => {
-  let sessionId = sessionStorage.getItem('adorio_session_id');
+  let sessionId;
+
+  try {
+    sessionId = sessionStorage.getItem("adorio_session_id");
+  } catch (error) {
+    // Storage unavailable in restricted contexts (private browsing, iframes, etc.)
+    sessionId = null;
+  }
 
   if (!sessionId) {
     sessionId = `${Date.now()}-${Math.random().toString(36).substring(2)}`;
-    sessionStorage.setItem('adorio_session_id', sessionId);
+
+    try {
+      sessionStorage.setItem("adorio_session_id", sessionId);
+    } catch (error) {
+      // Storage write failed; continue with in-memory sessionId
+    }
   }
 
   return sessionId;
@@ -391,8 +409,8 @@ export const generateVisitorId = async () => {
       storageCapabilities,
     };
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('Visitor ID generation failed:', error);
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Visitor ID generation failed:", error);
     }
 
     return {
@@ -402,16 +420,16 @@ export const generateVisitorId = async () => {
       sessionId: `session-${Date.now()}`,
       fingerprint: null,
       storageCapabilities: null,
-      error: 'id_generation_failed',
+      error: "id_generation_failed",
     };
   }
 };
 
 const getPersistentId = async () => {
   const storageKeys = [
-    'adorio_persistent_id',
-    'adorio_visitor_id',
-    'visitor_identifier',
+    "adorio_persistent_id",
+    "adorio_visitor_id",
+    "visitor_identifier",
   ];
 
   try {
@@ -420,6 +438,7 @@ const getPersistentId = async () => {
       if (id) return id;
     }
   } catch (e) {
+    void e;
   }
 
   try {
@@ -427,23 +446,29 @@ const getPersistentId = async () => {
       const id = sessionStorage.getItem(key);
       if (id) {
         try {
-          localStorage.setItem('adorio_persistent_id', id);
-        } catch (e) {}
+          localStorage.setItem("adorio_persistent_id", id);
+        } catch (e) {
+          void e;
+        }
         return id;
       }
     }
   } catch (e) {
+    void e;
   }
 
   try {
-    const id = await getFromIndexedDB('adorio_visitor_store', 'persistent_id');
+    const id = await getFromIndexedDB("adorio_visitor_store", "persistent_id");
     if (id) {
       try {
-        localStorage.setItem('adorio_persistent_id', id);
-      } catch (e) {}
+        localStorage.setItem("adorio_persistent_id", id);
+      } catch (e) {
+        void e;
+      }
       return id;
     }
   } catch (e) {
+    void e;
   }
 
   return null;
@@ -455,18 +480,21 @@ const createPersistentId = async () => {
     .substring(2)}-${performance.now()}`;
 
   try {
-    localStorage.setItem('adorio_persistent_id', id);
+    localStorage.setItem("adorio_persistent_id", id);
   } catch (e) {
+    void e;
   }
 
   try {
-    sessionStorage.setItem('adorio_persistent_id', id);
+    sessionStorage.setItem("adorio_persistent_id", id);
   } catch (e) {
+    void e;
   }
 
   try {
-    await storeInIndexedDB('adorio_visitor_store', 'persistent_id', id);
+    await storeInIndexedDB("adorio_visitor_store", "persistent_id", id);
   } catch (e) {
+    void e;
   }
 
   return id;
@@ -475,7 +503,7 @@ const createPersistentId = async () => {
 const getFromIndexedDB = (storeName, key) => {
   return new Promise((resolve, reject) => {
     try {
-      const request = indexedDB.open('AdorioAnalytics', 1);
+      const request = indexedDB.open("AdorioAnalytics", 1);
 
       request.onerror = () => reject(request.error);
 
@@ -489,7 +517,7 @@ const getFromIndexedDB = (storeName, key) => {
       request.onsuccess = (event) => {
         const db = event.target.result;
         try {
-          const transaction = db.transaction([storeName], 'readonly');
+          const transaction = db.transaction([storeName], "readonly");
           const store = transaction.objectStore(storeName);
           const getRequest = store.get(key);
 
@@ -508,7 +536,7 @@ const getFromIndexedDB = (storeName, key) => {
 const storeInIndexedDB = (storeName, key, value) => {
   return new Promise((resolve, reject) => {
     try {
-      const request = indexedDB.open('AdorioAnalytics', 1);
+      const request = indexedDB.open("AdorioAnalytics", 1);
 
       request.onerror = () => reject(request.error);
 
@@ -522,7 +550,7 @@ const storeInIndexedDB = (storeName, key, value) => {
       request.onsuccess = (event) => {
         const db = event.target.result;
         try {
-          const transaction = db.transaction([storeName], 'readwrite');
+          const transaction = db.transaction([storeName], "readwrite");
           const store = transaction.objectStore(storeName);
           const putRequest = store.put(value, key);
 

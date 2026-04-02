@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import PropTypes from "prop-types";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
   useLocation,
 } from "react-router-dom";
 
@@ -33,7 +32,11 @@ const ExternalRedirect = ({ to }) => {
   return null;
 };
 
-const AppShell = ({ darkMode, setDarkMode, token }) => {
+ExternalRedirect.propTypes = {
+  to: PropTypes.string.isRequired,
+};
+
+const AppShell = ({ darkMode, setDarkMode }) => {
   usePageTracking();
   const location = useLocation();
 
@@ -45,7 +48,6 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
       <Routes>
         <Route path="/" element={<TsBussing />} />
         <Route path="/algo" element={<ExternalRedirect to="/algo.html" />} />
-        <Route path="/sleep-demo" element={<ExternalRedirect to="https://preview--autonomy-peace-blueprint.lovable.app/?__lovable_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiSkdRd09SYkdIZlM5UDNia2hxM0ZPdWF1RlBzMiIsInByb2plY3RfaWQiOiI4MmNjMzQ0MS0wMjJkLTQwMzQtOTVhZi0yM2Y2NjcxYWExODQiLCJhY2Nlc3NfdHlwZSI6InByb2plY3QiLCJpc3MiOiJsb3ZhYmxlLWFwaSIsInN1YiI6IjgyY2MzNDQxLTAyMmQtNDAzNC05NWFmLTIzZjY2NzFhYTE4NCIsImF1ZCI6WyJsb3ZhYmxlLWFwcCJdLCJleHAiOjE3NzUzODIwMzksIm5iZiI6MTc3NDc3NzIzOSwiaWF0IjoxNzc0Nzc3MjM5fQ.oUt8vOoyKp4xa5k8aavOJN6IdwqRWTpvWswe4KqCRHWBLcN388lYSYsjrLCl_30OjlVf9DB3QwMhmLoYgXE1q87cYZGUWfVE6DxdQ2Nlx81352dl4xjW0Aucqp3v2Dap_06a09q7fOkq2JiyZlawpnhhgIM7BpSxpsTEeiNaTkJwp5Hnvl8q6WppLEhJqk7jP0I42BBNiDJDCuVkABF6slZUaEveaHudm85wIAYpHXBbo-JfwuXGzXeobOHbCIhuOGPmy8hFL2H5FX-LbzVuzo0be1zDyBYifhe8noxlbJYRK1jK40LOWg1p04Qia7-ICST1rN-J2kGCH7bLUyh1skXuiVXATy9Yb3xMWn7Wbp1lxPYWLqw82YCcFoEztc6cGBSmBtrcOOsXvTN0kHLYDswAQsDd5hxjnZlvlAXzP3HbD0Fl3h6BFdhxLncYJUWs049RYqimQXja0zc1DaZuhiQ7hQBYHUbjDWr7e7W7_NkfRAtZTBi9hWq6R4bOYnhZf6zI6BfGcYkkxHNzHj1pva3sQUeHa7jx61wRQdTWUgc_SpEkFNynAYlcbv1hHEi6jixBlQSoJLoZXb4KZMQ_pbmAMzj9Nk-9_YvDM7ANzRvupNc8OvTSJZ_6y9pPEdCvUfn7mTNhNroM6kh7QLkTiFjGXL8gMZu7pEnl0Z4UIpU" />} />
         <Route
           path="/home"
           element={
@@ -98,10 +100,14 @@ const AppShell = ({ darkMode, setDarkMode, token }) => {
   );
 };
 
+AppShell.propTypes = {
+  darkMode: PropTypes.bool.isRequired,
+  setDarkMode: PropTypes.func.isRequired,
+};
+
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
   const isLoading = useAuthBootstrap();
-  const { token } = useSelector((state) => state.user);
 
   if (isLoading) {
     return (
@@ -118,11 +124,7 @@ const App = () => {
     <ErrorBoundary>
       <div className={darkMode ? "dark" : ""}>
         <Router>
-          <AppShell
-            darkMode={darkMode}
-            setDarkMode={setDarkMode}
-            token={token}
-          />
+          <AppShell darkMode={darkMode} setDarkMode={setDarkMode} />
         </Router>
       </div>
     </ErrorBoundary>

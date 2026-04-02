@@ -57,11 +57,11 @@ const TsBussing = () => {
             items={shelfItems.art}
           />
         </div>
-      </main>
+      </div>
 
       {/* Right Sidebar */}
       <RightSidebar />
-    </div>
+    </main>
   );
 };
 

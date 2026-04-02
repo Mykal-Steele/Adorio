@@ -1,8 +1,8 @@
-# Adorio - Social Media Project
+# Adorio
 
-A social platform built with React, Node, and MongoDB.
+A portfolio site and showcase of different project collections and a place to host my works and make tools I need for myself and my friends
 
-## Check It Out
+## Check out the live site
 
 Live demo: [adorio.space](https://www.adorio.space)
 
@@ -11,63 +11,53 @@ Live demo: [adorio.space](https://www.adorio.space)
 - **User Accounts** - Signup, login, authentication with JWT
 - **Posts** - Create posts with text and optional images
 - **Likes** - Like/unlike posts with optimistic updates
-- **Comments** - Comment on posts with real-time updates
+- **Comments** - Comment on posts
 - **Infinite Scroll** - Posts load as you scroll down
 - **Responsive Design** - Works on mobile, tablet, desktop
 - **Image Uploads** - Cloudinary integration for storage
 - **Animations** - Smooth transitions using Framer Motion
 - **Emoji Picker** - Add emojis to comments
-- **404 Page** - Cyberpunk-style page with spotlight effect
 - **Security** - CSP implementation to prevent XSS attacks
 
 ## Tech Stack
 
 ### Frontend:
 
-- React (with Hooks, Context)
-- Redux Toolkit for state management
-- Vite for blazing fast builds
-- Tailwind CSS for styling
-- Framer-Motion for animations
-- Axios for API calls
-- Moment.js for time formatting
-- DOMPurify for security
+- React
+- Redux for state management
+- Vite
+- Tailwind
+- Framer-Motion
+- Axios
+- Moment.js
+- DOMPurify
 
 ### Backend:
 
 - Node.js + Express
-- MongoDB + Mongoose
-- JWT authentication
-- Cloudinary for image storage
-- Compression for better performance
-- Rate limiting to prevent spam
+- MongoDB
+- JWT
+- Cloudinary for image storage + compression
 
 ## How to Run
 
 ### Frontend:
 
 ```bash
-# Install deps
-npm install
-# Dev server with hot reload
-npm run dev
+bun install
+bun run dev
 # Build for production
-npm run build
-# Build + deploy
-npm run smt
+bun run build
+# Reset all local installs
+bun run deps:reset
 ```
 
 ### Backend:
 
 ```bash
-# Go to backend folder
 cd backend
-# Install deps
-npm install
-# Run server
-node index.js
-# Or with nodemon for development
-npm run dev
+bun install
+bun run dev
 ```
 
 ## Environment Variables
@@ -88,9 +78,7 @@ CLOUDINARY_SECRET=your_cloudinary_secret
 
 ## Deployment
 
-- Frontend deployed on Vercel
-- Backend deployed on Render.com
-- MongoDB Atlas for database
+- Frontend and backend containerized and deployed on NorthFlank
 
 ## Project Structure
 
@@ -109,13 +97,7 @@ CLOUDINARY_SECRET=your_cloudinary_secret
 │   ├── utils/            # Shared utilities (errors, async helpers)
 │   ├── middleware/       # Cross-cutting Express middleware
 │   └── index.js          # Server entry point
-└── public/               # Static assets
-
-## Architecture Notes
-
-- **Backend** now follows a controller/service split so routes stay tiny and easier to test. Shared configuration (database, CORS, rate limiting, Cloudinary) lives in `backend/config` for single-source-of-truth settings. Custom `ApiError` and `asyncHandler` utilities keep error handling consistent across the stack.
-- **Frontend** bootstraps authentication via `useAuthBootstrap`, bringing Redux hydration, local storage management, and helper side effects into one place. API calls resolve their base URL from `src/config/apiConfig.js`, which keeps browser and SSR environments in sync without scattered `process.env` checks.
-- **Comments & PropTypes** were added in critical components to make intent obvious for new contributors. If you're unsure where to add a feature, look for existing services/controllers on the backend or the hooks/components pattern on the frontend to stay aligned.
+└── public/               # Static assets + random files i want to share
 ```
 
 ## Todo
@@ -124,38 +106,7 @@ CLOUDINARY_SECRET=your_cloudinary_secret
 - [ ] Notifications
 - [ ] Direct messages
 - [ ] Follow/unfollow users
-- [ ] Search functionality
-- [ ] Hashtags
-
-## Deployment
-
-### Proxy Configuration
-
-When deploying behind a reverse proxy (Render, Heroku, Cloudflare, etc.), the app automatically configures Express's `trust proxy` setting to handle forwarded headers properly.
-
-**Environment Variables:**
-
-- `TRUST_PROXY` - Override proxy trust setting (true/false/number/IP)
-- Default behavior:
-  - Production: Trust 1 proxy (Render/Heroku) or 2 proxies (Cloudflare)
-  - Development: Trust all proxies
-
-**Common Platforms:**
-
-- **Render/Heroku**: Automatically detected, trusts 1 proxy
-- **Cloudflare**: Set `CLOUDFLARE=true` or detected via `CF_RAY` header
-- **Custom**: Set `TRUST_PROXY=2` for multiple proxies
-
-This fixes the `ERR_ERL_UNEXPECTED_X_FORWARDED_FOR` error from express-rate-limit.
-
-### Analytics & Monitoring
-
-The app includes built-in analytics with:
-
-- Real-time visitor tracking
-- Page view statistics
-- User behavior analysis
-- Health monitoring at `/api/health`
+- [ ] Hashtags (Categories)
 
 ## Contributing
 

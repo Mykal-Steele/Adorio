@@ -1,15 +1,16 @@
 # Build stage
-FROM node:20-alpine AS build
+FROM oven/bun:1.3.11-alpine AS build
 
 WORKDIR /app
+ARG VITE_GEMINI_API_KEY
+ENV VITE_GEMINI_API_KEY=$VITE_GEMINI_API_KEY
 
-COPY ./ai-slop/AI-Slop-For-CAO-exam/package*.json ./
-RUN npm ci
+COPY ./ai-slop/AI-Slop-For-CAO-exam/package.json ./
+COPY ./ai-slop/AI-Slop-For-CAO-exam/bun.lock ./
+RUN bun install --frozen-lockfile
 
 COPY ./ai-slop/AI-Slop-For-CAO-exam/ ./
-COPY .env.development ./
-RUN cp .env.development .env 2>/dev/null || echo "No .env.development"
-RUN npm run build
+RUN bun run build
 
 # Production stage
 FROM nginx:alpine

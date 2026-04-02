@@ -169,7 +169,7 @@ const RyGame = () => {
         this.y,
         game.dotRadius * (1 - progress * 0.5),
         0,
-        2 * Math.PI
+        2 * Math.PI,
       );
       ctx.fill();
 
@@ -432,7 +432,7 @@ const RyGame = () => {
 
   const getDot = (lineIndex, linePosY) => {
     return game.dotList.find(
-      (dot) => dot.lineIndex === lineIndex && dot.linePosY === linePosY
+      (dot) => dot.lineIndex === lineIndex && dot.linePosY === linePosY,
     );
   };
 
@@ -490,7 +490,7 @@ const RyGame = () => {
         !getDot(tempColumn + game.numberOfColumns, 0)
       ) {
         new Dot(
-          tempColumn + Math.floor(Math.random() * 2) * game.numberOfColumns
+          tempColumn + Math.floor(Math.random() * 2) * game.numberOfColumns,
         );
         return;
       }
@@ -515,7 +515,7 @@ const RyGame = () => {
         tempCount =
           1 +
           Math.floor(
-            Math.random() * (0.7 + 2.3 * tempProgress) * difficultyMultiplier
+            Math.random() * (0.7 + 2.3 * tempProgress) * difficultyMultiplier,
           );
       }
     } else {
@@ -597,7 +597,7 @@ const RyGame = () => {
         console.error("Failed to update score:", error);
       }
     },
-    [fetchLeaderboardData]
+    [fetchLeaderboardData],
   );
 
   // Check for and save high P-Level
@@ -663,7 +663,7 @@ const RyGame = () => {
       setAchievements(newAchievements);
       localStorage.setItem(
         "rhythmDotsAchievements",
-        JSON.stringify(newAchievements)
+        JSON.stringify(newAchievements),
       );
       setShowAchievement(achievementUnlocked);
 
@@ -686,7 +686,7 @@ const RyGame = () => {
         goal: Math.min(Math.max(Math.floor(highPLevel * 0.7), 8), 25),
         description: `Reach P-Level ${Math.min(
           Math.max(Math.floor(highPLevel * 0.7), 8),
-          25
+          25,
         )}`,
         completed: false,
       };
@@ -698,7 +698,7 @@ const RyGame = () => {
         goal: Math.min(Math.max(Math.floor(highPLevel * 0.9), 15), 40),
         description: `Reach P-Level ${Math.min(
           Math.max(Math.floor(highPLevel * 0.9), 15),
-          40
+          40,
         )}`,
         completed: false,
       };
@@ -722,7 +722,7 @@ const RyGame = () => {
         setAchievements(newAchievements);
         localStorage.setItem(
           "rhythmDotsAchievements",
-          JSON.stringify(newAchievements)
+          JSON.stringify(newAchievements),
         );
 
         setShowAchievement({
@@ -813,7 +813,7 @@ const RyGame = () => {
           if (!tempDot) {
             if (!game.debugMode) {
               setGameOverMessage(
-                `You pressed the wrong key! Final P-Level: ${pLevel}`
+                `You pressed the wrong key! Final P-Level: ${pLevel}`,
               );
               setPLevel(0);
               setShowGameOverScreen(true);
@@ -826,7 +826,7 @@ const RyGame = () => {
 
             // Create hit effect
             const colorIndex = Math.floor(
-              Math.random() * colors.hitEffects.length
+              Math.random() * colors.hitEffects.length,
             );
             createHitEffect(dotPos, colorIndex);
 
@@ -866,7 +866,7 @@ const RyGame = () => {
       pLevel,
       checkHighPLevel,
       checkAchievements,
-    ]
+    ],
   );
 
   const gameLoop = useCallback(() => {
@@ -929,7 +929,7 @@ const RyGame = () => {
 
       if (game.hasStartedRainbow) {
         game.rainbowColorIndexOffset = Math.floor(
-          (tempTime / (game.tempo / 4)) % (game.numberOfColumns / 2)
+          (tempTime / (game.tempo / 4)) % (game.numberOfColumns / 2),
         );
       }
       if (game.hasStartedRainbowBackground) {
@@ -937,7 +937,7 @@ const RyGame = () => {
           1 +
           Math.floor(
             (tempTime / (game.tempo / 2)) %
-              (colors.backgroundColorSet.length - 1)
+              (colors.backgroundColorSet.length - 1),
           );
       }
       if (game.hasStartedRocking) {
@@ -1113,7 +1113,7 @@ const RyGame = () => {
       setDailyQuest(updatedQuest);
       localStorage.setItem(
         "rhythmDotsDailyQuest",
-        JSON.stringify(updatedQuest)
+        JSON.stringify(updatedQuest),
       );
 
       setShowAchievement({
@@ -1215,8 +1215,8 @@ const RyGame = () => {
             currentUser?.username === player?.username
               ? "border-purple-500/30 bg-purple-900/10"
               : index === 0
-              ? "border-amber-500/20 bg-amber-900/5"
-              : "border-gray-700/30"
+                ? "border-amber-500/20 bg-amber-900/5"
+                : "border-gray-700/30"
           }`}
         >
           <div className="flex justify-between items-center">
@@ -1241,8 +1241,8 @@ const RyGame = () => {
                   player?.rhythmGame?.peakPLevel >= 50
                     ? "text-amber-400"
                     : player?.rhythmGame?.peakPLevel >= 25
-                    ? "text-purple-400"
-                    : "text-blue-400"
+                      ? "text-purple-400"
+                      : "text-blue-400"
                 }`}
               >
                 {player?.rhythmGame?.peakPLevel || 0}
@@ -1321,8 +1321,8 @@ const RyGame = () => {
                     pLevel >= 10
                       ? "text-orange-400"
                       : pLevel >= 5
-                      ? "text-amber-300"
-                      : "text-blue-300"
+                        ? "text-amber-300"
+                        : "text-blue-300"
                   }`}
                 >
                   P-Level:{" "}
@@ -1455,7 +1455,7 @@ const RyGame = () => {
               <span>
                 {gameIsActive
                   ? `${Math.floor(
-                      (game.audioCurrentTime / game.songDuration) * 100
+                      (game.audioCurrentTime / game.songDuration) * 100,
                     )}%`
                   : "Progress"}
               </span>
@@ -1644,7 +1644,7 @@ const RyGame = () => {
                                     ? maxPLevel
                                     : pLevel) /
                                     dailyQuest.goal) *
-                                    100
+                                    100,
                                 )}%`,
                               }}
                             ></div>
@@ -1815,7 +1815,7 @@ const RyGame = () => {
         </div>
       </div>
 
-      <style jsx="true">{`
+      <style>{`
         @keyframes flowingBackgroundTitle {
           0% {
             background-position: 0% 50%;
