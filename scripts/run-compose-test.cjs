@@ -155,13 +155,9 @@ const main = async () => {
       config.waitTimeoutMs,
       "1000",
     ]);
-    run(
-      "bun",
-      ["test", "--timeout", "240000", "./tests/integration.js"],
-      {
-        env,
-      },
-    );
+    run("bun", ["test", "--timeout", "240000", "./tests/integration.js"], {
+      env,
+    });
   } catch (error) {
     testError = error;
   } finally {
