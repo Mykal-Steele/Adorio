@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Icons } from "./Icons";
 
 // Helper function for status styling
@@ -70,7 +71,16 @@ const CarouselCard = React.memo(({ card }) => (
 
 CarouselCard.displayName = "CarouselCard";
 CarouselCard.propTypes = {
-  card: {},
+  card: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    title: PropTypes.string,
+    subtitle: PropTypes.string,
+    image: PropTypes.string,
+    alt: PropTypes.string,
+    rating: PropTypes.number,
+    price: PropTypes.string,
+    badge: PropTypes.string,
+  }).isRequired,
 };
 
 export default CarouselCard;

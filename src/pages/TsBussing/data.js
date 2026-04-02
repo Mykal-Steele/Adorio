@@ -18,7 +18,7 @@ export const shelfItems = {
       subtitle: "project",
       image: "https://placehold.co/520x390/0f172a/fbbf24?text=Coming Soon",
       rating: 0,
-      price: "Down",
+      price: "Demo",
       badge: null,
     },
     {
@@ -27,7 +27,7 @@ export const shelfItems = {
       subtitle: "project",
       image: "https://placehold.co/520x390/0f172a/fbbf24?text=Coming Soon",
       rating: 0,
-      price: "Down",
+      price: "Demo",
       badge: null,
     },
     {
@@ -36,7 +36,7 @@ export const shelfItems = {
       subtitle: "project",
       image: "https://placehold.co/520x390/0f172a/fbbf24?text=Coming Soon",
       rating: 0,
-      price: "Down",
+      price: "Demo",
       badge: null,
     },
   ],
@@ -47,7 +47,7 @@ export const shelfItems = {
       subtitle: "project",
       image: "https://placehold.co/520x390/0f172a/fbbf24?text=Coming Soon",
       rating: 0,
-      price: "Down",
+      price: "Demo",
       badge: null,
     },
     {
@@ -56,7 +56,7 @@ export const shelfItems = {
       subtitle: "project",
       image: "https://placehold.co/520x390/0f172a/fbbf24?text=Coming Soon",
       rating: 0,
-      price: "Down",
+      price: "Demo",
       badge: null,
     },
     {
@@ -65,7 +65,7 @@ export const shelfItems = {
       subtitle: "project",
       image: "https://placehold.co/520x390/0f172a/fbbf24?text=Coming Soon",
       rating: 0,
-      price: "Down",
+      price: "Demo",
       badge: null,
     },
     {
@@ -74,7 +74,7 @@ export const shelfItems = {
       subtitle: "project",
       image: "https://placehold.co/520x390/0f172a/fbbf24?text=Coming Soon",
       rating: 0,
-      price: "Down",
+      price: "Demo",
       badge: null,
     },
   ],
@@ -85,7 +85,7 @@ export const shelfItems = {
       subtitle: "project",
       image: "https://placehold.co/520x390/0f172a/fbbf24?text=Coming Soon",
       rating: 0,
-      price: "Down",
+      price: "Demo",
       badge: null,
     },
     {
@@ -94,7 +94,7 @@ export const shelfItems = {
       subtitle: "project",
       image: "https://placehold.co/520x390/0f172a/fbbf24?text=Coming Soon",
       rating: 0,
-      price: "Down",
+      price: "Demo",
       badge: null,
     },
     {
@@ -103,7 +103,7 @@ export const shelfItems = {
       subtitle: "project",
       image: "https://placehold.co/520x390/0f172a/fbbf24?text=Coming Soon",
       rating: 0,
-      price: "Down",
+      price: "Demo",
       badge: null,
     },
     {
@@ -112,7 +112,7 @@ export const shelfItems = {
       subtitle: "project",
       image: "https://placehold.co/520x390/0f172a/fbbf24?text=Coming Soon",
       rating: 0,
-      price: "Down",
+      price: "Demo",
       badge: null,
     },
   ],
