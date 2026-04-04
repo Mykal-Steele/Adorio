@@ -20,36 +20,33 @@ COPY ./ai-slop/AI-Slop-For-CAO-exam/package.json ./
 COPY ./ai-slop/AI-Slop-For-CAO-exam/bun.lock ./
 RUN bun install --frozen-lockfile
 COPY ./ai-slop/AI-Slop-For-CAO-exam ./
-RUN bun run build
+RUN npm run build
 
-# Frontend runtime target (nginx only)
-FROM nginx:alpine AS frontend
+# Install backend dependencies once and reuse in runtime image
+FROM node:20-alpine AS backend-deps
 
-RUN addgroup -S adorio && adduser -S -G adorio adorio
-
-COPY --from=build-adorio --chown=adorio:adorio /adorio/dist /usr/share/nginx/html/
-COPY --from=build-ai-slop --chown=adorio:adorio /ai-slop/dist /usr/share/nginx/html/cao/
-
-ARG ENV=production
-COPY nginx.${ENV}.conf /etc/nginx/nginx.conf
-
-RUN mkdir -p /run/nginx /var/cache/nginx /var/log/nginx && \
-  chown -R adorio:adorio /run/nginx /var/cache/nginx /var/log/nginx /etc/nginx /usr/share/nginx/html
-
-EXPOSE 8080
-USER adorio
-CMD ["nginx", "-g", "daemon off;"]
-
-# Backend runtime target (bun only)
-FROM oven/bun:1.3.11-alpine AS backend
-
-RUN addgroup -S adorio && adduser -S -G adorio adorio
-
-COPY --chown=adorio:adorio ./backend /app
 WORKDIR /app
-RUN bun install --production --frozen-lockfile
+COPY ./backend/package*.json ./
+RUN npm ci --only=production
+
+# Final runtime image (frontend + backend)
+FROM node:20-alpine AS runtime
+
+RUN apk add --no-cache nginx
+
+RUN addgroup -S adorio && adduser -S -G adorio adorio
+
+WORKDIR /app
+COPY ./backend ./
+COPY --from=backend-deps /app/node_modules ./node_modules
+
+COPY nginx.northflank.conf /etc/nginx/nginx.conf
 
 ENV PORT=3000
+
+RUN printf '%s\n' '#!/bin/sh' 'set -e' 'npm start &' 'exec nginx -g "daemon off;"' > /start.sh && chmod +x /start.sh
+
+EXPOSE 8080
 
 EXPOSE 3000
 USER adorio
