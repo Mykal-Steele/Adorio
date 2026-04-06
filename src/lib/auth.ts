@@ -9,7 +9,9 @@ const authSecret =
     ? undefined
     : "dev-only-better-auth-secret-change-me-please");
 
-if (!authSecret) {
+const isProductionBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+
+if (!authSecret && !isProductionBuildPhase) {
   throw new Error("Missing BETTER_AUTH_SECRET in production environment.");
 }
 
@@ -22,7 +24,8 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
 export const auth = betterAuth({
-  secret: authSecret,
+ 
+  secret: authSecret ?? "buSFY0o1plB8NLZQugfHpdBKaL4wAQKiq0+k6sf7PZrLWJ/TobQMRNyzhG0B+eM6eJ-secret",
   baseURL: authBaseUrl,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
