@@ -14,6 +14,7 @@ export function middleware(request: NextRequest) {
   const mainHost = (process.env.MAIN_HOST ?? DEFAULT_MAIN_HOST).toLowerCase();
   const socialHost = (process.env.SOCIAL_HOST ?? DEFAULT_SOCIAL_HOST).toLowerCase();
   const { pathname, search } = request.nextUrl;
+  const isRscRequest = request.nextUrl.searchParams.has("_rsc") || request.headers.has("rsc");
 
   if (!host || host.includes("localhost") || host.startsWith("127.0.0.1")) {
     return NextResponse.next();
@@ -33,7 +34,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  if ((host === mainHost || host === `www.${mainHost}`) && pathname === "/social") {
+  if ((host === mainHost || host === `www.${mainHost}`) && pathname === "/social" && !isRscRequest) {
     const target = new URL(`https://${socialHost}/`);
     target.search = search;
     return NextResponse.redirect(target, 308);

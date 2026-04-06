@@ -3,7 +3,6 @@ import { cva } from "class-variance-authority";
 import Link from "next/link";
 import Image from "next/image";
 
-
 const statusBadge = cva(
   "px-2 py-0.5 rounded text-xs font-main font-bold uppercase tracking-wider border",
   {
@@ -49,8 +48,16 @@ const getStatusTone = (status) => {
 };
 
 const CarouselCard = ({ card }) => {
-  const CardContainer = card.href ? Link : "div";
-  const cardContainerProps = card.href ? { href: card.href } : {};
+  const isExternalLink =
+    typeof card.href === "string" && /^https?:\/\//i.test(card.href);
+
+  const CardContainer = card.href ? (isExternalLink ? "a" : Link) : "div";
+
+  const cardContainerProps = card.href
+    ? isExternalLink
+      ? { href: card.href, rel: "noopener noreferrer" }
+      : { href: card.href }
+    : {};
 
   return (
     <div className="carousel-card shrink-0 w-65 group">
