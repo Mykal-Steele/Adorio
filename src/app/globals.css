@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-social-page-bg: rgb(var(--social-page-bg));
+  --color-social-surface: rgb(var(--social-surface));
+  --color-social-ink: rgb(var(--social-ink));
+  --color-social-ink-strong: rgb(var(--social-ink-strong));
+  --color-social-border: rgb(var(--social-border));
+  --color-social-accent: rgb(var(--social-accent));
+  --color-social-danger-soft: rgb(var(--social-danger-soft));
+  --color-social-avatar-bg: rgb(var(--social-avatar-bg));
+  --color-social-avatar-border: rgb(var(--social-avatar-border));
+  --shadow-social-card-hover: 0 14px 36px rgb(var(--social-ink) / 0.12);
+}
+
+:root {
+  --social-page-bg: 247 249 243;
+  --social-surface: 255 255 255;
+  --social-ink: 38 38 38;
+  --social-ink-strong: 27 27 27;
+  --social-border: 172 191 164;
+  --social-accent: 226 232 206;
+  --social-danger-soft: 228 203 203;
+  --social-avatar-bg: 226 232 206;
+  --social-avatar-border: 172 191 164;
+}
+
+.theme-social-olive {
+  --social-page-bg: 247 249 243;
+  --social-surface: 255 255 255;
+  --social-ink: 38 38 38;
+  --social-ink-strong: 27 27 27;
+  --social-border: 172 191 164;
+  --social-accent: 226 232 206;
+  --social-danger-soft: 228 203 203;
+  --social-avatar-bg: 226 232 206;
+  --social-avatar-border: 172 191 164;
+}
+
+.theme-social-ocean {
+  --social-page-bg: 238 245 251;
+  --social-surface: 247 251 255;
+  --social-ink: 23 35 52;
+  --social-ink-strong: 12 25 41;
+  --social-border: 152 188 207;
+  --social-accent: 206 231 241;
+  --social-danger-soft: 227 202 198;
+  --social-avatar-bg: 206 231 241;
+  --social-avatar-border: 152 188 207;
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+body {
+  margin: 0;
+}
+
+.font-handwriting {
+  font-family: var(--font-marker), cursive;
+}
+
+.font-main {
+  font-family: var(--font-poppins), sans-serif;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.wood-pattern-dark {
+  background-color: #3e2723;
+  background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.02) 0px,
+      rgba(255, 255, 255, 0.02) 2px,
+      transparent 2px,
+      transparent 8px
+    ),
+    linear-gradient(to bottom, #2d1b18, #3e2723);
+}
+
+.wood-pattern-light {
+  background-color: #795548;
+  background-image: repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.05) 0px,
+      rgba(0, 0, 0, 0.05) 1px,
+      transparent 1px,
+      transparent 10px
+    ),
+    linear-gradient(to bottom, #8e6f64ff, #7a574aff);
+}
+
+.cork-pattern {
+  background-color: #d7c49e;
+  background-image: linear-gradient(
+      rgba(214, 196, 158, 0.5),
+      rgba(215, 196, 158, 0.5)
+    ),
+    url("https://media.istockphoto.com/id/517699927/photo/corkboard-texture.jpg?s=612x612&w=0&k=20&c=gVkDdfbmPLkz029sAj4T_L7aGgCmCjfpXJ8caGVyZi8=");
+  background-size: 400px;
+  background-repeat: repeat;
+}
+
+.screen-glow {
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6),
+    0 0 10px rgba(100, 255, 100, 0.2);
+  background: linear-gradient(to bottom, #1a1a1a, #0d0d0d);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 16px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #4c3131ff;
+  border-left: 1px solid #4e342e;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.8);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #5d4037;
+  border-radius: 2px;
+  border: 1px solid #3e2723;
+  background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 12px
+    ),
+    linear-gradient(to right, #77483dff, #aa7260ff, #4a2c25);
+  box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.2),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 12px
+    ),
+    linear-gradient(to right, #5d4037, #795548, #5d4037);
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background: #261a15;
+}
