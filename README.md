@@ -43,7 +43,7 @@ Next.js app with two main routes:
 - Dev uses `docker-compose.dev.yml` and runs Next.js with hot reload on port `3000`.
 - Prod uses `docker-compose.yml` and runs:
   - Next.js standalone app container on internal port `3000`
-  - Nginx reverse proxy on port `80`
+  - Nginx reverse proxy on por-t `80`
 
 Commands:
 
