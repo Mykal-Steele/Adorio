@@ -1,6 +1,6 @@
 import { Icons } from "./Icons";
 import Image from "next/image";
-
+import me from "@/assets/me.webp";
 const NAV_ITEMS = ["Home", "About"];
 
 const TECH_STACK = [
@@ -59,7 +59,7 @@ const LeftSidebar = () => {
             <div className="absolute bottom-1 right-1 w-2 h-2 bg-amber-950 rounded-full shadow-inner"></div>
             <div className="w-full h-full bg-neutral-200 flex items-center justify-center text-neutral-400 overflow-hidden">
               <Image
-                src="https://i.ibb.co/KxH3wXDS/download-3.png"
+                src={me}
                 alt="Oakar Oo"
                 width={160}
                 height={160}

@@ -1,5 +1,5 @@
 // --- DATA ---
-import socialPageImage from "@/assets/socialpage.png";
+import socialPageImage from "@/assets/socialpage.webp";
 
 export const shelfItems = {
   web: [
@@ -7,8 +7,7 @@ export const shelfItems = {
       id: 1,
       title: "E-Commerce Shop",
       subtitle: "Full Stack React",
-      image:
-        "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?q=80&w=1000&auto=format&fit=crop",
+      image: null,
       rating: 5.0,
       price: "Live",
       badge: "Featured",
@@ -17,8 +16,7 @@ export const shelfItems = {
       id: 2,
       title: "Portfolio V1",
       subtitle: "First Website",
-      image:
-        "https://images.unsplash.com/photo-1545665277-593795997972?q=80&w=1000&auto=format&fit=crop",
+      image: null,
       rating: 3.5,
       price: "Archived",
     },
@@ -26,8 +24,7 @@ export const shelfItems = {
       id: 3,
       title: "Weather Dashboard",
       subtitle: "Data Viz",
-      image:
-        "https://images.unsplash.com/photo-1592210454359-9043f067919b?q=80&w=1000&auto=format&fit=crop",
+      image: null,
       rating: 4.2,
       price: "Beta",
     },
@@ -35,8 +32,7 @@ export const shelfItems = {
       id: 4,
       title: "Task Manager",
       subtitle: "Productivity Tool",
-      image:
-        "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?q=80&w=1000&auto=format&fit=crop",
+      image: null,
       rating: 4.8,
       price: "Live",
       badge: "Useful",
@@ -57,8 +53,7 @@ export const shelfItems = {
       id: 5,
       title: "Cosmic Invaders",
       subtitle: "Arcade Shooter",
-      image:
-        "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=1000&auto=format&fit=crop",
+      image: null,
       rating: 4.5,
       price: "Playable",
       badge: "Retro",
@@ -67,8 +62,7 @@ export const shelfItems = {
       id: 6,
       title: "Dungeon Crawler",
       subtitle: "Roguelike RPG",
-      image:
-        "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop",
+      image: null,
       rating: 4.0,
       price: "Demo",
     },
@@ -76,8 +70,7 @@ export const shelfItems = {
       id: 7,
       title: "Physics Box",
       subtitle: "Matter.js Test",
-      image:
-        "https://images.unsplash.com/photo-1628126235206-5260b9ea6441?q=80&w=1000&auto=format&fit=crop",
+      image: null,
       rating: 3.8,
       price: "Proto",
     },
@@ -85,8 +78,7 @@ export const shelfItems = {
       id: 8,
       title: "Pixel Runner",
       subtitle: "Endless Platformer",
-      image:
-        "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1000&auto=format&fit=crop",
+      image: null,
       rating: 4.1,
       price: "Playable",
     },
@@ -96,8 +88,7 @@ export const shelfItems = {
       id: 9,
       title: "Neon Flux",
       subtitle: "Digital Art",
-      image:
-        "https://images.unsplash.com/photo-1633511090164-b43840ea1607?q=80&w=1000&auto=format&fit=crop",
+      image: null,
       rating: 4.9,
       price: "Gallery",
       badge: "New",
@@ -106,8 +97,7 @@ export const shelfItems = {
       id: 10,
       title: "Cyber Prism",
       subtitle: "Illustration",
-      image:
-        "https://images.unsplash.com/photo-1614850523060-8da1d56ae167?q=80&w=1000&auto=format&fit=crop",
+      image: null,
       rating: 5.0,
       price: "$320",
       badge: "Best Seller",
@@ -116,8 +106,7 @@ export const shelfItems = {
       id: 11,
       title: "Void Walker",
       subtitle: "Photography",
-      image:
-        "https://images.unsplash.com/photo-1633511090164-b43840ea1607?q=80&w=1000&auto=format&fit=crop",
+      image: null,
       rating: 4.7,
       price: "$150",
     },
@@ -125,8 +114,7 @@ export const shelfItems = {
       id: 12,
       title: "Night Walker",
       subtitle: "Photography",
-      image:
-        "https://images.unsplash.com/photo-1633511090164-b43840ea1607?q=80&w=1000&auto=format&fit=crop",
+      image: null,
       rating: 4.1,
       price: "$50",
     },

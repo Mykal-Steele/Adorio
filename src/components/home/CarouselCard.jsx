@@ -66,15 +66,23 @@ const CarouselCard = ({ card }) => {
         className="block bg-green-900/30 border border-green-500/40 rounded-lg p-2 transition-all duration-300 group-hover:bg-green-900/50 group-hover:border-green-400/60"
       >
         <div className="relative aspect-4/3 overflow-hidden rounded bg-black/50 border border-green-800/50">
-          <Image
-            src={card.image}
-            alt={card.title}
-            fill
-            sizes="260px"
-            quality={65}
-            className="object-cover w-full h-full opacity-70 transition-all duration-500 group-hover:opacity-90 group-hover:scale-110 mix-blend-luminosity group-hover:mix-blend-normal"
-            style={{ filter: "sepia(20%) hue-rotate(80deg) saturate(50%)" }}
-          />
+          {card.image ? (
+            <Image
+              src={card.image}
+              alt={card.title}
+              fill
+              sizes="260px"
+              quality={65}
+              className="object-cover w-full h-full opacity-70 transition-all duration-500 group-hover:opacity-90 group-hover:scale-110 mix-blend-luminosity group-hover:mix-blend-normal"
+              style={{ filter: "sepia(20%) hue-rotate(80deg) saturate(50%)" }}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-neutral-950 text-green-400">
+              <span className="font-main text-xs font-bold tracking-[0.3em] uppercase">
+                JS Blank
+              </span>
+            </div>
+          )}
           {card.badge && (
             <div className="absolute top-2 right-2 bg-green-500 text-black px-2 py-0.5 rounded text-[10px] font-bold ">
               {card.badge}
