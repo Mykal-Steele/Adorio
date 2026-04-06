@@ -13,8 +13,8 @@
     "lint": "eslint . && tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:migrate": "prisma migrate dev && prisma generate",
+    "prisma:migrate:deploy": "prisma migrate deploy && prisma generate",
     "prisma:studio": "prisma studio",
     "postinstall": "prisma generate",
     "docker:build": "docker build --target runner -t new-adorio:latest .",
@@ -32,8 +32,9 @@
     "docker:prod:logs": "docker compose logs -f"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.0.0",
     "@better-auth/prisma-adapter": "^1.6.0",
-    "@prisma/client": "^6.8.0",
+    "@prisma/client": "^7.6.0",
     "@radix-ui/react-slot": "^1.2.4",
     "better-auth": "^1.6.0",
     "browser-image-compression": "^2.0.2",
@@ -47,6 +48,7 @@
     "lucide-react": "^1.6.0",
     "next": "^15.3.2",
     "next-themes": "^0.4.6",
+    "pg": "^8.16.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tailwind-merge": "^3.5.0",
@@ -71,7 +73,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
     "jsdom": "^27.1.0",
-    "prisma": "^6.8.0",
+    "prisma": "^7.0.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.57.0",
     "vitest": "^3.2.4"

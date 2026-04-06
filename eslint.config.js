@@ -7,7 +7,7 @@ import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist", ".next", "next-env.d.ts"]),
+  globalIgnores(["dist", ".next", "next-env.d.ts", "src/generated/prisma/**"]),
   {
     files: ["**/*.{js,jsx,mjs,cjs}"],
     extends: [

@@ -93,6 +93,9 @@ const postVoteBoxClass =
 const commentVoteBoxClass =
   "inline-flex h-8 items-center gap-1 rounded-full px-2 text-social-ink";
 
+const disabledControlClass =
+  "disabled:cursor-not-allowed disabled:pointer-events-auto disabled:opacity-55";
+
 const initialsFor = (name: string) =>
   name
     .split(" ")
@@ -483,7 +486,12 @@ function CommentItem({
               <div className={commentVoteBoxClass + " pl-0"}>
                 <button
                   type="button"
-                  className={`inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded transition-colors ${
+                  disabled={!canInteract}
+                  className={`inline-flex h-6 w-6 items-center justify-center rounded transition-colors ${
+                    !canInteract
+                      ? "cursor-not-allowed opacity-45"
+                      : "cursor-pointer"
+                  } ${
                     comment.voteByMe === 1
                       ? "bg-social-accent"
                       : "hover:bg-social-accent"
@@ -498,7 +506,12 @@ function CommentItem({
                 </span>
                 <button
                   type="button"
-                  className={`inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded transition-colors ${
+                  disabled={!canInteract}
+                  className={`inline-flex h-6 w-6 items-center justify-center rounded transition-colors ${
+                    !canInteract
+                      ? "cursor-not-allowed opacity-45"
+                      : "cursor-pointer"
+                  } ${
                     comment.voteByMe === -1
                       ? "bg-social-danger-soft"
                       : "hover:bg-social-accent"
@@ -512,7 +525,10 @@ function CommentItem({
 
               <button
                 type="button"
-                className={actionGhostButtonClass}
+                disabled={!canInteract}
+                className={`${actionGhostButtonClass} ${
+                  !canInteract ? "cursor-not-allowed opacity-45" : ""
+                }`}
                 onClick={() => setShowReplyForm((value) => !value)}
               >
                 Reply
@@ -549,13 +565,20 @@ function CommentItem({
             suppressHydrationWarning
           />
           <div className="flex items-center gap-2 mt-1">
-            <label className="inline-flex h-8 cursor-pointer items-center gap-2 rounded-md border border-social-border bg-social-surface px-2 text-xs text-social-ink transition-colors hover:bg-social-accent/55">
+            <label
+              className={`inline-flex h-8 items-center gap-2 rounded-md border border-social-border bg-social-surface px-2 text-xs text-social-ink transition-colors ${
+                canInteract
+                  ? "cursor-pointer hover:bg-social-accent/55"
+                  : "cursor-not-allowed opacity-55"
+              }`}
+            >
               <Paperclip size={14} />
               Attach
               <input
                 className="hidden"
                 type="file"
                 multiple
+                disabled={!canInteract}
                 onChange={(event) => {
                   void addReplyAttachment(comment.id, event.target.files);
                   event.currentTarget.value = "";
@@ -564,7 +587,7 @@ function CommentItem({
             </label>
             <Button
               type="button"
-              className="h-8 px-2 text-xs"
+              className={`h-8 px-2 text-xs ${disabledControlClass}`}
               disabled={
                 !canInteract ||
                 pendingReplyByComment[comment.id] ||
@@ -687,6 +710,8 @@ export default function Social({ data }: SocialProps) {
   >({});
   const [viewerState, setViewerState] = useState<ViewerState | null>(null);
   const { theme, setTheme } = useTheme();
+  const canInteract = !!session?.user?.id;
+  const viewerName = session?.user?.name?.trim() || "You";
 
   const socialTheme = isValidSocialTheme(theme) ? theme : DEFAULT_SOCIAL_THEME;
 
@@ -858,7 +883,7 @@ export default function Social({ data }: SocialProps) {
 
   const createOptimisticPost = (): SocialPost => ({
     id: makeTempId("post"),
-    author: "You",
+    author: viewerName,
     content: draftText.trim(),
     createdAt: new Date().toISOString(),
     score: 0,
@@ -968,11 +993,12 @@ export default function Social({ data }: SocialProps) {
   };
 
   const createOptimisticComment = (
+    authorName: string,
     text: string,
     attachments: ClientAttachmentInput[],
   ): SocialComment => ({
     id: makeTempId("comment"),
-    author: "You",
+    author: authorName,
     text: text.trim(),
     createdAt: new Date().toISOString(),
     score: 0,
@@ -1000,6 +1026,7 @@ export default function Social({ data }: SocialProps) {
     }
 
     const optimisticComment = createOptimisticComment(
+      viewerName,
       draft.text,
       draft.attachments,
     );
@@ -1131,6 +1158,7 @@ export default function Social({ data }: SocialProps) {
     }
 
     const optimisticReply = createOptimisticComment(
+      viewerName,
       draft.text,
       draft.attachments,
     );
@@ -1347,6 +1375,15 @@ export default function Social({ data }: SocialProps) {
           </aside>
 
           <section className="grid gap-4" aria-label="Post feed">
+            {!canInteract ? (
+              <Card className="bg-social-surface shadow-sm">
+                <CardContent className="mt-4 border border-dashed border-social-border pt-5 text-sm text-social-ink/80">
+                  Sign in to post, comment, and vote. You can continue browsing
+                  the board while signed out.
+                </CardContent>
+              </Card>
+            ) : null}
+
             <Card className="bg-social-surface shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -1366,13 +1403,20 @@ export default function Social({ data }: SocialProps) {
                   />
 
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-md bg-social-surface px-3 py-2 text-sm font-medium text-social-ink transition-colors hover:bg-social-accent/45">
+                    <label
+                      className={`inline-flex items-center gap-2 rounded-md bg-social-surface px-3 py-2 text-sm font-medium text-social-ink transition-colors ${
+                        canInteract
+                          ? "cursor-pointer hover:bg-social-accent/45"
+                          : "cursor-not-allowed opacity-55"
+                      }`}
+                    >
                       <Paperclip size={14} />
                       Add attachments
                       <input
                         className="hidden"
                         type="file"
                         multiple
+                        disabled={!canInteract}
                         onChange={async (event) => {
                           const inputEl = event.currentTarget;
                           const parsed = await handleFiles(event.target.files);
@@ -1386,11 +1430,11 @@ export default function Social({ data }: SocialProps) {
                     </label>
 
                     <Button
-                      className="bg-social-ink text-social-accent hover:bg-social-ink-strong"
+                      className={`bg-social-ink text-social-accent hover:bg-social-ink-strong ${disabledControlClass}`}
                       type="button"
                       onClick={handleCreatePost}
                       disabled={
-                        !session?.user?.id ||
+                        !canInteract ||
                         isPosting ||
                         (!draftText.trim() && draftAttachments.length === 0)
                       }
@@ -1525,7 +1569,12 @@ export default function Social({ data }: SocialProps) {
                       <div className={postVoteBoxClass}>
                         <button
                           type="button"
-                          className={`inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded transition-colors ${
+                          disabled={!canInteract}
+                          className={`inline-flex h-6 w-6 items-center justify-center rounded transition-colors ${
+                            !canInteract
+                              ? "cursor-not-allowed opacity-45"
+                              : "cursor-pointer"
+                          } ${
                             post.voteByMe === 1
                               ? "bg-social-accent"
                               : "hover:bg-social-accent/65"
@@ -1540,7 +1589,12 @@ export default function Social({ data }: SocialProps) {
                         </span>
                         <button
                           type="button"
-                          className={`inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded transition-colors ${
+                          disabled={!canInteract}
+                          className={`inline-flex h-6 w-6 items-center justify-center rounded transition-colors ${
+                            !canInteract
+                              ? "cursor-not-allowed opacity-45"
+                              : "cursor-pointer"
+                          } ${
                             post.voteByMe === -1
                               ? "bg-social-danger-soft"
                               : "hover:bg-social-accent/65"
@@ -1584,13 +1638,20 @@ export default function Social({ data }: SocialProps) {
                             suppressHydrationWarning
                           />
                           <div className="flex items-center gap-2 mt-1">
-                            <label className="inline-flex h-8 cursor-pointer items-center gap-2 rounded-md border border-social-border bg-social-surface px-2 text-xs text-social-ink transition-colors hover:bg-social-accent/55">
+                            <label
+                              className={`inline-flex h-8 items-center gap-2 rounded-md border border-social-border bg-social-surface px-2 text-xs text-social-ink transition-colors ${
+                                canInteract
+                                  ? "cursor-pointer hover:bg-social-accent/55"
+                                  : "cursor-not-allowed opacity-55"
+                              }`}
+                            >
                               <Paperclip size={14} />
                               Attach
                               <input
                                 type="file"
                                 className="hidden"
                                 multiple
+                                disabled={!canInteract}
                                 onChange={async (event) => {
                                   const inputEl = event.currentTarget;
                                   const files = await handleFiles(
@@ -1618,9 +1679,9 @@ export default function Social({ data }: SocialProps) {
                             </label>
                             <Button
                               type="button"
-                              className="h-8 px-2 text-xs"
+                              className={`h-8 px-2 text-xs ${disabledControlClass}`}
                               disabled={
-                                !session?.user?.id ||
+                                !canInteract ||
                                 pendingCommentByPost[post.id] ||
                                 (!postDraft.text.trim() &&
                                   postDraft.attachments.length === 0)
@@ -1830,7 +1891,7 @@ export default function Social({ data }: SocialProps) {
                                       !!loadingAttachmentById[attachmentId]
                                     }
                                     prefetchAttachment={prefetchAttachment}
-                                    canInteract={!!session?.user?.id}
+                                    canInteract={canInteract}
                                   />
                                 ))}
                               </div>

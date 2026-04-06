@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   images: {
     // Keep WebP first to avoid expensive AVIF encode time on cache misses.
     formats: ["image/webp", "image/avif"],
+    qualities: [65, 75],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {

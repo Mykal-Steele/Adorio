@@ -1,6 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { REPUTATION_MULTIPLIER } from "@/lib/constants";
 import type { ReputationEntry, SocialAttachment, SocialBoardData, SocialComment, SocialPost } from "@/lib/types";
