@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    command: bun run dev --hostname 0.0.0.0 --port 3000
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped

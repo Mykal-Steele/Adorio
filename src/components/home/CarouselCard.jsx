@@ -3,6 +3,7 @@ import { cva } from "class-variance-authority";
 import Link from "next/link";
 import Image from "next/image";
 
+
 const statusBadge = cva(
   "px-2 py-0.5 rounded text-xs font-main font-bold uppercase tracking-wider border",
   {
