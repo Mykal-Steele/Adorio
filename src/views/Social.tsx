@@ -1633,7 +1633,7 @@ export default function Social({ data }: SocialProps) {
                             </Button>
                           </div>
                           {/* Attachment preview below textbox, like post composer */}
-                            {postDraft.attachments.length > 0 ? (
+                          {postDraft.attachments.length > 0 ? (
                             <div className="grid gap-2">
                               <p className="text-xs font-medium text-social-ink/75">
                                 {postDraft.attachments.length} file(s) attached

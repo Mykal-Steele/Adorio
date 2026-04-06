@@ -140,7 +140,9 @@ export default function SocialAuthPage() {
               onChange={(event) => setPassword(event.target.value)}
               type="password"
               placeholder="Password"
-              autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
+              autoComplete={
+                mode === "sign-up" ? "new-password" : "current-password"
+              }
               required
               minLength={8}
             />
@@ -154,14 +156,22 @@ export default function SocialAuthPage() {
             </Button>
           </form>
 
-          <Button type="button" variant="outline" onClick={signInGoogle} disabled={isSubmitting}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={signInGoogle}
+            disabled={isSubmitting}
+          >
             Continue with Google
           </Button>
 
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
           <p className="text-sm text-social-ink/75">
-            Back to <Link href="/social" className="underline">Social board</Link>
+            Back to{" "}
+            <Link href="/social" className="underline">
+              Social board
+            </Link>
           </p>
         </CardContent>
       </Card>
