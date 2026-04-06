@@ -3,56 +3,68 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { prisma } from "@/lib/prisma";
 
-const authSecret =
-  process.env.BETTER_AUTH_SECRET ??
-  (process.env.NODE_ENV === "production"
-    ? undefined
-    : "dev-only-better-auth-secret-change-me-please");
-
 const isProductionBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
 
-if (!authSecret && !isProductionBuildPhase) {
-  throw new Error("Missing BETTER_AUTH_SECRET in production environment.");
-}
+const createAuth = () => {
+  const authSecret =
+    process.env.BETTER_AUTH_SECRET ??
+    (process.env.NODE_ENV === "production"
+      ? undefined
+      : "dev-only-better-auth-secret-change-me-please");
 
-const authBaseUrl =
-  process.env.BETTER_AUTH_URL ??
-  process.env.NEXT_PUBLIC_APP_URL ??
-  "http://localhost:3000";
+  if (!authSecret && !isProductionBuildPhase) {
+    throw new Error("Missing BETTER_AUTH_SECRET in production environment.");
+  }
 
-const googleClientId = process.env.GOOGLE_CLIENT_ID;
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const authBaseUrl =
+    process.env.BETTER_AUTH_URL ??
+    process.env.NEXT_PUBLIC_APP_URL ??
+    "http://localhost:3000";
 
-export const auth = betterAuth({
- 
-  secret: authSecret ?? "buSFY0o1plB8NLZQugfHpdBKaL4wAQKiq0+k6sf7PZrLWJ/TobQMRNyzhG0B+eM6eJ-secret",
-  baseURL: authBaseUrl,
-  database: prismaAdapter(prisma, {
-    provider: "postgresql",
-  }),
-  user: {
-    modelName: "User",
-  },
-  session: {
-    modelName: "Session",
-  },
-  account: {
-    modelName: "Account",
-  },
-  verification: {
-    modelName: "Verification",
-  },
-  emailAndPassword: {
-    enabled: true,
-  },
-  socialProviders:
-    googleClientId && googleClientSecret
-      ? {
-          google: {
-            clientId: googleClientId,
-            clientSecret: googleClientSecret,
-          },
-        }
-      : {},
-  plugins: [nextCookies()],
-});
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+  return betterAuth({
+    // Next may evaluate route modules during build before runtime env injection.
+    secret: authSecret ?? "build-time-placeholder-secret",
+    baseURL: authBaseUrl,
+    database: prismaAdapter(prisma, {
+      provider: "postgresql",
+    }),
+    user: {
+      modelName: "User",
+    },
+    session: {
+      modelName: "Session",
+    },
+    account: {
+      modelName: "Account",
+    },
+    verification: {
+      modelName: "Verification",
+    },
+    emailAndPassword: {
+      enabled: true,
+    },
+    socialProviders:
+      googleClientId && googleClientSecret
+        ? {
+            google: {
+              clientId: googleClientId,
+              clientSecret: googleClientSecret,
+            },
+          }
+        : {},
+    plugins: [nextCookies()],
+  });
+};
+
+let authInstance: ReturnType<typeof createAuth> | undefined;
+
+export const getAuth = () => {
+  if (!authInstance) {
+    authInstance = createAuth();
+  }
+
+  return authInstance;
+};
