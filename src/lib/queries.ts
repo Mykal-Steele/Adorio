@@ -23,16 +23,9 @@ type PostQueryResult = Prisma.PostGetPayload<{
         isPdf: true;
       };
     };
-    votes: {
-      select: {
-        value: true;
-        user: {
-          select: { id: true; name: true };
-        };
-      };
-    };
     comments: {
       orderBy: { createdAt: "desc" };
+      take: 200;
       select: {
         id: true;
         text: true;
@@ -49,14 +42,6 @@ type PostQueryResult = Prisma.PostGetPayload<{
             sizeBytes: true;
             isImage: true;
             isPdf: true;
-          };
-        };
-        votes: {
-          select: {
-            value: true;
-            user: {
-              select: { id: true; name: true };
-            };
           };
         };
       };
@@ -93,50 +78,6 @@ const mapAttachment = (attachment: {
   isImage: attachment.isImage,
   isPdf: attachment.isPdf,
 });
-
-const buildCommentTree = (
-  comments: CommentQueryResult[],
-  viewerUserId: string | null,
-): SocialComment[] => {
-  const childrenByParent = new Map<string, CommentQueryResult[]>();
-
-  comments.forEach((comment) => {
-    if (!comment.parentId) {
-      return;
-    }
-
-    const bucket = childrenByParent.get(comment.parentId) ?? [];
-    bucket.push(comment);
-    childrenByParent.set(comment.parentId, bucket);
-  });
-
-  const mapCommentNode = (comment: CommentQueryResult): SocialComment => {
-    const score = comment.votes.reduce((total, vote) => total + vote.value, 0);
-    const voteByMe = toVoteValue(
-      comment.votes.find((vote) => vote.user.id === viewerUserId)?.value ?? 0,
-    );
-    const directReplies = (childrenByParent.get(comment.id) ?? [])
-      .slice()
-      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-      .map((reply) => mapCommentNode(reply));
-
-    return {
-      id: comment.id,
-      author: comment.author.name,
-      text: comment.text,
-      createdAt: comment.createdAt.toISOString(),
-      score,
-      voteByMe,
-      attachments: comment.attachments.map((attachment) => mapAttachment(attachment)),
-      replies: directReplies,
-    };
-  };
-
-  return comments
-    .filter((comment) => !comment.parentId)
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-    .map((comment) => mapCommentNode(comment));
-};
 
 const collectReputationFromComments = (comments: SocialComment[], tracker: Map<string, number>) => {
   comments.forEach((comment) => {
@@ -178,7 +119,6 @@ const buildReputationBoard = (
 };
 
 const getSocialBoardDataUncached = async (
-  viewerUserId: string | null,
   viewerName: string | null,
 ): Promise<SocialBoardData> => {
   let posts: PostQueryResult[] = [];
@@ -204,16 +144,9 @@ const getSocialBoardDataUncached = async (
             isPdf: true,
           },
         },
-        votes: {
-          select: {
-            value: true,
-            user: {
-              select: { id: true, name: true },
-            },
-          },
-        },
         comments: {
           orderBy: { createdAt: "desc" },
+          take: 200,
           select: {
             id: true,
             text: true,
@@ -232,14 +165,6 @@ const getSocialBoardDataUncached = async (
                 isPdf: true,
               },
             },
-            votes: {
-              select: {
-                value: true,
-                user: {
-                  select: { id: true, name: true },
-                },
-              },
-            },
           },
         },
       },
@@ -252,21 +177,96 @@ const getSocialBoardDataUncached = async (
     };
   }
 
-  const mappedPosts: SocialPost[] = posts.map((post) => {
-    const score = post.votes.reduce((total, vote) => total + vote.value, 0);
-    const voteByMe = toVoteValue(
-      post.votes.find((vote) => vote.user.id === viewerUserId)?.value ?? 0,
-    );
+  const postIds = posts.map((post) => post.id);
+  const commentIds = posts.flatMap((post) =>
+    post.comments.map((comment) => comment.id),
+  );
 
+  const [postVoteSums, commentVoteSums] = await Promise.all([
+    postIds.length > 0
+      ? prisma.postVote.groupBy({
+          by: ["postId"],
+          where: {
+            postId: {
+              in: postIds,
+            },
+          },
+          _sum: {
+            value: true,
+          },
+        })
+      : Promise.resolve([]),
+    commentIds.length > 0
+      ? prisma.commentVote.groupBy({
+          by: ["commentId"],
+          where: {
+            commentId: {
+              in: commentIds,
+            },
+          },
+          _sum: {
+            value: true,
+          },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const postScoreById = new Map(
+    postVoteSums.map((item) => [item.postId, item._sum.value ?? 0]),
+  );
+  const commentScoreById = new Map(
+    commentVoteSums.map((item) => [item.commentId, item._sum.value ?? 0]),
+  );
+
+  const buildCommentTreeWithScores = (
+    comments: CommentQueryResult[],
+  ): SocialComment[] => {
+    const childrenByParent = new Map<string, CommentQueryResult[]>();
+
+    comments.forEach((comment) => {
+      if (!comment.parentId) {
+        return;
+      }
+
+      const bucket = childrenByParent.get(comment.parentId) ?? [];
+      bucket.push(comment);
+      childrenByParent.set(comment.parentId, bucket);
+    });
+
+    const mapCommentNode = (comment: CommentQueryResult): SocialComment => {
+      const directReplies = (childrenByParent.get(comment.id) ?? [])
+        .slice()
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+        .map((reply) => mapCommentNode(reply));
+
+      return {
+        id: comment.id,
+        author: comment.author.name,
+        text: comment.text,
+        createdAt: comment.createdAt.toISOString(),
+        score: commentScoreById.get(comment.id) ?? 0,
+        voteByMe: 0,
+        attachments: comment.attachments.map((attachment) => mapAttachment(attachment)),
+        replies: directReplies,
+      };
+    };
+
+    return comments
+      .filter((comment) => !comment.parentId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .map((comment) => mapCommentNode(comment));
+  };
+
+  const mappedPosts: SocialPost[] = posts.map((post) => {
     return {
       id: post.id,
       author: post.author.name,
       content: post.content,
       createdAt: post.createdAt.toISOString(),
-      score,
-      voteByMe,
+      score: postScoreById.get(post.id) ?? 0,
+      voteByMe: 0,
       attachments: post.attachments.map((attachment) => mapAttachment(attachment)),
-      comments: buildCommentTree(post.comments, viewerUserId),
+      comments: buildCommentTreeWithScores(post.comments),
     };
   });
 
@@ -274,7 +274,7 @@ const getSocialBoardDataUncached = async (
 };
 
 const getAnonymousSocialBoardDataCached = unstable_cache(
-  async () => getSocialBoardDataUncached(null, null),
+  async () => getSocialBoardDataUncached(null),
   ["social-board-data"],
   {
     revalidate: 30,
@@ -282,13 +282,34 @@ const getAnonymousSocialBoardDataCached = unstable_cache(
   },
 );
 
-export const getSocialBoardData = async (
-  viewerUserId: string | null,
-  viewerName: string | null,
-): Promise<SocialBoardData> => {
-  if (!viewerUserId) {
-    return getAnonymousSocialBoardDataCached();
-  }
+export const getSocialBoardData = async (): Promise<SocialBoardData> =>
+  getAnonymousSocialBoardDataCached();
 
-  return getSocialBoardDataUncached(viewerUserId, viewerName);
+type SocialViewerVotes = {
+  postVotes: Record<string, -1 | 0 | 1>;
+  commentVotes: Record<string, -1 | 0 | 1>;
+};
+
+export const getSocialViewerVotes = async (
+  viewerUserId: string,
+): Promise<SocialViewerVotes> => {
+  const [postVotes, commentVotes] = await Promise.all([
+    prisma.postVote.findMany({
+      where: { userId: viewerUserId },
+      select: { postId: true, value: true },
+    }),
+    prisma.commentVote.findMany({
+      where: { userId: viewerUserId },
+      select: { commentId: true, value: true },
+    }),
+  ]);
+
+  return {
+    postVotes: Object.fromEntries(
+      postVotes.map((vote) => [vote.postId, toVoteValue(vote.value)]),
+    ),
+    commentVotes: Object.fromEntries(
+      commentVotes.map((vote) => [vote.commentId, toVoteValue(vote.value)]),
+    ),
+  };
 };

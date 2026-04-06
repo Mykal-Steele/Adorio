@@ -22,27 +22,25 @@ export function middleware(request: NextRequest) {
 
   if (host === socialHost) {
     if (pathname === "/") {
-      const rewriteUrl = request.nextUrl.clone();
-      rewriteUrl.pathname = "/social";
-      return NextResponse.rewrite(rewriteUrl);
-    }
-
-    if (pathname === "/social") {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/";
-      return NextResponse.redirect(redirectUrl, 308);
+      redirectUrl.pathname = "/social";
+      const response = NextResponse.redirect(redirectUrl, 308);
+      response.headers.set("Cache-Control", "public, s-maxage=86400");
+      return response;
     }
   }
 
   if ((host === mainHost || host === `www.${mainHost}`) && pathname === "/social" && !isRscRequest) {
-    const target = new URL(`https://${socialHost}/`);
+    const target = new URL(`https://${socialHost}/social`);
     target.search = search;
-    return NextResponse.redirect(target, 308);
+    const response = NextResponse.redirect(target, 308);
+    response.headers.set("Cache-Control", "public, s-maxage=86400");
+    return response;
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)"],
 };

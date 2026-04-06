@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { getAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getSocialViewerVotes } from "@/lib/queries";
 import {
   createCommentSchema,
   createPostSchema,
@@ -54,6 +55,22 @@ export const getAttachmentDataUrlAction = async (input: unknown) => {
   }
 };
 
+export const getSocialViewerVotesAction = async () => {
+  try {
+    const viewerId = await getSessionUserId();
+
+    if (!viewerId) {
+      return { ok: false as const, error: "Please sign in." };
+    }
+
+    const votes = await getSocialViewerVotes(viewerId);
+    return { ok: true as const, votes };
+  } catch (error) {
+    console.error(error);
+    return { ok: false as const, error: "Internal server error" };
+  }
+};
+
 export const createPostAction = async (input: unknown) => {
   const parsed = createPostSchema.safeParse(input);
 
@@ -68,7 +85,7 @@ export const createPostAction = async (input: unknown) => {
       return { ok: false as const, error: "Please sign in to post." };
     }
 
-    await prisma.post.create({
+    const createdPost = await prisma.post.create({
       data: {
         content: parsed.data.content,
         authorId: viewerId,
@@ -83,10 +100,20 @@ export const createPostAction = async (input: unknown) => {
           })),
         },
       },
+      select: {
+        id: true,
+        createdAt: true,
+      },
     });
 
     refreshSocialRoute();
-    return { ok: true as const };
+    return {
+      ok: true as const,
+      post: {
+        id: createdPost.id,
+        createdAt: createdPost.createdAt.toISOString(),
+      },
+    };
   } catch (error) {
     console.error(error);
     return { ok: false as const, error: "Internal server error" };

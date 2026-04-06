@@ -1,6 +1,4 @@
 import { Suspense } from "react";
-import { headers } from "next/headers";
-import { getAuth } from "@/lib/auth";
 import { getSocialBoardData } from "@/lib/queries";
 import Social from "@/views/Social";
 import SocialLoading from "./loading";
@@ -8,21 +6,7 @@ import SocialLoading from "./loading";
 export const revalidate = 30;
 
 async function SocialData() {
-  const auth = getAuth();
-  let session: Awaited<ReturnType<typeof auth.api.getSession>> | null = null;
-
-  try {
-    session = await auth.api.getSession({
-      headers: await headers(),
-    });
-  } catch {
-    session = null;
-  }
-
-  const data = await getSocialBoardData(
-    session?.user?.id ?? null,
-    session?.user?.name ?? null,
-  );
+  const data = await getSocialBoardData();
 
   return <Social data={data} />;
 }

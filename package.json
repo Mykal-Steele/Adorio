@@ -29,7 +29,10 @@
     "docker:dev:logs": "docker compose -f docker-compose.dev.yml logs -f",
     "docker:prod:up": "docker compose up -d --build",
     "docker:prod:down": "docker compose down",
-    "docker:prod:logs": "docker compose logs -f"
+    "docker:prod:logs": "docker compose logs -f",
+    "docker:prod:proxy:up": "docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d --build",
+    "docker:prod:proxy:down": "docker compose -f docker-compose.yml -f docker-compose.proxy.yml down",
+    "docker:prod:proxy:logs": "docker compose -f docker-compose.yml -f docker-compose.proxy.yml logs -f"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",

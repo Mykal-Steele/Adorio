@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowBigDown,
@@ -35,6 +35,7 @@ import {
   createCommentAction,
   createPostAction,
   getAttachmentDataUrlAction,
+  getSocialViewerVotesAction,
   voteCommentAction,
   votePostAction,
 } from "@/app/social/actions";
@@ -239,6 +240,23 @@ const replaceCommentIdInTree = (
       replies: replaceCommentIdInTree(comment.replies, tempId, realId),
     };
   });
+
+const applyCommentVoteOverlay = (
+  comments: SocialComment[],
+  commentVotes: Record<string, -1 | 0 | 1>,
+): SocialComment[] =>
+  comments.map((comment) => ({
+    ...comment,
+    voteByMe: commentVotes[comment.id] ?? 0,
+    replies: applyCommentVoteOverlay(comment.replies, commentVotes),
+  }));
+
+const clearCommentVotes = (comments: SocialComment[]): SocialComment[] =>
+  comments.map((comment) => ({
+    ...comment,
+    voteByMe: 0,
+    replies: clearCommentVotes(comment.replies),
+  }));
 
 function AttachmentViewer({
   state,
@@ -664,6 +682,7 @@ export default function Social({ data }: SocialProps) {
   const { data: session } = authClient.useSession();
   const [actionError, setActionError] = useState<string | null>(null);
   const [isPosting, setIsPosting] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [pendingCommentByPost, setPendingCommentByPost] = useState<
     Record<string, boolean>
   >({});
@@ -712,8 +731,62 @@ export default function Social({ data }: SocialProps) {
   const { theme, setTheme } = useTheme();
   const canInteract = !!session?.user?.id;
   const viewerName = session?.user?.name?.trim() || "You";
+  const myReputation = useMemo(() => {
+    const signedInName = session?.user?.name?.trim();
+
+    if (!signedInName) {
+      return 0;
+    }
+
+    return (
+      data.reputationBoard.find((entry) => entry.author === signedInName)
+        ?.points ?? 0
+    );
+  }, [data.reputationBoard, session?.user?.name]);
 
   const socialTheme = isValidSocialTheme(theme) ? theme : DEFAULT_SOCIAL_THEME;
+
+  useEffect(() => {
+    const viewerId = session?.user?.id;
+
+    if (!viewerId) {
+      setPosts((current) =>
+        current.map((post) => ({
+          ...post,
+          voteByMe: 0,
+          comments: clearCommentVotes(post.comments),
+        })),
+      );
+      return;
+    }
+
+    let isCancelled = false;
+
+    const hydrateVotes = async () => {
+      const result = await getSocialViewerVotesAction();
+
+      if (!result.ok || isCancelled) {
+        return;
+      }
+
+      setPosts((current) =>
+        current.map((post) => ({
+          ...post,
+          voteByMe: result.votes.postVotes[post.id] ?? 0,
+          comments: applyCommentVoteOverlay(
+            post.comments,
+            result.votes.commentVotes,
+          ),
+        })),
+      );
+    };
+
+    void hydrateVotes();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [session?.user?.id]);
 
   const visiblePosts = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -927,8 +1000,18 @@ export default function Social({ data }: SocialProps) {
       return;
     }
 
+    setPosts((current) =>
+      current.map((post) =>
+        post.id === optimisticPost.id
+          ? {
+              ...post,
+              id: result.post.id,
+              createdAt: result.post.createdAt,
+            }
+          : post,
+      ),
+    );
     setIsPosting(false);
-    router.refresh();
   };
 
   const handleVotePost = (postId: string, value: -1 | 1) => {
@@ -1117,7 +1200,6 @@ export default function Social({ data }: SocialProps) {
       ...current,
       [postId]: false,
     }));
-    router.refresh();
   };
 
   const handleCreateReply = async (postId: string, parentId: string) => {
@@ -1241,7 +1323,6 @@ export default function Social({ data }: SocialProps) {
       ...current,
       [parentId]: false,
     }));
-    router.refresh();
   };
 
   return (
@@ -1270,12 +1351,18 @@ export default function Social({ data }: SocialProps) {
                 type="button"
                 variant="outline"
                 className="h-9 bg-social-surface text-social-ink hover:bg-social-accent/55"
+                disabled={isSigningOut}
                 onClick={async () => {
-                  await authClient.signOut();
-                  router.refresh();
+                  setIsSigningOut(true);
+                  try {
+                    await authClient.signOut();
+                    router.refresh();
+                  } finally {
+                    setIsSigningOut(false);
+                  }
                 }}
               >
-                Sign out
+                {isSigningOut ? "Signing out..." : "Sign out"}
               </Button>
             ) : (
               <Button
@@ -1332,7 +1419,7 @@ export default function Social({ data }: SocialProps) {
                     className="text-3xl font-bold tracking-tight text-social-ink leading-tight flex items-center justify-center mb-1"
                     style={{ minHeight: "2.5em" }}
                   >
-                    {data.myReputation}
+                    {myReputation}
                   </p>
                   <p className="text-xs text-social-ink/75 text-center mb-1">
                     Reputation points earned from positive reactions.
@@ -1377,7 +1464,7 @@ export default function Social({ data }: SocialProps) {
           <section className="grid gap-4" aria-label="Post feed">
             {!canInteract ? (
               <Card className="bg-social-surface shadow-sm">
-                <CardContent className="mt-4 border border-dashed border-social-border pt-5 text-sm text-social-ink/80">
+                <CardContent className="pt-5 text-sm text-social-ink/80">
                   Sign in to post, comment, and vote. You can continue browsing
                   the board while signed out.
                 </CardContent>
