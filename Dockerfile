@@ -18,7 +18,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN bun run build
+RUN bun run prisma:generate && bun run build
 
 FROM base AS runner
 WORKDIR /app
