@@ -1,14 +1,14 @@
-import corkboardTexture from "@/assets/corkboard.webp";
+import woodBackground from "@/assets/wood.webp";
 import { shelfItems } from "@/components/home/config/data";
 import LeftSidebar from "@/components/home/LeftSidebar";
 import RightSidebar from "@/components/home/RightSidebar";
 import Shelf from "@/components/home/Shelf";
 
 const backgroundStyle = {
-  backgroundImage: `linear-gradient(rgba(36, 25, 20, 0.22), rgba(36, 25, 20, 0.22)), url(${corkboardTexture.src})`,
+  backgroundImage: `url(${woodBackground.src})`,
   backgroundSize: "cover",
   backgroundPosition: "center",
-  opacity: 0.58,
+  opacity: 0.55,
 };
 
 const shelves = [

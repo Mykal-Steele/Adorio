@@ -45,7 +45,7 @@ export const shelfItems = {
       rating: 5.0,
       price: "Live",
       badge: "New",
-      href: "https://social.adorio.space/",
+      href: "/social",
     },
   ],
   games: [

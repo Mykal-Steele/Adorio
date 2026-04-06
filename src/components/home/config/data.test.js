@@ -5,7 +5,7 @@ describe("home shelf data", () => {
     const socialCard = shelfItems.web.find((item) => item.title === "Social");
 
     expect(socialCard).toBeDefined();
-    expect(socialCard.href).toBe("https://social.adorio.space/");
+    expect(socialCard.href).toBe("/social");
     expect(typeof socialCard.image).toBe("string");
   });
 });

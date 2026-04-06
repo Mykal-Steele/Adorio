@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowBigDown,
   ArrowBigUp,
   FileText,
   House,
+  Loader2,
   MessageSquare,
   Paperclip,
   PenSquare,
@@ -220,6 +221,21 @@ const removeCommentFromTree = (
       replies: removeCommentFromTree(comment.replies, commentId),
     }));
 
+const replaceCommentIdInTree = (
+  comments: SocialComment[],
+  tempId: string,
+  realId: string,
+): SocialComment[] =>
+  comments.map((comment) => {
+    const nextCommentId = comment.id === tempId ? realId : comment.id;
+
+    return {
+      ...comment,
+      id: nextCommentId,
+      replies: replaceCommentIdInTree(comment.replies, tempId, realId),
+    };
+  });
+
 function AttachmentViewer({
   state,
   onClose,
@@ -312,16 +328,28 @@ function AttachmentViewer({
 
 const AttachmentTile = ({
   attachment,
+  isLoading,
   onOpen,
+  onPrefetch,
 }: {
   attachment: SocialAttachment;
+  isLoading: boolean;
   onOpen: (attachment: SocialAttachment) => void;
+  onPrefetch: (attachment: SocialAttachment) => void;
 }) => (
   <button
     type="button"
-    className="group cursor-pointer overflow-hidden rounded-md border border-social-border bg-social-surface text-left transition-colors hover:bg-social-accent/35"
+    className="group relative w-full self-start cursor-pointer overflow-hidden rounded-md border border-social-border bg-social-surface text-left transition-colors hover:bg-social-accent/35"
     onClick={() => onOpen(attachment)}
+    onMouseEnter={() => onPrefetch(attachment)}
+    onFocus={() => onPrefetch(attachment)}
   >
+    {isLoading ? (
+      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-social-page-bg/65">
+        <Loader2 size={18} className="animate-spin text-social-ink/75" />
+      </div>
+    ) : null}
+
     {attachment.isImage && attachment.dataUrl ? (
       <Image
         className="max-h-105 w-full bg-social-page-bg object-contain"
@@ -343,11 +371,6 @@ const AttachmentTile = ({
           <p className="text-xs text-social-ink/70">
             {readableSize(attachment.sizeBytes)}
           </p>
-          {attachment.isImage ? (
-            <p className="mt-1 text-[11px] text-social-ink/55">
-              Click to load preview
-            </p>
-          ) : null}
         </div>
         <Badge className="mt-0.5 bg-social-accent/55 text-social-ink transition-colors group-hover:bg-social-accent">
           {attachment.isImage ? "Image" : attachment.isPdf ? "PDF" : "File"}
@@ -370,7 +393,10 @@ function CommentItem({
   submitReply,
   voteComment,
   openAttachment,
-  pending,
+  pendingReplyByComment,
+  resolveAttachment,
+  isAttachmentLoading,
+  prefetchAttachment,
 }: {
   postId: string;
   comment: SocialComment;
@@ -387,7 +413,10 @@ function CommentItem({
   submitReply: (postId: string, parentId: string) => void;
   voteComment: (commentId: string, value: -1 | 1) => void;
   openAttachment: (attachment: SocialAttachment) => void;
-  pending: boolean;
+  pendingReplyByComment: Record<string, boolean>;
+  resolveAttachment: (attachment: SocialAttachment) => SocialAttachment;
+  isAttachmentLoading: (attachmentId: string) => boolean;
+  prefetchAttachment: (attachment: SocialAttachment) => void;
 }) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const hasReplies = comment.replies.length > 0;
@@ -435,12 +464,14 @@ function CommentItem({
             {" "}
             {/* More indent for nested */}
             {comment.attachments.length > 0 ? (
-              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="mt-2 grid auto-rows-min grid-cols-1 content-start gap-2 sm:grid-cols-2">
                 {comment.attachments.map((attachment) => (
                   <AttachmentTile
                     key={attachment.id}
-                    attachment={attachment}
+                    attachment={resolveAttachment(attachment)}
+                    isLoading={isAttachmentLoading(attachment.id)}
                     onOpen={openAttachment}
+                    onPrefetch={prefetchAttachment}
                   />
                 ))}
               </div>
@@ -478,7 +509,7 @@ function CommentItem({
 
               <button
                 type="button"
-                className={actionGhostButtonClass + " pl-0"}
+                className={actionGhostButtonClass}
                 onClick={() => setShowReplyForm((value) => !value)}
               >
                 Reply
@@ -530,13 +561,14 @@ function CommentItem({
             </label>
             <Button
               type="button"
+              className="h-8 px-2 text-xs"
               disabled={
-                pending ||
+                pendingReplyByComment[comment.id] ||
                 (!draft.text.trim() && draft.attachments.length === 0)
               }
               onClick={() => submitReply(postId, comment.id)}
             >
-              Send reply
+              {pendingReplyByComment[comment.id] ? "Sending..." : "Send reply"}
             </Button>
           </div>
           {draft.attachments.length > 0 ? (
@@ -587,7 +619,10 @@ function CommentItem({
               submitReply={submitReply}
               voteComment={voteComment}
               openAttachment={openAttachment}
-              pending={pending}
+              pendingReplyByComment={pendingReplyByComment}
+              resolveAttachment={resolveAttachment}
+              isAttachmentLoading={isAttachmentLoading}
+              prefetchAttachment={prefetchAttachment}
             />
           ))}
         </div>
@@ -598,8 +633,27 @@ function CommentItem({
 
 export default function Social({ data }: SocialProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string | null>(null);
+  const [isPosting, setIsPosting] = useState(false);
+  const [pendingCommentByPost, setPendingCommentByPost] = useState<
+    Record<string, boolean>
+  >({});
+  const [pendingReplyByComment, setPendingReplyByComment] = useState<
+    Record<string, boolean>
+  >({});
+  const [attachmentDataUrlById, setAttachmentDataUrlById] = useState<
+    Record<string, string>
+  >({});
+  const [loadingAttachmentById, setLoadingAttachmentById] = useState<
+    Record<string, boolean>
+  >({});
+  const attachmentRequestByIdRef = useRef<
+    Record<string, Promise<string | null>>
+  >({});
+  const optimisticCommentResolutionRef = useRef<
+    Record<string, Promise<string | null>>
+  >({});
+  const resolvedOptimisticCommentIdRef = useRef<Record<string, string>>({});
   const [posts, setPosts] = useState<SocialPost[]>(data.posts);
   const [draftText, setDraftText] = useState("");
   const [draftAttachments, setDraftAttachments] = useState<
@@ -626,7 +680,6 @@ export default function Social({ data }: SocialProps) {
     Record<string, string>
   >({});
   const [viewerState, setViewerState] = useState<ViewerState | null>(null);
-  const [isViewerLoading, setIsViewerLoading] = useState(false);
   const { theme, setTheme } = useTheme();
 
   const socialTheme = isValidSocialTheme(theme) ? theme : DEFAULT_SOCIAL_THEME;
@@ -705,32 +758,93 @@ export default function Social({ data }: SocialProps) {
     }));
   };
 
+  const getResolvedAttachment = (attachment: SocialAttachment) => {
+    const resolvedDataUrl =
+      attachment.dataUrl ?? attachmentDataUrlById[attachment.id];
+    if (!resolvedDataUrl) {
+      return attachment;
+    }
+
+    return {
+      ...attachment,
+      dataUrl: resolvedDataUrl,
+    };
+  };
+
+  const ensureAttachmentDataUrl = async (attachment: SocialAttachment) => {
+    const cachedDataUrl =
+      attachment.dataUrl ?? attachmentDataUrlById[attachment.id];
+    if (cachedDataUrl) {
+      return cachedDataUrl;
+    }
+
+    const inFlight = attachmentRequestByIdRef.current[attachment.id];
+    if (inFlight) {
+      return inFlight;
+    }
+
+    const requestPromise = (async () => {
+      setLoadingAttachmentById((current) => ({
+        ...current,
+        [attachment.id]: true,
+      }));
+
+      try {
+        const result = await getAttachmentDataUrlAction({
+          attachmentId: attachment.id,
+        });
+
+        if (!result.ok) {
+          setActionError(result.error);
+          return null;
+        }
+
+        setAttachmentDataUrlById((current) => ({
+          ...current,
+          [attachment.id]: result.dataUrl,
+        }));
+
+        return result.dataUrl;
+      } finally {
+        setLoadingAttachmentById((current) => ({
+          ...current,
+          [attachment.id]: false,
+        }));
+        delete attachmentRequestByIdRef.current[attachment.id];
+      }
+    })();
+
+    attachmentRequestByIdRef.current[attachment.id] = requestPromise;
+    return requestPromise;
+  };
+
+  const prefetchAttachment = (attachment: SocialAttachment) => {
+    if (attachment.dataUrl || attachmentDataUrlById[attachment.id]) {
+      return;
+    }
+
+    void ensureAttachmentDataUrl(attachment);
+  };
+
   const openViewer = async (post: SocialPost, attachment: SocialAttachment) => {
-    if (attachment.dataUrl) {
+    const resolvedAttachment = getResolvedAttachment(attachment);
+
+    if (resolvedAttachment.dataUrl) {
       setViewerState({
-        attachment,
+        attachment: resolvedAttachment,
         postAuthor: post.author,
         postContent: post.content,
       });
       return;
     }
 
-    setIsViewerLoading(true);
-    setActionError(null);
-
-    const result = await getAttachmentDataUrlAction({
-      attachmentId: attachment.id,
-    });
-
-    setIsViewerLoading(false);
-
-    if (!result.ok) {
-      setActionError(result.error);
+    const dataUrl = await ensureAttachmentDataUrl(attachment);
+    if (!dataUrl) {
       return;
     }
 
     setViewerState({
-      attachment: { ...attachment, dataUrl: result.dataUrl },
+      attachment: { ...attachment, dataUrl },
       postAuthor: post.author,
       postContent: post.content,
     });
@@ -747,7 +861,7 @@ export default function Social({ data }: SocialProps) {
     comments: [],
   });
 
-  const handleCreatePost = () => {
+  const handleCreatePost = async () => {
     const parsed = createPostSchema.safeParse({
       content: draftText,
       attachments: draftAttachments,
@@ -765,19 +879,20 @@ export default function Social({ data }: SocialProps) {
     setDraftAttachments([]);
     setActionError(null);
 
-    startTransition(async () => {
-      const result = await createPostAction(parsed.data);
+    setIsPosting(true);
+    const result = await createPostAction(parsed.data);
 
-      if (!result.ok) {
-        setPosts((current) =>
-          current.filter((post) => post.id !== optimisticPost.id),
-        );
-        setActionError(result.error);
-        return;
-      }
+    if (!result.ok) {
+      setPosts((current) =>
+        current.filter((post) => post.id !== optimisticPost.id),
+      );
+      setActionError(result.error);
+      setIsPosting(false);
+      return;
+    }
 
-      router.refresh();
-    });
+    setIsPosting(false);
+    router.refresh();
   };
 
   const handleVotePost = (postId: string, value: -1 | 1) => {
@@ -796,14 +911,14 @@ export default function Social({ data }: SocialProps) {
       }),
     );
 
-    startTransition(async () => {
+    void (async () => {
       const result = await votePostAction({ postId, value });
 
       if (!result.ok) {
         setActionError(result.error);
         router.refresh();
       }
-    });
+    })();
   };
 
   const handleVoteComment = (commentId: string, value: -1 | 1) => {
@@ -821,14 +936,14 @@ export default function Social({ data }: SocialProps) {
       })),
     );
 
-    startTransition(async () => {
+    void (async () => {
       const result = await voteCommentAction({ commentId, value });
 
       if (!result.ok) {
         setActionError(result.error);
         router.refresh();
       }
-    });
+    })();
   };
 
   const createOptimisticComment = (
@@ -845,7 +960,7 @@ export default function Social({ data }: SocialProps) {
     replies: [],
   });
 
-  const handleCreateComment = (postId: string) => {
+  const handleCreateComment = async (postId: string) => {
     const draft = getPostDraft(postId);
     const parsed = createCommentSchema.safeParse({
       postId,
@@ -879,35 +994,102 @@ export default function Social({ data }: SocialProps) {
     setExpandedByPost((current) => ({ ...current, [postId]: true }));
     setActionError(null);
 
-    startTransition(async () => {
+    setPendingCommentByPost((current) => ({
+      ...current,
+      [postId]: true,
+    }));
+
+    const resolvePromise = (async () => {
       const result = await createCommentAction(parsed.data);
 
       if (!result.ok) {
-        setPosts((current) =>
-          current.map((post) =>
-            post.id === postId
-              ? {
-                  ...post,
-                  comments: post.comments.filter(
-                    (comment) => comment.id !== optimisticComment.id,
-                  ),
-                }
-              : post,
-          ),
-        );
-        setActionError(result.error);
+        return null;
+      }
+
+      return result.commentId;
+    })();
+
+    optimisticCommentResolutionRef.current[optimisticComment.id] =
+      resolvePromise;
+
+    const createdCommentId = await resolvePromise;
+    delete optimisticCommentResolutionRef.current[optimisticComment.id];
+
+    if (createdCommentId) {
+      resolvedOptimisticCommentIdRef.current[optimisticComment.id] =
+        createdCommentId;
+    }
+
+    const result = createdCommentId
+      ? { ok: true as const, commentId: createdCommentId }
+      : { ok: false as const, error: "Internal server error" };
+
+    if (!result.ok) {
+      setPosts((current) =>
+        current.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                comments: post.comments.filter(
+                  (comment) => comment.id !== optimisticComment.id,
+                ),
+              }
+            : post,
+        ),
+      );
+      setActionError(result.error);
+      setPendingCommentByPost((current) => ({
+        ...current,
+        [postId]: false,
+      }));
+      return;
+    }
+
+    setPosts((current) =>
+      current.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: replaceCommentIdInTree(
+                post.comments,
+                optimisticComment.id,
+                result.commentId,
+              ),
+            }
+          : post,
+      ),
+    );
+
+    setPendingCommentByPost((current) => ({
+      ...current,
+      [postId]: false,
+    }));
+    router.refresh();
+  };
+
+  const handleCreateReply = async (postId: string, parentId: string) => {
+    const mappedParentId = resolvedOptimisticCommentIdRef.current[parentId];
+    const unresolvedOptimisticParent =
+      parentId.startsWith("comment-") &&
+      optimisticCommentResolutionRef.current[parentId];
+
+    let resolvedParentId = mappedParentId ?? parentId;
+
+    if (unresolvedOptimisticParent) {
+      const realId = await unresolvedOptimisticParent;
+
+      if (!realId) {
+        setActionError("Reply is still syncing. Try again in a moment.");
         return;
       }
 
-      router.refresh();
-    });
-  };
+      resolvedParentId = realId;
+    }
 
-  const handleCreateReply = (postId: string, parentId: string) => {
     const draft = getReplyDraft(parentId);
     const parsed = createCommentSchema.safeParse({
       postId,
-      parentId,
+      parentId: resolvedParentId,
       text: draft.text,
       attachments: draft.attachments,
     });
@@ -927,13 +1109,20 @@ export default function Social({ data }: SocialProps) {
         post.id === postId
           ? {
               ...post,
-              comments: insertReply(post.comments, parentId, optimisticReply),
+              comments: insertReply(
+                post.comments,
+                resolvedParentId,
+                optimisticReply,
+              ),
             }
           : post,
       ),
     );
 
-    setCollapsedByComment((current) => ({ ...current, [parentId]: false }));
+    setCollapsedByComment((current) => ({
+      ...current,
+      [resolvedParentId]: false,
+    }));
 
     setReplyDraftByComment((current) => ({
       ...current,
@@ -942,29 +1131,58 @@ export default function Social({ data }: SocialProps) {
 
     setActionError(null);
 
-    startTransition(async () => {
-      const result = await createCommentAction(parsed.data);
+    setPendingReplyByComment((current) => ({
+      ...current,
+      [parentId]: true,
+    }));
 
-      if (!result.ok) {
-        setPosts((current) =>
-          current.map((post) =>
-            post.id === postId
-              ? {
-                  ...post,
-                  comments: removeCommentFromTree(
-                    post.comments,
-                    optimisticReply.id,
-                  ),
-                }
-              : post,
-          ),
-        );
-        setActionError(result.error);
-        return;
-      }
+    const result = await createCommentAction(parsed.data);
 
-      router.refresh();
-    });
+    if (!result.ok) {
+      setPosts((current) =>
+        current.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                comments: removeCommentFromTree(
+                  post.comments,
+                  optimisticReply.id,
+                ),
+              }
+            : post,
+        ),
+      );
+      setActionError(result.error);
+      setPendingReplyByComment((current) => ({
+        ...current,
+        [parentId]: false,
+      }));
+      return;
+    }
+
+    resolvedOptimisticCommentIdRef.current[optimisticReply.id] =
+      result.commentId;
+
+    setPosts((current) =>
+      current.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: replaceCommentIdInTree(
+                post.comments,
+                optimisticReply.id,
+                result.commentId,
+              ),
+            }
+          : post,
+      ),
+    );
+
+    setPendingReplyByComment((current) => ({
+      ...current,
+      [parentId]: false,
+    }));
+    router.refresh();
   };
 
   return (
@@ -1100,12 +1318,13 @@ export default function Social({ data }: SocialProps) {
                         type="file"
                         multiple
                         onChange={async (event) => {
+                          const inputEl = event.currentTarget;
                           const parsed = await handleFiles(event.target.files);
                           setDraftAttachments((current) => [
                             ...current,
                             ...parsed,
                           ]);
-                          event.currentTarget.value = "";
+                          inputEl.value = "";
                         }}
                       />
                     </label>
@@ -1115,11 +1334,11 @@ export default function Social({ data }: SocialProps) {
                       type="button"
                       onClick={handleCreatePost}
                       disabled={
-                        isPending ||
+                        isPosting ||
                         (!draftText.trim() && draftAttachments.length === 0)
                       }
                     >
-                      Publish
+                      {isPosting ? "Publishing..." : "Publish"}
                     </Button>
                   </div>
 
@@ -1191,14 +1410,6 @@ export default function Social({ data }: SocialProps) {
               </Card>
             ) : null}
 
-            {isViewerLoading ? (
-              <Card className="bg-social-surface shadow-sm">
-                <CardContent className="pt-5 text-sm text-social-ink/80">
-                  Loading attachment preview...
-                </CardContent>
-              </Card>
-            ) : null}
-
             {visiblePosts.map((post) => {
               const postDraft = getPostDraft(post.id);
               const isCommentsOpen = expandedByPost[post.id] ?? false;
@@ -1240,17 +1451,15 @@ export default function Social({ data }: SocialProps) {
                     ) : null}
 
                     {post.attachments.length > 0 ? (
-                      <div className="mt-3 flex snap-x gap-2 overflow-x-auto pb-1">
+                      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                         {post.attachments.map((attachment) => (
-                          <div
+                          <AttachmentTile
                             key={attachment.id}
-                            className="w-full min-w-60 snap-start sm:min-w-75"
-                          >
-                            <AttachmentTile
-                              attachment={attachment}
-                              onOpen={(item) => openViewer(post, item)}
-                            />
-                          </div>
+                            attachment={getResolvedAttachment(attachment)}
+                            isLoading={!!loadingAttachmentById[attachment.id]}
+                            onOpen={(item) => openViewer(post, item)}
+                            onPrefetch={prefetchAttachment}
+                          />
                         ))}
                       </div>
                     ) : null}
@@ -1326,6 +1535,7 @@ export default function Social({ data }: SocialProps) {
                                 className="hidden"
                                 multiple
                                 onChange={async (event) => {
+                                  const inputEl = event.currentTarget;
                                   const files = await handleFiles(
                                     event.target.files,
                                   );
@@ -1345,20 +1555,23 @@ export default function Social({ data }: SocialProps) {
                                       },
                                     };
                                   });
-                                  event.currentTarget.value = "";
+                                  inputEl.value = "";
                                 }}
                               />
                             </label>
                             <Button
                               type="button"
+                              className="h-8 px-2 text-xs"
                               disabled={
-                                isPending ||
+                                pendingCommentByPost[post.id] ||
                                 (!postDraft.text.trim() &&
                                   postDraft.attachments.length === 0)
                               }
                               onClick={() => handleCreateComment(post.id)}
                             >
-                              Comment
+                              {pendingCommentByPost[post.id]
+                                ? "Sending..."
+                                : "Comment"}
                             </Button>
                           </div>
                           {/* Attachment preview below textbox, like post composer */}
@@ -1551,7 +1764,14 @@ export default function Social({ data }: SocialProps) {
                                     openAttachment={(attachment) =>
                                       openViewer(post, attachment)
                                     }
-                                    pending={isPending}
+                                    pendingReplyByComment={
+                                      pendingReplyByComment
+                                    }
+                                    resolveAttachment={getResolvedAttachment}
+                                    isAttachmentLoading={(attachmentId) =>
+                                      !!loadingAttachmentById[attachmentId]
+                                    }
+                                    prefetchAttachment={prefetchAttachment}
                                   />
                                 ))}
                               </div>

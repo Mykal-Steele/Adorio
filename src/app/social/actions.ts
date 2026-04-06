@@ -107,7 +107,7 @@ export const createCommentAction = async (input: unknown) => {
   try {
     const viewerId = await ensureViewerId();
 
-    await prisma.comment.create({
+    const createdComment = await prisma.comment.create({
       data: {
         text: parsed.data.text,
         authorId: viewerId,
@@ -124,10 +124,13 @@ export const createCommentAction = async (input: unknown) => {
           })),
         },
       },
+      select: {
+        id: true,
+      },
     });
 
     refreshSocialRoute();
-    return { ok: true as const };
+    return { ok: true as const, commentId: createdComment.id };
   } catch (error) {
     console.error(error);
     return { ok: false as const, error: "Internal server error" };
