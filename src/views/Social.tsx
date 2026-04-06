@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
 import {
   ArrowBigDown,
   ArrowBigUp,
@@ -65,8 +64,19 @@ type ViewerState = {
   postContent: string;
 };
 
-const formatTime = (isoDate: string) =>
-  format(new Date(isoDate), "MMM d, h:mm a");
+const formatTime = (isoDate: string) => {
+  const date = new Date(isoDate);
+
+  // Use UTC so server and client render the same initial text.
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "UTC",
+  }).format(date);
+};
 
 const actionGhostButtonClass =
   "inline-flex h-8 cursor-pointer items-center rounded-md px-3 text-xs font-medium text-social-ink/80 transition-colors hover:bg-social-accent/55";

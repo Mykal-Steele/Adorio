@@ -5,7 +5,9 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   compress: true,
   images: {
-    formats: ["image/avif", "image/webp"],
+    // Keep WebP first to avoid expensive AVIF encode time on cache misses.
+    formats: ["image/webp", "image/avif"],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {
         protocol: "https",
