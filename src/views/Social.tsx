@@ -50,6 +50,7 @@ import {
   type ClientAttachmentInput,
 } from "@/lib/attachmentUtils";
 import { compressImage } from "@/lib/imageCompress";
+import { authClient } from "@/lib/auth-client";
 
 type SocialProps = {
   data: SocialBoardData;
@@ -397,6 +398,7 @@ function CommentItem({
   resolveAttachment,
   isAttachmentLoading,
   prefetchAttachment,
+  canInteract,
 }: {
   postId: string;
   comment: SocialComment;
@@ -417,6 +419,7 @@ function CommentItem({
   resolveAttachment: (attachment: SocialAttachment) => SocialAttachment;
   isAttachmentLoading: (attachmentId: string) => boolean;
   prefetchAttachment: (attachment: SocialAttachment) => void;
+  canInteract: boolean;
 }) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const hasReplies = comment.replies.length > 0;
@@ -563,6 +566,7 @@ function CommentItem({
               type="button"
               className="h-8 px-2 text-xs"
               disabled={
+                !canInteract ||
                 pendingReplyByComment[comment.id] ||
                 (!draft.text.trim() && draft.attachments.length === 0)
               }
@@ -623,6 +627,7 @@ function CommentItem({
               resolveAttachment={resolveAttachment}
               isAttachmentLoading={isAttachmentLoading}
               prefetchAttachment={prefetchAttachment}
+              canInteract={canInteract}
             />
           ))}
         </div>
@@ -633,6 +638,7 @@ function CommentItem({
 
 export default function Social({ data }: SocialProps) {
   const router = useRouter();
+  const { data: session } = authClient.useSession();
   const [actionError, setActionError] = useState<string | null>(null);
   const [isPosting, setIsPosting] = useState(false);
   const [pendingCommentByPost, setPendingCommentByPost] = useState<
@@ -862,6 +868,11 @@ export default function Social({ data }: SocialProps) {
   });
 
   const handleCreatePost = async () => {
+    if (!session?.user?.id) {
+      setActionError("Please sign in to post.");
+      return;
+    }
+
     const parsed = createPostSchema.safeParse({
       content: draftText,
       attachments: draftAttachments,
@@ -896,6 +907,11 @@ export default function Social({ data }: SocialProps) {
   };
 
   const handleVotePost = (postId: string, value: -1 | 1) => {
+    if (!session?.user?.id) {
+      setActionError("Please sign in to vote.");
+      return;
+    }
+
     setPosts((current) =>
       current.map((post) => {
         if (post.id !== postId) {
@@ -922,6 +938,11 @@ export default function Social({ data }: SocialProps) {
   };
 
   const handleVoteComment = (commentId: string, value: -1 | 1) => {
+    if (!session?.user?.id) {
+      setActionError("Please sign in to vote.");
+      return;
+    }
+
     setPosts((current) =>
       current.map((post) => ({
         ...post,
@@ -961,6 +982,11 @@ export default function Social({ data }: SocialProps) {
   });
 
   const handleCreateComment = async (postId: string) => {
+    if (!session?.user?.id) {
+      setActionError("Please sign in to comment.");
+      return;
+    }
+
     const draft = getPostDraft(postId);
     const parsed = createCommentSchema.safeParse({
       postId,
@@ -1068,6 +1094,11 @@ export default function Social({ data }: SocialProps) {
   };
 
   const handleCreateReply = async (postId: string, parentId: string) => {
+    if (!session?.user?.id) {
+      setActionError("Please sign in to reply.");
+      return;
+    }
+
     const mappedParentId = resolvedOptimisticCommentIdRef.current[parentId];
     const unresolvedOptimisticParent =
       parentId.startsWith("comment-") &&
@@ -1206,6 +1237,31 @@ export default function Social({ data }: SocialProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 md:self-center md:justify-end">
+            {session?.user ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 bg-social-surface text-social-ink hover:bg-social-accent/55"
+                onClick={async () => {
+                  await authClient.signOut();
+                  router.refresh();
+                }}
+              >
+                Sign out
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 bg-social-surface text-social-ink hover:bg-social-accent/55"
+                onClick={() => {
+                  window.location.href = "/social/auth";
+                }}
+              >
+                Sign in
+              </Button>
+            )}
+
             <div className="inline-flex rounded-md bg-social-surface p-1">
               {SOCIAL_THEME_OPTIONS.map((themeOption) => (
                 <button
@@ -1334,6 +1390,7 @@ export default function Social({ data }: SocialProps) {
                       type="button"
                       onClick={handleCreatePost}
                       disabled={
+                        !session?.user?.id ||
                         isPosting ||
                         (!draftText.trim() && draftAttachments.length === 0)
                       }
@@ -1563,6 +1620,7 @@ export default function Social({ data }: SocialProps) {
                               type="button"
                               className="h-8 px-2 text-xs"
                               disabled={
+                                !session?.user?.id ||
                                 pendingCommentByPost[post.id] ||
                                 (!postDraft.text.trim() &&
                                   postDraft.attachments.length === 0)
@@ -1575,7 +1633,7 @@ export default function Social({ data }: SocialProps) {
                             </Button>
                           </div>
                           {/* Attachment preview below textbox, like post composer */}
-                          {postDraft.attachments.length > 0 ? (
+                            {postDraft.attachments.length > 0 ? (
                             <div className="grid gap-2">
                               <p className="text-xs font-medium text-social-ink/75">
                                 {postDraft.attachments.length} file(s) attached
@@ -1772,6 +1830,7 @@ export default function Social({ data }: SocialProps) {
                                       !!loadingAttachmentById[attachmentId]
                                     }
                                     prefetchAttachment={prefetchAttachment}
+                                    canInteract={!!session?.user?.id}
                                   />
                                 ))}
                               </div>

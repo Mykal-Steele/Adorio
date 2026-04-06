@@ -2,7 +2,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { CURRENT_VIEWER_NAME, REPUTATION_MULTIPLIER } from "@/lib/constants";
+import { REPUTATION_MULTIPLIER } from "@/lib/constants";
 import type { ReputationEntry, SocialAttachment, SocialBoardData, SocialComment, SocialPost } from "@/lib/types";
 
 type PostQueryResult = Prisma.PostGetPayload<{
@@ -27,7 +27,7 @@ type PostQueryResult = Prisma.PostGetPayload<{
       select: {
         value: true;
         user: {
-          select: { name: true };
+          select: { id: true; name: true };
         };
       };
     };
@@ -55,7 +55,7 @@ type PostQueryResult = Prisma.PostGetPayload<{
           select: {
             value: true;
             user: {
-              select: { name: true };
+              select: { id: true; name: true };
             };
           };
         };
@@ -94,7 +94,10 @@ const mapAttachment = (attachment: {
   isPdf: attachment.isPdf,
 });
 
-const buildCommentTree = (comments: CommentQueryResult[], viewerName: string): SocialComment[] => {
+const buildCommentTree = (
+  comments: CommentQueryResult[],
+  viewerUserId: string | null,
+): SocialComment[] => {
   const childrenByParent = new Map<string, CommentQueryResult[]>();
 
   comments.forEach((comment) => {
@@ -109,7 +112,9 @@ const buildCommentTree = (comments: CommentQueryResult[], viewerName: string): S
 
   const mapCommentNode = (comment: CommentQueryResult): SocialComment => {
     const score = comment.votes.reduce((total, vote) => total + vote.value, 0);
-    const voteByMe = toVoteValue(comment.votes.find((vote) => vote.user.name === viewerName)?.value ?? 0);
+    const voteByMe = toVoteValue(
+      comment.votes.find((vote) => vote.user.id === viewerUserId)?.value ?? 0,
+    );
     const directReplies = (childrenByParent.get(comment.id) ?? [])
       .slice()
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
@@ -145,7 +150,10 @@ const collectReputationFromComments = (comments: SocialComment[], tracker: Map<s
   });
 };
 
-const buildReputationBoard = (posts: SocialPost[], viewerName: string): SocialBoardData => {
+const buildReputationBoard = (
+  posts: SocialPost[],
+  viewerName: string | null,
+): SocialBoardData => {
   const tracker = new Map<string, number>();
 
   posts.forEach((post) => {
@@ -170,7 +178,8 @@ const buildReputationBoard = (posts: SocialPost[], viewerName: string): SocialBo
 };
 
 const getSocialBoardDataUncached = async (
-  viewerName = CURRENT_VIEWER_NAME,
+  viewerUserId: string | null,
+  viewerName: string | null,
 ): Promise<SocialBoardData> => {
   let posts: PostQueryResult[] = [];
 
@@ -199,7 +208,7 @@ const getSocialBoardDataUncached = async (
           select: {
             value: true,
             user: {
-              select: { name: true },
+              select: { id: true, name: true },
             },
           },
         },
@@ -227,7 +236,7 @@ const getSocialBoardDataUncached = async (
               select: {
                 value: true,
                 user: {
-                  select: { name: true },
+                  select: { id: true, name: true },
                 },
               },
             },
@@ -245,7 +254,9 @@ const getSocialBoardDataUncached = async (
 
   const mappedPosts: SocialPost[] = posts.map((post) => {
     const score = post.votes.reduce((total, vote) => total + vote.value, 0);
-    const voteByMe = toVoteValue(post.votes.find((vote) => vote.user.name === viewerName)?.value ?? 0);
+    const voteByMe = toVoteValue(
+      post.votes.find((vote) => vote.user.id === viewerUserId)?.value ?? 0,
+    );
 
     return {
       id: post.id,
@@ -255,15 +266,15 @@ const getSocialBoardDataUncached = async (
       score,
       voteByMe,
       attachments: post.attachments.map((attachment) => mapAttachment(attachment)),
-      comments: buildCommentTree(post.comments, viewerName),
+      comments: buildCommentTree(post.comments, viewerUserId),
     };
   });
 
   return buildReputationBoard(mappedPosts, viewerName);
 };
 
-const getDefaultViewerSocialBoardDataCached = unstable_cache(
-  async () => getSocialBoardDataUncached(CURRENT_VIEWER_NAME),
+const getAnonymousSocialBoardDataCached = unstable_cache(
+  async () => getSocialBoardDataUncached(null, null),
   ["social-board-data"],
   {
     revalidate: 30,
@@ -272,11 +283,12 @@ const getDefaultViewerSocialBoardDataCached = unstable_cache(
 );
 
 export const getSocialBoardData = async (
-  viewerName = CURRENT_VIEWER_NAME,
+  viewerUserId: string | null,
+  viewerName: string | null,
 ): Promise<SocialBoardData> => {
-  if (viewerName === CURRENT_VIEWER_NAME) {
-    return getDefaultViewerSocialBoardDataCached();
+  if (!viewerUserId) {
+    return getAnonymousSocialBoardDataCached();
   }
 
-  return getSocialBoardDataUncached(viewerName);
+  return getSocialBoardDataUncached(viewerUserId, viewerName);
 };

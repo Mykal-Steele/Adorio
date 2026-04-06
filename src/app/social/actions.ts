@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
+import { headers } from "next/headers";
 import { z } from "zod";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { CURRENT_VIEWER_NAME } from "@/lib/constants";
 import {
   createCommentSchema,
   createPostSchema,
@@ -11,22 +12,12 @@ import {
   votePostSchema,
 } from "@/lib/validators";
 
-let cachedViewerId: string | null = null;
-
-const ensureViewerId = async () => {
-  if (cachedViewerId) {
-    return cachedViewerId;
-  }
-
-  const viewer = await prisma.user.upsert({
-    where: { name: CURRENT_VIEWER_NAME },
-    update: {},
-    create: { name: CURRENT_VIEWER_NAME },
-    select: { id: true },
+const getSessionUserId = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
   });
 
-  cachedViewerId = viewer.id;
-  return viewer.id;
+  return session?.user?.id ?? null;
 };
 
 const refreshSocialRoute = () => {
@@ -70,7 +61,11 @@ export const createPostAction = async (input: unknown) => {
   }
 
   try {
-    const viewerId = await ensureViewerId();
+    const viewerId = await getSessionUserId();
+
+    if (!viewerId) {
+      return { ok: false as const, error: "Please sign in to post." };
+    }
 
     await prisma.post.create({
       data: {
@@ -105,7 +100,11 @@ export const createCommentAction = async (input: unknown) => {
   }
 
   try {
-    const viewerId = await ensureViewerId();
+    const viewerId = await getSessionUserId();
+
+    if (!viewerId) {
+      return { ok: false as const, error: "Please sign in to comment." };
+    }
 
     const createdComment = await prisma.comment.create({
       data: {
@@ -145,7 +144,12 @@ export const votePostAction = async (input: unknown) => {
   }
 
   try {
-    const viewerId = await ensureViewerId();
+    const viewerId = await getSessionUserId();
+
+    if (!viewerId) {
+      return { ok: false as const, error: "Please sign in to vote." };
+    }
+
     const existing = await prisma.postVote.findUnique({
       where: {
         postId_userId: {
@@ -190,7 +194,12 @@ export const voteCommentAction = async (input: unknown) => {
   }
 
   try {
-    const viewerId = await ensureViewerId();
+    const viewerId = await getSessionUserId();
+
+    if (!viewerId) {
+      return { ok: false as const, error: "Please sign in to vote." };
+    }
+
     const existing = await prisma.commentVote.findUnique({
       where: {
         commentId_userId: {
