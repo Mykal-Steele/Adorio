@@ -20,9 +20,16 @@ describe("CarouselCard", () => {
   });
 
   it("renders a navigable link when href is provided", () => {
-    render(<CarouselCard card={{ ...baseCard, href: "/social" }} />);
+    render(
+      <CarouselCard
+        card={{ ...baseCard, href: "https://social.adorio.space/" }}
+      />,
+    );
 
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/social");
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "https://social.adorio.space/",
+    );
   });
 
   it("does not render a link when href is missing", () => {
