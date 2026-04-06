@@ -63,7 +63,6 @@ const LeftSidebar = () => {
                 alt="Oakar Oo"
                 width={160}
                 height={160}
-                unoptimized
                 className="w-full h-full object-cover"
               />
             </div>

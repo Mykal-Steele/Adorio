@@ -5,11 +5,27 @@ import { CURRENT_VIEWER_NAME, REPUTATION_MULTIPLIER } from "@/lib/constants";
 import type { ReputationEntry, SocialAttachment, SocialBoardData, SocialComment, SocialPost } from "@/lib/types";
 
 type PostQueryResult = Prisma.PostGetPayload<{
-  include: {
-    author: true;
-    attachments: true;
+  select: {
+    id: true;
+    content: true;
+    createdAt: true;
+    author: {
+      select: { name: true };
+    };
+    attachments: {
+      select: {
+        id: true;
+        name: true;
+        mimeType: true;
+        sizeBytes: true;
+        dataUrl: true;
+        isImage: true;
+        isPdf: true;
+      };
+    };
     votes: {
-      include: {
+      select: {
+        value: true;
         user: {
           select: { name: true };
         };
@@ -17,11 +33,28 @@ type PostQueryResult = Prisma.PostGetPayload<{
     };
     comments: {
       orderBy: { createdAt: "desc" };
-      include: {
-        attachments: true;
-        author: true;
+      select: {
+        id: true;
+        text: true;
+        createdAt: true;
+        parentId: true;
+        author: {
+          select: { name: true };
+        };
+        attachments: {
+          select: {
+            id: true;
+            name: true;
+            mimeType: true;
+            sizeBytes: true;
+            dataUrl: true;
+            isImage: true;
+            isPdf: true;
+          };
+        };
         votes: {
-          include: {
+          select: {
+            value: true;
             user: {
               select: { name: true };
             };
@@ -146,11 +179,27 @@ export const getSocialBoardData = async (viewerName = CURRENT_VIEWER_NAME): Prom
     posts = await prisma.post.findMany({
       take: 20,
       orderBy: { createdAt: "desc" },
-      include: {
-        author: true,
-        attachments: true,
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        author: {
+          select: { name: true },
+        },
+        attachments: {
+          select: {
+            id: true,
+            name: true,
+            mimeType: true,
+            sizeBytes: true,
+            dataUrl: true,
+            isImage: true,
+            isPdf: true,
+          },
+        },
         votes: {
-          include: {
+          select: {
+            value: true,
             user: {
               select: { name: true },
             },
@@ -158,11 +207,28 @@ export const getSocialBoardData = async (viewerName = CURRENT_VIEWER_NAME): Prom
         },
         comments: {
           orderBy: { createdAt: "desc" },
-          include: {
-            attachments: true,
-            author: true,
+          select: {
+            id: true,
+            text: true,
+            createdAt: true,
+            parentId: true,
+            author: {
+              select: { name: true },
+            },
+            attachments: {
+              select: {
+                id: true,
+                name: true,
+                mimeType: true,
+                sizeBytes: true,
+                dataUrl: true,
+                isImage: true,
+                isPdf: true,
+              },
+            },
             votes: {
-              include: {
+              select: {
+                value: true,
                 user: {
                   select: { name: true },
                 },

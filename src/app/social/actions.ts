@@ -10,13 +10,23 @@ import {
   votePostSchema,
 } from "@/lib/validators";
 
-const ensureViewer = async () =>
-  prisma.user.upsert({
+let cachedViewerId: string | null = null;
+
+const ensureViewerId = async () => {
+  if (cachedViewerId) {
+    return cachedViewerId;
+  }
+
+  const viewer = await prisma.user.upsert({
     where: { name: CURRENT_VIEWER_NAME },
     update: {},
     create: { name: CURRENT_VIEWER_NAME },
     select: { id: true },
   });
+
+  cachedViewerId = viewer.id;
+  return viewer.id;
+};
 
 export const createPostAction = async (input: unknown) => {
   const parsed = createPostSchema.safeParse(input);
@@ -26,12 +36,12 @@ export const createPostAction = async (input: unknown) => {
   }
 
   try {
-    const viewer = await ensureViewer();
+    const viewerId = await ensureViewerId();
 
     await prisma.post.create({
       data: {
         content: parsed.data.content,
-        authorId: viewer.id,
+        authorId: viewerId,
         attachments: {
           create: parsed.data.attachments.map((a) => ({
             name: a.name,
@@ -61,12 +71,12 @@ export const createCommentAction = async (input: unknown) => {
   }
 
   try {
-    const viewer = await ensureViewer();
+    const viewerId = await ensureViewerId();
 
     await prisma.comment.create({
       data: {
         text: parsed.data.text,
-        authorId: viewer.id,
+        authorId: viewerId,
         postId: parsed.data.postId,
         parentId: parsed.data.parentId,
         attachments: {
@@ -98,12 +108,12 @@ export const votePostAction = async (input: unknown) => {
   }
 
   try {
-    const viewer = await ensureViewer();
+    const viewerId = await ensureViewerId();
     const existing = await prisma.postVote.findUnique({
       where: {
         postId_userId: {
           postId: parsed.data.postId,
-          userId: viewer.id,
+          userId: viewerId,
         },
       },
     });
@@ -121,7 +131,7 @@ export const votePostAction = async (input: unknown) => {
       await prisma.postVote.create({
         data: {
           postId: parsed.data.postId,
-          userId: viewer.id,
+          userId: viewerId,
           value: parsed.data.value,
         },
       });
@@ -143,12 +153,12 @@ export const voteCommentAction = async (input: unknown) => {
   }
 
   try {
-    const viewer = await ensureViewer();
+    const viewerId = await ensureViewerId();
     const existing = await prisma.commentVote.findUnique({
       where: {
         commentId_userId: {
           commentId: parsed.data.commentId,
-          userId: viewer.id,
+          userId: viewerId,
         },
       },
     });
@@ -166,7 +176,7 @@ export const voteCommentAction = async (input: unknown) => {
       await prisma.commentVote.create({
         data: {
           commentId: parsed.data.commentId,
-          userId: viewer.id,
+          userId: viewerId,
           value: parsed.data.value,
         },
       });

@@ -70,8 +70,8 @@ const CarouselCard = ({ card }) => {
             src={card.image}
             alt={card.title}
             fill
-            unoptimized
             sizes="260px"
+            quality={65}
             className="object-cover w-full h-full opacity-70 transition-all duration-500 group-hover:opacity-90 group-hover:scale-110 mix-blend-luminosity group-hover:mix-blend-normal"
             style={{ filter: "sepia(20%) hue-rotate(80deg) saturate(50%)" }}
           />

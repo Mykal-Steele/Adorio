@@ -10,6 +10,7 @@ const useInfiniteCarousel = (trackRef, speed = 0.5, pauseOnHover = true) => {
   const animationRef = useRef(null);
   const isHoveringRef = useRef(false);
   const isDraggingRef = useRef(false);
+  const isDocumentVisibleRef = useRef(true);
   const directionRef = useRef(1);
   const hasInitializedDirectionRef = useRef(false);
   const wheelVelocityRef = useRef(0);
@@ -50,10 +51,18 @@ const useInfiniteCarousel = (trackRef, speed = 0.5, pauseOnHover = true) => {
     };
 
     const autoScroll = () => {
-      if (!(pauseOnHover && isHoveringRef.current) && !isDraggingRef.current) {
+      if (
+        isDocumentVisibleRef.current &&
+        !(pauseOnHover && isHoveringRef.current) &&
+        !isDraggingRef.current
+      ) {
         track.scrollLeft += speed * directionRef.current;
       }
       animationRef.current = requestAnimationFrame(autoScroll);
+    };
+
+    const handleVisibilityChange = () => {
+      isDocumentVisibleRef.current = document.visibilityState === "visible";
     };
 
     const startWheelMomentum = () => {
@@ -139,6 +148,8 @@ const useInfiniteCarousel = (trackRef, speed = 0.5, pauseOnHover = true) => {
       track.addEventListener(eventName, handler, options);
     });
 
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     const cancelAnimation = (ref) => {
       if (ref.current) {
         cancelAnimationFrame(ref.current);
@@ -156,6 +167,8 @@ const useInfiniteCarousel = (trackRef, speed = 0.5, pauseOnHover = true) => {
       listeners.forEach(([eventName, handler]) => {
         track.removeEventListener(eventName, handler);
       });
+
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [trackRef, speed, pauseOnHover]);
 

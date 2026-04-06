@@ -75,7 +75,10 @@ const Shelf = ({ category, iconName, speed, items }) => {
   }, [category, iconName]);
 
   const sourceItems = items?.length ? items : [];
-  const carouselItems = [...sourceItems, ...sourceItems, ...sourceItems];
+  const carouselItems = useMemo(
+    () => [...sourceItems, ...sourceItems, ...sourceItems],
+    [sourceItems],
+  );
 
   return (
     <div className="mb-16 relative" style={tiltStyle}>
@@ -116,7 +119,10 @@ const Shelf = ({ category, iconName, speed, items }) => {
                     style={{ width: "max-content" }}
                   >
                     {carouselItems.map((card, index) => (
-                      <CarouselCard key={index} card={card} />
+                      <CarouselCard
+                        key={`${card.id ?? "card"}-${index}`}
+                        card={card}
+                      />
                     ))}
                   </div>
                 </div>

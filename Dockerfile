@@ -15,6 +15,7 @@ CMD ["bun", "run", "dev", "--hostname", "0.0.0.0", "--port", "3000"]
 
 FROM base AS builder
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN bun run build
@@ -24,6 +25,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup -S nextjs && adduser -S nextjs -G nextjs
 
