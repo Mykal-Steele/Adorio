@@ -33,6 +33,7 @@ import { createCommentSchema, createPostSchema } from "@/lib/validators";
 import {
   createCommentAction,
   createPostAction,
+  getAttachmentDataUrlAction,
   voteCommentAction,
   votePostAction,
 } from "@/app/social/actions";
@@ -231,6 +232,7 @@ function AttachmentViewer({
   }
 
   const { attachment, postAuthor, postContent } = state;
+  const previewDataUrl = attachment.dataUrl;
 
   return (
     <div
@@ -261,10 +263,10 @@ function AttachmentViewer({
         </div>
 
         <div className="max-h-[72vh] overflow-auto bg-social-accent/45 p-4">
-          {attachment.isImage ? (
+          {attachment.isImage && previewDataUrl ? (
             <Image
               className="max-h-[68vh] w-full rounded-lg bg-social-surface object-contain"
-              src={attachment.dataUrl}
+              src={previewDataUrl}
               alt={attachment.name}
               width={1200}
               height={900}
@@ -272,18 +274,19 @@ function AttachmentViewer({
             />
           ) : null}
 
-          {attachment.isPdf ? (
+          {attachment.isPdf && previewDataUrl ? (
             <iframe
               className="h-[72vh] w-full rounded-lg bg-social-surface"
               title={`PDF preview ${attachment.name}`}
-              src={`${attachment.dataUrl}#view=FitH&toolbar=1&navpanes=0`}
+              src={`${previewDataUrl}#view=FitH&toolbar=1&navpanes=0`}
             />
           ) : null}
 
-          {!attachment.isImage && !attachment.isPdf ? (
+          {!previewDataUrl || (!attachment.isImage && !attachment.isPdf) ? (
             <div className="rounded-lg bg-social-surface p-5 text-social-ink/80">
-              Preview is not available for this file type. Download is available
-              below.
+              {!previewDataUrl
+                ? "Preview is still loading. Please wait a moment."
+                : "Preview is not available for this file type. Download is available below."}
             </div>
           ) : null}
         </div>
@@ -292,11 +295,15 @@ function AttachmentViewer({
           <p className="truncate text-sm text-social-ink/80">
             {postContent || "No post text provided."}
           </p>
-          <Button asChild>
-            <a href={attachment.dataUrl} download={attachment.name}>
-              Download file
-            </a>
-          </Button>
+          {previewDataUrl ? (
+            <Button asChild>
+              <a href={previewDataUrl} download={attachment.name}>
+                Download file
+              </a>
+            </Button>
+          ) : (
+            <Button disabled>Preparing file...</Button>
+          )}
         </div>
       </div>
     </div>
@@ -315,7 +322,7 @@ const AttachmentTile = ({
     className="group cursor-pointer overflow-hidden rounded-md border border-social-border bg-social-surface text-left transition-colors hover:bg-social-accent/35"
     onClick={() => onOpen(attachment)}
   >
-    {attachment.isImage ? (
+    {attachment.isImage && attachment.dataUrl ? (
       <Image
         className="max-h-105 w-full bg-social-page-bg object-contain"
         src={attachment.dataUrl}
@@ -336,9 +343,14 @@ const AttachmentTile = ({
           <p className="text-xs text-social-ink/70">
             {readableSize(attachment.sizeBytes)}
           </p>
+          {attachment.isImage ? (
+            <p className="mt-1 text-[11px] text-social-ink/55">
+              Click to load preview
+            </p>
+          ) : null}
         </div>
         <Badge className="mt-0.5 bg-social-accent/55 text-social-ink transition-colors group-hover:bg-social-accent">
-          {attachment.isPdf ? "PDF" : "File"}
+          {attachment.isImage ? "Image" : attachment.isPdf ? "PDF" : "File"}
         </Badge>
       </div>
     )}
@@ -614,6 +626,7 @@ export default function Social({ data }: SocialProps) {
     Record<string, string>
   >({});
   const [viewerState, setViewerState] = useState<ViewerState | null>(null);
+  const [isViewerLoading, setIsViewerLoading] = useState(false);
   const { theme, setTheme } = useTheme();
 
   const socialTheme = isValidSocialTheme(theme) ? theme : DEFAULT_SOCIAL_THEME;
@@ -692,9 +705,32 @@ export default function Social({ data }: SocialProps) {
     }));
   };
 
-  const openViewer = (post: SocialPost, attachment: SocialAttachment) => {
+  const openViewer = async (post: SocialPost, attachment: SocialAttachment) => {
+    if (attachment.dataUrl) {
+      setViewerState({
+        attachment,
+        postAuthor: post.author,
+        postContent: post.content,
+      });
+      return;
+    }
+
+    setIsViewerLoading(true);
+    setActionError(null);
+
+    const result = await getAttachmentDataUrlAction({
+      attachmentId: attachment.id,
+    });
+
+    setIsViewerLoading(false);
+
+    if (!result.ok) {
+      setActionError(result.error);
+      return;
+    }
+
     setViewerState({
-      attachment,
+      attachment: { ...attachment, dataUrl: result.dataUrl },
       postAuthor: post.author,
       postContent: post.content,
     });
@@ -1151,6 +1187,14 @@ export default function Social({ data }: SocialProps) {
               <Card className="bg-social-surface shadow-sm">
                 <CardContent className="pt-5 text-sm text-social-ink/80">
                   {actionError}
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {isViewerLoading ? (
+              <Card className="bg-social-surface shadow-sm">
+                <CardContent className="pt-5 text-sm text-social-ink/80">
+                  Loading attachment preview...
                 </CardContent>
               </Card>
             ) : null}

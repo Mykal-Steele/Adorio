@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { CURRENT_VIEWER_NAME } from "@/lib/constants";
 import {
@@ -31,6 +32,34 @@ const ensureViewerId = async () => {
 const refreshSocialRoute = () => {
   revalidateTag("social-board-data");
   revalidatePath("/social");
+};
+
+const attachmentDataRequestSchema = z.object({
+  attachmentId: z.string().cuid(),
+});
+
+export const getAttachmentDataUrlAction = async (input: unknown) => {
+  const parsed = attachmentDataRequestSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { ok: false as const, error: "Invalid attachment id" };
+  }
+
+  try {
+    const attachment = await prisma.attachment.findUnique({
+      where: { id: parsed.data.attachmentId },
+      select: { dataUrl: true },
+    });
+
+    if (!attachment) {
+      return { ok: false as const, error: "Attachment not found" };
+    }
+
+    return { ok: true as const, dataUrl: attachment.dataUrl };
+  } catch (error) {
+    console.error(error);
+    return { ok: false as const, error: "Internal server error" };
+  }
 };
 
 export const createPostAction = async (input: unknown) => {

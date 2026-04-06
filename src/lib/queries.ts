@@ -19,7 +19,6 @@ type PostQueryResult = Prisma.PostGetPayload<{
         name: true;
         mimeType: true;
         sizeBytes: true;
-        dataUrl: true;
         isImage: true;
         isPdf: true;
       };
@@ -48,7 +47,6 @@ type PostQueryResult = Prisma.PostGetPayload<{
             name: true;
             mimeType: true;
             sizeBytes: true;
-            dataUrl: true;
             isImage: true;
             isPdf: true;
           };
@@ -85,7 +83,6 @@ const mapAttachment = (attachment: {
   name: string;
   mimeType: string;
   sizeBytes: number;
-  dataUrl: string;
   isImage: boolean;
   isPdf: boolean;
 }): SocialAttachment => ({
@@ -93,7 +90,6 @@ const mapAttachment = (attachment: {
   name: attachment.name,
   mimeType: attachment.mimeType,
   sizeBytes: attachment.sizeBytes,
-  dataUrl: attachment.dataUrl,
   isImage: attachment.isImage,
   isPdf: attachment.isPdf,
 });
@@ -195,7 +191,6 @@ const getSocialBoardDataUncached = async (
             name: true,
             mimeType: true,
             sizeBytes: true,
-            dataUrl: true,
             isImage: true,
             isPdf: true,
           },
@@ -224,7 +219,6 @@ const getSocialBoardDataUncached = async (
                 name: true,
                 mimeType: true,
                 sizeBytes: true,
-                dataUrl: true,
                 isImage: true,
                 isPdf: true,
               },

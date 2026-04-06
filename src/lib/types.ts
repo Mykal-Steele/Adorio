@@ -3,7 +3,7 @@ export type SocialAttachment = {
   name: string;
   mimeType: string;
   sizeBytes: number;
-  dataUrl: string;
+  dataUrl?: string;
   isImage: boolean;
   isPdf: boolean;
 };

@@ -52,6 +52,8 @@ model Comment {
   @@index([postId])
   @@index([authorId])
   @@index([parentId])
+  @@index([postId, createdAt])
+  @@index([parentId, createdAt])
 }
 
 model Attachment {
