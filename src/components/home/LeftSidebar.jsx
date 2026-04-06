@@ -39,7 +39,7 @@ function TechItem({ icon, hover, label }) {
       <IconComponent
         className={`text-neutral-400 transition-colors ${hover}`}
       />
-      <span className="text-[10px] text-neutral-500">{label}</span>
+      <span className="text-[10px] text-neutral-700">{label}</span>
     </div>
   );
 }
@@ -63,8 +63,10 @@ const LeftSidebar = () => {
                 alt="Oakar Oo"
                 width={160}
                 height={160}
-                unoptimized
+                priority
+                fetchPriority="high"
                 className="w-full h-full object-cover"
+                sizes="160px"
               />
             </div>
             <div className="absolute top-0 right-0 w-full h-full bg-linear-to-tr from-transparent via-white/10 to-transparent pointer-events-none"></div>
@@ -73,7 +75,7 @@ const LeftSidebar = () => {
             <h1 className="text-2xl font-black text-amber-100 drop-shadow-md font-poppins tracking-widest ">
               Oakar Oo
             </h1>
-            <p className="text-amber-400/80 text-sm font-main">Student</p>
+            <p className="text-amber-300 text-sm font-main">Student</p>
           </div>
         </div>
 

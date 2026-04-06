@@ -112,7 +112,7 @@ body {
       rgba(214, 196, 158, 0.5),
       rgba(215, 196, 158, 0.5)
     ),
-    url("https://media.istockphoto.com/id/517699927/photo/corkboard-texture.jpg?s=612x612&w=0&k=20&c=gVkDdfbmPLkz029sAj4T_L7aGgCmCjfpXJ8caGVyZi8=");
+    url("/corkboard.webp");
   background-size: 400px;
   background-repeat: repeat;
 }

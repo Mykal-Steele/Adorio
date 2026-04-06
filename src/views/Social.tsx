@@ -127,7 +127,8 @@ const filterAndSortComments = (
         .toLowerCase()
         .includes(normalizedQuery);
     })
-    .toSorted((a, b) => {
+    .slice()
+    .sort((a, b) => {
       if (sortMode === "new") {
         return (
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -1102,6 +1103,7 @@ export default function Social({ data }: SocialProps) {
                               variant="outline"
                               size="icon-xs"
                               className="absolute right-1 top-1"
+                              aria-label="Remove attachment from post draft"
                               onClick={() =>
                                 setDraftAttachments((current) =>
                                   current.filter(
@@ -1115,6 +1117,7 @@ export default function Social({ data }: SocialProps) {
 
                             {attachment.mimeType.startsWith("image/") ? (
                               <Image
+                                aria-label="Remove attachment from reply draft"
                                 className="aspect-4/3 w-full rounded object-cover"
                                 src={attachment.dataUrl}
                                 alt={attachment.name}
@@ -1332,6 +1335,7 @@ export default function Social({ data }: SocialProps) {
                                         variant="outline"
                                         size="icon-xs"
                                         className="absolute right-1 top-1"
+                                        aria-label="Remove attachment from comment draft"
                                         onClick={() =>
                                           setCommentDraftByPost((current) => {
                                             const existing = current[

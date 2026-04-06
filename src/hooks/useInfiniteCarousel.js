@@ -35,12 +35,24 @@ const useInfiniteCarousel = (trackRef, speed = 0.5, pauseOnHover = true) => {
     const cards = carousel.querySelectorAll(".carousel-card");
     if (cards.length === 0) return;
 
-    const cardWidth = cards[0].offsetWidth;
-    const gap = 16;
-    const originalCardCount = cards.length / 3;
-    const singleSetWidth = originalCardCount * (cardWidth + gap);
+    let singleSetWidth = carousel.scrollWidth / 3;
 
-    track.scrollLeft = singleSetWidth;
+    const recalcLayout = () => {
+      singleSetWidth = carousel.scrollWidth / 3;
+
+      if (singleSetWidth > 0 && track.scrollLeft === 0) {
+        track.scrollLeft = singleSetWidth;
+      }
+    };
+
+    recalcLayout();
+
+    const resizeObserver = new ResizeObserver(() => {
+      recalcLayout();
+    });
+
+    resizeObserver.observe(track);
+    resizeObserver.observe(carousel);
 
     const syncLoopBounds = () => {
       if (track.scrollLeft <= 0) {
@@ -163,6 +175,7 @@ const useInfiniteCarousel = (trackRef, speed = 0.5, pauseOnHover = true) => {
       controlsRef.current = null;
       cancelAnimation(animationRef);
       cancelAnimation(wheelAnimationRef);
+      resizeObserver.disconnect();
 
       listeners.forEach(([eventName, handler]) => {
         track.removeEventListener(eventName, handler);

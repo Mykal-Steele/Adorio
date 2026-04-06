@@ -6,14 +6,40 @@ import useInfiniteCarousel from "@/hooks/useInfiniteCarousel";
 const Shelf = ({ category, iconName, speed, items }) => {
   const trackRef = useRef(null);
   const labelRef = useRef(null);
+  const labelRectRef = useRef(null);
   const [fallingStyle, setFallingStyle] = useState({});
   const { setDirection } = useInfiniteCarousel(trackRef, speed, true);
   const [hoverCount, setHoverCount] = useState(0);
   const isFalling = hoverCount >= 10;
 
   useEffect(() => {
-    if (isFalling && labelRef.current) {
-      const rect = labelRef.current.getBoundingClientRect();
+    const label = labelRef.current;
+    if (!label) return;
+
+    const updateRect = () => {
+      labelRectRef.current = label.getBoundingClientRect();
+    };
+
+    updateRect();
+
+    const observer = new ResizeObserver(() => {
+      updateRect();
+    });
+
+    observer.observe(label);
+    window.addEventListener("scroll", updateRect, { passive: true });
+    window.addEventListener("resize", updateRect);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", updateRect);
+      window.removeEventListener("resize", updateRect);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isFalling && labelRef.current && labelRectRef.current) {
+      const rect = labelRectRef.current;
 
       const randomX = (Math.random() - 0.5) * 400; // -200px to +200px drift
       const randomRotate =
@@ -74,7 +100,7 @@ const Shelf = ({ category, iconName, speed, items }) => {
     return { transform: `rotate(${angle}deg)` };
   }, [category, iconName]);
 
-  const sourceItems = items?.length ? items : [];
+  const sourceItems = useMemo(() => (items?.length ? items : []), [items]);
   const carouselItems = useMemo(
     () => [...sourceItems, ...sourceItems, ...sourceItems],
     [sourceItems],
@@ -132,13 +158,15 @@ const Shelf = ({ category, iconName, speed, items }) => {
               <div className="flex gap-4">
                 <button
                   onClick={() => setDirection(-1)}
-                  className="w-8 h-8 rounded-full bg-neutral-900 border-2 border-neutral-600 shadow-md flex items-center justify-center text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 active:scale-95 transition-all"
+                  className="w-8 h-8 rounded-full bg-neutral-900 border-2 border-neutral-600 shadow-md flex items-center justify-center text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800 active:scale-95 transition-all"
+                  aria-label={`Scroll ${category} carousel left`}
                 >
                   <Icons.ArrowLeft className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setDirection(1)}
-                  className="w-8 h-8 rounded-full bg-neutral-900 border-2 border-neutral-600 shadow-md flex items-center justify-center text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800 active:scale-95 transition-all"
+                  className="w-8 h-8 rounded-full bg-neutral-900 border-2 border-neutral-600 shadow-md flex items-center justify-center text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800 active:scale-95 transition-all"
+                  aria-label={`Scroll ${category} carousel right`}
                 >
                   <Icons.ArrowRight className="w-4 h-4" />
                 </button>

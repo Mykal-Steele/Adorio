@@ -12,7 +12,7 @@ const RightSidebar = () => {
             <br />
             <span className="text-amber-700 font-bold">Golang!</span>
           </p>
-          <p className="text-[10px] font-main text-yellow-700/60 mt-2 -rotate-1">
+          <p className="text-[10px] font-main text-yellow-800 mt-2 -rotate-1">
             — pinned Jan 7 2026
           </p>
         </div>
@@ -29,7 +29,7 @@ const RightSidebar = () => {
                 Mykal-Steele
               </span>
             </div>
-            <span className="text-[10px] text-neutral-500 font-main mt-1 block">
+            <span className="text-[10px] text-neutral-700 font-main mt-1 block">
               - check my codes here
             </span>
           </a>
@@ -44,7 +44,7 @@ const RightSidebar = () => {
                 oakar@adorio.space
               </span>
             </div>
-            <span className="text-[10px] text-neutral-500 font-main mt-1 block">
+            <span className="text-[10px] text-neutral-700 font-main mt-1 block">
               - sadly, i can&apos;t email you back with this email, but i WILL
               reply you back!
             </span>
@@ -58,7 +58,7 @@ const RightSidebar = () => {
           <p className="font-poppins text-neutral-800 text-sm leading-relaxed">
             There is an easier egg! :D
             <br />
-            <span className="text-neutral-500 text-xs font-main ml-2">
+            <span className="text-neutral-700 text-xs font-main ml-2">
               (hint: tilt)
             </span>
           </p>
