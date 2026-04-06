@@ -16,6 +16,8 @@ CMD ["bun", "run", "dev", "--hostname", "0.0.0.0", "--port", "3000"]
 FROM base AS builder
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG BUILD_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+ENV DATABASE_URL=${BUILD_DATABASE_URL}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN bun run prisma:generate && bun run build
