@@ -2,6 +2,8 @@ import { Icons } from "./Icons";
 import CalendarWidget from "./CalendarWidget";
 
 const RightSidebar = () => {
+  const obfuscatedMailto = "mailto:oakar%40adorio.space";
+
   return (
     <aside className="w-full z-30 shadow-[-4px_0_24px_rgba(0,0,0,0.5)] h-auto md:h-screen md:sticky md:top-0 overflow-y-auto border-l-0 md:border-l-8 border-t-8 md:border-t-0 border-amber-900 cork-pattern md:col-start-3 md:row-start-1 ts-right-sidebar">
       <div className="p-6 flex flex-col gap-6 relative">
@@ -34,14 +36,14 @@ const RightSidebar = () => {
             </span>
           </a>
           <a
-            href="mailto:oakar@adorio.space"
+            href={obfuscatedMailto}
             className="bg-amber-50 text-amber-900 p-3 shadow-md -rotate-3 hover:-rotate-1 transition-all duration-200 relative group mr-4 mt-4"
           >
             <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-red-500 shadow-sm z-10"></div>
             <div className="flex items-center gap-2">
               <Icons.Mail />
               <span className="font-poppins font-bold text-sm hover:underline">
-                oakar@adorio.space
+                oakar [at] adorio.space
               </span>
             </div>
             <span className="text-[10px] text-neutral-700 font-main mt-1 block">

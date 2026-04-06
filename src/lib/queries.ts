@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { CURRENT_VIEWER_NAME, REPUTATION_MULTIPLIER } from "@/lib/constants";
@@ -172,7 +173,9 @@ const buildReputationBoard = (posts: SocialPost[], viewerName: string): SocialBo
   };
 };
 
-export const getSocialBoardData = async (viewerName = CURRENT_VIEWER_NAME): Promise<SocialBoardData> => {
+const getSocialBoardDataUncached = async (
+  viewerName = CURRENT_VIEWER_NAME,
+): Promise<SocialBoardData> => {
   let posts: PostQueryResult[] = [];
 
   try {
@@ -263,4 +266,23 @@ export const getSocialBoardData = async (viewerName = CURRENT_VIEWER_NAME): Prom
   });
 
   return buildReputationBoard(mappedPosts, viewerName);
+};
+
+const getDefaultViewerSocialBoardDataCached = unstable_cache(
+  async () => getSocialBoardDataUncached(CURRENT_VIEWER_NAME),
+  ["social-board-data"],
+  {
+    revalidate: 30,
+    tags: ["social-board-data"],
+  },
+);
+
+export const getSocialBoardData = async (
+  viewerName = CURRENT_VIEWER_NAME,
+): Promise<SocialBoardData> => {
+  if (viewerName === CURRENT_VIEWER_NAME) {
+    return getDefaultViewerSocialBoardDataCached();
+  }
+
+  return getSocialBoardDataUncached(viewerName);
 };

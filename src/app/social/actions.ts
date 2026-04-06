@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { CURRENT_VIEWER_NAME } from "@/lib/constants";
 import {
@@ -26,6 +26,11 @@ const ensureViewerId = async () => {
 
   cachedViewerId = viewer.id;
   return viewer.id;
+};
+
+const refreshSocialRoute = () => {
+  revalidateTag("social-board-data");
+  revalidatePath("/social");
 };
 
 export const createPostAction = async (input: unknown) => {
@@ -55,7 +60,7 @@ export const createPostAction = async (input: unknown) => {
       },
     });
 
-    revalidatePath("/social");
+    refreshSocialRoute();
     return { ok: true as const };
   } catch (error) {
     console.error(error);
@@ -92,7 +97,7 @@ export const createCommentAction = async (input: unknown) => {
       },
     });
 
-    revalidatePath("/social");
+    refreshSocialRoute();
     return { ok: true as const };
   } catch (error) {
     console.error(error);
@@ -137,7 +142,7 @@ export const votePostAction = async (input: unknown) => {
       });
     }
 
-    revalidatePath("/social");
+    refreshSocialRoute();
     return { ok: true as const };
   } catch (error) {
     console.error(error);
@@ -182,7 +187,7 @@ export const voteCommentAction = async (input: unknown) => {
       });
     }
 
-    revalidatePath("/social");
+    refreshSocialRoute();
     return { ok: true as const };
   } catch (error) {
     console.error(error);

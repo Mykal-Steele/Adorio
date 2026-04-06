@@ -1,16 +1,14 @@
-"use client";
-
+import corkboardTexture from "@/assets/corkboard.webp";
 import { shelfItems } from "@/components/home/config/data";
 import LeftSidebar from "@/components/home/LeftSidebar";
 import RightSidebar from "@/components/home/RightSidebar";
 import Shelf from "@/components/home/Shelf";
 
 const backgroundStyle = {
-  backgroundImage:
-    "url('https://images.unsplash.com/photo-1585773818428-b50bebdc2344?fm=jpg&q=60&w=1920&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8d29vZCUyMHdhbGx8ZW58MHx8MHx8fDA%3D')",
+  backgroundImage: `linear-gradient(rgba(36, 25, 20, 0.22), rgba(36, 25, 20, 0.22)), url(${corkboardTexture.src})`,
   backgroundSize: "cover",
   backgroundPosition: "center",
-  opacity: 0.55,
+  opacity: 0.58,
 };
 
 const shelves = [

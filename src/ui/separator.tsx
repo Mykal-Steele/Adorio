@@ -12,10 +12,14 @@ function Separator({
   decorative = true,
   ...props
 }: SeparatorProps) {
+  const accessibilityProps = decorative
+    ? {}
+    : { role: "separator" as const, "aria-orientation": orientation };
+
   return (
     <div
-      role={decorative ? "none" : "separator"}
-      aria-orientation={orientation}
+      role={decorative ? "none" : undefined}
+      {...accessibilityProps}
       className={cn(
         "shrink-0 bg-[#ACBFA4]/55",
         orientation === "horizontal" ? "h-px w-full" : "h-full w-px",

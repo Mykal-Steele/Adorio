@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useState, useEffect, useMemo } from "react";
 import { Icons } from "./Icons";
 import CarouselCard from "./CarouselCard";
@@ -100,11 +102,10 @@ const Shelf = ({ category, iconName, speed, items }) => {
     return { transform: `rotate(${angle}deg)` };
   }, [category, iconName]);
 
-  const sourceItems = useMemo(() => (items?.length ? items : []), [items]);
-  const carouselItems = useMemo(
-    () => [...sourceItems, ...sourceItems, ...sourceItems],
-    [sourceItems],
-  );
+  const carouselItems = useMemo(() => {
+    const sourceItems = items?.length ? items : [];
+    return [...sourceItems, ...sourceItems, ...sourceItems];
+  }, [items]);
 
   return (
     <div className="mb-16 relative" style={tiltStyle}>
