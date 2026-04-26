@@ -29,6 +29,19 @@ npm run dev:backend
 node scripts/sync-platform-deps.cjs
 ```
 
+### Code Quality
+
+```bash
+# Auto-fix formatting (Prettier)
+npm run format
+
+# Check formatting without writing (used in CI)
+npm run format:check
+
+# Lint
+npm run lint
+```
+
 ### Build
 
 ```bash
