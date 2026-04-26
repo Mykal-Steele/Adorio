@@ -1,7 +1,7 @@
-import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { MAX_PREVIEW_LENGTH } from "../constants";
-import DOMPurify from "dompurify";
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MAX_PREVIEW_LENGTH } from '../constants';
+import DOMPurify from 'dompurify';
 
 // DOMPurify only works in the browser (it needs a DOM)
 const sanitize = (str) => {
@@ -9,16 +9,16 @@ const sanitize = (str) => {
   return DOMPurify.sanitize(str || '');
 };
 
-const PostContent = ({ title, content = "", isExpanded, onToggleExpand }) => {
-  const safeContent = content || "";
+const PostContent = ({ title, content = '', isExpanded, onToggleExpand }) => {
+  const safeContent = content || '';
   const shouldShowExpand = safeContent.length > MAX_PREVIEW_LENGTH;
 
   const displayContent =
     isExpanded || !shouldShowExpand
       ? safeContent
-      : safeContent.slice(0, MAX_PREVIEW_LENGTH) + "...";
+      : safeContent.slice(0, MAX_PREVIEW_LENGTH) + '...';
 
-  const sanitizedTitle = sanitize(title || "Untitled");
+  const sanitizedTitle = sanitize(title || 'Untitled');
   const sanitizedDisplayContent = sanitize(displayContent);
 
   return (

@@ -1,6 +1,6 @@
-import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 const ImageModal = ({ isVisible, imageUrl, title, onClose, instanceId }) => {
   if (!isVisible || !imageUrl) return null;
@@ -24,7 +24,7 @@ const ImageModal = ({ isVisible, imageUrl, title, onClose, instanceId }) => {
         >
           <img
             src={imageUrl}
-            alt={title || "Post image"}
+            alt={title || 'Post image'}
             className="max-w-full max-h-[90vh] object-contain rounded-2xl"
             crossOrigin="anonymous"
             referrerPolicy="no-referrer"

@@ -1,8 +1,8 @@
-import React, { useRef } from "react";
-import { motion } from "framer-motion";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
-import useClickOutside from "../../../../hooks/useClickOutside";
+import React, { useRef } from 'react';
+import { motion } from 'framer-motion';
+import data from '@emoji-mart/data';
+import Picker from '@emoji-mart/react';
+import useClickOutside from '../../../../hooks/useClickOutside';
 
 // this form handles all the comment input stuff - finally got emojis working!
 const CommentForm = ({
@@ -48,10 +48,10 @@ const CommentForm = ({
               skinTonePosition="search"
               dynamicWidth={true}
               style={{
-                width: "350px",
-                height: "400px",
-                borderRadius: "12px",
-                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
+                width: '350px',
+                height: '400px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
               }}
             />
           </div>
@@ -66,9 +66,7 @@ const CommentForm = ({
         className="w-full py-2.5 text-sm bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl hover:shadow-lg transition-all relative overflow-hidden group"
         disabled={isSubmitting}
       >
-        <span className="relative z-10">
-          {isSubmitting ? "Posting..." : "Post Comment"}
-        </span>
+        <span className="relative z-10">{isSubmitting ? 'Posting...' : 'Post Comment'}</span>
         {/* this overlay gives that subtle shine effect when hovering */}
         <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       </motion.button>

@@ -50,7 +50,7 @@ const ResizableTerminal = ({
       const paddingAndBorder = 24; // 12px padding top + 12px padding bottom
       const optimalHeight = Math.min(
         Math.max(scrollHeight + paddingAndBorder, minHeight),
-        maxInitialHeight
+        maxInitialHeight,
       );
 
       setHeight(optimalHeight);
@@ -73,10 +73,7 @@ const ResizableTerminal = ({
       e.preventDefault();
 
       const deltaY = e.clientY - startY.current;
-      const newHeight = Math.min(
-        Math.max(startHeight.current + deltaY, minHeight),
-        maxHeight
-      );
+      const newHeight = Math.min(Math.max(startHeight.current + deltaY, minHeight), maxHeight);
 
       setHeight(newHeight);
     };
@@ -111,10 +108,7 @@ const ResizableTerminal = ({
       e.preventDefault();
 
       const deltaY = e.touches[0].clientY - startY.current;
-      const newHeight = Math.min(
-        Math.max(startHeight.current + deltaY, minHeight),
-        maxHeight
-      );
+      const newHeight = Math.min(Math.max(startHeight.current + deltaY, minHeight), maxHeight);
 
       setHeight(newHeight);
     };
@@ -134,7 +128,7 @@ const ResizableTerminal = ({
     <div ref={containerRef} className={`relative ${className}`}>
       <div
         ref={contentRef}
-        className='bg-gray-900/50 rounded border font-mono text-sm text-gray-200 whitespace-pre-wrap overflow-auto p-3'
+        className="bg-gray-900/50 rounded border font-mono text-sm text-gray-200 whitespace-pre-wrap overflow-auto p-3"
         style={{
           height: `${height}px`,
           transition: isResizing ? 'none' : 'height 0.15s ease-out',
@@ -177,25 +171,25 @@ const ResizableTerminal = ({
         onTouchStart={handleTouchStart}
       >
         {/* Medium-sized corner grip */}
-        <div className='absolute bottom-0.5 right-0.5 space-y-0.5'>
-          <div className='flex space-x-0.5 justify-end'>
-            <div className='w-0.5 h-0.5 bg-gray-400/70 group-hover:bg-gray-300/90 rounded-sm transition-colors' />
-            <div className='w-0.5 h-0.5 bg-gray-400/70 group-hover:bg-gray-300/90 rounded-sm transition-colors' />
-            <div className='w-0.5 h-0.5 bg-gray-400/70 group-hover:bg-gray-300/90 rounded-sm transition-colors' />
+        <div className="absolute bottom-0.5 right-0.5 space-y-0.5">
+          <div className="flex space-x-0.5 justify-end">
+            <div className="w-0.5 h-0.5 bg-gray-400/70 group-hover:bg-gray-300/90 rounded-sm transition-colors" />
+            <div className="w-0.5 h-0.5 bg-gray-400/70 group-hover:bg-gray-300/90 rounded-sm transition-colors" />
+            <div className="w-0.5 h-0.5 bg-gray-400/70 group-hover:bg-gray-300/90 rounded-sm transition-colors" />
           </div>
-          <div className='flex space-x-0.5 justify-end'>
-            <div className='w-0.5 h-0.5 bg-gray-400/70 group-hover:bg-gray-300/90 rounded-sm transition-colors' />
-            <div className='w-0.5 h-0.5 bg-gray-400/70 group-hover:bg-gray-300/90 rounded-sm transition-colors' />
+          <div className="flex space-x-0.5 justify-end">
+            <div className="w-0.5 h-0.5 bg-gray-400/70 group-hover:bg-gray-300/90 rounded-sm transition-colors" />
+            <div className="w-0.5 h-0.5 bg-gray-400/70 group-hover:bg-gray-300/90 rounded-sm transition-colors" />
           </div>
-          <div className='flex space-x-0.5 justify-end'>
-            <div className='w-0.5 h-0.5 bg-gray-400/70 group-hover:bg-gray-300/90 rounded-sm transition-colors' />
+          <div className="flex space-x-0.5 justify-end">
+            <div className="w-0.5 h-0.5 bg-gray-400/70 group-hover:bg-gray-300/90 rounded-sm transition-colors" />
           </div>
         </div>
       </div>
 
       {/* Size indicator tooltip */}
       {isResizing && (
-        <div className='absolute bottom-6 right-4 bg-gray-800/90 text-gray-200 px-3 py-1.5 rounded-md text-xs font-mono border border-gray-600/50 shadow-lg'>
+        <div className="absolute bottom-6 right-4 bg-gray-800/90 text-gray-200 px-3 py-1.5 rounded-md text-xs font-mono border border-gray-600/50 shadow-lg">
           {height}px / {maxHeight}px
         </div>
       )}

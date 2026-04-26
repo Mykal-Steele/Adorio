@@ -1,26 +1,20 @@
-import React, {
-  useState,
-  useRef,
-  useCallback,
-  useMemo,
-  useEffect,
-} from "react";
-import { motion } from "framer-motion";
-import { addComment } from "../../api";
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { addComment } from '../../api';
 
-import AuthorHeader from "./components/AuthorHeader";
-import PostImage from "./components/PostImage";
-import ImageModal from "./components/ImageModal";
-import PostContent from "./components/PostContent";
-import InteractionButtons from "./components/InteractionButtons";
-import CommentSection from "./components/CommentSection";
+import AuthorHeader from './components/AuthorHeader';
+import PostImage from './components/PostImage';
+import ImageModal from './components/ImageModal';
+import PostContent from './components/PostContent';
+import InteractionButtons from './components/InteractionButtons';
+import CommentSection from './components/CommentSection';
 
 // Import hooks
-import { useImageLoader } from "./hooks/useImageLoader";
+import { useImageLoader } from './hooks/useImageLoader';
 
-import { isUserAdmin } from "./constants";
+import { isUserAdmin } from './constants';
 
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 const PostCard = ({
   _id,
@@ -37,20 +31,19 @@ const PostCard = ({
 }) => {
   // random id so framer-motion doesn't break animations when react decides to rerender stuff
   const instanceId = useMemo(
-    () =>
-      `post-${_id}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
-    [_id]
+    () => `post-${_id}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+    [_id],
   );
 
   // Derived states with safety checks
-  const isAdmin = user?.username === "Admin";
+  const isAdmin = user?.username === 'Admin';
 
   // Component state
   const [showComments, setShowComments] = useState(false);
-  const [newComment, setNewComment] = useState("");
+  const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [comments, setComments] = useState(() =>
-    Array.isArray(initialComments) ? initialComments : []
+    Array.isArray(initialComments) ? initialComments : [],
   );
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [expandedComments, setExpandedComments] = useState({});
@@ -58,7 +51,7 @@ const PostCard = ({
   const [showImageModal, setShowImageModal] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [optimisticLikesCount, setOptimisticLikesCount] = useState(
-    Array.isArray(likes) ? likes.length : 0 // Add safety
+    Array.isArray(likes) ? likes.length : 0, // Add safety
   );
   // Always start as false (matches SSR) — synced after auth loads via useEffect
   const [optimisticUserLiked, setOptimisticUserLiked] = useState(false);
@@ -76,14 +69,12 @@ const PostCard = ({
       setOptimisticUserLiked(
         Array.isArray(likes) &&
           likes.some(
-            (like) =>
-              (like?._id?.toString() || like?.toString()) ===
-              currentUserId.toString()
-          )
+            (like) => (like?._id?.toString() || like?.toString()) === currentUserId.toString(),
+          ),
       );
       setOptimisticLikesCount(Array.isArray(likes) ? likes.length : 0);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserId]);
 
   // Load image
@@ -105,7 +96,7 @@ const PostCard = ({
     setIsContentExpanded((prev) => !prev);
     if (!isContentExpanded) {
       requestAnimationFrame(() =>
-        window.scrollTo({ top: window.scrollY + 50, behavior: "smooth" })
+        window.scrollTo({ top: window.scrollY + 50, behavior: 'smooth' }),
       );
     }
   }, [isContentExpanded]);
@@ -127,11 +118,9 @@ const PostCard = ({
     hasInteractedRef.current = true;
 
     // Add the processing class to show animation - KEEP ONLY THIS INSTANCE
-    const buttonElement = document.querySelector(
-      `[data-post-id="${_id}"] .like-button`
-    );
+    const buttonElement = document.querySelector(`[data-post-id="${_id}"] .like-button`);
     if (buttonElement) {
-      buttonElement.classList.add("processing-like");
+      buttonElement.classList.add('processing-like');
     }
 
     // Update UI optimistically right away
@@ -144,15 +133,13 @@ const PostCard = ({
 
     try {
       // Pass the intended state to the API function
-      if (typeof onLike === "function") {
+      if (typeof onLike === 'function') {
         const response = await onLike(_id, willBeLiked);
 
         // Ensure our UI reflects the server state (reconciliation)
         if (response && Array.isArray(response.likes)) {
           const serverHasUserLike = response.likes.some(
-            (like) =>
-              (like?._id?.toString() || like?.toString()) ===
-              currentUserId?.toString()
+            (like) => (like?._id?.toString() || like?.toString()) === currentUserId?.toString(),
           );
 
           // Only update UI if it differs from server state
@@ -163,23 +150,21 @@ const PostCard = ({
         }
 
         // Add conditional logging
-        if (process.env.NODE_ENV !== "production") {
+        if (process.env.NODE_ENV !== 'production') {
           console.log(
-            `Like operation completed - Server state: ${
-              willBeLiked ? "liked" : "unliked"
-            }`
+            `Like operation completed - Server state: ${willBeLiked ? 'liked' : 'unliked'}`,
           );
         }
       }
     } catch (err) {
-      if (process.env.NODE_ENV !== "production") {
-        console.error("Error liking post:", err);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error liking post:', err);
       }
       const errStatus = (err as any)?.statusCode;
       if (errStatus === 401 || errStatus === 403) {
-        setAuthError("Please log in to like posts.");
+        setAuthError('Please log in to like posts.');
       } else {
-        setAuthError("Failed to like. Please try again.");
+        setAuthError('Failed to like. Please try again.');
       }
       setTimeout(() => setAuthError(null), 3000);
       // Revert optimistic update on error
@@ -188,7 +173,7 @@ const PostCard = ({
     } finally {
       // Remove processing indicator
       if (buttonElement) {
-        buttonElement.classList.remove("processing-like");
+        buttonElement.classList.remove('processing-like');
       }
       // Reset the in-progress flag with a small delay
       setTimeout(() => {
@@ -214,7 +199,7 @@ const PostCard = ({
         _id: tempId,
         text: newComment,
         user: {
-          username: user?.username || "You",
+          username: user?.username || 'You',
           _id: currentUserId,
         },
         createdAt: new Date().toISOString(),
@@ -227,7 +212,7 @@ const PostCard = ({
       ]);
 
       const commentText = newComment;
-      setNewComment("");
+      setNewComment('');
 
       setIsSubmitting(true);
       try {
@@ -237,39 +222,37 @@ const PostCard = ({
         if (updatedPost?.comments) {
           // replace all comments with the properly populated ones
           setComments(updatedPost.comments);
-          if (typeof onCommentAdded === "function") {
+          if (typeof onCommentAdded === 'function') {
             onCommentAdded(updatedPost);
           }
         }
       } catch (err) {
-        if (process.env.NODE_ENV !== "production") {
-          console.error("Error adding comment:", err);
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Error adding comment:', err);
         }
         const errStatus = (err as any)?.statusCode;
         if (errStatus === 401 || errStatus === 403) {
-          setAuthError("Please log in to comment.");
+          setAuthError('Please log in to comment.');
           setTimeout(() => setAuthError(null), 3000);
         }
         setComments((prevComments) =>
           Array.isArray(prevComments)
             ? prevComments.filter((comment) => comment._id !== tempId)
-            : []
+            : [],
         );
         setNewComment(commentText);
       } finally {
         setIsSubmitting(false);
       }
     },
-    [_id, newComment, isSubmitting, user, currentUserId, onCommentAdded]
+    [_id, newComment, isSubmitting, user, currentUserId, onCommentAdded],
   );
 
   // making sure we don't try to show broken images in the modal
   const safeImageUrl = useMemo(
     () =>
-      imageState?.isLoaded && !imageState?.hasError && imageState?.url
-        ? imageState.url
-        : null,
-    [imageState]
+      imageState?.isLoaded && !imageState?.hasError && imageState?.url ? imageState.url : null,
+    [imageState],
   );
 
   // make sure comments.length doesn't explode if comments is null
@@ -334,11 +317,9 @@ const PostCard = ({
         <button
           onClick={handleToggleContent}
           className="text-purple-400 hover:text-purple-300 text-sm font-medium mt-2 transition-colors"
-          aria-label={
-            isContentExpanded ? "Show less content" : "Show more content"
-          }
+          aria-label={isContentExpanded ? 'Show less content' : 'Show more content'}
         >
-          {isContentExpanded ? "Show less" : "Show more"}
+          {isContentExpanded ? 'Show less' : 'Show more'}
         </button>
       )}
 
@@ -351,9 +332,7 @@ const PostCard = ({
         onToggleComments={() => setShowComments(!showComments)}
       />
 
-      {authError && (
-        <p className="mt-2 text-sm text-amber-400">{authError}</p>
-      )}
+      {authError && <p className="mt-2 text-sm text-amber-400">{authError}</p>}
 
       {/* Comments Section */}
       <CommentSection

@@ -1,6 +1,6 @@
-'use client'
-import React from "react";
-import { motion } from "framer-motion";
+'use client';
+import React from 'react';
+import { motion } from 'framer-motion';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -20,9 +20,9 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren, ErrorBounda
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     this.setState({ error, errorInfo });
-    console.error("uncaught error:", error, errorInfo);
-    console.error("error stack:", error?.stack);
-    console.error("component stack:", errorInfo?.componentStack);
+    console.error('uncaught error:', error, errorInfo);
+    console.error('error stack:', error?.stack);
+    console.error('component stack:', errorInfo?.componentStack);
   }
 
   render() {
@@ -34,9 +34,7 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren, ErrorBounda
             animate={{ opacity: 1, y: 0 }}
             className="bg-gray-900/90 backdrop-blur-lg p-8 rounded-2xl border border-purple-500/20 max-w-md"
           >
-            <h2 className="text-2xl font-bold text-purple-400 mb-4">
-              Something went wrong
-            </h2>
+            <h2 className="text-2xl font-bold text-purple-400 mb-4">Something went wrong</h2>
             <p className="text-gray-300 mb-6">
               An unexpected error occurred. Please refresh the page.
             </p>
