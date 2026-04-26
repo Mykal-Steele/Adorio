@@ -1,8 +1,8 @@
-import React, { useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import CommentForm from "./CommentForm";
-import CommentItem from "./CommentItem";
+import React, { useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import CommentForm from './CommentForm';
+import CommentItem from './CommentItem';
 
 const CommentSection = ({
   visible,
@@ -33,7 +33,7 @@ const CommentSection = ({
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: "auto" }}
+        animate={{ opacity: 1, height: 'auto' }}
         exit={{ opacity: 0, height: 0 }}
         className="mt-4 pt-4 border-t border-gray-800/40 relative"
       >

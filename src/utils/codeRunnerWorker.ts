@@ -7,12 +7,7 @@ const deepEqual = (a, b) => {
     }
     return true;
   }
-  if (
-    typeof a === 'object' &&
-    a !== null &&
-    typeof b === 'object' &&
-    b !== null
-  ) {
+  if (typeof a === 'object' && a !== null && typeof b === 'object' && b !== null) {
     const aKeys = Object.keys(a);
     const bKeys = Object.keys(b);
     if (aKeys.length !== bKeys.length) return false;
@@ -26,11 +21,7 @@ const deepEqual = (a, b) => {
 
 const toLogString = (value) => {
   if (typeof value === 'string') return value;
-  if (
-    typeof value === 'number' ||
-    typeof value === 'boolean' ||
-    value === null
-  ) {
+  if (typeof value === 'number' || typeof value === 'boolean' || value === null) {
     return String(value);
   }
   if (typeof value === 'undefined') return 'undefined';
@@ -69,15 +60,12 @@ self.onmessage = (event) => {
   const { code, tests } = event.data;
 
   const logs = [];
-  const consoleProxy = ['log', 'info', 'warn', 'error'].reduce(
-    (proxy, method) => {
-      proxy[method] = (...args) => {
-        logs.push(args.map(toLogString).join(' '));
-      };
-      return proxy;
-    },
-    {},
-  );
+  const consoleProxy = ['log', 'info', 'warn', 'error'].reduce((proxy, method) => {
+    proxy[method] = (...args) => {
+      logs.push(args.map(toLogString).join(' '));
+    };
+    return proxy;
+  }, {});
 
   const module = { exports: {} };
   const require = () => {
@@ -98,9 +86,7 @@ self.onmessage = (event) => {
     const solution = evalCode(module, module.exports, require, console);
 
     if (typeof solution !== 'function') {
-      throw new Error(
-        'Make sure you export a function. Example: module.exports = generatePrimes;',
-      );
+      throw new Error('Make sure you export a function. Example: module.exports = generatePrimes;');
     }
 
     const testResults = tests.map((test) => {
@@ -132,8 +118,7 @@ self.onmessage = (event) => {
       };
     });
 
-    const allPassed =
-      testResults.length === 0 || testResults.every((test) => test.passed);
+    const allPassed = testResults.length === 0 || testResults.every((test) => test.passed);
 
     self.postMessage({
       status: allPassed ? 'success' : 'fail',
@@ -155,8 +140,7 @@ self.onerror = (event) => {
     event.preventDefault();
     self.postMessage({
       status: 'error',
-      error:
-        event.message || 'An unknown error occurred while executing the code.',
+      error: event.message || 'An unknown error occurred while executing the code.',
       logs: [],
       tests: [],
     });

@@ -40,9 +40,7 @@ const Profile = () => {
   // Add this handler function for comments
   const handleCommentAdded = (updatedPost) => {
     setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post._id === updatedPost._id ? updatedPost : post,
-      ),
+      prevPosts.map((post) => (post._id === updatedPost._id ? updatedPost : post)),
     );
   };
 
@@ -60,9 +58,7 @@ const Profile = () => {
       setHasMore(response.hasMore);
     } catch (err) {
       if (!isAbortError(err)) {
-        setError(
-          err instanceof Error ? err.message : 'failed to fetch user posts',
-        );
+        setError(err instanceof Error ? err.message : 'failed to fetch user posts');
       }
     } finally {
       setLoading(false);
@@ -102,10 +98,7 @@ const Profile = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 flex items-center justify-center gap-3"
         >
-          <motion.div
-            whileHover={{ rotate: 15 }}
-            className="bg-purple-600/20 p-3 rounded-xl"
-          >
+          <motion.div whileHover={{ rotate: 15 }} className="bg-purple-600/20 p-3 rounded-xl">
             <SparklesIcon className="h-8 w-8 text-purple-400" />
           </motion.div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(129,140,248,0.3)]">
@@ -114,11 +107,7 @@ const Profile = () => {
         </motion.div>
 
         {/* Posts Grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="space-y-6 pb-8"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-8">
           {posts.map((post, index) => (
             <React.Fragment key={post._id}>
               <div ref={index === posts.length - 1 ? lastPostRef : null}>
@@ -156,9 +145,7 @@ const Profile = () => {
               animate={{ scale: 1 }}
               className="text-center py-6 sm:py-8 bg-gray-900/50 rounded-lg border border-gray-800/40"
             >
-              <p className="text-sm sm:text-base text-gray-400">
-                No more posts to load
-              </p>
+              <p className="text-sm sm:text-base text-gray-400">No more posts to load</p>
             </motion.div>
           )}
         </motion.div>
