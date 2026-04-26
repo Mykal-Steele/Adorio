@@ -26,8 +26,8 @@ const Profile = () => {
       // Update the post in local state
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
-          post._id === postId ? { ...post, likes: updatedPost.likes } : post
-        )
+          post._id === postId ? { ...post, likes: updatedPost.likes } : post,
+        ),
       );
 
       return updatedPost;
@@ -40,9 +40,7 @@ const Profile = () => {
   // Add this handler function for comments
   const handleCommentAdded = (updatedPost) => {
     setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post._id === updatedPost._id ? updatedPost : post
-      )
+      prevPosts.map((post) => (post._id === updatedPost._id ? updatedPost : post)),
     );
   };
 
@@ -83,8 +81,8 @@ const Profile = () => {
 
   if (error) {
     return (
-      <div className='min-h-screen flex items-center justify-center p-4'>
-        <div className='bg-red-900/30 text-red-400 p-4 rounded-lg border border-red-800/50 backdrop-blur-md'>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="bg-red-900/30 text-red-400 p-4 rounded-lg border border-red-800/50 backdrop-blur-md">
           {error}
         </div>
       </div>
@@ -92,31 +90,24 @@ const Profile = () => {
   }
 
   return (
-    <div className='min-h-screen bg-gray-950 pb-16 sm:pb-0'>
-      <div className='container mx-auto max-w-2xl px-4 py-8 pt-20'>
+    <div className="min-h-screen bg-gray-950 pb-16 sm:pb-0">
+      <div className="container mx-auto max-w-2xl px-4 py-8 pt-20">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className='mb-8 flex items-center justify-center gap-3'
+          className="mb-8 flex items-center justify-center gap-3"
         >
-          <motion.div
-            whileHover={{ rotate: 15 }}
-            className='bg-purple-600/20 p-3 rounded-xl'
-          >
-            <SparklesIcon className='h-8 w-8 text-purple-400' />
+          <motion.div whileHover={{ rotate: 15 }} className="bg-purple-600/20 p-3 rounded-xl">
+            <SparklesIcon className="h-8 w-8 text-purple-400" />
           </motion.div>
-          <h1 className='text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(129,140,248,0.3)]'>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(129,140,248,0.3)]">
             {user?.username}&apos;s Posts
           </h1>
         </motion.div>
 
         {/* Posts Grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className='space-y-6 pb-8'
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-8">
           {posts.map((post, index) => (
             <React.Fragment key={post._id}>
               <div ref={index === posts.length - 1 ? lastPostRef : null}>
@@ -140,9 +131,9 @@ const Profile = () => {
             <motion.div
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
-              className='text-center py-6 sm:py-8 bg-gray-900/50 rounded-lg border border-gray-800/40'
+              className="text-center py-6 sm:py-8 bg-gray-900/50 rounded-lg border border-gray-800/40"
             >
-              <p className='text-sm sm:text-base text-gray-400'>
+              <p className="text-sm sm:text-base text-gray-400">
                 No posts available. Start creating posts!
               </p>
             </motion.div>
@@ -152,11 +143,9 @@ const Profile = () => {
             <motion.div
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
-              className='text-center py-6 sm:py-8 bg-gray-900/50 rounded-lg border border-gray-800/40'
+              className="text-center py-6 sm:py-8 bg-gray-900/50 rounded-lg border border-gray-800/40"
             >
-              <p className='text-sm sm:text-base text-gray-400'>
-                No more posts to load
-              </p>
+              <p className="text-sm sm:text-base text-gray-400">No more posts to load</p>
             </motion.div>
           )}
         </motion.div>

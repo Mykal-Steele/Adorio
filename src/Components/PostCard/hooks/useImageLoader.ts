@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 export function useImageLoader({ postImage, postId, instanceId }) {
   const isMounted = useRef(false);
@@ -29,7 +29,7 @@ export function useImageLoader({ postImage, postId, instanceId }) {
     }));
 
     if (!postImage?.url) {
-      if (process.env.NODE_ENV !== "production") {
+      if (process.env.NODE_ENV !== 'production') {
         console.log(`[${instanceId}] No valid image for post ${postId}`);
       }
       setImageState((prev) => ({ ...prev, isLoading: false, hasError: true }));
@@ -37,7 +37,7 @@ export function useImageLoader({ postImage, postId, instanceId }) {
     }
 
     try {
-      const baseUrl = postImage.url.split("?")[0];
+      const baseUrl = postImage.url.split('?')[0];
       const uniqueUrl = `${baseUrl}?postId=${postId}&instance=${instanceId}&t=${Date.now()}&r=${Math.random()
         .toString(36)
         .slice(2)}`;
@@ -46,8 +46,8 @@ export function useImageLoader({ postImage, postId, instanceId }) {
 
       const preloadImage = new Image();
       preloadImageRef.current = preloadImage;
-      preloadImage.crossOrigin = "anonymous";
-      preloadImage.referrerPolicy = "no-referrer";
+      preloadImage.crossOrigin = 'anonymous';
+      preloadImage.referrerPolicy = 'no-referrer';
 
       preloadImage.onload = () => {
         if (isMounted.current) {
@@ -74,7 +74,7 @@ export function useImageLoader({ postImage, postId, instanceId }) {
 
       preloadImage.src = uniqueUrl;
     } catch (error) {
-      if (process.env.NODE_ENV !== "production") {
+      if (process.env.NODE_ENV !== 'production') {
         console.error(`[${instanceId}] Error loading image:`, error);
       }
       setImageState((prev) => ({

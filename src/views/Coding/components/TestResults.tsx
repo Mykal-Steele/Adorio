@@ -9,15 +9,15 @@ import ResizableTerminal from './ResizableTerminal';
 const TestResults = ({ results, isRunning }) => {
   if (isRunning) {
     return (
-      <div className='text-center py-8'>
-        <div className='text-sm text-gray-400'>Running tests...</div>
+      <div className="text-center py-8">
+        <div className="text-sm text-gray-400">Running tests...</div>
       </div>
     );
   }
 
   if (!results) {
     return (
-      <div className='text-sm text-gray-400'>
+      <div className="text-sm text-gray-400">
         Write your solution and click &ldquo;Run Tests&rdquo; to see results.
       </div>
     );
@@ -25,15 +25,15 @@ const TestResults = ({ results, isRunning }) => {
 
   if (results.status === 'error') {
     return (
-      <div className='p-4 bg-red-900/30 border border-red-600/40 rounded-lg'>
-        <div className='text-red-300 font-semibold'>Error</div>
-        <div className='text-sm text-red-200 mt-1'>{results.error}</div>
+      <div className="p-4 bg-red-900/30 border border-red-600/40 rounded-lg">
+        <div className="text-red-300 font-semibold">Error</div>
+        <div className="text-sm text-red-200 mt-1">{results.error}</div>
       </div>
     );
   }
 
   return (
-    <div className='space-y-4'>
+    <div className="space-y-4">
       {results.tests.map((test, index) => (
         <TestCase key={index} test={test} />
       ))}
@@ -70,34 +70,28 @@ const TestCase = ({ test }) => {
 
   return (
     <div className={`p-4 rounded-lg border ${bgClass}`}>
-      <div className='space-y-3'>
+      <div className="space-y-3">
         {/* Status indicator */}
-        <div className='flex items-center justify-between'>
+        <div className="flex items-center justify-between">
           <span
-            className={`text-sm font-medium ${
-              isSuccess ? 'text-emerald-300' : 'text-red-300'
-            }`}
+            className={`text-sm font-medium ${isSuccess ? 'text-emerald-300' : 'text-red-300'}`}
           >
             {isSuccess ? '✓ Passed' : '✗ Failed'}
           </span>
-          <span className='text-xs text-gray-400 font-mono'>
-            {formatDuration(test.duration)}
-          </span>
+          <span className="text-xs text-gray-400 font-mono">{formatDuration(test.duration)}</span>
         </div>
 
         {/* Input */}
         <div>
-          <span className='text-gray-300 text-sm font-medium'>Input: </span>
-          <span className='font-mono text-purple-200'>
-            {CodeRunner.formatValue(test.args)}
-          </span>
+          <span className="text-gray-300 text-sm font-medium">Input: </span>
+          <span className="font-mono text-purple-200">{CodeRunner.formatValue(test.args)}</span>
         </div>
 
         {/* Console Output */}
         {test.logs && test.logs.length > 0 && (
           <div>
-            <span className='text-gray-300 text-sm font-medium'>Output: </span>
-            <div className='mt-1'>
+            <span className="text-gray-300 text-sm font-medium">Output: </span>
+            <div className="mt-1">
               <ResizableTerminal
                 content={test.logs.join('\n')}
                 minHeight={60}
@@ -109,26 +103,18 @@ const TestCase = ({ test }) => {
         )}
 
         {/* Expected and Actual */}
-        <div className='space-y-2'>
+        <div className="space-y-2">
           <div>
-            <span className='text-gray-300 text-sm font-medium'>
-              Expected:{' '}
-            </span>
-            <span className='font-mono text-emerald-200'>
+            <span className="text-gray-300 text-sm font-medium">Expected: </span>
+            <span className="font-mono text-emerald-200">
               {CodeRunner.formatValue(test.expected)}
             </span>
           </div>
 
           {!test.error && (
             <div>
-              <span className='text-gray-300 text-sm font-medium'>
-                Actual:{' '}
-              </span>
-              <span
-                className={`font-mono ${
-                  isSuccess ? 'text-emerald-200' : 'text-red-200'
-                }`}
-              >
+              <span className="text-gray-300 text-sm font-medium">Actual: </span>
+              <span className={`font-mono ${isSuccess ? 'text-emerald-200' : 'text-red-200'}`}>
                 {CodeRunner.formatValue(test.output)}
               </span>
             </div>
@@ -137,8 +123,8 @@ const TestCase = ({ test }) => {
 
         {/* Error message if any */}
         {test.error && (
-          <div className='text-red-200 font-mono text-sm bg-red-900/20 p-3 rounded border border-red-600/30'>
-            <span className='font-medium'>Runtime Error: </span>
+          <div className="text-red-200 font-mono text-sm bg-red-900/20 p-3 rounded border border-red-600/30">
+            <span className="font-medium">Runtime Error: </span>
             {test.error}
           </div>
         )}

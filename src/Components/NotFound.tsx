@@ -1,12 +1,12 @@
 'use client';
-import React, { useEffect, useState, useRef } from "react";
-import { SparklesIcon } from "@heroicons/react/24/outline";
-import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { texts } from "../../assests/404/messages";
+import React, { useEffect, useState, useRef } from 'react';
+import { SparklesIcon } from '@heroicons/react/24/outline';
+import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { texts } from '../../assests/404/messages';
 
 const NotFound = () => {
-  const [randomText, setRandomText] = useState("");
+  const [randomText, setRandomText] = useState('');
   const [vh, setVh] = useState(800);
   const [vw, setVw] = useState(1200);
   const router = useRouter();
@@ -21,7 +21,7 @@ const NotFound = () => {
   // making the page look all cyberpunky with these lights
   const lightPosition = useTransform(
     [smoothMouseX, smoothMouseY],
-    ([x, y]) => `calc(${x}px - 50%) calc(${y}px - 50%)`
+    ([x, y]) => `calc(${x}px - 50%) calc(${y}px - 50%)`,
   );
 
   const handleMouseMove = ({ clientX, clientY }) => {
@@ -34,8 +34,10 @@ const NotFound = () => {
     setVh(window.innerHeight);
     setVw(window.innerWidth);
     setRandomText(texts[Math.floor(Math.random() * texts.length)]);
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = "auto"; };
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
   }, []);
 
   return (
@@ -50,7 +52,8 @@ const NotFound = () => {
           backgroundPosition: lightPosition,
           opacity: useTransform(
             [smoothMouseX, smoothMouseY],
-            ([x, y]) => 0.7 - Math.sqrt((x as number) * (x as number) + (y as number) * (y as number)) / 2000
+            ([x, y]) =>
+              0.7 - Math.sqrt((x as number) * (x as number) + (y as number) * (y as number)) / 2000,
           ),
         }}
         className="fixed inset-0 pointer-events-none bg-[radial-gradient(400px_at_50%_50%,rgba(129,140,248,0.4),transparent)] backdrop-blur-[2px] transition-opacity duration-300"
@@ -59,16 +62,8 @@ const NotFound = () => {
       {/* main card that tilts with mouse movement */}
       <motion.div
         style={{
-          rotateX: useTransform(
-            smoothMouseY,
-            [0, vh],
-            [15, -15]
-          ),
-          rotateY: useTransform(
-            smoothMouseX,
-            [0, vw],
-            [-15, 15]
-          ),
+          rotateX: useTransform(smoothMouseY, [0, vh], [15, -15]),
+          rotateY: useTransform(smoothMouseX, [0, vw], [-15, 15]),
           transformPerspective: 2000,
         }}
         className="relative bg-gray-900/90 backdrop-blur-2xl border border-gray-800/60 rounded-3xl p-8 max-w-md text-center space-y-6 overflow-hidden shadow-2xl"
@@ -91,7 +86,7 @@ const NotFound = () => {
         {/* big 404 text with shadow effect */}
         <motion.h1
           style={{
-            textShadow: "0 0 40px rgba(129,140,248,0.4)",
+            textShadow: '0 0 40px rgba(129,140,248,0.4)',
             x: useTransform(smoothMouseX, [0, vw], [-30, 30]),
             y: useTransform(smoothMouseY, [0, vh], [-30, 30]),
           }}
@@ -125,7 +120,7 @@ const NotFound = () => {
 
         {/* back button */}
         <motion.button
-          onClick={() => router.push("/")}
+          onClick={() => router.push('/')}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           style={{

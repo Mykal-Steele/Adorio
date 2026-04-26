@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 // Infinite Carousel Hook
 const useInfiniteCarousel = (trackRef, speed = 0.5, pauseOnHover = true) => {
@@ -17,10 +17,10 @@ const useInfiniteCarousel = (trackRef, speed = 0.5, pauseOnHover = true) => {
     const track = trackRef.current;
     if (!track) return;
 
-    const carousel = track.querySelector(".carousel-content");
+    const carousel = track.querySelector('.carousel-content');
     if (!carousel) return;
 
-    const cards = carousel.querySelectorAll(".carousel-card");
+    const cards = carousel.querySelectorAll('.carousel-card');
     if (cards.length === 0) return;
 
     const cardWidth = cards[0].offsetWidth;
@@ -67,10 +67,7 @@ const useInfiniteCarousel = (trackRef, speed = 0.5, pauseOnHover = true) => {
       wheelVelocityRef.current += targetDir * 25;
 
       // Clamp velocity
-      wheelVelocityRef.current = Math.max(
-        -60,
-        Math.min(60, wheelVelocityRef.current)
-      );
+      wheelVelocityRef.current = Math.max(-60, Math.min(60, wheelVelocityRef.current));
 
       if (!wheelAnimationRef.current) {
         wheelAnimationRef.current = requestAnimationFrame(smoothWheelScroll);
@@ -88,10 +85,7 @@ const useInfiniteCarousel = (trackRef, speed = 0.5, pauseOnHover = true) => {
     const handleWheel = (e) => {
       e.preventDefault();
       wheelVelocityRef.current += e.deltaY * 0.05;
-      wheelVelocityRef.current = Math.max(
-        -50,
-        Math.min(50, wheelVelocityRef.current)
-      );
+      wheelVelocityRef.current = Math.max(-50, Math.min(50, wheelVelocityRef.current));
       if (Math.abs(e.deltaY) > 2) {
         directionRef.current = e.deltaY > 0 ? 1 : -1;
       }
@@ -121,28 +115,27 @@ const useInfiniteCarousel = (trackRef, speed = 0.5, pauseOnHover = true) => {
       lastDragXRef.current = e.pageX;
     };
 
-    track.addEventListener("scroll", handleScroll);
-    track.addEventListener("mouseenter", handleMouseEnter);
-    track.addEventListener("mouseleave", handleMouseLeave);
-    track.addEventListener("wheel", handleWheel, { passive: false });
-    track.addEventListener("mousedown", handleMouseDown);
-    track.addEventListener("mouseup", handleMouseUp);
-    track.addEventListener("mousemove", handleMouseMove);
+    track.addEventListener('scroll', handleScroll);
+    track.addEventListener('mouseenter', handleMouseEnter);
+    track.addEventListener('mouseleave', handleMouseLeave);
+    track.addEventListener('wheel', handleWheel, { passive: false });
+    track.addEventListener('mousedown', handleMouseDown);
+    track.addEventListener('mouseup', handleMouseUp);
+    track.addEventListener('mousemove', handleMouseMove);
 
     animationRef.current = requestAnimationFrame(autoScroll);
 
     return () => {
       controlsRef.current = null;
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      if (wheelAnimationRef.current)
-        cancelAnimationFrame(wheelAnimationRef.current);
-      track.removeEventListener("scroll", handleScroll);
-      track.removeEventListener("mouseenter", handleMouseEnter);
-      track.removeEventListener("mouseleave", handleMouseLeave);
-      track.removeEventListener("wheel", handleWheel);
-      track.removeEventListener("mousedown", handleMouseDown);
-      track.removeEventListener("mouseup", handleMouseUp);
-      track.removeEventListener("mousemove", handleMouseMove);
+      if (wheelAnimationRef.current) cancelAnimationFrame(wheelAnimationRef.current);
+      track.removeEventListener('scroll', handleScroll);
+      track.removeEventListener('mouseenter', handleMouseEnter);
+      track.removeEventListener('mouseleave', handleMouseLeave);
+      track.removeEventListener('wheel', handleWheel);
+      track.removeEventListener('mousedown', handleMouseDown);
+      track.removeEventListener('mouseup', handleMouseUp);
+      track.removeEventListener('mousemove', handleMouseMove);
     };
   }, [trackRef, speed, pauseOnHover]);
 

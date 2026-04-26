@@ -25,15 +25,13 @@ const ResultsPanel = ({ results, isRunning, onRunTests, onReset }) => {
   };
   const getResultSummary = () => {
     if (!results) return null;
-    if (results.status === 'success')
-      return { label: 'All tests passed', tone: 'success' };
+    if (results.status === 'success') return { label: 'All tests passed', tone: 'success' };
     if (results.status === 'failure') {
       const total = results.tests.length;
       const passed = results.tests.filter((test) => test.passed).length;
       return { label: `${passed}/${total} tests passed`, tone: 'warning' };
     }
-    if (results.status === 'error')
-      return { label: 'Runtime error', tone: 'error' };
+    if (results.status === 'error') return { label: 'Runtime error', tone: 'error' };
     return null;
   };
 
@@ -45,10 +43,10 @@ const ResultsPanel = ({ results, isRunning, onRunTests, onReset }) => {
   };
 
   return (
-    <div className='bg-gray-900/70 border border-gray-800 rounded-xl shadow-lg p-4'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2'>
-          <h3 className='text-lg font-semibold text-gray-100'>Results</h3>
+    <div className="bg-gray-900/70 border border-gray-800 rounded-xl shadow-lg p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-100">Results</h3>
           {summary && (
             <span
               className={`px-3 py-1 text-xs font-medium rounded-full border ${
@@ -60,8 +58,8 @@ const ResultsPanel = ({ results, isRunning, onRunTests, onReset }) => {
           )}
         </div>
 
-        <div className='flex gap-2 items-center'>
-          <span className='text-xs text-gray-500 mr-2'>
+        <div className="flex gap-2 items-center">
+          <span className="text-xs text-gray-500 mr-2">
             {resetClicked
               ? 'Press again to wipe saved code'
               : 'First: reset editor, second: wipe saved code'}
@@ -74,18 +72,16 @@ const ResultsPanel = ({ results, isRunning, onRunTests, onReset }) => {
                 : 'border-gray-700 hover:border-purple-500/60 hover:bg-purple-600/10'
             }`}
           >
-            <ArrowPathIcon
-              className={`h-4 w-4 ${resetClicked ? 'animate-pulse' : ''}`}
-            />
+            <ArrowPathIcon className={`h-4 w-4 ${resetClicked ? 'animate-pulse' : ''}`} />
             {resetClicked ? 'Wipe Memory' : 'Reset'}
           </button>
 
           <button
             onClick={onRunTests}
             disabled={isRunning}
-            className='flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed'
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg shadow hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <PlayIcon className='h-4 w-4' />
+            <PlayIcon className="h-4 w-4" />
             {isRunning ? 'Running...' : 'Run Tests'}
           </button>
         </div>

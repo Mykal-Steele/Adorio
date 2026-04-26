@@ -1,4 +1,4 @@
-import type { NextConfig } from 'next'
+import type { NextConfig } from 'next';
 
 const config: NextConfig = {
   output: 'standalone',
@@ -15,13 +15,13 @@ const config: NextConfig = {
 
   // In dev, proxy /api to Express so no CORS issues
   async rewrites() {
-    if (process.env.NODE_ENV !== 'development') return []
+    if (process.env.NODE_ENV !== 'development') return [];
     return [
       {
         source: '/api/:path*',
         destination: 'http://localhost:3000/api/:path*',
       },
-    ]
+    ];
   },
 
   async headers() {
@@ -34,12 +34,12 @@ const config: NextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ],
       },
-    ]
+    ];
   },
 
   experimental: {
     optimizePackageImports: ['@heroicons/react', 'lucide-react'],
   },
-}
+};
 
-export default config
+export default config;

@@ -31,11 +31,7 @@ class FrontendMonitor {
     if (typeof window !== 'undefined') {
       const originalConsoleError = console.error;
       console.error = (...args) => {
-        if (
-          args.some(
-            (arg) => typeof arg === 'string' && arg.includes('analytics')
-          )
-        ) {
+        if (args.some((arg) => typeof arg === 'string' && arg.includes('analytics'))) {
           this.recordError(new Error(args.join(' ')));
         }
         originalConsoleError.apply(console, args);
@@ -122,7 +118,7 @@ const frontendMonitor = new FrontendMonitor();
 // Performance timing wrapper
 export const withPerformanceTracking = <TArgs extends unknown[]>(
   name: string,
-  fn: (...args: TArgs) => Promise<unknown>
+  fn: (...args: TArgs) => Promise<unknown>,
 ) => {
   return async (...args: TArgs) => {
     const startTime = performance.now();
@@ -159,7 +155,10 @@ export { frontendMonitor };
 // Send stats periodically in production
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
   // Send stats every 5 minutes
-  setInterval(() => {
-    frontendMonitor.sendStatsToBackend();
-  }, 5 * 60 * 1000);
+  setInterval(
+    () => {
+      frontendMonitor.sendStatsToBackend();
+    },
+    5 * 60 * 1000,
+  );
 }

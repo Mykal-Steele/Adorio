@@ -1,24 +1,24 @@
-'use client'
-import Link from 'next/link'
-import PropTypes from 'prop-types'
-import { useRouter, usePathname } from 'next/navigation'
-import { SparklesIcon } from '@heroicons/react/24/outline'
-import { useAppDispatch, useAppSelector } from '../redux/hooks'
-import { logout } from '../redux/userSlice'
-import { motion } from 'framer-motion'
+'use client';
+import Link from 'next/link';
+import PropTypes from 'prop-types';
+import { useRouter, usePathname } from 'next/navigation';
+import { SparklesIcon } from '@heroicons/react/24/outline';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
+import { logout } from '../redux/userSlice';
+import { motion } from 'framer-motion';
 
 const Navbar = () => {
-  const { token } = useAppSelector((state) => state.user)
-  const dispatch = useAppDispatch()
-  const router = useRouter()
-  const pathname = usePathname()
+  const { token } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  if (pathname === '/') return null
+  if (pathname === '/') return null;
 
   const handleLogout = () => {
-    dispatch(logout())
-    router.push('/login')
-  }
+    dispatch(logout());
+    router.push('/login');
+  };
 
   return (
     <motion.nav
@@ -29,10 +29,7 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-2 sm:px-4">
         <div className="flex items-center justify-between h-14 sm:h-16 relative">
-          <Link
-            href="/"
-            className="flex items-center space-x-1 sm:space-x-2 group ml-1"
-          >
+          <Link href="/" className="flex items-center space-x-1 sm:space-x-2 group ml-1">
             <motion.div whileHover={{ rotate: 15 }} whileTap={{ scale: 0.95 }}>
               <SparklesIcon className="h-6 w-6 sm:h-7 sm:w-7 text-purple-400 transition-transform" />
             </motion.div>
@@ -115,8 +112,8 @@ const Navbar = () => {
         </div>
       </div>
     </motion.nav>
-  )
-}
+  );
+};
 
 /** @param {{ href: string, text: string, className?: string }} props */
 const NavLink = ({ href, text, className = '' }) => (
@@ -128,12 +125,12 @@ const NavLink = ({ href, text, className = '' }) => (
       {text}
     </Link>
   </motion.div>
-)
+);
 
 NavLink.propTypes = {
   href: PropTypes.string.isRequired,
   text: PropTypes.string.isRequired,
   className: PropTypes.string,
-}
+};
 
-export default Navbar
+export default Navbar;

@@ -1,7 +1,7 @@
-import React from "react";
-import { motion } from "framer-motion";
-import moment from "moment";
-import { ADMIN_AVATAR_URL } from "../constants";
+import React from 'react';
+import { motion } from 'framer-motion';
+import moment from 'moment';
+import { ADMIN_AVATAR_URL } from '../constants';
 
 // Header for post author and timestamp.
 const AuthorHeader = ({ user, createdAt, isAdmin }) => {
@@ -22,16 +22,14 @@ const AuthorHeader = ({ user, createdAt, isAdmin }) => {
             ) : (
               // Use first letter when a profile image is not available.
               <span className="text-xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
-                {user?.username?.charAt(0).toUpperCase() || "U"}
+                {user?.username?.charAt(0).toUpperCase() || 'U'}
               </span>
             )}
           </div>
         </motion.div>
         <div>
           <p className="font-medium text-gray-100">{user?.username}</p>
-          <p className="text-sm text-gray-400">
-            {moment.utc(createdAt).local().fromNow()}
-          </p>
+          <p className="text-sm text-gray-400">{moment.utc(createdAt).local().fromNow()}</p>
         </div>
       </div>
     </div>

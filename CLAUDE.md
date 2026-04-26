@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 Adorio is a social media platform deployed at **adorio.space**. It is a JavaScript monorepo containing:
+
 - A **Next.js 16 App Router** frontend (replaced Vite/React 18)
 - A Node.js/Express backend (ES Modules)
 - An AI exam-prep sidecar app (`ai-slop/`, React/TypeScript, Gemini API)
@@ -101,6 +102,7 @@ The backend, Next.js standalone server, and Nginx all run in the same Docker con
 ### Backend Architecture (`backend/`)
 
 All backend code uses ES Modules (`"type": "module"`). The pattern is strict **Controller → Service → Model**:
+
 - Controllers handle only HTTP concerns (parsing request, sending response)
 - Services contain all business logic and database access
 - `asyncHandler` wraps every controller so thrown errors reach Express's error handler automatically
@@ -125,17 +127,17 @@ A separate React/TypeScript app built independently and served at `/cao/`. It ha
 
 ## Key Environment Variables
 
-| Variable | Where | Purpose |
-|---|---|---|
-| `BACKEND_INTERNAL_URL` | Next.js server (SSR only) | Internal URL for `serverFetch` (`http://localhost:3000`) |
-| `NEXT_PUBLIC_CLOUDINARY_NAME` | Next.js client | Cloudinary cloud name |
-| `MONGO_URI` | Backend | MongoDB Atlas connection string |
-| `JWT_SECRET` | Backend | Signs access tokens |
-| `REFRESH_TOKEN_SECRET` | Backend | Signs refresh tokens (falls back to `JWT_SECRET`) |
-| `CLIENT_URL` | Backend | CORS allowed origin |
-| `CLOUDINARY_NAME/KEY/SECRET/URL` | Backend + Frontend | Image upload/CDN |
-| `VITE_GEMINI_API_KEY` | ai-slop build | Gemini API for exam prep |
-| `NODE_ENV` | All | `development` \| `production` |
+| Variable                         | Where                     | Purpose                                                  |
+| -------------------------------- | ------------------------- | -------------------------------------------------------- |
+| `BACKEND_INTERNAL_URL`           | Next.js server (SSR only) | Internal URL for `serverFetch` (`http://localhost:3000`) |
+| `NEXT_PUBLIC_CLOUDINARY_NAME`    | Next.js client            | Cloudinary cloud name                                    |
+| `MONGO_URI`                      | Backend                   | MongoDB Atlas connection string                          |
+| `JWT_SECRET`                     | Backend                   | Signs access tokens                                      |
+| `REFRESH_TOKEN_SECRET`           | Backend                   | Signs refresh tokens (falls back to `JWT_SECRET`)        |
+| `CLIENT_URL`                     | Backend                   | CORS allowed origin                                      |
+| `CLOUDINARY_NAME/KEY/SECRET/URL` | Backend + Frontend        | Image upload/CDN                                         |
+| `VITE_GEMINI_API_KEY`            | ai-slop build             | Gemini API for exam prep                                 |
+| `NODE_ENV`                       | All                       | `development` \| `production`                            |
 
 Backend-specific values live in `backend/.env`.
 

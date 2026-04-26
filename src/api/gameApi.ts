@@ -1,5 +1,5 @@
-import axios from "axios";
-import { handleApiError } from "../utils/errorHandling";
+import axios from 'axios';
+import { handleApiError } from '../utils/errorHandling';
 
 // Create a shared API instance with consistent configuration
 const API = axios.create({
@@ -10,13 +10,13 @@ const API = axios.create({
 // Add request interceptor to attach auth token to all requests
 API.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 /**
@@ -25,10 +25,10 @@ API.interceptors.request.use(
  */
 export const fetchLeaderboard = async () => {
   try {
-    const response = await API.get("/game/leaderboard");
+    const response = await API.get('/game/leaderboard');
     return response.data;
   } catch (error) {
-    console.error("Error fetching leaderboard:", error);
+    console.error('Error fetching leaderboard:', error);
     return [];
   }
 };
@@ -41,16 +41,13 @@ export const fetchLeaderboard = async () => {
  */
 export const updateScore = async (score, difficulty) => {
   try {
-    const response = await API.post("/game/update-score", {
+    const response = await API.post('/game/update-score', {
       score,
       difficulty,
     });
     return response.data;
   } catch (error) {
-    console.error(
-      "Failed to update score:",
-      error.response?.data || error.message
-    );
+    console.error('Failed to update score:', error.response?.data || error.message);
     // Return a sensible fallback so the UI can handle it gracefully
     return { anonymous: true, localScore: true };
   }
@@ -62,16 +59,16 @@ export const updateScore = async (score, difficulty) => {
  */
 export const fetchUserGameStats = async () => {
   try {
-    const response = await API.get("/game/user-stats");
+    const response = await API.get('/game/user-stats');
     return response.data;
   } catch (error) {
     // Don't treat as error for anonymous users
     if (error.response && error.response.status === 401) {
-      console.log("User not authenticated, using local stats");
-      return { peakPLevel: 0, difficulty: "normal", anonymous: true };
+      console.log('User not authenticated, using local stats');
+      return { peakPLevel: 0, difficulty: 'normal', anonymous: true };
     }
 
-    console.error("Error fetching user game stats:", error);
-    return { peakPLevel: 0, difficulty: "normal", anonymous: true };
+    console.error('Error fetching user game stats:', error);
+    return { peakPLevel: 0, difficulty: 'normal', anonymous: true };
   }
 };
