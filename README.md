@@ -12,6 +12,7 @@ npm run dev:full       # frontend :3001 + backend :3000
 ```
 
 After switching between Windows ↔ Linux:
+
 ```bash
 node scripts/sync-platform-deps.cjs
 ```
@@ -48,26 +49,26 @@ npm run test:prod  # integration against prod containers
 
 **Frontend:**
 
-| Variable | Purpose |
-|---|---|
-| `BACKEND_INTERNAL_URL` | SSR → Express URL (`http://localhost:3000`) |
-| `NEXT_PUBLIC_CLOUDINARY_NAME` | Cloudinary cloud name |
+| Variable                      | Purpose                                     |
+| ----------------------------- | ------------------------------------------- |
+| `BACKEND_INTERNAL_URL`        | SSR → Express URL (`http://localhost:3000`) |
+| `NEXT_PUBLIC_CLOUDINARY_NAME` | Cloudinary cloud name                       |
 
 **Backend** (`backend/.env`):
 
-| Variable | Purpose |
-|---|---|
-| `MONGO_URI` | MongoDB Atlas URI |
-| `JWT_SECRET` | Access token signing key |
-| `REFRESH_TOKEN_SECRET` | Refresh token key (falls back to `JWT_SECRET`) |
-| `CLIENT_URL` | CORS origin |
-| `CLOUDINARY_NAME` / `CLOUDINARY_KEY` / `CLOUDINARY_SECRET` / `CLOUDINARY_URL` | Cloudinary |
+| Variable                                                                      | Purpose                                        |
+| ----------------------------------------------------------------------------- | ---------------------------------------------- |
+| `MONGO_URI`                                                                   | MongoDB Atlas URI                              |
+| `JWT_SECRET`                                                                  | Access token signing key                       |
+| `REFRESH_TOKEN_SECRET`                                                        | Refresh token key (falls back to `JWT_SECRET`) |
+| `CLIENT_URL`                                                                  | CORS origin                                    |
+| `CLOUDINARY_NAME` / `CLOUDINARY_KEY` / `CLOUDINARY_SECRET` / `CLOUDINARY_URL` | Cloudinary                                     |
 
 **Docker build args:**
 
-| Arg | Values |
-|---|---|
-| `ENV` | `development` or `production` |
+| Arg                   | Values                                   |
+| --------------------- | ---------------------------------------- |
+| `ENV`                 | `development` or `production`            |
 | `VITE_GEMINI_API_KEY` | Gemini key for the AI sidecar at `/cao/` |
 
 ## License
