@@ -53,11 +53,7 @@ const NotFound = () => {
           opacity: useTransform(
             [smoothMouseX, smoothMouseY],
             ([x, y]) =>
-              0.7 -
-              Math.sqrt(
-                (x as number) * (x as number) + (y as number) * (y as number),
-              ) /
-                2000,
+              0.7 - Math.sqrt((x as number) * (x as number) + (y as number) * (y as number)) / 2000,
           ),
         }}
         className="fixed inset-0 pointer-events-none bg-[radial-gradient(400px_at_50%_50%,rgba(129,140,248,0.4),transparent)] backdrop-blur-[2px] transition-opacity duration-300"

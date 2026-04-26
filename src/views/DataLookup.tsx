@@ -21,8 +21,7 @@ import {
 } from '../api/analytics';
 import { formatDuration, formatCompactNumber } from '../utils/timeFormatting';
 
-const formatNumber = (value) =>
-  typeof value === 'number' ? value.toLocaleString() : '—';
+const formatNumber = (value) => (typeof value === 'number' ? value.toLocaleString() : '—');
 
 const formatDateTime = (value) => {
   if (!value) return '—';
@@ -39,17 +38,11 @@ const formatDateTime = (value) => {
 
 const SummaryCard = ({ label, value, hint }) => (
   <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-gray-700 dark:bg-gray-900">
-    <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
-      {label}
-    </div>
+    <div className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</div>
     <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-gray-100">
       {formatNumber(value)}
     </div>
-    {hint ? (
-      <div className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-        {hint}
-      </div>
-    ) : null}
+    {hint ? <div className="mt-1 text-xs text-gray-400 dark:text-gray-500">{hint}</div> : null}
   </div>
 );
 
@@ -94,10 +87,7 @@ const SummaryTable = ({ data }) => (
             </tr>
           ) : (
             data.map((row) => (
-              <tr
-                key={row.path}
-                className="hover:bg-gray-50 dark:hover:bg-gray-800/80"
-              >
+              <tr key={row.path} className="hover:bg-gray-50 dark:hover:bg-gray-800/80">
                 <td
                   className="max-w-xs truncate px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100"
                   title={row.path}
@@ -208,9 +198,7 @@ const RecentVisitsTable = ({ data }) => (
                       </span>
                     </div>
                   ) : (
-                    <span className="text-gray-500 dark:text-gray-400">
-                      Guest
-                    </span>
+                    <span className="text-gray-500 dark:text-gray-400">Guest</span>
                   )}
                 </td>
                 <td
@@ -220,12 +208,9 @@ const RecentVisitsTable = ({ data }) => (
                   {row.formattedReferrer || row.referrer || '—'}
                 </td>
                 <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                  <div>UA: {row.userAgent ? row.userAgent.slice(0, 80) : '—'}</div>
                   <div>
-                    UA: {row.userAgent ? row.userAgent.slice(0, 80) : '—'}
-                  </div>
-                  <div>
-                    Locale: {row.locale || '—'} · TZ Offset:{' '}
-                    {row.timezoneOffset ?? '—'}
+                    Locale: {row.locale || '—'} · TZ Offset: {row.timezoneOffset ?? '—'}
                   </div>
                   {row.durationMs != null ? (
                     <div>Duration: {formatDuration(row.durationMs)}</div>
@@ -271,9 +256,7 @@ const ChartTooltip = ({ active, payload, label }: ChartTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
-        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-          {label}
-        </p>
+        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{label}</p>
         {payload.map((entry, index) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
             {entry.name}: {formatCompactNumber(entry.value)}
@@ -290,8 +273,7 @@ const PageVisitsPieChart = ({ data }) => {
   const chartData = data
     .slice(0, 8) // Show top 8 pages
     .map((item, index) => ({
-      name:
-        item.path.length > 20 ? `${item.path.substring(0, 20)}...` : item.path,
+      name: item.path.length > 20 ? `${item.path.substring(0, 20)}...` : item.path,
       value: item.totalVisits,
       fullPath: item.path,
       color: CHART_COLORS[index % CHART_COLORS.length],
@@ -311,9 +293,7 @@ const PageVisitsPieChart = ({ data }) => {
               cy="50%"
               outerRadius={80}
               dataKey="value"
-              label={({ name, percent }) =>
-                `${name} (${(percent * 100).toFixed(1)}%)`
-              }
+              label={({ name, percent }) => `${name} (${(percent * 100).toFixed(1)}%)`}
             >
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -337,9 +317,7 @@ const VisitorStatsChart = ({ data }) => {
         </h3>
         <div className="h-80 flex items-center justify-center">
           <div className="text-center text-gray-500 dark:text-gray-400">
-            <div className="text-sm font-medium">
-              Visitor statistics unavailable
-            </div>
+            <div className="text-sm font-medium">Visitor statistics unavailable</div>
             <div className="text-xs mt-1">
               {data === null
                 ? 'This feature requires backend deployment'
@@ -356,9 +334,7 @@ const VisitorStatsChart = ({ data }) => {
     .map((visitor) => ({
       nickname: visitor.nickname || 'Anonymous',
       visits: visitor.totalVisits || 0,
-      avgDuration: visitor.avgDuration
-        ? Math.round(visitor.avgDuration / 1000)
-        : 0, // Convert to seconds
+      avgDuration: visitor.avgDuration ? Math.round(visitor.avgDuration / 1000) : 0, // Convert to seconds
       uniquePages: visitor.uniquePages || 0,
     }));
 
@@ -371,13 +347,7 @@ const VisitorStatsChart = ({ data }) => {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="nickname"
-              angle={-45}
-              textAnchor="end"
-              height={60}
-              fontSize={12}
-            />
+            <XAxis dataKey="nickname" angle={-45} textAnchor="end" height={60} fontSize={12} />
             <YAxis fontSize={12} />
             <Tooltip content={<ChartTooltip />} />
             <Legend />
@@ -420,20 +390,14 @@ const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
                   strokeWidth="1.5"
                   stroke="currentColor"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
             {loading ? (
               <div className="flex justify-center py-8">
-                <div className="text-gray-500 dark:text-gray-400">
-                  Loading visitor details...
-                </div>
+                <div className="text-gray-500 dark:text-gray-400">Loading visitor details...</div>
               </div>
             ) : visitorDetails ? (
               <div className="space-y-6">
@@ -452,9 +416,7 @@ const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
                       </div>
                       <div>
                         <span className="text-gray-500">Visitor ID:</span>{' '}
-                        <span className="font-mono text-xs">
-                          {visitorDetails.visitorId}
-                        </span>
+                        <span className="font-mono text-xs">{visitorDetails.visitorId}</span>
                       </div>
                       <div>
                         <span className="text-gray-500">User:</span>{' '}
@@ -468,15 +430,11 @@ const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
                       </div>
                       <div>
                         <span className="text-gray-500">Total Visits:</span>{' '}
-                        <span className="font-medium">
-                          {visitorDetails.totalVisits}
-                        </span>
+                        <span className="font-medium">{visitorDetails.totalVisits}</span>
                       </div>
                       <div>
                         <span className="text-gray-500">Unique Pages:</span>{' '}
-                        <span className="font-medium">
-                          {visitorDetails.pathCount}
-                        </span>
+                        <span className="font-medium">{visitorDetails.pathCount}</span>
                       </div>
                     </div>
                   </div>
@@ -551,29 +509,22 @@ const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {visitorDetails.visitHistory
-                          .slice(0, 20)
-                          .map((visit, index) => (
-                            <tr
-                              key={index}
-                              className="hover:bg-gray-100 dark:hover:bg-gray-700"
-                            >
-                              <td className="px-3 py-2 text-xs text-gray-700 dark:text-gray-300">
-                                {visit.formattedTime}
-                              </td>
-                              <td className="px-3 py-2 text-xs text-gray-900 dark:text-gray-100 font-medium">
-                                {visit.path}
-                              </td>
-                              <td className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
-                                {visit.formattedReferrer}
-                              </td>
-                              <td className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
-                                {visit.durationMs
-                                  ? formatDuration(visit.durationMs)
-                                  : '—'}
-                              </td>
-                            </tr>
-                          ))}
+                        {visitorDetails.visitHistory.slice(0, 20).map((visit, index) => (
+                          <tr key={index} className="hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <td className="px-3 py-2 text-xs text-gray-700 dark:text-gray-300">
+                              {visit.formattedTime}
+                            </td>
+                            <td className="px-3 py-2 text-xs text-gray-900 dark:text-gray-100 font-medium">
+                              {visit.path}
+                            </td>
+                            <td className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
+                              {visit.formattedReferrer}
+                            </td>
+                            <td className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
+                              {visit.durationMs ? formatDuration(visit.durationMs) : '—'}
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
@@ -604,11 +555,7 @@ const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
                             Browser Info
                           </h5>
                           <pre className="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
-                            {JSON.stringify(
-                              visitorDetails.browserInfo,
-                              null,
-                              2,
-                            )}
+                            {JSON.stringify(visitorDetails.browserInfo, null, 2)}
                           </pre>
                         </div>
                       )}
@@ -765,34 +712,25 @@ const DataLookup = () => {
         // Handle page view summary
         const summaryResponse = results[0];
         setSummary(
-          summaryResponse.status === 'fulfilled'
-            ? summaryResponse.value.results || []
-            : [],
+          summaryResponse.status === 'fulfilled' ? summaryResponse.value.results || [] : [],
         );
 
         // Handle recent visits
         const recentResponse = results[1];
         setRecentVisits(
-          recentResponse.status === 'fulfilled'
-            ? recentResponse.value.results || []
-            : [],
+          recentResponse.status === 'fulfilled' ? recentResponse.value.results || [] : [],
         );
 
         // Handle visitor stats (new feature that might not be deployed yet)
         const visitorResponse = results[2];
         setVisitorStats(
-          visitorResponse.status === 'fulfilled'
-            ? visitorResponse.value.results || []
-            : [],
+          visitorResponse.status === 'fulfilled' ? visitorResponse.value.results || [] : [],
         );
 
         // Check if any endpoints failed
         const failedEndpoints = results.filter((r) => r.status === 'rejected');
         if (failedEndpoints.length > 0) {
-          console.warn(
-            `${failedEndpoints.length} analytics endpoints failed:`,
-            failedEndpoints,
-          );
+          console.warn(`${failedEndpoints.length} analytics endpoints failed:`, failedEndpoints);
         }
 
         setLastUpdated(new Date());
@@ -848,8 +786,8 @@ const DataLookup = () => {
               Analytics data lookup
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-400">
-              View real-time page analytics, unique visitor counts, and the
-              latest recorded visits across the site.
+              View real-time page analytics, unique visitor counts, and the latest recorded visits
+              across the site.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -869,9 +807,7 @@ const DataLookup = () => {
 
         {error ? (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
-            <p className="font-medium">
-              We couldn&apos;t load the analytics data.
-            </p>
+            <p className="font-medium">We couldn&apos;t load the analytics data.</p>
             <p className="mt-2 text-xs">{error}</p>
             <button
               type="button"
@@ -892,9 +828,7 @@ const DataLookup = () => {
               Totals at a glance
             </h2>
             {loading ? (
-              <span className="text-xs text-gray-400 dark:text-gray-500">
-                Updating…
-              </span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">Updating…</span>
             ) : null}
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -925,8 +859,7 @@ const DataLookup = () => {
               Visual Analytics
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Interactive charts showing page popularity and visitor activity
-              patterns.
+              Interactive charts showing page popularity and visitor activity patterns.
             </p>
           </div>
           <div className="grid gap-6 lg:grid-cols-2">
@@ -945,8 +878,7 @@ const DataLookup = () => {
                 Performance by path
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Sorted by total visits so you can spot your busiest routes
-                instantly.
+                Sorted by total visits so you can spot your busiest routes instantly.
               </p>
             </div>
           </div>
@@ -963,8 +895,7 @@ const DataLookup = () => {
                 Visitor Statistics
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Detailed breakdown of individual visitor activity with friendly
-                nicknames.
+                Detailed breakdown of individual visitor activity with friendly nicknames.
                 {visitorStats.length === 0 && (
                   <span className="block mt-1 text-amber-600 dark:text-amber-400">
                     ⚠️ Requires latest backend deployment
@@ -973,10 +904,7 @@ const DataLookup = () => {
               </p>
             </div>
           </div>
-          <VisitorStatsTable
-            data={visitorStats}
-            onVisitorClick={handleVisitorClick}
-          />
+          <VisitorStatsTable data={visitorStats} onVisitorClick={handleVisitorClick} />
         </section>
 
         <section aria-labelledby="recent-heading" className="space-y-4">
@@ -989,8 +917,7 @@ const DataLookup = () => {
                 Recent visit stream
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Latest tracked visits with metadata. Older entries roll off as
-                you load more.
+                Latest tracked visits with metadata. Older entries roll off as you load more.
               </p>
             </div>
             <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
