@@ -1,18 +1,18 @@
-'use client';
-import { useEffect } from 'react';
-import { useAppSelector } from '../../../redux/hooks';
-import { useRouter, usePathname } from 'next/navigation';
+'use client'
+import { useEffect } from 'react'
+import { useAppSelector } from '../../../redux/hooks'
+import { useRouter, usePathname } from 'next/navigation'
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const { token, isAuthLoading } = useAppSelector((s) => s.user);
-  const router = useRouter();
-  const pathname = usePathname();
+  const { token, isAuthLoading } = useAppSelector((s) => s.user)
+  const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     if (!isAuthLoading && !token) {
-      router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+      router.replace(`/login?redirect=${encodeURIComponent(pathname)}`)
     }
-  }, [isAuthLoading, token, router, pathname]);
+  }, [isAuthLoading, token, router, pathname])
 
   if (isAuthLoading) {
     return (
@@ -22,10 +22,10 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           <p className="text-gray-300 text-lg">Loading Adorio...</p>
         </div>
       </div>
-    );
+    )
   }
 
-  if (!token) return null;
+  if (!token) return null
 
-  return <>{children}</>;
+  return <>{children}</>
 }

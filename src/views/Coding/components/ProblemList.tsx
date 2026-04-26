@@ -13,7 +13,7 @@ const ProblemList = ({ problems, activeProblemId, onProblemSelect }) => {
   // Get sorted problems - default is easiest to hardest
   const sortedProblems = useMemo(
     () => getSortedProblems(sortHardestFirst, { problems }),
-    [problems, sortHardestFirst],
+    [problems, sortHardestFirst]
   );
 
   const toggleSort = () => {
@@ -21,14 +21,14 @@ const ProblemList = ({ problems, activeProblemId, onProblemSelect }) => {
   };
 
   return (
-    <div className="bg-gray-900/70 border border-gray-800 rounded-xl p-4 shadow-lg">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Problems</h2>
+    <div className='bg-gray-900/70 border border-gray-800 rounded-xl p-4 shadow-lg'>
+      <div className='flex items-center justify-between mb-4'>
+        <h2 className='text-lg font-semibold'>Problems</h2>
 
         {/* Sort toggle icon */}
         <button
           onClick={toggleSort}
-          className="p-1 text-gray-400 hover:text-purple-300 transition-colors"
+          className='p-1 text-gray-400 hover:text-purple-300 transition-colors'
           title={
             sortHardestFirst
               ? 'Currently: Hard → Easy (click for Easy → Hard)'
@@ -36,14 +36,14 @@ const ProblemList = ({ problems, activeProblemId, onProblemSelect }) => {
           }
         >
           {sortHardestFirst ? (
-            <ChevronDownIcon className="w-5 h-5" />
+            <ChevronDownIcon className='w-5 h-5' />
           ) : (
-            <ChevronUpIcon className="w-5 h-5" />
+            <ChevronUpIcon className='w-5 h-5' />
           )}
         </button>
       </div>
 
-      <div className="space-y-2">
+      <div className='space-y-2'>
         {sortedProblems.map((problem) => (
           <ProblemItem
             key={problem.id}
@@ -61,7 +61,12 @@ const ProblemList = ({ problems, activeProblemId, onProblemSelect }) => {
 /**
  * Individual Problem Item with debounced click handling
  */
-const ProblemItem = ({ problem, isActive, hasSavedProgress, onProblemSelect }) => {
+const ProblemItem = ({
+  problem,
+  isActive,
+  hasSavedProgress,
+  onProblemSelect,
+}) => {
   const clickTimeoutRef = useRef(null);
 
   // Cleanup timeout on unmount
@@ -93,17 +98,23 @@ const ProblemItem = ({ problem, isActive, hasSavedProgress, onProblemSelect }) =
     : 'border-gray-800 hover:border-purple-500/40 hover:bg-purple-600/5';
 
   // Add subtle left border for saved progress
-  const progressIndicator = hasSavedProgress ? 'border-l-2 border-l-emerald-400/60' : '';
+  const progressIndicator = hasSavedProgress
+    ? 'border-l-2 border-l-emerald-400/60'
+    : '';
 
   return (
     <button
       onClick={handleClick}
       className={`w-full text-left p-3 rounded-lg border transition-all ${activeClass} ${progressIndicator}`}
-      title={hasSavedProgress ? `${problem.title} - Has saved progress` : problem.title}
+      title={
+        hasSavedProgress
+          ? `${problem.title} - Has saved progress`
+          : problem.title
+      }
     >
-      <div className="flex items-center justify-between">
-        <span className="font-medium text-gray-100">{problem.title}</span>
-        <span className="text-xs uppercase tracking-wide text-purple-300">
+      <div className='flex items-center justify-between'>
+        <span className='font-medium text-gray-100'>{problem.title}</span>
+        <span className='text-xs uppercase tracking-wide text-purple-300'>
           {problem.difficulty}
         </span>
       </div>

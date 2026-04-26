@@ -8,7 +8,10 @@ interface ErrorBoundaryState {
   errorInfo: React.ErrorInfo | null;
 }
 
-class ErrorBoundary extends React.Component<React.PropsWithChildren, ErrorBoundaryState> {
+class ErrorBoundary extends React.Component<
+  React.PropsWithChildren,
+  ErrorBoundaryState
+> {
   constructor(props: React.PropsWithChildren) {
     super(props);
     this.state = { hasError: false, error: null, errorInfo: null };
@@ -34,7 +37,9 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren, ErrorBounda
             animate={{ opacity: 1, y: 0 }}
             className="bg-gray-900/90 backdrop-blur-lg p-8 rounded-2xl border border-purple-500/20 max-w-md"
           >
-            <h2 className="text-2xl font-bold text-purple-400 mb-4">Something went wrong</h2>
+            <h2 className="text-2xl font-bold text-purple-400 mb-4">
+              Something went wrong
+            </h2>
             <p className="text-gray-300 mb-6">
               An unexpected error occurred. Please refresh the page.
             </p>

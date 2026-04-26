@@ -26,13 +26,18 @@ export class CodeRunner {
     if (Object.is(a, b)) return true;
 
     if (Array.isArray(a) && Array.isArray(b)) {
-      return a.length === b.length && a.every((item, i) => this.isEqual(item, b[i]));
+      return (
+        a.length === b.length && a.every((item, i) => this.isEqual(item, b[i]))
+      );
     }
 
     if (a && b && typeof a === 'object' && typeof b === 'object') {
       const keysA = Object.keys(a);
       const keysB = Object.keys(b);
-      return keysA.length === keysB.length && keysA.every((key) => this.isEqual(a[key], b[key]));
+      return (
+        keysA.length === keysB.length &&
+        keysA.every((key) => this.isEqual(a[key], b[key]))
+      );
     }
 
     if (typeof a === 'string' && typeof b === 'string') {
@@ -98,28 +103,36 @@ export class CodeRunner {
       log: (...args) =>
         logs.push(
           args
-            .map((arg) => (typeof arg === 'object' ? JSON.stringify(arg) : String(arg)))
-            .join(' '),
+            .map((arg) =>
+              typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+            )
+            .join(' ')
         ),
       info: (...args) =>
         logs.push(
           args
-            .map((arg) => (typeof arg === 'object' ? JSON.stringify(arg) : String(arg)))
-            .join(' '),
+            .map((arg) =>
+              typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+            )
+            .join(' ')
         ),
       warn: (...args) =>
         logs.push(
           '⚠️ ' +
             args
-              .map((arg) => (typeof arg === 'object' ? JSON.stringify(arg) : String(arg)))
-              .join(' '),
+              .map((arg) =>
+                typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+              )
+              .join(' ')
         ),
       error: (...args) =>
         logs.push(
           '❌ ' +
             args
-              .map((arg) => (typeof arg === 'object' ? JSON.stringify(arg) : String(arg)))
-              .join(' '),
+              .map((arg) =>
+                typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+              )
+              .join(' ')
         ),
     };
 
@@ -140,13 +153,20 @@ export class CodeRunner {
     `;
 
     if (consoleProxy) {
-      return new Function('console', `"use strict";\n${wrappedCode}`)(consoleProxy);
+      return new Function('console', `"use strict";\n${wrappedCode}`)(
+        consoleProxy
+      );
     }
     return new Function(`"use strict";\n${wrappedCode}`)();
   }
 
   // Execute code and capture output for terminal display
-  static async executeForOutput(code, functionName, sampleArgs = [], methodName = null) {
+  static async executeForOutput(
+    code,
+    functionName,
+    sampleArgs = [],
+    methodName = null
+  ) {
     return new Promise((resolve) => {
       setTimeout(() => {
         const { proxy: consoleProxy, logs } = this.createConsoleProxy();
@@ -165,13 +185,15 @@ export class CodeRunner {
             }
           `;
 
-          const userCallable = new Function(`"use strict";\n${wrappedCode}`)(consoleProxy);
+          const userCallable = new Function(`"use strict";\n${wrappedCode}`)(
+            consoleProxy
+          );
 
           if (typeof userCallable !== 'function') {
             logs.push(
               `❌ Error: Please define a ${
                 methodName ? 'class' : 'function'
-              } named ${functionName}`,
+              } named ${functionName}`
             );
             return resolve({ status: 'error', logs, returnValue: null });
           }
@@ -186,7 +208,9 @@ export class CodeRunner {
                   returnValue = instance[methodName]();
                   logs.push(`Return: ${this.formatValue(returnValue)}`);
                 } else {
-                  logs.push(`❌ Error: Method ${methodName} not found in class`);
+                  logs.push(
+                    `❌ Error: Method ${methodName} not found in class`
+                  );
                 }
               } else {
                 // Function execution
@@ -194,7 +218,9 @@ export class CodeRunner {
                 logs.push(`Return: ${this.formatValue(returnValue)}`);
               }
             } catch (error) {
-              logs.push(`❌ Runtime Error: ${this.extractErrorInfo(error, code)}`);
+              logs.push(
+                `❌ Runtime Error: ${this.extractErrorInfo(error, code)}`
+              );
             }
           }
 
@@ -208,12 +234,7 @@ export class CodeRunner {
   }
 
   // Execute user code and run tests - now captures output for each test case
-  static async execute(
-    code: string,
-    functionName: string,
-    tests: TestCase[],
-    methodName: string | null = null,
-  ): Promise<ExecuteResult> {
+  static async execute(code: string, functionName: string, tests: TestCase[], methodName: string | null = null): Promise<ExecuteResult> {
     return new Promise((resolve) => {
       setTimeout(() => {
         try {
@@ -236,7 +257,9 @@ export class CodeRunner {
               `;
 
               // Get a fresh instance of the function/class for each test
-              const userCallable = new Function(`"use strict";\n${wrappedCode}`)(consoleProxy);
+              const userCallable = new Function(
+                `"use strict";\n${wrappedCode}`
+              )(consoleProxy);
 
               if (typeof userCallable !== 'function') {
                 return {
@@ -261,7 +284,7 @@ export class CodeRunner {
                     consoleProxy,
                     logs,
                     index,
-                    code,
+                    code
                   )
                 : this.runFunctionTestWithOutput(
                     userCallable,
@@ -269,7 +292,7 @@ export class CodeRunner {
                     consoleProxy,
                     logs,
                     index,
-                    code,
+                    code
                   );
             } catch (error) {
               return {
@@ -339,7 +362,7 @@ export class CodeRunner {
     consoleProxy,
     logs,
     index,
-    code,
+    code
   ) {
     const start = performance.now();
 

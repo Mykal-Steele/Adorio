@@ -29,7 +29,10 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-2 sm:px-4">
         <div className="flex items-center justify-between h-14 sm:h-16 relative">
-          <Link href="/" className="flex items-center space-x-1 sm:space-x-2 group ml-1">
+          <Link
+            href="/"
+            className="flex items-center space-x-1 sm:space-x-2 group ml-1"
+          >
             <motion.div whileHover={{ rotate: 15 }} whileTap={{ scale: 0.95 }}>
               <SparklesIcon className="h-6 w-6 sm:h-7 sm:w-7 text-purple-400 transition-transform" />
             </motion.div>
@@ -74,7 +77,11 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center gap-2 sm:gap-4">
-                <NavLink href="/login" text="Login" className="hidden sm:block" />
+                <NavLink
+                  href="/login"
+                  text="Login"
+                  className="hidden sm:block"
+                />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

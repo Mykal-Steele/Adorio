@@ -54,7 +54,8 @@ export class ProblemStorage {
         code: codeToSave,
         results: state.results || null,
         functionName: state.functionName || null,
-        methodName: typeof state.methodName === 'string' ? state.methodName : null,
+        methodName:
+          typeof state.methodName === 'string' ? state.methodName : null,
         lastModified: Date.now(),
         // Add checksum to verify data integrity
         checksum: btoa(problemId + codeToSave).slice(0, 16),
@@ -95,7 +96,10 @@ export class ProblemStorage {
 
       // Validate checksum if present
       if (data.checksum) {
-        const expectedChecksum = btoa(problemId + (data.code || '')).slice(0, 16);
+        const expectedChecksum = btoa(problemId + (data.code || '')).slice(
+          0,
+          16
+        );
         if (data.checksum !== expectedChecksum) {
           console.warn('Data integrity check failed for problem:', problemId);
           localStorage.removeItem(key);
@@ -103,7 +107,11 @@ export class ProblemStorage {
         }
       }
 
-      if (meta.functionName && data.functionName && data.functionName !== meta.functionName) {
+      if (
+        meta.functionName &&
+        data.functionName &&
+        data.functionName !== meta.functionName
+      ) {
         console.warn('Function mismatch detected for problem:', problemId);
         return null;
       }
@@ -213,7 +221,10 @@ export class ProblemStorage {
     try {
       const keys = Object.keys(localStorage);
       keys
-        .filter((key) => key.startsWith(STORAGE_KEY_PREFIX) || key === ACTIVE_PROBLEM_KEY)
+        .filter(
+          (key) =>
+            key.startsWith(STORAGE_KEY_PREFIX) || key === ACTIVE_PROBLEM_KEY
+        )
         .forEach((key) => localStorage.removeItem(key));
     } catch (error) {
       console.warn('Failed to clear all problems:', error);
