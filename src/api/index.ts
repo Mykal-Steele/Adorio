@@ -22,7 +22,7 @@ API.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export const register = async (userData) => {
@@ -50,9 +50,7 @@ export const fetchUserData = async () => {
     return response.data;
   } catch (error) {
     const customMessage =
-      process.env.NODE_ENV !== 'production'
-        ? 'failed to fetch user data'
-        : null;
+      process.env.NODE_ENV !== 'production' ? 'failed to fetch user data' : null;
     throw handleApiError(error, customMessage);
   }
 };
@@ -66,12 +64,6 @@ export const storeSecret = async (message, password) => {
   }
 };
 
-export {
-  getPosts,
-  createPost,
-  likePost,
-  addComment,
-  getSinglePost,
-} from './posts';
+export { getPosts, createPost, likePost, addComment, getSinglePost } from './posts';
 
 export default API;

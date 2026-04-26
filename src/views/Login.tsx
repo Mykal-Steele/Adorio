@@ -1,51 +1,53 @@
-'use client'
-import React, { useState } from 'react'
-import { useAppDispatch } from '../redux/hooks'
-import { setUser } from '../redux/userSlice'
-import { login } from '../api'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { SparklesIcon } from '@heroicons/react/24/outline'
+'use client';
+import React, { useState } from 'react';
+import { useAppDispatch } from '../redux/hooks';
+import { setUser } from '../redux/userSlice';
+import { login } from '../api';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { SparklesIcon } from '@heroicons/react/24/outline';
 
 const Login = () => {
-  const dispatch = useAppDispatch()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const from = searchParams.get('redirect') || '/home'
-  const redirect = searchParams.get('redirect')
+  const from = searchParams.get('redirect') || '/home';
+  const redirect = searchParams.get('redirect');
 
   const handleLogin = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
     try {
-      const response = await login({ email, password })
+      const response = await login({ email, password });
       if (response.user && response.token) {
-        localStorage.setItem('token', response.token)
-        dispatch(setUser({ user: response.user, token: response.token }))
-        router.replace(from)
+        localStorage.setItem('token', response.token);
+        dispatch(setUser({ user: response.user, token: response.token }));
+        router.replace(from);
       } else {
-        setError('Invalid response from server. Please try again.')
+        setError('Invalid response from server. Please try again.');
       }
     } catch (err) {
-      console.error('Error during login:', err)
+      console.error('Error during login:', err);
       if (err.response) {
-        setError(err.response.data.message || 'Login failed. Please check your email and password.')
+        setError(
+          err.response.data.message || 'Login failed. Please check your email and password.',
+        );
       } else if (err.request) {
-        setError('Unable to reach the server. Please check your connection.')
+        setError('Unable to reach the server. Please check your connection.');
       } else {
-        setError('An unexpected error occurred. Please try again in a few minutes.')
+        setError('An unexpected error occurred. Please try again in a few minutes.');
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
@@ -66,9 +68,7 @@ const Login = () => {
         <form onSubmit={handleLogin} className="space-y-4">
           {/* Email input */}
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
             <input
               type="email"
               placeholder="Enter your email"
@@ -81,9 +81,7 @@ const Login = () => {
 
           {/* Password input */}
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Password
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
             <input
               type="password"
               placeholder="Enter your password"
@@ -123,7 +121,7 @@ const Login = () => {
                   ></path>
                 </svg>
               ) : (
-                "Login"
+                'Login'
               )}
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -156,7 +154,7 @@ const Login = () => {
         </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

@@ -1,6 +1,6 @@
-import React, { useRef } from "react";
-import { motion } from "framer-motion";
-import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
+import React, { useRef } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowsPointingOutIcon } from '@heroicons/react/24/outline';
 
 // image component that handles all the loading states - finally got this right
 const PostImage = ({ imageState, onImageClick, title, postId, instanceId }) => {
@@ -53,10 +53,10 @@ const PostImage = ({ imageState, onImageClick, title, postId, instanceId }) => {
             <img
               ref={imageRef}
               src={imageState.url}
-              alt={title || "Post image"}
+              alt={title || 'Post image'}
               className="w-full h-auto max-h-[600px] object-cover"
               loading="lazy"
-              style={{ aspectRatio: "2 / 1.1" }}
+              style={{ aspectRatio: '2 / 1.1' }}
               data-post-id={postId}
               crossOrigin="anonymous"
               referrerPolicy="no-referrer"

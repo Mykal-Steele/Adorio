@@ -1,5 +1,5 @@
 // infinite scroll hook i stole from a youtube tutorial and tweaked
-import { useRef, useCallback } from "react";
+import { useRef, useCallback } from 'react';
 
 interface UseInfiniteScrollOptions {
   loading: boolean;
@@ -23,7 +23,7 @@ const useInfiniteScroll = ({ loading, hasMore, onLoadMore }: UseInfiniteScrollOp
 
       if (node) observer.current.observe(node);
     },
-    [loading, hasMore, onLoadMore]
+    [loading, hasMore, onLoadMore],
   );
 
   return [lastPostRef];
