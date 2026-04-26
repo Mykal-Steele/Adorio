@@ -1,312 +1,286 @@
 const axios = require('axios');
 const puppeteer = require('puppeteer');
-const { execSync } = require('child_process');
 
-const safeExec = command => {
-  try {
-    return execSync(command, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
-  } catch (error) {
-    const stdout = error?.stdout ? String(error.stdout).trim() : '';
-    const stderr = error?.stderr ? String(error.stderr).trim() : '';
-    return [stdout, stderr].filter(Boolean).join('\n').trim() || 'No output';
-  }
-};
+const BASE_URL = process.env.TEST_TARGET_URL || 'http://localhost:8080';
 
-const collectDockerDebugInfo = () => {
-  const ps = safeExec('docker ps --format "{{.Names}}\t{{.Status}}"');
-  const composeServices = safeExec('docker compose -f docker-compose.yml ps --all');
-  const composeProdServices = safeExec('docker compose -f docker-compose.prod.yml ps --all');
-
-  return [
-    '--- docker ps ---',
-    ps || 'No running containers',
-    '--- docker compose (dev) ps ---',
-    composeServices || 'No compose services (dev)',
-    '--- docker compose (prod) ps ---',
-    composeProdServices || 'No compose services (prod)'
-  ].join('\n');
-};
-
-// Helper to wait for the backend to be ready
-const waitForBackend = async (url, retries = 30, interval = 2000) => {
-  let lastErrorMessage = 'No response received from backend';
-
+const waitForBackend = async (retries = 30, interval = 2000) => {
+  let lastError = 'no response';
   for (let i = 0; i < retries; i++) {
     try {
-      const response = await axios.get(`${url}/api/health`);
-      if (response.status === 200) return true;
+      const res = await axios.get(`${BASE_URL}/api/health`);
+      if (res.status === 200) return;
     } catch (err) {
-      lastErrorMessage = err?.message || 'Unknown request error';
+      lastError = err?.message || 'unknown error';
     }
-    await new Promise(resolve => setTimeout(resolve, interval));
+    await new Promise((r) => setTimeout(r, interval));
   }
-
-  const dockerInfo = collectDockerDebugInfo();
   throw new Error(
-    `Backend at ${url} did not become ready in time. Last request error: ${lastErrorMessage}\n${dockerInfo}`
+    `Backend at ${BASE_URL} not ready after ${(retries * interval) / 1000}s. Last error: ${lastError}`,
   );
 };
 
-const getWithRetry = async (url, retries = 5, interval = 1000) => {
-  let lastError = null;
-
-  for (let i = 0; i < retries; i++) {
-    try {
-      return await axios.get(url);
-    } catch (error) {
-      lastError = error;
-      await new Promise(resolve => setTimeout(resolve, interval));
-    }
-  }
-
-  throw new Error(`Failed after ${retries} retries for ${url}: ${lastError?.message || 'Unknown request error'}`);
-};
-
-describe('Adorio Integration Tests', () => {
+describe('Adorio integration tests', () => {
   let browser;
   let nodeEnv;
-  let expectedClientUrl;
-  let expectedPort;
-  let baseUrl; // Use this to target the correct URL dynamically
 
   beforeAll(async () => {
-    browser = await puppeteer.launch({ 
-      headless: "new",
-      // Add args if running in CI/Docker environment often helps stability
-      args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+    await waitForBackend();
+    const res = await axios.get(`${BASE_URL}/api/test-env`);
+    nodeEnv = res.data.NODE_ENV;
+    browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
-
-    // Determine base URL - locally it's usually localhost:8080 or the mapped port
-    // If you are testing the PROD URL directly, change this default.
-    baseUrl = process.env.TEST_TARGET_URL || 'http://localhost:8080';
-
-    console.log(`Waiting for backend at ${baseUrl}...`);
-    await waitForBackend(baseUrl);
-
-    // Get environment from backend
-    try {
-      const response = await axios.get(`${baseUrl}/api/test-env`);
-      nodeEnv = response.data.NODE_ENV;
-      // In production, we expect the public URL; in dev, localhost
-      expectedClientUrl = nodeEnv === 'production' ? 'https://adorio.space' : 'http://localhost:8080';
-      expectedPort = '3000';
-      console.log(`Environment detected: ${nodeEnv}`);
-    } catch (error) {
-      console.error('Failed to get env from backend:', error.message);
-      throw error; // Fail fast if we can't even get the env
-    }
-  }, 120000); // Increased timeout for docker startup
+    // Warm up the Next.js server so the first Puppeteer test doesn't hit a cold-start timeout
+    await axios.get(BASE_URL, { validateStatus: null, timeout: 60000 });
+    console.log(`Running against ${BASE_URL} (${nodeEnv})`);
+  }, 120_000);
 
   afterAll(async () => {
     if (browser) await browser.close();
   });
 
-  // --- CONFIGURATION & ENV TESTS ---
+  // ── Smoke ─────────────────────────────────────────────────────────────────
 
-  test('Backend env vars are set correctly', async () => {
-    const response = await axios.get(`${baseUrl}/api/test-env`);
-    expect(response.status).toBe(200);
-    expect(response.data.NODE_ENV).toBe(nodeEnv);
-    
-    // Backend returns boolean (true if set) for sensitive env vars
-    expect(response.data.MONGO_URI).toBe(true);
-    expect(response.data.JWT_SECRET).toBe(true);
-    expect(typeof response.data.CLOUDINARY_NAME).toBe('string');
-    expect(response.data.CLOUDINARY_NAME.length).toBeGreaterThan(0);
-    expect(response.data.CLOUDINARY_KEY).toBe(true);
-    expect(response.data.CLOUDINARY_SECRET).toBe(true);
-    
-    // For non-sensitive strings
-    expect(typeof response.data.CLIENT_URL).toBe('string');
-    expect(response.data.CLIENT_URL).toBe(expectedClientUrl);
-    expect(typeof response.data.PORT).toBe('string');
-    expect(response.data.PORT).toBe(expectedPort);
+  describe('Smoke', () => {
+    test('health endpoint returns healthy', async () => {
+      const res = await axios.get(`${BASE_URL}/api/health`);
+      expect(res.status).toBe(200);
+      expect(res.data.isHealthy).toBe(true);
+    });
+
+    test('frontend loads with correct title and no JS errors', async () => {
+      const page = await browser.newPage();
+      const jsErrors = [];
+      page.on('pageerror', (err) => jsErrors.push(err.message));
+      await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+      expect(await page.title()).toBe('Oakar Oo — Portfolio | Adorio');
+      expect(jsErrors).toHaveLength(0);
+      await page.close();
+    }, 30_000);
+
+    test('frontend can reach /api/health', async () => {
+      const page = await browser.newPage();
+      await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+      const ok = await page.evaluate(async () => {
+        const res = await fetch('/api/health');
+        return res.ok;
+      });
+      expect(ok).toBe(true);
+      await page.close();
+    }, 30_000);
+
+    test('/cao/ returns 200 with sidecar content', async () => {
+      const page = await browser.newPage();
+      const res = await page.goto(`${BASE_URL}/cao/`, { waitUntil: 'domcontentloaded' });
+      expect(res.status()).toBe(200);
+      expect(await page.title()).toBe('ArchMaster - Architecture Exam Prep');
+      await page.close();
+    });
+
+    test('/cao redirects to /cao/', async () => {
+      const res = await axios.get(`${BASE_URL}/cao`, {
+        maxRedirects: 0,
+        validateStatus: null,
+      });
+      expect(res.status).toBe(301);
+    });
   });
 
-  // --- SECURITY & HEADERS TESTS (Handled by Cloudflare in Prod) ---
+  // ── Required env vars ─────────────────────────────────────────────────────
 
-  test('Security Headers are present', async () => {
-    // We check the headers on the main index page
-    const response = await axios.get(baseUrl);
-    
-    // Check for basic security headers (only in production, since dev nginx doesn't have them)
-    if (nodeEnv === 'production') {
-      expect(response.headers['x-frame-options']).toBe('DENY');
-      expect(response.headers['x-content-type-options']).toBe('nosniff');
-      expect(response.headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
-    } else {
-      // In dev, no headers set in nginx
-      console.log('Dev mode: Security headers not checked (handled by Cloudflare in prod)');
-    }
+  describe('Environment', () => {
+    test('required backend env vars are set', async () => {
+      const res = await axios.get(`${BASE_URL}/api/test-env`);
+      expect(res.status).toBe(200);
+      // Sensitive vars — backend returns true when set, not the value
+      expect(res.data.MONGO_URI).toBe(true);
+      expect(res.data.JWT_SECRET).toBe(true);
+      expect(res.data.CLOUDINARY_KEY).toBe(true);
+      expect(res.data.CLOUDINARY_SECRET).toBe(true);
+      expect(typeof res.data.CLOUDINARY_NAME).toBe('string');
+      expect(res.data.CLOUDINARY_NAME.length).toBeGreaterThan(0);
+    });
   });
 
-  // --- FRONTEND FUNCTIONALITY TESTS ---
+  // ── Auth API ──────────────────────────────────────────────────────────────
 
-  test('Frontend loads correctly without Console Errors', async () => {
-    const page = await browser.newPage();
-    const consoleErrors = [];
-    const failedResourceResponses = [];
-    
-    // Listen for console errors to catch hidden crashes
-    page.on('console', msg => {
-      if (msg.type() === 'error') consoleErrors.push(msg.text());
+  describe('Auth API', () => {
+    // Use a unique username/email per run to avoid conflicts with existing data
+    const ts = Date.now();
+    const username = `testuser_${ts}`;
+    const email = `testuser_${ts}@integration.test`;
+    const password = 'Integration_Test_123!';
+    let accessToken;
+    let refreshToken;
+
+    test('register creates a new user and returns a token', async () => {
+      const res = await axios.post(`${BASE_URL}/api/users/register`, { username, email, password });
+      expect(res.status).toBe(201);
+      expect(res.data).toHaveProperty('token');
+      expect(res.data).toHaveProperty('user');
+      expect(res.data.user.username).toBe(username);
+      accessToken = res.data.token;
     });
-    page.on('pageerror', err => {
-      consoleErrors.push(err.toString());
+
+    test('login returns access and refresh tokens', async () => {
+      const res = await axios.post(`${BASE_URL}/api/users/login`, { email, password });
+      expect(res.status).toBe(200);
+      expect(res.data).toHaveProperty('token');
+      expect(res.data).toHaveProperty('refreshToken');
+      accessToken = res.data.token;
+      refreshToken = res.data.refreshToken;
     });
-    page.on('response', response => {
-      if (response.status() >= 500) {
-        failedResourceResponses.push({
-          status: response.status(),
-          url: response.url(),
-        });
+
+    test('GET /api/users/me without token returns 401', async () => {
+      const res = await axios.get(`${BASE_URL}/api/users/me`, { validateStatus: null });
+      expect(res.status).toBe(401);
+    });
+
+    test('GET /api/users/me with valid token returns the user', async () => {
+      const res = await axios.get(`${BASE_URL}/api/users/me`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      expect(res.status).toBe(200);
+      expect(res.data.username).toBe(username);
+    });
+
+    test('refresh-token returns a new access token', async () => {
+      const res = await axios.post(`${BASE_URL}/api/users/refresh-token`, { refreshToken });
+      expect(res.status).toBe(200);
+      expect(res.data).toHaveProperty('token');
+    });
+
+    test('login with wrong password returns 401', async () => {
+      const res = await axios.post(
+        `${BASE_URL}/api/users/login`,
+        { email, password: 'wrong_password' },
+        { validateStatus: null },
+      );
+      expect(res.status).toBe(401);
+    });
+  });
+
+  // ── Posts API ─────────────────────────────────────────────────────────────
+
+  describe('Posts API', () => {
+    test('GET /api/posts returns posts array', async () => {
+      const res = await axios.get(`${BASE_URL}/api/posts`);
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.data.posts)).toBe(true);
+      if (res.data.posts.length > 0) {
+        expect(res.data.posts[0]).toHaveProperty('_id');
+        expect(res.data.posts[0]).toHaveProperty('content');
       }
     });
 
-    await page.goto(baseUrl, { waitUntil: 'networkidle0' });
-    
-    const title = await page.title();
-    expect(title).toBe('Adorio | Social Media Platform | Connect & Share');
-
-    // Fail if there were critical JS errors
-    if (consoleErrors.length > 0) {
-      console.warn('Frontend Console Errors:', consoleErrors);
-    }
-    if (failedResourceResponses.length > 0) {
-      console.warn('Frontend 5xx Resources:', failedResourceResponses);
-    }
-    // We expect 0 errors, but sometimes 3rd party scripts (ads/analytics) fail. 
-    // Uncomment this line to enforce 0 errors:
-    // expect(consoleErrors.length).toBe(0);
-
-    // Check if the frontend can make an API call (Smoke test)
-    const apiOk = await page.evaluate(async () => {
-      try {
-        const response = await fetch('/api/health');
-        return response.ok;
-      } catch {
-        return false;
-      }
-    });
-    expect(apiOk).toBe(true);
-    await page.close();
-  });
-
-  // --- SIDECAR TESTS ---
-
-  test('Sidecar is mounted and serving content', async () => {
-    const page = await browser.newPage();
-    const consoleErrors = [];
-    
-    // Listen for console errors on the /cao page
-    page.on('console', msg => {
-      if (msg.type() === 'error') consoleErrors.push(msg.text());
-    });
-    page.on('pageerror', err => {
-      consoleErrors.push(err.toString());
+    test('POST /api/posts without token returns 401', async () => {
+      const res = await axios.post(
+        `${BASE_URL}/api/posts`,
+        { content: 'test' },
+        { validateStatus: null },
+      );
+      expect(res.status).toBe(401);
     });
 
-    const response = await page.goto(`${baseUrl}/cao/`, { waitUntil: 'domcontentloaded' });
-    
-    // Ensure it's a 200 OK (not a 404 falling back to main app)
-    expect(response.status()).toBe(200);
+    test('PUT /api/posts/:id/like without token returns 401', async () => {
+      const res = await axios.put(
+        `${BASE_URL}/api/posts/000000000000000000000000/like`,
+        {},
+        { validateStatus: null },
+      );
+      expect(res.status).toBe(401);
+    });
 
-    const title = await page.title();
-    expect(title).toBe('ArchMaster - Architecture Exam Prep');
-    
-    // Check that we're on the correct URL (not redirected to main app)
-    const currentUrl = page.url();
-    expect(currentUrl).toContain('/cao/');
-    
-    // Verify it's actually the sidecar and not the main React app
-    const content = await page.content();
-    expect(content).toContain('ArchMaster'); // Assuming the title or header is in the content
-    expect(content).not.toContain('Adorio | Social Media Platform'); // Ensure it's not the main app
-    
-    // Fail if there were console errors on the /cao page
-    if (consoleErrors.length > 0) {
-      console.warn('Sidecar console errors:', consoleErrors);
-      // Uncomment to enforce 0 errors:
-      // expect(consoleErrors.length).toBe(0);
-    }
-
-    await page.close();
+    test('POST /api/posts/:id/comment without token returns 401', async () => {
+      const res = await axios.post(
+        `${BASE_URL}/api/posts/000000000000000000000000/comment`,
+        { text: 'test' },
+        { validateStatus: null },
+      );
+      expect(res.status).toBe(401);
+    });
   });
 
-  test('Sidecar has API key embedded', async () => {
-    const page = await browser.newPage();
-    await page.goto(`${baseUrl}/cao/`);
-    
-    // 1. Negative Check: Ensure error message isn't there
-    const bodyText = await page.evaluate(() => document.body.innerText);
-    expect(bodyText).not.toContain('API Key not found');
+  // ── Security ──────────────────────────────────────────────────────────────
 
-    // 2. Positive Check (Optional but recommended): 
-    // Does the global config variable exist? (Assuming it's injected into window.CONFIG or similar)
-    // const hasConfig = await page.evaluate(() => window.ENV_API_KEY !== undefined);
-    // expect(hasConfig).toBe(true);
-
-    await page.close();
-  });
-
-  // --- BACKEND API TESTS ---
-
-  test('Backend health check passes', async () => {
-    const response = await getWithRetry(`${baseUrl}/api/health`, 8, 750);
-    expect(response.status).toBe(200);
-    expect(response.data).toHaveProperty('isHealthy');
-    expect(response.data.isHealthy).toBe(true);
-  });
-
-  test('Backend can retrieve posts (DB connectivity)', async () => {
-    const response = await getWithRetry(`${baseUrl}/api/posts`, 8, 750);
-    expect(response.status).toBe(200);
-    expect(Array.isArray(response.data.posts)).toBe(true);
-    
-    // Optional: Check structure of first post if exists
-    if (response.data.posts.length > 0) {
-      expect(response.data.posts[0]).toHaveProperty('_id');
-    }
-  });
-
-  // --- INFRASTRUCTURE / DOCKER TESTS ---
-
-  test('Inter-service connectivity: Docker containers are running', () => {
-    // NOTE: This test assumes we are running ON the host machine that has Docker CLI access.
-    // If running inside a CI container, this might fail without socket binding.
-    try {
-      const output = execSync('docker ps --format "{{.Names}}"', { encoding: 'utf8' });
-      const containers = output.trim().split('\n');
-      
-      // In PROD (Docker Compose), names are usually prefixed with folder name "adorio"
-      // We check for partial match to be safe against folder name changes
-      const frontendRunning = containers.some(name => name.includes('frontend') || name.includes('adorio-frontend'));
-      expect(frontendRunning).toBe(true);
-
+  describe('Security headers', () => {
+    test('security headers are present in production', async () => {
       if (nodeEnv !== 'production') {
-        // In DEV, sidecar is a separate container
-        const sidecarRunning = containers.some(name => name.includes('ai-slop') || name.includes('adorio-ai-slop'));
-        expect(sidecarRunning).toBe(true);
+        console.log('Skipping: security headers only enforced in production nginx config');
+        return;
       }
-    } catch (err) {
-      console.warn("Skipping Docker CLI test: 'docker' command not found or no permission.");
-    }
+      const res = await axios.get(BASE_URL);
+      expect(res.headers['x-frame-options']).toBe('DENY');
+      expect(res.headers['x-content-type-options']).toBe('nosniff');
+      expect(res.headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+    });
   });
 
-  test('Sidecar volume mount/copy verification', () => {
-    try {
-      if (nodeEnv === 'production') {
-        // In prod, /cao is copied into the Nginx image.
-        // Exec into the frontend container to verify file existence.
-        const output = execSync('docker exec adorio-frontend-1 ls /usr/share/nginx/html/cao/index.html', { encoding: 'utf8' });
-        expect(output.trim()).toContain('index.html');
-      } else {
-        // In dev, the sidecar is separate and volume mounted.
-        const output = execSync('docker exec adorio-ai-slop-1 ls /usr/share/nginx/html/index.html', { encoding: 'utf8' });
-        expect(output.trim()).toContain('index.html');
-      }
-    } catch (err) {
-       console.warn("Skipping Volume Verification: Docker CLI access required.");
-    }
+  // ── SEO ───────────────────────────────────────────────────────────────────
+
+  describe('SEO', () => {
+    // Share one page load across all SEO checks — no reason to navigate 3 times
+    let seoPage;
+
+    beforeAll(async () => {
+      seoPage = await browser.newPage();
+      await seoPage.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+    }, 30_000);
+
+    afterAll(async () => {
+      await seoPage?.close();
+    });
+
+    test('html lang attribute is "en"', async () => {
+      const lang = await seoPage.evaluate(() => document.documentElement.lang);
+      expect(lang).toBe('en');
+    });
+
+    test('has a non-empty meta description', async () => {
+      const description = await seoPage.evaluate(() =>
+        document.querySelector('meta[name="description"]')?.getAttribute('content'),
+      );
+      expect(typeof description).toBe('string');
+      expect(description.length).toBeGreaterThan(0);
+    });
+
+    test('has Open Graph meta tags', async () => {
+      const ogTitle = await seoPage.evaluate(() =>
+        document.querySelector('meta[property="og:title"]')?.getAttribute('content'),
+      );
+      expect(typeof ogTitle).toBe('string');
+      expect(ogTitle.length).toBeGreaterThan(0);
+    });
+
+    test('robots.txt is accessible and disallows /api/', async () => {
+      const res = await axios.get(`${BASE_URL}/robots.txt`);
+      expect(res.status).toBe(200);
+      expect(res.data).toContain('Disallow: /api/');
+    });
+  });
+
+  // ── Performance ───────────────────────────────────────────────────────────
+
+  describe('Performance', () => {
+    test('/api/health responds within 500ms', async () => {
+      const start = Date.now();
+      await axios.get(`${BASE_URL}/api/health`);
+      expect(Date.now() - start).toBeLessThan(500);
+    });
+
+    test('homepage TTFB is under 2000ms', async () => {
+      const start = Date.now();
+      await axios.get(BASE_URL, { validateStatus: null });
+      expect(Date.now() - start).toBeLessThan(2000);
+    });
+
+    test('/_next/static/ assets are served with long-cache headers', async () => {
+      const html = (await axios.get(BASE_URL)).data;
+      const match = html.match(/\/_next\/static\/[^"' ]+\.js/);
+      if (!match) return; // no static JS on this page — skip gracefully
+      const assetRes = await axios.get(`${BASE_URL}${match[0]}`, { validateStatus: null });
+      expect(assetRes.headers['cache-control']).toMatch(/max-age=31536000/);
+    });
   });
 });
