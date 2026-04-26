@@ -29,7 +29,8 @@
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\" \"*.{ts,js,mjs,cjs,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx}\" \"*.{ts,js,mjs,cjs,json}\"",
-    "nginx-logs": "sudo tail -f /var/log/nginx/error.log"
+    "nginx-logs": "sudo tail -f /var/log/nginx/error.log",
+    "prepare": "husky"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.19.0",
@@ -63,6 +64,10 @@
     "socket.io-client": "^4.8.1",
     "unique-names-generator": "^4.7.1"
   },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,js,jsx}": "prettier --write",
+    "*.{ts,js,mjs,cjs,json}": "prettier --write"
+  },
   "jest": {
     "modulePathIgnorePatterns": [
       "<rootDir>/.next/"
@@ -80,7 +85,9 @@
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
     "globals": "^15.14.0",
+    "husky": "^9.1.7",
     "jest": "^29.7.0",
+    "lint-staged": "^16.4.0",
     "postcss": "^8.5.3",
     "prettier": "^3.8.3",
     "supertest": "^7.0.0",
