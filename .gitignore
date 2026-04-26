@@ -31,3 +31,6 @@ jwtGen.js
 *.pem
 *.key
 Adorio/backend/.env
+# Next.js build output
+.next/
+out/
