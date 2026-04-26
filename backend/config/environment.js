@@ -35,6 +35,7 @@ const defaultOrigins = [
   "https://mykal-steele.github.io",
   "https://www.mykal-steele.github.io",
   "http://localhost:3000",
+  "http://localhost:3001",
   "http://localhost:5173",
   "http://localhost:5174", // In case vite uses alternate port
   "https://adorio.space",
