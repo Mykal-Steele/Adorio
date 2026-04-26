@@ -31,11 +31,7 @@ class FrontendMonitor {
     if (typeof window !== 'undefined') {
       const originalConsoleError = console.error;
       console.error = (...args) => {
-        if (
-          args.some(
-            (arg) => typeof arg === 'string' && arg.includes('analytics'),
-          )
-        ) {
+        if (args.some((arg) => typeof arg === 'string' && arg.includes('analytics'))) {
           this.recordError(new Error(args.join(' ')));
         }
         originalConsoleError.apply(console, args);
@@ -147,9 +143,7 @@ export const withPerformanceTracking = <TArgs extends unknown[]>(
 
       return result;
     } catch (error) {
-      frontendMonitor.recordError(
-        error instanceof Error ? error : new Error(String(error)),
-      );
+      frontendMonitor.recordError(error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   };

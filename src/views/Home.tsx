@@ -1,19 +1,9 @@
 'use client';
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-} from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { getPosts, createPost, likePost } from '../api';
 import PostCard from '../Components/PostCard';
 import { useAppSelector } from '../redux/hooks';
-import {
-  SparklesIcon,
-  ExclamationTriangleIcon,
-  CameraIcon,
-} from '@heroicons/react/24/outline';
+import { SparklesIcon, ExclamationTriangleIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import SkeletonLoader from '../Components/SkeletonLoader';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
@@ -77,11 +67,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getPosts(
-        page,
-        3,
-        abortControllerRef.current.signal,
-      );
+      const response = await getPosts(page, 3, abortControllerRef.current.signal);
       const newPosts = response.posts || [];
       setPosts((prev) => (page === 1 ? newPosts : [...prev, ...newPosts]));
       setHasMore(response.hasMore);
@@ -276,9 +262,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
           <h3 className="text-sm sm:text-base font-medium bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
             {error.status} Error
           </h3>
-          <p className="text-xs sm:text-sm text-gray-300 mt-0.5">
-            {error.message}
-          </p>
+          <p className="text-xs sm:text-sm text-gray-300 mt-0.5">{error.message}</p>
           <button
             onClick={() => setError(null)}
             className="mt-1.5 text-xs sm:text-sm text-purple-400 hover:text-purple-300 transition-colors"
@@ -293,9 +277,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
 
   return (
     <div className="relative min-h-screen bg-gray-950 pb-16 sm:pb-0">
-      <AnimatePresence>
-        {error && <ErrorMessage error={error} />}
-      </AnimatePresence>
+      <AnimatePresence>{error && <ErrorMessage error={error} />}</AnimatePresence>
 
       <div className="container mx-auto max-w-2xl px-2 sm:px-4 py-6 sm:py-8 pt-16 sm:pt-20">
         {loading && (
@@ -441,9 +423,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
                   onLike={handleLike}
                   onCommentAdded={(updatedPost) => {
                     setPosts((prevPosts) =>
-                      prevPosts.map((p) =>
-                        p._id === updatedPost._id ? updatedPost : p,
-                      ),
+                      prevPosts.map((p) => (p._id === updatedPost._id ? updatedPost : p)),
                     );
                   }}
                 />
@@ -459,9 +439,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
               animate={{ scale: 1 }}
               className="text-center py-6 sm:py-8 bg-gray-900/50 rounded-lg border border-gray-800/40"
             >
-              <p className="text-sm sm:text-base text-gray-400">
-                No more posts to load
-              </p>
+              <p className="text-sm sm:text-base text-gray-400">No more posts to load</p>
             </motion.div>
           )}
         </motion.div>
