@@ -72,3 +72,41 @@ jobs:
           echo "VITE_GEMINI_API_KEY=${{ secrets.VITE_GEMINI_API_KEY }}" >> .env.production
       - name: Run integration tests
         run: npm run test:prod
+
+  audit:
+    name: Live site audit
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Wait for Northflank to deploy (5 min)
+        run: sleep 300
+      - name: Run site audit
+        run: node scripts/audit.mjs https://adorio.space
+      - name: Publish latest report to repo
+        run: |
+          latest=$(ls -t reports/audit-*.html 2>/dev/null | head -1)
+          if [ -n "$latest" ]; then
+            cp "$latest" public/performance-report.html
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add public/performance-report.html
+            git diff --cached --quiet || git commit -m "chore: update performance report [skip ci]"
+            git push
+          fi
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-${{ github.sha }}
+          path: reports/
+          retention-days: 90
