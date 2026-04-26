@@ -30,6 +30,8 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\" \"*.{ts,js,mjs,cjs,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx}\" \"*.{ts,js,mjs,cjs,json}\"",
     "nginx-logs": "sudo tail -f /var/log/nginx/error.log",
+    "audit": "node scripts/audit.mjs",
+    "audit:local": "node scripts/audit.mjs http://localhost:8080",
     "prepare": "husky"
   },
   "dependencies": {
@@ -79,6 +81,7 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "autoprefixer": "^10.4.20",
+    "axe-core": "^4.11.3",
     "concurrently": "^9.2.1",
     "eslint": "^9.17.0",
     "eslint-config-next": "^15.3.1",
@@ -87,9 +90,11 @@
     "globals": "^15.14.0",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
+    "lighthouse": "^13.1.0",
     "lint-staged": "^16.4.0",
     "postcss": "^8.5.3",
     "prettier": "^3.8.3",
+    "ssl-checker": "^3.0.1",
     "supertest": "^7.0.0",
     "tailwind-scrollbar": "^3.0.0",
     "tailwindcss": "^3.4.3"
