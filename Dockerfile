@@ -48,5 +48,5 @@ ENV BACKEND_INTERNAL_URL=http://localhost:3000
 
 RUN printf '#!/bin/sh\nPORT=3000 node /app/backend/index.js &\nPORT=3001 HOSTNAME=0.0.0.0 node /nextjs/server.js &\nnginx -g "daemon off;"\n' > /start.sh && chmod +x /start.sh
 
-EXPOSE 80
+EXPOSE 8080
 CMD ["/bin/sh", "/start.sh"]

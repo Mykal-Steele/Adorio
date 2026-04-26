@@ -93,8 +93,12 @@ const getWebGLFingerprint = () => {
     try {
       const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
       if (debugInfo) {
-        result.unmaskedVendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-        result.unmaskedRenderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        result.unmaskedVendor = gl.getParameter(
+          debugInfo.UNMASKED_VENDOR_WEBGL,
+        );
+        result.unmaskedRenderer = gl.getParameter(
+          debugInfo.UNMASKED_RENDERER_WEBGL,
+        );
       }
     } catch (debugError) {}
 
@@ -262,7 +266,9 @@ const getBrowserFingerprint = async () => {
         vendor: webgl.vendor || webgl.unmaskedVendor || '',
         renderer: webgl.renderer || webgl.unmaskedRenderer || '',
         version: webgl.version || '',
-        extensions: Array.isArray(webgl.extensions) ? webgl.extensions.slice(0, 20) : [],
+        extensions: Array.isArray(webgl.extensions)
+          ? webgl.extensions.slice(0, 20)
+          : [],
       };
     }
 
@@ -297,7 +303,8 @@ const getBrowserFingerprint = async () => {
 
 const getNetworkFingerprint = () => {
   const nav = navigator as NavigatorExtended;
-  const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
+  const connection =
+    nav.connection || nav.mozConnection || nav.webkitConnection;
 
   if (!connection) return null;
 
@@ -407,7 +414,9 @@ export const generateVisitorId = async () => {
     }
 
     return {
-      persistentId: `fallback-${Date.now()}-${Math.random().toString(36).substring(2)}`,
+      persistentId: `fallback-${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2)}`,
       sessionId: `session-${Date.now()}`,
       fingerprint: null,
       storageCapabilities: null,
@@ -417,7 +426,11 @@ export const generateVisitorId = async () => {
 };
 
 const getPersistentId = async () => {
-  const storageKeys = ['adorio_persistent_id', 'adorio_visitor_id', 'visitor_identifier'];
+  const storageKeys = [
+    'adorio_persistent_id',
+    'adorio_visitor_id',
+    'visitor_identifier',
+  ];
 
   try {
     for (const key of storageKeys) {
@@ -452,7 +465,9 @@ const getPersistentId = async () => {
 };
 
 const createPersistentId = async () => {
-  const id = `${Date.now()}-${Math.random().toString(36).substring(2)}-${performance.now()}`;
+  const id = `${Date.now()}-${Math.random()
+    .toString(36)
+    .substring(2)}-${performance.now()}`;
 
   try {
     localStorage.setItem('adorio_persistent_id', id);
@@ -469,7 +484,10 @@ const createPersistentId = async () => {
   return id;
 };
 
-const getFromIndexedDB = (storeName: string, key: string): Promise<string | null> => {
+const getFromIndexedDB = (
+  storeName: string,
+  key: string,
+): Promise<string | null> => {
   return new Promise((resolve, reject) => {
     try {
       const request = indexedDB.open('AdorioAnalytics', 1);

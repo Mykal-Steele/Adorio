@@ -753,7 +753,8 @@ function treeHeight(root) {
       {
         input: 'findClosestPair([[0, 0], [5, 4], [3, 1], [10, 10], [6, 2]])',
         output: '"closest points are index 1 and 4 coords: (5,4) and (6,2)"',
-        explanation: 'Points at indices 1 and 4 have the smallest distance between them.',
+        explanation:
+          'Points at indices 1 and 4 have the smallest distance between them.',
       },
       {
         input: 'findClosestPair([[1, 1], [4, 4], [2, 2]])',
@@ -846,17 +847,22 @@ function findClosestPair(points) {
     ],
     examples: [
       {
-        input: 'searchWord("hello", [["h","e","l","l","o"], ["w","o","r","l","d"]])',
+        input:
+          'searchWord("hello", [["h","e","l","l","o"], ["w","o","r","l","d"]])',
         output: '"found at (0, 0) from left to right"',
-        explanation: 'The word "hello" can be found horizontally starting at position (0,0).',
+        explanation:
+          'The word "hello" can be found horizontally starting at position (0,0).',
       },
       {
-        input: 'searchWord("world", [["h","e","l","l","o"], ["w","o","r","l","d"]])',
+        input:
+          'searchWord("world", [["h","e","l","l","o"], ["w","o","r","l","d"]])',
         output: '"found at (1, 0) from left to right"',
-        explanation: 'The word "world" can be found horizontally starting at position (1,0).',
+        explanation:
+          'The word "world" can be found horizontally starting at position (1,0).',
       },
       {
-        input: 'searchWord("xyz", [["h","e","l","l","o"], ["w","o","r","l","d"]])',
+        input:
+          'searchWord("xyz", [["h","e","l","l","o"], ["w","o","r","l","d"]])',
         output: '"not found"',
         explanation: 'The word "xyz" cannot be found in any direction.',
       },
@@ -1164,10 +1170,7 @@ export const getAllProblems = (options: { includeHidden?: boolean } = {}) => {
  * @param {boolean} hardestFirst - If true, sorts from hardest to easiest. If false, sorts from easiest to hardest
  * @returns {Array<Problem>} Sorted problems array
  */
-export const getSortedProblems = (
-  hardestFirst = false,
-  options: { includeHidden?: boolean; problems?: Problem[] } = {},
-) => {
+export const getSortedProblems = (hardestFirst = false, options: { includeHidden?: boolean; problems?: Problem[] } = {}) => {
   const { includeHidden = false, problems: baseProblems } = options;
   const problemsToSort = baseProblems
     ? includeHidden

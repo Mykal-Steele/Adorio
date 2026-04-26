@@ -1,24 +1,24 @@
-'use client';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { CodeBracketIcon } from '@heroicons/react/24/outline';
-import AdSenseScript from '../../Components/AdSenseScript';
-import dynamic from 'next/dynamic';
+'use client'
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { CodeBracketIcon } from "@heroicons/react/24/outline";
+import AdSenseScript from "../../Components/AdSenseScript";
+import dynamic from "next/dynamic";
 
 // Components
-import ProblemList from './components/ProblemList';
-import ProblemDetails from './components/ProblemDetails';
-import ResultsPanel from './components/ResultsPanel';
-import TestResults from './components/TestResults';
+import ProblemList from "./components/ProblemList";
+import ProblemDetails from "./components/ProblemDetails";
+import ResultsPanel from "./components/ResultsPanel";
+import TestResults from "./components/TestResults";
 
-const CodeEditor = dynamic(() => import('./components/CodeEditor'), {
+const CodeEditor = dynamic(() => import("./components/CodeEditor"), {
   ssr: false,
   loading: () => <div className="h-[360px] bg-gray-900 animate-pulse rounded-lg" />,
 });
 
 // Services and Data
-import { getAllProblems, getProblem } from './problems';
-import { CodeRunner } from './CodeRunner';
-import { ProblemStorage } from './utils/problemStorage';
+import { getAllProblems, getProblem } from "./problems";
+import { CodeRunner } from "./CodeRunner";
+import { ProblemStorage } from "./utils/problemStorage";
 
 const getProblemMeta = (problem) => ({
   functionName: problem?.functionName || null,
@@ -33,7 +33,7 @@ const Coding = () => {
   // Initialize with first problem so SSR includes its description (better SEO)
   const problems = getAllProblems();
   const [activeProblemId, setActiveProblemId] = useState(problems[0]?.id ?? null);
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState("");
   const [results, setResults] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -80,7 +80,7 @@ const Coding = () => {
 
       const savedState = ProblemStorage.loadProblemState(
         activeProblem.id,
-        getProblemMeta(activeProblem),
+        getProblemMeta(activeProblem)
       );
 
       if (savedState && savedState.code.trim()) {
@@ -97,13 +97,19 @@ const Coding = () => {
 
   // Auto-save current state when code changes (debounced) with validation
   useEffect(() => {
-    if (activeProblem && code && code !== activeProblem.starterCode && !isResetInProgress.current) {
+    if (
+      activeProblem &&
+      code &&
+      code !== activeProblem.starterCode &&
+      !isResetInProgress.current
+    ) {
       // Only save if code actually belongs to this problem and we're not in a reset
       const currentSavedState = ProblemStorage.loadProblemState(
         activeProblem.id,
-        getProblemMeta(activeProblem),
+        getProblemMeta(activeProblem)
       );
-      const isCodeDifferent = !currentSavedState || currentSavedState.code !== code;
+      const isCodeDifferent =
+        !currentSavedState || currentSavedState.code !== code;
 
       if (isCodeDifferent) {
         ProblemStorage.debouncedSave(activeProblem.id, {
@@ -129,11 +135,11 @@ const Coding = () => {
     };
 
     // Save on page unload
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     // Cleanup function to save on component unmount
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       if (activeProblem && code !== activeProblem.starterCode) {
         ProblemStorage.saveProblemState(activeProblem.id, {
           code,
@@ -157,14 +163,14 @@ const Coding = () => {
       }
 
       // Clear current state to prevent contamination
-      setCode('');
+      setCode("");
       setResults(null);
       setIsRunning(false);
 
       // Switch to new problem
       setActiveProblemId(problemId);
     },
-    [activeProblem, code, results],
+    [activeProblem, code, results]
   );
 
   const handleCodeChange = useCallback((newCode) => {
@@ -185,7 +191,7 @@ const Coding = () => {
       codeSnapshot,
       activeProblem.functionName,
       activeProblem.tests,
-      activeProblem.methodName || null, // Pass methodName if it exists
+      activeProblem.methodName || null // Pass methodName if it exists
     );
 
     if (activeProblemIdRef.current !== problemId) {
@@ -230,11 +236,13 @@ const Coding = () => {
   // Loading state
   if (problems.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <CodeBracketIcon className="h-10 w-10 text-purple-400 mx-auto mb-4" />
-          <p className="text-lg">No challenges available right now.</p>
-          <p className="text-sm text-gray-400">Check back later for new problems.</p>
+      <div className='min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center'>
+        <div className='text-center'>
+          <CodeBracketIcon className='h-10 w-10 text-purple-400 mx-auto mb-4' />
+          <p className='text-lg'>No challenges available right now.</p>
+          <p className='text-sm text-gray-400'>
+            Check back later for new problems.
+          </p>
         </div>
       </div>
     );
@@ -242,38 +250,40 @@ const Coding = () => {
 
   if (!activeProblem) {
     return (
-      <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <CodeBracketIcon className="h-10 w-10 text-purple-400 mx-auto mb-4" />
-          <p className="text-lg">Loading challenges...</p>
+      <div className='min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center'>
+        <div className='text-center'>
+          <CodeBracketIcon className='h-10 w-10 text-purple-400 mx-auto mb-4' />
+          <p className='text-lg'>Loading challenges...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 py-8 px-4">
+    <div className='min-h-screen bg-gray-950 text-gray-100 py-8 px-4'>
       <AdSenseScript />
-      <div className="max-w-6xl mx-auto">
+      <div className='max-w-6xl mx-auto'>
         {/* Header */}
-        <header className="mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-purple-600/20 border border-purple-500/40">
-              <CodeBracketIcon className="h-8 w-8 text-purple-300" />
+        <header className='mb-8'>
+          <div className='flex items-center gap-3'>
+            <div className='p-3 rounded-xl bg-purple-600/20 border border-purple-500/40'>
+              <CodeBracketIcon className='h-8 w-8 text-purple-300' />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
+              <h1 className='text-3xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent'>
                 Coding Challenges
               </h1>
-              <p className="text-gray-400">Practice JavaScript problem solving</p>
+              <p className='text-gray-400'>
+                Practice JavaScript problem solving
+              </p>
             </div>
           </div>
         </header>
 
         {/* Main Layout */}
-        <div className="grid lg:grid-cols-[300px_1fr] gap-6">
+        <div className='grid lg:grid-cols-[300px_1fr] gap-6'>
           {/* Sidebar */}
-          <aside className="space-y-6">
+          <aside className='space-y-6'>
             <ProblemList
               problems={problems}
               activeProblemId={activeProblemId}
@@ -282,7 +292,7 @@ const Coding = () => {
           </aside>
 
           {/* Main Content */}
-          <main className="space-y-6">
+          <main className='space-y-6'>
             <ProblemDetails problem={activeProblem} />
 
             <CodeEditor

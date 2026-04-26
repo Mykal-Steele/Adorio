@@ -1,6 +1,9 @@
 import API from './index';
 import { API_BASE_URL } from '../config/apiConfig';
-import { generateBrowserFingerprint, generateVisitorId } from '../utils/browserFingerprinting';
+import {
+  generateBrowserFingerprint,
+  generateVisitorId,
+} from '../utils/browserFingerprinting';
 import { withPerformanceTracking } from '../utils/frontendMonitoring';
 
 const STATS_BASE = `${API_BASE_URL}/stats`;

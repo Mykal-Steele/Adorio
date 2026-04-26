@@ -1,12 +1,12 @@
-import { Suspense } from 'react';
-import type { Metadata } from 'next';
-import SkeletonLoader from '@/Components/SkeletonLoader';
-import PostsLoader from './PostsLoader';
+import { Suspense } from 'react'
+import type { Metadata } from 'next'
+import SkeletonLoader from '@/Components/SkeletonLoader'
+import PostsLoader from './PostsLoader'
 
 export const metadata: Metadata = {
   title: 'Home',
   description: 'Recent posts from the Adorio community. Share thoughts, projects, and ideas.',
-};
+}
 
 export default function HomePage() {
   return (
@@ -21,5 +21,5 @@ export default function HomePage() {
         <PostsLoader />
       </Suspense>
     </div>
-  );
+  )
 }

@@ -7,7 +7,11 @@ interface UseInfiniteScrollOptions {
   onLoadMore: () => void;
 }
 
-const useInfiniteScroll = ({ loading, hasMore, onLoadMore }: UseInfiniteScrollOptions) => {
+const useInfiniteScroll = ({
+  loading,
+  hasMore,
+  onLoadMore,
+}: UseInfiniteScrollOptions) => {
   const observer = useRef<IntersectionObserver | null>(null);
 
   const lastPostRef = useCallback(
