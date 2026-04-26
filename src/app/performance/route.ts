@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs/promises';
+import { readFile } from 'fs/promises';
+import { createDecipheriv, createHash } from 'crypto';
 import path from 'path';
 
 function isAuthorized(authHeader: string | null, password: string): boolean {
@@ -26,12 +27,28 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const reportPath = path.join(process.cwd(), 'public', 'performance-report.html');
-    const html = await fs.readFile(reportPath, 'utf8');
+    const encPath = path.join(process.cwd(), 'public', 'performance-report.enc');
+    const payload = Buffer.from(await readFile(encPath, 'utf8'), 'base64');
+
+    const iv = payload.subarray(0, 12);
+    const authTag = payload.subarray(12, 28);
+    const ciphertext = payload.subarray(28);
+
+    const key = createHash('sha256').update(password).digest();
+    const decipher = createDecipheriv('aes-256-gcm', key, iv);
+    decipher.setAuthTag(authTag);
+
+    const html = Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('utf8');
+
     return new NextResponse(html, {
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
   } catch {
-    return new NextResponse('No report available yet. Run the audit first.', { status: 404 });
+    return new NextResponse(
+      'No report available yet. Run: npm run audit && npm run encrypt-report',
+      {
+        status: 404,
+      },
+    );
   }
 }
