@@ -7,10 +7,7 @@ const VISITOR_STORAGE_KEY = 'adorio:visitorId';
 const SESSION_STORAGE_KEY = 'adorio:sessionId';
 
 const createId = () => {
-  if (
-    typeof crypto !== 'undefined' &&
-    typeof crypto.randomUUID === 'function'
-  ) {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
   }
 
@@ -41,15 +38,13 @@ const usePageTracking = () => {
   const searchParams = useSearchParams();
   const user = useAppSelector((state) => state.user.user);
   const userId = user?._id || null;
-  const isAutomatedBrowser =
-    typeof navigator !== 'undefined' && navigator.webdriver === true;
+  const isAutomatedBrowser = typeof navigator !== 'undefined' && navigator.webdriver === true;
 
   const visitorIdRef = useRef(null);
   const sessionIdRef = useRef(null);
   const navigationRef = useRef({
     path: null,
-    startedAt:
-      typeof performance !== 'undefined' ? performance.now() : Date.now(),
+    startedAt: typeof performance !== 'undefined' ? performance.now() : Date.now(),
   });
 
   useEffect(() => {
@@ -79,8 +74,7 @@ const usePageTracking = () => {
 
     const search = searchParams.toString() ? `?${searchParams.toString()}` : '';
     const fullPath = `${pathname}${search}` || '/';
-    const nowPerformance =
-      typeof performance !== 'undefined' ? performance.now() : Date.now();
+    const nowPerformance = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const previous = navigationRef.current;
 
     // Skip if this is the same path to avoid duplicate tracking
@@ -106,14 +100,10 @@ const usePageTracking = () => {
       path: fullPath,
       fullUrl: window.location.href,
       referrer:
-        typeof document !== 'undefined' && document.referrer
-          ? document.referrer
-          : undefined,
+        typeof document !== 'undefined' && document.referrer ? document.referrer : undefined,
       durationMs,
       locale:
-        typeof navigator !== 'undefined' && navigator.language
-          ? navigator.language
-          : undefined,
+        typeof navigator !== 'undefined' && navigator.language ? navigator.language : undefined,
       timezoneOffset: new Date().getTimezoneOffset(),
       metadata: {
         viewport: {
@@ -148,8 +138,7 @@ const usePageTracking = () => {
     }
 
     const handleBeforeUnload = () => {
-      const nowPerformance =
-        typeof performance !== 'undefined' ? performance.now() : Date.now();
+      const nowPerformance = typeof performance !== 'undefined' ? performance.now() : Date.now();
       const { path, startedAt } = navigationRef.current || {};
 
       if (!path) {
@@ -160,14 +149,10 @@ const usePageTracking = () => {
         path,
         fullUrl: window.location.href,
         referrer:
-          typeof document !== 'undefined' && document.referrer
-            ? document.referrer
-            : undefined,
+          typeof document !== 'undefined' && document.referrer ? document.referrer : undefined,
         durationMs: Math.max(0, nowPerformance - (startedAt ?? nowPerformance)),
         locale:
-          typeof navigator !== 'undefined' && navigator.language
-            ? navigator.language
-            : undefined,
+          typeof navigator !== 'undefined' && navigator.language ? navigator.language : undefined,
         timezoneOffset: new Date().getTimezoneOffset(),
         metadata: {
           event: 'unload',

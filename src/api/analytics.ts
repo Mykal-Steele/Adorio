@@ -1,9 +1,6 @@
 import API from './index';
 import { API_BASE_URL } from '../config/apiConfig';
-import {
-  generateBrowserFingerprint,
-  generateVisitorId,
-} from '../utils/browserFingerprinting';
+import { generateBrowserFingerprint, generateVisitorId } from '../utils/browserFingerprinting';
 import { withPerformanceTracking } from '../utils/frontendMonitoring';
 
 const STATS_BASE = `${API_BASE_URL}/stats`;
@@ -71,15 +68,15 @@ const trackPageView = withPerformanceTracking(
                 fingerprint: null,
                 storageCapabilities: null,
               }),
-            1500
-          )
+            1500,
+          ),
         ), // 1.5 second timeout
       ]);
 
-      const [fingerprint, visitorData] = await Promise.all([
+      const [fingerprint, visitorData] = (await Promise.all([
         fingerprintPromise,
         visitorPromise,
-      ]) as [unknown, { persistentId: string; sessionId: string }];
+      ])) as [unknown, { persistentId: string; sessionId: string }];
 
       const body = JSON.stringify({
         path,
@@ -124,7 +121,7 @@ const trackPageView = withPerformanceTracking(
         console.error('Analytics tracking completely failed:', mainError);
       }
     }
-  }
+  },
 );
 
 const fetchPageViewSummary = async (params = {}) => {

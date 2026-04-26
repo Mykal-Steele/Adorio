@@ -1,7 +1,7 @@
-import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import moment from "moment";
-import { ADMIN_AVATAR_URL, isUserAdmin } from "../../constants";
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import moment from 'moment';
+import { ADMIN_AVATAR_URL, isUserAdmin } from '../../constants';
 
 const CommentItem = ({ comment, isExpanded, onToggleExpand }) => {
   const MAX_COMMENT_LENGTH = 150;
@@ -17,27 +17,23 @@ const CommentItem = ({ comment, isExpanded, onToggleExpand }) => {
       <div className="flex items-start gap-3">
         <div className="w-7 h-7 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
           {isUserAdmin(comment.user?.username) ? (
-            <img
-              src={ADMIN_AVATAR_URL}
-              alt="Admin Avatar"
-              className="w-full h-full object-cover"
-            />
+            <img src={ADMIN_AVATAR_URL} alt="Admin Avatar" className="w-full h-full object-cover" />
           ) : (
             <span className="text-xs font-medium text-white">
-              {comment.user?.username?.charAt(0).toUpperCase() || "U"}
+              {comment.user?.username?.charAt(0).toUpperCase() || 'U'}
             </span>
           )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="space-y-2">
             <span className="text-sm font-medium text-gray-200 truncate">
-              {comment.user?.username || "Unknown"}
+              {comment.user?.username || 'Unknown'}
             </span>
             <AnimatePresence initial={false}>
               <motion.div
-                key={isExpanded ? "expanded" : "collapsed"}
+                key={isExpanded ? 'expanded' : 'collapsed'}
                 initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
+                animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden w-full"
@@ -55,7 +51,7 @@ const CommentItem = ({ comment, isExpanded, onToggleExpand }) => {
                 className="text-purple-400 hover:text-purple-300 text-sm font-medium mt-1 transition-colors"
                 type="button"
               >
-                {isExpanded ? "Show less" : "Show more"}
+                {isExpanded ? 'Show less' : 'Show more'}
               </button>
             )}
           </div>
