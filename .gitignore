@@ -34,3 +34,6 @@ Adorio/backend/.env
 # Next.js build output
 .next/
 out/
+
+# Audit reports (generated output — do not commit)
+reports/
