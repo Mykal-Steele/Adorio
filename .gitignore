@@ -37,3 +37,6 @@ out/
 
 # Audit reports (generated output — do not commit)
 reports/
+
+# Local audit password
+scripts/.env

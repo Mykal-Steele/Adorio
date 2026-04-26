@@ -32,6 +32,7 @@
     "nginx-logs": "sudo tail -f /var/log/nginx/error.log",
     "audit": "node scripts/audit.mjs",
     "audit:local": "node scripts/audit.mjs http://localhost:8080",
+    "encrypt-report": "node --env-file=scripts/.env scripts/encrypt-report.mjs",
     "prepare": "husky"
   },
   "dependencies": {
