@@ -45,3 +45,30 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+
+  integration:
+    name: Integration tests (prod)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Create .env.production
+        run: |
+          echo "NODE_ENV=production" >> .env.production
+          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env.production
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.production
+          echo "REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}" >> .env.production
+          echo "CLIENT_URL=${{ secrets.CLIENT_URL }}" >> .env.production
+          echo "CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}" >> .env.production
+          echo "CLOUDINARY_KEY=${{ secrets.CLOUDINARY_KEY }}" >> .env.production
+          echo "CLOUDINARY_SECRET=${{ secrets.CLOUDINARY_SECRET }}" >> .env.production
+          echo "CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }}" >> .env.production
+          echo "VITE_GEMINI_API_KEY=${{ secrets.VITE_GEMINI_API_KEY }}" >> .env.production
+      - name: Run integration tests
+        run: npm run test:prod

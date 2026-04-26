@@ -55,12 +55,12 @@ const authenticateUser = async ({ email, password }) => {
 
   const user = await User.findOne({ email: { $eq: email } });
   if (!user) {
-    throw ApiError.badRequest('user not found');
+    throw ApiError.unauthorized('invalid credentials');
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw ApiError.badRequest('invalid credentials');
+    throw ApiError.unauthorized('invalid credentials');
   }
 
   return { user, sanitizedUser: sanitizeUser(user) };

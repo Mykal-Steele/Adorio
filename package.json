@@ -63,6 +63,11 @@
     "socket.io-client": "^4.8.1",
     "unique-names-generator": "^4.7.1"
   },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "<rootDir>/.next/"
+    ]
+  },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
     "@types/node": "^22.0.0",
