@@ -99,3 +99,23 @@
 .custom-scrollbar::-webkit-scrollbar-corner {
   background: #261a15;
 }
+
+/* Layout: 3-column grid on desktop — left sidebar | main content | right sidebar */
+@media (min-width: 768px) {
+  .ts-bussing-layout {
+    height: 100vh;
+    overflow: hidden;
+  }
+  .ts-left-sidebar {
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .ts-right-sidebar {
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .ts-main-content {
+    height: 100vh;
+    overflow-y: auto;
+  }
+}
