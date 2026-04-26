@@ -4,8 +4,7 @@ import { Star, ArrowUpRight } from 'lucide-react';
 
 const cardsData = [
   {
-    image:
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop',
     title: 'Abstract Waves',
     subtitle: '3D Render',
     rating: 4.9,
@@ -13,16 +12,14 @@ const cardsData = [
     badge: 'New',
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1633511090164-b43840ea1607?q=80&w=1000&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1633511090164-b43840ea1607?q=80&w=1000&auto=format&fit=crop',
     title: 'Neon Flux',
     subtitle: 'Digital Art',
     rating: 4.8,
     price: '$180',
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1614850523060-8da1d56ae167?q=80&w=1000&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1614850523060-8da1d56ae167?q=80&w=1000&auto=format&fit=crop',
     title: 'Cyber Prism',
     subtitle: 'Illustration',
     rating: 5.0,
@@ -31,16 +28,14 @@ const cardsData = [
     badgeColor: 'bg-indigo-600',
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1633511090164-b43840ea1607?q=80&w=1000&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1633511090164-b43840ea1607?q=80&w=1000&auto=format&fit=crop',
     title: 'Void Walker',
     subtitle: 'Photography',
     rating: 4.7,
     price: '$150',
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1618172193763-c511deb635ca?q=80&w=1000&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1618172193763-c511deb635ca?q=80&w=1000&auto=format&fit=crop',
     title: 'Solar Flare',
     subtitle: 'Abstract',
     rating: 4.6,
@@ -52,13 +47,13 @@ const tripleCards = [...cardsData, ...cardsData, ...cardsData];
 
 function CarouselCard({ card }) {
   return (
-    <div className="carousel-card shrink-0 w-[280px] group">
-      <div className="bg-white rounded-xl p-2 shadow-sm border border-gray-100 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-gray-100">
+    <div className='carousel-card shrink-0 w-[280px] group'>
+      <div className='bg-white rounded-xl p-2 shadow-sm border border-gray-100 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg'>
+        <div className='relative aspect-[4/3] overflow-hidden rounded-lg bg-gray-100'>
           <img
             src={card.image}
             alt={card.title}
-            className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
+            className='object-cover w-full h-full transition-transform duration-700 group-hover:scale-110'
           />
           {card.badge && (
             <div
@@ -72,21 +67,21 @@ function CarouselCard({ card }) {
             </div>
           )}
         </div>
-        <div className="p-3">
-          <div className="flex justify-between items-start mb-1">
+        <div className='p-3'>
+          <div className='flex justify-between items-start mb-1'>
             <div>
-              <h3 className="text-base font-bold text-gray-900">{card.title}</h3>
-              <p className="text-gray-500 text-xs">{card.subtitle}</p>
+              <h3 className='text-base font-bold text-gray-900'>{card.title}</h3>
+              <p className='text-gray-500 text-xs'>{card.subtitle}</p>
             </div>
-            <div className="flex items-center gap-0.5 text-amber-500">
-              <Star className="w-3 h-3 fill-current" />
-              <span className="text-xs font-medium text-gray-700">{card.rating}</span>
+            <div className='flex items-center gap-0.5 text-amber-500'>
+              <Star className='w-3 h-3 fill-current' />
+              <span className='text-xs font-medium text-gray-700'>{card.rating}</span>
             </div>
           </div>
-          <div className="mt-2 flex items-center justify-between">
-            <span className="text-lg font-bold text-gray-900">{card.price}</span>
-            <button className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-900 hover:bg-indigo-600 hover:text-white transition-colors">
-              <ArrowUpRight className="w-4 h-4" />
+          <div className='mt-2 flex items-center justify-between'>
+            <span className='text-lg font-bold text-gray-900'>{card.price}</span>
+            <button className='w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-900 hover:bg-indigo-600 hover:text-white transition-colors'>
+              <ArrowUpRight className='w-4 h-4' />
             </button>
           </div>
         </div>
@@ -164,10 +159,7 @@ export default function RetroTV({ style = 'beige' }: { style?: string }) {
 
     autoScroll();
 
-    const handleMouseEnter = () => {
-      isHovering = true;
-      track.style.cursor = 'grab';
-    };
+    const handleMouseEnter = () => { isHovering = true; track.style.cursor = 'grab'; };
     const handleMouseLeave = () => {
       isHovering = false;
       isDragging = false;
@@ -245,78 +237,48 @@ export default function RetroTV({ style = 'beige' }: { style?: string }) {
   }, [useInfiniteScroll]);
 
   return (
-    <div className="p-3">
-      <div
-        className={`bg-gradient-to-b ${tvStyles[style]} rounded-lg shadow-lg border border-gray-300`}
-      >
+    <div className='p-3'>
+      <div className={`bg-gradient-to-b ${tvStyles[style]} rounded-lg shadow-lg border border-gray-300`}>
         {/* Top vents */}
-        <div className="flex justify-center gap-1 pt-2 pb-1">
+        <div className='flex justify-center gap-1 pt-2 pb-1'>
           {[...Array(12)].map((_, i) => (
-            <div key={i} className="w-4 h-0.5 bg-gray-400/50 rounded-full" />
+            <div key={i} className='w-4 h-0.5 bg-gray-400/50 rounded-full' />
           ))}
         </div>
 
         {/* Screen area */}
-        <div className="mx-3 mb-3">
-          <div className="bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 p-2 rounded-lg">
+        <div className='mx-3 mb-3'>
+          <div className='bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 p-2 rounded-lg'>
             <div
-              className="relative bg-gradient-to-br from-gray-200 via-white to-gray-100 rounded overflow-hidden"
-              style={{
-                boxShadow: 'inset 0 0 20px rgba(0,0,0,0.3), inset 0 0 60px rgba(0,0,0,0.1)',
-              }}
+              className='relative bg-gradient-to-br from-gray-200 via-white to-gray-100 rounded overflow-hidden'
+              style={{ boxShadow: 'inset 0 0 20px rgba(0,0,0,0.3), inset 0 0 60px rgba(0,0,0,0.1)' }}
             >
               {/* Scanlines overlay */}
               <div
-                className="absolute inset-0 z-30 pointer-events-none opacity-[0.03]"
-                style={{
-                  backgroundImage:
-                    'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.5) 2px, rgba(0,0,0,0.5) 4px)',
-                }}
+                className='absolute inset-0 z-30 pointer-events-none opacity-[0.03]'
+                style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.5) 2px, rgba(0,0,0,0.5) 4px)' }}
               />
               {/* Screen glare */}
               <div
-                className="absolute inset-0 z-20 pointer-events-none opacity-20"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 40%, transparent 100%)',
-                }}
+                className='absolute inset-0 z-20 pointer-events-none opacity-20'
+                style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 40%, transparent 100%)' }}
               />
               {/* Fade Gradients */}
               {useInfiniteScroll && (
                 <>
-                  <div
-                    className="absolute top-0 bottom-0 left-0 w-12 z-10 pointer-events-none"
-                    style={{
-                      background:
-                        'linear-gradient(to right, rgb(255 255 255) 0%, transparent 100%)',
-                    }}
-                  />
-                  <div
-                    className="absolute top-0 bottom-0 right-0 w-12 z-10 pointer-events-none"
-                    style={{
-                      background: 'linear-gradient(to left, rgb(255 255 255) 0%, transparent 100%)',
-                    }}
-                  />
+                  <div className='absolute top-0 bottom-0 left-0 w-12 z-10 pointer-events-none' style={{ background: 'linear-gradient(to right, rgb(255 255 255) 0%, transparent 100%)' }} />
+                  <div className='absolute top-0 bottom-0 right-0 w-12 z-10 pointer-events-none' style={{ background: 'linear-gradient(to left, rgb(255 255 255) 0%, transparent 100%)' }} />
                 </>
               )}
 
               {/* Carousel Content */}
               <div
                 ref={trackRef}
-                className="overflow-x-auto"
-                style={{
-                  scrollBehavior: 'auto',
-                  msOverflowStyle: 'none',
-                  scrollbarWidth: 'none',
-                  opacity: isReady ? 1 : 0,
-                }}
+                className='overflow-x-auto'
+                style={{ scrollBehavior: 'auto', msOverflowStyle: 'none', scrollbarWidth: 'none', opacity: isReady ? 1 : 0 }}
               >
                 <style>{`.overflow-x-auto::-webkit-scrollbar { display: none; }`}</style>
-                <div
-                  ref={carouselRef}
-                  className="flex gap-6 py-5 pl-3 items-center"
-                  style={{ width: 'max-content' }}
-                >
+                <div ref={carouselRef} className='flex gap-6 py-5 pl-3 items-center' style={{ width: 'max-content' }}>
                   {displayCards.map((card, index) => (
                     <CarouselCard key={index} card={card} />
                   ))}
@@ -327,20 +289,20 @@ export default function RetroTV({ style = 'beige' }: { style?: string }) {
         </div>
 
         {/* Control panel */}
-        <div className="flex items-center justify-between px-4 pb-3">
-          <span className="text-xs font-bold text-gray-600 tracking-wider">ADORIO</span>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-b from-gray-600 to-gray-800 border-2 border-gray-500 shadow-inner">
-              <div className="w-full h-full rounded-full flex items-center justify-center">
-                <div className="w-1 h-2 bg-gray-400 rounded-full" />
+        <div className='flex items-center justify-between px-4 pb-3'>
+          <span className='text-xs font-bold text-gray-600 tracking-wider'>ADORIO</span>
+          <div className='flex items-center gap-2'>
+            <div className='w-6 h-6 rounded-full bg-gradient-to-b from-gray-600 to-gray-800 border-2 border-gray-500 shadow-inner'>
+              <div className='w-full h-full rounded-full flex items-center justify-center'>
+                <div className='w-1 h-2 bg-gray-400 rounded-full' />
               </div>
             </div>
-            <div className="w-6 h-6 rounded-full bg-gradient-to-b from-gray-600 to-gray-800 border-2 border-gray-500 shadow-inner">
-              <div className="w-full h-full rounded-full flex items-center justify-center">
-                <div className="w-1 h-2 bg-gray-400 rounded-full rotate-45" />
+            <div className='w-6 h-6 rounded-full bg-gradient-to-b from-gray-600 to-gray-800 border-2 border-gray-500 shadow-inner'>
+              <div className='w-full h-full rounded-full flex items-center justify-center'>
+                <div className='w-1 h-2 bg-gray-400 rounded-full rotate-45' />
               </div>
             </div>
-            <div className="w-4 h-4 rounded-sm bg-gradient-to-b from-gray-700 to-gray-900 border border-gray-600" />
+            <div className='w-4 h-4 rounded-sm bg-gradient-to-b from-gray-700 to-gray-900 border border-gray-600' />
           </div>
         </div>
       </div>

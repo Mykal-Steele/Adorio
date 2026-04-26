@@ -37,7 +37,9 @@ const Register = () => {
     } catch (err) {
       console.error('Error during registration:', err);
       if (err.response) {
-        setError(err.response.data.message || 'Registration failed: Unknown error');
+        setError(
+          err.response.data.message || 'Registration failed: Unknown error',
+        );
       } else {
         setError('Registration failed: No response from server');
       }
@@ -60,7 +62,9 @@ const Register = () => {
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Username</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Username
+            </label>
             <input
               type="text"
               placeholder="Enter your username"
@@ -72,7 +76,9 @@ const Register = () => {
           </div>
 
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Email
+            </label>
             <input
               type="email"
               placeholder="Enter your email"
@@ -84,7 +90,9 @@ const Register = () => {
           </div>
 
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Password
+            </label>
             <input
               type="password"
               placeholder="Enter your password"

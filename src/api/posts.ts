@@ -65,7 +65,7 @@ export const likePost = async (postId, shouldBeLiked) => {
         logger.info(
           `Sending FINAL like state for post ${postId}: ${
             finalIntent.shouldBeLiked ? 'LIKED' : 'UNLIKED'
-          }`,
+          }`
         );
       }
 
@@ -76,7 +76,10 @@ export const likePost = async (postId, shouldBeLiked) => {
       delete likeIntents[postId];
       return response.data;
     } catch (error) {
-      throw handleApiError(error, `failed to ${shouldBeLiked ? 'like' : 'unlike'} post`);
+      throw handleApiError(
+        error,
+        `failed to ${shouldBeLiked ? 'like' : 'unlike'} post`
+      );
     } finally {
       delete pendingRequests[postId];
     }
