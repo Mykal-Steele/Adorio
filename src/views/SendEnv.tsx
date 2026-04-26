@@ -80,8 +80,12 @@ const SendEnv = () => {
         {success ? (
           <div className="space-y-4">
             <div className="p-4 bg-green-900/20 border border-green-500/20 rounded-lg">
-              <p className="text-green-400 mb-2">Your secret has been stored successfully!</p>
-              <p className="text-gray-400 text-sm">Use this command to retrieve your secret:</p>
+              <p className="text-green-400 mb-2">
+                Your secret has been stored successfully!
+              </p>
+              <p className="text-gray-400 text-sm">
+                Use this command to retrieve your secret:
+              </p>
             </div>
 
             <div className="relative">
@@ -97,7 +101,9 @@ const SendEnv = () => {
               </button>
             </div>
 
-            {copied && <p className="text-green-400 text-sm">Copied to clipboard!</p>}
+            {copied && (
+              <p className="text-green-400 text-sm">Copied to clipboard!</p>
+            )}
 
             <button
               onClick={() => {
@@ -113,7 +119,9 @@ const SendEnv = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Secret Message Input */}
             <div className="text-left">
-              <label className="block text-sm font-medium text-gray-300 mb-1">Secret Message</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Secret Message
+              </label>
               <textarea
                 placeholder="Enter your secret message"
                 value={message}
@@ -125,7 +133,9 @@ const SendEnv = () => {
 
             {/* Password Input */}
             <div className="text-left">
-              <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Password
+              </label>
               <div className="space-y-1">
                 <input
                   type="password"
@@ -136,8 +146,8 @@ const SendEnv = () => {
                   required
                 />
                 <p className="text-xs text-gray-500">
-                  <span className="text-amber-400">Note:</span> Your username will be automatically
-                  added to this password for encryption.
+                  <span className="text-amber-400">Note:</span> Your username
+                  will be automatically added to this password for encryption.
                 </p>
               </div>
             </div>

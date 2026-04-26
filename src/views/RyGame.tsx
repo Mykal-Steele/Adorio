@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   SparklesIcon,
   MusicalNoteIcon,
@@ -11,19 +11,20 @@ import {
   ChartBarIcon,
   ArrowTrendingUpIcon,
   UserGroupIcon,
-} from '@heroicons/react/24/outline';
-import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
-import { fetchLeaderboard, updateScore, fetchUserGameStats } from '../api/gameApi';
+} from "@heroicons/react/24/outline";
+import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import {
+  fetchLeaderboard,
+  updateScore,
+  fetchUserGameStats,
+} from "../api/gameApi";
 
 // Stateless game primitives — module-level so React doesn't recreate them every render.
 const DOT_RADIUS = 11;
 
 class Color {
-  r: number;
-  g: number;
-  b: number;
-  a: number;
+  r: number; g: number; b: number; a: number;
   constructor(r: number, g: number, b: number, a = 1) {
     this.r = r;
     this.g = g;
@@ -36,8 +37,7 @@ class Color {
 }
 
 class Pos {
-  x: number;
-  y: number;
+  x: number; y: number;
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
@@ -45,12 +45,7 @@ class Pos {
 }
 
 class HitEffect {
-  x: number;
-  y: number;
-  color: Color;
-  startTime: number;
-  duration: number;
-  maxSize: number;
+  x: number; y: number; color: Color; startTime: number; duration: number; maxSize: number;
   constructor(x: number, y: number, color: Color) {
     this.x = x;
     this.y = y;
@@ -140,7 +135,7 @@ const RyGame = () => {
   const audioRef = useRef(null);
   const gameLoopRef = useRef(null);
   const [audioHasLoaded, setAudioHasLoaded] = useState(false);
-  const [message, setMessage] = useState('Loading...');
+  const [message, setMessage] = useState("Loading...");
   const [gameIsActive, setGameIsActive] = useState(false);
   const [pLevel, setPLevel] = useState(0);
   const [highPLevel, setHighPLevel] = useState(0);
@@ -153,9 +148,9 @@ const RyGame = () => {
     reach50PLevel: false,
   });
   const [showAchievement, setShowAchievement] = useState(null);
-  const [difficulty, setDifficulty] = useState('normal');
+  const [difficulty, setDifficulty] = useState("normal");
   const [hitEffects, setHitEffects] = useState([]);
-  const [gameOverMessage, setGameOverMessage] = useState('');
+  const [gameOverMessage, setGameOverMessage] = useState("");
   const [showGameOverScreen, setShowGameOverScreen] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
@@ -173,7 +168,9 @@ const RyGame = () => {
     destinationMaximumRadius: 20,
     pulsationAmplitude: 3,
     rockingAmplitude: 0.15,
-    destinationKeyCodeSet: [81, 87, 69, 82, 85, 73, 79, 80, 65, 83, 68, 70, 74, 75, 76, 186],
+    destinationKeyCodeSet: [
+      81, 87, 69, 82, 85, 73, 79, 80, 65, 83, 68, 70, 74, 75, 76, 186,
+    ],
     hitEffects: [],
     debugMode: false,
     context: null,
@@ -200,11 +197,7 @@ const RyGame = () => {
   }).current;
 
   class Dot {
-    lineIndex: number;
-    linePosY: number;
-    createdAt: number;
-    isHit: boolean;
-    hitTime: number;
+    lineIndex: number; linePosY: number; createdAt: number; isHit: boolean; hitTime: number;
     constructor(lineIndex: number) {
       this.lineIndex = lineIndex;
       this.linePosY = 0;
@@ -231,7 +224,9 @@ const RyGame = () => {
       let tempOffset;
       if (this.lineIndex >= game.numberOfColumns) {
         tempOffset =
-          (this.lineIndex - game.numberOfColumns) * (game.lineHeight + 1) * 2 + game.lineHeight + 1;
+          (this.lineIndex - game.numberOfColumns) * (game.lineHeight + 1) * 2 +
+          game.lineHeight +
+          1;
       } else {
         tempOffset = this.lineIndex * (game.lineHeight + 1) * 2;
       }
@@ -255,7 +250,7 @@ const RyGame = () => {
 
       // white outline for better contrast
       game.context.save();
-      game.context.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      game.context.strokeStyle = "rgba(255, 255, 255, 0.7)";
       game.context.lineWidth = 1;
       drawCircleOutline(tempPos, game.dotRadius + 1);
       game.context.restore();
@@ -289,7 +284,9 @@ const RyGame = () => {
       let tempOffset;
       if (this.lineIndex >= game.numberOfColumns) {
         tempOffset =
-          (this.lineIndex - game.numberOfColumns) * (game.lineHeight + 1) * 2 + game.lineHeight + 1;
+          (this.lineIndex - game.numberOfColumns) * (game.lineHeight + 1) * 2 +
+          game.lineHeight +
+          1;
       } else {
         tempOffset = this.lineIndex * (game.lineHeight + 1) * 2;
       }
@@ -315,7 +312,8 @@ const RyGame = () => {
       }
     } else {
       if (game.hasStartedRainbow) {
-        const index = (column + game.rainbowColorIndexOffset) % (game.numberOfColumns / 2);
+        const index =
+          (column + game.rainbowColorIndexOffset) % (game.numberOfColumns / 2);
         tempColor = colors.rainbowRightColorSet[index];
       } else {
         tempColor = colors.defaultRightColor;
@@ -342,13 +340,18 @@ const RyGame = () => {
     while (tempColumn < game.numberOfColumns) {
       let tempPosX1;
       if (tempColumn < game.numberOfColumns / 2) {
-        tempPosX1 = (tempColumn + 0.5) * (game.canvasWidth / (game.numberOfColumns + 0.5));
+        tempPosX1 =
+          (tempColumn + 0.5) *
+          (game.canvasWidth / (game.numberOfColumns + 0.5));
       } else {
-        tempPosX1 = (tempColumn + 1.0) * (game.canvasWidth / (game.numberOfColumns + 0.5));
+        tempPosX1 =
+          (tempColumn + 1.0) *
+          (game.canvasWidth / (game.numberOfColumns + 0.5));
       }
 
       const tempPosX2 =
-        (tempPosX1 - game.canvasWidth / 2) / (game.lineTaper - game.rockingOffset) +
+        (tempPosX1 - game.canvasWidth / 2) /
+          (game.lineTaper - game.rockingOffset) +
         game.canvasWidth / 2;
 
       // Draw upper lines
@@ -356,7 +359,9 @@ const RyGame = () => {
       while (tempLinePosY <= game.lineHeight) {
         const tempPos = game.linePosList[index];
         index += 1;
-        tempPos.x = ((tempPosX2 - tempPosX1) * tempLinePosY) / game.lineHeight + tempPosX1;
+        tempPos.x =
+          ((tempPosX2 - tempPosX1) * tempLinePosY) / game.lineHeight +
+          tempPosX1;
         tempPos.y = ((1 + tempLinePosY) * game.canvasHeight) / totalLineHeight;
         tempLinePosY += 1;
       }
@@ -366,9 +371,12 @@ const RyGame = () => {
       while (tempLinePosY <= game.lineHeight) {
         const tempPos = game.linePosList[index];
         index += 1;
-        tempPos.x = ((tempPosX2 - tempPosX1) * tempLinePosY) / game.lineHeight + tempPosX1;
+        tempPos.x =
+          ((tempPosX2 - tempPosX1) * tempLinePosY) / game.lineHeight +
+          tempPosX1;
         tempPos.y =
-          ((2 + 2 * game.lineHeight - tempLinePosY) * game.canvasHeight) / totalLineHeight;
+          ((2 + 2 * game.lineHeight - tempLinePosY) * game.canvasHeight) /
+          totalLineHeight;
         tempLinePosY += 1;
       }
       tempColumn += 1;
@@ -387,7 +395,7 @@ const RyGame = () => {
     game.context.shadowOffsetX = 2;
     game.context.shadowOffsetY = 2;
     game.context.shadowBlur = 3;
-    game.context.shadowColor = 'rgba(0, 0, 0, 0.7)';
+    game.context.shadowColor = "rgba(0, 0, 0, 0.7)";
     game.context.fillText(text, pos.x, pos.y);
     game.context.restore();
   };
@@ -411,7 +419,9 @@ const RyGame = () => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps -- thin synchronous lookup over the stable `game` ref.
   const getDot = (lineIndex, linePosY) => {
-    return game.dotList.find((dot) => dot.lineIndex === lineIndex && dot.linePosY === linePosY);
+    return game.dotList.find(
+      (dot) => dot.lineIndex === lineIndex && dot.linePosY === linePosY
+    );
   };
 
   const drawAllDots = () => {
@@ -464,8 +474,13 @@ const RyGame = () => {
   const createDot = () => {
     for (let i = 0; i < 100; i++) {
       const tempColumn = Math.floor(Math.random() * game.numberOfColumns);
-      if (!getDot(tempColumn, 0) && !getDot(tempColumn + game.numberOfColumns, 0)) {
-        new Dot(tempColumn + Math.floor(Math.random() * 2) * game.numberOfColumns);
+      if (
+        !getDot(tempColumn, 0) &&
+        !getDot(tempColumn + game.numberOfColumns, 0)
+      ) {
+        new Dot(
+          tempColumn + Math.floor(Math.random() * 2) * game.numberOfColumns
+        );
         return;
       }
     }
@@ -477,16 +492,20 @@ const RyGame = () => {
 
     // Adjust dot creation rate based on difficulty
     let difficultyMultiplier = 1;
-    if (difficulty === 'easy') difficultyMultiplier = 0.7;
-    if (difficulty === 'hard') difficultyMultiplier = 1.3;
+    if (difficulty === "easy") difficultyMultiplier = 0.7;
+    if (difficulty === "hard") difficultyMultiplier = 1.3;
 
     if (game.audioCurrentTime < game.songDuration - 3) {
       if (game.numberOfAdvancesUntilRest < 0) {
         tempCount = 0;
-        game.numberOfAdvancesUntilRest = 2 + Math.floor(Math.random() * (4 + 8 * tempProgress));
+        game.numberOfAdvancesUntilRest =
+          2 + Math.floor(Math.random() * (4 + 8 * tempProgress));
       } else {
         tempCount =
-          1 + Math.floor(Math.random() * (0.7 + 2.3 * tempProgress) * difficultyMultiplier);
+          1 +
+          Math.floor(
+            Math.random() * (0.7 + 2.3 * tempProgress) * difficultyMultiplier
+          );
       }
     } else {
       tempCount = 0;
@@ -500,21 +519,21 @@ const RyGame = () => {
 
   // Load high P-Level from local storage
   useEffect(() => {
-    const savedHighPLevel = localStorage.getItem('rhythmDotsHighPLevel');
+    const savedHighPLevel = localStorage.getItem("rhythmDotsHighPLevel");
     if (savedHighPLevel) {
       setHighPLevel(parseInt(savedHighPLevel));
     }
 
-    const savedAchievements = localStorage.getItem('rhythmDotsAchievements');
+    const savedAchievements = localStorage.getItem("rhythmDotsAchievements");
     if (savedAchievements) {
       setAchievements(JSON.parse(savedAchievements));
     }
 
     // Check if this is the first visit to show tutorial
-    const firstVisit = localStorage.getItem('rhythmDotsFirstVisit');
+    const firstVisit = localStorage.getItem("rhythmDotsFirstVisit");
     if (!firstVisit) {
       setShowTutorial(true);
-      localStorage.setItem('rhythmDotsFirstVisit', 'false');
+      localStorage.setItem("rhythmDotsFirstVisit", "false");
     }
   }, []);
 
@@ -525,7 +544,7 @@ const RyGame = () => {
       const data = await fetchLeaderboard();
       setLeaderboard(data || []);
     } catch (error) {
-      console.error('Error fetching leaderboard:', error);
+      console.error("Error fetching leaderboard:", error);
       setLeaderboard([]);
     } finally {
       setIsLoadingLeaderboard(false);
@@ -564,17 +583,17 @@ const RyGame = () => {
         // Always update the leaderboard after a score update
         fetchLeaderboardData();
       } catch (error) {
-        console.error('Failed to update score:', error);
+        console.error("Failed to update score:", error);
       }
     },
-    [fetchLeaderboardData],
+    [fetchLeaderboardData]
   );
 
   // Check for and save high P-Level
   const checkHighPLevel = useCallback(() => {
     if (maxPLevel > highPLevel) {
       setHighPLevel(maxPLevel);
-      localStorage.setItem('rhythmDotsHighPLevel', maxPLevel.toString());
+      localStorage.setItem("rhythmDotsHighPLevel", maxPLevel.toString());
 
       // Update server with new high score if logged in
       if (currentUser) {
@@ -595,8 +614,8 @@ const RyGame = () => {
     if (!newAchievements.firstPlay) {
       newAchievements.firstPlay = true;
       achievementUnlocked = {
-        name: 'First Play',
-        description: 'Started your rhythm journey',
+        name: "First Play",
+        description: "Started your rhythm journey",
         icon: <SparklesIcon className="h-6 w-6 text-yellow-300" />,
       };
     }
@@ -605,8 +624,8 @@ const RyGame = () => {
     if (!newAchievements.reach10PLevel && pLevel >= 10) {
       newAchievements.reach10PLevel = true;
       achievementUnlocked = {
-        name: 'Beginner',
-        description: 'Reached P-Level 10',
+        name: "Beginner",
+        description: "Reached P-Level 10",
         icon: <CheckBadgeIcon className="h-6 w-6 text-blue-400" />,
       };
     }
@@ -614,8 +633,8 @@ const RyGame = () => {
     if (!newAchievements.reach25PLevel && pLevel >= 25) {
       newAchievements.reach25PLevel = true;
       achievementUnlocked = {
-        name: 'Getting Good',
-        description: 'Reached P-Level 25',
+        name: "Getting Good",
+        description: "Reached P-Level 25",
         icon: <TrophyIcon className="h-6 w-6 text-purple-400" />,
       };
     }
@@ -623,15 +642,18 @@ const RyGame = () => {
     if (!newAchievements.reach50PLevel && pLevel >= 50) {
       newAchievements.reach50PLevel = true;
       achievementUnlocked = {
-        name: 'Rhythm Master',
-        description: 'Reached P-Level 50!',
+        name: "Rhythm Master",
+        description: "Reached P-Level 50!",
         icon: <FireIcon className="h-6 w-6 text-amber-500" />,
       };
     }
 
     if (achievementUnlocked) {
       setAchievements(newAchievements);
-      localStorage.setItem('rhythmDotsAchievements', JSON.stringify(newAchievements));
+      localStorage.setItem(
+        "rhythmDotsAchievements",
+        JSON.stringify(newAchievements)
+      );
       setShowAchievement(achievementUnlocked);
 
       // Hide achievement notification after 3 seconds
@@ -643,13 +665,18 @@ const RyGame = () => {
 
   // Generate quests based on player skill level
   const generateSkillBasedQuests = useCallback(() => {
-    const baseQuests = [{ goal: 5, description: 'Reach P-Level 5', completed: false }];
+    const baseQuests = [
+      { goal: 5, description: "Reach P-Level 5", completed: false },
+    ];
 
     // For better players, generate more challenging quests
     if (highPLevel > 10) {
       const advancedQuest = {
         goal: Math.min(Math.max(Math.floor(highPLevel * 0.7), 8), 25),
-        description: `Reach P-Level ${Math.min(Math.max(Math.floor(highPLevel * 0.7), 8), 25)}`,
+        description: `Reach P-Level ${Math.min(
+          Math.max(Math.floor(highPLevel * 0.7), 8),
+          25
+        )}`,
         completed: false,
       };
       baseQuests.push(advancedQuest);
@@ -658,7 +685,10 @@ const RyGame = () => {
     if (highPLevel > 20) {
       const expertQuest = {
         goal: Math.min(Math.max(Math.floor(highPLevel * 0.9), 15), 40),
-        description: `Reach P-Level ${Math.min(Math.max(Math.floor(highPLevel * 0.9), 15), 40)}`,
+        description: `Reach P-Level ${Math.min(
+          Math.max(Math.floor(highPLevel * 0.9), 15),
+          40
+        )}`,
         completed: false,
       };
       baseQuests.push(expertQuest);
@@ -672,18 +702,21 @@ const RyGame = () => {
     if (audioRef.current && game.audioHasLoaded) {
       audioRef.current.play();
       setGameIsActive(true);
-      setMessage(''); // Empty message instead of showing P-Level
+      setMessage(""); // Empty message instead of showing P-Level
       setShowGameOverScreen(false);
 
       // Trigger first play achievement if it's the player's first time
       if (!achievements.firstPlay) {
         const newAchievements = { ...achievements, firstPlay: true };
         setAchievements(newAchievements);
-        localStorage.setItem('rhythmDotsAchievements', JSON.stringify(newAchievements));
+        localStorage.setItem(
+          "rhythmDotsAchievements",
+          JSON.stringify(newAchievements)
+        );
 
         setShowAchievement({
-          name: 'First Play',
-          description: 'Started your rhythm journey',
+          name: "First Play",
+          description: "Started your rhythm journey",
           icon: <SparklesIcon className="h-6 w-6 text-yellow-300" />,
         });
 
@@ -745,7 +778,7 @@ const RyGame = () => {
 
       if (keyCode === 27) {
         // Escape
-        setMessage('Press space to play!');
+        setMessage("Press space to play!");
         stopGame();
         resetGameAndAudio();
         setShowGameOverScreen(false);
@@ -768,7 +801,9 @@ const RyGame = () => {
           const tempDot = getDot(keyIndex, game.lineHeight);
           if (!tempDot) {
             if (!game.debugMode) {
-              setGameOverMessage(`You pressed the wrong key! Final P-Level: ${pLevel}`);
+              setGameOverMessage(
+                `You pressed the wrong key! Final P-Level: ${pLevel}`
+              );
               setPLevel(0);
               setShowGameOverScreen(true);
               stopGame();
@@ -779,7 +814,9 @@ const RyGame = () => {
             const dotPos = tempDot.getPosition();
 
             // Create hit effect
-            const colorIndex = Math.floor(Math.random() * colors.hitEffects.length);
+            const colorIndex = Math.floor(
+              Math.random() * colors.hitEffects.length
+            );
             createHitEffect(dotPos, colorIndex);
 
             // Mark dot as hit but don't remove it yet - let it fade out
@@ -820,7 +857,7 @@ const RyGame = () => {
       checkAchievements,
       createHitEffect,
       getDot,
-    ],
+    ]
   );
 
   const gameLoop = useCallback(() => {
@@ -872,7 +909,8 @@ const RyGame = () => {
       // visual effects
       let tempOffset;
       if (game.hasStartedPulsating) {
-        const tempNumber = 1 - Math.sin(((tempTime / (game.tempo / 4)) % 1) * Math.PI);
+        const tempNumber =
+          1 - Math.sin(((tempTime / (game.tempo / 4)) % 1) * Math.PI);
         tempOffset = game.pulsationAmplitude * (1 - tempNumber * tempNumber);
       } else {
         tempOffset = game.pulsationAmplitude;
@@ -882,15 +920,20 @@ const RyGame = () => {
 
       if (game.hasStartedRainbow) {
         game.rainbowColorIndexOffset = Math.floor(
-          (tempTime / (game.tempo / 4)) % (game.numberOfColumns / 2),
+          (tempTime / (game.tempo / 4)) % (game.numberOfColumns / 2)
         );
       }
       if (game.hasStartedRainbowBackground) {
         game.backgroundColorIndex =
-          1 + Math.floor((tempTime / (game.tempo / 2)) % (colors.backgroundColorSet.length - 1));
+          1 +
+          Math.floor(
+            (tempTime / (game.tempo / 2)) %
+              (colors.backgroundColorSet.length - 1)
+          );
       }
       if (game.hasStartedRocking) {
-        const tempNumber = 1 - Math.sin(((tempTime / (game.tempo / 4)) % 1) * Math.PI);
+        const tempNumber =
+          1 - Math.sin(((tempTime / (game.tempo / 4)) % 1) * Math.PI);
         game.rockingOffset = game.rockingAmplitude * tempNumber * tempNumber;
         updateLinePosList();
       }
@@ -909,7 +952,7 @@ const RyGame = () => {
     ctx.fillRect(0, 0, game.canvasWidth, game.canvasHeight);
 
     // grid pattern in bg
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
     ctx.lineWidth = 1;
 
     // bigger grid = better fps
@@ -929,13 +972,13 @@ const RyGame = () => {
     }
 
     // score display
-    setMessage(''); // Empty message instead of showing P-Level
+    setMessage(""); // Empty message instead of showing P-Level
     drawMessage();
 
     // draw the main game elements
     ctx.lineWidth = 3;
     ctx.shadowBlur = 12;
-    ctx.shadowColor = 'rgba(139, 92, 246, 0.7)';
+    ctx.shadowColor = "rgba(139, 92, 246, 0.7)";
 
     for (let i = 0; i < game.numberOfColumns; i++) {
       setContextColorByColumn(i);
@@ -980,10 +1023,10 @@ const RyGame = () => {
     canvas.style.width = `${game.canvasWidth}px`;
     canvas.style.height = `${game.canvasHeight}px`;
 
-    const ctx = canvas.getContext('2d', { alpha: false });
+    const ctx = canvas.getContext("2d", { alpha: false });
     ctx.scale(dpr, dpr);
     game.context = ctx;
-    ctx.font = 'bold 16px Inter, system-ui, sans-serif';
+    ctx.font = "bold 16px Inter, system-ui, sans-serif";
     ctx.lineWidth = 3;
     ctx.strokeStyle = colors.blackColor.toString();
     ctx.imageSmoothingEnabled = true;
@@ -999,13 +1042,13 @@ const RyGame = () => {
     updateLinePosList();
 
     // Add event listeners
-    window.addEventListener('keydown', handleKeyDownEvent);
+    window.addEventListener("keydown", handleKeyDownEvent);
 
     // Start game loop
     gameLoopRef.current = requestAnimationFrame(gameLoop);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDownEvent);
+      window.removeEventListener("keydown", handleKeyDownEvent);
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
       }
@@ -1015,8 +1058,8 @@ const RyGame = () => {
 
   // Create key-to-note mapping for visualization
   const keyMap = [
-    ['Q', 'W', 'E', 'R', 'U', 'I', 'O', 'P'],
-    ['A', 'S', 'D', 'F', 'J', 'K', 'L', ';'],
+    ["Q", "W", "E", "R", "U", "I", "O", "P"],
+    ["A", "S", "D", "F", "J", "K", "L", ";"],
   ];
 
   // Daily quest - generate a random goal every day
@@ -1025,8 +1068,8 @@ const RyGame = () => {
   useEffect(() => {
     // Generate daily quest based on date
     const today = new Date().toDateString();
-    const savedQuest = localStorage.getItem('rhythmDotsDailyQuest');
-    const savedQuestDate = localStorage.getItem('rhythmDotsDailyQuestDate');
+    const savedQuest = localStorage.getItem("rhythmDotsDailyQuest");
+    const savedQuestDate = localStorage.getItem("rhythmDotsDailyQuestDate");
 
     if (savedQuestDate === today && savedQuest) {
       setDailyQuest(JSON.parse(savedQuest));
@@ -1035,8 +1078,8 @@ const RyGame = () => {
       const newQuest = generateSkillBasedQuests();
       setDailyQuest(newQuest);
 
-      localStorage.setItem('rhythmDotsDailyQuest', JSON.stringify(newQuest));
-      localStorage.setItem('rhythmDotsDailyQuestDate', today);
+      localStorage.setItem("rhythmDotsDailyQuest", JSON.stringify(newQuest));
+      localStorage.setItem("rhythmDotsDailyQuestDate", today);
     }
   }, [generateSkillBasedQuests]);
 
@@ -1046,19 +1089,28 @@ const RyGame = () => {
 
     let completed = false;
 
-    if (dailyQuest.description.includes('P-Level') && pLevel >= dailyQuest.goal) {
+    if (
+      dailyQuest.description.includes("P-Level") &&
+      pLevel >= dailyQuest.goal
+    ) {
       completed = true;
-    } else if (dailyQuest.description.includes('streak') && maxPLevel >= dailyQuest.goal) {
+    } else if (
+      dailyQuest.description.includes("streak") &&
+      maxPLevel >= dailyQuest.goal
+    ) {
       completed = true;
     }
 
     if (completed) {
       const updatedQuest = { ...dailyQuest, completed: true };
       setDailyQuest(updatedQuest);
-      localStorage.setItem('rhythmDotsDailyQuest', JSON.stringify(updatedQuest));
+      localStorage.setItem(
+        "rhythmDotsDailyQuest",
+        JSON.stringify(updatedQuest)
+      );
 
       setShowAchievement({
-        name: 'Daily Quest Complete!',
+        name: "Daily Quest Complete!",
         description: dailyQuest.description,
         icon: <CheckBadgeIcon className="h-6 w-6 text-green-400" />,
       });
@@ -1072,7 +1124,10 @@ const RyGame = () => {
   // Check if we need to update the user's score when the game ends
   useEffect(() => {
     // When game over screen is shown, update user score if it's a new personal best
-    if (showGameOverScreen && maxPLevel > (currentUser?.rhythmGame?.peakPLevel || 0)) {
+    if (
+      showGameOverScreen &&
+      maxPLevel > (currentUser?.rhythmGame?.peakPLevel || 0)
+    ) {
       updateUserScore(maxPLevel, difficulty);
     }
   }, [showGameOverScreen, maxPLevel, difficulty, currentUser, updateUserScore]);
@@ -1089,10 +1144,10 @@ const RyGame = () => {
           setHighPLevel(gameStats.peakPLevel || 0);
 
           // Try to get the full user profile if we have stats
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem("token");
           if (token) {
             try {
-              const response = await axios.get('/api/users/me', {
+              const response = await axios.get("/api/users/me", {
                 baseURL: '',
                 headers: { Authorization: `Bearer ${token}` },
               });
@@ -1101,19 +1156,19 @@ const RyGame = () => {
                 setCurrentUser(response.data);
               }
             } catch (err) {
-              console.log('Error fetching user profile, proceeding as guest');
+              console.log("Error fetching user profile, proceeding as guest");
             }
           }
         } else {
           // For anonymous users, use local storage
-          const savedHighPLevel = localStorage.getItem('rhythmDotsHighPLevel');
+          const savedHighPLevel = localStorage.getItem("rhythmDotsHighPLevel");
           if (savedHighPLevel) {
             setHighPLevel(parseInt(savedHighPLevel) || 0);
           }
         }
       } catch (error) {
         // On any error, fall back to local storage
-        const savedHighPLevel = localStorage.getItem('rhythmDotsHighPLevel');
+        const savedHighPLevel = localStorage.getItem("rhythmDotsHighPLevel");
         if (savedHighPLevel) {
           setHighPLevel(parseInt(savedHighPLevel) || 0);
         }
@@ -1127,7 +1182,7 @@ const RyGame = () => {
   useEffect(() => {
     if (!currentUser) return;
     const checkAuthInterval = setInterval(() => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
         setCurrentUser(null);
       }
@@ -1155,23 +1210,23 @@ const RyGame = () => {
           key={player._id || `player-${index}`}
           className={`p-3 rounded-lg border ${
             currentUser?.username === player?.username
-              ? 'border-purple-500/30 bg-purple-900/10'
+              ? "border-purple-500/30 bg-purple-900/10"
               : index === 0
-                ? 'border-amber-500/20 bg-amber-900/5'
-                : 'border-gray-700/30'
+              ? "border-amber-500/20 bg-amber-900/5"
+              : "border-gray-700/30"
           }`}
         >
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <span
                 className={`text-xs font-medium ${
-                  index === 0 ? 'text-amber-400' : 'text-gray-400'
+                  index === 0 ? "text-amber-400" : "text-gray-400"
                 }`}
               >
                 #{index + 1}
               </span>
               <span className="ml-2 text-sm text-gray-200 truncate max-w-[120px]">
-                {player?.username || 'Anonymous'}
+                {player?.username || "Anonymous"}
                 {currentUser?.username === player?.username && (
                   <span className="text-xs text-purple-400 ml-1">(you)</span>
                 )}
@@ -1181,16 +1236,16 @@ const RyGame = () => {
               <span
                 className={`text-sm font-bold ${
                   player?.rhythmGame?.peakPLevel >= 50
-                    ? 'text-amber-400'
+                    ? "text-amber-400"
                     : player?.rhythmGame?.peakPLevel >= 25
-                      ? 'text-purple-400'
-                      : 'text-blue-400'
+                    ? "text-purple-400"
+                    : "text-blue-400"
                 }`}
               >
                 {player?.rhythmGame?.peakPLevel || 0}
               </span>
               <span className="ml-2 text-xs bg-gray-800 px-1.5 py-0.5 rounded text-gray-400">
-                {player?.rhythmGame?.difficulty || 'normal'}
+                {player?.rhythmGame?.difficulty || "normal"}
               </span>
             </div>
           </div>
@@ -1223,10 +1278,12 @@ const RyGame = () => {
           <div className="absolute top-6 right-6 flex items-center">
             <div
               className={`h-3 w-3 rounded-full ${
-                gameIsActive ? 'bg-green-400 animate-pulse' : 'bg-red-400'
+                gameIsActive ? "bg-green-400 animate-pulse" : "bg-red-400"
               } mr-2`}
             ></div>
-            <span className="text-xs text-gray-400">{gameIsActive ? 'Playing' : 'Ready'}</span>
+            <span className="text-xs text-gray-400">
+              {gameIsActive ? "Playing" : "Ready"}
+            </span>
           </div>
 
           {/* Updated left sidebar to show only necessary information */}
@@ -1234,32 +1291,38 @@ const RyGame = () => {
             <div
               className="bg-gray-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-gray-700/30"
               style={{
-                minWidth: Math.max(100, 20 + String(highPLevel).length * 10) + 'px',
+                minWidth:
+                  Math.max(100, 20 + String(highPLevel).length * 10) + "px",
               }}
             >
-              <span className="text-sm font-medium text-amber-300">Best P-Level: </span>
+              <span className="text-sm font-medium text-amber-300">
+                Best P-Level:{" "}
+              </span>
               <span className="text-white font-bold">{highPLevel}</span>
             </div>
 
             {gameIsActive && (
               <div
                 className={`bg-gray-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border ${
-                  pLevel >= 5 ? 'border-orange-500/50 animate-pulse' : 'border-gray-700/30'
+                  pLevel >= 5
+                    ? "border-orange-500/50 animate-pulse"
+                    : "border-gray-700/30"
                 }`}
                 style={{
-                  minWidth: Math.max(100, 20 + String(pLevel).length * 10) + 'px',
+                  minWidth:
+                    Math.max(100, 20 + String(pLevel).length * 10) + "px",
                 }}
               >
                 <span
                   className={`text-sm font-medium ${
                     pLevel >= 10
-                      ? 'text-orange-400'
+                      ? "text-orange-400"
                       : pLevel >= 5
-                        ? 'text-amber-300'
-                        : 'text-blue-300'
+                      ? "text-amber-300"
+                      : "text-blue-300"
                   }`}
                 >
-                  P-Level:{' '}
+                  P-Level:{" "}
                 </span>
                 <span className="text-white font-bold">{pLevel}</span>
               </div>
@@ -1276,10 +1339,16 @@ const RyGame = () => {
                 className="fixed top-20 right-6 z-50 max-w-xs"
               >
                 <div className="bg-gray-800/80 backdrop-blur-md px-4 py-3 rounded-xl border border-purple-500/50 shadow-lg flex items-center gap-3">
-                  <div className="bg-gray-900/50 p-2 rounded-lg">{showAchievement.icon}</div>
+                  <div className="bg-gray-900/50 p-2 rounded-lg">
+                    {showAchievement.icon}
+                  </div>
                   <div className="text-left">
-                    <h3 className="text-purple-300 font-bold text-sm">{showAchievement.name}</h3>
-                    <p className="text-gray-300 text-xs">{showAchievement.description}</p>
+                    <h3 className="text-purple-300 font-bold text-sm">
+                      {showAchievement.name}
+                    </h3>
+                    <p className="text-gray-300 text-xs">
+                      {showAchievement.description}
+                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -1303,7 +1372,9 @@ const RyGame = () => {
                   <h3 className="text-xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent mb-3">
                     Game Over
                   </h3>
-                  <p className="text-gray-300 text-lg mb-2">{gameOverMessage}</p>
+                  <p className="text-gray-300 text-lg mb-2">
+                    {gameOverMessage}
+                  </p>
                   {pLevel > 0 && (
                     <div className="flex flex-col gap-2 mb-4">
                       <div className="flex justify-between items-center">
@@ -1313,12 +1384,16 @@ const RyGame = () => {
 
                       <div className="flex justify-between items-center">
                         <p className="text-gray-400 text-sm">Peak P-Level:</p>
-                        <p className="text-white font-bold text-lg">{maxPLevel}</p>
+                        <p className="text-white font-bold text-lg">
+                          {maxPLevel}
+                        </p>
                       </div>
 
                       <div className="flex justify-between items-center">
                         <p className="text-gray-400 text-sm">All-time Best:</p>
-                        <p className="text-purple-300 font-bold">{highPLevel}</p>
+                        <p className="text-purple-300 font-bold">
+                          {highPLevel}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -1326,7 +1401,7 @@ const RyGame = () => {
                     onClick={() => {
                       resetGameAndAudio();
                       setShowGameOverScreen(false);
-                      setMessage('Press space to play!');
+                      setMessage("Press space to play!");
                     }}
                     className="mt-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-lg hover:opacity-90 transition-all"
                   >
@@ -1344,8 +1419,9 @@ const RyGame = () => {
                     Ready to Play?
                   </h3>
                   <p className="text-gray-300 text-sm mb-4">
-                    Press <span className="text-purple-400 font-bold">SPACE</span> to start the
-                    rhythm game!
+                    Press{" "}
+                    <span className="text-purple-400 font-bold">SPACE</span> to
+                    start the rhythm game!
                   </p>
                   <div className="animate-bounce mt-2">
                     <div className="h-10 w-10 rounded-full bg-purple-600/20 flex items-center justify-center mx-auto">
@@ -1375,8 +1451,10 @@ const RyGame = () => {
               <span>0:00</span>
               <span>
                 {gameIsActive
-                  ? `${Math.floor((game.audioCurrentTime / game.songDuration) * 100)}%`
-                  : 'Progress'}
+                  ? `${Math.floor(
+                      (game.audioCurrentTime / game.songDuration) * 100
+                    )}%`
+                  : "Progress"}
               </span>
               <span>3:23</span>
             </div>
@@ -1384,8 +1462,10 @@ const RyGame = () => {
               <div
                 className="h-full bg-gradient-to-r from-purple-600 to-blue-500 rounded-full relative"
                 style={{
-                  width: `${(game.audioCurrentTime / game.songDuration) * 100}%`,
-                  transition: 'width 0.3s linear',
+                  width: `${
+                    (game.audioCurrentTime / game.songDuration) * 100
+                  }%`,
+                  transition: "width 0.3s linear",
                 }}
               >
                 {/* Pulsing glow effect on the progress bar */}
@@ -1402,7 +1482,7 @@ const RyGame = () => {
             onLoadedData={() => {
               game.audioHasLoaded = true;
               setAudioHasLoaded(true);
-              setMessage('Press space to play!');
+              setMessage("Press space to play!");
               resetGameAndAudio();
             }}
           />
@@ -1417,12 +1497,14 @@ const RyGame = () => {
 
                 <div className="space-y-4 text-gray-300 text-sm">
                   <p>
-                    1. Press <span className="text-purple-400 font-bold">SPACE</span> to start the
-                    game
+                    1. Press{" "}
+                    <span className="text-purple-400 font-bold">SPACE</span> to
+                    start the game
                   </p>
                   <p>2. Dots will travel down the lines toward the circles</p>
                   <p>
-                    3. When a dot reaches a circle, press the corresponding key on your keyboard
+                    3. When a dot reaches a circle, press the corresponding key
+                    on your keyboard
                   </p>
                   <p>4. Build up your streak for bonus points!</p>
                   <p>5. Complete daily quests and unlock achievements</p>
@@ -1467,8 +1549,8 @@ const RyGame = () => {
                           key={keyIndex}
                           className={`w-8 h-8 flex items-center justify-center rounded border ${
                             keyIndex < 4
-                              ? 'border-purple-500/50 bg-purple-900/20 text-purple-300'
-                              : 'border-blue-500/50 bg-blue-900/20 text-blue-300'
+                              ? "border-purple-500/50 bg-purple-900/20 text-purple-300"
+                              : "border-blue-500/50 bg-blue-900/20 text-blue-300"
                           } text-xs font-bold`}
                         >
                           {key}
@@ -1507,15 +1589,17 @@ const RyGame = () => {
                     Difficulty
                   </h3>
                   <div className="flex gap-2 justify-center">
-                    {['easy', 'normal', 'hard'].map((level) => (
+                    {["easy", "normal", "hard"].map((level) => (
                       <button
                         key={level}
                         onClick={() => !gameIsActive && setDifficulty(level)}
                         className={`px-3 py-1.5 text-xs rounded-md capitalize ${
                           difficulty === level
-                            ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                            : 'bg-gray-800/70 text-gray-400 hover:text-gray-300'
-                        } ${gameIsActive ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                            : "bg-gray-800/70 text-gray-400 hover:text-gray-300"
+                        } ${
+                          gameIsActive ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                         disabled={gameIsActive}
                       >
                         {level}
@@ -1533,7 +1617,9 @@ const RyGame = () => {
                   {dailyQuest && (
                     <div
                       className={`bg-gray-800/60 p-3 rounded-lg border ${
-                        dailyQuest.completed ? 'border-green-500/40' : 'border-amber-500/30'
+                        dailyQuest.completed
+                          ? "border-green-500/40"
+                          : "border-amber-500/30"
                       }`}
                     >
                       <div className="flex items-start gap-2">
@@ -1543,18 +1629,20 @@ const RyGame = () => {
                           <TrophyIcon className="h-5 w-5 text-amber-400 mt-0.5" />
                         )}
                         <div className="text-left">
-                          <p className="text-xs text-gray-300">{dailyQuest.description}</p>
+                          <p className="text-xs text-gray-300">
+                            {dailyQuest.description}
+                          </p>
                           <div className="mt-2 w-full bg-gray-700/50 h-2 rounded-full overflow-hidden">
                             <div
                               className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
                               style={{
                                 width: `${Math.min(
                                   100,
-                                  ((dailyQuest.description.includes('streak')
+                                  ((dailyQuest.description.includes("streak")
                                     ? maxPLevel
                                     : pLevel) /
                                     dailyQuest.goal) *
-                                    100,
+                                    100
                                 )}%`,
                               }}
                             ></div>
@@ -1579,68 +1667,84 @@ const RyGame = () => {
                     <div
                       className={`p-2 rounded-lg border ${
                         achievements.firstPlay
-                          ? 'bg-gray-800/60 border-purple-500/30'
-                          : 'bg-gray-800/20 border-gray-700/30'
+                          ? "bg-gray-800/60 border-purple-500/30"
+                          : "bg-gray-800/20 border-gray-700/30"
                       }`}
                     >
                       <div className="flex flex-col items-center">
                         <SparklesIcon
                           className={`h-5 w-5 ${
-                            achievements.firstPlay ? 'text-yellow-300' : 'text-gray-500'
+                            achievements.firstPlay
+                              ? "text-yellow-300"
+                              : "text-gray-500"
                           }`}
                         />
-                        <p className="text-[10px] text-gray-400 mt-1">First Play</p>
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          First Play
+                        </p>
                       </div>
                     </div>
 
                     <div
                       className={`p-2 rounded-lg border ${
                         achievements.reach10PLevel
-                          ? 'bg-gray-800/60 border-blue-500/30'
-                          : 'bg-gray-800/20 border-gray-700/30'
+                          ? "bg-gray-800/60 border-blue-500/30"
+                          : "bg-gray-800/20 border-gray-700/30"
                       }`}
                     >
                       <div className="flex flex-col items-center">
                         <CheckBadgeIcon
                           className={`h-5 w-5 ${
-                            achievements.reach10PLevel ? 'text-blue-400' : 'text-gray-500'
+                            achievements.reach10PLevel
+                              ? "text-blue-400"
+                              : "text-gray-500"
                           }`}
                         />
-                        <p className="text-[10px] text-gray-400 mt-1">10 P-Level</p>
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          10 P-Level
+                        </p>
                       </div>
                     </div>
 
                     <div
                       className={`p-2 rounded-lg border ${
                         achievements.reach25PLevel
-                          ? 'bg-gray-800/60 border-purple-500/30'
-                          : 'bg-gray-800/20 border-gray-700/30'
+                          ? "bg-gray-800/60 border-purple-500/30"
+                          : "bg-gray-800/20 border-gray-700/30"
                       }`}
                     >
                       <div className="flex flex-col items-center">
                         <TrophyIcon
                           className={`h-5 w-5 ${
-                            achievements.reach25PLevel ? 'text-purple-400' : 'text-gray-500'
+                            achievements.reach25PLevel
+                              ? "text-purple-400"
+                              : "text-gray-500"
                           }`}
                         />
-                        <p className="text-[10px] text-gray-400 mt-1">25 P-Level</p>
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          25 P-Level
+                        </p>
                       </div>
                     </div>
 
                     <div
                       className={`p-2 rounded-lg border ${
                         achievements.reach50PLevel
-                          ? 'bg-gray-800/60 border-amber-500/30'
-                          : 'bg-gray-800/20 border-gray-700/30'
+                          ? "bg-gray-800/60 border-amber-500/30"
+                          : "bg-gray-800/20 border-gray-700/30"
                       }`}
                     >
                       <div className="flex flex-col items-center">
                         <FireIcon
                           className={`h-5 w-5 ${
-                            achievements.reach50PLevel ? 'text-amber-500' : 'text-gray-500'
+                            achievements.reach50PLevel
+                              ? "text-amber-500"
+                              : "text-gray-500"
                           }`}
                         />
-                        <p className="text-[10px] text-gray-400 mt-1">50 P-Level</p>
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          50 P-Level
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -1671,12 +1775,12 @@ const RyGame = () => {
                 Leaderboard
               </h2>
               <span className="text-xs text-gray-400 ml-auto">
-                {isLoadingLeaderboard ? 'Updating...' : 'Live'}
+                {isLoadingLeaderboard ? "Updating..." : "Live"}
               </span>
             </div>
           </div>
 
-          <div className="p-3 overflow-y-auto" style={{ maxHeight: '60vh' }}>
+          <div className="p-3 overflow-y-auto" style={{ maxHeight: "60vh" }}>
             {isLoadingLeaderboard ? (
               <div className="flex justify-center py-4">
                 <div className="animate-spin h-5 w-5">
@@ -1689,7 +1793,9 @@ const RyGame = () => {
 
             {!currentUser && (
               <div className="mt-3 p-2 border border-blue-500/20 bg-blue-900/10 rounded-lg">
-                <p className="text-xs text-blue-300">Sign in to appear on the leaderboard</p>
+                <p className="text-xs text-blue-300">
+                  Sign in to appear on the leaderboard
+                </p>
               </div>
             )}
 

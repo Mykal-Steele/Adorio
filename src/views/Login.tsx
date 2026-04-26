@@ -37,12 +37,15 @@ const Login = () => {
       console.error('Error during login:', err);
       if (err.response) {
         setError(
-          err.response.data.message || 'Login failed. Please check your email and password.',
+          err.response.data.message ||
+            'Login failed. Please check your email and password.',
         );
       } else if (err.request) {
         setError('Unable to reach the server. Please check your connection.');
       } else {
-        setError('An unexpected error occurred. Please try again in a few minutes.');
+        setError(
+          'An unexpected error occurred. Please try again in a few minutes.',
+        );
       }
     } finally {
       setLoading(false);
@@ -68,7 +71,9 @@ const Login = () => {
         <form onSubmit={handleLogin} className="space-y-4">
           {/* Email input */}
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Email
+            </label>
             <input
               type="email"
               placeholder="Enter your email"
@@ -81,7 +86,9 @@ const Login = () => {
 
           {/* Password input */}
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Password
+            </label>
             <input
               type="password"
               placeholder="Enter your password"
