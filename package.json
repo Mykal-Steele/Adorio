@@ -27,6 +27,8 @@
     "test:dev": "sh -c 'set -e; npm run docker:preflight; cleanup() { docker compose -f docker-compose.yml down --remove-orphans || true; }; trap cleanup EXIT; docker compose -f docker-compose.yml down --remove-orphans || true; docker compose -f docker-compose.yml up -d --build --remove-orphans; node scripts/wait-for-url.cjs http://localhost:8080/api/health 180000 1000; npm run test:integration'",
     "test:prod": "sh -c 'set -e; npm run docker:preflight; cleanup() { docker compose -f docker-compose.prod.yml down --remove-orphans || true; }; trap cleanup EXIT; docker compose -f docker-compose.prod.yml down --remove-orphans || true; docker compose -f docker-compose.prod.yml up -d --build --remove-orphans; node scripts/wait-for-url.cjs http://localhost:8080/api/health 240000 1000; npm run test:integration'",
     "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\" \"*.{ts,js,mjs,cjs,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx}\" \"*.{ts,js,mjs,cjs,json}\"",
     "nginx-logs": "sudo tail -f /var/log/nginx/error.log"
   },
   "dependencies": {
@@ -75,6 +77,7 @@
     "globals": "^15.14.0",
     "jest": "^29.7.0",
     "postcss": "^8.5.3",
+    "prettier": "^3.8.3",
     "supertest": "^7.0.0",
     "tailwind-scrollbar": "^3.0.0",
     "tailwindcss": "^3.4.3"

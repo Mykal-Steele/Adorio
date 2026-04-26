@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+dist/
+build/
+backend/
+backend-go/
+ai-slop/
+public/
+*.min.js
+package-lock.json
