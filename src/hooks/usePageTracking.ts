@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useAppSelector } from '../redux/hooks';
+import { useAppSelector } from '../store/hooks';
 import { trackPageView } from '../api/analytics';
 
 const VISITOR_STORAGE_KEY = 'adorio:visitorId';
@@ -49,10 +49,6 @@ const usePageTracking = () => {
 
   useEffect(() => {
     if (typeof window === 'undefined') {
-      return;
-    }
-
-    if (isAutomatedBrowser) {
       return;
     }
 

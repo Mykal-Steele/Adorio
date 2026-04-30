@@ -24,7 +24,7 @@ export const isAbortError = (error) => {
   );
 };
 
-export const handleApiError = (error, customMessage, context = {}) => {
+export const handleApiError = (error, customMessage = null, context = {}) => {
   if (isAbortError(error)) {
     return new AbortError();
   }
