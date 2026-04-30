@@ -18,8 +18,8 @@ import {
   fetchRecentVisits,
   fetchVisitorStats,
   fetchVisitorDetails,
-} from '../api/analytics';
-import { formatDuration, formatCompactNumber } from '../utils/timeFormatting';
+} from '../../api/analytics';
+import { formatDuration, formatCompactNumber } from '../../utils/timeFormatting';
 
 const formatNumber = (value) => (typeof value === 'number' ? value.toLocaleString() : '—');
 
@@ -258,7 +258,11 @@ const ChartTooltip = ({ active, payload, label }: ChartTooltipProps) => {
       <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{label}</p>
         {payload.map((entry, index) => (
-          <p key={index} className="text-sm" style={{ color: entry.color }}>
+          <p
+            key={index}
+            className="text-sm text-[color:var(--chart-color)]"
+            style={{ '--chart-color': entry.color } as React.CSSProperties}
+          >
             {entry.name}: {formatCompactNumber(entry.value)}
           </p>
         ))}
@@ -268,7 +272,6 @@ const ChartTooltip = ({ active, payload, label }: ChartTooltipProps) => {
   return null;
 };
 
-// Pie chart for most visited pages
 const PageVisitsPieChart = ({ data }) => {
   const chartData = data
     .slice(0, 8) // Show top 8 pages
@@ -307,7 +310,6 @@ const PageVisitsPieChart = ({ data }) => {
   );
 };
 
-// Bar chart for visitor statistics
 const VisitorStatsChart = ({ data }) => {
   if (!data || data.length === 0) {
     return (
@@ -360,7 +362,6 @@ const VisitorStatsChart = ({ data }) => {
   );
 };
 
-// Visitor Details Modal
 const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
   if (!isOpen) return null;
 
@@ -575,7 +576,6 @@ const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
   );
 };
 
-// Visitor statistics table
 const VisitorStatsTable = ({ data, onVisitorClick }) => (
   <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
     <div className="max-h-[32rem] overflow-auto">

@@ -13,8 +13,8 @@ import {
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
-import { fetchLeaderboard, updateScore, fetchUserGameStats } from '../api/gameApi';
+import { fetchUserData } from '../../api';
+import { fetchLeaderboard, updateScore, fetchUserGameStats } from '../../api/gameApi';
 
 // Stateless game primitives — module-level so React doesn't recreate them every render.
 const DOT_RADIUS = 11;
@@ -1089,19 +1089,12 @@ const RyGame = () => {
           setHighPLevel(gameStats.peakPLevel || 0);
 
           // Try to get the full user profile if we have stats
-          const token = localStorage.getItem('token');
-          if (token) {
+          if (localStorage.getItem('token')) {
             try {
-              const response = await axios.get('/api/users/me', {
-                baseURL: '',
-                headers: { Authorization: `Bearer ${token}` },
-              });
-
-              if (response?.data) {
-                setCurrentUser(response.data);
-              }
-            } catch (err) {
-              console.log('Error fetching user profile, proceeding as guest');
+              const userData = await fetchUserData();
+              if (userData) setCurrentUser(userData);
+            } catch {
+              // proceed as guest
             }
           }
         } else {

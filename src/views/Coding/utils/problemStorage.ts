@@ -3,10 +3,7 @@
  * Handles persistent storage for coding problems with proper formatting preservation
  */
 
-const STORAGE_KEY_PREFIX = 'coding_problem_';
-const ACTIVE_PROBLEM_KEY = 'coding_active_problem';
-const STORAGE_VERSION = '1.0';
-
+import { STORAGE_KEY_PREFIX, ACTIVE_PROBLEM_KEY } from '../constants/storage';
 /**
  * Storage structure for each problem:
  * {
@@ -49,15 +46,12 @@ export class ProblemStorage {
       const codeToSave = typeof state.code === 'string' ? state.code : '';
 
       const storageData = {
-        version: STORAGE_VERSION,
         problemId,
         code: codeToSave,
         results: state.results || null,
         functionName: state.functionName || null,
         methodName: typeof state.methodName === 'string' ? state.methodName : null,
         lastModified: Date.now(),
-        // Add checksum to verify data integrity
-        checksum: btoa(problemId + codeToSave).slice(0, 16),
       };
 
       const key = `${STORAGE_KEY_PREFIX}${problemId}`;
@@ -86,21 +80,9 @@ export class ProblemStorage {
 
       const data = JSON.parse(stored);
 
-      // Validate data structure and integrity
-      if (data.version !== STORAGE_VERSION || data.problemId !== problemId) {
-        // Remove outdated data
+      if (data.problemId !== problemId) {
         localStorage.removeItem(key);
         return null;
-      }
-
-      // Validate checksum if present
-      if (data.checksum) {
-        const expectedChecksum = btoa(problemId + (data.code || '')).slice(0, 16);
-        if (data.checksum !== expectedChecksum) {
-          console.warn('Data integrity check failed for problem:', problemId);
-          localStorage.removeItem(key);
-          return null;
-        }
       }
 
       if (meta.functionName && data.functionName && data.functionName !== meta.functionName) {

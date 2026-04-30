@@ -1,46 +1,37 @@
 'use client';
 import React, { useState } from 'react';
-import { useAppDispatch } from '../redux/hooks';
-import { setUser } from '../redux/userSlice';
-import { register } from '../api';
+import { useAppDispatch } from '../../store/hooks';
+import { login } from '../../api';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SparklesIcon } from '@heroicons/react/24/outline';
+import { applyAuthSession, getAuthErrorMessage, getRedirectPaths } from '../../utils/authFlow';
 
-const Register = () => {
+const Login = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const from = searchParams.get('redirect') || '/home';
-  const redirect = searchParams.get('redirect');
+  const { from, redirect } = getRedirectPaths(searchParams);
 
-  const handleRegister = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      const response = await register({ username, email, password });
-      if (response && response.user && response.token) {
-        localStorage.setItem('token', response.token);
-        dispatch(setUser({ user: response.user, token: response.token }));
+      const response = await login({ email, password });
+      if (applyAuthSession(dispatch, response)) {
         router.replace(from);
       } else {
-        setError('Unexpected response data format');
+        setError('Invalid response from server. Please try again.');
       }
     } catch (err) {
-      console.error('Error during registration:', err);
-      if (err.response) {
-        setError(err.response.data.message || 'Registration failed: Unknown error');
-      } else {
-        setError('Registration failed: No response from server');
-      }
+      setError(getAuthErrorMessage(err, 'Login failed. Please check your email and password.'));
     } finally {
       setLoading(false);
     }
@@ -55,22 +46,10 @@ const Register = () => {
         </div>
 
         <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
-          Create Account
+          Welcome Back
         </h1>
 
-        <form onSubmit={handleRegister} className="space-y-4">
-          <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Username</label>
-            <input
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-3 rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400"
-              required
-            />
-          </div>
-
+        <form onSubmit={handleLogin} className="space-y-4">
           <div className="text-left">
             <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
             <input
@@ -123,7 +102,7 @@ const Register = () => {
                   ></path>
                 </svg>
               ) : (
-                'Create Account'
+                'Login'
               )}
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -143,12 +122,12 @@ const Register = () => {
         </div>
 
         <p className="mt-4 text-center text-gray-400">
-          Already have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link
-            href={redirect ? `/login?redirect=${redirect}` : '/login'}
+            href={redirect ? `/register?redirect=${redirect}` : '/register'}
             className="text-purple-400 hover:underline font-medium"
           >
-            Log in
+            Sign up
           </Link>
         </p>
       </div>
@@ -156,4 +135,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;

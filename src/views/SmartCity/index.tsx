@@ -1,4 +1,4 @@
-import AdSenseScript from '../Components/AdSenseScript';
+import AdSenseScript from '../../components/AdSenseScript';
 
 const docs = [
   { title: 'DeepLink Mobile API', file: 'SCB DeepLink Mobile API Developer Guide.html' },

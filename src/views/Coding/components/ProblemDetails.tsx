@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Problem Details Component
  * Single responsibility: Display problem information
