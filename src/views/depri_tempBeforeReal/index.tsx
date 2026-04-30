@@ -1,4 +1,4 @@
-import AdSenseScript from '../../Components/AdSenseScript';
+import AdSenseScript from '../../components/AdSenseScript';
 import RetroTV from './RetroTV';
 
 // Static wooden sign — server rendered

@@ -1,13 +1,13 @@
 'use client';
 import React, { useEffect, useState, useCallback } from 'react';
-import { useAppSelector } from '../redux/hooks';
-import { getPosts, likePost } from '../api'; // Import likePost API function
-import PostCard from '../Components/PostCard';
+import { useAppSelector } from '../../store/hooks';
+import { getPosts, likePost } from '../../api'; // Import likePost API function
+import PostCard from '../../components/PostCard';
 import { SparklesIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
-import SkeletonLoader from '../Components/SkeletonLoader';
-import useInfiniteScroll from '../hooks/useInfiniteScroll';
-import { isAbortError } from '../utils/errorHandling';
+import SkeletonLoader from '../../components/ui/SkeletonLoader';
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
+import { isAbortError } from '../../utils/errorHandling';
 
 const Profile = () => {
   const { user } = useAppSelector((state) => state.user);
@@ -76,7 +76,11 @@ const Profile = () => {
   });
 
   if (loading && page === 1) {
-    return <SkeletonLoader count={3} />;
+    return (
+      <div className="container mx-auto max-w-2xl px-4 py-8 pt-20">
+        <SkeletonLoader count={3} />
+      </div>
+    );
   }
 
   if (error) {

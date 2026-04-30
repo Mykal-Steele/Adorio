@@ -1,14 +1,14 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import SkeletonLoader from '@/Components/SkeletonLoader';
+import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import PostsLoader from './PostsLoader';
 
 export const metadata: Metadata = {
-  title: 'Home',
+  title: 'Social',
   description: 'Recent posts from the Adorio community. Share thoughts, projects, and ideas.',
 };
 
-export default function HomePage() {
+export default function SocialPage() {
   return (
     <div className="min-h-screen bg-gray-950">
       <Suspense

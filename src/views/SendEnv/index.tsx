@@ -1,10 +1,8 @@
 'use client';
 import React, { useState } from 'react';
-import { useAppSelector } from '../redux/hooks';
-import API from '../api';
-import { handleApiError } from '../utils/errorHandling';
+import { storeSecret } from '../../api';
 import { SparklesIcon, ClipboardIcon } from '@heroicons/react/24/outline';
-import AdSenseScript from '../Components/AdSenseScript';
+import AdSenseScript from '../../components/AdSenseScript';
 
 const SendEnv = () => {
   const [message, setMessage] = useState('');
@@ -14,7 +12,6 @@ const SendEnv = () => {
   const [success, setSuccess] = useState(false);
   const [retrievalCommand, setRetrievalCommand] = useState('');
   const [copied, setCopied] = useState(false);
-  const user = useAppSelector((state) => state.user?.user);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,24 +24,15 @@ const SendEnv = () => {
         throw new Error('Please fill in both the message and password fields');
       }
 
-      // Send the request to store the encrypted message
-      const response = await API.post('/secretenv', {
-        message,
-        password,
-      });
+      const response = await storeSecret(message, password);
 
       setSuccess(true);
-      setRetrievalCommand(response.data.retrievalCommand);
+      setRetrievalCommand(response.retrievalCommand);
 
-      // Clear the form
       setMessage('');
       setPassword('');
     } catch (err) {
-      const errorMessage = handleApiError(err, 'Failed to store secret');
-      setError(errorMessage.message || 'An unexpected error occurred');
-      if (process.env.NODE_ENV !== 'production') {
-        console.error('Error storing secret:', err);
-      }
+      setError(err instanceof Error ? err.message : 'Failed to store secret');
     } finally {
       setIsSubmitting(false);
     }
@@ -66,13 +54,11 @@ const SendEnv = () => {
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
       <AdSenseScript />
       <div className="relative bg-gray-900/80 backdrop-blur-md border border-gray-800/50 rounded-2xl p-8 max-w-md w-full text-center space-y-6 overflow-hidden shadow-lg">
-        {/* Icon with glow */}
         <div className="flex justify-center relative">
           <SparklesIcon className="h-16 w-16 text-purple-400 relative z-10" />
           <div className="absolute w-32 h-32 bg-purple-600/20 blur-[50px] rounded-full" />
         </div>
 
-        {/* Title */}
         <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
           Store Secret Message
         </h1>
@@ -111,7 +97,6 @@ const SendEnv = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Secret Message Input */}
             <div className="text-left">
               <label className="block text-sm font-medium text-gray-300 mb-1">Secret Message</label>
               <textarea
@@ -123,7 +108,6 @@ const SendEnv = () => {
               />
             </div>
 
-            {/* Password Input */}
             <div className="text-left">
               <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
               <div className="space-y-1">
@@ -142,7 +126,6 @@ const SendEnv = () => {
               </div>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -177,7 +160,6 @@ const SendEnv = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </button>
 
-            {/* Error Message */}
             {error && (
               <p className="text-red-500 text-sm mt-4 text-center bg-red-900/20 p-2 rounded-lg">
                 {error}
