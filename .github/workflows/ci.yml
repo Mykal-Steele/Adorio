@@ -57,7 +57,10 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm ci
+      - name: Install dependencies
+        run: npm run setup
+      - name: Install Puppeteer browser
+        run: npx puppeteer browsers install chrome
       - name: Create .env.production
         run: |
           echo "NODE_ENV=production" >> .env.production
