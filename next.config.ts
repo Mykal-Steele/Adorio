@@ -36,16 +36,24 @@ const config: NextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         ],
       },
-      // Static pre-rendered pages — let Cloudflare cache the HTML at edge.
-      // s-maxage controls the CDN TTL; max-age keeps the browser copy for 60s.
-      // stale-while-revalidate lets Cloudflare serve stale while it re-fetches in the background.
+      // Static public pages — Cloudflare caches at edge.
       {
         source:
-          '/:path(|about|projects|contact|coding|login|register|rygame|smartcity|profile|data-lookup|sendenv|tempBeforeReal|algo)',
+          '/:path(|about|projects|contact|coding|login|register|smartcity|tempBeforeReal|algo)',
         headers: [
           {
             key: 'Cache-Control',
             value: 'public, max-age=60, s-maxage=3600, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      // Protected/auth routes — must never be cached at a shared CDN layer.
+      {
+        source: '/:path(profile|data-lookup|sendenv|rygame)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, no-store',
           },
         ],
       },

@@ -348,19 +348,10 @@ function IDELayoutInner({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const routes = [
-      '/',
-      '/about',
-      '/projects',
-      '/contact',
-      '/projects/create-adorex',
-      '/projects/chroma-board',
-      '/projects/vexta',
-      '/projects/discord-forge',
-      '/projects/axum-rest',
-      '/projects/express-legacy',
-    ];
-    routes.forEach((r) => router.prefetch(r));
+    if (typeof window === 'undefined' || window.innerWidth < 768) return;
+    const staticRoutes = ['/', '/about', '/projects', '/contact'];
+    const projectRoutes = portfolioData.projects.map((p) => `/projects/${p.id}`);
+    [...staticRoutes, ...projectRoutes].forEach((r) => router.prefetch(r));
   }, [router]);
 
   if (isMobile) return <MobileShell>{children}</MobileShell>;
