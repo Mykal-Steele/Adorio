@@ -83,9 +83,7 @@ const buildCloudinaryUrl = (publicId, version, transformation) => {
 const normalizePublicId = (image) =>
   image?.publicId ||
   image?.public_id ||
-  derivePublicIdFromUrl(
-    image?.secureUrl || image?.secure_url || image?.url || image?.path
-  );
+  derivePublicIdFromUrl(image?.secureUrl || image?.secure_url || image?.url || image?.path);
 
 const resolveBaseUrl = (image) =>
   image?.secureUrl || image?.secure_url || image?.url || image?.path;
@@ -95,15 +93,14 @@ const resolveVersion = (image) =>
     image?.version ||
       image?.versionId ||
       image?.version_id ||
-      parseVersionFromUrl(resolveBaseUrl(image))
+      parseVersionFromUrl(resolveBaseUrl(image)),
   );
 
 const resolveOptimizedUrl = (publicId, version, fallbackUrl) =>
   buildCloudinaryUrl(publicId, version, DISPLAY_TRANSFORMATION) || fallbackUrl;
 
 const resolveThumbnailUrl = (publicId, version, fallbackUrl) =>
-  buildCloudinaryUrl(publicId, version, THUMBNAIL_TRANSFORMATION) ||
-  fallbackUrl;
+  buildCloudinaryUrl(publicId, version, THUMBNAIL_TRANSFORMATION) || fallbackUrl;
 
 export const extractUploadedImageMetadata = (file) => {
   if (!file) {
@@ -111,8 +108,7 @@ export const extractUploadedImageMetadata = (file) => {
   }
 
   const version =
-    ensureNumber(file.version) ||
-    parseVersionFromUrl(file.secure_url || file.path || file.url);
+    ensureNumber(file.version) || parseVersionFromUrl(file.secure_url || file.path || file.url);
 
   return {
     assetId: file.asset_id,
@@ -170,7 +166,5 @@ export const formatImageForResponse = (image) => {
 
 export const normalizeExistingImage = (image) => {
   const formatted = formatImageForResponse(image);
-  return (
-    formatted || (resolveBaseUrl(image) ? { url: resolveBaseUrl(image) } : null)
-  );
+  return formatted || (resolveBaseUrl(image) ? { url: resolveBaseUrl(image) } : null);
 };

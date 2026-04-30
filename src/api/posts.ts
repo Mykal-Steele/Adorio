@@ -1,48 +1,19 @@
-import API from './index';
-import { handleApiError } from '../utils/errorHandling';
+import API, { request } from './index';
 
-const logger = {
-  error: (message, data) => {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error(message, data);
-    }
-  },
-  warn: (message) => {
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn(message);
-    }
-  },
-  info: (message) => {
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(message);
-    }
-  },
-};
-
-export const getPosts = async (page = 1, limit = 5, signal?: AbortSignal) => {
-  try {
-    const response = await API.get(`/posts?page=${page}&limit=${limit}`, {
+export const getPosts = (page = 1, limit = 5, signal?: AbortSignal) =>
+  request(
+    API.get(`/posts?page=${page}&limit=${limit}`, {
       signal,
       timeout: 10000,
-    });
-    return response.data;
-  } catch (error) {
-    throw handleApiError(error, 'failed to fetch posts');
-  }
-};
+    }),
+  );
 
-export const createPost = async (postData) => {
-  try {
-    const config =
-      postData instanceof FormData
-        ? { headers: {} }
-        : { headers: { 'Content-Type': 'application/json' } };
-
-    const response = await API.post('/posts', postData, config);
-    return response.data;
-  } catch (error) {
-    throw handleApiError(error, 'error creating post');
-  }
+export const createPost = (postData) => {
+  const config =
+    postData instanceof FormData
+      ? { headers: {} }
+      : { headers: { 'Content-Type': 'application/json' } };
+  return request(API.post('/posts', postData, config));
 };
 
 const likeIntents = {};
@@ -61,8 +32,12 @@ export const likePost = async (postId, shouldBeLiked) => {
 
       const finalIntent = likeIntents[postId];
 
+      if (!finalIntent) {
+        return null;
+      }
+
       if (process.env.NODE_ENV !== 'production') {
-        logger.info(
+        console.log(
           `Sending FINAL like state for post ${postId}: ${
             finalIntent.shouldBeLiked ? 'LIKED' : 'UNLIKED'
           }`,
@@ -73,11 +48,9 @@ export const likePost = async (postId, shouldBeLiked) => {
         shouldBeLiked: finalIntent.shouldBeLiked,
       });
 
-      delete likeIntents[postId];
       return response.data;
-    } catch (error) {
-      throw handleApiError(error, `failed to ${shouldBeLiked ? 'like' : 'unlike'} post`);
     } finally {
+      delete likeIntents[postId];
       delete pendingRequests[postId];
     }
   })();
@@ -85,23 +58,11 @@ export const likePost = async (postId, shouldBeLiked) => {
   return pendingRequests[postId];
 };
 
-export const addComment = async (postId, commentText) => {
-  try {
-    const response = await API.post(`/posts/${postId}/comment`, {
+export const addComment = (postId, commentText) =>
+  request(
+    API.post(`/posts/${postId}/comment`, {
       text: commentText,
-      optimisticId: `temp-${Date.now()}`,
-    });
-    return response.data;
-  } catch (error) {
-    throw handleApiError(error, 'error adding comment');
-  }
-};
+    }),
+  );
 
-export const getSinglePost = async (postId) => {
-  try {
-    const response = await API.get(`/posts/${postId}`);
-    return response.data;
-  } catch (error) {
-    throw handleApiError(error, 'error fetching post');
-  }
-};
+export const getSinglePost = (postId) => request(API.get(`/posts/${postId}`));

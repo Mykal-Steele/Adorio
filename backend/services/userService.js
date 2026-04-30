@@ -1,69 +1,50 @@
 import bcrypt from 'bcryptjs';
-import User from '../models/User.js';
 import ApiError from '../utils/ApiError.js';
+import validate from '../utils/validate.js';
+import { registerSchema, loginSchema } from '../schemas/index.js';
+import {
+  findUserByEmailOrUsername,
+  createUser,
+  findUserById as dbFindUserById,
+  findUserByEmail,
+} from '../models/index.js';
 
-const sanitizeUser = (user) => ({
+export const sanitizeUser = (user) => ({
   _id: user._id,
   username: user.username,
   email: user.email,
+  isAdmin: user.isAdmin ?? false,
 });
 
-const ensureUniqueUser = async ({ email, username }) => {
-  const existingUser = await User.findOne({
-    $or: [{ email: { $eq: email } }, { username: { $eq: username } }],
-  });
+export const createUserAccount = async (rawBody) => {
+  const { username, email, password } = validate(registerSchema, rawBody);
 
-  if (existingUser) {
-    const message =
-      existingUser.email === email
-        ? 'Email already exists'
-        : 'Username already exists';
-    throw ApiError.badRequest(message.toLowerCase());
+  const existing = await findUserByEmailOrUsername(email, username);
+  if (existing) {
+    const message = existing.email === email ? 'Email already exists' : 'Username already exists';
+    throw ApiError.badRequest(message);
   }
-};
-
-const createUserAccount = async ({ username, email, password }) => {
-  if (!username || !email || !password) {
-    throw ApiError.badRequest('All fields are required');
-  }
-
-  await ensureUniqueUser({ email, username });
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await User.create({ username, email, password: hashedPassword });
+  const user = await createUser({ username, email, password: hashedPassword });
 
   return sanitizeUser(user);
 };
 
-const findUserById = async (id, { includePassword = false } = {}) => {
-  const query = includePassword
-    ? User.findById(id)
-    : User.findById(id).select('-password');
-  const user = await query;
-
-  if (!user) {
-    throw ApiError.notFound('User not found');
-  }
-
+export const findUserById = async (id, options) => {
+  const user = await dbFindUserById(id, options);
+  if (!user) throw ApiError.notFound('User not found');
   return user;
 };
 
-const authenticateUser = async ({ email, password }) => {
-  if (!email || !password) {
-    throw ApiError.badRequest('Email and password are required');
-  }
+export const authenticateUser = async (rawBody) => {
+  const { email, password } = validate(loginSchema, rawBody);
 
-  const user = await User.findOne({ email: { $eq: email } });
-  if (!user) {
-    throw ApiError.unauthorized('invalid credentials');
-  }
+  const user = await findUserByEmail(email);
+  if (!user) throw ApiError.unauthorized('Invalid credentials');
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    throw ApiError.unauthorized('invalid credentials');
-  }
+  if (!isMatch) throw ApiError.unauthorized('Invalid credentials');
 
   return { user, sanitizedUser: sanitizeUser(user) };
 };
-
-export { sanitizeUser, createUserAccount, findUserById, authenticateUser };
