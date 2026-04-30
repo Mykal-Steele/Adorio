@@ -3,7 +3,6 @@ node_modules/
 out/
 dist/
 build/
-backend/
 backend-go/
 ai-slop/
 public/
