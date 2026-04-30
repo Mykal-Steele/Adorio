@@ -1,7 +1,10 @@
 # Adorio Social Media Platform - Robots Rules
 User-agent: *
 Allow: /
-Allow: /home
+Allow: /about
+Allow: /projects
+Allow: /contact
+Allow: /social
 Allow: /login
 Allow: /register
 Allow: /profile
@@ -14,5 +17,4 @@ Disallow: /*/api/
 Disallow: /dev/
 Disallow: /draft/
 
-# Sitemap location (add once you have one)
-# Sitemap: https://adorio.space/sitemap.xml
+Sitemap: https://adorio.space/sitemap.xml
