@@ -9,25 +9,18 @@ import {
 import { extractUploadedImageMetadata } from '../utils/imageFormatter.js';
 
 const createPostHandler = asyncHandler(async (req, res) => {
-  const { title, content } = req.body;
   const image = extractUploadedImageMetadata(req.file) || undefined;
-
   const post = await createPost({
     userId: req.user.id,
-    title,
-    content,
+    title: req.body.title,
+    content: req.body.content,
     image,
   });
-
   res.status(201).json(post);
 });
 
 const getPostsHandler = asyncHandler(async (req, res) => {
-  const pagination = await getPaginatedPosts({
-    page: req.query.page,
-    limit: req.query.limit,
-  });
-
+  const pagination = await getPaginatedPosts(req.query);
   res.status(200).json(pagination);
 });
 
@@ -37,11 +30,7 @@ const getSinglePostHandler = asyncHandler(async (req, res) => {
 });
 
 const toggleLikeHandler = asyncHandler(async (req, res) => {
-  const { post, action } = await togglePostLike({
-    postId: req.params.id,
-    userId: req.user.id,
-  });
-
+  const { post, action } = await togglePostLike({ postId: req.params.id, userId: req.user.id });
   res.status(200).json({
     _id: post._id,
     likes: post.likes,
@@ -56,7 +45,6 @@ const addCommentHandler = asyncHandler(async (req, res) => {
     userId: req.user.id,
     text: req.body.text,
   });
-
   res.status(201).json(populatedPost);
 });
 
