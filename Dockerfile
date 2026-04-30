@@ -3,6 +3,8 @@ FROM node:20-alpine AS build-nextjs
 
 WORKDIR /app
 COPY package*.json ./
+# Puppeteer is only used by integration tests; skip its Chrome download during the image build
+ENV PUPPETEER_SKIP_DOWNLOAD=1
 RUN npm ci
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1

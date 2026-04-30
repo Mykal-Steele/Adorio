@@ -26,9 +26,3 @@ export interface Post {
   comments: Comment[];
   createdAt: string;
 }
-
-export interface UserState {
-  user: User | null;
-  token: string | null;
-  isAuthLoading: boolean;
-}

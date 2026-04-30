@@ -1,7 +1,8 @@
 'use client';
 import { useEffect } from 'react';
-import { useAppSelector } from '../../../redux/hooks';
+import { useAppSelector } from '../../../store/hooks';
 import { useRouter, usePathname } from 'next/navigation';
+import Spinner from '@/components/ui/Spinner';
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const { token, isAuthLoading } = useAppSelector((s) => s.user);
@@ -17,10 +18,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   if (isAuthLoading) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-500 border-r-transparent mb-4" />
-          <p className="text-gray-300 text-lg">Loading Adorio...</p>
-        </div>
+        <Spinner size="md" label="Loading Adorio..." />
       </div>
     );
   }

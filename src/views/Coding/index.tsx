@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { CodeBracketIcon } from '@heroicons/react/24/outline';
-import AdSenseScript from '../../Components/AdSenseScript';
+import AdSenseScript from '../../components/AdSenseScript';
 import dynamic from 'next/dynamic';
 
 // Components

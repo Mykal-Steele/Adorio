@@ -1,40 +1,25 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+import userSchema from '../schemas/db/userSchema.js';
 
-const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true, // this automatically makes an index so lookups are fast
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true, // same here, makes searching by email super quick
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  // secret admin powers are given to users whose name starts with 'a' and ends with 'dmin'
+export const User = mongoose.model('User', userSchema);
 
-  // Game stats for Rhythm Dots
-  rhythmGame: {
-    peakPLevel: {
-      type: Number,
-      default: 0,
-    },
-    difficulty: {
-      type: String,
-      enum: ["easy", "normal", "hard"],
-      default: "normal",
-    },
-    lastPlayed: {
-      type: Date,
-    },
-  },
-});
+export const findUserById = (id, { includePassword = false } = {}) =>
+  includePassword ? User.findById(id) : User.findById(id).select('-password');
 
-// gonna add profile pics when i figure out how cloudinary works better
-// this is good enough for now tho
+export const findUserByEmail = (email) => User.findOne({ email: { $eq: email } });
 
-export default mongoose.model("User", userSchema);
+export const findUserByEmailOrUsername = (email, username) =>
+  User.findOne({ $or: [{ email: { $eq: email } }, { username: { $eq: username } }] });
+
+export const createUser = (data) => User.create(data);
+
+export const findUsersWithScore = () =>
+  User.find({ 'rhythmGame.peakPLevel': { $gt: 0 } }, 'username rhythmGame')
+    .sort({ 'rhythmGame.peakPLevel': -1 })
+    .lean();
+
+export const updateUserRhythm = (userId, rhythmData) =>
+  User.findByIdAndUpdate(userId, { rhythmGame: rhythmData }, { new: true });
+
+export const findUsersByIds = (ids) =>
+  User.find({ _id: { $in: ids } }, 'username email displayName').lean();

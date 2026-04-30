@@ -1,25 +1,9 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+import secretEnvSchema from '../schemas/db/secretEnvSchema.js';
 
-const secretEnvSchema = new mongoose.Schema(
-  {
-    encryptedMessage: {
-      type: String,
-      required: true,
-    },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    // Store a hash of the "real password" so we can verify it later
-    passwordHash: {
-      type: String,
-      required: true,
-    },
-  },
-  { timestamps: true }
-);
+export const SecretEnv = mongoose.model('SecretEnv', secretEnvSchema);
 
-const SecretEnv = mongoose.model("SecretEnv", secretEnvSchema);
+export const createSecretEnv = (data) => SecretEnv.create(data);
 
-export default SecretEnv;
+export const findSecretByPasswordHash = (passwordHash) =>
+  SecretEnv.findOne({ passwordHash }).sort({ createdAt: -1 });

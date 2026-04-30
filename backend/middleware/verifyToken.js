@@ -26,10 +26,7 @@ const optional = (req, _res, next) => {
 
   if (authHeader) {
     try {
-      const decoded = jwt.verify(
-        extractToken(authHeader),
-        environment.jwtSecret
-      );
+      const decoded = jwt.verify(extractToken(authHeader), environment.jwtSecret);
       req.user = { id: decoded.userId, isAdmin: decoded.isAdmin };
     } catch (error) {
       if (process.env.NODE_ENV !== 'production') {
@@ -51,7 +48,5 @@ const admin = (req, _res, next) => {
   next();
 };
 
-const protect = verifyToken;
-
 export default verifyToken;
-export { verifyToken, protect, admin, optional };
+export { verifyToken, verifyToken as protect, admin, optional };

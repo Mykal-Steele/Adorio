@@ -4,12 +4,35 @@ Social media app. Live at [adorio.space](https://adorio.space).
 
 **Stack:** Next.js 16 (App Router) + Express + MongoDB + Nginx in Docker.
 
-## Run locally
+## Quick start
 
 ```bash
-npm install
+npm run setup
 npm run dev:full       # frontend :3001 + backend :3000
 ```
+
+`npm run setup` installs root app, Express backend, and AI sidecar dependencies. Root `npm install` alone is not enough for full local dev.
+
+## Daily workflow
+
+```bash
+npm run dev:full       # normal local work
+npm run dev:backend    # backend only
+npm run dev            # frontend only
+npm run dev:ai-slop    # AI sidecar only, if working on /cao
+```
+
+## Repo map
+
+- `src/`: main Next.js app. Most frontend work starts here.
+- `backend/`: Express API. Most server work starts here.
+- `ai-slop/AI-Slop-For-CAO-exam/`: separate Vite app served at `/cao/`.
+- `backend-go/`: experimental backend. Ignore for normal product work.
+- `public/`: static assets.
+- `scripts/`: repo utilities.
+- `__tests__/`: integration tests.
+
+If you only want normal product work, focus on `src/` and `backend/`.
 
 After switching between Windows ↔ Linux:
 
@@ -27,6 +50,14 @@ docker compose -f docker-compose.prod.yml up --build  # prod, port 8080
 ## Build
 
 ```bash
+npm run build
+```
+
+## Standard checks
+
+```bash
+npm run lint
+npm run typecheck
 npm run build
 ```
 
