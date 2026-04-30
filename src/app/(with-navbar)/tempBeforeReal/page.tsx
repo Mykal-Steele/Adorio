@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import TempBeforeReal from '@/views/tempBeforeReal';
+import TempBeforeReal from '@/views/depri_tempBeforeReal';
 
 export const metadata: Metadata = {
   title: 'Adorio',

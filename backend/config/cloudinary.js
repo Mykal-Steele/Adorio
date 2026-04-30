@@ -1,5 +1,6 @@
 import cloudinary from 'cloudinary';
 import { environment, isProduction } from './environment.js';
+import ApiError from '../utils/ApiError.js';
 
 const validateCloudinaryConfig = () => {
   const { name, key, secret } = environment.cloudinary;
@@ -7,7 +8,7 @@ const validateCloudinaryConfig = () => {
   if (!name || !key || !secret) {
     const message = 'Cloudinary credentials are missing';
     if (isProduction) {
-      throw new Error(message);
+      throw ApiError.internalServerError(message);
     }
     console.warn(`${message}. Image uploads will be disabled.`);
     return false;

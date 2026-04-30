@@ -1,9 +1,6 @@
 import crypto from 'crypto';
 import { isProduction } from '../config/environment.js';
-import {
-  createVisitorFingerprint,
-  createStableVisitorId,
-} from '../utils/fingerprinting.js';
+import { createVisitorFingerprint, createStableVisitorId } from '../utils/fingerprinting.js';
 
 const VISITOR_COOKIE_NAME = 'adorio_vid';
 const VISITOR_SESSION_HEADER = 'x-adorio-session-id';
@@ -25,39 +22,10 @@ const visitorIdentifier = (req, res, next) => {
   const bodyVisitorId = body.visitorId;
   const headerVisitorId = headers[VISITOR_ID_HEADER];
 
-  // Extract fingerprint data from request
   const fingerprintData = body.fingerprint || {};
 
-  // Improved IP extraction with multiple fallbacks
-  const extractBestIp = (req) => {
-    const potentialIps = [
-      req.headers['cf-connecting-ip'],
-      req.headers['x-real-ip'],
-      req.headers['x-forwarded-for']?.split(',')[0]?.trim(),
-      req.headers['x-client-ip'],
-      req.connection?.remoteAddress,
-      req.socket?.remoteAddress,
-      req.ip,
-    ].filter(Boolean);
-
-    for (const ip of potentialIps) {
-      if (ip) {
-        const cleanIp = ip.replace(/^::ffff:/, '');
-        if (
-          process.env.NODE_ENV === 'production' &&
-          (cleanIp === '127.0.0.1' ||
-            cleanIp === '::1' ||
-            cleanIp === 'localhost')
-        ) {
-          continue;
-        }
-        return cleanIp;
-      }
-    }
-    return potentialIps[0] || 'unknown';
-  };
-
-  const ipAddress = extractBestIp(req);
+  // req.ip is already resolved correctly by Express trust proxy config
+  const ipAddress = req.ip || 'unknown';
 
   // Create fingerprint
   const fingerprint = createVisitorFingerprint({
@@ -69,15 +37,10 @@ const visitorIdentifier = (req, res, next) => {
     behavior: fingerprintData.behavior,
   });
 
-  let cookieVisitorId =
-    cookies[VISITOR_COOKIE_NAME] || headerVisitorId || bodyVisitorId;
+  let cookieVisitorId = cookies[VISITOR_COOKIE_NAME] || headerVisitorId || bodyVisitorId;
 
   // Create stable visitor ID using cookie and fingerprint
-  const stableVisitorId = createStableVisitorId(
-    cookieVisitorId,
-    fingerprint,
-    ipAddress
-  );
+  const stableVisitorId = createStableVisitorId(cookieVisitorId, fingerprint, ipAddress);
 
   // Use stable ID as the primary visitor ID
   let visitorId = stableVisitorId;
@@ -86,8 +49,7 @@ const visitorIdentifier = (req, res, next) => {
     cookieVisitorId = generateVisitorId();
   }
 
-  const visitorSessionId =
-    headers[VISITOR_SESSION_HEADER] || body.sessionId || null;
+  const visitorSessionId = headers[VISITOR_SESSION_HEADER] || body.sessionId || null;
 
   // Set cookie with the original cookie ID (for consistency)
   if (cookies[VISITOR_COOKIE_NAME] !== cookieVisitorId) {

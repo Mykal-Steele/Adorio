@@ -37,4 +37,47 @@ const likeLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-export { standardLimiter, postLimiter, likeLimiter };
+// Registration limiter - 10 accounts per hour per IP
+const registrationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10,
+  message: {
+    error: 'Too many accounts created from this IP, please try again later.',
+    retryAfter: '1 hour',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Auth limiter - 10 login/refresh attempts per 15 minutes per IP
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: {
+    error: 'Too many authentication attempts, please try again later.',
+    retryAfter: '15 minutes',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Secret message retrieval limiter - 20 attempts per 5 minutes per IP
+const secretLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 20,
+  message: {
+    error: 'Too many secret retrieval attempts, please try again later.',
+    retryAfter: '5 minutes',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+export {
+  standardLimiter,
+  postLimiter,
+  likeLimiter,
+  registrationLimiter,
+  authLimiter,
+  secretLimiter,
+};

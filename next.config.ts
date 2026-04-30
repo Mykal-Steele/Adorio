@@ -13,13 +13,14 @@ const config: NextConfig = {
     ],
   },
 
-  // In dev, proxy /api to Express so no CORS issues
+  // Proxy /api to Express — works in dev and standalone builds.
+  // In Docker production, Nginx intercepts /api before Next.js, so this is a no-op there.
   async rewrites() {
-    if (process.env.NODE_ENV !== 'development') return [];
+    const backend = process.env.BACKEND_INTERNAL_URL || 'http://localhost:3000';
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:3000/api/:path*',
+        destination: `${backend}/api/:path*`,
       },
     ];
   },
@@ -32,6 +33,7 @@ const config: NextConfig = {
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         ],
       },
     ];
