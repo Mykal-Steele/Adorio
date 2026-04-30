@@ -31,7 +31,7 @@ const decryptMessage = (stored, password) => {
 
 const hashPassword = (password) => {
   if (!process.env.JWT_SECRET) throw ApiError.internalServerError('JWT_SECRET not configured');
-  return crypto.createHmac('sha256', process.env.JWT_SECRET).update(password).digest('hex');
+  return crypto.pbkdf2Sync(password, process.env.JWT_SECRET, 310000, 32, 'sha256').toString('hex');
 };
 
 export const createSecretMessage = async ({ userId, rawBody }) => {
