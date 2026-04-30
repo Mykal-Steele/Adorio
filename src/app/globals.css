@@ -1,15 +1,304 @@
+/* Google Fonts + custom @font-face — Tailwind has no font-loading mechanism */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+
+@font-face {
+  font-family: 'Funny Hello';
+  src: url('/FunnyHello.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Body Styling */
+/* Portfolio IDE theme tokens — midnight defaults for SSR flash prevention.
+   ThemeProvider overwrites these at runtime. Tailwind can't drive runtime themes. */
+:root {
+  --ide-bg-0: #060a0f;
+  --ide-bg-1: #080c11;
+  --ide-bg-2: #0a0e14;
+  --ide-bg-3: #0d1117;
+  --ide-bg-4: #0f141a;
+  --ide-bg-5: #1a2130;
+  --ide-border-subtle: rgba(255,255,255,0.04);
+  --ide-border: rgba(255,255,255,0.06);
+  --ide-border-medium: rgba(255,255,255,0.08);
+  --ide-border-strong: rgba(255,255,255,0.1);
+  --ide-border-stronger: rgba(255,255,255,0.12);
+  --ide-text-1: #f1f3fc;
+  --ide-text-2: #a8abb3;
+  --ide-text-3: #94a3b8;
+  --ide-text-4: #72757d;
+  --ide-text-5: #64748b;
+  --ide-text-6: #475569;
+  --ide-text-7: #3d4f6b;
+  --ide-text-8: #5a6e8a;
+  --ide-text-9: #2d3748;
+  --ide-accent: #00ffc2;
+  --ide-accent-dark: #00654b;
+  --ide-accent-light: #aaffdc;
+  --ide-accent-bright: #00edb4;
+  --ide-accent-a5: rgba(0,255,194,0.05);
+  --ide-accent-a6: rgba(0,255,194,0.06);
+  --ide-accent-a8: rgba(0,255,194,0.08);
+  --ide-accent-a10: rgba(0,255,194,0.1);
+  --ide-accent-a12: rgba(0,255,194,0.12);
+  --ide-accent-a15: rgba(0,255,194,0.15);
+  --ide-accent-a20: rgba(0,255,194,0.2);
+  --ide-accent-a25: rgba(0,255,194,0.25);
+  --ide-accent-a30: rgba(0,255,194,0.3);
+  --ide-accent-light-a15: rgba(170,255,220,0.15);
+  --ide-accent-light-a40: rgba(170,255,220,0.4);
+  --ide-accent-light-a60: rgba(170,255,220,0.6);
+  --ide-accent-light-a70: rgba(170,255,220,0.7);
+  --ide-orange: #fe9d00;
+  --ide-orange-light: #ffbd4a;
+  --ide-orange-a12: rgba(254,157,0,0.12);
+  --ide-orange-a18: rgba(254,157,0,0.18);
+  --ide-orange-a30: rgba(254,157,0,0.3);
+  --ide-orange-a45: rgba(254,157,0,0.45);
+  --ide-purple: #a78bfa;
+  --ide-purple-a10: rgba(167,139,250,0.1);
+  --ide-purple-a12: rgba(167,139,250,0.12);
+  --ide-purple-a15: rgba(167,139,250,0.15);
+  --ide-purple-a25: rgba(167,139,250,0.25);
+  --ide-blue: #60a5fa;
+  --ide-blue-light: #93c5fd;
+  --ide-blue-a18: rgba(96,165,250,0.18);
+  --ide-blue-a45: rgba(96,165,250,0.45);
+  --ide-green: #4ade80;
+  --ide-red: #d7383b;
+  --ide-red-dark: #ce422b;
+  --ide-red-a12: rgba(215,56,59,0.12);
+  --ide-pink: #ff9195;
+  --ide-pink-a12: rgba(255,145,149,0.12);
+  --ide-cyan: #00acd7;
+  --ide-ts-blue: #3178c6;
+  --ide-ts-blue-a8: rgba(49,120,198,0.08);
+  --ide-ts-blue-a10: rgba(49,120,198,0.1);
+  --ide-ts-blue-a20: rgba(49,120,198,0.2);
+  --ide-yellow: #f7c131;
+  --ide-syntax-string: #c3e88d;
+  --ide-syntax-string2: #00fdc1;
+  --ide-line-number: rgba(114,117,125,0.3);
+  --ide-scrollbar: #1a2130;
+}
+
+/* IDE themes
+   next-themes sets [data-theme="X"] on <html> at runtime and in a blocking
+   script during SSR, so these take over from the :root midnight defaults with
+   zero flash. One block per theme — all variables must be redefined here so
+   nothing accidentally inherits a midnight value. */
+
+[data-theme="nord"] {
+  --ide-bg-0: #242933; --ide-bg-1: #272d38; --ide-bg-2: #2e3440;
+  --ide-bg-3: #3b4252; --ide-bg-4: #434c5e; --ide-bg-5: #4c566a;
+  --ide-text-1: #eceff4; --ide-text-2: #d8dee9; --ide-text-3: #b8c4d4;
+  --ide-text-4: #8a9bb5; --ide-text-5: #8da4c0; --ide-text-6: #8a9fb8;
+  --ide-text-7: #8096b0; --ide-text-8: #8a9fb8; --ide-text-9: #7590ac;
+  --ide-accent: #88c0d0; --ide-accent-dark: #2e5e6a;
+  --ide-accent-light: #a3d5e0; --ide-accent-bright: #8fbcbb;
+  --ide-accent-a5: rgba(136,192,208,0.05); --ide-accent-a6: rgba(136,192,208,0.06);
+  --ide-accent-a8: rgba(136,192,208,0.08); --ide-accent-a10: rgba(136,192,208,0.1);
+  --ide-accent-a12: rgba(136,192,208,0.12); --ide-accent-a15: rgba(136,192,208,0.15);
+  --ide-accent-a20: rgba(136,192,208,0.2); --ide-accent-a25: rgba(136,192,208,0.25);
+  --ide-accent-a30: rgba(136,192,208,0.3);
+  --ide-accent-light-a15: rgba(163,213,224,0.15); --ide-accent-light-a40: rgba(163,213,224,0.4);
+  --ide-accent-light-a60: rgba(163,213,224,0.6); --ide-accent-light-a70: rgba(163,213,224,0.7);
+  --ide-orange: #d08770; --ide-orange-light: #dba48e;
+  --ide-orange-a12: rgba(208,135,112,0.12); --ide-orange-a18: rgba(208,135,112,0.18);
+  --ide-orange-a30: rgba(208,135,112,0.3); --ide-orange-a45: rgba(208,135,112,0.45);
+  --ide-purple: #b48ead;
+  --ide-purple-a10: rgba(180,142,173,0.1); --ide-purple-a12: rgba(180,142,173,0.12);
+  --ide-purple-a15: rgba(180,142,173,0.15); --ide-purple-a25: rgba(180,142,173,0.25);
+  --ide-blue: #81a1c1; --ide-blue-light: #a3bdda;
+  --ide-blue-a18: rgba(129,161,193,0.18); --ide-blue-a45: rgba(129,161,193,0.45);
+  --ide-green: #a3be8c; --ide-red: #bf616a; --ide-red-dark: #a3424c;
+  --ide-red-a12: rgba(191,97,106,0.12); --ide-pink: #bf616a;
+  --ide-pink-a12: rgba(191,97,106,0.12); --ide-cyan: #8fbcbb;
+  --ide-ts-blue: #5e81ac;
+  --ide-ts-blue-a8: rgba(94,129,172,0.08); --ide-ts-blue-a10: rgba(94,129,172,0.1);
+  --ide-ts-blue-a20: rgba(94,129,172,0.2);
+  --ide-yellow: #ebcb8b; --ide-syntax-string: #a3be8c; --ide-syntax-string2: #88c0d0;
+  --ide-line-number: rgba(136,153,178,0.5); --ide-scrollbar: #4c566a;
+}
+
+[data-theme="dracula"] {
+  --ide-bg-0: #191a21; --ide-bg-1: #1d1e28; --ide-bg-2: #21222c;
+  --ide-bg-3: #282a36; --ide-bg-4: #2d2f3d; --ide-bg-5: #44475a;
+  --ide-text-1: #f8f8f2; --ide-text-2: #d4d4d0; --ide-text-3: #bfbdb6;
+  --ide-text-4: #8b8ca1; --ide-text-5: #8892c2; --ide-text-6: #828aae;
+  --ide-text-7: #767a9e; --ide-text-8: #848cb2; --ide-text-9: #727698;
+  --ide-accent: #bd93f9; --ide-accent-dark: #5a3d80;
+  --ide-accent-light: #d4b8ff; --ide-accent-bright: #50fa7b;
+  --ide-accent-a5: rgba(189,147,249,0.05); --ide-accent-a6: rgba(189,147,249,0.06);
+  --ide-accent-a8: rgba(189,147,249,0.08); --ide-accent-a10: rgba(189,147,249,0.1);
+  --ide-accent-a12: rgba(189,147,249,0.12); --ide-accent-a15: rgba(189,147,249,0.15);
+  --ide-accent-a20: rgba(189,147,249,0.2); --ide-accent-a25: rgba(189,147,249,0.25);
+  --ide-accent-a30: rgba(189,147,249,0.3);
+  --ide-accent-light-a15: rgba(212,184,255,0.15); --ide-accent-light-a40: rgba(212,184,255,0.4);
+  --ide-accent-light-a60: rgba(212,184,255,0.6); --ide-accent-light-a70: rgba(212,184,255,0.7);
+  --ide-orange: #ffb86c; --ide-orange-light: #ffd4a0;
+  --ide-orange-a12: rgba(255,184,108,0.12); --ide-orange-a18: rgba(255,184,108,0.18);
+  --ide-orange-a30: rgba(255,184,108,0.3); --ide-orange-a45: rgba(255,184,108,0.45);
+  --ide-purple: #ff79c6;
+  --ide-purple-a10: rgba(255,121,198,0.1); --ide-purple-a12: rgba(255,121,198,0.12);
+  --ide-purple-a15: rgba(255,121,198,0.15); --ide-purple-a25: rgba(255,121,198,0.25);
+  --ide-blue: #8be9fd; --ide-blue-light: #b5f0ff;
+  --ide-blue-a18: rgba(139,233,253,0.18); --ide-blue-a45: rgba(139,233,253,0.45);
+  --ide-green: #50fa7b; --ide-red: #ff5555; --ide-red-dark: #cc3333;
+  --ide-red-a12: rgba(255,85,85,0.12); --ide-pink: #ff79c6;
+  --ide-pink-a12: rgba(255,121,198,0.12); --ide-cyan: #8be9fd;
+  --ide-ts-blue: #6272a4;
+  --ide-ts-blue-a8: rgba(98,114,164,0.08); --ide-ts-blue-a10: rgba(98,114,164,0.1);
+  --ide-ts-blue-a20: rgba(98,114,164,0.2);
+  --ide-yellow: #f1fa8c; --ide-syntax-string: #f1fa8c; --ide-syntax-string2: #50fa7b;
+  --ide-line-number: rgba(98,114,164,0.7); --ide-scrollbar: #44475a;
+}
+
+[data-theme="one-dark"] {
+  --ide-bg-0: #1b1e24; --ide-bg-1: #1e2127; --ide-bg-2: #21252b;
+  --ide-bg-3: #282c34; --ide-bg-4: #2c313a; --ide-bg-5: #353b45;
+  --ide-text-1: #abb2bf; --ide-text-2: #9da5b4; --ide-text-3: #8b939e;
+  --ide-text-4: #7a8291; --ide-text-5: #6e7a8e; --ide-text-6: #7b838e;
+  --ide-text-7: #727c8e; --ide-text-8: #7b8694; --ide-text-9: #6a7488;
+  --ide-accent: #61afef; --ide-accent-dark: #2d5a80;
+  --ide-accent-light: #8fc8f5; --ide-accent-bright: #56b6c2;
+  --ide-accent-a5: rgba(97,175,239,0.05); --ide-accent-a6: rgba(97,175,239,0.06);
+  --ide-accent-a8: rgba(97,175,239,0.08); --ide-accent-a10: rgba(97,175,239,0.1);
+  --ide-accent-a12: rgba(97,175,239,0.12); --ide-accent-a15: rgba(97,175,239,0.15);
+  --ide-accent-a20: rgba(97,175,239,0.2); --ide-accent-a25: rgba(97,175,239,0.25);
+  --ide-accent-a30: rgba(97,175,239,0.3);
+  --ide-accent-light-a15: rgba(143,200,245,0.15); --ide-accent-light-a40: rgba(143,200,245,0.4);
+  --ide-accent-light-a60: rgba(143,200,245,0.6); --ide-accent-light-a70: rgba(143,200,245,0.7);
+  --ide-orange: #d19a66; --ide-orange-light: #e0b68a;
+  --ide-orange-a12: rgba(209,154,102,0.12); --ide-orange-a18: rgba(209,154,102,0.18);
+  --ide-orange-a30: rgba(209,154,102,0.3); --ide-orange-a45: rgba(209,154,102,0.45);
+  --ide-purple: #c678dd;
+  --ide-purple-a10: rgba(198,120,221,0.1); --ide-purple-a12: rgba(198,120,221,0.12);
+  --ide-purple-a15: rgba(198,120,221,0.15); --ide-purple-a25: rgba(198,120,221,0.25);
+  --ide-blue: #61afef; --ide-blue-light: #8fc8f5;
+  --ide-blue-a18: rgba(97,175,239,0.18); --ide-blue-a45: rgba(97,175,239,0.45);
+  --ide-green: #98c379; --ide-red: #e06c75; --ide-red-dark: #be5046;
+  --ide-red-a12: rgba(224,108,117,0.12); --ide-pink: #e06c75;
+  --ide-pink-a12: rgba(224,108,117,0.12); --ide-cyan: #56b6c2;
+  --ide-ts-blue: #4d78cc;
+  --ide-ts-blue-a8: rgba(77,120,204,0.08); --ide-ts-blue-a10: rgba(77,120,204,0.1);
+  --ide-ts-blue-a20: rgba(77,120,204,0.2);
+  --ide-yellow: #e5c07b; --ide-syntax-string: #98c379; --ide-syntax-string2: #56b6c2;
+  --ide-line-number: rgba(92,99,112,0.5); --ide-scrollbar: #353b45;
+}
+
+[data-theme="catppuccin"] {
+  --ide-bg-0: #11111b; --ide-bg-1: #131320; --ide-bg-2: #181825;
+  --ide-bg-3: #1e1e2e; --ide-bg-4: #252536; --ide-bg-5: #313244;
+  --ide-text-1: #cdd6f4; --ide-text-2: #bac2de; --ide-text-3: #a6adc8;
+  --ide-text-4: #7f849c; --ide-text-5: #6c7086; --ide-text-6: #6a6d86;
+  --ide-text-7: #6c708a; --ide-text-8: #6a6d86; --ide-text-9: #626688;
+  --ide-accent: #cba6f7; --ide-accent-dark: #5c3d80;
+  --ide-accent-light: #e0c8ff; --ide-accent-bright: #94e2d5;
+  --ide-accent-a5: rgba(203,166,247,0.05); --ide-accent-a6: rgba(203,166,247,0.06);
+  --ide-accent-a8: rgba(203,166,247,0.08); --ide-accent-a10: rgba(203,166,247,0.1);
+  --ide-accent-a12: rgba(203,166,247,0.12); --ide-accent-a15: rgba(203,166,247,0.15);
+  --ide-accent-a20: rgba(203,166,247,0.2); --ide-accent-a25: rgba(203,166,247,0.25);
+  --ide-accent-a30: rgba(203,166,247,0.3);
+  --ide-accent-light-a15: rgba(224,200,255,0.15); --ide-accent-light-a40: rgba(224,200,255,0.4);
+  --ide-accent-light-a60: rgba(224,200,255,0.6); --ide-accent-light-a70: rgba(224,200,255,0.7);
+  --ide-orange: #fab387; --ide-orange-light: #fcc8a8;
+  --ide-orange-a12: rgba(250,179,135,0.12); --ide-orange-a18: rgba(250,179,135,0.18);
+  --ide-orange-a30: rgba(250,179,135,0.3); --ide-orange-a45: rgba(250,179,135,0.45);
+  --ide-purple: #f5c2e7;
+  --ide-purple-a10: rgba(245,194,231,0.1); --ide-purple-a12: rgba(245,194,231,0.12);
+  --ide-purple-a15: rgba(245,194,231,0.15); --ide-purple-a25: rgba(245,194,231,0.25);
+  --ide-blue: #89b4fa; --ide-blue-light: #b4d0fc;
+  --ide-blue-a18: rgba(137,180,250,0.18); --ide-blue-a45: rgba(137,180,250,0.45);
+  --ide-green: #a6e3a1; --ide-red: #f38ba8; --ide-red-dark: #d66a85;
+  --ide-red-a12: rgba(243,139,168,0.12); --ide-pink: #f38ba8;
+  --ide-pink-a12: rgba(243,139,168,0.12); --ide-cyan: #94e2d5;
+  --ide-ts-blue: #74c7ec;
+  --ide-ts-blue-a8: rgba(116,199,236,0.08); --ide-ts-blue-a10: rgba(116,199,236,0.1);
+  --ide-ts-blue-a20: rgba(116,199,236,0.2);
+  --ide-yellow: #f9e2af; --ide-syntax-string: #a6e3a1; --ide-syntax-string2: #94e2d5;
+  --ide-line-number: rgba(88,91,112,0.5); --ide-scrollbar: #313244;
+}
+
+/* -webkit-font-smoothing has no Tailwind equivalent */
 body {
   @apply m-0 font-sans bg-gray-950 overflow-y-scroll;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbar Styling */
+.ide-layout,
+.ide-layout body {
+  overflow: hidden;
+}
+
+/* Theme-aware hover backgrounds — values use CSS vars, !important overrides base resets */
+.ide-hover:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+.ide-hover-icon:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Custom animations — Tailwind only ships spin/ping/pulse/bounce */
+@keyframes rainbow {
+  0%   { color: var(--ide-accent); }
+  25%  { color: var(--ide-orange); }
+  50%  { color: var(--ide-purple); }
+  75%  { color: var(--ide-blue); }
+  100% { color: var(--ide-accent); }
+}
+.rainbow-icon {
+  animation: rainbow 4s linear infinite;
+}
+.rainbow-btn:hover .rainbow-icon {
+  animation: none;
+  color: var(--ide-text-1);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+@keyframes typingDot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40%           { opacity: 1;   transform: scale(1); }
+}
+
+@keyframes settingsFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+
+@keyframes slideInBottom {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes slideOutBottom {
+  from { transform: translateY(0); }
+  to   { transform: translateY(100%); }
+}
+
+@keyframes dropdownOpen {
+  from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 @layer utilities {
   ::-webkit-scrollbar {
     @apply w-3;
@@ -28,6 +317,7 @@ body {
     @apply bg-transparent h-[16px] w-3;
   }
 
+  /* CSS border triangle trick — no Tailwind equivalent */
   ::-webkit-scrollbar-button:single-button:vertical:decrement {
     border: 0 6px 8px 6px solid transparent;
     border-bottom-color: #4b5563;
@@ -38,6 +328,7 @@ body {
     border-top-color: #4b5563;
   }
 
+  /* Firefox scrollbar — scrollbar-color shorthand has no Tailwind mapping */
   @supports (scrollbar-color: auto) {
     * {
       scrollbar-color: #4b5563 transparent;

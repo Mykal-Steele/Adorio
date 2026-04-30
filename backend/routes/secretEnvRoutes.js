@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import verifyToken from '../middleware/verifyToken.js';
+import { secretLimiter } from '../config/rateLimiters.js';
 import {
   storeSecretMessage,
   retrieveSecretMessageHandler,
@@ -8,6 +9,7 @@ import {
 const router = Router();
 
 router.post('/', verifyToken, storeSecretMessage);
-router.get('/', retrieveSecretMessageHandler);
+// No auth by design — curl-friendly personal message saver; password hash protects the content
+router.get('/', secretLimiter, retrieveSecretMessageHandler);
 
 export default router;

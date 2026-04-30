@@ -1,0 +1,1 @@
+export const TITLE_CHARACTER_LIMIT = 200;

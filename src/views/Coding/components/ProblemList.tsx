@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import { ProblemStorage } from '../utils/problemStorage';
 import { getSortedProblems } from '../problems';
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
