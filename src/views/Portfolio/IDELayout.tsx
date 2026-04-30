@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Folder,
   Bot,
@@ -337,6 +338,7 @@ function MobileShell({ children }: { children: ReactNode }) {
 
 function IDELayoutInner({ children }: { children: ReactNode }) {
   const { isMobile, isTablet } = useResponsive();
+  const router = useRouter();
 
   useEffect(() => {
     document.documentElement.classList.add('ide-layout');
@@ -344,6 +346,22 @@ function IDELayoutInner({ children }: { children: ReactNode }) {
       document.documentElement.classList.remove('ide-layout');
     };
   }, []);
+
+  useEffect(() => {
+    const routes = [
+      '/',
+      '/about',
+      '/projects',
+      '/contact',
+      '/projects/create-adorex',
+      '/projects/chroma-board',
+      '/projects/vexta',
+      '/projects/discord-forge',
+      '/projects/axum-rest',
+      '/projects/express-legacy',
+    ];
+    routes.forEach((r) => router.prefetch(r));
+  }, [router]);
 
   if (isMobile) return <MobileShell>{children}</MobileShell>;
   if (isTablet) return <TabletShell>{children}</TabletShell>;
