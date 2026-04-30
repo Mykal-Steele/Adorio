@@ -21,7 +21,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@components/*": ["./src/Components/*"]
+      "@components/*": ["src/components/*"]
     },
     "module": "esnext"
   },
