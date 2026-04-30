@@ -1,30 +1,16 @@
 import crypto from 'crypto';
 
 const generateFingerprint = (components) => {
-  const normalized = components
-    .filter(Boolean)
-    .map(String)
-    .join('|');
+  const normalized = components.filter(Boolean).map(String).join('|');
 
-  return crypto
-    .createHash('sha256')
-    .update(normalized)
-    .digest('hex')
-    .substring(0, 16);
+  return crypto.createHash('sha256').update(normalized).digest('hex').substring(0, 16);
 };
 
 const extractScreenFingerprint = (screenData) => {
   if (!screenData) return null;
 
-  const {
-    width,
-    height,
-    availWidth,
-    availHeight,
-    colorDepth,
-    pixelDepth,
-    devicePixelRatio,
-  } = screenData;
+  const { width, height, availWidth, availHeight, colorDepth, pixelDepth, devicePixelRatio } =
+    screenData;
 
   return `${width}x${height}|${availWidth}x${availHeight}|${colorDepth}|${pixelDepth}|${devicePixelRatio}`;
 };
@@ -32,11 +18,10 @@ const extractScreenFingerprint = (screenData) => {
 const extractLocaleFingerprint = (localeData) => {
   if (!localeData) return null;
 
-  const { timezone, timezoneOffset, language, languages, country, dateFormat } =
-    localeData;
+  const { timezone, timezoneOffset, language, languages, country, dateFormat } = localeData;
 
   return `${timezone}|${timezoneOffset}|${language}|${languages?.join(
-    ','
+    ',',
   )}|${country}|${dateFormat}`;
 };
 
@@ -57,22 +42,20 @@ const extractBrowserFingerprint = (browserData) => {
   } = browserData;
 
   return `${userAgent}|${platform}|${cookieEnabled}|${doNotTrack}|${hardwareConcurrency}|${maxTouchPoints}|${vendor}|${webgl}|${canvas}|${fonts?.join(
-    ','
+    ',',
   )}`;
 };
 
 const extractNetworkFingerprint = (networkData) => {
   if (!networkData) return null;
 
-  const { connectionType, effectiveType, downlink, rtt, saveData } =
-    networkData;
+  const { connectionType, effectiveType, downlink, rtt, saveData } = networkData;
 
   return `${connectionType}|${effectiveType}|${downlink}|${rtt}|${saveData}`;
 };
 
 export const createVisitorFingerprint = (fingerprintData) => {
-  const { screen, locale, browser, network, ipAddress, behavior } =
-    fingerprintData || {};
+  const { screen, locale, browser, network, ipAddress, behavior } = fingerprintData || {};
 
   const components = [
     extractScreenFingerprint(screen),
@@ -129,7 +112,7 @@ const levenshteinDistance = (str1, str2) => {
         matrix[i][j] = Math.min(
           matrix[i - 1][j - 1] + 1,
           matrix[i][j - 1] + 1,
-          matrix[i - 1][j] + 1
+          matrix[i - 1][j] + 1,
         );
       }
     }
