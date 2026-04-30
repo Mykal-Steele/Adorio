@@ -4,7 +4,7 @@ import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import useClickOutside from '../../../../hooks/useClickOutside';
 
-// this form handles all the comment input stuff - finally got emojis working!
+// this form handles all the comment input stuff
 const CommentForm = ({
   value,
   onChange,
@@ -28,7 +28,7 @@ const CommentForm = ({
           placeholder="Add a comment..."
           className="w-full p-2 text-gray-300 bg-gray-800/50 rounded-xl border-0 focus:ring-2 focus:ring-purple-500 outline-none"
         />
-        {/* emoji button - tried to make it look like fb's */}
+        {/* emoji button */}
         <button
           type="button"
           onClick={() => onToggleEmojiPicker(!showEmojiPicker)}

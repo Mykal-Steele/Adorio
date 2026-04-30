@@ -1,10 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { User, UserState } from '../types';
+import type { User } from '../types';
+
+export interface UserState {
+  user: User | null;
+  token: string | null;
+  isAuthLoading: boolean;
+}
 
 const initialState: UserState = {
   user: null,
   token: null,
-  isAuthLoading: true, // true until bootstrap resolves
+  isAuthLoading: true,
 };
 
 const userSlice = createSlice({

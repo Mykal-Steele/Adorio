@@ -12,7 +12,7 @@ import CommentSection from './components/CommentSection';
 // Import hooks
 import { useImageLoader } from './hooks/useImageLoader';
 
-import { isUserAdmin } from './constants';
+import { ADMIN_AVATAR_URL } from './constants';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
@@ -36,7 +36,7 @@ const PostCard = ({
   );
 
   // Derived states with safety checks
-  const isAdmin = user?.username === 'Admin';
+  const isAdmin = user?.isAdmin === true;
 
   // Component state
   const [showComments, setShowComments] = useState(false);
@@ -271,10 +271,8 @@ const PostCard = ({
       className="p-6 bg-gray-900/80 backdrop-blur-md rounded-xl shadow-xl transition-all relative group hover:bg-gray-900/90"
       data-post-id={_id}
     >
-      {/* Author Header */}
       <AuthorHeader user={user} createdAt={createdAt} isAdmin={isAdmin} />
 
-      {/* Post Image */}
       {postImage && (
         <PostImage
           imageState={imageState}
@@ -285,7 +283,6 @@ const PostCard = ({
         />
       )}
 
-      {/* Image Modal */}
       <ImageModal
         isVisible={showImageModal}
         imageUrl={safeImageUrl}
@@ -293,7 +290,6 @@ const PostCard = ({
         onClose={() => setShowImageModal(false)}
         instanceId={instanceId}
       />
-      {/* Close modal button - this is only shown when showImageModal is true */}
       {showImageModal && (
         <button
           className="absolute top-4 right-4 p-2 bg-gray-900/80 backdrop-blur-lg rounded-full hover:bg-gray-800/60 transition-colors group"
@@ -304,7 +300,6 @@ const PostCard = ({
         </button>
       )}
 
-      {/* Post Content */}
       <PostContent
         title={title}
         content={content}
@@ -312,7 +307,6 @@ const PostCard = ({
         onToggleExpand={handleToggleContent}
       />
 
-      {/* Show more/less content */}
       {content.length > 150 && (
         <button
           onClick={handleToggleContent}
@@ -323,7 +317,6 @@ const PostCard = ({
         </button>
       )}
 
-      {/* Interaction Buttons */}
       <InteractionButtons
         userLiked={optimisticUserLiked}
         likesCount={optimisticLikesCount}
@@ -334,7 +327,6 @@ const PostCard = ({
 
       {authError && <p className="mt-2 text-sm text-amber-400">{authError}</p>}
 
-      {/* Comments Section */}
       <CommentSection
         visible={showComments}
         comments={comments || []} // Ensure array

@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 // Explicitly loads AdSense script for React pages
 const AdSenseScript = () => {

@@ -1,74 +1,40 @@
-import axios from 'axios';
-import { handleApiError } from '../utils/errorHandling';
+import API, { request } from './index';
 
-// Create a shared API instance with consistent configuration
-const API = axios.create({
-  baseURL: '/api',
-  timeout: 10000,
-});
+const leaderboardFallback = [];
+const anonymousScoreFallback = {
+  anonymous: true,
+  localScore: true,
+};
+const anonymousStatsFallback = {
+  peakPLevel: 0,
+  difficulty: 'normal',
+  anonymous: true,
+};
 
-// Add request interceptor to attach auth token to all requests
-API.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-/**
- * Fetch leaderboard data
- * @returns {Promise<Array>} Sorted array of users with rhythm game scores
- */
 export const fetchLeaderboard = async () => {
   try {
-    const response = await API.get('/game/leaderboard');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching leaderboard:', error);
-    return [];
+    return await request(API.get('/game/leaderboard'));
+  } catch {
+    return leaderboardFallback;
   }
 };
 
-/**
- * Update user's rhythm game score
- * @param {number} score - The player's P-Level score
- * @param {string} difficulty - Game difficulty (easy, normal, hard)
- * @returns {Promise<Object>} Response with updated score info
- */
 export const updateScore = async (score, difficulty) => {
   try {
-    const response = await API.post('/game/update-score', {
-      score,
-      difficulty,
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Failed to update score:', error.response?.data || error.message);
-    // Return a sensible fallback so the UI can handle it gracefully
-    return { anonymous: true, localScore: true };
+    return await request(API.post('/game/update-score', { score, difficulty }));
+  } catch {
+    return anonymousScoreFallback;
   }
 };
 
-/**
- * Fetch the current user's rhythm game stats
- * @returns {Promise<Object>} User's game statistics
- */
 export const fetchUserGameStats = async () => {
   try {
-    const response = await API.get('/game/user-stats');
-    return response.data;
+    return await request(API.get('/game/user-stats'));
   } catch (error) {
-    // Don't treat as error for anonymous users
-    if (error.response && error.response.status === 401) {
+    if (error?.statusCode === 401 && process.env.NODE_ENV !== 'production') {
       console.log('User not authenticated, using local stats');
-      return { peakPLevel: 0, difficulty: 'normal', anonymous: true };
     }
 
-    console.error('Error fetching user game stats:', error);
-    return { peakPLevel: 0, difficulty: 'normal', anonymous: true };
+    return anonymousStatsFallback;
   }
 };

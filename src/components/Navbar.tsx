@@ -3,8 +3,8 @@ import Link from 'next/link';
 import PropTypes from 'prop-types';
 import { useRouter, usePathname } from 'next/navigation';
 import { SparklesIcon } from '@heroicons/react/24/outline';
-import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { logout } from '../redux/userSlice';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { logout } from '../store/userSlice';
 import { motion } from 'framer-motion';
 
 const Navbar = () => {
@@ -42,19 +42,19 @@ const Navbar = () => {
             <div className="hidden sm:flex items-center gap-2 mr-1">
               {token ? (
                 <>
-                  <NavLink href="/home" text="Home" />
+                  <NavLink href="/social" text="Social" />
                   <NavLink href="/profile" text="Profile" />
                   <NavLink href="/coding" text="Coding" />
                   <NavLink href="/smartcity" text="SmartCity" />
                   <NavLink href="/rygame" text="RyGame" />
-                  <NavLink href="/cao" text="CAO" />
+                  <NavLink href="/cao" text="CAO" external />
                   <NavLink href="/algo" text="Algorithms" />
                 </>
               ) : (
                 <>
                   <NavLink href="/coding" text="Coding" />
                   <NavLink href="/smartcity" text="SmartCity" />
-                  <NavLink href="/cao" text="CAO" />
+                  <NavLink href="/cao" text="CAO" external />
                   <NavLink href="/algo" text="Algorithms" />
                 </>
               )}
@@ -93,18 +93,18 @@ const Navbar = () => {
         <div className="sm:hidden flex justify-center space-x-4 pb-2">
           {token ? (
             <>
-              <NavLink href="/home" text="Home" />
+              <NavLink href="/social" text="Social" />
               <NavLink href="/profile" text="Profile" />
               <NavLink href="/coding" text="Coding" />
               <NavLink href="/smartcity" text="SmartCity" />
               <NavLink href="/rygame" text="RyGame" />
-              <NavLink href="/cao" text="CAO" />
+              <NavLink href="/cao" text="CAO" external />
             </>
           ) : (
             <>
               <NavLink href="/coding" text="Coding" />
               <NavLink href="/smartcity" text="SmartCity" />
-              <NavLink href="/cao" text="CAO" />
+              <NavLink href="/cao" text="CAO" external />
               <NavLink href="/login" text="Login" />
               <NavLink href="/register" text="Register" />
             </>
@@ -115,15 +115,24 @@ const Navbar = () => {
   );
 };
 
-/** @param {{ href: string, text: string, className?: string }} props */
-const NavLink = ({ href, text, className = '' }) => (
+/** @param {{ href: string, text: string, className?: string, external?: boolean }} props */
+const NavLink = ({ href, text, className = '', external = false }) => (
   <motion.div whileHover={{ scale: 1.05 }} className={`relative ${className}`}>
-    <Link
-      href={href}
-      className="text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 flex items-center"
-    >
-      {text}
-    </Link>
+    {external ? (
+      <a
+        href={href}
+        className="text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 flex items-center"
+      >
+        {text}
+      </a>
+    ) : (
+      <Link
+        href={href}
+        className="text-gray-300 px-3 py-1 sm:px-4 sm:py-2 text-sm sm:text-base font-medium hover:text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 transition-all duration-300 flex items-center"
+      >
+        {text}
+      </Link>
+    )}
   </motion.div>
 );
 
@@ -131,6 +140,7 @@ NavLink.propTypes = {
   href: PropTypes.string.isRequired,
   text: PropTypes.string.isRequired,
   className: PropTypes.string,
+  external: PropTypes.bool,
 };
 
 export default Navbar;

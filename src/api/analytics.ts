@@ -1,23 +1,9 @@
 import API from './index';
-import { API_BASE_URL } from '../config/apiConfig';
+
 import { generateBrowserFingerprint, generateVisitorId } from '../utils/browserFingerprinting';
 import { withPerformanceTracking } from '../utils/frontendMonitoring';
-
-const STATS_BASE = `${API_BASE_URL}/stats`;
-const TRACK_ENDPOINT = `${STATS_BASE}/track`;
-
-interface TrackPageViewPayload {
-  path?: string;
-  fullUrl?: string;
-  referrer?: string;
-  durationMs?: number;
-  locale?: string;
-  timezoneOffset?: number;
-  metadata?: Record<string, unknown>;
-  visitorId?: string;
-  sessionId?: string;
-  userId?: string;
-}
+import { TRACK_ENDPOINT } from './constants/analytics_const';
+import type { TrackPageViewPayload } from './types/analytics';
 
 const normalizeDuration = (value: unknown): number | undefined => {
   if (typeof value !== 'number' || Number.isNaN(value)) {
@@ -51,32 +37,20 @@ const trackPageView = withPerformanceTracking(
         return;
       }
 
-      // Generate fingerprint data with a timeout so page tracking stays fast.
-      const fingerprintPromise = Promise.race([
-        generateBrowserFingerprint(),
-        new Promise((resolve) => setTimeout(() => resolve(null), 2000)), // 2 second timeout
-      ]);
+      // Fingerprint and visitor ID with axios-style timeout via Promise.allSettled
+      const fingerprintPromise = generateBrowserFingerprint();
+      const visitorPromise = generateVisitorId();
 
-      const visitorPromise = Promise.race([
-        generateVisitorId(),
-        new Promise((resolve) =>
-          setTimeout(
-            () =>
-              resolve({
-                persistentId: `timeout-${Date.now()}`,
-                sessionId: `session-${Date.now()}`,
-                fingerprint: null,
-                storageCapabilities: null,
-              }),
-            1500,
-          ),
-        ), // 1.5 second timeout
-      ]);
-
-      const [fingerprint, visitorData] = (await Promise.all([
+      const [fingerprintResult, visitorResult] = await Promise.allSettled([
         fingerprintPromise,
         visitorPromise,
-      ])) as [unknown, { persistentId: string; sessionId: string }];
+      ]);
+
+      const fingerprint = fingerprintResult.status === 'fulfilled' ? fingerprintResult.value : null;
+      const visitorData =
+        visitorResult.status === 'fulfilled'
+          ? visitorResult.value
+          : { persistentId: `fallback-${Date.now()}`, sessionId: `session-${Date.now()}` };
 
       const body = JSON.stringify({
         path,
