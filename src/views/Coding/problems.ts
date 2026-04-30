@@ -1,4 +1,5 @@
-import { ProblemDifficulty, Problem } from './types';
+import type { Problem } from './types';
+import { ProblemDifficulty } from './constants/enums';
 
 const isProblemVisible = (problem) => problem?.isVisible !== false;
 
