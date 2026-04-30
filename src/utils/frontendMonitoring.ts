@@ -22,21 +22,6 @@ class FrontendMonitor {
       fingerprintingTime: [],
       lastError: null,
     };
-
-    this.setupErrorHandling();
-  }
-
-  setupErrorHandling() {
-    // Capture unhandled analytics errors
-    if (typeof window !== 'undefined') {
-      const originalConsoleError = console.error;
-      console.error = (...args) => {
-        if (args.some((arg) => typeof arg === 'string' && arg.includes('analytics'))) {
-          this.recordError(new Error(args.join(' ')));
-        }
-        originalConsoleError.apply(console, args);
-      };
-    }
   }
 
   recordTrackingAttempt() {

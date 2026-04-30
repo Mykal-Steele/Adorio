@@ -20,50 +20,26 @@ API.interceptors.response.use(
     if (!isAbortError(error) && process.env.NODE_ENV !== 'production') {
       console.error('api error:', error.config?.url, error.response?.status);
     }
-
-    return Promise.reject(error);
+    return Promise.reject(handleApiError(error));
   },
 );
 
-export const register = async (userData) => {
-  try {
-    const response = await API.post('/users/register', userData);
-    return response.data;
-  } catch (error) {
-    throw handleApiError(error, 'registration failed');
-  }
+// Wrapper extracts data, interceptor handles errors
+export const request = async (axiosCall) => {
+  const response = await axiosCall;
+  return response.data;
 };
 
-export const login = async (userData) => {
-  try {
-    const response = await API.post('/users/login', userData);
-    return response.data;
-  } catch (error) {
-    throw handleApiError(error, 'login failed');
-  }
-};
+export const register = (userData) => request(API.post('/users/register', userData));
 
-// gets the current user's profile data
-export const fetchUserData = async () => {
-  try {
-    const response = await API.get('/users/me');
-    return response.data;
-  } catch (error) {
-    const customMessage =
-      process.env.NODE_ENV !== 'production' ? 'failed to fetch user data' : null;
-    throw handleApiError(error, customMessage);
-  }
-};
+export const login = (userData) => request(API.post('/users/login', userData));
 
-export const storeSecret = async (message, password) => {
-  try {
-    const response = await API.post('/secretenv', { message, password });
-    return response.data;
-  } catch (error) {
-    throw handleApiError(error, 'Failed to store secret');
-  }
-};
+export const fetchUserData = () => request(API.get('/users/me'));
 
+export const storeSecret = (message, password) =>
+  request(API.post('/secretenv', { message, password }));
+
+export { sendContactMessage } from './contact';
 export { getPosts, createPost, likePost, addComment, getSinglePost } from './posts';
 
 export default API;

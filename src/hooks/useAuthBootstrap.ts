@@ -1,36 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useAppDispatch } from '../redux/hooks';
-import { setUser, setAuthLoaded } from '../redux/userSlice';
+import { useAppDispatch } from '../store/hooks';
+import { setUser, setAuthLoaded } from '../store/userSlice';
 import { fetchUserData } from '../api';
 
-// Initializes auth state from persisted storage and ensures ancillary client setup.
-const ensureInstagramHandle = () => {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const INSTAGRAM_KEY = 'instagram';
-  if (!localStorage.getItem(INSTAGRAM_KEY)) {
-    localStorage.setItem(INSTAGRAM_KEY, 'kruskal.oakar');
-  }
-};
-
-/**
- * Bootstraps authenticated user context from persisted tokens on initial load.
- * Keeps component logic slim and makes the login flow easier to reason about.
- * Optimized to prevent multiple authentication calls.
- */
 const useAuthBootstrap = () => {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(true);
-  const [hasInitialized, setHasInitialized] = useState(false);
 
   useEffect(() => {
-    // Prevent multiple initialization calls
-    if (hasInitialized) {
-      return;
-    }
-
     let isActive = true;
 
     const hydrateUser = async () => {
@@ -40,7 +17,6 @@ const useAuthBootstrap = () => {
         if (isActive) {
           dispatch(setAuthLoaded());
           setIsLoading(false);
-          setHasInitialized(true);
         }
         return;
       }
@@ -59,18 +35,16 @@ const useAuthBootstrap = () => {
         if (isActive) {
           dispatch(setAuthLoaded());
           setIsLoading(false);
-          setHasInitialized(true);
         }
       }
     };
 
-    ensureInstagramHandle();
     hydrateUser();
 
     return () => {
       isActive = false;
     };
-  }, [dispatch, hasInitialized]);
+  }, [dispatch]);
 
   return isLoading;
 };

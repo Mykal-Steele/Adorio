@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import moment from 'moment';
 import { ADMIN_AVATAR_URL } from '../constants';
 
-// Header for post author and timestamp.
 const AuthorHeader = ({ user, createdAt, isAdmin }) => {
   return (
     <div className="flex items-center justify-between mb-4">
