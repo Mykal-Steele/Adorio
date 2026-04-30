@@ -37,13 +37,18 @@ const trackPageView = withPerformanceTracking(
         return;
       }
 
-      // Fingerprint and visitor ID with axios-style timeout via Promise.allSettled
-      const fingerprintPromise = generateBrowserFingerprint();
-      const visitorPromise = generateVisitorId();
+      const timeout = <T>(ms: number, fallback: T): Promise<T> =>
+        new Promise((resolve) => setTimeout(() => resolve(fallback), ms));
 
       const [fingerprintResult, visitorResult] = await Promise.allSettled([
-        fingerprintPromise,
-        visitorPromise,
+        Promise.race([generateBrowserFingerprint(), timeout(1500, null)]),
+        Promise.race([
+          generateVisitorId(),
+          timeout(1500, {
+            persistentId: `timeout-${Date.now()}`,
+            sessionId: `session-${Date.now()}`,
+          }),
+        ]),
       ]);
 
       const fingerprint = fingerprintResult.status === 'fulfilled' ? fingerprintResult.value : null;
