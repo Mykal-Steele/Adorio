@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowsPointingOutIcon } from '@heroicons/react/24/outline';
 
-// image component that handles all the loading states - finally got this right
+// image component that handles all the loading states
 const PostImage = ({ imageState, onImageClick, title, postId, instanceId }) => {
   const imageRef = useRef(null);
 
@@ -20,7 +20,7 @@ const PostImage = ({ imageState, onImageClick, title, postId, instanceId }) => {
         disabled={!imageState.isLoaded || imageState.hasError}
         type="button"
       >
-        {/* spinner while image loads - looks way better than empty space */}
+        {/* spinner while image loads */}
         {imageState.isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800/50">
             <div className="w-8 h-8 border-4 border-gray-600 border-t-purple-500 rounded-full animate-spin"></div>

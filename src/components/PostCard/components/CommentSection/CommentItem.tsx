@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import moment from 'moment';
-import { ADMIN_AVATAR_URL, isUserAdmin } from '../../constants';
+import { ADMIN_AVATAR_URL } from '../../constants';
 
 const CommentItem = ({ comment, isExpanded, onToggleExpand }) => {
   const MAX_COMMENT_LENGTH = 150;
@@ -16,7 +16,7 @@ const CommentItem = ({ comment, isExpanded, onToggleExpand }) => {
     >
       <div className="flex items-start gap-3">
         <div className="w-7 h-7 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
-          {isUserAdmin(comment.user?.username) ? (
+          {comment.user?.isAdmin ? (
             <img src={ADMIN_AVATAR_URL} alt="Admin Avatar" className="w-full h-full object-cover" />
           ) : (
             <span className="text-xs font-medium text-white">
