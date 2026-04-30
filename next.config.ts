@@ -36,6 +36,37 @@ const config: NextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         ],
       },
+      // Static public pages — Cloudflare caches at edge.
+      {
+        source:
+          '/:path(|about|projects|contact|coding|login|register|smartcity|tempBeforeReal|algo)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=60, s-maxage=3600, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      // Protected/auth routes — must never be cached at a shared CDN layer.
+      {
+        source: '/:path(profile|data-lookup|sendenv|rygame)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'private, no-store',
+          },
+        ],
+      },
+      // Project detail pages are SSG — safe to cache longer
+      {
+        source: '/projects/:id',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+          },
+        ],
+      },
     ];
   },
 
