@@ -37,7 +37,7 @@ const errorHandler = (err, req, res, _next) => {
     console.error(
       `[${new Date().toISOString()}] ${statusCode} error: ${err.message} (${
         req.method
-      } ${req.path})`
+      } ${req.path})`,
     );
   }
 

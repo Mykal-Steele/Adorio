@@ -5,32 +5,26 @@ import ApiError from '../utils/ApiError.js';
 const signToken = (payload, secret, options) => {
   try {
     return jwt.sign(payload, secret, options);
-  } catch (error) {
-    throw new ApiError('Failed to sign token', 500, { cause: error.message });
+  } catch {
+    throw ApiError.internalServerError('Failed to sign token');
   }
 };
 
-const createAuthTokens = (userId) => {
+export const createAuthTokens = (userId, isAdmin = false) => {
   if (!environment.jwtSecret) {
-    throw new ApiError('JWT_SECRET is not configured', 500);
+    throw ApiError.internalServerError('JWT_SECRET is not configured');
   }
 
-  const token = signToken({ userId }, environment.jwtSecret, {
-    expiresIn: '15m',
-  });
-  const refreshToken = signToken({ userId }, environment.refreshTokenSecret, {
-    expiresIn: '7d',
-  });
+  const token = signToken({ userId, isAdmin }, environment.jwtSecret, { expiresIn: '15m' });
+  const refreshToken = signToken({ userId }, environment.refreshTokenSecret, { expiresIn: '7d' });
 
   return { token, refreshToken };
 };
 
-const verifyRefreshToken = (token) => {
+export const verifyRefreshToken = (token) => {
   try {
     return jwt.verify(token, environment.refreshTokenSecret);
-  } catch (error) {
+  } catch {
     throw ApiError.unauthorized('Invalid refresh token');
   }
 };
-
-export { createAuthTokens, verifyRefreshToken };

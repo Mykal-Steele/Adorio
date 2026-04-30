@@ -1,154 +1,92 @@
-import express from "express";
-import cors from "cors";
-import compression from "compression";
-import cookieParser from "cookie-parser";
-import path from "path";
-import { fileURLToPath } from "url";
-import serverless from "serverless-http";
+import express from 'express';
+import cors from 'cors';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
 
-import corsOptions from "./config/corsOptions.js";
-import { environment, isProduction } from "./config/environment.js";
-import { connectDatabase } from "./config/database.js";
+import corsOptions from './config/corsOptions.js';
+import { environment, isProduction } from './config/environment.js';
+import { connectDatabase } from './config/database.js';
 import {
   standardLimiter,
   postLimiter,
   likeLimiter,
-} from "./config/rateLimiters.js";
-import "./config/cloudinary.js";
-import errorHandler from "./middleware/errorHandler.js";
+  registrationLimiter,
+  authLimiter,
+} from './config/rateLimiters.js';
+import './config/cloudinary.js';
+import errorHandler from './middleware/errorHandler.js';
 
-import userRoutes from "./routes/userRoutes.js";
-import postRoutes from "./routes/postRoutes.js";
-import gameRoutes from "./routes/gameRoutes.js";
-import secretEnvRoutes from "./routes/secretEnvRoutes.js";
-import visitorIdentifier from "./middleware/visitorIdentifier.js";
-import { optional, protect } from "./middleware/verifyToken.js";
-import {
-  trackVisit,
-  getPageViewSummary,
-  getRecentVisitEntries,
-  getVisitorSummary,
-  getVisitorDetailsInfo,
-  getHealthStatus,
-  getSystemStats,
-} from "./controllers/analyticsController.js";
+import userRoutes from './routes/userRoutes.js';
+import postRoutes from './routes/postRoutes.js';
+import gameRoutes from './routes/gameRoutes.js';
+import secretEnvRoutes from './routes/secretEnvRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
+import { getHealthStatus } from './controllers/analyticsController.js';
 
-process.env.TZ = "UTC";
+process.env.TZ = 'UTC';
 
 const app = express();
 
-// Configure trust proxy for production deployments (Render, Heroku, Cloudflare, etc.)
-// This allows express-rate-limit and other middleware to properly handle X-Forwarded-For headers
-const configureTrustProxy = () => {
-  // Allow override via environment variable
-  if (process.env.TRUST_PROXY) {
-    const trustValue = process.env.TRUST_PROXY;
-    if (trustValue === "true" || trustValue === "1") {
-      return true;
-    } else if (trustValue === "false" || trustValue === "0") {
-      return false;
-    } else if (!isNaN(trustValue)) {
-      return parseInt(trustValue, 10);
-    } else {
-      return trustValue; // String value (e.g., IP address)
-    }
-  }
-
-  // Default configuration based on environment
-  if (process.env.NODE_ENV === "production") {
-    // Common cloud platforms
-    if (
-      process.env.RENDER ||
-      process.env.HEROKU_APP_NAME ||
-      process.env.VERCEL
-    ) {
-      return 1; // Trust the first proxy
-    }
-    // For Cloudflare or multiple proxies
-    if (process.env.CF_RAY || process.env.CLOUDFLARE) {
-      return 2; // Trust up to 2 proxies
-    }
-    return 1; // Default for production
-  } else {
-    // In development, trust the first proxy (nginx)
-    return 1;
-  }
-};
-
-const trustProxyValue = configureTrustProxy();
-app.set("trust proxy", trustProxyValue);
-
-// Log proxy configuration in production for debugging
-if (process.env.NODE_ENV === "production") {
-  console.log(`Trust proxy configured: ${trustProxyValue}`);
-}
+// Northflank sits behind Cloudflare (1 proxy hop)
+app.set('trust proxy', 1);
 
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 app.use(compression());
-app.options("*", cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(standardLimiter);
-app.use("/api/posts/:id/like", likeLimiter);
-app.use("/api/posts", (req, res, next) => {
-  if (req.method === "POST") {
+app.use('/api/users/register', (req, res, next) => {
+  if (req.method === 'POST') return registrationLimiter(req, res, next);
+  return next();
+});
+app.use('/api/users/login', (req, res, next) => {
+  if (req.method === 'POST') return authLimiter(req, res, next);
+  return next();
+});
+app.use('/api/users/refresh-token', (req, res, next) => {
+  if (req.method === 'POST') return authLimiter(req, res, next);
+  return next();
+});
+app.use('/api/posts/:id/like', likeLimiter);
+app.use('/api/posts', (req, res, next) => {
+  if (req.method === 'POST') {
     return postLimiter(req, res, next);
   }
   return next();
 });
 
-app.use("/api/users", userRoutes);
-app.use("/api/posts", postRoutes);
-app.use("/api/game", gameRoutes);
-app.use("/api/secretenv", secretEnvRoutes);
-app.post("/api/analytics/track", visitorIdentifier, optional, trackVisit);
-app.get("/api/analytics/page-views", optional, getPageViewSummary);
-app.get("/api/analytics/recent", optional, getRecentVisitEntries);
+app.use('/api/users', userRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/game', gameRoutes);
+app.use('/api/secretenv', secretEnvRoutes);
+app.use('/api/stats', analyticsRoutes);
 
-app.post("/api/metrics/track", visitorIdentifier, optional, trackVisit);
-app.get("/api/metrics/page-views", optional, getPageViewSummary);
-app.get("/api/metrics/recent", optional, getRecentVisitEntries);
+app.get('/api/health', getHealthStatus);
 
-app.post("/api/stats/track", visitorIdentifier, optional, trackVisit);
-app.get("/api/stats/page-views", optional, getPageViewSummary);
-app.get("/api/stats/recent", optional, getRecentVisitEntries);
-app.get("/api/stats/visitor-stats", optional, getVisitorSummary);
-app.get("/api/stats/visitor/:visitorId", optional, getVisitorDetailsInfo);
-
-// Health and monitoring endpoints
-app.get("/api/health", getHealthStatus);
-app.get("/api/stats/system", optional, getSystemStats);
-
-// Test env endpoint
-app.get("/api/test-env", (req, res) => {
-  res.json({
-    NODE_ENV: process.env.NODE_ENV,
-    MONGO_URI: !!process.env.MONGO_URI,
-    JWT_SECRET: !!process.env.JWT_SECRET,
-    CLOUDINARY_NAME: process.env.CLOUDINARY_NAME,
-    CLOUDINARY_KEY: !!process.env.CLOUDINARY_KEY,
-    CLOUDINARY_SECRET: !!process.env.CLOUDINARY_SECRET,
-    CLIENT_URL: process.env.CLIENT_URL,
-    PORT: process.env.PORT,
+if (!isProduction) {
+  app.get('/api/test-env', (req, res) => {
+    res.json({
+      NODE_ENV: process.env.NODE_ENV,
+      MONGO_URI: !!process.env.MONGO_URI,
+      JWT_SECRET: !!process.env.JWT_SECRET,
+      CLOUDINARY_NAME: process.env.CLOUDINARY_NAME,
+      CLOUDINARY_KEY: !!process.env.CLOUDINARY_KEY,
+      CLOUDINARY_SECRET: !!process.env.CLOUDINARY_SECRET,
+      CLIENT_URL: process.env.CLIENT_URL,
+      PORT: process.env.PORT,
+    });
   });
-});
+}
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-app.use(express.static(path.join(__dirname, "dist")));
-
-app.get("/", (_req, res) => {
-  res.send("Adorio API is running!");
-});
-
-app.get("*", (_req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+app.get('/', (_req, res) => {
+  res.send('Adorio API is running!');
 });
 
 app.use(errorHandler);
 
-const handler = serverless(app);
-export { handler, app };
+export { app };
 
 const startServer = async () => {
   try {
@@ -156,7 +94,7 @@ const startServer = async () => {
     const port = environment.port;
     app.listen(port, () => console.log(`Server running on port ${port}`));
   } catch (error) {
-    console.error("Failed to start server", error);
+    console.error('Failed to start server', error);
   }
 };
 
