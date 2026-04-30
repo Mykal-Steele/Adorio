@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { PlayIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
 /**

@@ -1,18 +1,3 @@
-// Core data types and interfaces for the coding challenge system
-
-export const TestStatus = {
-  PENDING: 'pending',
-  SUCCESS: 'success',
-  FAILURE: 'failure',
-  ERROR: 'error',
-};
-
-export const ProblemDifficulty = {
-  EASY: 'Easy',
-  MEDIUM: 'Medium',
-  HARD: 'Hard',
-};
-
 export interface TestCase {
   name: string;
   args: unknown[];

@@ -1,14 +1,15 @@
 'use client';
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { getPosts, createPost, likePost } from '../api';
-import PostCard from '../Components/PostCard';
-import { useAppSelector } from '../redux/hooks';
+import { getPosts, createPost, likePost } from '../../api';
+import PostCard from '../../components/PostCard';
+import { useAppSelector } from '../../store/hooks';
 import { SparklesIcon, ExclamationTriangleIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
-import SkeletonLoader from '../Components/SkeletonLoader';
-import useInfiniteScroll from '../hooks/useInfiniteScroll';
+import SkeletonLoader from '../../components/ui/SkeletonLoader';
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import { debounce } from 'lodash';
-import { isAbortError } from '../utils/errorHandling';
+import { isAbortError } from '../../utils/errorHandling';
+import { TITLE_CHARACTER_LIMIT } from './constants/title';
 
 const Home = ({ initialPosts = [], initialHasMore = true }) => {
   const [posts, setPosts] = useState(initialPosts);
@@ -29,8 +30,6 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
 
   const textareaRef = useRef(null);
   const abortControllerRef = useRef(new AbortController());
-
-  const TITLE_CHARACTER_LIMIT = 100;
 
   const handleLike = async (postId, shouldBeLiked) => {
     try {
@@ -58,9 +57,6 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
   };
 
   const fetchPosts = useCallback(async () => {
-    // Skip if SSR loaded page 1 and we haven't scrolled yet
-    if (page === 1 && initialPosts.length > 0) return;
-
     abortControllerRef.current.abort();
     abortControllerRef.current = new AbortController();
 
@@ -82,7 +78,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     } finally {
       setLoading(false);
     }
-  }, [page, initialPosts.length]);
+  }, [page]);
 
   useEffect(() => {
     fetchPosts();
@@ -98,16 +94,37 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (!e.persisted) return;
+      abortControllerRef.current = new AbortController();
+      setPosts([]);
+      setPage(1);
+      setHasMore(true);
+      setLoading(true);
+      setError(null);
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
+
+  const loadMoreStateRef = useRef({ loading, isFetchingMore, hasMore });
+
+  useEffect(() => {
+    loadMoreStateRef.current = { loading, isFetchingMore, hasMore };
+  }, [loading, isFetchingMore, hasMore]);
+
   const handleLoadMore = useMemo(
     () =>
       debounce(() => {
-        if (!loading && !isFetchingMore && hasMore) {
+        const s = loadMoreStateRef.current;
+        if (!s.loading && !s.isFetchingMore && s.hasMore) {
           setIsFetchingMore(true);
           setPage((prevPage) => prevPage + 1);
           setTimeout(() => setIsFetchingMore(false), 300);
         }
       }, 200),
-    [loading, hasMore, isFetchingMore],
+    [],
   );
 
   const [lastPostRef] = useInfiniteScroll({
@@ -134,6 +151,10 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
 
         canvas.width = width;
         canvas.height = height;
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
         ctx.drawImage(img, 0, 0, width, height);
 
         canvas.toBlob(
@@ -161,7 +182,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
 
     const file = e.target.files[0];
     if (file) {
-      const validImageTypes = ['image/jpeg', 'image/png'];
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
       if (validImageTypes.includes(file.type)) {
         const optimizedImage = await optimizeImage(file);
         setImage(optimizedImage);

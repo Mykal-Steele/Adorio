@@ -1,4 +1,4 @@
-import SkeletonLoader from '@/Components/SkeletonLoader';
+import SkeletonLoader from '@/components/ui/SkeletonLoader';
 
 export default function HomeLoading() {
   return (
