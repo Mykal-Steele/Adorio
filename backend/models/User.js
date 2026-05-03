@@ -21,5 +21,7 @@ export const findUsersWithScore = () =>
 export const updateUserRhythm = (userId, rhythmData) =>
   User.findByIdAndUpdate(userId, { rhythmGame: rhythmData }, { new: true });
 
+export const deleteUserById = (id) => User.findByIdAndDelete(id);
+
 export const findUsersByIds = (ids) =>
   User.find({ _id: { $in: ids } }, 'username email displayName').lean();

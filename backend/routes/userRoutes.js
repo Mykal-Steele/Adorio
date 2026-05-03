@@ -5,6 +5,7 @@ import {
   registerUser,
   loginUser,
   refreshToken,
+  deleteUserHandler,
 } from '../controllers/userController.js';
 
 const router = Router();
@@ -13,5 +14,6 @@ router.get('/me', verifyToken, getCurrentUser);
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/refresh-token', refreshToken);
+router.delete('/me', verifyToken, deleteUserHandler);
 
 export default router;
