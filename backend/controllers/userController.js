@@ -5,6 +5,7 @@ import {
   findUserById,
   authenticateUser,
   sanitizeUser,
+  deleteUserAccount,
 } from '../services/userService.js';
 import { createAuthTokens, verifyRefreshToken } from '../services/authService.js';
 
@@ -37,4 +38,9 @@ const refreshToken = asyncHandler(async (req, res) => {
   res.status(200).json({ token: newToken });
 });
 
-export { getCurrentUser, registerUser, loginUser, refreshToken };
+const deleteUserHandler = asyncHandler(async (req, res) => {
+  await deleteUserAccount(req.user.id);
+  res.status(204).send();
+});
+
+export { getCurrentUser, registerUser, loginUser, refreshToken, deleteUserHandler };

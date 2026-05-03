@@ -7,6 +7,7 @@ import {
   getSinglePostHandler,
   toggleLikeHandler,
   addCommentHandler,
+  deletePostHandler,
 } from '../controllers/postController.js';
 
 const router = Router();
@@ -16,5 +17,6 @@ router.get('/', getPostsHandler);
 router.get('/:id', getSinglePostHandler);
 router.put('/:id/like', verifyToken, toggleLikeHandler);
 router.post('/:id/comment', verifyToken, addCommentHandler);
+router.delete('/:id', verifyToken, deletePostHandler);
 
 export default router;

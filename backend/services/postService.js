@@ -10,6 +10,7 @@ import {
   findPostLikesById,
   updatePostById,
   pushCommentToPost,
+  deletePostById,
 } from '../models/index.js';
 
 const normalizePost = (doc) => {
@@ -63,6 +64,13 @@ export const togglePostLike = async ({ postId, userId }) => {
 
   const post = await updatePostById(postId, update, { new: true });
   return { post, action: isLiked ? 'unliked' : 'liked' };
+};
+
+export const deletePost = async ({ postId, userId }) => {
+  const post = await dbFindPostById(postId);
+  if (!post) throw ApiError.notFound('Post not found');
+  if (post.user._id.toString() !== userId) throw ApiError.forbidden('Not authorized');
+  await deletePostById(postId);
 };
 
 export const addCommentToPost = async ({ postId, userId, text }) => {
