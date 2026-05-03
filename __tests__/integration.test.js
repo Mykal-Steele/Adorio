@@ -570,15 +570,13 @@ describe('Adorio integration tests', () => {
   // ── Security headers ──────────────────────────────────────────────────────
 
   describe('Security headers', () => {
-    test('security headers are present in production', async () => {
-      if (nodeEnv !== 'production') {
-        console.log('Skipping: security headers only enforced in production nginx config');
-        return;
-      }
+    test('security headers are present', async () => {
+      // next.config.ts sets these on all routes in all environments
       const res = await axios.get(BASE_URL);
       expect(res.headers['x-frame-options']).toBe('DENY');
       expect(res.headers['x-content-type-options']).toBe('nosniff');
       expect(res.headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+      expect(res.headers['permissions-policy']).toBe('camera=(), microphone=(), geolocation=()');
     });
   });
 
