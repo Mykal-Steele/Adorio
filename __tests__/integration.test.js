@@ -29,6 +29,7 @@ describe('Adorio integration tests', () => {
     username: `user_${ts}`,
     email: `user_${ts}@integration.test`,
     password: 'Integration_Test_123!',
+    userId: null,
     accessToken: null,
     refreshToken: null,
   };
@@ -47,6 +48,12 @@ describe('Adorio integration tests', () => {
   }, 120_000);
 
   afterAll(async () => {
+    if (sharedUser.userId && sharedUser.accessToken) {
+      await axios.delete(`${BASE_URL}/api/users/me`, {
+        headers: { Authorization: `Bearer ${sharedUser.accessToken}` },
+        validateStatus: null,
+      });
+    }
     if (browser) await browser.close();
   });
 
@@ -138,6 +145,7 @@ describe('Adorio integration tests', () => {
         expect(res.data).toHaveProperty('token');
         expect(res.data).toHaveProperty('user');
         expect(res.data.user.username).toBe(sharedUser.username);
+        sharedUser.userId = res.data.user._id;
         sharedUser.accessToken = res.data.token;
       });
 
@@ -266,6 +274,15 @@ describe('Adorio integration tests', () => {
 
   describe('Posts API', () => {
     let createdPostId;
+
+    afterAll(async () => {
+      if (createdPostId && sharedUser.accessToken) {
+        await axios.delete(`${BASE_URL}/api/posts/${createdPostId}`, {
+          headers: { Authorization: `Bearer ${sharedUser.accessToken}` },
+          validateStatus: null,
+        });
+      }
+    });
 
     describe('Unauthenticated guards', () => {
       test('POST /api/posts without token returns 401', async () => {

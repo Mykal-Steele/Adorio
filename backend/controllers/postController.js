@@ -5,6 +5,7 @@ import {
   getPostById,
   togglePostLike,
   addCommentToPost,
+  deletePost,
 } from '../services/postService.js';
 import { extractUploadedImageMetadata } from '../utils/imageFormatter.js';
 
@@ -48,10 +49,16 @@ const addCommentHandler = asyncHandler(async (req, res) => {
   res.status(201).json(populatedPost);
 });
 
+const deletePostHandler = asyncHandler(async (req, res) => {
+  await deletePost({ postId: req.params.id, userId: req.user.id });
+  res.status(204).send();
+});
+
 export {
   createPostHandler,
   getPostsHandler,
   getSinglePostHandler,
   toggleLikeHandler,
   addCommentHandler,
+  deletePostHandler,
 };

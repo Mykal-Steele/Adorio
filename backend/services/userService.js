@@ -7,6 +7,7 @@ import {
   createUser,
   findUserById as dbFindUserById,
   findUserByEmail,
+  deleteUserById,
 } from '../models/index.js';
 
 export const sanitizeUser = (user) => ({
@@ -35,6 +36,12 @@ export const findUserById = async (id, options) => {
   const user = await dbFindUserById(id, options);
   if (!user) throw ApiError.notFound('User not found');
   return user;
+};
+
+export const deleteUserAccount = async (userId) => {
+  const user = await dbFindUserById(userId);
+  if (!user) throw ApiError.notFound('User not found');
+  await deleteUserById(userId);
 };
 
 export const authenticateUser = async (rawBody) => {
