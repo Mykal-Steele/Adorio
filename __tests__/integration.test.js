@@ -36,8 +36,8 @@ describe('Adorio integration tests', () => {
 
   beforeAll(async () => {
     await waitForBackend();
-    const res = await axios.get(`${BASE_URL}/api/test-env`);
-    nodeEnv = res.data.NODE_ENV;
+    const res = await axios.get(`${BASE_URL}/api/test-env`, { validateStatus: null });
+    nodeEnv = res.status === 200 ? res.data.NODE_ENV : 'production';
     browser = await puppeteer.launch({
       headless: 'new',
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -112,6 +112,9 @@ describe('Adorio integration tests', () => {
         validateStatus: null,
       });
       expect(res.status).toBe(301);
+      // prod nginx redirects to absolute https://adorio.space/cao/; dev uses relative /cao/
+      // both end with /cao/
+      expect(res.headers.location).toMatch(/\/cao\/$/);
     });
   });
 
@@ -119,7 +122,12 @@ describe('Adorio integration tests', () => {
 
   describe('Environment', () => {
     test('required backend env vars are set', async () => {
-      const res = await axios.get(`${BASE_URL}/api/test-env`);
+      const res = await axios.get(`${BASE_URL}/api/test-env`, { validateStatus: null });
+      if (res.status === 404) {
+        // /api/test-env is dev-only; skip in production containers
+        console.log('Skipping: /api/test-env not available in production');
+        return;
+      }
       expect(res.status).toBe(200);
       // Sensitive vars — backend returns true when set, not the value
       expect(res.data.MONGO_URI).toBe(true);
