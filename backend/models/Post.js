@@ -39,6 +39,8 @@ export const findPostLikesById = (id) => Post.findById(id).select('likes').lean(
 
 export const updatePostById = (id, update, options) => Post.findByIdAndUpdate(id, update, options);
 
+export const deletePostById = (id) => Post.findByIdAndDelete(id);
+
 export const pushCommentToPost = async (postId, comment) => {
   const post = await Post.findById(postId);
   if (!post) return null;

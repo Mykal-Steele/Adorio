@@ -1,5 +1,5 @@
 # Stage 1: Build Next.js frontend
-FROM node:20-alpine AS build-nextjs
+FROM node:24-alpine AS build-nextjs
 
 WORKDIR /app
 COPY package*.json ./
@@ -13,7 +13,7 @@ ENV BACKEND_INTERNAL_URL=http://localhost:3000
 RUN npm run build
 
 # Stage 2: Build AI-Slop
-FROM node:20-alpine AS build-ai-slop
+FROM node:24-alpine AS build-ai-slop
 
 WORKDIR /ai-slop
 ARG VITE_GEMINI_API_KEY
@@ -24,7 +24,7 @@ COPY ./ai-slop/AI-Slop-For-CAO-exam ./
 RUN npm run build
 
 # Stage 3: Production runtime
-FROM node:20-alpine
+FROM node:24-alpine
 
 RUN apk add --no-cache nginx
 
