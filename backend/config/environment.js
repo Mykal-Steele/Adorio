@@ -42,6 +42,8 @@ const defaultOrigins = [
   'https://www.adorio.space',
   'https://adorio.vercel.app',
   'http://127.0.0.1:5173',
+  'http://103.253.145.214',
+  'http://163.47.9.93',
 ];
 
 const dynamicOrigins = [environment.clientUrl, environment.viteBackendUrl].filter(Boolean);
