@@ -368,33 +368,6 @@ export const portfolioData = {
     },
   ] as Project[],
 
-  liveProjects: [
-    {
-      name: 'create-adorex',
-      status: 'ONLINE',
-      uptime: '99.9%',
-      cpu: '0.1%',
-      latency: '0.3ms',
-      mem: '64MB',
-    },
-    {
-      name: 'portfolio-ide',
-      status: 'ONLINE',
-      uptime: '99.5%',
-      cpu: '2.1%',
-      latency: '18ms',
-      mem: '512MB',
-    },
-    {
-      name: 'discord-forge',
-      status: 'DEGRADED',
-      uptime: '97.8%',
-      cpu: '6.4%',
-      latency: '45ms',
-      mem: '256MB',
-    },
-  ],
-
   skills: [
     { name: 'typescript', version: '5.4.0', category: 'Language', active: true },
     { name: 'javascript', version: 'ES2024', category: 'Language', active: true },

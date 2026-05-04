@@ -53,9 +53,14 @@ npm run format:check     # Prettier check (used in CI)
 npm run build            # Next.js standalone build → .next/standalone/
 npm run start            # serve the standalone build locally
 
-# ── Docker ────────────────────────────────────────────────────
+# ── Docker (local) ────────────────────────────────────────────
 docker compose up --build                              # dev at :8080
 docker compose -f docker-compose.prod.yml up --build  # prod at :8080
+
+# ── Docker (production — run on droplet) ──────────────────────
+npm run docker:redeploy  # build image + replace running container (what CI runs)
+npm run docker:logs      # tail container logs
+npm run docker:status    # check container state
 
 # ── Testing (requires Docker) ─────────────────────────────────
 npm run test:dev         # integration tests against dev containers
@@ -67,25 +72,44 @@ npm run test:prod        # integration tests against prod containers
 ### Request Flow (Production)
 
 ```
-Browser → Cloudflare CDN → Northflank (adorio.space, port 8080)
-  └─ Nginx (port 80)
-       ├─ /api/*          → localhost:3000 (Express backend)
-       ├─ /cao/*          → static files /usr/share/nginx/html/cao/ (ai-slop)
-       ├─ /_next/static/* → localhost:3001 (Next.js, 1yr cache)
-       └─ /*              → localhost:3001 (Next.js SSR, proxy_buffering off)
+Browser → Cloudflare CDN (SSL mode: Full) → reserved IP 163.47.9.93 (DigitalOcean SGP1)
+  └─ Docker container adorio-container (host ports 80→8080, 443→8443)
+       └─ Nginx (8080 HTTP / 8443 HTTPS)
+            ├─ /api/*          → localhost:3000 (Express backend)
+            ├─ /cao/*          → static files /usr/share/nginx/html/cao/ (ai-slop)
+            ├─ /_next/static/* → localhost:3001 (Next.js, 1yr cache)
+            └─ /*              → localhost:3001 (Next.js SSR, proxy_buffering off)
 ```
 
 The backend, Next.js standalone server, and Nginx all run in the same Docker container. `nginx.production.conf` / `nginx.development.conf` are selected at image build time via `$ENV` build arg.
 
 ### Hosting
 
-- **Platform**: Northflank (combined service `adorio`, US-Central)
-- **Compute**: 0.1 vCPU / 256 MB RAM (runtime); 4 vCPU / 16 GB RAM (builds)
-- **Domain**: `adorio.space` → Northflank port 8080
-- **CDN/Proxy**: Cloudflare sits in front of Northflank
-- **Internal service URL**: `p01--adorio--lfyvvjybkxr8.code.run`
+- **Platform**: DigitalOcean droplet — region SGP1, Ubuntu 22.04.5 LTS, hostname `adorio`
+- **Compute**: 2 vCPU / 2 GB RAM / 60 GB SSD / 3 TB transfer ($18/mo)
+- **Droplet IP**: 103.253.145.214 (direct); **Reserved IP**: 163.47.9.93 (Cloudflare A record target)
+- **Domain**: `adorio.space` → Cloudflare (proxied) → reserved IP 163.47.9.93
+- **CDN/Proxy**: Cloudflare sits in front of the droplet (SSL mode: Full)
+- **SSL**: Cloudflare Origin Certificate (RSA) — `adorio.space.pem` + `adorio.space.key` at project root, mounted read-only into container at `/etc/ssl/`
+- **Project location on droplet**: `~/Adorio`
 - **Database**: MongoDB Atlas (connection via `MONGO_URI`)
 - **Images**: Cloudinary
+
+### CI/CD
+
+GitHub Actions (`.github/workflows/ci.yml`) triggers on push to `main`.
+
+Pipeline order (each step gates the next):
+
+1. **Format check** — `npm run format:check`
+2. **Lint** — `npm run lint`
+3. **TypeScript + build** — `npm run build`
+4. **Integration tests** — spins up prod Docker containers, runs Puppeteer tests (`npm run test:prod`)
+5. **Deploy** — SSH into droplet via `appleboy/ssh-action`; runs `cd ~/Adorio && git pull origin main && npm run docker:redeploy`
+
+`docker:redeploy` = rebuild image (`--build-arg ENV=production`) → stop + remove old container → start new container with cert mounts and `--env-file .env`.
+
+Secrets stored in GitHub: `DROPLET_IP`, `DROPLET_SSH_KEY`, plus all app env vars injected during the integration-test step.
 
 ### Frontend Architecture (`src/`)
 
