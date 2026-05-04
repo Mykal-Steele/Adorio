@@ -1,7 +1,13 @@
 import type { NextConfig } from 'next';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const config: NextConfig = {
   output: 'standalone',
+
+  // Skip on prod builds (Docker) — type checking runs locally via `npm run typecheck`
+  typescript: { ignoreBuildErrors: isProd },
+  eslint: { ignoreDuringBuilds: isProd },
 
   // framer-motion v12 is ESM-only; transpile it so webpack handles it correctly
   transpilePackages: ['framer-motion'],
