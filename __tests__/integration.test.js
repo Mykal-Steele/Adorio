@@ -1,7 +1,7 @@
 const axios = require('axios');
 const puppeteer = require('puppeteer');
 
-const BASE_URL = process.env.TEST_TARGET_URL || 'http://localhost:8080';
+const BASE_URL = process.env.TEST_TARGET_URL || 'http://localhost:80';
 
 const waitForBackend = async (retries = 30, interval = 2000) => {
   let lastError = 'no response';
