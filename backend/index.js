@@ -22,6 +22,7 @@ import postRoutes from './routes/postRoutes.js';
 import gameRoutes from './routes/gameRoutes.js';
 import secretEnvRoutes from './routes/secretEnvRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import monitoringRoutes from './routes/monitoringRoutes.js';
 import { getHealthStatus } from './controllers/analyticsController.js';
 
 process.env.TZ = 'UTC';
@@ -64,6 +65,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/game', gameRoutes);
 app.use('/api/secretenv', secretEnvRoutes);
 app.use('/api/stats', analyticsRoutes);
+app.use('/api', monitoringRoutes);
 
 app.get('/api/health', getHealthStatus);
 
