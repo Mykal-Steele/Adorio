@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
 
 import corsOptions from './config/corsOptions.js';
 import { environment, isProduction } from './config/environment.js';
@@ -30,6 +31,7 @@ const app = express();
 // Northflank sits behind Cloudflare (1 proxy hop)
 app.set('trust proxy', 1);
 
+app.use(morgan(':date[iso] :method :url :status :res[content-length]b - :response-time ms'));
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
