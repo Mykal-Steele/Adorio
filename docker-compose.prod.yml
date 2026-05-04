@@ -6,7 +6,11 @@ services:
         ENV: production
         VITE_GEMINI_API_KEY: ${VITE_GEMINI_API_KEY}
     ports:
-      - "8080:8080"
+      - "80:8080"
+      - "443:8443"
     environment:
       - NODE_ENV=production
     env_file: .env.production
+    volumes:
+      - ./adorio.space.pem:/etc/ssl/adorio.space.pem:ro
+      - ./adorio.space.key:/etc/ssl/adorio.space.key:ro
