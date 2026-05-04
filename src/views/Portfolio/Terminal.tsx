@@ -95,12 +95,13 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
       },
     ],
 
-    status: () =>
-      portfolioData.liveProjects.map((p) => ({
-        prefix: p.status === 'ONLINE' ? '  ✓ ' : '  ~ ',
-        text: `${p.name.padEnd(18)} ${p.status.padEnd(10)} uptime ${p.uptime.padEnd(8)} latency ${p.latency}`,
-        color: p.status === 'ONLINE' ? 'var(--ide-green)' : 'var(--ide-orange)',
-      })),
+    status: () => [
+      {
+        prefix: '  ✓ ',
+        text: 'Adorio             ONLINE     uptime check /api/uptime',
+        color: 'var(--ide-green)',
+      },
+    ],
 
     ls: () => [
       { prefix: '  ', text: 'src/', color: 'var(--ide-orange)' },
@@ -300,13 +301,15 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
           <button
             style={{
               background: 'none',
-              border: 'none',
+              borderTop: 'none',
+              borderRight: 'none',
+              borderLeft: 'none',
+              borderBottom: '2px solid var(--ide-accent)',
               cursor: 'pointer',
               color: 'var(--ide-text-1)',
               fontSize: 10,
               fontFamily: sans,
               fontWeight: 600,
-              borderBottom: '2px solid var(--ide-accent)',
               paddingBottom: 2,
             }}
           >

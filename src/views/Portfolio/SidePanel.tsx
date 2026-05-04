@@ -74,8 +74,10 @@ function ExplorerPanel() {
             className="w-full flex items-center gap-2 py-1 text-left transition-colors"
             style={{
               background: isActive ? 'var(--ide-border)' : 'transparent',
+              borderTop: 'none',
+              borderRight: 'none',
+              borderBottom: 'none',
               borderLeft: isActive ? '2px solid var(--ide-accent)' : '2px solid transparent',
-              border: 'none',
               cursor: 'pointer',
               paddingLeft: isActive ? 22 : 24,
               paddingRight: 12,

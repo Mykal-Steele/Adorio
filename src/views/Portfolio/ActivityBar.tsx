@@ -40,9 +40,11 @@ export function ActivityBar() {
                   width: 40,
                   height: 40,
                   background: isActive ? 'var(--ide-border)' : 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
+                  borderTop: 'none',
+                  borderRight: 'none',
+                  borderBottom: 'none',
                   borderLeft: isActive ? '2px solid var(--ide-orange)' : '2px solid transparent',
+                  cursor: 'pointer',
                 }}
                 onClick={() => setActiveSidePanel(id)}
               >

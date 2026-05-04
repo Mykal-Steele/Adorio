@@ -58,48 +58,185 @@ const CHIPS = [
   { label: 'background', query: 'tell me your background' },
 ];
 
-function SystemPanel() {
-  const [tick, setTick] = useState(0);
+type LiveStatus = 'ONLINE' | 'DEGRADED' | 'DOWN' | 'PAUSED';
+
+const STATUS_CODE: Record<number, LiveStatus> = {
+  2: 'ONLINE',
+  8: 'DEGRADED',
+  9: 'DOWN',
+  0: 'PAUSED',
+};
+
+// Display name overrides for UptimeRobot friendly_name values
+const DISPLAY_NAMES: Record<string, string> = {
+  'adorio.space': 'Adorio',
+};
+
+// Which monitors also pull CPU from /api/metrics (matched against friendly_name)
+const CPU_MONITORS = new Set(['adorio.space']);
+
+interface MonitorCard {
+  key: string;
+  displayName: string;
+  status: LiveStatus;
+  uptime: string;
+  hasCpu: boolean;
+}
+
+const LS_MONITORS = 'sys_monitors';
+const LS_CPU = 'sys_cpu';
+const LS_MEMORY = 'sys_memory';
+const LS_FETCHED_AT = 'sys_fetched_at';
+
+function readCache<T>(key: string): T | null {
+  try {
+    return JSON.parse(localStorage.getItem(key) ?? 'null');
+  } catch {
+    return null;
+  }
+}
+function writeCache(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* quota */
+  }
+}
+
+function useSecondsAgo(ts: number | null) {
+  const [age, setAge] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setTick((v) => v + 1), 3000);
+    if (!ts) return;
+    setAge(Math.floor((Date.now() - ts) / 1000));
+    const t = setInterval(() => setAge(Math.floor((Date.now() - ts) / 1000)), 5000);
     return () => clearInterval(t);
+  }, [ts]);
+  if (!ts) return null;
+  return age < 10 ? 'just now' : `${age}s ago`;
+}
+
+function SystemPanel() {
+  const [monitors, setMonitors] = useState<MonitorCard[]>([]);
+  const [cpu, setCpu] = useState<string | null>(null);
+  const [memory, setMemory] = useState<string | null>(null);
+  const [fetchedAt, setFetchedAt] = useState<number | null>(null);
+
+  useEffect(() => {
+    const cachedMonitors = readCache<MonitorCard[]>(LS_MONITORS);
+    if (cachedMonitors) setMonitors(cachedMonitors);
+    const cachedCpu = readCache<string>(LS_CPU);
+    if (cachedCpu) setCpu(cachedCpu);
+    const cachedMemory = readCache<string>(LS_MEMORY);
+    if (cachedMemory) setMemory(cachedMemory);
+    const cachedFetchedAt = readCache<number>(LS_FETCHED_AT);
+    if (cachedFetchedAt) setFetchedAt(cachedFetchedAt);
   }, []);
-  const cpuValues = ['2.1%', '1.8%', '2.4%', '2.0%'];
-  const currentCpu = cpuValues[tick % cpuValues.length];
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/uptime');
+        const json = await res.json();
+        const raw = json?.monitors;
+        if (!Array.isArray(raw) || raw.length === 0) return;
+        const cards = raw.map(
+          (m: { friendly_name: string; status: number; custom_uptime_ratio: string }) => ({
+            key: m.friendly_name,
+            displayName: DISPLAY_NAMES[m.friendly_name] ?? m.friendly_name,
+            status: STATUS_CODE[m.status] ?? 'ONLINE',
+            uptime: `${(parseFloat(m.custom_uptime_ratio) || 100).toFixed(3)}%`,
+            hasCpu: CPU_MONITORS.has(m.friendly_name),
+          }),
+        );
+        setMonitors(cards);
+        writeCache(LS_MONITORS, cards);
+        if (json.ts) {
+          setFetchedAt((prev) => Math.max(prev ?? 0, json.ts));
+          writeCache(LS_FETCHED_AT, json.ts);
+        }
+      } catch {
+        /* silent */
+      }
+    };
+    const t1 = setTimeout(load, 1500);
+    const t2 = setInterval(load, 60_000);
+    return () => {
+      clearTimeout(t1);
+      clearInterval(t2);
+    };
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/metrics');
+        const json = await res.json();
+        if (json.cpu) {
+          setCpu(json.cpu);
+          writeCache(LS_CPU, json.cpu);
+        }
+        if (json.memory) {
+          setMemory(json.memory);
+          writeCache(LS_MEMORY, json.memory);
+        }
+        if (json.ts) {
+          setFetchedAt((prev) => Math.max(prev ?? 0, json.ts));
+          writeCache(LS_FETCHED_AT, json.ts);
+        }
+      } catch {
+        /* silent */
+      }
+    };
+    const t1 = setTimeout(load, 1500);
+    const t2 = setInterval(load, 60_000);
+    return () => {
+      clearTimeout(t1);
+      clearInterval(t2);
+    };
+  }, []);
+
+  const updatedAgo = useSecondsAgo(fetchedAt);
 
   return (
     <div className="flex flex-col h-full overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
-          <span
-            style={{
-              fontSize: 9,
-              fontFamily: sans,
-              color: 'var(--ide-text-5)',
-              letterSpacing: '0.12em',
-            }}
-          >
-            Live Projects
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              style={{
+                fontSize: 9,
+                fontFamily: sans,
+                color: 'var(--ide-text-5)',
+                letterSpacing: '0.12em',
+              }}
+            >
+              Live Projects
+            </span>
+            {updatedAgo && (
+              <span style={{ fontSize: 8, fontFamily: mono, color: 'var(--ide-text-7)' }}>
+                {updatedAgo}
+              </span>
+            )}
+          </div>
           <Circle
             size={6}
             fill="var(--ide-accent)"
             color="var(--ide-accent)"
-            className="pulse-dot"
             style={{ animation: 'pulse 2s infinite' }}
           />
         </div>
-        {portfolioData.liveProjects.map((proj) => {
+        {monitors.map((m) => {
           const statusColor =
-            proj.status === 'ONLINE'
+            m.status === 'ONLINE'
               ? 'var(--ide-accent)'
-              : proj.status === 'DEGRADED'
+              : m.status === 'DEGRADED' || m.status === 'DOWN'
                 ? 'var(--ide-orange)'
-                : 'var(--ide-accent)';
-          const barWidth = proj.status === 'DEGRADED' ? 64 : parseInt(proj.cpu) || 10;
+                : 'var(--ide-text-5)';
+          const cpuVal = m.hasCpu && cpu ? cpu : '—';
+          const barWidth = m.hasCpu && cpu ? parseFloat(cpu) || 2 : 2;
           return (
             <div
-              key={proj.name}
+              key={m.key}
               className="mb-3 p-3"
               style={{ background: 'var(--ide-bg-2)', border: '1px solid var(--ide-border)' }}
             >
@@ -112,7 +249,7 @@ function SystemPanel() {
                     fontWeight: 600,
                   }}
                 >
-                  {proj.name}
+                  {m.displayName}
                 </span>
                 <span
                   style={{
@@ -122,20 +259,20 @@ function SystemPanel() {
                     letterSpacing: '0.05em',
                   }}
                 >
-                  {proj.status}
+                  {m.status}
                 </span>
               </div>
               <div className="flex gap-3 mb-2">
                 {[
+                  { label: 'CPU', value: cpuVal, color: 'var(--ide-text-1)' },
                   {
-                    label: 'CPU',
-                    value: proj.status === 'DEGRADED' ? proj.cpu : currentCpu,
-                    color: proj.status === 'DEGRADED' ? 'var(--ide-orange)' : 'var(--ide-text-1)',
+                    label: 'Memory',
+                    value: m.hasCpu && memory ? memory : '—',
+                    color: 'var(--ide-text-1)',
                   },
-                  { label: 'Latency', value: proj.latency, color: 'var(--ide-text-1)' },
-                  { label: 'Uptime', value: proj.uptime, color: 'var(--ide-accent)' },
-                ].map((m) => (
-                  <div key={m.label}>
+                  { label: 'Uptime', value: m.uptime, color: 'var(--ide-accent)' },
+                ].map((stat) => (
+                  <div key={stat.label}>
                     <div
                       style={{
                         fontSize: 8,
@@ -144,9 +281,11 @@ function SystemPanel() {
                         marginBottom: 1,
                       }}
                     >
-                      {m.label}
+                      {stat.label}
                     </div>
-                    <div style={{ fontSize: 12, fontFamily: mono, color: m.color }}>{m.value}</div>
+                    <div style={{ fontSize: 12, fontFamily: mono, color: stat.color }}>
+                      {stat.value}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -447,8 +586,10 @@ export function RightPanel() {
               className="flex items-center gap-1.5 px-4 h-full"
               style={{
                 background: isActive ? 'var(--ide-bg-4)' : 'transparent',
+                borderTop: 'none',
+                borderRight: 'none',
+                borderLeft: 'none',
                 borderBottom: isActive ? '2px solid var(--ide-accent)' : '2px solid transparent',
-                border: 'none',
                 cursor: 'pointer',
                 fontSize: 9,
                 fontFamily: sans,
