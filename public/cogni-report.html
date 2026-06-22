@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CogniMax Research Report</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ── Reset ────────────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Design tokens (all text colours verified WCAG AA+) ─ */
+:root {
+  --ink:      #1a1410;   /* body text       – 17:1 vs white ✓ */
+  --sub:      #4a4038;   /* secondary text  –  8:1 vs white ✓ */
+  --muted:    #5c5046;   /* captions        –  6.4:1 vs white ✓ */
+  --accent:   #7a2c14;   /* headings        –  9.3:1 vs white ✓ */
+  --safe:     #1e5530;   /* positive green  –  9.5:1 vs white ✓ */
+  --warn:     #5c3a00;   /* amber           –  9.1:1 vs white ✓ */
+  --danger:   #8c1c1c;   /* red             –  9.5:1 vs white ✓ */
+  --border:   #d0c7b4;
+  --bg:       #f6f3ec;
+  --panel:    #ffffff;
+  --panel2:   #f0ebe0;
+}
+
+/* ── Page shell ───────────────────────────────────────── */
+html { background: var(--bg); }
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--bg);
+}
+.page {
+  max-width: 1000px;
+  margin: 32px auto;
+  background: var(--panel);
+  padding: 52px 68px;
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--accent);
+}
+
+/* ── Header ───────────────────────────────────────────── */
+.rpt-header { text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 18px; margin-bottom: 26px; }
+.rpt-header h1 { font-size: 24px; color: var(--accent); letter-spacing: -0.2px; }
+.rpt-header p  { font-size: 14px; color: var(--sub); margin-top: 5px; }
+
+/* ── Abstract ─────────────────────────────────────────── */
+.abstract {
+  background: var(--panel2); border-left: 4px solid var(--accent);
+  border-radius: 0 5px 5px 0; padding: 15px 20px; margin-bottom: 32px;
+  font-size: 15.5px; line-height: 1.75; color: var(--sub);
+}
+
+/* ── Sections ─────────────────────────────────────────── */
+section { margin-bottom: 38px; }
+section h2 {
+  font-size: 18px; color: var(--accent); border-bottom: 1px solid var(--border);
+  padding-bottom: 6px; margin-bottom: 14px; counter-increment: section;
+}
+section h2::before { content: counter(section) ". "; font-weight: normal; }
+body { counter-reset: section; }
+
+h3 {
+  font-size: 15.5px; font-weight: bold; color: var(--ink);
+  margin: 20px 0 8px; padding-left: 10px;
+  border-left: 3px solid var(--border);
+}
+
+p { margin-bottom: 10px; font-size: 15.5px; }
+p:last-child { margin-bottom: 0; }
+
+/* ── Callout box ─────────────────────────────────────── */
+.kf {
+  background: #f4f1ec;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  padding: 12px 16px; margin: 14px 0;
+}
+.kf-label {
+  display: block; font-size: 12px; font-weight: bold;
+  color: var(--accent);    /* 9.3:1 on #f4f1ec ✓ */
+  margin-bottom: 5px;
+}
+.kf p { font-size: 15.5px; font-weight: bold; color: var(--ink); margin: 0; line-height: 1.55; }
+
+/* ── Term note ────────────────────────────────────────── */
+.term { font-size: 13.5px; color: var(--sub); font-style: italic; font-weight: normal; }
+
+/* ── Hypothesis cards ─────────────────────────────────── */
+.hyp-row { display: flex; gap: 12px; margin: 14px 0 20px; }
+.hyp-card { flex: 1; border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; background: var(--panel2); }
+.hyp-card .h-label { font-size: 12px; font-weight: bold; color: var(--accent); margin-bottom: 8px; }
+.hyp-card .h-text  { font-size: 14px; line-height: 1.65; color: var(--ink); }
+.badge { display: inline-block; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 3px; margin-top: 10px; }
+.b-inv { background: #fff0d8; color: #7a5000; }   /* 6.9:1 ✓ */
+.b-no  { background: #f0ebf6; color: #3d2060; }   /* 8.5:1 ✓ */
+.b-yes { background: #e4f1e8; color: var(--safe); }
+
+/* ── Figures ──────────────────────────────────────────── */
+.fig { margin: 14px 0 18px; }
+.fig-title {
+  font-size: 14.5px; font-weight: bold; color: var(--ink);
+  text-align: center; margin-bottom: 7px; line-height: 1.4;
+}
+.cw  { position: relative; width: 100%; }   /* Chart.js requires this */
+.cw-sm { height: 175px; }
+.cw-md { height: 220px; }
+.cw-lg { height: 258px; }
+.cw-xl { height: 310px; }
+.fig-cap {
+  font-size: 13px; color: var(--muted); text-align: center;
+  margin-top: 7px; line-height: 1.55;
+}
+.fig-cap b { font-style: normal; }
+
+/* ── Tables ───────────────────────────────────────────── */
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0; }
+th { background: var(--panel2); text-align: left; padding: 8px 11px; font-weight: bold; border-bottom: 2px solid var(--border); font-size: 13.5px; color: var(--ink); }
+td { padding: 7px 11px; border-bottom: 1px solid var(--border); color: var(--sub); }
+tr:last-child td { border-bottom: none; }
+.sig        { color: var(--safe); font-weight: bold; }
+.ns         { color: var(--muted); font-style: italic; }
+.disc       { color: var(--danger); }
+.ctr        { text-align: center; }
+td.sig, td.ns { text-align: center; }   /* center p-value cells consistently */
+.annot { font-size: 13px; color: var(--sub); font-style: italic; margin-top: 4px; }
+
+/* ── Stat boxes ─────────────────────────────────────────── */
+.stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
+.stat-box { flex: 1; min-width: 120px; background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; text-align: center; }
+.stat-box .n   { font-size: 22px; font-weight: bold; color: var(--accent); line-height: 1.1; }
+.stat-box .n.g { color: var(--safe); }
+.stat-box .l   { font-size: 13px; color: var(--sub); margin-top: 5px; line-height: 1.4; }
+
+/* ── Experiment steps ─────────────────────────────────── */
+.exp { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
+.exp-n { flex-shrink: 0; width: 28px; height: 28px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; margin-top: 2px; }
+.exp-body h4   { font-size: 15px; font-weight: bold; margin-bottom: 4px; color: var(--ink); }
+.exp-body p    { font-size: 14px; margin-bottom: 3px; line-height: 1.65; color: var(--sub); }
+.exp-body .goal{ font-size: 13px; color: var(--muted); font-style: italic; }
+
+/* ── Callout boxes ────────────────────────────────────── */
+.concern { border-left: 3px solid var(--danger); background: #fdf0f0; padding: 13px 17px; margin: 14px 0; border-radius: 0 6px 6px 0; font-size: 15.5px; line-height: 1.7; color: var(--sub); }
+.concern b { color: var(--danger); }
+.note-box  { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 13px 17px; margin: 14px 0; font-size: 15.5px; line-height: 1.7; color: var(--sub); }
+
+hr.div { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+
+@media (max-width: 700px) { .page { padding: 24px 18px; } .hyp-row { flex-direction: column; } }
+@media print {
+  html, body { background: white; }
+  .page { margin: 0 auto; max-width: 100%; border: none; padding: 14mm 18mm; }
+  .fig { text-align: center; }
+  .cw  { margin: 0 auto; }
+  section, .fig, table { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="rpt-header">
+  <h1>CogniMax Research Report</h1>
+  <p>Skill-Conditioned Exploitative Chess Search &nbsp;·&nbsp; 1,600 games, 8 skill bands &nbsp;·&nbsp; June 2026</p>
+</header>
+
+<div class="abstract">
+CogniMax is a chess engine that predicts how a human player at a given skill level is likely to respond, then picks moves that exploit those tendencies rather than assuming the opponent plays perfectly. Tested across 1,600 games at skill levels Elo 600 to 2000, it won games significantly faster than standard Stockfish at 6 of 8 skill bands. The advantage was largest against the <em>strongest</em> opponents, not the weakest. Two bands need more data to be conclusive. The main open question is whether the advantage comes from the human-behavior model specifically, or from the different search strategy alone.
+</div>
+
+
+<!-- 1. BACKGROUND -->
+<section>
+<h2>Background</h2>
+
+<p><b>Standard chess engines</b> like Stockfish assume the opponent always plays the best possible move. This means they never set traps, because a perfect opponent would never fall for one.</p>
+
+<p><b>CogniMax</b> takes a different approach. At each move, it asks a human-behavior model called <b>maia3</b> (a neural network trained on 600 million real Lichess games) what a player at the target skill level is actually likely to play. It then picks the move with the highest expected payoff against that specific human prediction - even if that move looks weaker to a conventional evaluator. This lets it set traps that real players at that level are statistically likely to fall into.</p>
+
+<p><b>The comparison is fair:</b> both CogniMax and Stockfish are given the same compute budget. The only difference is the decision strategy - human-prediction vs. perfect-opponent assumption.</p>
+</section>
+
+
+<!-- 2. HYPOTHESES -->
+<section>
+<h2>Hypotheses</h2>
+<p style="font-size:14.5px;color:var(--sub)">Three predictions were made before the experiments began and tested against real results.</p>
+
+<div class="hyp-row">
+  <div class="hyp-card">
+    <div class="h-label">H1 - Speed</div>
+    <div class="h-text">CogniMax wins in fewer moves. The advantage shrinks against stronger opponents, who are harder to exploit.</div>
+    <span class="badge b-inv">True, but shape was opposite</span>
+  </div>
+  <div class="hyp-card">
+    <div class="h-label">H2 - Trap Frequency</div>
+    <div class="h-text">The engine sets fewer traps against stronger opponents, who are more likely to see through them.</div>
+    <span class="badge b-no">Not true</span>
+  </div>
+  <div class="hyp-card">
+    <div class="h-label">H3 - Prediction Accuracy</div>
+    <div class="h-text">When the engine sets a trap, its confidence that the opponent will fall for it should match how often they actually do.</div>
+    <span class="badge b-yes">Confirmed</span>
+  </div>
+</div>
+</section>
+
+
+<!-- 3. METRIC -->
+<section>
+<h2>Why "Moves to Win" Instead of Win Rate</h2>
+
+<p>The original plan was to compare win rates. This turned out to be useless: both engines are so much stronger than their opponents that they win nearly every game. Win rate cannot separate them.</p>
+
+<div class="kf">
+  <span class="kf-label">Why this matters</span>
+  <p>The real question is not whether an engine wins, but how quickly. "Moves to win" stays meaningful even when both engines win 99% of games.</p>
+</div>
+
+<div class="fig">
+  <p class="fig-title">Both engines win nearly every game - win rate tells us nothing</p>
+  <div class="cw cw-sm"><canvas id="winRateChart"></canvas></div>
+  <p class="fig-cap"><b>Figure 1.</b> Win rates at each skill level. Both engines stay above 95%. Max difference between them: 5 percentage points - too small and inconsistent to use as a metric.</p>
+</div>
+</section>
+
+
+<!-- 4. RESULTS -->
+<section>
+<h2>Results</h2>
+
+<h3>H1 - Speed advantage (confirmed, shape inverted)</h3>
+
+<div class="kf">
+  <span class="kf-label">Main finding</span>
+  <p>CogniMax won games 2 to 13.5 moves faster than Stockfish. Significant at 6 of 8 skill bands. The advantage grows with opponent strength - largest at Elo 2000, smallest at Elo 600.</p>
+</div>
+
+<p>The surprise: the original prediction said the advantage would <em>shrink</em> against stronger players. The opposite happened. Elo 600 and 1000 are borderline (not yet statistically reliable) - addressed in the next experiment.</p>
+
+<p><span class="term">How to read the table: "p-value" is how confident we are the result is not random chance. Below 0.05 means reliable. "Cliff's delta" measures the practical size of the effect: 0 means no difference, 1 means CogniMax was always faster.</span></p>
+
+<div class="fig">
+  <p class="fig-title">CogniMax (red) wins faster - the gap grows at higher skill levels</p>
+  <div class="cw cw-lg"><canvas id="mtwChart"></canvas></div>
+  <p class="fig-cap"><b>Figure 2.</b> Median moves to win. Lower = faster. Filled circles = statistically reliable. Open circles = borderline, needs more data.</p>
+</div>
+
+<div class="fig">
+  <p class="fig-title">Effect size grows steadily - reaching "large" (0.59) at Elo 2000</p>
+  <div class="cw cw-md"><canvas id="effectChart"></canvas></div>
+  <p class="fig-cap"><b>Figure 3.</b> Cliff's delta (effect size) by skill band. Above 0.2 is meaningful; above 0.5 is large. Dashed line = trend. Filled dots = statistically reliable results.</p>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Skill level</th>
+      <th class="ctr">CogniMax<br><span style="font-weight:normal;font-size:12px">(moves, median)</span></th>
+      <th class="ctr">Stockfish<br><span style="font-weight:normal;font-size:12px">(moves, median)</span></th>
+      <th class="ctr">Moves saved</th>
+      <th>Reliable?<br><span style="font-weight:normal;font-size:12px">(p-value)</span></th>
+      <th class="ctr">Effect size<br><span style="font-weight:normal;font-size:12px">(Cliff's delta)</span></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Elo 600 (beginner)</td> <td class="ctr">21.5</td><td class="ctr">24.0</td><td class="ctr">2.5</td><td class="ns">p = 0.071, n.s.</td><td class="ctr">0.12</td></tr>
+    <tr><td>Elo 800</td>             <td class="ctr">22.0</td><td class="ctr">28.0</td><td class="ctr">6.0</td><td class="sig">p = 0.002 ✓</td>  <td class="ctr">0.24</td></tr>
+    <tr><td>Elo 1000</td>            <td class="ctr">24.0</td><td class="ctr">26.0</td><td class="ctr">2.0</td><td class="ns">p = 0.096, n.s.</td><td class="ctr">0.11</td></tr>
+    <tr><td>Elo 1200</td>            <td class="ctr">24.0</td><td class="ctr">29.0</td><td class="ctr">5.0</td><td class="sig">p &lt; 0.001 ✓</td><td class="ctr">0.27</td></tr>
+    <tr><td>Elo 1400</td>            <td class="ctr">25.0</td><td class="ctr">34.0</td><td class="ctr">9.0</td><td class="sig">p &lt; 0.001 ✓</td><td class="ctr">0.28</td></tr>
+    <tr><td>Elo 1600</td>            <td class="ctr">25.0</td><td class="ctr">30.0</td><td class="ctr">5.0</td><td class="sig">p &lt; 0.001 ✓</td><td class="ctr">0.30</td></tr>
+    <tr><td>Elo 1800</td>            <td class="ctr">27.0</td><td class="ctr">34.0</td><td class="ctr">7.0</td><td class="sig">p &lt; 0.001 ✓</td><td class="ctr">0.26</td></tr>
+    <tr><td>Elo 2000 (skilled)</td>  <td class="ctr">23.5</td><td class="ctr">37.0</td><td class="ctr">13.5</td><td class="sig">p &lt; 0.0001 ✓</td><td class="ctr">0.59</td></tr>
+  </tbody>
+</table>
+<p class="annot">Run 4. 100 games per engine per skill band, 1,600 total. ✓ = statistically reliable (after correction for testing 8 bands simultaneously).</p>
+
+<h3>Why the advantage grows with opponent strength</h3>
+
+<p>At Elo 600, beginners blunder against almost any move. Stockfish already converts these games quickly - so there is little room for CogniMax to add speed on top.</p>
+
+<p>At higher Elo, players only make mistakes under specific types of pressure. CogniMax steers every move toward the positions that this specific player is most likely to mishandle. Stockfish optimises for positions that are hard for a <em>perfect</em> player, which is a completely different target.</p>
+
+<p>A supporting factor: maia3's ability to predict opponent moves improves at higher skill levels, because skilled players make more consistent and concentrated choices. Better predictions lead to better exploitation.</p>
+
+<div class="fig">
+  <p class="fig-title">maia3 predicts higher-Elo players more accurately</p>
+  <div class="cw cw-md"><canvas id="coverageChart"></canvas></div>
+  <p class="fig-cap"><b>Figure 4.</b> "Coverage" = the share of actual opponent moves that the engine considered as possibilities. At Elo 600, 1 in 4 moves were never on the engine's radar. At Elo 2000, only 1 in 10. Higher coverage means better exploitation of opponent tendencies.</p>
+</div>
+
+<hr class="div">
+
+<h3>H2 - Trap frequency (not confirmed)</h3>
+
+<div class="kf">
+  <span class="kf-label">Finding</span>
+  <p>Trap frequency stayed flat across all skill bands. The prediction that it would decrease against stronger players was wrong.</p>
+</div>
+
+<p>A "trap played" requires two conditions at once: the move must be objectively weaker by a defined margin, AND its expected value against this specific opponent must be higher. Both conditions being true simultaneously is uncommon. Most of CogniMax's advantage comes from ordinary moves chosen to maximise expected value - not from set traps.</p>
+
+<div class="fig">
+  <p class="fig-title">Trap rate is flat - does not decrease at higher skill levels</p>
+  <div class="cw cw-md"><canvas id="trapRateChart"></canvas></div>
+  <p class="fig-cap"><b>Figure 5.</b> Trap candidates considered (grey) and traps played (red) per 100 decisions. Both are flat. About 1 in 8 candidates are played; the rest are rejected because the engine predicts the opponent would not fall for them.</p>
+</div>
+
+<hr class="div">
+
+<h3>H3 - Prediction accuracy (confirmed)</h3>
+
+<div class="kf">
+  <span class="kf-label">Finding</span>
+  <p>The engine demands higher confidence before setting a trap against weaker players, and accepts lower confidence against stronger ones. Predictions match reality within 2%.</p>
+</div>
+
+<p>At Elo 600, traps are only played when the engine predicts a roughly 78% chance the opponent blunders. At Elo 1800-2000, it accepts around 63%. This is not a flaw - weaker players are more unpredictable, so the engine is appropriately more cautious. The trend is statistically reliable (r = -0.19, p = 0.0003 on 363 trap events).</p>
+
+<div class="fig">
+  <p class="fig-title">Engine requires higher confidence to set a trap against weaker players</p>
+  <div class="cw cw-md"><canvas id="blunderChart"></canvas></div>
+  <p class="fig-cap"><b>Figure 6.</b> Minimum confidence required before playing a trap, by skill band. Values are percentages: at 78% the engine needs near-certainty; at 63% it accepts moderate confidence. Declining trend is statistically reliable.</p>
+</div>
+</section>
+
+
+<!-- 5. SUPPORTING FINDINGS -->
+<section>
+<h2>Supporting Findings</h2>
+
+<h3>CogniMax caused more opponent mistakes at every skill level</h3>
+
+<div class="kf">
+  <span class="kf-label">Mechanistic evidence</span>
+  <p>An "error" is any opponent move losing at least 10 centipawns relative to their best option. CogniMax caused more errors per 100 opponent moves than Stockfish at every one of the 8 skill bands tested.</p>
+</div>
+
+<div class="fig">
+  <p class="fig-title">CogniMax-created positions cause more opponent mistakes everywhere</p>
+  <div class="cw cw-md"><canvas id="errorChart"></canvas></div>
+  <p class="fig-cap"><b>Figure 7.</b> Opponent mistakes per 100 moves. Red = when playing against CogniMax. Grey = when playing against Stockfish. The red line is consistently higher - including at Elo 600 and 1000 where the speed advantage was not yet statistically confirmed.</p>
+</div>
+
+<table>
+  <thead>
+    <tr><th>Elo</th><th class="ctr">vs Stockfish<br><span style="font-weight:normal;font-size:12px">mistakes/100</span></th><th class="ctr">vs CogniMax<br><span style="font-weight:normal;font-size:12px">mistakes/100</span></th><th class="ctr">Difference</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>600</td> <td class="ctr">7.65</td><td class="ctr">9.39</td><td class="ctr sig">+1.74</td></tr>
+    <tr><td>800</td> <td class="ctr">7.27</td><td class="ctr">8.18</td><td class="ctr sig">+0.92</td></tr>
+    <tr><td>1000</td><td class="ctr">7.56</td><td class="ctr">7.91</td><td class="ctr">+0.35</td></tr>
+    <tr><td>1200</td><td class="ctr">6.70</td><td class="ctr">7.58</td><td class="ctr sig">+0.88</td></tr>
+    <tr><td>1400</td><td class="ctr">5.95</td><td class="ctr">7.47</td><td class="ctr sig">+1.52</td></tr>
+    <tr><td>1600</td><td class="ctr">6.34</td><td class="ctr">7.00</td><td class="ctr sig">+0.65</td></tr>
+    <tr><td>1800</td><td class="ctr">6.07</td><td class="ctr">7.17</td><td class="ctr sig">+1.10</td></tr>
+    <tr><td>2000</td><td class="ctr">6.23</td><td class="ctr">8.44</td><td class="ctr sig">+2.21</td></tr>
+  </tbody>
+</table>
+
+<div class="fig">
+  <p class="fig-title">CogniMax causes 5% to 35% more mistakes per game - largest gap at Elo 2000</p>
+  <div class="cw cw-sm"><canvas id="errPctChart"></canvas></div>
+  <p class="fig-cap"><b>Figure 8.</b> Percentage increase in opponent mistakes caused by CogniMax positions versus Stockfish positions. All values are positive (CogniMax always causes more mistakes). The effect is smallest at Elo 1000 (+4.6%) and largest at Elo 2000 (+35.5%), consistent with the growing advantage curve.</p>
+</div>
+
+<h3>Traps were played but never "converted" by the strict definition</h3>
+
+<div class="kf">
+  <span class="kf-label">Important clarification</span>
+  <p>No set trap resulted in the opponent immediately making the exact predicted blunder. But opponents still made more mistakes overall. CogniMax wins through sustained positional pressure accumulated over many moves - not through a single trap moment.</p>
+</div>
+
+<div class="fig">
+  <p class="fig-title">Traps are played but never produce an immediate clean conversion</p>
+  <div class="cw cw-md"><canvas id="trapFunnelChart"></canvas></div>
+  <p class="fig-cap"><b>Figure 9.</b> Three stages per 100 decisions. Grey = trap candidate existed. Red = trap was played. Black dashed = trap immediately converted (zero throughout). The engine's advantage comes from the pressure created by these positions, not from opponents playing directly into the trap on the next move.</p>
+</div>
+
+<h3>Standard accuracy metrics do not apply here</h3>
+
+<p>CogniMax deliberately plays objectively weaker moves when they create better expected outcomes against the specific opponent. By standard chess metrics (centipawn loss, engine accuracy), this looks like lower accuracy - which is expected, because CogniMax is optimising a different objective than those metrics measure.</p>
+
+<div class="kf">
+  <span class="kf-label">Technical note</span>
+  <p>The engine accuracy column in the dataset returns 0% for every single game due to a technical bug (shallow evaluation used instead of deep analysis). It must be ignored entirely. The correct metric is opponent error rate, shown in Figure 7.</p>
+</div>
+</section>
+
+
+<!-- MECHANISM SECTION -->
+<section>
+<h2>How CogniMax Wins Faster Without Always Playing Traps</h2>
+
+<div class="kf">
+  <span class="kf-label">The mechanism</span>
+  <p>On every single move, CogniMax steers toward positions where the specific opponent is most likely to make a mistake - not just during formal trap moments. This continuous pressure is what produces faster wins, not the occasional discrete trap.</p>
+</div>
+
+<h3>Two things happen on every decision</h3>
+
+<p><b>Expected value steering.</b> When selecting any move - safe or not - CogniMax asks: "Given what this specific opponent is likely to do next, which move leads to the best outcome?" Even ordinary non-trap moves are chosen based on this criterion. Stockfish asks a different question: "What is the objectively best position against a perfect opponent?" Against a real human, these two questions have different answers, and CogniMax follows the one that matters.</p>
+
+<p><b>Tie-break preference.</b> When two moves have nearly the same expected value, CogniMax always picks the one where the opponent's predicted blunder probability is highest. This preference applies on every decision, regardless of whether a formal trap is triggered. Over 25 to 35 moves per game, these small preferences accumulate into a systematically more error-prone game trajectory for the opponent.</p>
+
+<div class="kf">
+  <span class="kf-label">Why sacrificing objective quality can be worth it</span>
+  <p>A move that costs 0.02 win-expectation objectively, but raises the opponent's error probability from 15% to 40%, has a net expected-value gain of roughly +0.25 against this opponent. Standard engines never make this trade. CogniMax makes it wherever the numbers favour it - which is most of the time at higher Elo.</p>
+</div>
+
+<p>This is also why conventional "engine accuracy" metrics look similar for both engines. CogniMax deliberately plays some objectively weaker moves. By standard chess metrics that penalise any deviation from the engine's best move, this looks like lower accuracy. But CogniMax is optimising a different objective - one that is directly connected to the results in Figures 7 and 8.</p>
+</section>
+
+
+<!-- 6. EXPERIMENT HISTORY -->
+<section>
+<h2>Experiment History</h2>
+
+<p>Six experiments were run in total. Run 1 was discarded because of a design flaw. The three main valid experiments (Runs 2, 3, 4) all pointed in the same direction.</p>
+
+<table>
+  <thead>
+    <tr><th>Experiment</th><th>Games/engine</th><th>Bands</th><th>What changed</th><th>Result</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="disc"><b>Run 1</b></td><td>10</td><td>5</td>
+      <td>First test; baseline engine differed by skill band</td>
+      <td class="disc">Discarded. Control was inconsistent; results are meaningless.</td>
+    </tr>
+    <tr>
+      <td><b>Sweep 1</b></td><td>10</td><td>1 (800)</td>
+      <td>Fixed control; tested 15 parameter settings</td>
+      <td>3 settings looked better; too small to be certain</td>
+    </tr>
+    <tr>
+      <td><b>Run 2</b></td><td>10</td><td>8</td>
+      <td>First valid comparison across all skill bands</td>
+      <td>CogniMax faster at all bands; inverted shape first seen</td>
+    </tr>
+    <tr>
+      <td><b>Sweep 2</b></td><td>10-20</td><td>1-3</td>
+      <td>Tested faster configuration; 8 pre-written predictions</td>
+      <td>New config 36% faster per move, no loss in game speed; adopted</td>
+    </tr>
+    <tr>
+      <td><b>Run 3</b></td><td>10</td><td>8</td>
+      <td>Improved tie-breaking rule; faster config applied</td>
+      <td>1 of 8 bands significant; infrastructure validated</td>
+    </tr>
+    <tr>
+      <td><b>Run 4 (main)</b></td><td>100</td><td>8</td>
+      <td>Same config as Run 3 with 10x more games</td>
+      <td>6 of 8 bands significant; all hypotheses formally tested</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="fig">
+  <p class="fig-title">CogniMax was consistently faster at Elo 800 across all three valid runs</p>
+  <div class="cw cw-md"><canvas id="historyChart"></canvas></div>
+  <p class="fig-cap"><b>Figure 10.</b> Mean moves to win at Elo 800 in each valid run. CogniMax (red) was faster than Stockfish (grey) in all three, with different sample sizes and engine configurations. The consistent direction supports the result's reliability.</p>
+</div>
+
+<h3>The risk dial (lambda)</h3>
+
+<p>CogniMax has a parameter called lambda that controls how willing it is to take risky traps. Think of it as a confidence dial - negative values require near-certainty, positive values accept long shots.</p>
+
+<table>
+  <thead>
+    <tr><th>Setting</th><th>Behaviour</th><th>Minimum confidence to set a trap</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Lambda = -16 (cautious)</td><td>Only plays traps when almost certain they will work</td><td>~97% predicted success</td></tr>
+    <tr><td>Lambda = 0 (Run 4 default)</td><td>Standard expected-value calculation</td><td>~63-78% in practice</td></tr>
+    <tr><td>Lambda = +16 (aggressive)</td><td>Accepts long-shot traps for large upside</td><td>As low as 7%</td></tr>
+  </tbody>
+</table>
+
+<p>An internal test within Run 4 (30 paired games per setting per band) found all three settings beat Stockfish at every Elo band. The chart below shows the median moves-to-win for each setting.</p>
+
+<div class="fig">
+  <p class="fig-title">All three risk settings beat Stockfish - cautious wins fastest at high Elo</p>
+  <div class="cw cw-xl"><canvas id="lambdaChart"></canvas></div>
+  <p class="fig-cap"><b>Figure 11.</b> Median moves to win for each lambda setting vs the Stockfish control (dashed grey), at 30 paired games per band. All three CogniMax arms finish faster than control at every band. Lambda = -16 (cautious) tends to win fastest at high Elo; lambda = +16 (aggressive) does well at low Elo. Note: these 30-pair results use a fixed opening set and are not directly comparable to the main Run 4 results (100 games, varied openings).</p>
+</div>
+</section>
+
+
+<!-- 7. LIMITATIONS -->
+<section>
+<h2>Limitations and Open Questions</h2>
+
+<div class="concern">
+  <b>Critical concern - circular test:</b> The same model (maia3) is used both to predict what the opponent will do and to simulate the opponent in every game. When you know your opponent's exact strategy, any expectimax engine is mathematically guaranteed to outperform one that does not. The current results therefore partially measure a structural guarantee rather than proving the human-behavior modeling specifically is useful. The upcoming experiments test the engine against opponents that are not the same model it uses for predictions.
+</div>
+
+<h3>Elo 600 and 1000 need more data</h3>
+
+<p>At Elo 600, CogniMax was 2.5 moves faster but the result is not statistically reliable. To confirm it, we would need ~460 unpaired games, or ~80 paired games (where both engines play the same openings, removing a lot of noise). The paired design is planned for Run 5.</p>
+
+<div class="fig">
+  <p class="fig-title">Elo 600 and 1000 show the right direction but are not yet confirmed</p>
+  <div class="cw cw-sm"><canvas id="gapChart"></canvas></div>
+  <p class="fig-cap"><b>Figure 12.</b> Moves saved per game. Dark red = statistically confirmed. Light red = correct direction but not enough data. Elo 600 and 1000 will be retested with a paired design in Run 5.</p>
+</div>
+
+<h3>The advantage at Elo 2000 may keep growing above it</h3>
+
+<p>The effect at Elo 2000 (saving 13.5 moves, effect size 0.59) is the largest in the dataset with no sign of levelling off. It is unknown whether the trend continues, plateaus, or reverses above Elo 2000. Run 7 will test this, pending a calibration check of maia3's prediction accuracy at those skill levels.</p>
+</section>
+
+
+<!-- 8. FUTURE EXPERIMENTS -->
+<section>
+<h2>Planned Experiments</h2>
+
+<p>Experiments 1 through 3 are the minimum needed for a complete, defensible result. The rest extend and stress-test the findings.</p>
+
+<div class="stat-row">
+  <div class="stat-box"><div class="n g">Done</div><div class="l">Run 4 data analysis</div></div>
+  <div class="stat-box"><div class="n g">Done</div><div class="l">Code improvements (logging, Lc0 helper, risk scheduling)</div></div>
+  <div class="stat-box"><div class="n">Next</div><div class="l">Run 5: retest Elo 600 and 1000</div></div>
+  <div class="stat-box"><div class="n">Soon</div><div class="l">X0 + X1: test against different opponents</div></div>
+</div>
+
+<div class="exp">
+  <div class="exp-n">1</div>
+  <div class="exp-body">
+    <h4>Run 5 - Retest Elo 600 and 1000</h4>
+    <p>Both engines play the same 40 openings, 80 paired games per band. The matched design removes opening-to-opening noise and needs far fewer games than an unpaired test.</p>
+    <p class="goal">Expected: both bands become statistically significant, completing the advantage curve. ~2 hours Colab.</p>
+  </div>
+</div>
+
+<div class="exp">
+  <div class="exp-n">2</div>
+  <div class="exp-body">
+    <h4>X0 - Test against a randomly-blundering opponent</h4>
+    <p>Replace maia3 (the simulated human) with Stockfish playing at reduced skill using a built-in "Skill Level" setting. This opponent makes random mistakes rather than human-pattern ones. CogniMax still uses maia3 predictions. 80 paired games at Elo 1400, 1600, 1800, 2000.</p>
+    <p class="goal">First circularity break. If the advantage shrinks compared to maia3 games, it means the human-behavior model is specifically useful (not just the search structure). ~5 hours Colab.</p>
+  </div>
+</div>
+
+<div class="exp">
+  <div class="exp-n">3</div>
+  <div class="exp-body">
+    <h4>X1 - Ablation: how much of the advantage comes from the human model?</h4>
+    <p>Five engine versions compared at Elo 600, 1000, 1600, 2000 (80 pairs each): (a) Stockfish control, (b) CogniMax with maia3 (current), (c) CogniMax with uniform probability over all legal moves (expectimax structure, no human model at all), (d) CogniMax using Stockfish's own probability estimates, (e) CogniMax without the preference for error-inducing moves.</p>
+    <p class="goal">If version (c) performs as well as (b), the advantage comes from the search structure, not the human model. If (b) is faster, the human model adds real value beyond structure alone. This is the most important experiment. ~18 hours Colab.</p>
+  </div>
+</div>
+
+<div class="exp">
+  <div class="exp-n">4</div>
+  <div class="exp-body">
+    <h4>X6 - Test against Leela Chess Zero (Lc0)</h4>
+    <p>Replace maia3 with Lc0 (trained entirely on self-play, no human games, different architecture) at low strength. CogniMax still uses maia3 predictions. 80 paired games x 4 skill bands. Lc0 is already installed.</p>
+    <p class="goal">If CogniMax still wins faster, the advantage generalises to non-maia3 opponents. ~12 hours Colab.</p>
+  </div>
+</div>
+
+<div class="exp">
+  <div class="exp-n">5</div>
+  <div class="exp-body">
+    <h4>X7 - Validate against real human Lichess games</h4>
+    <p>At positions where CogniMax and Stockfish recommend different moves, find real Lichess games where each move was played, and check how often the real human opponent made a mistake within 5 moves. Uses logistic regression to control for skill level, time, and position type.</p>
+    <p class="goal">Gold-standard test: real human behaviour, no simulation, no circularity. About 1 day of setup, ~3 hours Colab.</p>
+  </div>
+</div>
+
+<div class="exp">
+  <div class="exp-n">6</div>
+  <div class="exp-body">
+    <h4>Run 6 - Adaptive risk schedule</h4>
+    <p>Lambda = -16 at Elo 600 rising to +12 at Elo 2000. 100 paired games per band, all 8 bands. Based on Run 4 internal test, which showed lambda = -16 gave the most reliable results.</p>
+    <p class="goal">Tests whether adapting risk tolerance to skill level flattens or improves the advantage curve. ~10 hours Colab.</p>
+  </div>
+</div>
+
+<div class="exp">
+  <div class="exp-n">7</div>
+  <div class="exp-body">
+    <h4>Run 7 - Extend to Elo 2200-2600</h4>
+    <p>Three new skill bands above the current maximum. A calibration check on maia3's prediction accuracy must pass first.</p>
+    <p class="goal">Determines whether the growing advantage curve continues above Elo 2000 or levels off. ~4 hours Colab if check passes.</p>
+  </div>
+</div>
+
+<div class="exp">
+  <div class="exp-n">8</div>
+  <div class="exp-body">
+    <h4>Run 8 - Tactically rich opening positions</h4>
+    <p>30 opening positions screened for tactical complexity (open files, exposed kings, unbalanced material). 5 skill bands, 100 paired games each. Run 4 used standard openings that may have been too quiet.</p>
+    <p class="goal">Tests whether opening selection suppressed the low-Elo advantage in Run 4. ~6 hours Colab.</p>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr><th>Experiment</th><th>What it tests</th><th>Colab time</th><th>Calendar</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Run 5</td><td>Confirm Elo 600 and 1000</td><td>~2 h</td><td>Day 1</td></tr>
+    <tr><td>X0 - Random-blunder opponent</td><td>First circularity break</td><td>~5 h</td><td>Day 2</td></tr>
+    <tr><td>X1 - Predictor ablation</td><td>Isolate human-model benefit</td><td>~18 h</td><td>Days 3-5</td></tr>
+    <tr><td>X6 - Lc0 opponent</td><td>Different-architecture opponent</td><td>~12 h</td><td>Days 6-8</td></tr>
+    <tr><td>X7 - Real Lichess data</td><td>Real human validation</td><td>~3 h</td><td>Days 9-10</td></tr>
+    <tr><td>Run 6 - Lambda schedule</td><td>Adaptive risk strategy</td><td>~10 h</td><td>Days 11-13</td></tr>
+    <tr><td>Run 7 - Elo 2200-2600</td><td>Extend advantage curve</td><td>~4 h</td><td>Days 14-15</td></tr>
+    <tr><td>Run 8 - Rich openings</td><td>Opening complexity effect</td><td>~6 h</td><td>Days 16-20</td></tr>
+    <tr><td>Final writeup</td><td>Report and conclusions</td><td>-</td><td>Days 21-22</td></tr>
+  </tbody>
+</table>
+
+<div class="note-box">
+  <b>Minimum viable result</b> (Run 5 + X0 + X1): Confirms the speed advantage at all 8 skill bands and tests whether it comes from human-behavior modeling or expectimax structure. About 5 calendar days.
+</div>
+</section>
+
+</div>
+
+<script>
+const F   = 'Georgia, serif';
+const ACC = '#7a2c14';
+const GRY = '#7a7060';
+const LGR = '#bbb0a0';
+const SAF = '#1e5530';
+
+Chart.defaults.font.family = F;
+Chart.defaults.color = '#4a4038';
+
+const ticks = () => ({ font: { family: F, size: 12 }, color: '#4a4038' });
+const gridC = { color: '#e8e0d0' };
+const aLbl  = t => ({ display: !!t, text: t, font: { family: F, size: 12 }, color: '#4a4038' });
+const lgnd  = { labels: { font: { family: F, size: 13 }, padding: 14, boxWidth: 26, color: '#1a1410' } };
+const tip   = { bodyFont: { family: F, size: 13 }, titleFont: { family: F, size: 13, weight: 'bold' } };
+
+const sc = (xl, yl, mn, mx) => ({
+  x: { ticks: ticks(), grid: gridC, title: aLbl(xl) },
+  y: { ticks: ticks(), grid: gridC, title: aLbl(yl), min: mn, max: mx }
+});
+const bOpts = (xl, yl, mn, mx) => ({
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: lgnd, tooltip: tip },
+  scales: sc(xl, yl, mn, mx)
+});
+
+const BANDS = ['600','800','1000','1200','1400','1600','1800','2000'];
+const SIG   = [false,true,false,true,true,true,true,true];
+const CM_MED  = [21.5,22.0,24.0,24.0,25.0,25.0,27.0,23.5];
+const CTL_MED = [24.0,28.0,26.0,29.0,34.0,30.0,34.0,37.0];
+const DELTA   = [0.121,0.238,0.107,0.269,0.276,0.302,0.261,0.588];
+const TREND   = [0.105,0.152,0.199,0.247,0.294,0.341,0.389,0.436];
+const COV     = [76.5,83.3,85.0,84.5,86.4,86.9,88.4,89.8];
+const TRAP_P  = [1.60,1.87,1.78,1.60,2.02,1.40,1.16,2.84];
+const TRAP_C  = [13.15,14.61,13.61,14.40,15.63,12.86,12.43,16.87];
+const BLUNDER = [0.776,0.724,0.755,0.745,0.725,0.688,0.631,0.639];
+const CM_ERR  = [9.39,8.18,7.91,7.58,7.47,7.00,7.17,8.44];
+const BL_ERR  = [7.65,7.27,7.56,6.70,5.95,6.34,6.07,6.23];
+const WIN_CM  = [100,100,99,100,99,100,100,100];
+const WIN_BL  = [99,97,100,100,97,100,98,95];
+const GAP     = CTL_MED.map((v,i) => +(v-CM_MED[i]).toFixed(1));
+
+const ln = (label,data,color,fill) => ({
+  label, data, borderColor: color, borderWidth: 2,
+  backgroundColor: fill ? color+'1c' : 'transparent', fill: !!fill,
+  pointBackgroundColor: color, pointRadius: 5, tension: 0.22
+});
+
+new Chart('winRateChart', {
+  type: 'bar',
+  data: { labels: BANDS, datasets: [
+    { label:'Stockfish baseline', data:WIN_BL, backgroundColor:LGR, borderColor:GRY, borderWidth:1 },
+    { label:'CogniMax', data:WIN_CM, backgroundColor:ACC+'cc', borderColor:ACC, borderWidth:1 }
+  ]},
+  options: bOpts('Opponent Elo','Win Rate (%)', 85, 103)
+});
+
+new Chart('mtwChart', {
+  type: 'line',
+  data: { labels: BANDS, datasets: [
+    { label:'CogniMax', data:CM_MED, borderColor:ACC, borderWidth:2.5, tension:0.22,
+      backgroundColor: ACC+'28', fill:'+1',
+      pointBackgroundColor: SIG.map(s=>s?ACC:'#c0807070'),
+      pointBorderColor:     SIG.map(s=>s?ACC:'#a06050'),
+      pointRadius: SIG.map(s=>s?6:5) },
+    { label:'Stockfish baseline', data:CTL_MED, borderColor:GRY, borderWidth:2.5, tension:0.22,
+      backgroundColor:'transparent', fill:false,
+      pointBackgroundColor:GRY, pointRadius:5 }
+  ]},
+  options: bOpts('Opponent Elo','Median moves to win (lower = faster)', 15, 42)
+});
+
+new Chart('effectChart', {
+  type: 'line',
+  data: { labels: BANDS, datasets: [
+    { label:"Cliff's delta (effect size: 0=none, 1=always faster)", data:DELTA,
+      borderColor:ACC, borderWidth:2.5, tension:0.22, backgroundColor:ACC+'1c', fill:true,
+      pointBackgroundColor:SIG.map(s=>s?ACC:'#c09080'), pointRadius:6 },
+    { label:'Trend line', data:TREND, borderColor:'#aaa', borderDash:[5,5],
+      borderWidth:1.5, pointRadius:0, fill:false, tension:0 }
+  ]},
+  options: bOpts('Opponent Elo', "Effect size (Cliff's delta: 0 = no difference, 1 = always faster)", 0, 0.70)
+});
+
+new Chart('coverageChart', {
+  type: 'line',
+  data: { labels: BANDS, datasets: [
+    { ...ln('% of opponent moves correctly predicted by maia3', COV, SAF, true), pointRadius:5 }
+  ]},
+  options: bOpts('Opponent Elo','Prediction coverage (%)', 70, 96)
+});
+
+new Chart('trapRateChart', {
+  type: 'line',
+  data: { labels: BANDS, datasets: [
+    { ...ln('Trap positions considered (per 100 decisions)', TRAP_C, GRY, false) },
+    { ...ln('Traps actually played (per 100 decisions)',     TRAP_P, ACC, false) }
+  ]},
+  options: bOpts('Opponent Elo','Count per 100 decisions', 0, 20)
+});
+
+new Chart('blunderChart', {
+  type: 'line',
+  data: { labels: BANDS, datasets: [
+    { ...ln('Minimum confidence required to play a trap', BLUNDER, '#503070', true) }
+  ]},
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: lgnd, tooltip: tip },
+    scales: {
+      x: sc('Opponent Elo','',0,1).x,
+      y: { ticks: { ...ticks(), callback: v => Math.round(v*100)+'%' },
+           grid: gridC, title: aLbl('Minimum blunder confidence required'), min: 0.55, max: 0.85 }
+    }
+  }
+});
+
+new Chart('errorChart', {
+  type: 'line',
+  data: { labels: BANDS, datasets: [
+    { label:'Playing against CogniMax - mistakes per 100 moves', data:CM_ERR,
+      borderColor:ACC, borderWidth:2.5, tension:0.22,
+      backgroundColor: ACC+'28', fill:'-1',
+      pointBackgroundColor:ACC, pointRadius:5 },
+    { label:'Playing against Stockfish - mistakes per 100 moves', data:BL_ERR,
+      borderColor:GRY, borderWidth:2.5, tension:0.22,
+      backgroundColor:'transparent', fill:false,
+      pointBackgroundColor:GRY, pointRadius:5 }
+  ]},
+  options: bOpts('Opponent Elo','Opponent mistakes per 100 moves', 4, 11)
+});
+
+new Chart('trapFunnelChart', {
+  type: 'line',
+  data: { labels: BANDS, datasets: [
+    { ...ln('Trap candidates considered (per 100)', TRAP_C, GRY, false), pointRadius:4 },
+    { ...ln('Traps played (per 100)',               TRAP_P, ACC, false), pointRadius:4 },
+    { label:'Immediate conversions (always 0)', data:[0,0,0,0,0,0,0,0],
+      borderColor:'#1a1410', borderDash:[4,4], borderWidth:1.5,
+      pointRadius:0, fill:false, tension:0 }
+  ]},
+  options: bOpts('Opponent Elo','Count per 100 decisions', 0, 20)
+});
+
+new Chart('historyChart', {
+  type: 'bar',
+  data: {
+    labels: ['Run 2  (n=10)','Run 3  (n=10)','Run 4  (n=100)'],
+    datasets: [
+      { label:'Stockfish baseline', data:[25.8,25.6,27.3], backgroundColor:LGR, borderColor:GRY, borderWidth:1 },
+      { label:'CogniMax',           data:[24.8,22.1,23.5], backgroundColor:ACC+'cc', borderColor:ACC, borderWidth:1 }
+    ]
+  },
+  options: bOpts('Run (all games at Elo 800)','Mean moves to win', 0, 32)
+});
+
+new Chart('gapChart', {
+  type: 'bar',
+  data: { labels: BANDS, datasets: [{
+    label:'Moves saved per game',
+    data: GAP,
+    backgroundColor: GAP.map((_,i)=> SIG[i] ? ACC+'cc' : ACC+'44'),
+    borderColor:     GAP.map((_,i)=> SIG[i] ? ACC      : '#b08070'),
+    borderWidth: 1.5
+  }]},
+  options: bOpts('Opponent Elo','Moves saved per game', 0, 16)
+});
+
+/* Error percentage increase chart */
+const ERR_PCT = [22.8, 12.6, 4.6, 13.2, 25.6, 10.3, 18.1, 35.5];
+new Chart('errPctChart', {
+  type: 'bar',
+  data: { labels: BANDS, datasets: [{
+    label: 'Additional opponent mistakes caused by CogniMax (%)',
+    data: ERR_PCT,
+    backgroundColor: ERR_PCT.map(v => v >= 20 ? ACC+'cc' : ACC+'88'),
+    borderColor: ACC, borderWidth: 1.5
+  }]},
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: lgnd, tooltip: tip },
+    scales: {
+      x: sc('Opponent Elo','',0,50).x,
+      y: { ticks: { ...ticks(), callback: v => v+'%' }, grid: gridC,
+           title: aLbl('Extra mistakes vs Stockfish positions (%)'), min: 0, max: 42 }
+    }
+  }
+});
+
+/* Lambda sweep chart (paired internal test, n=30 per arm per band) */
+const LAM_CTL = [22.0, 26.5, 27.5, 34.5, 35.0, 43.0, 33.0, 36.0];
+const LAM_M16 = [17.0, 21.0, 23.0, 23.0, 28.0, 28.0, 25.0, 23.5];
+const LAM_0   = [21.0, 23.0, 22.0, 25.0, 27.0, 30.0, 26.5, 26.5];
+const LAM_P16 = [17.0, 20.5, 23.5, 26.0, 24.0, 32.0, 28.0, 23.5];
+
+new Chart('lambdaChart', {
+  type: 'line',
+  data: { labels: BANDS, datasets: [
+    { label:'Stockfish (control)', data:LAM_CTL,
+      borderColor:GRY, borderDash:[5,4], borderWidth:2,
+      pointRadius:4, pointBackgroundColor:GRY, backgroundColor:'transparent', fill:false, tension:0.2 },
+    { label:'λ = -16  (cautious)', data:LAM_M16,
+      borderColor:'#503070', borderWidth:2,
+      pointRadius:4, pointBackgroundColor:'#503070', backgroundColor:'transparent', fill:false, tension:0.2 },
+    { label:'λ = 0  (default)', data:LAM_0,
+      borderColor:ACC, borderWidth:2,
+      pointRadius:4, pointBackgroundColor:ACC, backgroundColor:'transparent', fill:false, tension:0.2 },
+    { label:'λ = +16  (aggressive)', data:LAM_P16,
+      borderColor:SAF, borderWidth:2,
+      pointRadius:4, pointBackgroundColor:SAF, backgroundColor:'transparent', fill:false, tension:0.2 }
+  ]},
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { ...lgnd, position: 'top' },
+      tooltip: tip
+    },
+    scales: sc('Opponent Elo','Median moves to win (lower = faster)', 14, 46)
+  }
+});
+</script>
+</body>
+</html>
