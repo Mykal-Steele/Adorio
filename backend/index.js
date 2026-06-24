@@ -13,6 +13,7 @@ import {
   likeLimiter,
   registrationLimiter,
   authLimiter,
+  uploadLimiter,
 } from './config/rateLimiters.js';
 import './config/cloudinary.js';
 import errorHandler from './middleware/errorHandler.js';
@@ -23,6 +24,7 @@ import gameRoutes from './routes/gameRoutes.js';
 import secretEnvRoutes from './routes/secretEnvRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import monitoringRoutes from './routes/monitoringRoutes.js';
+import hostedFileRoutes from './routes/hostedFileRoutes.js';
 import { getHealthStatus } from './controllers/analyticsController.js';
 
 process.env.TZ = 'UTC';
@@ -34,7 +36,7 @@ app.set('trust proxy', 1);
 
 app.use(morgan(':date[iso] :method :url :status :res[content-length]b - :response-time ms'));
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 app.use(compression());
 app.options('*', cors(corsOptions));
@@ -59,6 +61,10 @@ app.use('/api/posts', (req, res, next) => {
   }
   return next();
 });
+app.use('/api/hosted', (req, res, next) => {
+  if (req.method === 'POST') return uploadLimiter(req, res, next);
+  return next();
+});
 
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
@@ -66,6 +72,7 @@ app.use('/api/game', gameRoutes);
 app.use('/api/secretenv', secretEnvRoutes);
 app.use('/api/stats', analyticsRoutes);
 app.use('/api', monitoringRoutes);
+app.use('/api/hosted', hostedFileRoutes);
 
 app.get('/api/health', getHealthStatus);
 
