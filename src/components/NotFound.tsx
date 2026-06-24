@@ -10,145 +10,136 @@ const NotFound = () => {
   const [vh, setVh] = useState(800);
   const [vw, setVw] = useState(1200);
   const router = useRouter();
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // tracking mouse coords for all the fancy animations
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const smoothMouseX = useSpring(mouseX, { stiffness: 600, damping: 30 });
   const smoothMouseY = useSpring(mouseY, { stiffness: 600, damping: 30 });
 
-  // making the page look all cyberpunky with these lights
   const lightPosition = useTransform(
     [smoothMouseX, smoothMouseY],
     ([x, y]) => `calc(${x}px - 50%) calc(${y}px - 50%)`,
   );
 
-  const handleMouseMove = ({ clientX, clientY }) => {
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    mouseX.set(clientX - rect.left + window.scrollX);
-    mouseY.set(clientY - rect.top + window.scrollY);
+    mouseX.set(e.clientX - rect.left + window.scrollX);
+    mouseY.set(e.clientY - rect.top + window.scrollY);
   };
 
   useEffect(() => {
     setVh(window.innerHeight);
     setVw(window.innerWidth);
     setRandomText(texts[Math.floor(Math.random() * texts.length)]);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
   }, []);
 
   return (
     <div
       ref={containerRef}
-      className="min-h-screen bg-gray-950 flex items-center justify-center p-4 overflow-hidden"
+      className="fixed inset-0 bg-gray-950 flex items-center justify-center p-6 overflow-hidden"
       onMouseMove={handleMouseMove}
     >
-      {/* sick spotlight effect that follows your cursor - had to watch 3 tutorials to get this right */}
-      <motion.div
+      {/* Dot-grid background */}
+      <div
+        className="absolute inset-0 opacity-[0.15] pointer-events-none"
         style={{
-          backgroundPosition: lightPosition,
-          opacity: useTransform(
-            [smoothMouseX, smoothMouseY],
-            ([x, y]) =>
-              0.7 - Math.sqrt((x as number) * (x as number) + (y as number) * (y as number)) / 2000,
-          ),
+          backgroundImage: 'radial-gradient(circle, #6366f1 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
         }}
-        className="fixed inset-0 pointer-events-none bg-[radial-gradient(400px_at_50%_50%,rgba(129,140,248,0.4),transparent)] backdrop-blur-[2px] transition-opacity duration-300"
       />
 
-      {/* main card that tilts with mouse movement */}
+      {/* Cursor spotlight */}
+      <motion.div
+        style={{ backgroundPosition: lightPosition }}
+        className="fixed inset-0 pointer-events-none bg-[radial-gradient(500px_at_50%_50%,rgba(129,140,248,0.12),transparent)]"
+      />
+
+      {/* Card */}
       <motion.div
         style={{
-          rotateX: useTransform(smoothMouseY, [0, vh], [15, -15]),
-          rotateY: useTransform(smoothMouseX, [0, vw], [-15, 15]),
-          transformPerspective: 2000,
+          rotateX: useTransform(smoothMouseY, [0, vh], [8, -8]),
+          rotateY: useTransform(smoothMouseX, [0, vw], [-8, 8]),
+          transformPerspective: 1500,
         }}
-        className="relative bg-gray-900/90 backdrop-blur-2xl border border-gray-800/60 rounded-3xl p-8 max-w-md text-center space-y-6 overflow-hidden shadow-2xl"
+        className="relative w-full max-w-lg bg-gray-900/90 backdrop-blur-2xl border border-gray-700/50 rounded-3xl p-10 text-center shadow-2xl overflow-hidden"
       >
-        {/* added this gradient for some depth */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-blue-600/10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-transparent to-blue-600/10 pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
 
-        {/* glowing icon at the top */}
         <motion.div
+          style={{
+            x: useTransform(smoothMouseX, [0, vw], [-12, 12]),
+            y: useTransform(smoothMouseY, [0, vh], [-12, 12]),
+          }}
+          className="flex justify-center mb-6"
+        >
+          <div className="relative">
+            <SparklesIcon className="h-14 w-14 text-purple-400 relative z-10" />
+            <div className="absolute inset-0 w-24 h-24 -translate-x-5 -translate-y-5 bg-purple-600/20 blur-[40px] rounded-full" />
+          </div>
+        </motion.div>
+
+        <motion.p
           style={{
             x: useTransform(smoothMouseX, [0, vw], [-20, 20]),
             y: useTransform(smoothMouseY, [0, vh], [-20, 20]),
           }}
-          className="flex justify-center relative"
+          className="text-sm font-semibold text-purple-400 tracking-widest uppercase mb-2"
         >
-          <SparklesIcon className="h-16 w-16 text-purple-400 relative z-10" />
-          <div className="absolute w-32 h-32 bg-purple-600/30 blur-[50px] rounded-full" />
-        </motion.div>
-
-        {/* big 404 text with shadow effect */}
-        <motion.h1
-          style={{
-            textShadow: '0 0 40px rgba(129,140,248,0.4)',
-            x: useTransform(smoothMouseX, [0, vw], [-30, 30]),
-            y: useTransform(smoothMouseY, [0, vh], [-30, 30]),
-          }}
-          className="text-8xl font-black bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent relative"
-        >
-          404
-        </motion.h1>
-
-        {/* subtitle */}
-        <motion.p
-          style={{
-            x: useTransform(smoothMouseX, [0, vw], [-15, 15]),
-            y: useTransform(smoothMouseY, [0, vh], [-15, 15]),
-          }}
-          className="text-xl font-medium text-gray-300 uppercase tracking-widest"
-        >
-          Lost in the Void
+          404 — Page not found
         </motion.p>
 
-        {/* random funny error message */}
-        <motion.div
+        <motion.h1
           style={{
-            x: useTransform(smoothMouseX, [0, vw], [-10, 10]),
-            y: useTransform(smoothMouseY, [0, vh], [-10, 10]),
+            x: useTransform(smoothMouseX, [0, vw], [-16, 16]),
+            y: useTransform(smoothMouseY, [0, vh], [-16, 16]),
           }}
-          className="text-gray-400 text-lg italic px-4 relative"
+          className="text-4xl font-black text-white mb-4"
         >
-          <span className="relative z-10">{randomText}</span>
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-600/15 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
-        </motion.div>
+          Lost in the Void
+        </motion.h1>
 
-        {/* back button */}
-        <motion.button
-          onClick={() => router.push('/')}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <motion.p
           style={{
-            x: useTransform(smoothMouseX, [0, vw], [-10, 10]),
-            y: useTransform(smoothMouseY, [0, vh], [-10, 10]),
+            x: useTransform(smoothMouseX, [0, vw], [-8, 8]),
+            y: useTransform(smoothMouseY, [0, vh], [-8, 8]),
           }}
-          className="inline-flex items-center px-8 py-3.5 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden group"
+          className="text-gray-400 text-base italic mb-8 leading-relaxed"
         >
-          <span className="relative z-10 flex items-center gap-2">
-            <span>Return to Reality</span>
-            <motion.svg
-              viewBox="0 0 24 24"
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              animate={{ x: [0, 2, 0] }}
-              transition={{ duration: 1.2, repeat: Infinity }}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
-            </motion.svg>
-          </span>
-          <div className="absolute inset-0 bg-gradient-to-r from-white/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </motion.button>
+          {randomText}
+        </motion.p>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <motion.button
+            onClick={() => router.back()}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-6 py-3 rounded-xl border border-gray-700 text-gray-300 text-sm font-medium hover:bg-white/5 transition-colors"
+          >
+            Go back
+          </motion.button>
+          <motion.button
+            onClick={() => router.push('/')}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold shadow-lg hover:shadow-purple-500/25 transition-all relative overflow-hidden group"
+          >
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              Return home
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </span>
+            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </motion.button>
+        </div>
       </motion.div>
     </div>
   );

@@ -23,7 +23,6 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
   const [imagePreview, setImagePreview] = useState('');
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [page, setPage] = useState(initialPosts.length > 0 ? 2 : 1);
-  const [objectUrls, setObjectUrls] = useState([]);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   // Prevent hydration mismatch: user-dependent UI only renders after client mount
   const [mounted, setMounted] = useState(false);
@@ -300,12 +299,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     <div className="relative min-h-screen bg-gray-950 pb-16 sm:pb-0">
       <AnimatePresence>{error && <ErrorMessage error={error} />}</AnimatePresence>
 
-      <div className="container mx-auto max-w-2xl px-2 sm:px-4 py-6 sm:py-8 pt-16 sm:pt-20">
-        {loading && (
-          <motion.div className="text-center py-6">
-            <p className="text-gray-400">Loading new posts...</p>
-          </motion.div>
-        )}
+      <div className="container mx-auto max-w-2xl px-2 sm:px-4 py-6 sm:py-8 pt-6 sm:pt-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -423,18 +417,14 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
           </motion.div>
         )}
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="space-y-4 sm:space-y-6 pb-8"
-        >
-          {posts.map((post, index) => (
-            <React.Fragment key={post._id}>
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="relative  mt-4 pt-4 border-t border-gray-800/40"
+        <div className="space-y-4 sm:space-y-5 pb-8">
+          {loading && posts.length === 0 ? (
+            <SkeletonLoader count={3} />
+          ) : (
+            posts.map((post, index) => (
+              <div
+                key={post._id}
+                className="border-t border-gray-800/40 pt-4"
                 ref={index === posts.length - 1 ? lastPostRef : null}
               >
                 <PostCard
@@ -448,22 +438,23 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
                     );
                   }}
                 />
-              </motion.div>
-            </React.Fragment>
-          ))}
-
-          {loading && <SkeletonLoader count={3} />}
-
-          {!loading && !hasMore && (
-            <motion.div
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              className="text-center py-6 sm:py-8 bg-gray-900/50 rounded-lg border border-gray-800/40"
-            >
-              <p className="text-sm sm:text-base text-gray-400">No more posts to load</p>
-            </motion.div>
+              </div>
+            ))
           )}
-        </motion.div>
+
+          {isFetchingMore && <SkeletonLoader count={2} />}
+
+          {!loading && !hasMore && posts.length > 0 && (
+            <p className="text-center py-6 text-sm text-gray-500">You&apos;ve reached the end</p>
+          )}
+
+          {!loading && posts.length === 0 && !error && (
+            <div className="text-center py-16">
+              <SparklesIcon className="h-10 w-10 text-gray-700 mx-auto mb-3" />
+              <p className="text-gray-500">No posts yet. Be the first to post!</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
