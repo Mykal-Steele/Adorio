@@ -34,6 +34,9 @@ export const register = (userData) => request(API.post('/users/register', userDa
 
 export const login = (userData) => request(API.post('/users/login', userData));
 
+export const refreshAccessToken = (refreshToken: string): Promise<{ token: string }> =>
+  request(API.post('/users/refresh-token', { refreshToken }));
+
 export const fetchUserData = () => request(API.get('/users/me'));
 
 export const storeSecret = (message, password) =>
@@ -41,5 +44,11 @@ export const storeSecret = (message, password) =>
 
 export { sendContactMessage } from './contact';
 export { getPosts, createPost, likePost, addComment, getSinglePost } from './posts';
+export {
+  uploadHostedFile,
+  getMyHostedFiles,
+  deleteHostedFile,
+  getAllHostedFilesAdmin,
+} from './hosting';
 
 export default API;
