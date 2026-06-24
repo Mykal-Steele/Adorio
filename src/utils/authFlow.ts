@@ -9,6 +9,7 @@ type SearchParamsLike = {
 type AuthResponse = {
   user?: unknown;
   token?: string;
+  refreshToken?: string;
 };
 
 const isUser = (value: unknown): value is User => {
@@ -30,6 +31,9 @@ export const applyAuthSession = (dispatch: (action: unknown) => void, response: 
   }
 
   localStorage.setItem('token', response.token);
+  if (response.refreshToken) {
+    localStorage.setItem('refreshToken', response.refreshToken);
+  }
   dispatch(setUser({ user: response.user, token: response.token }));
   return true;
 };
