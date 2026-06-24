@@ -17,8 +17,7 @@ const environment = {
   port: normalize(process.env.PORT) || 3000,
   mongoUri: normalize(process.env.MONGO_URI),
   jwtSecret: normalize(process.env.JWT_SECRET),
-  refreshTokenSecret:
-    normalize(process.env.REFRESH_TOKEN_SECRET) || normalize(process.env.JWT_SECRET),
+  refreshTokenSecret: normalize(process.env.JWT_SECRET),
   clientUrl: normalize(process.env.CLIENT_URL),
   viteBackendUrl: normalize(process.env.VITE_BACKEND_URL),
   cloudinary: {

@@ -7,7 +7,6 @@ const config: NextConfig = {
 
   // Skip on prod builds (Docker) — type checking runs locally via `npm run typecheck`
   typescript: { ignoreBuildErrors: isProd },
-  eslint: { ignoreDuringBuilds: isProd },
 
   // framer-motion v12 is ESM-only; transpile it so webpack handles it correctly
   transpilePackages: ['framer-motion'],
