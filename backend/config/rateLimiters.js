@@ -73,6 +73,17 @@ const secretLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+const uploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  message: {
+    error: 'Too many file uploads from this IP, please try again later.',
+    retryAfter: '1 hour',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export {
   standardLimiter,
   postLimiter,
@@ -80,4 +91,5 @@ export {
   registrationLimiter,
   authLimiter,
   secretLimiter,
+  uploadLimiter,
 };
