@@ -1,12 +1,13 @@
 import { serverFetch } from '@/lib/serverFetch';
 import Home from '@/views/Home';
+import type { Post } from '@/types';
 
 export default async function PostsLoader() {
-  let initialPosts: any[] = [];
+  let initialPosts: Post[] = [];
   let initialHasMore = true;
 
   try {
-    const data = await serverFetch<{ posts: any[]; hasMore: boolean }>(
+    const data = await serverFetch<{ posts: Post[]; hasMore: boolean }>(
       '/api/posts?page=1&limit=3',
       { cache: 'no-store' },
     );
