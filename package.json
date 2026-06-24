@@ -90,7 +90,8 @@
     ],
     "testPathIgnorePatterns": [
       "<rootDir>/node_modules/",
-      "<rootDir>/__tests__/unit/"
+      "<rootDir>/__tests__/unit/",
+      "helpers\\.js$"
     ]
   },
   "devDependencies": {
