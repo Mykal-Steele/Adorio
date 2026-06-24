@@ -30,6 +30,7 @@ const userSlice = createSlice({
       state.token = null;
       state.isAuthLoading = false;
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
     },
   },
 });
