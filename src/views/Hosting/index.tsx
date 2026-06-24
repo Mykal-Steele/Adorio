@@ -64,7 +64,7 @@ export default function HostingView() {
     } catch {
       setError('Failed to delete file');
     } finally {
-      setDeletingSlug('');
+      setDeletingSlug((prev) => (prev === slug ? '' : prev));
     }
   };
 
@@ -210,8 +210,8 @@ export default function HostingView() {
                       </p>
                       <p className="font-mono text-xs text-purple-400 mt-0.5">/h/{f.slug}</p>
                       <p className="text-xs text-gray-600 mt-0.5">
-                        {(f.size / 1024).toFixed(1)} KB &middot;{' '}
-                        {f.views === 1 ? '1 view' : `${f.views} views`} &middot;{' '}
+                        {f.size >= 1024 ? `${(f.size / 1024).toFixed(1)} KB` : `${f.size} B`}{' '}
+                        &middot; {f.views === 1 ? '1 view' : `${f.views} views`} &middot;{' '}
                         {new Date(f.createdAt).toLocaleDateString()}
                       </p>
                     </div>
@@ -227,7 +227,7 @@ export default function HostingView() {
                         target="_blank"
                         rel="noreferrer"
                         className="rounded-lg bg-gray-800 p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
-                        title="View"
+                        aria-label={`View ${f.originalFilename}`}
                       >
                         <EyeIcon className="h-4 w-4" />
                       </a>
@@ -235,7 +235,7 @@ export default function HostingView() {
                         onClick={() => handleDelete(f.slug)}
                         disabled={deletingSlug === f.slug}
                         className="rounded-lg bg-red-950/40 p-1.5 text-red-500 hover:bg-red-950/70 hover:text-red-400 transition-colors disabled:opacity-50"
-                        title="Delete"
+                        aria-label={`Delete ${f.originalFilename}`}
                       >
                         <TrashIcon className="h-4 w-4" />
                       </button>
