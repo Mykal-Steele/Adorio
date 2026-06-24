@@ -25,8 +25,8 @@ const NotFound = () => {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    mouseX.set(e.clientX - rect.left + window.scrollX);
-    mouseY.set(e.clientY - rect.top + window.scrollY);
+    mouseX.set(e.clientX - rect.left);
+    mouseY.set(e.clientY - rect.top);
   };
 
   useEffect(() => {
