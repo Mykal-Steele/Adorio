@@ -16,8 +16,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const registerUser = asyncHandler(async (req, res) => {
   const sanitizedUser = await createUserAccount(req.body);
-  const { token } = createAuthTokens(sanitizedUser._id, sanitizedUser.isAdmin);
-  res.status(201).json({ user: sanitizedUser, token });
+  const { token, refreshToken } = createAuthTokens(sanitizedUser._id, sanitizedUser.isAdmin);
+  res.status(201).json({ user: sanitizedUser, token, refreshToken });
 });
 
 const loginUser = asyncHandler(async (req, res) => {

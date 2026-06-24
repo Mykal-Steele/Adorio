@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch } from '../store/hooks';
 import { setUser, setAuthLoaded } from '../store/userSlice';
-import { fetchUserData } from '../api';
+import { fetchUserData, refreshAccessToken } from '../api';
 
 const useAuthBootstrap = () => {
   const dispatch = useAppDispatch();
@@ -27,6 +27,20 @@ const useAuthBootstrap = () => {
           dispatch(setUser({ user: userData, token: storedToken }));
         }
       } catch (error) {
+        const storedRefreshToken = localStorage.getItem('refreshToken');
+        if (storedRefreshToken) {
+          try {
+            const { token: newToken } = await refreshAccessToken(storedRefreshToken);
+            localStorage.setItem('token', newToken);
+            const userData = await fetchUserData();
+            if (isActive) {
+              dispatch(setUser({ user: userData, token: newToken }));
+            }
+            return;
+          } catch {
+            localStorage.removeItem('refreshToken');
+          }
+        }
         localStorage.removeItem('token');
         if (process.env.NODE_ENV !== 'production') {
           console.error('Failed to fetch user data:', error);

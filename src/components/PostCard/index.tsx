@@ -11,6 +11,7 @@ import CommentSection from './components/CommentSection';
 
 // Import hooks
 import { useImageLoader } from './hooks/useImageLoader';
+import type { ApiClientError } from '@/utils/errorHandling';
 
 import { ADMIN_AVATAR_URL } from './constants';
 
@@ -160,7 +161,7 @@ const PostCard = ({
       if (process.env.NODE_ENV !== 'production') {
         console.error('Error liking post:', err);
       }
-      const errStatus = (err as any)?.statusCode;
+      const errStatus = (err as ApiClientError)?.statusCode;
       if (errStatus === 401 || errStatus === 403) {
         setAuthError('Please log in to like posts.');
       } else {
@@ -230,7 +231,7 @@ const PostCard = ({
         if (process.env.NODE_ENV !== 'production') {
           console.error('Error adding comment:', err);
         }
-        const errStatus = (err as any)?.statusCode;
+        const errStatus = (err as ApiClientError)?.statusCode;
         if (errStatus === 401 || errStatus === 403) {
           setAuthError('Please log in to comment.');
           setTimeout(() => setAuthError(null), 3000);
