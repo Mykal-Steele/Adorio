@@ -9,7 +9,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider
       attribute="data-theme"
-      defaultTheme="midnight"
+      defaultTheme="one-dark"
       themes={['midnight', 'nord', 'dracula', 'one-dark', 'catppuccin']}
       disableTransitionOnChange
       enableSystem={false}
