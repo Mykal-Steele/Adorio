@@ -76,6 +76,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
       }
     } finally {
       setLoading(false);
+      setIsFetchingMore(false);
     }
   }, [page]);
 
@@ -120,7 +121,6 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
         if (!s.loading && !s.isFetchingMore && s.hasMore) {
           setIsFetchingMore(true);
           setPage((prevPage) => prevPage + 1);
-          setTimeout(() => setIsFetchingMore(false), 300);
         }
       }, 200),
     [],
