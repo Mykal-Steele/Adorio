@@ -337,13 +337,21 @@ function MobileShell({ children }: { children: ReactNode }) {
 
 function IDELayoutInner({ children }: { children: ReactNode }) {
   const { isMobile, isTablet } = useResponsive();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.add('ide-layout');
+    setMounted(true);
     return () => {
       document.documentElement.classList.remove('ide-layout');
     };
   }, []);
+
+  // Don't render any shell until we know the real breakpoint — prevents
+  // DesktopShell flashing on mobile before useResponsive reads window.innerWidth.
+  if (!mounted) {
+    return <div style={{ height: '100dvh', background: 'var(--ide-bg-2)' }} />;
+  }
 
   if (isMobile) return <MobileShell>{children}</MobileShell>;
   if (isTablet) return <TabletShell>{children}</TabletShell>;
