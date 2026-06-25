@@ -21,10 +21,23 @@ export default function HostingView() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
     getMyHostedFiles()
       .then(setFiles)
-      .catch(() => setError('Failed to load files'))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!controller.signal.aborted) setError('Failed to load files');
+      })
+      .finally(() => {
+        clearTimeout(timeout);
+        setLoading(false);
+      });
+
+    return () => {
+      controller.abort();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const handleFile = async (file: File) => {

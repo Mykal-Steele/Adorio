@@ -50,21 +50,20 @@ const Navbar = () => {
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-lg border-b border-gray-800 shadow-lg"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* ── Single bar ─────────────────────────────────────── */}
-        <div className="flex items-center h-14 sm:h-16">
+      <div className="max-w-6xl mx-auto px-4 lg:px-6">
+        <div className="flex items-center h-16 lg:h-[72px]">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0 mr-6">
             <motion.div whileHover={{ rotate: 15 }} whileTap={{ scale: 0.9 }}>
-              <SparklesIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
+              <SparklesIcon className="h-6 w-6 text-purple-400" />
             </motion.div>
-            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Adorio
             </span>
           </Link>
 
           {/* Desktop nav — fills middle, links are centered within it */}
-          <div className="hidden sm:flex flex-1 items-center justify-center gap-0.5">
+          <div className="hidden lg:flex flex-1 items-center justify-center gap-0.5">
             {links.map(({ href, text, external }) =>
               external ? (
                 <a
@@ -92,7 +91,7 @@ const Navbar = () => {
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={handleLogout}
-              className="hidden sm:block ml-6 shrink-0 px-5 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 transition-opacity"
+              className="hidden lg:block ml-6 shrink-0 px-5 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 transition-opacity"
             >
               Logout
             </motion.button>
@@ -100,7 +99,7 @@ const Navbar = () => {
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
               <Link
                 href="/register"
-                className="hidden sm:block ml-6 shrink-0 px-5 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 transition-opacity"
+                className="hidden lg:block ml-6 shrink-0 px-5 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 transition-opacity"
               >
                 Get Started
               </Link>
@@ -110,7 +109,7 @@ const Navbar = () => {
           {/* Mobile hamburger */}
           <button
             onClick={() => setOpen((v) => !v)}
-            className="sm:hidden ml-auto p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+            className="lg:hidden ml-auto p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
             aria-label="Toggle navigation menu"
           >
             {open ? <XMarkIcon className="h-5 w-5" /> : <Bars3Icon className="h-5 w-5" />}
@@ -127,7 +126,7 @@ const Navbar = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="sm:hidden overflow-hidden border-t border-gray-800 bg-gray-950"
+            className="lg:hidden overflow-hidden border-t border-gray-800 bg-gray-950"
           >
             <div className="max-w-6xl mx-auto px-4 py-2 flex flex-col">
               {links.map(({ href, text, external }) =>
