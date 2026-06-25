@@ -86,8 +86,8 @@ export function useTheme() {
 
   if (!ctx) throw new Error('useTheme must be used inside ThemeProvider');
 
-  // next-themes returns undefined on the server before hydration; fall back to midnight.
-  const theme = (nextTheme as ThemeName) ?? 'midnight';
+  // next-themes returns undefined on the server before hydration; fall back to one-dark.
+  const theme = (nextTheme as ThemeName) ?? 'one-dark';
   const setTheme = (t: ThemeName) => nextSetTheme(t);
 
   return { theme, setTheme, fontSize: ctx.fontSize, setFontSize: ctx.setFontSize };
