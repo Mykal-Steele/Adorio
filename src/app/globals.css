@@ -52,11 +52,43 @@
   --ide-line-number: rgba(92,99,112,0.5); --ide-scrollbar: #353b45;
 }
 
-/* IDE themes
-   next-themes sets [data-theme="X"] on <html> at runtime and in a blocking
-   script during SSR, so these take over from the :root midnight defaults with
-   zero flash. One block per theme — all variables must be redefined here so
-   nothing accidentally inherits a midnight value. */
+/* IDE themes — every theme has its own explicit block so :root is only a
+   silent fallback that never shows through during navigation.
+   next-themes sets [data-theme="X"] on <html> synchronously via a blocking
+   script before first paint, and it persists across client-side navigation. */
+
+[data-theme="midnight"] {
+  --ide-bg-0: #060a0f; --ide-bg-1: #080c11; --ide-bg-2: #0a0e14;
+  --ide-bg-3: #0d1117; --ide-bg-4: #0f141a; --ide-bg-5: #1a2130;
+  --ide-text-1: #f1f3fc; --ide-text-2: #a8abb3; --ide-text-3: #94a3b8;
+  --ide-text-4: #72757d; --ide-text-5: #64748b; --ide-text-6: #475569;
+  --ide-text-7: #3d4f6b; --ide-text-8: #5a6e8a; --ide-text-9: #2d3748;
+  --ide-accent: #00ffc2; --ide-accent-dark: #00654b;
+  --ide-accent-light: #aaffdc; --ide-accent-bright: #00edb4;
+  --ide-accent-a5: rgba(0,255,194,0.05); --ide-accent-a6: rgba(0,255,194,0.06);
+  --ide-accent-a8: rgba(0,255,194,0.08); --ide-accent-a10: rgba(0,255,194,0.1);
+  --ide-accent-a12: rgba(0,255,194,0.12); --ide-accent-a15: rgba(0,255,194,0.15);
+  --ide-accent-a20: rgba(0,255,194,0.2); --ide-accent-a25: rgba(0,255,194,0.25);
+  --ide-accent-a30: rgba(0,255,194,0.3);
+  --ide-accent-light-a15: rgba(170,255,220,0.15); --ide-accent-light-a40: rgba(170,255,220,0.4);
+  --ide-accent-light-a60: rgba(170,255,220,0.6); --ide-accent-light-a70: rgba(170,255,220,0.7);
+  --ide-orange: #fe9d00; --ide-orange-light: #ffbd4a;
+  --ide-orange-a12: rgba(254,157,0,0.12); --ide-orange-a18: rgba(254,157,0,0.18);
+  --ide-orange-a30: rgba(254,157,0,0.3); --ide-orange-a45: rgba(254,157,0,0.45);
+  --ide-purple: #a78bfa;
+  --ide-purple-a10: rgba(167,139,250,0.1); --ide-purple-a12: rgba(167,139,250,0.12);
+  --ide-purple-a15: rgba(167,139,250,0.15); --ide-purple-a25: rgba(167,139,250,0.25);
+  --ide-blue: #60a5fa; --ide-blue-light: #93c5fd;
+  --ide-blue-a18: rgba(96,165,250,0.18); --ide-blue-a45: rgba(96,165,250,0.45);
+  --ide-green: #4ade80; --ide-red: #d7383b; --ide-red-dark: #ce422b;
+  --ide-red-a12: rgba(215,56,59,0.12); --ide-pink: #ff9195;
+  --ide-pink-a12: rgba(255,145,149,0.12); --ide-cyan: #00acd7;
+  --ide-ts-blue: #3178c6;
+  --ide-ts-blue-a8: rgba(49,120,198,0.08); --ide-ts-blue-a10: rgba(49,120,198,0.1);
+  --ide-ts-blue-a20: rgba(49,120,198,0.2);
+  --ide-yellow: #f7c131; --ide-syntax-string: #c3e88d; --ide-syntax-string2: #00fdc1;
+  --ide-line-number: rgba(114,117,125,0.3); --ide-scrollbar: #1a2130;
+}
 
 [data-theme="nord"] {
   --ide-bg-0: #242933; --ide-bg-1: #272d38; --ide-bg-2: #2e3440;
