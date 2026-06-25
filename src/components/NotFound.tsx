@@ -41,14 +41,8 @@ const NotFound = () => {
       className="fixed inset-0 bg-gray-950 flex items-center justify-center p-6 overflow-hidden"
       onMouseMove={handleMouseMove}
     >
-      {/* Dot-grid background */}
-      <div
-        className="absolute inset-0 opacity-[0.15] pointer-events-none"
-        style={{
-          backgroundImage: 'radial-gradient(circle, #6366f1 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-        }}
-      />
+      {/* Dot-grid background via Tailwind arbitrary utilities */}
+      <div className="absolute inset-0 opacity-[0.15] pointer-events-none bg-[radial-gradient(circle,#6366f1_1px,transparent_1px)] bg-[length:32px_32px]" />
 
       {/* Cursor spotlight */}
       <motion.div

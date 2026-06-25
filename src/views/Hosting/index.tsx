@@ -17,7 +17,7 @@ export default function HostingView() {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState('');
   const [dragging, setDragging] = useState(false);
-  const [deletingSlug, setDeletingSlug] = useState('');
+  const [deletingSlugs, setDeletingSlugs] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -57,14 +57,18 @@ export default function HostingView() {
   };
 
   const handleDelete = async (slug: string) => {
-    setDeletingSlug(slug);
+    setDeletingSlugs((prev) => new Set(prev).add(slug));
     try {
       await deleteHostedFile(slug);
       setFiles((prev) => prev.filter((f) => f.slug !== slug));
     } catch {
       setError('Failed to delete file');
     } finally {
-      setDeletingSlug((prev) => (prev === slug ? '' : prev));
+      setDeletingSlugs((prev) => {
+        const next = new Set(prev);
+        next.delete(slug);
+        return next;
+      });
     }
   };
 
@@ -233,7 +237,7 @@ export default function HostingView() {
                       </a>
                       <button
                         onClick={() => handleDelete(f.slug)}
-                        disabled={deletingSlug === f.slug}
+                        disabled={deletingSlugs.has(f.slug)}
                         className="rounded-lg bg-red-950/40 p-1.5 text-red-500 hover:bg-red-950/70 hover:text-red-400 transition-colors disabled:opacity-50"
                         aria-label={`Delete ${f.originalFilename}`}
                       >
