@@ -41,14 +41,8 @@ const NotFound = () => {
       className="fixed inset-0 bg-gray-950 flex items-center justify-center p-6 overflow-hidden"
       onMouseMove={handleMouseMove}
     >
-      {/* Dot-grid background */}
-      <div
-        className="absolute inset-0 opacity-[0.15] pointer-events-none"
-        style={{
-          backgroundImage: 'radial-gradient(circle, #6366f1 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-        }}
-      />
+      {/* Dot-grid background via Tailwind arbitrary utilities */}
+      <div className="absolute inset-0 opacity-[0.15] pointer-events-none bg-[radial-gradient(circle,#6366f1_1px,transparent_1px)] bg-[length:32px_32px]" />
 
       {/* Cursor spotlight */}
       <motion.div
@@ -63,7 +57,7 @@ const NotFound = () => {
           rotateY: useTransform(smoothMouseX, [0, vw], [-8, 8]),
           transformPerspective: 1500,
         }}
-        className="relative w-full max-w-lg bg-gray-900/90 backdrop-blur-2xl border border-gray-700/50 rounded-3xl p-10 text-center shadow-2xl overflow-hidden"
+        className="relative w-full max-w-lg bg-gray-900/90 backdrop-blur-2xl border border-gray-700/50 rounded-3xl px-10 py-16 text-center shadow-2xl overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-transparent to-blue-600/10 pointer-events-none" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
