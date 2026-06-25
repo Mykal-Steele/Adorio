@@ -3,8 +3,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { SparklesIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { logout } from '../store/userSlice';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { logout } from '@/store/userSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type NavItem = { href: string; text: string; external?: boolean };
