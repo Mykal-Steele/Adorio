@@ -104,6 +104,12 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
       '${containerAppPullIdentity.id}': {}
     }
   }
+  // Bicep can't infer this from the identity block above (role assignments aren't
+  // referenced there), so it's spelled out: the AcrPull grant must exist before the
+  // container app tries to pull from the registry using that identity.
+  dependsOn: [
+    acrPullForContainerApp
+  ]
   properties: {
     managedEnvironmentId: containerAppsEnvironment.id
     configuration: {
