@@ -95,6 +95,9 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
       - uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -108,3 +111,5 @@ jobs:
         run: |
           az containerapp update --name adorio --resource-group adorio-prod-rg \
             --image adorioacr.azurecr.io/adorio:${{ github.sha }}
+      - name: Verify deployment health
+        run: node scripts/wait-for-url.cjs https://adorio.orangeground-7d1e6e2f.southeastasia.azurecontainerapps.io/api/health 180000 2000
