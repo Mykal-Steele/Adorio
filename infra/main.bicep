@@ -16,8 +16,14 @@ param deployIdentityName string = 'adorio-github-deploy-identity'
 @description('GitHub repo in "owner/repo" form, used to scope the OIDC federated credential')
 param githubRepo string = 'Mykal-Steele/Adorio'
 
-@description('Bootstrap image used on first deploy, before CI has pushed a real image')
-param bootstrapImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
+// No default on purpose. This template gets re-applied for infra changes unrelated to
+// app code (RBAC, scaling, etc.) — CI owns image updates via `az containerapp update`
+// and never re-runs this template. If this had a default, re-applying the template for
+// an infra tweak would silently reset the running app back to that default and cut
+// traffic over to it, which is exactly what happened once already. Always pass the
+// currently-running image explicitly: `--parameters containerImage=<current image>`.
+@description('Image the container app should run — always pass the current running image explicitly, no default')
+param containerImage string
 
 @secure()
 param mongoUri string
@@ -139,7 +145,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
       containers: [
         {
           name: containerAppName
-          image: bootstrapImage
+          image: containerImage
           resources: {
             cpu: json('1.0')
             memory: '2Gi'
@@ -209,6 +215,20 @@ resource acrPushForDeployIdentity 'Microsoft.Authorization/roleAssignments@2022-
   scope: registry
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8311e382-0749-4cb8-b61a-304f252e45ec')
+    principalId: deployIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// `az acr build` needs this in addition to AcrPush — it's an ARM-level orchestration
+// role (uploading build context, queuing the run), not a data-plane push/pull action.
+// AcrPush alone gets "resource could not be found" / "AuthorizationFailed" on
+// listBuildSourceUploadUrl, confirmed the hard way against the real registry.
+resource acrTasksContributorForDeployIdentity 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(registry.id, deployIdentity.id, 'ContainerRegistryTasksContributor')
+  scope: registry
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'fb382eab-e894-4461-af04-94435c366c3f')
     principalId: deployIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
