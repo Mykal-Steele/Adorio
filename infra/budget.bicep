@@ -6,8 +6,12 @@ param amount int = 150
 @description('Email to notify when spend crosses a threshold')
 param contactEmail string = 'mykal.stele@gmail.com'
 
-@description('First-of-month start date for the budget period (Monthly time grain re-evaluates automatically every month after this)')
-param startDate string = '2026-08-01T00:00:00Z'
+// utcNow() only works as a parameter default — computed at deploy time, not committed
+// as a fixed value. Needed because a hardcoded date would eventually fall outside the
+// "past start date must be within the current time-grain period" rule on any future
+// redeploy of this same template (e.g. touching notification thresholds later).
+@description('First-of-month start date for the budget period — always computed as the current month, not fixed, so redeploying this template months from now still works')
+param startDate string = utcNow('yyyy-MM-01T00:00:00Z')
 
 resource monthlyBudget 'Microsoft.Consumption/budgets@2024-08-01' = {
   name: 'adorio-monthly-credit'
@@ -33,16 +37,16 @@ resource monthlyBudget 'Microsoft.Consumption/budgets@2024-08-01' = {
         thresholdType: 'Actual'
         contactEmails: [contactEmail]
       }
-      Actual_GreaterThan_100_Percent: {
+      Actual_GreaterThanOrEqualTo_100_Percent: {
         enabled: true
-        operator: 'GreaterThan'
+        operator: 'GreaterThanOrEqualTo'
         threshold: 100
         thresholdType: 'Actual'
         contactEmails: [contactEmail]
       }
-      Forecasted_GreaterThan_100_Percent: {
+      Forecasted_GreaterThanOrEqualTo_100_Percent: {
         enabled: true
-        operator: 'GreaterThan'
+        operator: 'GreaterThanOrEqualTo'
         threshold: 100
         thresholdType: 'Forecasted'
         contactEmails: [contactEmail]
