@@ -57,11 +57,6 @@ npm run start            # serve the standalone build locally
 docker compose up --build                              # dev at :8080
 docker compose -f docker-compose.prod.yml up --build  # prod at :8080
 
-# ── Docker (production — run on droplet) ──────────────────────
-npm run docker:redeploy  # build image + replace running container (what CI runs)
-npm run docker:logs      # tail container logs
-npm run docker:status    # check container state
-
 # ── Testing (requires Docker) ─────────────────────────────────
 npm run test:dev         # integration tests against dev containers
 npm run test:prod        # integration tests against prod containers
@@ -72,26 +67,27 @@ npm run test:prod        # integration tests against prod containers
 ### Request Flow (Production)
 
 ```
-Browser → Cloudflare CDN (SSL mode: Full) → reserved IP 163.47.9.93 (DigitalOcean SGP1)
-  └─ Docker container adorio-container (host ports 80→8080, 443→8443)
-       └─ Nginx (8080 HTTP / 8443 HTTPS)
+Browser → Azure Container Apps ingress (managed TLS, Envoy)
+  └─ Container App `adorio` (single active revision, minReplicas 1, autoscale to 3)
+       └─ Nginx (plain HTTP :8080 — Container Apps terminates TLS at the platform edge)
             ├─ /api/*          → localhost:3000 (Express backend)
             ├─ /cao/*          → static files /usr/share/nginx/html/cao/ (ai-slop)
             ├─ /_next/static/* → localhost:3001 (Next.js, 1yr cache)
             └─ /*              → localhost:3001 (Next.js SSR, proxy_buffering off)
 ```
 
-The backend, Next.js standalone server, and Nginx all run in the same Docker container. `nginx.production.conf` / `nginx.development.conf` are selected at image build time via `$ENV` build arg.
+The backend, Next.js standalone server, and Nginx all run in the same Docker container, same as before the Azure migration. `nginx.production.conf` no longer terminates TLS itself (dropped in the migration — Container Apps' ingress does that now with a free managed certificate). `nginx.production.conf` / `nginx.development.conf` are still selected at image build time via the `$ENV` build arg.
+
+**Custom domain note**: `adorio.space` → Cloudflare cutover hasn't happened yet — the site is currently only reachable at its Azure-issued FQDN (`adorio.<env-id>.southeastasia.azurecontainerapps.io`). Binding the custom domain + managed cert to the Container App, then repointing Cloudflare DNS, is still on the migration to-do list.
 
 ### Hosting
 
-- **Platform**: DigitalOcean droplet — region SGP1, Ubuntu 22.04.5 LTS, hostname `adorio`
-- **Compute**: 2 vCPU / 2 GB RAM / 60 GB SSD / 3 TB transfer ($18/mo)
-- **Droplet IP**: 103.253.145.214 (direct); **Reserved IP**: 163.47.9.93 (Cloudflare A record target)
-- **Domain**: `adorio.space` → Cloudflare (proxied) → reserved IP 163.47.9.93
-- **CDN/Proxy**: Cloudflare sits in front of the droplet (SSL mode: Full)
-- **SSL**: Cloudflare Origin Certificate (RSA) — `adorio.space.pem` + `adorio.space.key` at project root, mounted read-only into container at `/etc/ssl/`
-- **Project location on droplet**: `~/Adorio`
+- **Platform**: Azure Container Apps — region `southeastasia`, resource group `adorio-prod-rg`, subscription funded by a recurring $150/mo Visual Studio Enterprise credit
+- **Compute**: single Container App (`adorio`) — 1.0 vCPU / 2Gi memory, `minReplicas: 1` (always warm, no cold start), `maxReplicas: 3`, `/api/health` wired as both liveness and readiness probe
+- **Registry**: Azure Container Registry `adorioacr` — the container app pulls images via its own user-assigned managed identity (`AcrPull`), no admin credentials on the registry
+- **Deploys**: a separate user-assigned managed identity authenticates GitHub Actions via OIDC (no stored secret) with `AcrPush` + `Container Registry Tasks Contributor` (registry-scoped) and `Container Apps Contributor` (resource-group-scoped) — see `infra/main.bicep`
+- **Infra as code**: `infra/main.bicep` (app stack: environment, registry, container app, identities, RBAC) and `infra/budget.bicep` (subscription cost budget) — both applied manually via `az deployment group create` / `az deployment sub create`, **not** run automatically by CI. `infra/main.bicep`'s `containerImage` parameter has no default on purpose — always pass the currently-running image explicitly when re-applying it, or it'll reset the live app
+- **Budget guardrail**: subscription-level Azure Cost Management budget, $150/mo, email alerts at 50/80/100% actual spend and 100% forecasted — alert-only, does not cap or throttle spend automatically
 - **Database**: MongoDB Atlas (connection via `MONGO_URI`)
 - **Images**: Cloudinary
 
@@ -105,11 +101,9 @@ Pipeline order (each step gates the next):
 2. **Lint** — `npm run lint`
 3. **TypeScript + build** — `npm run build`
 4. **Integration tests** — spins up prod Docker containers, runs Puppeteer tests (`npm run test:prod`)
-5. **Deploy** — SSH into droplet via `appleboy/ssh-action`; runs `cd ~/Adorio && git pull origin main && npm run docker:redeploy`
+5. **Deploy** — authenticates to Azure via OIDC (`azure/login`, no stored client secret), builds and pushes the image with `az acr build` (runs the existing multi-stage `Dockerfile` unmodified via ACR Tasks, cloud-side), rolls out the new image with `az containerapp update`, then verifies `/api/health` actually comes back healthy on the real FQDN with `scripts/wait-for-url.cjs` before the job succeeds — a revision that never goes healthy fails the deploy loudly instead of silently leaving a broken revision live
 
-`docker:redeploy` = rebuild image (`--build-arg ENV=production`) → stop + remove old container → start new container with cert mounts and `--env-file .env`.
-
-Secrets stored in GitHub: `DROPLET_IP`, `DROPLET_SSH_KEY`, plus all app env vars injected during the integration-test step.
+Secrets stored in GitHub: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` (identify the deploy-time managed identity — no password or key material, just identifiers), plus all app env vars injected during the integration-test step. Runtime secrets the live Container App actually uses (`MONGO_URI`, `JWT_SECRET`, etc.) are baked in separately via the Bicep deployment, not by this pipeline.
 
 ### Frontend Architecture (`src/`)
 
