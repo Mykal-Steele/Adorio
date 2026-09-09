@@ -206,7 +206,7 @@ export function SettingsPanel() {
                     fontWeight: 500,
                   }}
                 >
-                  Editor Font Size
+                  Code Font Size
                 </label>
                 <span
                   style={{
