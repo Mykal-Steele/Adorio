@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { GitCommit, GitPullRequest, ArrowRight, Zap, ExternalLink } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
@@ -20,10 +21,104 @@ const statusColors: Record<string, string> = {
   DEPRECATED: 'var(--ide-pink)',
 };
 
+interface GithubCommit {
+  sha: string;
+  message: string;
+  repo: string;
+  branch: string;
+  url: string;
+  timestamp: string;
+}
+
+interface GithubPullRequest {
+  id: number;
+  repo: string;
+  title: string;
+  status: 'open' | 'merged' | 'closed';
+  action: string;
+  url: string;
+  timestamp: string;
+}
+
+const LS_COMMITS = 'gh_activity_commits';
+const LS_PRS = 'gh_activity_prs';
+const LS_TS = 'gh_activity_ts';
+
+function readCache<T>(key: string): T | null {
+  try {
+    return JSON.parse(localStorage.getItem(key) ?? 'null');
+  } catch {
+    return null;
+  }
+}
+function writeCache(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* quota */
+  }
+}
+
+function formatRelativeTime(iso: string): string {
+  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo ago`;
+  return `${Math.floor(months / 12)}y ago`;
+}
+
+function useGithubActivity() {
+  const [commits, setCommits] = useState<GithubCommit[] | null>(null);
+  const [pullRequests, setPullRequests] = useState<GithubPullRequest[] | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const cachedCommits = readCache<GithubCommit[]>(LS_COMMITS);
+    if (cachedCommits) setCommits(cachedCommits);
+    const cachedPrs = readCache<GithubPullRequest[]>(LS_PRS);
+    if (cachedPrs) setPullRequests(cachedPrs);
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/github-activity');
+        const json = await res.json();
+        if (!res.ok || json.error) {
+          setError(true);
+          return;
+        }
+        setCommits(json.commits ?? []);
+        setPullRequests(json.pullRequests ?? []);
+        setError(false);
+        writeCache(LS_COMMITS, json.commits ?? []);
+        writeCache(LS_PRS, json.pullRequests ?? []);
+        if (json.ts) writeCache(LS_TS, json.ts);
+      } catch {
+        setError(true);
+      }
+    };
+    const t1 = setTimeout(load, 1500);
+    const t2 = setInterval(load, 60_000);
+    return () => {
+      clearTimeout(t1);
+      clearInterval(t2);
+    };
+  }, []);
+
+  return { commits, pullRequests, error };
+}
+
 export function Dashboard() {
   const router = useRouter();
   const { openProject, prefetchProject } = useProjectNavigation();
   const { isMobile, isTablet } = useResponsive();
+  const { commits, pullRequests, error } = useGithubActivity();
 
   return (
     <div className="min-h-full">
@@ -216,59 +311,89 @@ export function Dashboard() {
             </div>
           </div>
           <div className="px-6 py-4">
-            {portfolioData.commits.slice(0, 5).map((c, i) => {
-              const branchColor =
-                c.branch === 'main'
-                  ? 'var(--ide-accent)'
-                  : c.branch.startsWith('fix/')
-                    ? 'var(--ide-orange)'
-                    : 'var(--ide-purple)';
-              return (
-                <div
-                  key={c.hash}
-                  className="flex items-start gap-3 mb-4"
-                  style={{
-                    paddingBottom: i < 4 ? 16 : 0,
-                    borderBottom: i < 4 ? '1px solid var(--ide-border-subtle)' : 'none',
-                  }}
-                >
-                  <div style={{ marginTop: 3 }}>
-                    <GitCommit size={12} color="var(--ide-text-7)" />
-                  </div>
-                  <div className="flex-1 min-w-0">
+            {commits === null && !error && (
+              <div className="flex flex-col gap-4 mb-4">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="animate-pulse flex flex-col gap-2">
+                    <div style={{ height: 10, width: '75%', background: 'var(--ide-border)' }} />
                     <div
-                      style={{
-                        fontSize: 12,
-                        fontFamily: sans,
-                        color: 'var(--ide-text-2)',
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {c.message}
-                    </div>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span style={{ fontSize: 10, fontFamily: mono, color: branchColor }}>
-                        {c.branch}
-                      </span>
-                      <span style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-7)' }}>
-                        #{c.hash}
-                      </span>
-                      <span style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-7)' }}>
-                        {c.time}
-                      </span>
-                    </div>
-                    <div className="flex gap-2 mt-1">
-                      <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-green)' }}>
-                        +{c.additions}
-                      </span>
-                      <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-pink)' }}>
-                        -{c.deletions}
-                      </span>
-                    </div>
+                      style={{ height: 8, width: '35%', background: 'var(--ide-border-subtle)' }}
+                    />
                   </div>
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            )}
+            {commits === null && error && (
+              <div
+                style={{ fontSize: 11, fontFamily: sans, color: 'var(--ide-text-6)' }}
+                className="mb-4"
+              >
+                Couldn&apos;t reach GitHub right now.
+              </div>
+            )}
+            {commits !== null && commits.length === 0 && (
+              <div
+                style={{ fontSize: 11, fontFamily: sans, color: 'var(--ide-text-6)' }}
+                className="mb-4"
+              >
+                No recent public commits.
+              </div>
+            )}
+            {commits !== null &&
+              commits.slice(0, 5).map((c, i, arr) => {
+                const branchColor =
+                  c.branch === 'main'
+                    ? 'var(--ide-accent)'
+                    : c.branch.startsWith('fix')
+                      ? 'var(--ide-orange)'
+                      : 'var(--ide-purple)';
+                return (
+                  <a
+                    key={`${c.repo}-${c.sha}`}
+                    href={c.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-3 mb-4 transition-opacity hover:opacity-80"
+                    style={{
+                      paddingBottom: i < arr.length - 1 ? 16 : 0,
+                      borderBottom:
+                        i < arr.length - 1 ? '1px solid var(--ide-border-subtle)' : 'none',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <div style={{ marginTop: 3 }}>
+                      <GitCommit size={12} color="var(--ide-text-7)" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontFamily: sans,
+                          color: 'var(--ide-text-2)',
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {c.message}
+                      </div>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span style={{ fontSize: 10, fontFamily: mono, color: branchColor }}>
+                          {c.repo.split('/')[1] ?? c.repo}
+                        </span>
+                        <span
+                          style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-7)' }}
+                        >
+                          #{c.sha}
+                        </span>
+                        <span
+                          style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-7)' }}
+                        >
+                          {formatRelativeTime(c.timestamp)}
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
             <button
               onClick={() => router.push('/projects')}
               style={{
@@ -316,78 +441,104 @@ export function Dashboard() {
                 padding: '1px 6px',
               }}
             >
-              {portfolioData.pullRequests.filter((p) => p.status === 'open').length} OPEN
+              {pullRequests ? pullRequests.filter((p) => p.status === 'open').length : '—'} OPEN
             </span>
           </div>
           <div className="px-6 py-4">
-            {portfolioData.pullRequests.map((pr, i) => {
-              const isOpen = pr.status === 'open';
-              const isMerged = pr.status === 'merged';
-              return (
-                <div
-                  key={pr.id}
-                  className="mb-4"
-                  style={{
-                    paddingBottom: i < portfolioData.pullRequests.length - 1 ? 16 : 0,
-                    borderBottom:
-                      i < portfolioData.pullRequests.length - 1
-                        ? '1px solid var(--ide-border-subtle)'
-                        : 'none',
-                  }}
-                >
-                  <div className="flex items-start gap-3">
-                    <GitPullRequest
-                      size={12}
-                      color={
-                        isOpen
-                          ? 'var(--ide-accent)'
-                          : isMerged
-                            ? 'var(--ide-purple)'
-                            : 'var(--ide-text-6)'
-                      }
-                      style={{ marginTop: 2, flexShrink: 0 }}
+            {pullRequests === null && !error && (
+              <div className="flex flex-col gap-4">
+                {[0, 1].map((i) => (
+                  <div key={i} className="animate-pulse flex flex-col gap-2">
+                    <div style={{ height: 10, width: '80%', background: 'var(--ide-border)' }} />
+                    <div
+                      style={{ height: 8, width: '30%', background: 'var(--ide-border-subtle)' }}
                     />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge
-                          color={(prColors[pr.status] || prColors.open).text}
-                          bg={(prColors[pr.status] || prColors.open).bg}
-                          style={{ padding: '2px 7px' }}
+                  </div>
+                ))}
+              </div>
+            )}
+            {pullRequests === null && error && (
+              <div style={{ fontSize: 11, fontFamily: sans, color: 'var(--ide-text-6)' }}>
+                Couldn&apos;t reach GitHub right now.
+              </div>
+            )}
+            {pullRequests !== null && pullRequests.length === 0 && (
+              <div style={{ fontSize: 11, fontFamily: sans, color: 'var(--ide-text-6)' }}>
+                No recent pull request activity.
+              </div>
+            )}
+            {pullRequests !== null &&
+              pullRequests.map((pr, i, arr) => {
+                const isOpen = pr.status === 'open';
+                const isMerged = pr.status === 'merged';
+                return (
+                  <a
+                    key={`${pr.repo}-${pr.id}`}
+                    href={pr.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mb-4 block transition-opacity hover:opacity-80"
+                    style={{
+                      paddingBottom: i < arr.length - 1 ? 16 : 0,
+                      borderBottom:
+                        i < arr.length - 1 ? '1px solid var(--ide-border-subtle)' : 'none',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <GitPullRequest
+                        size={12}
+                        color={
+                          isOpen
+                            ? 'var(--ide-accent)'
+                            : isMerged
+                              ? 'var(--ide-purple)'
+                              : 'var(--ide-text-6)'
+                        }
+                        style={{ marginTop: 2, flexShrink: 0 }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge
+                            color={(prColors[pr.status] || prColors.open).text}
+                            bg={(prColors[pr.status] || prColors.open).bg}
+                            style={{ padding: '2px 7px' }}
+                          >
+                            {pr.status.toUpperCase()}
+                          </Badge>
+                          <span
+                            style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-7)' }}
+                          >
+                            #{pr.id}
+                          </span>
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontFamily: sans,
+                            color: 'var(--ide-text-2)',
+                            lineHeight: 1.4,
+                          }}
                         >
-                          {pr.status.toUpperCase()}
-                        </Badge>
-                        <span
-                          style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-7)' }}
-                        >
-                          #{pr.id}
-                        </span>
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 12,
-                          fontFamily: sans,
-                          color: 'var(--ide-text-2)',
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        {pr.title}
-                      </div>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-orange)' }}>
-                          {pr.head}
-                        </span>
-                        <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-7)' }}>
-                          → {pr.base}
-                        </span>
-                        <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-7)' }}>
-                          {pr.time}
-                        </span>
+                          {pr.title}
+                        </div>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span
+                            style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-orange)' }}
+                          >
+                            {pr.repo.split('/')[1] ?? pr.repo}
+                          </span>
+                          <span
+                            style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-7)' }}
+                          >
+                            {formatRelativeTime(pr.timestamp)}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
+                  </a>
+                );
+              })}
           </div>
         </div>
       </div>
@@ -437,6 +588,7 @@ export function Dashboard() {
                 prefetchProject(proj.id);
                 (e.currentTarget as HTMLElement).style.borderColor = 'var(--ide-orange-a30)';
               }}
+              onTouchStart={() => prefetchProject(proj.id)}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = 'var(--ide-border)';
               }}
@@ -498,7 +650,7 @@ export function Dashboard() {
                   {proj.language}
                 </span>
                 <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-7)' }}>
-                  {proj.lastCommit}
+                  {proj.stats[0]?.value}
                 </span>
               </div>
             </button>
