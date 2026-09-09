@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 import { useIDE } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
 import { sans } from './constants/fonts';
+import { usePendingNavPath } from './hooks/usePendingNavPath';
 
 const mainTabs = [
   { name: 'dashboard.tsx', path: '/', color: 'var(--ide-orange)' },
@@ -28,6 +29,8 @@ export function TabBar() {
   const pathname = usePathname();
   const router = useRouter();
   const { openProjectTabs, closeProjectTab } = useIDE();
+  const pendingPath = usePendingNavPath();
+  const effectivePath = pendingPath ?? pathname;
 
   useEffect(() => {
     mainTabs.forEach((tab) => router.prefetch(tab.path));
@@ -38,8 +41,8 @@ export function TabBar() {
   }, [router, openProjectTabs]);
 
   const isActive = (path: string) => {
-    if (path === '/' && pathname === '/') return true;
-    if (path !== '/' && pathname.startsWith(path)) return true;
+    if (path === '/' && effectivePath === '/') return true;
+    if (path !== '/' && effectivePath.startsWith(path)) return true;
     return false;
   };
 
@@ -85,7 +88,7 @@ export function TabBar() {
           );
         })}
         {projectTabItems.map((tab) => {
-          const active = pathname === tab.path;
+          const active = effectivePath === tab.path;
           return (
             <div
               key={tab.id}
