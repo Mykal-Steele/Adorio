@@ -22,7 +22,7 @@ const statusColors: Record<string, string> = {
 
 export function Dashboard() {
   const router = useRouter();
-  const { openProject } = useProjectNavigation();
+  const { openProject, prefetchProject } = useProjectNavigation();
   const { isMobile, isTablet } = useResponsive();
 
   return (
@@ -434,6 +434,7 @@ export function Dashboard() {
                 borderRadius: 4,
               }}
               onMouseEnter={(e) => {
+                prefetchProject(proj.id);
                 (e.currentTarget as HTMLElement).style.borderColor = 'var(--ide-orange-a30)';
               }}
               onMouseLeave={(e) => {
