@@ -67,7 +67,7 @@ npm run test:prod        # integration tests against prod containers
 ### Request Flow (Production)
 
 ```
-Browser → Azure Container Apps ingress (managed TLS, Envoy)
+Browser → Cloudflare CDN (SSL mode: Full strict) → Azure Container Apps ingress (managed TLS, Envoy)
   └─ Container App `adorio` (single active revision, minReplicas 1, autoscale to 3)
        └─ Nginx (plain HTTP :8080 — Container Apps terminates TLS at the platform edge)
             ├─ /api/*          → localhost:3000 (Express backend)
@@ -78,7 +78,7 @@ Browser → Azure Container Apps ingress (managed TLS, Envoy)
 
 The backend, Next.js standalone server, and Nginx all run in the same Docker container, same as before the Azure migration. `nginx.production.conf` no longer terminates TLS itself (dropped in the migration — Container Apps' ingress does that now with a free managed certificate). `nginx.production.conf` / `nginx.development.conf` are still selected at image build time via the `$ENV` build arg.
 
-**Custom domain note**: `adorio.space` → Cloudflare cutover hasn't happened yet — the site is currently only reachable at its Azure-issued FQDN (`adorio.<env-id>.southeastasia.azurecontainerapps.io`). Binding the custom domain + managed cert to the Container App, then repointing Cloudflare DNS, is still on the migration to-do list.
+**Custom domain**: `adorio.space` and `www.adorio.space` are both bound to the Container App with Azure-managed certificates (`SniEnabled`). Root domain uses an A record to the Container Apps environment's static IP + `HTTP` validation (apex domains can't use CNAME/managed-cert validation the way subdomains can); `www` uses a CNAME straight to the container app's default FQDN + `CNAME` validation. Both records are proxied through Cloudflare (SSL mode `Full (strict)`, safe now that the origin presents a real trusted cert instead of a manually mounted one).
 
 ### Hosting
 
