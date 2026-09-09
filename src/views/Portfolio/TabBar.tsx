@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { useIDE } from './context/IDEContext';
@@ -27,6 +28,14 @@ export function TabBar() {
   const pathname = usePathname();
   const router = useRouter();
   const { openProjectTabs, closeProjectTab } = useIDE();
+
+  useEffect(() => {
+    mainTabs.forEach((tab) => router.prefetch(tab.path));
+  }, [router]);
+
+  useEffect(() => {
+    openProjectTabs.forEach((id) => router.prefetch(`/projects/${id}`));
+  }, [router, openProjectTabs]);
 
   const isActive = (path: string) => {
     if (path === '/' && pathname === '/') return true;

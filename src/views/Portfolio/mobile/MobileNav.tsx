@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Code2, User, FolderGit2, Mail, MoreHorizontal } from 'lucide-react';
 import { sans } from '../constants/fonts';
@@ -18,6 +19,10 @@ const navItems = [
 export function MobileNav({ onMoreOpen }: MobileNavProps) {
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    navItems.forEach((item) => router.prefetch(item.path));
+  }, [router]);
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === '/';
