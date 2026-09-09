@@ -1,62 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, Circle, BarChart2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Bot, Circle, BarChart2, Sparkles } from 'lucide-react';
 import { useIDE } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
 import { useResponsive } from './hooks/useResponsive';
 import { mono, sans } from './constants/fonts';
-
-function matchResponse(input: string): string {
-  const q = input.toLowerCase();
-  if (q.includes('stack') || q.includes('tech') || q.includes('language') || q.includes('tool'))
-    return portfolioData.aiResponses.stack;
-  if (
-    q.includes('project') ||
-    q.includes('repo') ||
-    q.includes('work') ||
-    q.includes('npm') ||
-    q.includes('adorex')
-  )
-    return portfolioData.aiResponses.projects;
-  if (
-    q.includes('avail') ||
-    q.includes('hire') ||
-    q.includes('job') ||
-    q.includes('collab') ||
-    q.includes('intern')
-  )
-    return portfolioData.aiResponses.available;
-  if (q.includes('community') || q.includes('mentor') || q.includes('teach'))
-    return portfolioData.aiResponses.community;
-  if (
-    q.includes('philosoph') ||
-    q.includes('approach') ||
-    q.includes('bun') ||
-    q.includes('rust') ||
-    q.includes('go')
-  )
-    return portfolioData.aiResponses.philosophy;
-  if (
-    q.includes('background') ||
-    q.includes('experience') ||
-    q.includes('career') ||
-    q.includes('kmutt') ||
-    q.includes('university')
-  )
-    return portfolioData.aiResponses.background;
-  if (q.includes('contact') || q.includes('email') || q.includes('reach') || q.includes('message'))
-    return portfolioData.aiResponses.contact;
-  return portfolioData.aiResponses.default;
-}
-
-const CHIPS = [
-  { label: 'stack', query: "what's your tech stack?" },
-  { label: 'projects', query: 'show me your projects' },
-  { label: 'available', query: 'are you available to hire?' },
-  { label: 'community', query: 'what community roles do you have?' },
-  { label: 'background', query: 'tell me your background' },
-];
 
 type LiveStatus = 'ONLINE' | 'DEGRADED' | 'DOWN' | 'PAUSED';
 
@@ -338,37 +287,7 @@ function SystemPanel() {
   );
 }
 
-interface Message {
-  role: 'user' | 'system';
-  text: string;
-}
-
 export function AskMePanel() {
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'system', text: portfolioData.aiResponses.default },
-  ]);
-  const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
-
-  const sendMessage = (text: string) => {
-    if (!text.trim()) return;
-    setMessages((prev) => [...prev, { role: 'user', text }]);
-    setInput('');
-    setIsTyping(true);
-    setTimeout(
-      () => {
-        setIsTyping(false);
-        setMessages((prev) => [...prev, { role: 'system', text: matchResponse(text) }]);
-      },
-      900 + Math.random() * 400,
-    );
-  };
-
   return (
     <div className="flex flex-col h-full">
       <div className="shrink-0 px-4 py-3" style={{ borderBottom: '1px solid var(--ide-border)' }}>
@@ -377,13 +296,14 @@ export function AskMePanel() {
             style={{
               width: 24,
               height: 24,
-              background: 'var(--ide-accent)',
+              background: 'var(--ide-bg-2)',
+              border: '1px solid var(--ide-border)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Bot size={12} color="var(--ide-accent-dark)" />
+            <Bot size={12} color="var(--ide-text-5)" />
           </div>
           <div>
             <div
@@ -405,153 +325,57 @@ export function AskMePanel() {
             style={{
               fontSize: 8,
               fontFamily: sans,
-              color: 'var(--ide-accent)',
-              background: 'var(--ide-accent-a10)',
+              color: 'var(--ide-text-5)',
+              background: 'var(--ide-border-subtle)',
               padding: '2px 6px',
+              letterSpacing: '0.05em',
             }}
           >
-            ONLINE
+            COMING SOON
           </div>
         </div>
-      </div>
-      <div className="flex-1 overflow-y-auto px-4 py-3" style={{ scrollbarWidth: 'none' }}>
-        {messages.map((msg, i) => (
-          <div key={i} className={`mb-4 ${msg.role === 'user' ? 'text-right' : ''}`}>
-            {msg.role === 'system' && (
-              <div className="flex items-center gap-1 mb-1">
-                <Bot size={9} color="var(--ide-accent)" />
-                <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-accent)' }}>
-                  Ask Oo
-                </span>
-              </div>
-            )}
-            <div
-              className="inline-block text-left"
-              style={{
-                background: msg.role === 'system' ? 'var(--ide-bg-2)' : 'var(--ide-accent-a8)',
-                border: `1px solid ${msg.role === 'system' ? 'var(--ide-border)' : 'var(--ide-accent-a20)'}`,
-                padding: '8px 12px',
-                maxWidth: '100%',
-              }}
-            >
-              <pre
-                style={{
-                  fontSize: 10,
-                  fontFamily: mono,
-                  color: msg.role === 'system' ? 'var(--ide-text-4)' : 'var(--ide-accent-light)',
-                  whiteSpace: 'pre-wrap',
-                  margin: 0,
-                  lineHeight: 1.7,
-                }}
-              >
-                {msg.text}
-              </pre>
-            </div>
-          </div>
-        ))}
-        {isTyping && (
-          <div className="mb-4">
-            <div className="flex items-center gap-1 mb-1">
-              <Bot size={9} color="var(--ide-accent)" />
-              <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-accent)' }}>
-                Ask Oo
-              </span>
-            </div>
-            <div
-              style={{
-                background: 'var(--ide-bg-2)',
-                border: '1px solid var(--ide-border)',
-                padding: '8px 12px',
-                display: 'inline-flex',
-                gap: 4,
-                alignItems: 'center',
-              }}
-            >
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: 4,
-                    height: 4,
-                    background: 'var(--ide-accent)',
-                    borderRadius: '50%',
-                    animation: `typingDot 1.2s ${i * 0.2}s infinite`,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-        <div ref={bottomRef} />
       </div>
       <div
-        className="shrink-0 px-4 pt-2 pb-1 flex flex-wrap gap-1"
-        style={{ borderTop: '1px solid var(--ide-border-subtle)' }}
+        className="flex-1 overflow-y-auto px-6 flex flex-col items-center justify-center text-center gap-3"
+        style={{ scrollbarWidth: 'none' }}
       >
-        {CHIPS.map((chip) => (
-          <button
-            key={chip.label}
-            onClick={() => sendMessage(chip.query)}
-            style={{
-              background: 'var(--ide-border-subtle)',
-              border: '1px solid var(--ide-border-medium)',
-              cursor: 'pointer',
-              fontSize: 9,
-              fontFamily: mono,
-              color: 'var(--ide-text-5)',
-              padding: '2px 7px',
-              letterSpacing: '0.04em',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--ide-accent-a30)';
-              (e.currentTarget as HTMLElement).style.color = 'var(--ide-accent)';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--ide-border-medium)';
-              (e.currentTarget as HTMLElement).style.color = 'var(--ide-text-5)';
-            }}
-          >
-            {chip.label}
-          </button>
-        ))}
-      </div>
-      <div className="shrink-0 px-4 pb-3 pt-2">
         <div
-          className="flex items-center gap-2"
           style={{
+            width: 36,
+            height: 36,
             background: 'var(--ide-bg-2)',
-            border: '1px solid var(--ide-border-strong)',
-            padding: '6px 10px',
+            border: '1px dashed var(--ide-border-medium)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <span style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-accent)' }}>›</span>
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-            placeholder="Ask anything about oakar..."
-            style={{
-              flex: 1,
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              fontSize: 10,
-              fontFamily: mono,
-              color: 'var(--ide-text-2)',
-            }}
-          />
-          <button
-            onClick={() => sendMessage(input)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              color: input.trim() ? 'var(--ide-accent)' : 'var(--ide-text-7)',
-            }}
-          >
-            <Send size={12} />
-          </button>
+          <Sparkles size={16} color="var(--ide-text-6)" />
         </div>
+        <div
+          style={{
+            fontSize: 11,
+            fontFamily: sans,
+            color: 'var(--ide-text-2)',
+            fontWeight: 600,
+          }}
+        >
+          Not built yet
+        </div>
+        <p
+          style={{
+            fontSize: 10,
+            fontFamily: mono,
+            color: 'var(--ide-text-5)',
+            lineHeight: 1.7,
+            maxWidth: 210,
+            margin: 0,
+          }}
+        >
+          This is going to be a real assistant you can ask about my projects and background, once
+          it's hooked up to an actual AI backend. For now there's nothing behind it, so it's parked
+          here until that part is done.
+        </p>
       </div>
     </div>
   );
