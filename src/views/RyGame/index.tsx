@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { fetchUserData } from '../../api';
 import { fetchLeaderboard, updateScore, fetchUserGameStats } from '../../api/gameApi';
 
-// Stateless game primitives — module-level so React doesn't recreate them every render.
+// Stateless game primitives, defined at module level so React doesn't recreate them every render.
 const DOT_RADIUS = 11;
 
 class Color {

@@ -316,7 +316,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
           </h1>
         </motion.div>
 
-        {/* Post Creation Card — only visible when logged in */}
+        {/* Post Creation Card, only visible when logged in */}
         {mounted && user && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
