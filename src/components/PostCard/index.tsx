@@ -54,7 +54,7 @@ const PostCard = ({
   const [optimisticLikesCount, setOptimisticLikesCount] = useState(
     Array.isArray(likes) ? likes.length : 0, // Add safety
   );
-  // Always start as false (matches SSR) — synced after auth loads via useEffect
+  // Always start as false (matches SSR), synced after auth loads via useEffect
   const [optimisticUserLiked, setOptimisticUserLiked] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
