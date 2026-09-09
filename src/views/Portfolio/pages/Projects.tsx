@@ -14,7 +14,7 @@ export function Projects() {
 
   const totalRepos = portfolioData.projects.length;
   const stableCount = portfolioData.projects.filter((p) => p.status === 'STABLE').length;
-  const totalStars = portfolioData.projects.reduce((acc, p) => acc + p.stars, 0);
+  const githubRepos = portfolioData.projects.filter((p) => p.repoUrl).length;
 
   return (
     <div className="min-h-full">
@@ -32,9 +32,9 @@ export function Projects() {
           className={`flex ${isMobile ? 'flex-wrap gap-4' : 'items-center gap-6'} mt-8 mb-8 px-6 py-4`}
         >
           {[
-            { label: 'Total Repos', value: totalRepos.toString() },
+            { label: 'Total Projects', value: totalRepos.toString() },
             { label: 'Stable Builds', value: stableCount.toString() },
-            { label: 'Total Stars', value: totalStars.toLocaleString() },
+            { label: 'On GitHub', value: githubRepos.toString() },
             { label: 'NPM Packages', value: '1' },
           ].map((s) => (
             <div key={s.label} className="flex items-baseline gap-3">
@@ -81,6 +81,7 @@ export function Projects() {
                   prefetchProject(proj.id);
                   (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)';
                 }}
+                onTouchStart={() => prefetchProject(proj.id)}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.background = 'transparent';
                 }}
@@ -142,39 +143,44 @@ export function Projects() {
                           textOverflow: 'ellipsis',
                         }}
                       >
-                        &ldquo;{proj.commitMessage}&rdquo;
+                        {proj.description.slice(0, 60)}
+                        {proj.description.length > 60 ? '…' : ''}
                       </div>
                     </div>
-                    <div style={{ flexShrink: 0, width: 90 }}>
-                      <div
-                        style={{
-                          fontSize: 9,
-                          fontFamily: sans,
-                          color: 'var(--ide-text-6)',
-                          letterSpacing: '0.04em',
-                        }}
-                      >
-                        Last Commit
+                    {proj.stats[0] && (
+                      <div style={{ flexShrink: 0, width: 90 }}>
+                        <div
+                          style={{
+                            fontSize: 9,
+                            fontFamily: sans,
+                            color: 'var(--ide-text-6)',
+                            letterSpacing: '0.04em',
+                          }}
+                        >
+                          {proj.stats[0].label}
+                        </div>
+                        <div style={{ fontSize: 11, fontFamily: mono, color: 'var(--ide-text-4)' }}>
+                          {proj.stats[0].value}
+                        </div>
                       </div>
-                      <div style={{ fontSize: 11, fontFamily: mono, color: 'var(--ide-text-4)' }}>
-                        {proj.lastCommit}
+                    )}
+                    {proj.stats[1] && (
+                      <div style={{ flexShrink: 0, width: 90, textAlign: 'right' }}>
+                        <div
+                          style={{
+                            fontSize: 9,
+                            fontFamily: sans,
+                            color: 'var(--ide-text-6)',
+                            letterSpacing: '0.04em',
+                          }}
+                        >
+                          {proj.stats[1].label}
+                        </div>
+                        <div style={{ fontSize: 11, fontFamily: mono, color: 'var(--ide-accent)' }}>
+                          {proj.stats[1].value}
+                        </div>
                       </div>
-                    </div>
-                    <div style={{ flexShrink: 0, width: 80, textAlign: 'right' }}>
-                      <div
-                        style={{
-                          fontSize: 9,
-                          fontFamily: sans,
-                          color: 'var(--ide-text-6)',
-                          letterSpacing: '0.04em',
-                        }}
-                      >
-                        Footprint
-                      </div>
-                      <div style={{ fontSize: 11, fontFamily: mono, color: 'var(--ide-accent)' }}>
-                        {proj.footprint}
-                      </div>
-                    </div>
+                    )}
                   </>
                 )}
                 <ArrowRight size={14} color="var(--ide-text-7)" style={{ flexShrink: 0 }} />
@@ -203,7 +209,7 @@ export function Projects() {
             {
               label: 'Latest Release',
               sub: 'create-adorex',
-              value: 'v1.4',
+              value: 'v1.4.14',
               color: 'var(--ide-accent)',
             },
           ].map((stat) => (
