@@ -83,6 +83,7 @@ function ExplorerPanel() {
               paddingRight: 12,
             }}
             onMouseEnter={(e) => {
+              router.prefetch(f.path);
               if (!isActive)
                 (e.currentTarget as HTMLElement).style.background = 'var(--ide-border-subtle)';
             }}
@@ -362,6 +363,7 @@ function SearchPanel() {
         <button
           key={i}
           onClick={() => router.push(r.path)}
+          onMouseEnter={() => router.prefetch(r.path)}
           className="w-full text-left mb-3"
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
         >

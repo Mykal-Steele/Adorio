@@ -27,6 +27,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { IDEProvider } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
 import { sans, mono } from './constants/fonts';
+import { NavigationProgressBar } from './shared/NavigationProgressBar';
 
 function DesktopShell({ children }: { children: ReactNode }) {
   const { terminalOpen, isSettingsOpen } = useIDE();
@@ -353,9 +354,14 @@ function IDELayoutInner({ children }: { children: ReactNode }) {
     return <div style={{ height: '100dvh', background: 'var(--ide-bg-2)' }} />;
   }
 
-  if (isMobile) return <MobileShell>{children}</MobileShell>;
-  if (isTablet) return <TabletShell>{children}</TabletShell>;
-  return <DesktopShell>{children}</DesktopShell>;
+  const Shell = isMobile ? MobileShell : isTablet ? TabletShell : DesktopShell;
+
+  return (
+    <>
+      <NavigationProgressBar />
+      <Shell>{children}</Shell>
+    </>
+  );
 }
 
 export function IDELayout({ children }: { children: ReactNode }) {
