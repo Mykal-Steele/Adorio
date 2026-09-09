@@ -51,7 +51,7 @@ const Navbar = () => {
       className="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-lg border-b border-gray-800 shadow-lg"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* ── Single bar ─────────────────────────────────────── */}
+        {/* Single bar */}
         <div className="flex items-center h-14 sm:h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0 mr-6">
@@ -63,7 +63,7 @@ const Navbar = () => {
             </span>
           </Link>
 
-          {/* Desktop nav — fills middle, links are centered within it */}
+          {/* Desktop nav, fills middle, links are centered within it */}
           <div className="hidden sm:flex flex-1 items-center justify-center gap-0.5">
             {links.map(({ href, text, external }) =>
               external ? (
