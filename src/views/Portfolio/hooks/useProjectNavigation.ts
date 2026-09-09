@@ -12,5 +12,9 @@ export function useProjectNavigation() {
     router.push(`/projects/${id}`);
   };
 
-  return { openProject };
+  const prefetchProject = (id: string) => {
+    router.prefetch(`/projects/${id}`);
+  };
+
+  return { openProject, prefetchProject };
 }
