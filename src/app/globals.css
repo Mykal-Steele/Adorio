@@ -50,6 +50,7 @@
   --ide-ts-blue-a20: rgba(77,120,204,0.2);
   --ide-yellow: #e5c07b; --ide-syntax-string: #98c379; --ide-syntax-string2: #56b6c2;
   --ide-line-number: rgba(92,99,112,0.5); --ide-scrollbar: #353b45;
+  --ide-editor-font-size: 13px;
 }
 
 /* IDE themes — every theme has its own explicit block so :root is only a
