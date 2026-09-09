@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Folder,
@@ -252,10 +252,13 @@ function ProfilePanel() {
       </div>
       <div className="grid gap-1" style={{ gridTemplateColumns: '1fr 1fr' }}>
         {[
-          { label: 'Years', value: '4' },
-          { label: 'Repos', value: '5' },
+          { label: 'Years', value: String(new Date().getFullYear() - 2021) },
+          {
+            label: 'Repos',
+            value: String(portfolioData.projects.filter((p) => p.repoUrl).length),
+          },
           { label: 'NPM Pkg', value: '1' },
-          { label: 'Commits', value: '7+' },
+          { label: 'Community', value: String(portfolioData.community.length) },
         ].map((s) => (
           <div
             key={s.label}
@@ -389,14 +392,101 @@ function SearchPanel() {
   );
 }
 
+interface GithubCommit {
+  sha: string;
+  message: string;
+  repo: string;
+  branch: string;
+  url: string;
+  timestamp: string;
+}
+
+interface GithubPullRequest {
+  id: number;
+  repo: string;
+  title: string;
+  status: 'open' | 'merged' | 'closed';
+  action: string;
+  url: string;
+  timestamp: string;
+}
+
+const GIT_PANEL_LS_COMMITS = 'gh_activity_commits';
+const GIT_PANEL_LS_PRS = 'gh_activity_prs';
+
+function readGitPanelCache<T>(key: string): T | null {
+  try {
+    return JSON.parse(localStorage.getItem(key) ?? 'null');
+  } catch {
+    return null;
+  }
+}
+function writeGitPanelCache(key: string, value: unknown) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* quota */
+  }
+}
+
+function formatGitPanelRelativeTime(iso: string): string {
+  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo ago`;
+  return `${Math.floor(months / 12)}y ago`;
+}
+
+function useGitPanelActivity() {
+  const [commits, setCommits] = useState<GithubCommit[] | null>(null);
+  const [pullRequests, setPullRequests] = useState<GithubPullRequest[] | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const cachedCommits = readGitPanelCache<GithubCommit[]>(GIT_PANEL_LS_COMMITS);
+    if (cachedCommits) setCommits(cachedCommits);
+    const cachedPrs = readGitPanelCache<GithubPullRequest[]>(GIT_PANEL_LS_PRS);
+    if (cachedPrs) setPullRequests(cachedPrs);
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/github-activity');
+        const json = await res.json();
+        if (!res.ok || json.error) {
+          setError(true);
+          return;
+        }
+        setCommits(json.commits ?? []);
+        setPullRequests(json.pullRequests ?? []);
+        setError(false);
+        writeGitPanelCache(GIT_PANEL_LS_COMMITS, json.commits ?? []);
+        writeGitPanelCache(GIT_PANEL_LS_PRS, json.pullRequests ?? []);
+      } catch {
+        setError(true);
+      }
+    };
+    const t1 = setTimeout(load, 1500);
+    const t2 = setInterval(load, 60_000);
+    return () => {
+      clearTimeout(t1);
+      clearInterval(t2);
+    };
+  }, []);
+
+  return { commits, pullRequests, error };
+}
+
 function GitPanel() {
-  const statusColors: Record<string, string> = {
-    main: 'var(--ide-accent)',
-    'fix/win-paths': 'var(--ide-orange)',
-    'feature/astro-template': 'var(--ide-purple)',
-    'feature/ts-strict': 'var(--ide-blue)',
-    'feature/rust-backend': 'var(--ide-red-dark)',
-  };
+  const { commits, pullRequests, error } = useGitPanelActivity();
+  const openPrs = pullRequests?.filter((p) => p.status === 'open') ?? [];
+
   return (
     <div>
       <div className="px-3 mb-3">
@@ -419,7 +509,11 @@ function GitPanel() {
           </span>
         </div>
         <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-6)' }}>
-          {portfolioData.commits.length} commits this quarter
+          {commits === null
+            ? error
+              ? "couldn't load activity"
+              : 'loading recent activity...'
+            : `${commits.length} recent commit${commits.length === 1 ? '' : 's'}`}
         </div>
       </div>
       <div className="px-3 mb-3">
@@ -434,25 +528,36 @@ function GitPanel() {
         >
           OPEN PRS
         </div>
-        {portfolioData.pullRequests
-          .filter((p) => p.status === 'open')
-          .map((pr) => (
-            <div key={pr.id} className="flex items-start gap-2 mb-2">
-              <GitPullRequest
-                size={10}
-                color="var(--ide-blue)"
-                style={{ marginTop: 2, flexShrink: 0 }}
-              />
-              <div>
-                <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-3)' }}>
-                  #{pr.id} {pr.title.slice(0, 32)}...
-                </div>
-                <div style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-text-6)' }}>
-                  {pr.time}
-                </div>
+        {pullRequests !== null && openPrs.length === 0 && (
+          <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-7)' }}>
+            No open pull requests.
+          </div>
+        )}
+        {openPrs.map((pr) => (
+          <a
+            key={`${pr.repo}-${pr.id}`}
+            href={pr.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-start gap-2 mb-2"
+            style={{ textDecoration: 'none' }}
+          >
+            <GitPullRequest
+              size={10}
+              color="var(--ide-blue)"
+              style={{ marginTop: 2, flexShrink: 0 }}
+            />
+            <div>
+              <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-3)' }}>
+                #{pr.id} {pr.title.slice(0, 32)}
+                {pr.title.length > 32 ? '...' : ''}
+              </div>
+              <div style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-text-6)' }}>
+                {formatGitPanelRelativeTime(pr.timestamp)}
               </div>
             </div>
-          ))}
+          </a>
+        ))}
       </div>
       <div className="px-3">
         <div
@@ -466,43 +571,80 @@ function GitPanel() {
         >
           RECENT COMMITS
         </div>
-        {portfolioData.commits.slice(0, 5).map((c) => (
-          <div key={c.hash} className="flex items-start gap-2 mb-3">
-            <GitCommit
-              size={10}
-              color="var(--ide-text-6)"
-              style={{ marginTop: 2, flexShrink: 0 }}
-            />
-            <div className="min-w-0">
+        {commits === null && !error && (
+          <div className="flex flex-col gap-3">
+            {[0, 1, 2].map((i) => (
               <div
-                style={{
-                  fontSize: 10,
-                  fontFamily: sans,
-                  color: 'var(--ide-text-4)',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {c.message}
-              </div>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span
-                  style={{
-                    fontSize: 9,
-                    fontFamily: mono,
-                    color: statusColors[c.branch] || 'var(--ide-text-5)',
-                  }}
-                >
-                  #{c.hash}
-                </span>
-                <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-7)' }}>
-                  {c.time}
-                </span>
-              </div>
-            </div>
+                key={i}
+                className="animate-pulse"
+                style={{ height: 10, width: '70%', background: 'var(--ide-border)' }}
+              />
+            ))}
           </div>
-        ))}
+        )}
+        {commits === null && error && (
+          <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-7)' }}>
+            Couldn&apos;t reach GitHub right now.
+          </div>
+        )}
+        {commits !== null && commits.length === 0 && (
+          <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-7)' }}>
+            No recent public commits.
+          </div>
+        )}
+        {commits !== null &&
+          commits.slice(0, 5).map((c) => {
+            const branchColor =
+              c.branch === 'main'
+                ? 'var(--ide-accent)'
+                : c.branch.startsWith('fix')
+                  ? 'var(--ide-orange)'
+                  : 'var(--ide-purple)';
+            return (
+              <a
+                key={`${c.repo}-${c.sha}`}
+                href={c.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-2 mb-3"
+                style={{ textDecoration: 'none' }}
+              >
+                <GitCommit
+                  size={10}
+                  color="var(--ide-text-6)"
+                  style={{ marginTop: 2, flexShrink: 0 }}
+                />
+                <div className="min-w-0">
+                  <div
+                    style={{
+                      fontSize: 10,
+                      fontFamily: sans,
+                      color: 'var(--ide-text-4)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {c.message}
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span
+                      style={{
+                        fontSize: 9,
+                        fontFamily: mono,
+                        color: branchColor,
+                      }}
+                    >
+                      #{c.sha}
+                    </span>
+                    <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-7)' }}>
+                      {formatGitPanelRelativeTime(c.timestamp)}
+                    </span>
+                  </div>
+                </div>
+              </a>
+            );
+          })}
       </div>
     </div>
   );
