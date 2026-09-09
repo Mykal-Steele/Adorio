@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Code2, User, FolderGit2, Mail, MoreHorizontal } from 'lucide-react';
 import { sans } from '../constants/fonts';
+import { usePendingNavPath } from '../hooks/usePendingNavPath';
 
 interface MobileNavProps {
   onMoreOpen: () => void;
@@ -19,14 +20,16 @@ const navItems = [
 export function MobileNav({ onMoreOpen }: MobileNavProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const pendingPath = usePendingNavPath();
+  const effectivePath = pendingPath ?? pathname;
 
   useEffect(() => {
     navItems.forEach((item) => router.prefetch(item.path));
   }, [router]);
 
   const isActive = (path: string) => {
-    if (path === '/') return pathname === '/';
-    return pathname.startsWith(path);
+    if (path === '/') return effectivePath === '/';
+    return effectivePath.startsWith(path);
   };
 
   return (
