@@ -9,7 +9,7 @@ import { statusConfig } from '../constants/status';
 import { Breadcrumb, Badge, IDECard, PageHeader } from '../shared';
 
 export function Projects() {
-  const { openProject } = useProjectNavigation();
+  const { openProject, prefetchProject } = useProjectNavigation();
   const { isMobile, isTablet } = useResponsive();
 
   const totalRepos = portfolioData.projects.length;
@@ -78,6 +78,7 @@ export function Projects() {
                   cursor: 'pointer',
                 }}
                 onMouseEnter={(e) => {
+                  prefetchProject(proj.id);
                   (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)';
                 }}
                 onMouseLeave={(e) => {
