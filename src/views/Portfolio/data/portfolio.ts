@@ -1,5 +1,10 @@
 // Portfolio data — single source of truth for all portfolio UI
 
+export interface ProjectStat {
+  label: string;
+  value: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -7,23 +12,14 @@ export interface Project {
   language: string;
   langColor: string;
   description: string;
-  lastCommit: string;
-  commitMessage: string;
-  commitHash: string;
-  footprint: string;
-  stars: number;
-  tags: string[];
-  uptime: string;
-  cpu: string;
-  latency: string;
-  mem: string;
-  threadPool: string;
-  kernelSync: string;
   archNote: string;
+  tags: string[];
+  stats: ProjectStat[];
   branch: string;
   color: string;
   npm?: string;
   repoUrl?: string;
+  liveUrl?: string;
 }
 
 export interface TimelineItem {
@@ -111,260 +107,221 @@ export const portfolioData = {
     },
   ] as ExperienceItem[],
 
-  commits: [
-    {
-      hash: 'a4d2c19',
-      message: 'feat: release create-adorex v1.4.0 with Bun/Elysia template',
-      branch: 'main',
-      time: '2 days ago',
-      additions: 234,
-      deletions: 18,
-    },
-    {
-      hash: 'b7e9f31',
-      message: 'feat: add Hono backend scaffold to adorex CLI',
-      branch: 'main',
-      time: '1 week ago',
-      additions: 187,
-      deletions: 42,
-    },
-    {
-      hash: 'c1a8e72',
-      message: 'fix: resolve Windows path normalization bug in CLI',
-      branch: 'fix/win-paths',
-      time: '2 weeks ago',
-      additions: 23,
-      deletions: 11,
-    },
-    {
-      hash: 'd3f4b56',
-      message: 'feat: build portfolio as VSCode-style IDE',
-      branch: 'main',
-      time: '1 month ago',
-      additions: 1842,
-      deletions: 0,
-    },
-    {
-      hash: 'e9c2a18',
-      message: 'refactor: migrate discord-forge to TypeScript strict mode',
-      branch: 'feature/ts-strict',
-      time: '2 months ago',
-      additions: 312,
-      deletions: 289,
-    },
-    {
-      hash: 'f6d1e34',
-      message: 'chore: update TypeScript 5.4, Bun to 1.1.x',
-      branch: 'main',
-      time: '3 months ago',
-      additions: 14,
-      deletions: 8,
-    },
-    {
-      hash: 'g0b7c91',
-      message: 'feat: initial Axum REST API scaffold with SQLx + JWT',
-      branch: 'feature/rust-backend',
-      time: '4 months ago',
-      additions: 447,
-      deletions: 0,
-    },
-  ],
-
-  pullRequests: [
-    {
-      id: 18,
-      title: 'feat: Add Astro + Tailwind 4.0 template to adorex',
-      status: 'open',
-      base: 'main',
-      head: 'feature/astro-template',
-      reviews: 0,
-      comments: 3,
-      time: '3 days ago',
-    },
-    {
-      id: 17,
-      title: 'fix: Windows path resolution in create-adorex CLI',
-      status: 'merged',
-      base: 'main',
-      head: 'fix/win-paths',
-      reviews: 1,
-      comments: 5,
-      time: '2 weeks ago',
-    },
-    {
-      id: 15,
-      title: 'feat: Add Hono + Bun backend scaffold',
-      status: 'merged',
-      base: 'main',
-      head: 'feature/hono-scaffold',
-      reviews: 0,
-      comments: 2,
-      time: '1 month ago',
-    },
-    {
-      id: 12,
-      title: 'docs: Add CONTRIBUTING.md and usage examples',
-      status: 'closed',
-      base: 'main',
-      head: 'docs/contributing',
-      reviews: 0,
-      comments: 1,
-      time: '2 months ago',
-    },
-  ],
-
   projects: [
     {
-      id: 'create-adorex',
-      name: 'create-adorex',
+      id: 'adorio',
+      name: 'Adorio',
       status: 'STABLE',
       language: 'TypeScript',
       langColor: '#3178c6',
       description:
-        'CLI tool on NPM that scaffolds production-ready backend environments. Generates an Express + TypeScript + Prisma 7 + SQLite project in one command — like create-vite but for backends. Reduces setup time by 70–80%. v1.4.0 adds Bun/Elysia and Astro templates.',
-      lastCommit: '2 days ago',
-      commitMessage: 'feat: bump to v1.4.0, add Bun/Elysia template',
-      commitHash: 'a4d2c19',
-      footprint: '48 KB',
-      stars: 24,
-      tags: ['#NPM', '#CLI', '#TYPESCRIPT', '#SCAFFOLDING'],
-      uptime: '99.99%',
-      cpu: '0.1%',
-      latency: '0.3ms',
-      mem: '64 MB',
-      threadPool: '1 ACTIVE',
-      kernelSync: 'STABLE',
+        "The site you're on right now. A full-stack social platform: a Next.js 16 App Router frontend paired with a separate Express REST API, both in TypeScript. JWT auth, post creation with Cloudinary image uploads, likes, comments, and an infinite feed that streams in over React Suspense. A first-party analytics system fingerprints visitors (canvas, WebGL, screen, fonts) to track page views without a third-party tool.",
       archNote:
-        'Zero runtime dependencies. Template engine reads adorex.config.ts and scaffolds routes, DB schemas, and auth wiring. Cross-platform path normalization added in v1.3.x. Available on NPM: npx create-adorex.',
+        'Backend follows a strict Controller to Service to Model to Schema layering with Zod validation and MongoDB Atlas via Mongoose. The whole stack, Nginx included, ships as one Docker image to Azure Container Apps behind Cloudflare. Every push to main runs format, lint, typecheck, build, and real Puppeteer integration tests against Docker containers before GitHub Actions authenticates via OIDC and deploys, gated on the new revision actually coming up healthy.',
+      tags: ['#NEXTJS', '#EXPRESS', '#MONGODB', '#AZURE'],
+      stats: [
+        { label: 'Last Push', value: 'Sep 2026' },
+        { label: 'Created', value: 'Jan 2025' },
+        { label: 'Size', value: '86 MB' },
+        { label: 'License', value: 'AGPL-3.0' },
+      ],
+      branch: 'main',
+      color: '#00ffc2',
+      repoUrl: 'github.com/Mykal-Steele/Adorio',
+    },
+    {
+      id: 'create-adorex',
+      name: 'create-adorex',
+      status: 'STABLE',
+      language: 'JavaScript',
+      langColor: '#f7df1e',
+      description:
+        'A CLI published on NPM that scaffolds a backend project in one command: Express 5, TypeScript, Prisma 7 with SQLite (via libsql), one Prisma model, two starter routes. Built on cac for argument parsing and @clack/prompts for the interactive setup, with a plain string-replace templating step, no config file.',
+      archNote:
+        'One template exists (express-sqlite) — there is no Bun/Elysia or Astro template despite what earlier commit messages implied. The CLI itself has three runtime dependencies (cac, @clack/prompts, picocolors), a real node --test suite, and currently no auth scaffolding in the generated project.',
+      tags: ['#NPM', '#CLI', '#JAVASCRIPT', '#SCAFFOLDING'],
+      stats: [
+        { label: 'Version', value: 'v1.4.14' },
+        { label: 'Downloads', value: '50/mo' },
+        { label: 'Last Push', value: 'Apr 2026' },
+        { label: 'License', value: 'MIT' },
+      ],
       branch: 'main',
       color: '#00ffc2',
       npm: 'npmjs.com/package/create-adorex',
       repoUrl: 'github.com/Mykal-Steele/adorex-cli',
     },
     {
-      id: 'chroma-board',
-      name: 'ChromaBoard',
-      status: 'STABLE',
-      language: 'TypeScript',
-      langColor: '#3178c6',
-      description:
-        'Project management web app built with the MERN stack. Features real-time board sync, kanban boards, and role-based access control. Uses Express + MongoDB Atlas with JWT auth and Socket.io for live collaboration.',
-      lastCommit: '2 months ago',
-      commitMessage: 'feat: add real-time board sync via WebSockets',
-      commitHash: 'f2a9c84',
-      footprint: '2.1 MB',
-      stars: 11,
-      tags: ['#REACT', '#EXPRESS', '#MONGODB', '#WEBSOCKET'],
-      uptime: '98.4%',
-      cpu: '4.2%',
-      latency: '22ms',
-      mem: '512 MB',
-      threadPool: '4 ACTIVE',
-      kernelSync: 'STABLE',
-      archNote:
-        'Socket.io handles real-time sync. Express REST API with JWT auth middleware. MongoDB Atlas for cloud storage. React Query for client-side cache invalidation and optimistic updates.',
-      branch: 'main',
-      color: '#00ffc2',
-    },
-    {
       id: 'vexta',
       name: 'Vexta',
       status: 'STABLE',
-      language: 'C++',
-      langColor: '#f34b7d',
+      language: 'Dart',
+      langColor: '#0175C2',
       description:
-        'Cross-platform system to use your phone as a virtual webcam on Windows. Flutter (Dart) mobile sender streams JPEG frames over TCP to a C++ desktop receiver that registers a virtual camera driver (Softcam), making it visible to any video conferencing app.',
-      lastCommit: '3 months ago',
-      commitMessage: 'chore: bundle DLL registration into Inno Setup installer',
-      commitHash: 'v1.0.1',
-      footprint: '—',
-      stars: 0,
-      tags: ['#C++', '#FLUTTER', '#DART', '#TCP'],
-      uptime: '—',
-      cpu: '—',
-      latency: '<1ms',
-      mem: '—',
-      threadPool: '—',
-      kernelSync: 'STABLE',
+        'Turns a phone into a virtual webcam on Windows over the local network. A Flutter/Dart mobile app captures and JPEG-compresses camera frames and streams them over a raw TCP socket; a second Flutter/Dart app on the Windows side decodes the JPEGs and pipes the raw frames through Dart FFI into a virtual-camera driver so any video call app can see it as a webcam.',
       archNote:
-        'Flutter mobile app → TCP port 4444 → C++ JPEG decoder. Virtual camera driver registered via CMake + CMake + regsvr32. Inno Setup packages everything for one-click Windows install. Reduced setup complexity by ~90%.',
+        'The frame capture, TCP streaming, JPEG decode, and FFI bridge are all authored Dart. The virtual-camera driver itself is a vendored, unmodified third-party C++ library (softcam by tshino, MIT licensed), not code written for this project. An Inno Setup install script exists but no built installer has been published as a release yet.',
+      tags: ['#FLUTTER', '#DART', '#TCP', '#FFI'],
+      stats: [
+        { label: 'Last Push', value: 'Feb 2026' },
+        { label: 'Size', value: '2.3 MB' },
+        { label: 'License', value: 'none (vendored driver: MIT)' },
+      ],
       branch: 'main',
-      color: '#f34b7d',
+      color: '#0175C2',
       repoUrl: 'github.com/Mykal-Steele/Vexta',
     },
     {
-      id: 'discord-forge',
-      name: 'DiscordForge',
+      id: 'cognimax',
+      name: 'CogniMax',
+      status: 'BETA',
+      language: 'Python',
+      langColor: '#3572A5',
+      description:
+        "A chess research project modeling how a player of a given skill level actually plays, not just the strongest move. An expectimax search takes Stockfish's top candidate replies and weights them by maia3's predicted human-reply probabilities (with a risk-sensitivity parameter), so the engine can flag moves that are statistically likely to induce a blunder at a target Elo.",
+      archNote:
+        "Runs as a notebook on Google Colab with a GPU for the maia3 policy net, paired with a local Stockfish 18 binary and python-chess. A real statistics layer backs the results: bootstrap A/B tests, Holm-corrected paired tests, power analysis. The author's own README says runs 1 through 5 are complete and run 6 stopped partway after an out-of-memory crash — this is an active, self-audited research project, not a finished product.",
+      tags: ['#PYTHON', '#CHESS', '#PYTORCH', '#RESEARCH'],
+      stats: [
+        { label: 'Last Push', value: 'Jul 2026' },
+        { label: 'Size', value: '34 MB' },
+        { label: 'License', value: 'none' },
+      ],
+      branch: 'main',
+      color: '#fe9d00',
+      repoUrl: 'github.com/Mykal-Steele/CogniMax',
+    },
+    {
+      id: 'archmaster',
+      name: 'ArchMaster',
       status: 'STABLE',
       language: 'TypeScript',
       langColor: '#3178c6',
       description:
-        'Discord bot with a web dashboard. Handles slash commands, role automation, and server analytics. Built with Discord.js, Express, and MongoDB.',
-      lastCommit: '3 months ago',
-      commitMessage: 'refactor: migrate to TypeScript strict mode',
-      commitHash: 'e9c2a18',
-      footprint: '1.4 MB',
-      stars: 8,
-      tags: ['#DISCORD.JS', '#TYPESCRIPT', '#EXPRESS', '#MONGODB'],
-      uptime: '97.8%',
-      cpu: '2.8%',
-      latency: '45ms',
-      mem: '256 MB',
-      threadPool: '2 ACTIVE',
-      kernelSync: 'STABLE',
+        "A Gemini-backed study tool for a Computer Architecture exam, built into this site at /cao/. A real bank of problems (ISA encoding, cache mapping, virtual memory translation, pipeline hazards, Amdahl's law, and more) each ship with a fully worked solution, and a chat panel answers follow-up questions grounded in a retrieval layer over the course notes rather than the model's memory alone.",
       archNote:
-        'Command handler uses a decorator pattern for slash command registration. Cron jobs handle scheduled moderation tasks. Dashboard reads bot state from Redis for low-latency queries.',
+        'The retrieval step chunks a bundled study-notes file and scores chunks against the question with Fuse.js fuzzy search plus a hand-written keyword-overlap score, then feeds the best matches into the prompt before streaming the answer back. A "Reasoning On" toggle swaps in a slower model with a larger thinking budget for harder questions.',
+      tags: ['#REACT', '#GEMINI', '#RAG', '#VITE'],
+      stats: [
+        { label: 'Type', value: 'Vite + React app' },
+        { label: 'Served at', value: '/cao/' },
+      ],
       branch: 'main',
       color: '#00ffc2',
+      liveUrl: '/cao/',
     },
     {
-      id: 'axum-rest',
-      name: 'Axum-REST',
-      status: 'BETA',
-      language: 'Rust',
-      langColor: '#ce422b',
+      id: 'rhythm-dots',
+      name: 'Rhythm Dots',
+      status: 'STABLE',
+      language: 'TypeScript',
+      langColor: '#3178c6',
       description:
-        'REST API scaffold built with Axum in Rust. A learning project — includes Tower middleware, JWT auth, and SQLx with Postgres. Exploring Rust for web services.',
-      lastCommit: '4 months ago',
-      commitMessage: 'feat: initial Axum REST API scaffold with SQLx',
-      commitHash: 'g0b7c91',
-      footprint: '3.2 MB',
-      stars: 5,
-      tags: ['#RUST', '#AXUM', '#SQLX', '#POSTGRES'],
-      uptime: '99.9%',
-      cpu: '0.8%',
-      latency: '0.6ms',
-      mem: '32 MB',
-      threadPool: '8 ACTIVE',
-      kernelSync: 'SYNCING',
+        'A canvas rhythm game built into this site at /rygame. Dots fall down 8 lanes in time with a synced audio track; hit the matching key when a dot lands and keep the streak alive. Difficulty levels, achievements, a daily quest, and a real backend leaderboard for logged-in players, with a localStorage fallback for anonymous play.',
       archNote:
-        'Tower middleware for rate limiting and auth. SQLx compile-time query checking catches SQL errors at build time. Learning project for Rust web dev.',
-      branch: 'feature/rust-backend',
-      color: '#fe9d00',
+        "Hand-rolled game loop on a canvas, driven by requestAnimationFrame synced to the audio element's currentTime, no game engine. Adapted from an existing rhythm-game concept (credited in-app to Jack Eisenmann / ostracod, music by Soleviio) rather than an original design from scratch.",
+      tags: ['#CANVAS', '#GAME', '#REACT'],
+      stats: [
+        { label: 'Type', value: 'Canvas game' },
+        { label: 'Served at', value: '/rygame' },
+      ],
+      branch: 'main',
+      color: '#ff9195',
+      liveUrl: '/rygame',
     },
     {
-      id: 'express-legacy',
-      name: 'Express-Legacy-API',
-      status: 'DEPRECATED',
-      language: 'JavaScript',
-      langColor: '#f7df1e',
+      id: 'mistbound',
+      name: 'Mistbound',
+      status: 'BETA',
+      language: 'C#',
+      langColor: '#178600',
       description:
-        'Old REST API from before I switched to TypeScript. Was the backend for my early MERN projects. Replaced by newer tooling using Hono + Bun.',
-      lastCommit: '1 year ago',
-      commitMessage: 'docs: archival note — see create-adorex for modern scaffold',
-      commitHash: '0a1b2c3',
-      footprint: '8.4 MB',
-      stars: 3,
-      tags: ['#NODE', '#EXPRESS', '#MONGO', '#LEGACY'],
-      uptime: '—',
-      cpu: '—',
-      latency: '—',
-      mem: '—',
-      threadPool: '—',
-      kernelSync: 'OFFLINE',
-      archNote: 'Pre-TypeScript. Replaced by Hono + Bun rewrites. No active maintenance.',
-      branch: 'archive/stable',
-      color: '#ff9195',
+        'A Unity 2D action-platformer prototype. Double-jump and wall-slide movement, mouse-aimed shooting, two enemy types (including a timing-based QTE enemy that freezes game time during the encounter), a kill-count quest tracker, and a health/damage system with UI.',
+      archNote:
+        "Built solo over about 16 months (79 commits). Still missing a finished death/game-over flow (there's a literal TODO for it in the player controller), and one enemy's damage handler is an empty stub. A genuine work in progress, not a finished game.",
+      tags: ['#UNITY', '#CSHARP', '#GAMEDEV'],
+      stats: [
+        { label: 'Last Push', value: 'Jul 2025' },
+        { label: 'Commits', value: '79' },
+        { label: 'Size', value: '37 MB' },
+        { label: 'License', value: 'MIT' },
+      ],
+      branch: 'main',
+      color: '#178600',
+      repoUrl: 'github.com/Mykal-Steele/MIstboundMain',
+    },
+    {
+      id: 'chronochunk',
+      name: 'ChronoChunk',
+      status: 'BETA',
+      language: 'Python',
+      langColor: '#3572A5',
+      description:
+        "A Discord bot. What's actually deployed on the default branch is a small, working MVP: a number-guessing game and a utility command that splits long pasted text into Discord's message-size limit, kept alive on Render's free tier via a scheduled health-check ping. The real work in progress lives on an unmerged branch: AI personality and memory, and music playback via yt-dlp.",
+      archNote:
+        'discord.py + aiohttp for the deployed MVP; the unmerged branch adds a proper module layout with its own pytest suite. Described here as BETA because the substantial version of this project has not shipped to the branch that runs in production yet.',
+      tags: ['#PYTHON', '#DISCORD', '#AI'],
+      stats: [
+        { label: 'Active branch', value: 'ai/chat' },
+        { label: 'Last Push', value: 'Jul 2026' },
+        { label: 'License', value: 'MIT' },
+      ],
+      branch: 'ai/chat',
+      color: '#fe9d00',
+      repoUrl: 'github.com/Mykal-Steele/ChronoChunk',
+    },
+    {
+      id: 'coding-challenges',
+      name: 'Coding Challenges',
+      status: 'STABLE',
+      language: 'TypeScript',
+      langColor: '#3178c6',
+      description:
+        'An in-browser JavaScript problem set built into this site at /coding, nine problems from easy to hard (prime sieves, Tower of Hanoi, matrix multiplication, closest pair of points, grid word search, and more). A CodeMirror editor, per-problem test cases with a deep-equal checker, and progress saved to localStorage.',
+      archNote:
+        "Code runs directly on the main thread via the Function constructor against each test case, not in an isolated Web Worker (a worker-based runner exists in the codebase but isn't actually wired up).",
+      tags: ['#REACT', '#CODEMIRROR', '#DSA'],
+      stats: [
+        { label: 'Problems', value: '9' },
+        { label: 'Served at', value: '/coding' },
+      ],
+      branch: 'main',
+      color: '#00ffc2',
+      liveUrl: '/coding',
+    },
+    {
+      id: 'data-lookup',
+      name: 'Data Lookup',
+      status: 'STABLE',
+      language: 'TypeScript',
+      langColor: '#3178c6',
+      description:
+        "This site's own analytics dashboard, built at /data-lookup for logged-in accounts. Charts (Recharts) and tables built on the same first-party visitor-fingerprinting data Adorio itself collects: top pages, recent visits, a per-visitor drilldown with browser, screen, and visit history.",
+      archNote:
+        'Fetches from four real backend endpoints in parallel with Promise.allSettled, so one failing endpoint does not blank the whole page.',
+      tags: ['#REACT', '#RECHARTS', '#ANALYTICS'],
+      stats: [
+        { label: 'Access', value: 'requires login' },
+        { label: 'Served at', value: '/data-lookup' },
+      ],
+      branch: 'main',
+      color: '#00ffc2',
+      liveUrl: '/data-lookup',
+    },
+    {
+      id: 'smartcity',
+      name: 'SmartCity',
+      status: 'STABLE',
+      language: 'HTML',
+      langColor: '#e34c26',
+      description:
+        "A small documentation viewer at /smartcity hosting real developer-guide docs from Siam Commercial Bank's DeepLink Mobile and Direct Debit APIs, from a smart-city fintech engagement. This is a document reader, not a live API integration, no request/response demo runs on this page.",
+      archNote: 'Static HTML guides served from the app, opened through a simple link list.',
+      tags: ['#DOCS', '#FINTECH'],
+      stats: [{ label: 'Served at', value: '/smartcity' }],
+      branch: 'main',
+      color: '#e34c26',
+      liveUrl: '/smartcity',
     },
   ] as Project[],
 
@@ -373,23 +330,23 @@ export const portfolioData = {
     { name: 'javascript', version: 'ES2024', category: 'Language', active: true },
     { name: 'go', version: '1.22.0', category: 'Language', active: true },
     { name: 'python', version: '3.12.0', category: 'Language', active: true },
+    { name: 'dart', version: '3.x', category: 'Language', active: true },
     { name: 'rust', version: '1.77.0', category: 'Language', active: false },
     { name: 'c++', version: 'C++20', category: 'Language', active: true },
-    { name: 'c#', version: '.NET 8', category: 'Language', active: false },
+    { name: 'c#', version: '.NET 8', category: 'Language', active: true },
     { name: 'java', version: '21 LTS', category: 'Language', active: false },
     { name: 'sql', version: 'Standard', category: 'Language', active: true },
     { name: 'react', version: '18.3.0', category: 'Framework', active: true },
     { name: 'next.js', version: '16.2.0', category: 'Framework', active: true },
-    { name: 'hono', version: '4.3.0', category: 'Framework', active: true },
-    { name: 'elysia (bun)', version: '1.0.7', category: 'Framework', active: true },
+    { name: 'flutter', version: '3.x', category: 'Framework', active: true },
     { name: 'express', version: '4.18.0', category: 'Framework', active: true },
-    { name: 'astro', version: '4.8.0', category: 'Framework', active: true },
     { name: 'tailwind css', version: '3.4.3', category: 'Framework', active: true },
     { name: 'node.js', version: '20 LTS', category: 'Runtime', active: true },
     { name: 'bun', version: '1.1.x', category: 'Runtime', active: true },
     { name: 'git', version: '2.44.0', category: 'Tool', active: true },
     { name: 'docker', version: '25.x', category: 'Tool', active: true },
     { name: 'prisma', version: '7.x', category: 'Tool', active: true },
+    { name: 'unity', version: '2022 LTS', category: 'Tool', active: true },
     { name: 'cli development', version: '—', category: 'Tool', active: true },
     { name: 'figma', version: 'latest', category: 'Tool', active: false },
   ],
@@ -397,22 +354,22 @@ export const portfolioData = {
   stack: [
     {
       category: 'Languages',
-      items: ['TypeScript', 'JavaScript', 'Go', 'Python', 'C++', 'Java', 'SQL'],
+      items: ['TypeScript', 'JavaScript', 'Go', 'Python', 'Dart', 'C#', 'C++', 'SQL'],
       color: 'var(--ide-accent)',
     },
     {
       category: 'Frontend',
-      items: ['React', 'Next.js', 'Astro', 'Tailwind CSS 4.0'],
+      items: ['React', 'Next.js', 'Flutter', 'Tailwind CSS'],
       color: 'var(--ide-orange)',
     },
     {
       category: 'Backend',
-      items: ['Hono', 'Bun (Elysia)', 'Express', 'Node.js'],
+      items: ['Express', 'Node.js', 'Bun'],
       color: 'var(--ide-purple)',
     },
     {
       category: 'Tools & Infra',
-      items: ['Docker', 'Prisma', 'Git', 'Nginx', 'CLI Development'],
+      items: ['Docker', 'Prisma', 'Git', 'Unity', 'CLI Development'],
       color: 'var(--ide-blue)',
     },
   ] as StackGroup[],
@@ -422,7 +379,7 @@ export const portfolioData = {
       year: '2026',
       hash: 'a4d2c19',
       event:
-        'Microsoft Student Ambassador. 2nd place KMUTT IOT Hackathon (NFC attendance system). Building create-adorex v1.4.0.',
+        'Microsoft Student Ambassador. 2nd place KMUTT IOT Hackathon (NFC attendance system). Maintaining create-adorex and researching CogniMax, a chess engine that models opponent skill.',
       branch: 'main',
       status: 'IN_PROGRESS',
     },
@@ -472,7 +429,7 @@ export const portfolioData = {
     {
       file: 'projects.json',
       line: 1,
-      content: '"name": "create-adorex" // NPM CLI v1.4.0',
+      content: '"name": "create-adorex" // NPM CLI',
       path: '/projects',
     },
     { file: 'contact.sh', line: 3, content: '#!/bin/bash — init_connection()', path: '/contact' },
@@ -487,23 +444,4 @@ export const portfolioData = {
     'lucide-react@latest',
     'redux-toolkit@2.x',
   ],
-
-  aiResponses: {
-    stack:
-      '// Querying stack.config...\n\n  Languages:  TypeScript, JavaScript, Go, Python\n               + C++, Java, SQL\n  Frontend:   React, Next.js, Astro, Tailwind CSS 4.0\n  Backend:    Hono, Bun (Elysia), Express\n  Tools:      Docker, Prisma, Git, CLI Development\n\n// 23 packages installed.',
-    projects:
-      '// Indexing project registry...\n\n  create-adorex    — TypeScript  STABLE  (NPM v1.4.0)\n  ChromaBoard      — TypeScript  STABLE  (MERN fullstack)\n  Vexta            — C++        STABLE  (virtual webcam)\n  DiscordForge     — TypeScript  STABLE  (Discord bot)\n  Axum-REST        — Rust        BETA    (learning project)\n\n// Open projects.json to browse.\n// $ npx create-adorex to try the CLI.',
-    available:
-      '// Checking calendar.json...\n\n  Status:        OPEN_TO_OPPORTUNITIES\n  Type:          Internship, part-time, or collab\n  University:    KMUTT — CS Year 2 (Bangkok)\n  Timezone:      UTC+7\n  Response time: < 24h\n\n// Open contact.sh to send a message.',
-    community:
-      '// Reading community.log...\n\n  [ACTIVE] Microsoft Student Ambassadors\n           → AI tools & cloud-based academic projects\n  [ACTIVE] Google Developer Group (GDG)\n           → Modern web & backend tech talks\n  [ATTENDED] FOSSASIA Summit Bangkok — March 2025\n           → Open-source tech, ThaiLLMs, cloud-native',
-    philosophy:
-      '// Reading notes.txt...\n\n  I like using the right tool for the job.\n  Go when I need speed, Bun for quick dev,\n  Rust when I want to learn low-level stuff.\n\n  create-adorex came from being annoyed\n  at setting up the same project structure\n  over and over.',
-    background:
-      "// git log --author='Oakar Oo' --reverse...\n\n  2021  — Started coding. TypeScript, React, MERN.\n  2023  — Built first Discord bots & web apps.\n  2025  — Started CS at KMUTT (GPA 3.38).\n           Published create-adorex on NPM.\n           Joined GDG. Attended FOSSASIA Summit.\n  2026  — [CURRENT] MSA member. IOT Hackathon 2nd.\n           Building v1.4.0.",
-    contact:
-      '// Available channels:\n\n  email:    oakar@adorio.space\n  github:   github.com/Mykal-Steele\n  linkedin: linkedin.com/in/oakaroo\n\n// Open contact.sh tab to send a message.',
-    default:
-      "// ASK_OO — Oakar's info\n// Topics:\n\n  → 'stack'         tech stack & tools\n  → 'projects'      repos & work\n  → 'available'     work together\n  → 'community'     memberships\n  → 'background'    timeline\n  → 'contact'       how to reach me\n\n// Type a question or click a chip below.",
-  },
 };

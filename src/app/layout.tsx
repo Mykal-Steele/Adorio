@@ -8,7 +8,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 export const metadata: Metadata = {
   title: { default: 'Adorio', template: '%s | Adorio' },
   description:
-    'Full-stack developer portfolio — TypeScript, Go, Rust, Bun. CLI tools, web apps, and backend services.',
+    'Full-stack developer portfolio: TypeScript, Go, Rust, Bun. CLI tools, web apps, and backend services.',
   metadataBase: new URL('https://adorio.space'),
   openGraph: {
     siteName: 'Adorio',

@@ -46,6 +46,12 @@ const config: NextConfig = {
 
   experimental: {
     optimizePackageImports: ['@heroicons/react', 'lucide-react'],
+    // Portfolio routes are fully static (generateStaticParams, no per-request data), so
+    // router.prefetch() results are safe to reuse well past the 5 min default. A visitor
+    // who reads About for a while shouldn't pay for a re-fetch when they click Projects next.
+    staleTimes: {
+      static: 1800,
+    },
   },
 };
 
