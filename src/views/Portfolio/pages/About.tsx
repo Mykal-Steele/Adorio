@@ -205,9 +205,9 @@ export function About() {
           style={{ gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)' }}
         >
           {[
-            { label: 'Projects Shipped', value: '5' },
+            { label: 'Projects Shipped', value: String(portfolioData.projects.length) },
             { label: 'NPM Packages', value: '1' },
-            { label: 'Community Roles', value: '2' },
+            { label: 'Community Roles', value: String(portfolioData.community.length) },
           ].map((stat) => (
             <IDECard key={stat.label} className="p-4" bg="bg-3">
               <div

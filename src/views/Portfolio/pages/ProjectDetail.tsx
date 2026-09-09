@@ -1,96 +1,144 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Circle, ExternalLink, Package } from 'lucide-react';
+import { ExternalLink, Package, PlayCircle } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
 import { mono, sans, vietnam, title as titleFont } from '../constants/fonts';
 import { statusConfig, codeColors } from '../constants/status';
 import { Breadcrumb, Badge, IDECard } from '../shared';
 
-function getCodeSnippet(proj: (typeof portfolioData.projects)[0]) {
-  if (proj.language === 'Rust') {
-    return {
-      lines: [
-        { n: '01', code: `use axum::{Router, routing::get};`, type: 'keyword' },
-        { n: '02', code: `use sqlx::PgPool;`, type: 'keyword' },
-        { n: '03', code: ``, type: 'empty' },
-        { n: '04', code: `#[derive(Debug, serde::Serialize)]`, type: 'attr' },
-        { n: '05', code: `pub struct AppState {`, type: 'normal' },
-        { n: '06', code: `    db: PgPool,`, type: 'field' },
-        { n: '07', code: `}`, type: 'normal' },
-        { n: '08', code: ``, type: 'empty' },
-        { n: '09', code: `#[tokio::main]`, type: 'attr' },
-        { n: '10', code: `async fn main() {`, type: 'normal' },
-        { n: '11', code: `    let pool = PgPool::connect(&db_url).await?;`, type: 'normal' },
-        { n: '12', code: `    // Build Axum router with state`, type: 'comment' },
-        { n: '13', code: `    let app = Router::new()`, type: 'normal' },
-        { n: '14', code: `        .route("/health", get(health_check))`, type: 'field' },
-        { n: '15', code: `        .with_state(AppState { db: pool });`, type: 'normal' },
-      ],
-    };
-  }
-  if (proj.id === 'create-adorex') {
-    return {
-      lines: [
+const EXT_BY_LANGUAGE: Record<string, string> = {
+  Rust: '.rs',
+  Go: '.go',
+  JavaScript: '.js',
+  TypeScript: '.ts',
+  Python: '.py',
+  Dart: '.dart',
+  'C#': '.cs',
+  HTML: '.html',
+};
+
+function getCodeSnippet(id: string) {
+  switch (id) {
+    case 'create-adorex':
+      return [
         { n: '01', code: `#!/usr/bin/env node`, type: 'comment' },
-        { n: '02', code: `import { scaffold } from './scaffold';`, type: 'keyword' },
-        { n: '03', code: `import { parseArgs } from './cli';`, type: 'keyword' },
+        { n: '02', code: `import { scaffold } from './scaffold.js';`, type: 'keyword' },
+        { n: '03', code: `import { parseArgs } from './cli.js';`, type: 'keyword' },
         { n: '04', code: ``, type: 'empty' },
         { n: '05', code: `const { name, template } = parseArgs();`, type: 'normal' },
         { n: '06', code: ``, type: 'empty' },
-        { n: '07', code: `// Supported templates:`, type: 'comment' },
-        { n: '08', code: `// hono | react | astro | elysia`, type: 'comment' },
-        { n: '09', code: `await scaffold({`, type: 'normal' },
-        { n: '10', code: `  name,`, type: 'field' },
-        { n: '11', code: `  template,`, type: 'field' },
-        { n: '12', code: `  withTypeScript: true,`, type: 'field' },
-        { n: '13', code: `});`, type: 'normal' },
-        { n: '14', code: ``, type: 'empty' },
-        { n: '15', code: `console.log('✓ Project ready. Run: bun dev');`, type: 'normal' },
-      ],
-    };
-  }
-  if (proj.language === 'TypeScript') {
-    return {
-      lines: [
-        { n: '01', code: `import { Hono } from 'hono';`, type: 'keyword' },
-        { n: '02', code: `import { jwt } from 'hono/jwt';`, type: 'keyword' },
-        { n: '03', code: ``, type: 'empty' },
-        { n: '04', code: `const app = new Hono();`, type: 'normal' },
-        { n: '05', code: ``, type: 'empty' },
-        { n: '06', code: `app.use('/api/*', jwt({ secret: env.JWT_SECRET }));`, type: 'normal' },
+        { n: '07', code: `// One template today: express-sqlite`, type: 'comment' },
+        { n: '08', code: `await scaffold({ name, template });`, type: 'normal' },
+        { n: '09', code: ``, type: 'empty' },
+        { n: '10', code: `console.log('project ready');`, type: 'normal' },
+      ];
+    case 'vexta':
+      return [
+        { n: '01', code: `Socket socket = await Socket.connect(host, 4444);`, type: 'normal' },
+        { n: '02', code: ``, type: 'empty' },
+        { n: '03', code: `final jpeg = await compressFrame(cameraImage);`, type: 'normal' },
+        { n: '04', code: `final header = ByteData(4)..setUint32(0, jpeg.length);`, type: 'field' },
+        { n: '05', code: `socket.add(header.buffer.asUint8List());`, type: 'field' },
+        { n: '06', code: `socket.add(jpeg);`, type: 'field' },
         { n: '07', code: ``, type: 'empty' },
-        { n: '08', code: `app.get('/api/health', (c) => {`, type: 'normal' },
-        { n: '09', code: `  return c.json({ status: 'ok' });`, type: 'field' },
-        { n: '10', code: `});`, type: 'normal' },
-        { n: '11', code: ``, type: 'empty' },
-        { n: '12', code: `export default { fetch: app.fetch };`, type: 'normal' },
-        { n: '13', code: `// Runs on Bun: bun run index.ts`, type: 'comment' },
-        { n: '14', code: ``, type: 'empty' },
-        { n: '15', code: ``, type: 'empty' },
-      ],
-    };
+        { n: '08', code: `// receiver decodes with the image pub package,`, type: 'comment' },
+        { n: '09', code: `// then hands raw bytes to the driver via FFI.`, type: 'comment' },
+      ];
+    case 'cognimax':
+      return [
+        { n: '01', code: `def _chance_node(board, depth, lam):`, type: 'keyword' },
+        { n: '02', code: `    replies = maia3.predict(board)`, type: 'normal' },
+        { n: '03', code: `    scores = [`, type: 'normal' },
+        { n: '04', code: `        _max_node(board.push(m), depth - 1)`, type: 'field' },
+        { n: '05', code: `        for m, p in replies`, type: 'field' },
+        { n: '06', code: `    ]`, type: 'normal' },
+        {
+          n: '07',
+          code: `    # risk-sensitive weighted average, not a plain mean`,
+          type: 'comment',
+        },
+        { n: '08', code: `    return risk_weighted(scores, replies, lam)`, type: 'normal' },
+      ];
+    case 'archmaster':
+      return [
+        { n: '01', code: `const chunks = rankChunks(question, notes);`, type: 'normal' },
+        { n: '02', code: `const context = chunks.slice(0, k).join('\\n');`, type: 'normal' },
+        { n: '03', code: ``, type: 'empty' },
+        { n: '04', code: `const stream = await chat.sendMessageStream({`, type: 'normal' },
+        { n: '05', code: `  message: \`\${context}\\n\\n\${question}\`,`, type: 'field' },
+        { n: '06', code: `});`, type: 'normal' },
+        { n: '07', code: `for await (const chunk of stream) render(chunk.text);`, type: 'normal' },
+      ];
+    case 'rhythm-dots':
+      return [
+        { n: '01', code: `function tick(now: number) {`, type: 'normal' },
+        { n: '02', code: `  const t = audio.currentTime;`, type: 'field' },
+        { n: '03', code: `  dots.forEach((d) => d.updatePosition(t));`, type: 'field' },
+        { n: '04', code: `  drawFrame(ctx, dots, hitEffects);`, type: 'field' },
+        { n: '05', code: `  requestAnimationFrame(tick);`, type: 'field' },
+        { n: '06', code: `}`, type: 'normal' },
+      ];
+    case 'mistbound':
+      return [
+        { n: '01', code: `void Update() {`, type: 'normal' },
+        { n: '02', code: `    if (Input.GetMouseButtonDown(0) && !isFrozen)`, type: 'field' },
+        { n: '03', code: `        CheckQteHit(clockHandAngle);`, type: 'field' },
+        { n: '04', code: `}`, type: 'normal' },
+        { n: '05', code: ``, type: 'empty' },
+        { n: '06', code: `// death/respawn flow: not implemented yet`, type: 'comment' },
+      ];
+    case 'chronochunk':
+      return [
+        { n: '01', code: `@bot.command()`, type: 'attr' },
+        { n: '02', code: `async def guess(ctx, number: int):`, type: 'keyword' },
+        { n: '03', code: `    game = games.get(ctx.author.id)`, type: 'normal' },
+        { n: '04', code: `    if not game:`, type: 'normal' },
+        { n: '05', code: `        return await ctx.send("start with /game first")`, type: 'field' },
+        { n: '06', code: `    game.check(number)`, type: 'field' },
+      ];
+    case 'coding-challenges':
+      return [
+        { n: '01', code: `const fn = new Function(\`return \${userCode}\`)();`, type: 'normal' },
+        { n: '02', code: `for (const t of testCases) {`, type: 'normal' },
+        { n: '03', code: `  const result = fn(...t.input);`, type: 'field' },
+        { n: '04', code: `  t.passed = deepEqual(result, t.expected);`, type: 'field' },
+        { n: '05', code: `}`, type: 'normal' },
+        { n: '06', code: `// runs on the main thread, not a Worker`, type: 'comment' },
+      ];
+    case 'data-lookup':
+      return [
+        { n: '01', code: `const [summary, visits, stats, details] =`, type: 'normal' },
+        { n: '02', code: `  await Promise.allSettled([`, type: 'normal' },
+        { n: '03', code: `    fetchPageViewSummary(),`, type: 'field' },
+        { n: '04', code: `    fetchRecentVisits(),`, type: 'field' },
+        { n: '05', code: `    fetchVisitorStats(),`, type: 'field' },
+        { n: '06', code: `    fetchVisitorDetails(),`, type: 'field' },
+        { n: '07', code: `  ]);`, type: 'normal' },
+      ];
+    case 'smartcity':
+      return [
+        { n: '01', code: `const guides = [`, type: 'normal' },
+        {
+          n: '02',
+          code: `  { title: 'SCB DeepLink Mobile', href: '/smartcity/deeplink.html' },`,
+          type: 'field',
+        },
+        {
+          n: '03',
+          code: `  { title: 'SCB Direct Debit', href: '/smartcity/direct-debit.html' },`,
+          type: 'field',
+        },
+        { n: '04', code: `];`, type: 'normal' },
+      ];
+    default:
+      return [
+        { n: '01', code: `export default async function App() {`, type: 'normal' },
+        { n: '02', code: `  return <Layout>{children}</Layout>;`, type: 'field' },
+        { n: '03', code: `}`, type: 'normal' },
+      ];
   }
-  return {
-    lines: [
-      { n: '01', code: `package main`, type: 'keyword' },
-      { n: '02', code: ``, type: 'empty' },
-      { n: '03', code: `import (`, type: 'normal' },
-      { n: '04', code: `    "net/http"`, type: 'field' },
-      { n: '05', code: `    "time"`, type: 'field' },
-      { n: '06', code: `)`, type: 'normal' },
-      { n: '07', code: ``, type: 'empty' },
-      { n: '08', code: `func main() {`, type: 'normal' },
-      { n: '09', code: `    mux := http.NewServeMux()`, type: 'field' },
-      { n: '10', code: `    mux.HandleFunc("/health", healthCheck)`, type: 'field' },
-      { n: '11', code: `    server := &http.Server{`, type: 'field' },
-      { n: '12', code: `        Addr: ":8080",`, type: 'field' },
-      { n: '13', code: `        ReadTimeout: 10 * time.Second,`, type: 'field' },
-      { n: '14', code: `    }`, type: 'field' },
-      { n: '15', code: `}`, type: 'normal' },
-    ],
-  };
 }
 
 export function ProjectDetail({ id }: { id: string }) {
@@ -124,21 +172,8 @@ export function ProjectDetail({ id }: { id: string }) {
   }
 
   const sc = statusConfig[project.status] || statusConfig.STABLE;
-  const snippet = getCodeSnippet(project);
-  const ext =
-    project.language === 'Rust'
-      ? '.rs'
-      : project.language === 'Go'
-        ? '.go'
-        : project.language === 'JavaScript'
-          ? '.js'
-          : '.ts';
-  const kernelColor =
-    project.kernelSync === 'STABLE'
-      ? 'var(--ide-accent)'
-      : project.kernelSync === 'SYNCING'
-        ? 'var(--ide-orange)'
-        : 'var(--ide-pink)';
+  const snippet = getCodeSnippet(project.id);
+  const ext = EXT_BY_LANGUAGE[project.language] ?? '.ts';
 
   return (
     <div className="flex flex-col" style={{ minHeight: '100%' }}>
@@ -303,15 +338,15 @@ export function ProjectDetail({ id }: { id: string }) {
                   color: 'var(--ide-text-7)',
                 }}
               >
-                Read Only
+                Illustrative, not the literal file
               </span>
             </div>
             <div className="px-4 py-4">
-              {snippet.lines.map((line) => (
+              {snippet.map((line) => (
                 <div key={line.n} className="flex items-start" style={{ lineHeight: '22px' }}>
                   <span
                     style={{
-                      fontSize: 11,
+                      fontSize: 'var(--ide-editor-font-size, 12px)',
                       fontFamily: mono,
                       color: 'var(--ide-line-number)',
                       width: 32,
@@ -324,7 +359,7 @@ export function ProjectDetail({ id }: { id: string }) {
                   </span>
                   <span
                     style={{
-                      fontSize: 12,
+                      fontSize: 'var(--ide-editor-font-size, 12px)',
                       fontFamily: mono,
                       color: codeColors[line.type] || 'var(--ide-text-1)',
                     }}
@@ -361,7 +396,7 @@ export function ProjectDetail({ id }: { id: string }) {
           )}
         </div>
 
-        {/* Right metrics panel */}
+        {/* Right facts panel */}
         <div
           className="shrink-0"
           style={{
@@ -381,166 +416,71 @@ export function ProjectDetail({ id }: { id: string }) {
                   letterSpacing: '0.12em',
                 }}
               >
-                System Metrics
+                Facts
               </span>
               <span style={{ fontSize: 8, background: sc.bg, color: sc.color, padding: '1px 6px' }}>
                 {project.status}
               </span>
             </div>
 
-            {project.status !== 'DEPRECATED' && (
-              <>
-                <div className="mb-4">
-                  <div
-                    style={{
-                      fontSize: 8,
-                      fontFamily: sans,
-                      color: 'var(--ide-text-6)',
-                      marginBottom: 4,
-                      letterSpacing: '0.08em',
-                    }}
-                  >
-                    Memory Usage
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <span style={{ fontSize: 18, fontFamily: mono, color: 'var(--ide-text-1)' }}>
-                      {project.mem}
-                    </span>
-                  </div>
-                  <div style={{ height: 2, background: 'var(--ide-border)', marginTop: 6 }}>
-                    <div
-                      style={{ height: '100%', width: '35%', background: 'var(--ide-accent)' }}
-                    />
-                  </div>
+            <IDECard className="mb-4 p-3">
+              {project.stats.map((s) => (
+                <div key={s.label} className="flex items-center justify-between mb-2 last:mb-0">
+                  <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-6)' }}>
+                    {s.label}
+                  </span>
+                  <span style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-1)' }}>
+                    {s.value}
+                  </span>
                 </div>
+              ))}
+            </IDECard>
 
-                <div className="mb-4">
-                  <div
-                    style={{
-                      fontSize: 8,
-                      fontFamily: sans,
-                      color: 'var(--ide-text-6)',
-                      marginBottom: 4,
-                      letterSpacing: '0.08em',
-                    }}
-                  >
-                    Latency
-                  </div>
-                  <div style={{ fontSize: 18, fontFamily: mono, color: 'var(--ide-orange)' }}>
-                    {project.latency}
-                  </div>
-                  <div style={{ height: 2, background: 'var(--ide-border)', marginTop: 6 }}>
-                    <div
-                      style={{ height: '100%', width: '12%', background: 'var(--ide-orange)' }}
-                    />
-                  </div>
-                </div>
-
-                <IDECard className="mb-4 p-3">
-                  {[
-                    { label: 'Thread Pool', value: project.threadPool },
-                    { label: 'CPU Util', value: project.cpu },
-                    { label: 'Uptime', value: project.uptime },
-                  ].map((m) => (
-                    <div key={m.label} className="flex items-center justify-between mb-2">
-                      <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-6)' }}>
-                        {m.label}
-                      </span>
-                      <span style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-1)' }}>
-                        {m.value}
-                      </span>
-                    </div>
-                  ))}
-                </IDECard>
-
-                <div
-                  className="mb-4 p-3"
-                  style={{ background: `${kernelColor}10`, border: `1px solid ${kernelColor}30` }}
-                >
-                  <div
-                    style={{
-                      fontSize: 8,
-                      fontFamily: sans,
-                      color: 'var(--ide-text-6)',
-                      marginBottom: 4,
-                    }}
-                  >
-                    Kernel Sync
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Circle size={6} fill={kernelColor} color={kernelColor} />
-                    <span style={{ fontSize: 11, fontFamily: mono, color: kernelColor }}>
-                      {project.kernelSync}
-                    </span>
-                  </div>
-                </div>
-
-                {project.repoUrl && (
-                  <a
-                    href={`https://${project.repoUrl}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full flex items-center justify-center gap-2 py-3 transition-opacity hover:opacity-90"
-                    style={{
-                      background: 'var(--ide-orange)',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: 11,
-                      fontFamily: sans,
-                      fontWeight: 700,
-                      color: 'var(--ide-bg-2)',
-                      letterSpacing: '0.08em',
-                      marginBottom: 8,
-                      textDecoration: 'none',
-                      display: 'flex',
-                    }}
-                  >
-                    <ExternalLink size={12} />
-                    View Source
-                  </a>
-                )}
-              </>
-            )}
-
-            {project.status === 'DEPRECATED' && (
-              <div
-                className="p-3 mb-4"
+            {project.liveUrl && (
+              <button
+                onClick={() => router.push(project.liveUrl!)}
+                className="w-full flex items-center justify-center gap-2 py-3 transition-opacity hover:opacity-90"
                 style={{
-                  background: 'var(--ide-pink-a12)',
-                  border: '1px solid var(--ide-pink-a12)',
+                  background: 'var(--ide-accent)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 11,
+                  fontFamily: sans,
+                  fontWeight: 700,
+                  color: 'var(--ide-bg-2)',
+                  letterSpacing: '0.08em',
+                  marginBottom: 8,
                 }}
               >
-                <div
-                  style={{
-                    fontSize: 9,
-                    fontFamily: sans,
-                    color: 'var(--ide-pink)',
-                    marginBottom: 4,
-                  }}
-                >
-                  DEPRECATED
-                </div>
-                <div
-                  style={{
-                    fontSize: 10,
-                    fontFamily: vietnam,
-                    color: 'var(--ide-text-5)',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  This project is archived. Superseded by newer tooling in the stack.
-                </div>
-              </div>
+                <PlayCircle size={12} />
+                Open Live
+              </button>
             )}
 
-            <div className="flex items-center gap-4 mt-4">
-              <div style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-6)' }}>
-                ★ {project.stars}
-              </div>
-              <div style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-7)' }}>
-                #{project.commitHash}
-              </div>
-            </div>
+            {project.repoUrl && (
+              <a
+                href={`https://${project.repoUrl}`}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full flex items-center justify-center gap-2 py-3 transition-opacity hover:opacity-90"
+                style={{
+                  background: project.liveUrl ? 'transparent' : 'var(--ide-orange)',
+                  border: project.liveUrl ? '1px solid var(--ide-border-medium)' : 'none',
+                  cursor: 'pointer',
+                  fontSize: 11,
+                  fontFamily: sans,
+                  fontWeight: 700,
+                  color: project.liveUrl ? 'var(--ide-text-4)' : 'var(--ide-bg-2)',
+                  letterSpacing: '0.08em',
+                  marginBottom: 8,
+                  textDecoration: 'none',
+                  display: 'flex',
+                }}
+              >
+                <ExternalLink size={12} />
+                View Source
+              </a>
+            )}
           </div>
         </div>
       </div>
