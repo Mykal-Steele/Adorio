@@ -17,25 +17,13 @@ const bootLines: TermLine[] = [
   { prefix: '$ ', text: 'whoami', color: 'var(--ide-accent)' },
   {
     prefix: '  ',
-    text: `oakar oo — Full-Stack Developer, KMUTT Bangkok`,
+    text: `oakar oo, Full-Stack Developer, KMUTT Bangkok`,
     color: 'var(--ide-accent-light)',
   },
-  { prefix: '$ ', text: 'status --live', color: 'var(--ide-accent)' },
-  {
-    prefix: '  ✓ ',
-    text: 'create-adorex   ONLINE   uptime 99.9%   latency 0.3ms',
-    color: 'var(--ide-green)',
-  },
-  {
-    prefix: '  ✓ ',
-    text: 'portfolio-ide   ONLINE   uptime 99.5%   latency 18ms',
-    color: 'var(--ide-green)',
-  },
-  {
-    prefix: '  ~ ',
-    text: 'discord-forge   DEGRADED uptime 97.8%   latency 45ms',
-    color: 'var(--ide-orange)',
-  },
+  { prefix: '$ ', text: 'init --portfolio', color: 'var(--ide-accent)' },
+  { prefix: '  ✓ ', text: 'shell mounted', color: 'var(--ide-green)' },
+  { prefix: '  ✓ ', text: 'theme loaded', color: 'var(--ide-green)' },
+  { prefix: '  ✓ ', text: 'routes ready', color: 'var(--ide-green)' },
   { prefix: '$ ', text: 'availability --check', color: 'var(--ide-accent)' },
   { prefix: '  → ', text: 'Status: Open to Opportunities', color: 'var(--ide-purple)' },
   { prefix: '  → ', text: 'TYPE:   Internship · Part-time · Collab', color: 'var(--ide-text-3)' },
@@ -84,7 +72,7 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
     whoami: () => [
       {
         prefix: '  ',
-        text: `${portfolioData.name} — ${portfolioData.role}`,
+        text: `${portfolioData.name}, ${portfolioData.role}`,
         color: 'var(--ide-accent-light)',
       },
       { prefix: '  ', text: `${portfolioData.university}`, color: 'var(--ide-text-3)' },
@@ -367,7 +355,7 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
           <div key={i} className="flex items-start" style={{ lineHeight: '20px' }}>
             <span
               style={{
-                fontSize: 11,
+                fontSize: 'var(--ide-editor-font-size, 11px)',
                 fontFamily: mono,
                 color: line?.color ?? 'var(--ide-text-3)',
                 whiteSpace: 'pre',
@@ -377,7 +365,11 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
               {line?.prefix}
             </span>
             <span
-              style={{ fontSize: 11, fontFamily: mono, color: line?.color ?? 'var(--ide-text-3)' }}
+              style={{
+                fontSize: 'var(--ide-editor-font-size, 11px)',
+                fontFamily: mono,
+                color: line?.color ?? 'var(--ide-text-3)',
+              }}
             >
               {line?.text}
             </span>
@@ -391,7 +383,12 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
           style={{ borderTop: '1px solid var(--ide-border-subtle)' }}
         >
           <span
-            style={{ fontSize: 11, fontFamily: mono, color: 'var(--ide-accent)', flexShrink: 0 }}
+            style={{
+              fontSize: 'var(--ide-editor-font-size, 11px)',
+              fontFamily: mono,
+              color: 'var(--ide-accent)',
+              flexShrink: 0,
+            }}
           >
             root@{portfolioData.handle}:~$
           </span>
@@ -408,7 +405,7 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
               background: 'transparent',
               border: 'none',
               outline: 'none',
-              fontSize: 11,
+              fontSize: 'var(--ide-editor-font-size, 11px)',
               fontFamily: mono,
               color: 'var(--ide-text-2)',
             }}

@@ -21,10 +21,10 @@ import {
 } from '../../api/analytics';
 import { formatDuration, formatCompactNumber } from '../../utils/timeFormatting';
 
-const formatNumber = (value) => (typeof value === 'number' ? value.toLocaleString() : '—');
+const formatNumber = (value) => (typeof value === 'number' ? value.toLocaleString() : 'N/A');
 
 const formatDateTime = (value) => {
-  if (!value) return '—';
+  if (!value) return 'N/A';
 
   try {
     return new Intl.DateTimeFormat(undefined, {
@@ -104,7 +104,7 @@ const SummaryTable = ({ data }) => (
                   {formatNumber(row.uniqueUsers)}
                 </td>
                 <td className="px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300">
-                  {row.avgDuration ? formatDuration(row.avgDuration) : '—'}
+                  {row.avgDuration ? formatDuration(row.avgDuration) : 'N/A'}
                 </td>
                 <td className="px-4 py-3 text-right text-sm text-gray-700 dark:text-gray-300">
                   {formatDateTime(row.firstVisitAt)}
@@ -205,12 +205,12 @@ const RecentVisitsTable = ({ data }) => (
                   className="max-w-xs truncate px-4 py-3 text-sm text-gray-700 dark:text-gray-300"
                   title={row.formattedReferrer || row.referrer}
                 >
-                  {row.formattedReferrer || row.referrer || '—'}
+                  {row.formattedReferrer || row.referrer || 'N/A'}
                 </td>
                 <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
-                  <div>UA: {row.userAgent ? row.userAgent.slice(0, 80) : '—'}</div>
+                  <div>UA: {row.userAgent ? row.userAgent.slice(0, 80) : 'N/A'}</div>
                   <div>
-                    Locale: {row.locale || '—'} · TZ Offset: {row.timezoneOffset ?? '—'}
+                    Locale: {row.locale || 'N/A'} · TZ Offset: {row.timezoneOffset ?? 'N/A'}
                   </div>
                   {row.durationMs != null ? (
                     <div>Duration: {formatDuration(row.durationMs)}</div>
@@ -522,7 +522,7 @@ const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
                               {visit.formattedReferrer}
                             </td>
                             <td className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
-                              {visit.durationMs ? formatDuration(visit.durationMs) : '—'}
+                              {visit.durationMs ? formatDuration(visit.durationMs) : 'N/A'}
                             </td>
                           </tr>
                         ))}
@@ -800,7 +800,7 @@ const DataLookup = () => {
               {loading ? 'Refreshing…' : 'Refresh data'}
             </button>
             <div className="text-xs text-gray-500 dark:text-gray-400">
-              Last updated: {lastUpdated ? formatDateTime(lastUpdated) : '—'}
+              Last updated: {lastUpdated ? formatDateTime(lastUpdated) : 'N/A'}
             </div>
           </div>
         </header>
