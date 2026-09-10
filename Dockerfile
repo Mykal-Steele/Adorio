@@ -39,7 +39,7 @@ COPY --from=build-ai-slop /ai-slop/dist /usr/share/nginx/html/cao/
 # Express backend
 COPY ./backend /app/backend
 WORKDIR /app/backend
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Nginx config
 ARG ENV=production
