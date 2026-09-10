@@ -174,6 +174,7 @@ export function ProjectDetail({ id }: { id: string }) {
   const sc = statusConfig[project.status] || statusConfig.STABLE;
   const snippet = getCodeSnippet(project.id);
   const ext = EXT_BY_LANGUAGE[project.language] ?? '.ts';
+  const liveUrl = project.liveUrl;
 
   return (
     <div className="flex flex-col" style={{ minHeight: '100%' }}>
@@ -436,9 +437,9 @@ export function ProjectDetail({ id }: { id: string }) {
               ))}
             </IDECard>
 
-            {project.liveUrl && (
+            {liveUrl && (
               <button
-                onClick={() => router.push(project.liveUrl!)}
+                onClick={() => router.push(liveUrl)}
                 className="w-full flex items-center justify-center gap-2 py-3 transition-opacity hover:opacity-90"
                 style={{
                   background: 'var(--ide-accent)',

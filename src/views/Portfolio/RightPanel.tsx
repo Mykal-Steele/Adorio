@@ -5,6 +5,7 @@ import { Bot, Circle, BarChart2, Sparkles } from 'lucide-react';
 import { useIDE } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
 import { useResponsive } from './hooks/useResponsive';
+import { readLocalCache, writeLocalCache } from './utils/localCache';
 import { mono, sans } from './constants/fonts';
 
 type LiveStatus = 'ONLINE' | 'DEGRADED' | 'DOWN' | 'PAUSED';
@@ -37,21 +38,6 @@ const LS_CPU = 'sys_cpu';
 const LS_MEMORY = 'sys_memory';
 const LS_FETCHED_AT = 'sys_fetched_at';
 
-function readCache<T>(key: string): T | null {
-  try {
-    return JSON.parse(localStorage.getItem(key) ?? 'null');
-  } catch {
-    return null;
-  }
-}
-function writeCache(key: string, value: unknown) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    /* quota */
-  }
-}
-
 function useSecondsAgo(ts: number | null) {
   const [age, setAge] = useState(0);
   useEffect(() => {
@@ -71,13 +57,13 @@ function SystemPanel() {
   const [fetchedAt, setFetchedAt] = useState<number | null>(null);
 
   useEffect(() => {
-    const cachedMonitors = readCache<MonitorCard[]>(LS_MONITORS);
+    const cachedMonitors = readLocalCache<MonitorCard[]>(LS_MONITORS);
     if (cachedMonitors) setMonitors(cachedMonitors);
-    const cachedCpu = readCache<string>(LS_CPU);
+    const cachedCpu = readLocalCache<string>(LS_CPU);
     if (cachedCpu) setCpu(cachedCpu);
-    const cachedMemory = readCache<string>(LS_MEMORY);
+    const cachedMemory = readLocalCache<string>(LS_MEMORY);
     if (cachedMemory) setMemory(cachedMemory);
-    const cachedFetchedAt = readCache<number>(LS_FETCHED_AT);
+    const cachedFetchedAt = readLocalCache<number>(LS_FETCHED_AT);
     if (cachedFetchedAt) setFetchedAt(cachedFetchedAt);
   }, []);
 
@@ -98,10 +84,10 @@ function SystemPanel() {
           }),
         );
         setMonitors(cards);
-        writeCache(LS_MONITORS, cards);
+        writeLocalCache(LS_MONITORS, cards);
         if (json.ts) {
           setFetchedAt((prev) => Math.max(prev ?? 0, json.ts));
-          writeCache(LS_FETCHED_AT, json.ts);
+          writeLocalCache(LS_FETCHED_AT, json.ts);
         }
       } catch {
         /* silent */
@@ -122,15 +108,15 @@ function SystemPanel() {
         const json = await res.json();
         if (json.cpu) {
           setCpu(json.cpu);
-          writeCache(LS_CPU, json.cpu);
+          writeLocalCache(LS_CPU, json.cpu);
         }
         if (json.memory) {
           setMemory(json.memory);
-          writeCache(LS_MEMORY, json.memory);
+          writeLocalCache(LS_MEMORY, json.memory);
         }
         if (json.ts) {
           setFetchedAt((prev) => Math.max(prev ?? 0, json.ts));
-          writeCache(LS_FETCHED_AT, json.ts);
+          writeLocalCache(LS_FETCHED_AT, json.ts);
         }
       } catch {
         /* silent */

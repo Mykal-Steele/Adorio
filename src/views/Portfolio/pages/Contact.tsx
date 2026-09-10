@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Send, GithubIcon, LinkedinIcon, Mail, AlertCircle } from 'lucide-react';
-import { sendContactMessage } from '../../../api';
+import { sendContactMessage } from '@/api';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
 import { mono, sans, vietnam } from '../constants/fonts';
