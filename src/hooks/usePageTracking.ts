@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useAppSelector } from '../store/hooks';
-import { trackPageView } from '../api/analytics';
+import { useAppSelector } from '@/store/hooks';
+import { trackPageView } from '@/api/analytics';
 
 const VISITOR_STORAGE_KEY = 'adorio:visitorId';
 const SESSION_STORAGE_KEY = 'adorio:sessionId';

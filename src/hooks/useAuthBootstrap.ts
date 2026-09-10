@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useAppDispatch } from '../store/hooks';
-import { setUser, setAuthLoaded } from '../store/userSlice';
-import { fetchUserData, refreshAccessToken } from '../api';
+import { useAppDispatch } from '@/store/hooks';
+import { setUser, setAuthLoaded } from '@/store/userSlice';
+import { fetchUserData, refreshAccessToken } from '@/api';
 
 const useAuthBootstrap = () => {
   const dispatch = useAppDispatch();

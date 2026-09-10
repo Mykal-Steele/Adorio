@@ -1,6 +1,6 @@
 'use client';
 import { useEffect } from 'react';
-import { useAppSelector } from '../../../store/hooks';
+import { useAppSelector } from '@/store/hooks';
 import { useRouter, usePathname } from 'next/navigation';
 import Spinner from '@/components/ui/Spinner';
 
