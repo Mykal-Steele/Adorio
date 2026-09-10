@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAppDispatch } from '../../store/hooks';
 import { register } from '../../api';
 import Link from 'next/link';
@@ -52,8 +52,14 @@ const Register = () => {
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Username</label>
+            <label
+              htmlFor="register-username"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
+              Username
+            </label>
             <input
+              id="register-username"
               type="text"
               placeholder="Enter your username"
               value={username}
@@ -64,8 +70,14 @@ const Register = () => {
           </div>
 
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+            <label
+              htmlFor="register-email"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
+              Email
+            </label>
             <input
+              id="register-email"
               type="email"
               placeholder="Enter your email"
               value={email}
@@ -76,8 +88,14 @@ const Register = () => {
           </div>
 
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+            <label
+              htmlFor="register-password"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
+              Password
+            </label>
             <input
+              id="register-password"
               type="password"
               placeholder="Enter your password"
               value={password}
@@ -122,7 +140,10 @@ const Register = () => {
           </button>
 
           {error && (
-            <p className="text-red-500 text-sm mt-4 text-center bg-red-900/20 p-2 rounded-lg">
+            <p
+              role="alert"
+              className="text-red-500 text-sm mt-4 text-center bg-red-900/20 p-2 rounded-lg"
+            >
               {error}
             </p>
           )}

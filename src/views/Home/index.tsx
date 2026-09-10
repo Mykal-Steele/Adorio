@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { getPosts, createPost, likePost } from '../../api';
 import PostCard from '../../components/PostCard';
 import { useAppSelector } from '../../store/hooks';
@@ -48,7 +48,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
       }
       return response;
     } catch (err) {
-      if (!err.message?.includes('cancelled') && !err.cancelled) {
+      if (!isAbortError(err)) {
         // Propagate to PostCard so it can revert optimistic state and show the right message
         throw err;
       }
@@ -175,25 +175,28 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
   };
 
   const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validImageTypes.includes(file.type)) {
+      setError({
+        message: 'Invalid file type. Please upload an image (JPEG or PNG).',
+        status: 'Error',
+      });
+      return;
+    }
+
+    const optimizedImage = await optimizeImage(file);
+    const objectUrl = URL.createObjectURL(optimizedImage);
+
+    // Only revoke the previous preview once the new one is ready to replace it
     if (imagePreview) {
       URL.revokeObjectURL(imagePreview);
     }
 
-    const file = e.target.files[0];
-    if (file) {
-      const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      if (validImageTypes.includes(file.type)) {
-        const optimizedImage = await optimizeImage(file);
-        setImage(optimizedImage);
-        const objectUrl = URL.createObjectURL(optimizedImage);
-        setImagePreview(objectUrl);
-      } else {
-        setError({
-          message: 'Invalid file type. Please upload an image (JPEG or PNG).',
-          status: 'Error',
-        });
-      }
-    }
+    setImage(optimizedImage);
+    setImagePreview(objectUrl);
   };
 
   useEffect(() => {
@@ -269,6 +272,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
 
   const ErrorMessage = ({ error }) => (
     <motion.div
+      role="alert"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -328,7 +332,11 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
             </h2>
             <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
               <div className="relative">
+                <label htmlFor="new-post-title" className="sr-only">
+                  Post title
+                </label>
                 <motion.input
+                  id="new-post-title"
                   whileFocus={{ scale: 1.02 }}
                   type="text"
                   value={title}
@@ -345,7 +353,11 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
               </div>
 
               <div className="relative">
+                <label htmlFor="new-post-content" className="sr-only">
+                  Post content
+                </label>
                 <motion.textarea
+                  id="new-post-content"
                   ref={textareaRef}
                   whileFocus={{ scale: 1.02 }}
                   value={content}

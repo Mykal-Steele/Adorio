@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAppDispatch } from '../../store/hooks';
 import { login } from '../../api';
 import Link from 'next/link';
@@ -51,8 +51,11 @@ const Login = () => {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+            <label htmlFor="login-email" className="block text-sm font-medium text-gray-300 mb-1">
+              Email
+            </label>
             <input
+              id="login-email"
               type="email"
               placeholder="Enter your email"
               value={email}
@@ -63,8 +66,14 @@ const Login = () => {
           </div>
 
           <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+            <label
+              htmlFor="login-password"
+              className="block text-sm font-medium text-gray-300 mb-1"
+            >
+              Password
+            </label>
             <input
+              id="login-password"
               type="password"
               placeholder="Enter your password"
               value={password}
@@ -109,7 +118,10 @@ const Login = () => {
           </button>
 
           {error && (
-            <p className="text-red-500 text-sm mt-4 text-center bg-red-900/20 p-2 rounded-lg">
+            <p
+              role="alert"
+              className="text-red-500 text-sm mt-4 text-center bg-red-900/20 p-2 rounded-lg"
+            >
               {error}
             </p>
           )}

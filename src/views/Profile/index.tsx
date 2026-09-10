@@ -1,7 +1,7 @@
 'use client';
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAppSelector } from '../../store/hooks';
-import { getPosts, likePost } from '../../api'; // Import likePost API function
+import { getPosts, likePost } from '../../api';
 import PostCard from '../../components/PostCard';
 import { SparklesIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,13 +17,10 @@ const Profile = () => {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
 
-  // Add this handler function for likes
   const handleLike = async (postId: string, shouldBeLiked: boolean) => {
     try {
-      // Call the API
       const updatedPost = await likePost(postId, shouldBeLiked);
 
-      // Update the post in local state
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post._id === postId ? { ...post, likes: updatedPost.likes } : post,
@@ -32,12 +29,13 @@ const Profile = () => {
 
       return updatedPost;
     } catch (err) {
-      console.error('Error liking post:', err);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error liking post:', err);
+      }
       throw err;
     }
   };
 
-  // Add this handler function for comments
   const handleCommentAdded = (updatedPost) => {
     setPosts((prevPosts) =>
       prevPosts.map((post) => (post._id === updatedPost._id ? updatedPost : post)),
@@ -96,7 +94,6 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-950 pb-16 sm:pb-0">
       <div className="container mx-auto max-w-2xl px-4 py-8 pt-20">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -110,25 +107,19 @@ const Profile = () => {
           </h1>
         </motion.div>
 
-        {/* Posts Grid */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 pb-8">
           {posts.map((post, index) => (
-            <React.Fragment key={post._id}>
-              <div ref={index === posts.length - 1 ? lastPostRef : null}>
-                <PostCard
-                  {...post}
-                  user={post.user} // Ensure user is passed
-                  currentUserId={user?._id}
-                  onLike={handleLike} // Add this prop
-                  onCommentAdded={handleCommentAdded} // Add this prop
-                />
-              </div>
-
-              {/* Strategic ad placement - only after 5th post and if there are more posts */}
-            </React.Fragment>
+            <div key={post._id} ref={index === posts.length - 1 ? lastPostRef : null}>
+              <PostCard
+                {...post}
+                user={post.user}
+                currentUserId={user?._id}
+                onLike={handleLike}
+                onCommentAdded={handleCommentAdded}
+              />
+            </div>
           ))}
 
-          {/* loading more posts spinner thingy */}
           {loading && page > 1 && <SkeletonLoader count={1} />}
 
           {!loading && posts.length === 0 && (
