@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 
 export const streamGeminiResponse = async (
   history: { role: string; text: string }[],
@@ -42,7 +42,9 @@ export const streamGeminiResponse = async (
       parts: [{ text: msg.text }],
     }));
 
-    const thinkingConfig = useThinking ? { thinkingBudget: 32768 } : undefined;
+    // gemini-3-pro-preview uses thinkingLevel, not the thinkingBudget token
+    // count that Gemini 2.5 models use.
+    const thinkingConfig = useThinking ? { thinkingLevel: ThinkingLevel.HIGH } : undefined;
 
     const activeChat = ai.chats.create({
       model: modelName,
