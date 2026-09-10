@@ -18,14 +18,16 @@ const ResizableTerminal = ({
   const startY = useRef(0);
   const startHeight = useRef(0);
   const isResizingRef = useRef(false);
+  const detachDragListenersRef = useRef(null);
 
-  // Cleanup function
+  // Cleanup function - removes whichever drag listeners are currently
+  // attached (set by handleMouseDown/handleTouchStart below) if the
+  // component unmounts mid-drag, before mouseup/touchend ever fires.
   useEffect(() => {
     return () => {
-      document.removeEventListener('mousemove', () => {});
-      document.removeEventListener('mouseup', () => {});
-      document.removeEventListener('touchmove', () => {});
-      document.removeEventListener('touchend', () => {});
+      if (detachDragListenersRef.current) {
+        detachDragListenersRef.current();
+      }
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
     };
@@ -85,12 +87,17 @@ const ResizableTerminal = ({
       document.removeEventListener('mouseup', handleMouseUp);
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
+      detachDragListenersRef.current = null;
     };
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
     document.body.style.userSelect = 'none';
     document.body.style.cursor = 'ns-resize';
+    detachDragListenersRef.current = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
   };
 
   // Touch event handlers for mobile support
@@ -118,10 +125,15 @@ const ResizableTerminal = ({
       isResizingRef.current = false;
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
+      detachDragListenersRef.current = null;
     };
 
     document.addEventListener('touchmove', handleTouchMove, { passive: false });
     document.addEventListener('touchend', handleTouchEnd);
+    detachDragListenersRef.current = () => {
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
   };
 
   return (

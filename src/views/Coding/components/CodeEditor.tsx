@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { tokyoNight } from '@uiw/codemirror-theme-tokyo-night';
@@ -17,19 +17,8 @@ const CodeEditor = ({ code, onChange, height = '360px' }) => {
     closeBrackets(),
   ];
 
-  // Clear editor history when component mounts with new content
-  useEffect(() => {
-    if (editorRef.current && editorRef.current.view) {
-      // Clear undo/redo history for fresh start
-      const view = editorRef.current.view;
-      if (view.state.history) {
-        // Force clear history by dispatching a history reset
-        view.dispatch({
-          effects: [],
-        });
-      }
-    }
-  }, [code]); // Re-run when code prop changes
+  // Undo/redo history is reset by the parent remounting this component
+  // with a new `key` whenever the problem changes or the user resets.
 
   return (
     <div className="bg-gray-900/70 border border-gray-800 rounded-xl shadow-lg overflow-hidden">
