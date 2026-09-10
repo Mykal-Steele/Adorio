@@ -112,6 +112,7 @@ const Navbar = () => {
             onClick={() => setOpen((v) => !v)}
             className="sm:hidden ml-auto p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
             aria-label="Toggle navigation menu"
+            aria-expanded={open}
           >
             {open ? <XMarkIcon className="h-5 w-5" /> : <Bars3Icon className="h-5 w-5" />}
           </button>

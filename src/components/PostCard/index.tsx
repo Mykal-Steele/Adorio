@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { addComment } from '../../api';
+import { addComment } from '@/api';
 
 import AuthorHeader from './components/AuthorHeader';
 import PostImage from './components/PostImage';
@@ -13,9 +13,7 @@ import CommentSection from './components/CommentSection';
 import { useImageLoader } from './hooks/useImageLoader';
 import type { ApiClientError } from '@/utils/errorHandling';
 
-import { ADMIN_AVATAR_URL } from './constants';
-
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { ADMIN_AVATAR_URL, MAX_PREVIEW_LENGTH } from './constants';
 
 const PostCard = ({
   _id,
@@ -106,8 +104,6 @@ const PostCard = ({
   const handleToggleComment = useCallback((commentId) => {
     setExpandedComments((prev) => ({ ...prev, [commentId]: !prev[commentId] }));
   }, []);
-
-  // Replace the current handleLike function
 
   const handleLike = useCallback(async () => {
     // Get the target state (opposite of current state)
@@ -291,24 +287,10 @@ const PostCard = ({
         onClose={() => setShowImageModal(false)}
         instanceId={instanceId}
       />
-      {showImageModal && (
-        <button
-          className="absolute top-4 right-4 p-2 bg-gray-900/80 backdrop-blur-lg rounded-full hover:bg-gray-800/60 transition-colors group"
-          onClick={() => setShowImageModal(false)}
-          aria-label="Close image preview"
-        >
-          <XMarkIcon className="h-6 w-6 text-gray-200 group-hover:text-purple-400" />
-        </button>
-      )}
 
-      <PostContent
-        title={title}
-        content={content}
-        isExpanded={isContentExpanded}
-        onToggleExpand={handleToggleContent}
-      />
+      <PostContent title={title} content={content} isExpanded={isContentExpanded} />
 
-      {content.length > 150 && (
+      {content.length > MAX_PREVIEW_LENGTH && (
         <button
           onClick={handleToggleContent}
           className="text-purple-400 hover:text-purple-300 text-sm font-medium mt-2 transition-colors"
@@ -326,10 +308,15 @@ const PostCard = ({
         onToggleComments={() => setShowComments(!showComments)}
       />
 
-      {authError && <p className="mt-2 text-sm text-amber-400">{authError}</p>}
+      {authError && (
+        <p role="alert" className="mt-2 text-sm text-amber-400">
+          {authError}
+        </p>
+      )}
 
       <CommentSection
         visible={showComments}
+        postId={_id}
         comments={comments || []} // Ensure array
         newComment={newComment}
         isSubmitting={isSubmitting}

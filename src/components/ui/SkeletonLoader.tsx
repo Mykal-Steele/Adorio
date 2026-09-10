@@ -5,7 +5,7 @@ interface SkeletonLoaderProps {
 
 const SkeletonLoader = ({ count = 1, className = '' }: SkeletonLoaderProps) => {
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-6 ${className}`} role="status" aria-label="Loading posts">
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}

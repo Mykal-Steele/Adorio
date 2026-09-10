@@ -1,11 +1,12 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
-import useClickOutside from '../../../../hooks/useClickOutside';
+import useClickOutside from '@/hooks/useClickOutside';
 
 // this form handles all the comment input stuff
 const CommentForm = ({
+  postId,
   value,
   onChange,
   onSubmit,
@@ -15,13 +16,18 @@ const CommentForm = ({
   onEmojiSelect,
 }) => {
   const emojiPickerRef = useRef(null);
+  const inputId = `comment-input-${postId}`;
   // using my custom hook to close the emoji picker when clicking outside
   useClickOutside(emojiPickerRef, () => onToggleEmojiPicker(false));
 
   return (
     <form onSubmit={onSubmit} className="mb-4">
       <motion.div whileFocus={{ scale: 1.02 }} className="relative">
+        <label htmlFor={inputId} className="sr-only">
+          Add a comment
+        </label>
         <input
+          id={inputId}
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -33,6 +39,8 @@ const CommentForm = ({
           type="button"
           onClick={() => onToggleEmojiPicker(!showEmojiPicker)}
           className="absolute right-2 top-2 text-gray-400 hover:text-gray-200"
+          aria-label={showEmojiPicker ? 'Close emoji picker' : 'Open emoji picker'}
+          aria-expanded={showEmojiPicker}
         >
           😊
         </button>

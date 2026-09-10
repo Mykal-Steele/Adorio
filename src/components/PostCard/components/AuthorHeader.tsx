@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import moment from 'moment';
 import { ADMIN_AVATAR_URL } from '../constants';

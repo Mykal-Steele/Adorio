@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MAX_PREVIEW_LENGTH } from '../constants';
 import DOMPurify from 'dompurify';
@@ -9,7 +8,7 @@ const sanitize = (str) => {
   return DOMPurify.sanitize(str || '');
 };
 
-const PostContent = ({ title, content = '', isExpanded, onToggleExpand }) => {
+const PostContent = ({ title, content = '', isExpanded }) => {
   const safeContent = content || '';
   const shouldShowExpand = safeContent.length > MAX_PREVIEW_LENGTH;
 
@@ -40,16 +39,6 @@ const PostContent = ({ title, content = '', isExpanded, onToggleExpand }) => {
             />
           </motion.div>
         </AnimatePresence>
-
-        {shouldShowExpand && !isExpanded && (
-          <button
-            onClick={onToggleExpand}
-            className="text-purple-400 hover:text-purple-300 text-sm font-medium mt-2 transition-colors"
-            type="button"
-          >
-            Show more
-          </button>
-        )}
       </div>
     </div>
   );
