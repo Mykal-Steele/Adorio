@@ -1415,7 +1415,7 @@ kbd {
         <fieldset class="fieldset">
           <legend><span class="fieldset__step">2</span> Words</legend>
           <div class="fieldset__options">
-            <label class="radio radio--all"><input type="checkbox" id="drill-set-all" checked>
+            <label class="radio radio--all"><input type="checkbox" id="drill-set-all">
               <span><strong>Every set</strong><small id="drill-set-all-count"></small></span></label>
             <!-- One checkbox per entry in CATEGORIES, inserted here at boot. -->
           </div>
@@ -3989,7 +3989,7 @@ const Draw = (() => {
       const label = document.createElement('label');
       label.className = 'radio';
       label.innerHTML =
-        `<input type="checkbox" name="drill-set" value="${cat.id}" checked>` +
+        `<input type="checkbox" name="drill-set" value="${cat.id}">` +
         `<span><strong lang="ko">${cat.ko}</strong>` +
         `<small>${cat.en}, ${countIn(cat.id)} words</small></span>`;
       fieldset.append(label);
