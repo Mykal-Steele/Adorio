@@ -344,7 +344,17 @@ img, svg { display: block; max-width: 100%; }
   .tab { flex: 1; text-align: center; }
 }
 
-.brand { display: flex; align-items: center; gap: 0.7rem; min-width: 0; }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--speed) var(--ease);
+}
+.brand:hover, .brand:focus-visible { opacity: 0.8; }
 
 .brand__mark {
   display: grid;
@@ -1297,13 +1307,13 @@ kbd {
 
 <header class="masthead">
   <div class="wrap masthead__inner">
-    <div class="brand">
+    <a class="brand" href="#/deck" aria-label="Hangul Study Deck home">
       <span class="brand__mark" aria-hidden="true">한</span>
       <span class="brand__text">
         <strong class="brand__name">Hangul Study Deck</strong>
         <span class="brand__sub">Countries, Occupations, Things, Numbers &amp; Drinks</span>
       </span>
-    </div>
+    </a>
 
     <nav class="tabs" aria-label="Sections">
       <a class="tab" href="#/deck" data-page="deck">Deck</a>
