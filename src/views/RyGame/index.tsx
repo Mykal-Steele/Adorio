@@ -670,7 +670,9 @@ const RyGame = () => {
   // Memoize the game-related functions
   const startGame = useCallback(() => {
     if (audioRef.current && game.audioHasLoaded) {
-      audioRef.current.play();
+      audioRef.current.play().catch((error) => {
+        console.error('Failed to start audio playback:', error);
+      });
       setGameIsActive(true);
       setMessage(''); // Empty message instead of showing P-Level
       setShowGameOverScreen(false);

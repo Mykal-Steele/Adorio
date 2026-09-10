@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   PieChart,
   Pie,
@@ -684,6 +684,11 @@ const DataLookup = () => {
   const [visitorDetailsLoading, setVisitorDetailsLoading] = useState(false);
   const [showVisitorModal, setShowVisitorModal] = useState(false);
 
+  // Tracks the most recently issued loadData call so a slower, older
+  // request can't overwrite state with stale results after a newer one
+  // has already resolved (e.g. rapid Refresh / Load more clicks).
+  const latestRequestIdRef = useRef(0);
+
   const totals = useMemo(() => {
     return summary.reduce(
       (acc, item) => {
@@ -698,6 +703,7 @@ const DataLookup = () => {
 
   const loadData = useCallback(
     async (recentLimit = limit) => {
+      const requestId = ++latestRequestIdRef.current;
       setLoading(true);
       setError(null);
 
@@ -708,6 +714,10 @@ const DataLookup = () => {
           fetchRecentVisits({ limit: recentLimit }),
           fetchVisitorStats({ limit: 50 }),
         ]);
+
+        // A newer loadData call started while this one was in flight -
+        // don't let this stale response clobber fresher state.
+        if (requestId !== latestRequestIdRef.current) return;
 
         // Handle page view summary
         const summaryResponse = results[0];
@@ -735,10 +745,13 @@ const DataLookup = () => {
 
         setLastUpdated(new Date());
       } catch (err) {
+        if (requestId !== latestRequestIdRef.current) return;
         console.error('failed to load analytics data', err);
         setError(err?.message || 'Unable to load analytics data right now.');
       } finally {
-        setLoading(false);
+        if (requestId === latestRequestIdRef.current) {
+          setLoading(false);
+        }
       }
     },
     [limit],
