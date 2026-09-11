@@ -43,7 +43,8 @@ export function MobileHeader({ onMenuOpen }: MobileHeaderProps) {
         <ThemeSwitcher />
         <button
           onClick={onMenuOpen}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+          aria-label="Open menu"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 10 }}
         >
           <Menu size={20} color="var(--ide-text-3)" />
         </button>
