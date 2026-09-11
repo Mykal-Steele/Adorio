@@ -90,7 +90,7 @@ export function MobileDrawer({
           <button
             onClick={onClose}
             aria-label={`Close ${title}`}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 10 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 16 }}
           >
             <X size={16} color="var(--ide-text-5)" />
           </button>
