@@ -121,10 +121,9 @@ export function TabBar() {
                   if (active) router.push('/projects');
                 }}
                 aria-label={`Close ${tab.name} tab`}
-                className="flex items-center justify-center mr-2"
+                className="flex items-center justify-center mr-2 h-full"
                 style={{
-                  width: 16,
-                  height: 16,
+                  width: 32,
                   background: 'transparent',
                   border: 'none',
                   cursor: 'pointer',

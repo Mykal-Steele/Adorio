@@ -338,6 +338,7 @@ function SearchPanel() {
         {query && (
           <button
             onClick={() => setQuery('')}
+            aria-label="Clear search"
             style={{
               background: 'none',
               border: 'none',
