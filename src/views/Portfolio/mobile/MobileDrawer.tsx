@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { sans } from '../constants/fonts';
+import { IconButton } from '../shared';
 import type { ReactNode } from 'react';
 
 interface MobileDrawerProps {
@@ -87,13 +88,9 @@ export function MobileDrawer({
           >
             {title}
           </span>
-          <button
-            onClick={onClose}
-            aria-label={`Close ${title}`}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 16 }}
-          >
+          <IconButton onClick={onClose} aria-label={`Close ${title}`}>
             <X size={16} color="var(--ide-text-5)" />
-          </button>
+          </IconButton>
         </div>
         <div
           className="flex-1 overflow-y-auto"
