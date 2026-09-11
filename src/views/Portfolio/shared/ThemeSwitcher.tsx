@@ -27,12 +27,13 @@ export function ThemeSwitcher({ showLabel = false }: ThemeSwitcherProps) {
       <button
         onClick={() => setOpen((v) => !v)}
         title="Switch Theme"
+        aria-label="Switch Theme"
         className="rainbow-btn flex items-center justify-center gap-1.5"
         style={{
           background: open ? 'var(--ide-border-medium)' : 'var(--ide-border-subtle)',
           border: '1px solid var(--ide-border)',
           cursor: 'pointer',
-          padding: showLabel ? '2px 6px' : '4px 8px',
+          padding: showLabel ? '2px 6px' : '11px 13px',
           borderRadius: 4,
           fontSize: 10,
           fontFamily: sans,
