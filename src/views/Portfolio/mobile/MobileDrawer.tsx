@@ -74,7 +74,7 @@ export function MobileDrawer({
       >
         <div
           className="flex items-center justify-between px-4 shrink-0"
-          style={{ height: 40, borderBottom: '1px solid var(--ide-border)' }}
+          style={{ height: 48, borderBottom: '1px solid var(--ide-border)' }}
         >
           <span
             style={{
