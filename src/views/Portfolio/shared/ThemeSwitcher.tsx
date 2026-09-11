@@ -33,7 +33,7 @@ export function ThemeSwitcher({ showLabel = false }: ThemeSwitcherProps) {
           background: open ? 'var(--ide-border-medium)' : 'var(--ide-border-subtle)',
           border: '1px solid var(--ide-border)',
           cursor: 'pointer',
-          padding: showLabel ? '2px 6px' : '11px 13px',
+          padding: showLabel ? '2px 6px' : 17,
           borderRadius: 4,
           fontSize: 10,
           fontFamily: sans,
