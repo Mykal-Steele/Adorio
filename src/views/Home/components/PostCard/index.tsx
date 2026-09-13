@@ -31,6 +31,7 @@ const PostCard = ({
   onCommentAdded,
   onLike,
   currentUserId,
+  currentUsername,
   index = 0,
 }) => {
   const instanceId = useMemo(
@@ -116,10 +117,11 @@ const PostCard = ({
             (like) => (like?._id?.toString() || like?.toString()) === currentUserId?.toString(),
           );
 
-          if (serverHasUserLike !== optimisticUserLiked) {
-            setOptimisticUserLiked(serverHasUserLike);
-            setOptimisticLikesCount(response.likes.length);
-          }
+          // Server is authoritative — apply it even if it matches the pre-click
+          // state (this closure's optimisticUserLiked is the value from before
+          // the optimistic update, not the willBeLiked value just applied).
+          setOptimisticUserLiked(serverHasUserLike);
+          setOptimisticLikesCount(response.likes.length);
         }
       }
     } catch (err) {
@@ -160,7 +162,7 @@ const PostCard = ({
       const tempComment = {
         _id: tempId,
         text: newComment,
-        user: { username: user?.username || 'You', _id: currentUserId },
+        user: { username: currentUsername || 'You', _id: currentUserId },
         createdAt: new Date().toISOString(),
       };
 
@@ -200,7 +202,7 @@ const PostCard = ({
         setIsSubmitting(false);
       }
     },
-    [_id, newComment, isSubmitting, user, currentUserId, onCommentAdded],
+    [_id, newComment, isSubmitting, currentUsername, currentUserId, onCommentAdded],
   );
 
   const safeImageUrl = useMemo(
@@ -258,6 +260,7 @@ const PostCard = ({
         userLiked={optimisticUserLiked}
         likesCount={optimisticLikesCount}
         commentsCount={commentsCount}
+        commentsOpen={showComments}
         onLike={handleLike}
         onToggleComments={() => setShowComments(!showComments)}
       />
@@ -290,6 +293,7 @@ const areEqual = (prevProps, nextProps) => {
     prevProps.content !== nextProps.content ||
     prevProps.createdAt !== nextProps.createdAt ||
     prevProps.currentUserId !== nextProps.currentUserId ||
+    prevProps.currentUsername !== nextProps.currentUsername ||
     prevProps.index !== nextProps.index
   ) {
     return false;
