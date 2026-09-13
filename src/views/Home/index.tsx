@@ -1,15 +1,171 @@
 'use client';
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import Link from 'next/link';
 import { getPosts, createPost, likePost } from '../../api';
-import PostCard from '../../components/PostCard';
+import PostCard from './components/PostCard';
+import PostSkeleton from './components/PostSkeleton';
 import { useAppSelector } from '../../store/hooks';
-import { SparklesIcon, ExclamationTriangleIcon, CameraIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon, CameraIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
-import SkeletonLoader from '../../components/ui/SkeletonLoader';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import { debounce } from 'lodash';
 import { isAbortError } from '../../utils/errorHandling';
 import { TITLE_CHARACTER_LIMIT } from './constants/title';
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const ErrorToast = ({ error, onDismiss }) => (
+  <motion.div
+    initial={{ opacity: 0, y: -20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    className="fixed left-2 right-2 top-2 z-50 sm:left-auto sm:right-4 sm:top-4"
+  >
+    <div className="flex max-w-md items-start gap-3 rounded-[3px] border border-[var(--paper-ink)] bg-[var(--paper-cream)] p-4 shadow-[3px_4px_0_var(--paper-ink)]">
+      <ExclamationTriangleIcon className="h-6 w-6 shrink-0 text-[#8d3a33]" />
+      <div>
+        <h3 className="font-paper-mono text-xs uppercase tracking-[.14em] text-[#8d3a33]">
+          {error.status} error
+        </h3>
+        <p className="mt-1 text-sm text-[var(--paper-muted)]">{error.message}</p>
+        <button
+          onClick={onDismiss}
+          className="mt-2 text-sm font-medium text-[var(--paper-accent)] hover:text-[var(--paper-ink)]"
+          aria-label="Dismiss error message"
+        >
+          Dismiss
+        </button>
+      </div>
+    </div>
+  </motion.div>
+);
+
+const ComposeCard = ({
+  title,
+  content,
+  isCreating,
+  imagePreview,
+  onTitleChange,
+  onContentChange,
+  onImageChange,
+  onRemoveImage,
+  onSubmit,
+}) => (
+  <section
+    aria-labelledby="compose-h"
+    className="relative mt-[clamp(34px,4vw,48px)] rotate-[-0.3deg] rounded-[3px] bg-[var(--paper-cream)] p-[clamp(22px,3vw,34px)] shadow-[0_14px_26px_-14px_rgba(60,44,24,.3),0_2px_0_rgba(60,44,24,.1)]"
+  >
+    <span
+      aria-hidden="true"
+      className="absolute -top-3 left-7 h-[26px] w-24 rotate-[-3.5deg] border-x border-dashed border-[rgba(60,44,24,.3)] bg-[rgba(242,199,68,.7)] shadow-[0_1px_3px_rgba(60,44,24,.2)]"
+    />
+    <div className="flex flex-wrap items-baseline gap-3">
+      <h2 id="compose-h" className="font-paper-serif text-[27px] font-bold">
+        Create a post
+      </h2>
+      <span className="font-paper-hand text-xl text-[var(--paper-accent)]">
+        &larr; ship it, then write it up
+      </span>
+    </div>
+
+    <form onSubmit={onSubmit}>
+      <label className="mt-[22px] block">
+        <span className="mb-1.5 block font-paper-mono text-[11px] uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
+          Title
+        </span>
+        <input
+          value={title}
+          onChange={onTitleChange}
+          placeholder="Give it a headline"
+          maxLength={TITLE_CHARACTER_LIMIT}
+          disabled={isCreating}
+          required
+          className="w-full border-b-[1.5px] border-[rgba(60,44,24,.4)] bg-transparent px-0.5 py-2 font-paper-serif text-xl outline-none focus:border-[var(--paper-accent-strong)]"
+        />
+        <span className="mt-1 block text-right font-paper-mono text-[10px] text-[var(--paper-muted-2)]">
+          {title.length}/{TITLE_CHARACTER_LIMIT}
+        </span>
+      </label>
+
+      <label className="mt-6 block">
+        <span className="mb-2 block font-paper-mono text-[11px] uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
+          The story
+        </span>
+        <textarea
+          value={content}
+          onChange={onContentChange}
+          rows={4}
+          placeholder="What did you build, break, or fix today?"
+          disabled={isCreating}
+          required
+          className="paper-ruled w-full resize-y px-0.5 py-1 text-base leading-8 outline-none"
+        />
+      </label>
+
+      <div className="mt-[22px] flex flex-wrap items-center justify-between gap-4">
+        <label className="flex cursor-pointer items-center gap-[9px] rounded-full border-[1.5px] border-dashed border-[rgba(60,44,24,.5)] px-4 py-2.5 text-sm font-medium transition-colors hover:border-[var(--paper-accent-strong)] hover:bg-[var(--paper-yellow-soft)]">
+          <CameraIcon className="h-4 w-4" />
+          Clip in a screenshot
+          <input
+            type="file"
+            onChange={onImageChange}
+            className="hidden"
+            accept="image/*"
+            disabled={isCreating}
+          />
+        </label>
+
+        <button
+          type="submit"
+          disabled={isCreating}
+          className="rotate-[1deg] rounded-[4px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-[30px] py-3 font-paper-mono text-sm font-bold uppercase tracking-[.16em] shadow-[3px_4px_0_var(--paper-ink)] transition-transform hover:-translate-y-px disabled:opacity-60"
+        >
+          {isCreating ? 'Pinning...' : 'Pin it up'}
+        </button>
+      </div>
+
+      {imagePreview && (
+        <div className="relative mt-4 inline-block rotate-[-0.7deg] bg-[#f1e7d3] p-[10px] shadow-[0_2px_0_rgba(60,44,24,.12)]">
+          <img
+            src={imagePreview}
+            alt="Selected upload preview"
+            className="h-48 max-w-full rounded-[1px] object-cover"
+          />
+          <button
+            type="button"
+            onClick={onRemoveImage}
+            className="absolute -right-2 -top-2 rounded-full border border-[var(--paper-ink)] bg-[var(--paper-cream)] p-1 shadow-[1px_2px_0_var(--paper-ink)]"
+            aria-label="Remove selected image"
+          >
+            <XMarkIcon className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+    </form>
+  </section>
+);
+
+const GuestPrompt = () => (
+  <section className="mt-[clamp(34px,4vw,48px)] rotate-[-0.3deg] rounded-[3px] bg-[var(--paper-cream)] p-[clamp(22px,3vw,34px)] text-center shadow-[0_14px_26px_-14px_rgba(60,44,24,.3),0_2px_0_rgba(60,44,24,.1)]">
+    <p className="font-paper-serif text-xl font-bold">Want to pin something up?</p>
+    <p className="mt-2 text-[var(--paper-muted)]">
+      <Link
+        href="/login"
+        className="font-medium text-[var(--paper-accent)] hover:text-[var(--paper-ink)]"
+      >
+        Log in
+      </Link>{' '}
+      or{' '}
+      <Link
+        href="/register"
+        className="font-medium text-[var(--paper-accent)] hover:text-[var(--paper-ink)]"
+      >
+        create an account
+      </Link>{' '}
+      to post to the wall.
+    </p>
+  </section>
+);
 
 const Home = ({ initialPosts = [], initialHasMore = true }) => {
   const [posts, setPosts] = useState(initialPosts);
@@ -24,10 +180,10 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [page, setPage] = useState(initialPosts.length > 0 ? 2 : 1);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'photos'>('all');
   // Prevent hydration mismatch: user-dependent UI only renders after client mount
   const [mounted, setMounted] = useState(false);
 
-  const textareaRef = useRef(null);
   const abortControllerRef = useRef(new AbortController());
 
   const handleLike = async (postId, shouldBeLiked) => {
@@ -37,12 +193,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
       if (response && response._id && Array.isArray(response.likes)) {
         setPosts((prevPosts) =>
           prevPosts.map((post) =>
-            post._id === response._id
-              ? {
-                  ...post,
-                  likes: response.likes,
-                }
-              : post,
+            post._id === response._id ? { ...post, likes: response.likes } : post,
           ),
         );
       }
@@ -158,12 +309,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
 
         canvas.toBlob(
           (blob) => {
-            resolve(
-              new File([blob], file.name, {
-                type: 'image/jpeg',
-                lastModified: Date.now(),
-              }),
-            );
+            resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
           },
           'image/jpeg',
           0.85,
@@ -194,6 +340,14 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
         });
       }
     }
+  };
+
+  const handleRemoveImage = () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImage(null);
+    setImagePreview('');
   };
 
   useEffect(() => {
@@ -267,169 +421,133 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     }
   };
 
-  const ErrorMessage = ({ error }) => (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="fixed top-2 left-2 right-2 sm:top-4 sm:right-4 sm:left-auto z-50"
-    >
-      <div className="bg-gray-900/90 backdrop-blur-lg p-3 sm:p-4 rounded-lg sm:rounded-xl shadow-2xl border border-purple-500/20 flex items-start gap-2 sm:gap-3 max-w-md">
-        <div className="bg-purple-500/10 p-1.5 sm:p-2 rounded-md">
-          <ExclamationTriangleIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
-        </div>
-        <div>
-          <h3 className="text-sm sm:text-base font-medium bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
-            {error.status} Error
-          </h3>
-          <p className="text-xs sm:text-sm text-gray-300 mt-0.5">{error.message}</p>
-          <button
-            onClick={() => setError(null)}
-            className="mt-1.5 text-xs sm:text-sm text-purple-400 hover:text-purple-300 transition-colors"
-            aria-label="Dismiss error message"
-          >
-            Dismiss
-          </button>
-        </div>
-      </div>
-    </motion.div>
+  const filteredPosts = useMemo(
+    () => (filter === 'photos' ? posts.filter((p) => p.image) : posts),
+    [filter, posts],
+  );
+
+  const countLabel =
+    filter === 'photos'
+      ? `${filteredPosts.length} with photos`
+      : `${posts.length} posts on the wall`;
+
+  const newTodayCount = useMemo(
+    () => posts.filter((p) => Date.now() - new Date(p.createdAt).getTime() < DAY_MS).length,
+    [posts],
   );
 
   return (
-    <div className="relative min-h-screen bg-gray-950 pb-16 sm:pb-0">
-      <AnimatePresence>{error && <ErrorMessage error={error} />}</AnimatePresence>
+    <div className="paper-theme min-h-screen">
+      <AnimatePresence>
+        {error && <ErrorToast error={error} onDismiss={() => setError(null)} />}
+      </AnimatePresence>
 
-      <div className="container mx-auto max-w-2xl px-2 sm:px-4 py-6 sm:py-8 pt-6 sm:pt-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 sm:mb-8 flex items-center justify-center gap-2 sm:gap-3"
+      <section className="relative bg-[var(--paper-hero)] px-4 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16">
+        <div className="mx-auto max-w-5xl">
+          <div className="flex flex-wrap items-end justify-between gap-7">
+            <div className="max-w-[54ch]">
+              <p className="mb-3 font-paper-mono text-xs uppercase tracking-[.2em] text-[var(--paper-muted-2)]">
+                Adorio community &middot; social feed
+              </p>
+              <h1 className="font-paper-serif text-[clamp(40px,6.4vw,64px)] font-bold leading-[1.02] tracking-[-.02em]">
+                Recent posts
+              </h1>
+              <p className="mt-3.5 text-[17px] leading-[1.62] text-[var(--paper-muted)]">
+                A place to share what you&apos;re building, breaking, and fixing. Post an update,
+                drop a screenshot, or just say hi.
+              </p>
+            </div>
+            {mounted && newTodayCount > 0 && (
+              <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-[18px] py-3 font-paper-hand text-2xl leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
+                {newTodayCount} new today
+              </p>
+            )}
+          </div>
+
+          {mounted &&
+            (user ? (
+              <ComposeCard
+                title={title}
+                content={content}
+                isCreating={isCreating}
+                imagePreview={imagePreview}
+                onTitleChange={(e) => setTitle(e.target.value)}
+                onContentChange={(e) => setContent(e.target.value)}
+                onImageChange={handleImageChange}
+                onRemoveImage={handleRemoveImage}
+                onSubmit={handleSubmit}
+              />
+            ) : (
+              <GuestPrompt />
+            ))}
+        </div>
+
+        <svg
+          viewBox="0 0 1200 22"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          focusable="false"
+          className="absolute inset-x-0 -bottom-px block h-[22px] w-full"
         >
-          <motion.div
-            whileHover={{ rotate: 15 }}
-            className="bg-purple-600/20 p-2 sm:p-3 rounded-lg sm:rounded-xl"
-          >
-            <SparklesIcon className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400" />
-          </motion.div>
-          <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(129,140,248,0.3)]">
-            Recent Posts
-          </h1>
-        </motion.div>
+          <path
+            fill="#e5d8c0"
+            d="M0,22 H1200 V9 L1174,15 L1150,7 L1126,17 L1100,10 L1076,18 L1050,8 L1024,16 L1000,9 L974,19 L948,11 L924,6 L898,15 L872,9 L846,18 L820,12 L796,7 L770,16 L744,10 L718,19 L692,13 L668,7 L642,15 L616,9 L590,18 L564,11 L540,6 L514,16 L488,10 L462,19 L436,12 L412,7 L386,15 L360,9 L334,17 L308,11 L284,6 L258,16 L232,10 L206,18 L180,13 L156,7 L130,15 L104,9 L78,17 L52,11 L26,6 L0,14 Z"
+          />
+        </svg>
+      </section>
 
-        {/* Post Creation Card, only visible when logged in */}
-        {mounted && user && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mb-6 sm:mb-8 p-3 sm:p-6 bg-gray-900/80 backdrop-blur-md rounded-xl sm:rounded-2xl border border-gray-800/50 shadow-lg hover:shadow-xl transition-all"
-          >
-            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
-              Create a New Post
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-              <div className="relative">
-                <motion.input
-                  whileFocus={{ scale: 1.02 }}
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Post title"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500"
-                  required
-                  disabled={isCreating}
-                  maxLength={TITLE_CHARACTER_LIMIT}
+      <main id="feed" className="px-4 pb-20 pt-9 sm:px-8 sm:pb-24 sm:pt-12">
+        <div className="mx-auto max-w-5xl">
+          <div className="flex items-end gap-1.5 pl-1.5">
+            <button
+              onClick={() => setFilter('all')}
+              aria-pressed={filter === 'all'}
+              className={`relative rounded-t-[10px] border border-b-0 px-[22px] pb-3 pt-[11px] text-[15px] font-bold rotate-[-0.8deg] ${
+                filter === 'all'
+                  ? 'border-[rgba(60,44,24,.28)] bg-[var(--paper-cream)]'
+                  : 'border-[rgba(60,44,24,.22)] bg-[#ecdfc8] text-[var(--paper-muted)]'
+              }`}
+            >
+              {filter === 'all' && (
+                <span
+                  aria-hidden="true"
+                  className="absolute bottom-[7px] left-[11px] right-[11px] h-[9px] rounded-[2px_6px_3px_7px] bg-[var(--paper-yellow)]"
                 />
-                <div className="absolute bottom-1.5 sm:bottom-2 right-2 text-xs text-gray-400">
-                  {title.length}/{TITLE_CHARACTER_LIMIT}
-                </div>
-              </div>
-
-              <div className="relative">
-                <motion.textarea
-                  ref={textareaRef}
-                  whileFocus={{ scale: 1.02 }}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="What's on your mind?"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-200 placeholder-gray-500"
-                  rows={3}
-                  required
-                  disabled={isCreating}
+              )}
+              <span className="relative">All posts</span>
+            </button>
+            <button
+              onClick={() => setFilter('photos')}
+              aria-pressed={filter === 'photos'}
+              className={`relative rounded-t-[10px] border border-b-0 px-5 pb-2.5 pt-[9px] text-[15px] font-medium rotate-[1deg] ${
+                filter === 'photos'
+                  ? 'border-[rgba(60,44,24,.28)] bg-[var(--paper-cream)] font-bold'
+                  : 'border-[rgba(60,44,24,.22)] bg-[#ecdfc8] text-[var(--paper-muted)]'
+              }`}
+            >
+              {filter === 'photos' && (
+                <span
+                  aria-hidden="true"
+                  className="absolute bottom-[7px] left-[11px] right-[11px] h-[9px] rounded-[2px_6px_3px_7px] bg-[var(--paper-yellow)]"
                 />
-              </div>
+              )}
+              <span className="relative">Photos</span>
+            </button>
+            <p className="mb-1.5 ml-auto font-paper-mono text-xs uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
+              {countLabel}
+            </p>
+          </div>
+          <div aria-hidden="true" className="paper-dashed-rule h-0.5" />
 
-              <div className="space-y-2">
-                <label className="block text-sm sm:text-base font-medium text-gray-400">
-                  Upload Image (Optional)
-                </label>
-                <motion.label
-                  whileHover={{ scale: 1.02 }}
-                  className="flex flex-col items-center justify-center w-full h-24 sm:h-32 border-2 border-dashed border-gray-700/50 rounded-lg cursor-pointer hover:border-purple-500/50 transition-all relative overflow-hidden group"
-                >
-                  <div className="flex flex-col items-center justify-center pt-3 sm:pt-5 pb-4 sm:pb-6 z-10">
-                    <motion.div
-                      animate={{ y: [0, -5, 0] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      <CameraIcon className="h-6 w-6 sm:h-8 sm:w-8 text-gray-500 group-hover:text-purple-400 transition-colors" />
-                    </motion.div>
-                    <p className="text-xs sm:text-sm text-gray-500 group-hover:text-purple-300 transition-colors text-center px-2">
-                      Click to upload or drag and drop
-                    </p>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <input
-                    type="file"
-                    onChange={handleImageChange}
-                    className="hidden"
-                    accept="image/*"
-                    disabled={isCreating}
-                  />
-                </motion.label>
-                {imagePreview && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="mt-4 rounded-lg overflow-hidden border border-gray-800/50"
-                  >
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-32 sm:h-48 object-cover"
-                    />
-                  </motion.div>
-                )}
-              </div>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                type="submit"
-                className="w-full py-2 sm:py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:shadow-xl transition-all relative overflow-hidden group"
-                disabled={isCreating}
-              >
-                <span className="relative z-10 text-sm sm:text-base">
-                  {isCreating ? 'Creating...' : 'Create Post'}
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </motion.button>
-            </form>
-          </motion.div>
-        )}
-
-        <div className="space-y-4 sm:space-y-5 pb-8">
-          {loading && posts.length === 0 ? (
-            <SkeletonLoader count={3} />
-          ) : (
-            posts.map((post, index) => (
-              <div
-                key={post._id}
-                className="border-t border-gray-800/40 pt-4"
-                ref={index === posts.length - 1 ? lastPostRef : null}
-              >
+          <div className="mt-[clamp(34px,4vw,50px)] [column-gap:clamp(24px,3vw,38px)] [column-width:22rem]">
+            {loading && posts.length === 0 ? (
+              <PostSkeleton count={3} />
+            ) : (
+              filteredPosts.map((post, index) => (
                 <PostCard
+                  key={post._id}
                   {...post}
-                  user={post.user}
+                  index={index}
                   currentUserId={user?._id}
                   onLike={handleLike}
                   onCommentAdded={(updatedPost) => {
@@ -438,24 +556,33 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
                     );
                   }}
                 />
-              </div>
-            ))
+              ))
+            )}
+          </div>
+
+          <div ref={lastPostRef} aria-hidden="true" />
+
+          {isFetchingMore && (
+            <div className="mt-8 [column-gap:clamp(24px,3vw,38px)] [column-width:22rem]">
+              <PostSkeleton count={2} />
+            </div>
           )}
 
-          {isFetchingMore && <SkeletonLoader count={2} />}
-
           {!loading && !hasMore && posts.length > 0 && (
-            <p className="text-center py-6 text-sm text-gray-500">You&apos;ve reached the end</p>
+            <p className="mx-auto mt-[clamp(40px,5vw,64px)] text-center font-paper-hand text-2xl text-[var(--paper-muted)]">
+              that&apos;s everything for now, check back later
+            </p>
           )}
 
           {!loading && posts.length === 0 && !error && (
-            <div className="text-center py-16">
-              <SparklesIcon className="h-10 w-10 text-gray-700 mx-auto mb-3" />
-              <p className="text-gray-500">No posts yet. Be the first to post!</p>
+            <div className="py-16 text-center">
+              <p className="font-paper-hand text-2xl text-[var(--paper-muted)]">
+                No posts yet. Be the first to pin one up!
+              </p>
             </div>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 };
