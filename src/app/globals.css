@@ -22,9 +22,9 @@
   --ide-border-medium: rgba(255,255,255,0.08);
   --ide-border-strong: rgba(255,255,255,0.1);
   --ide-border-stronger: rgba(255,255,255,0.12);
-  --ide-text-1: #abb2bf; --ide-text-2: #9da5b4; --ide-text-3: #8b939e;
-  --ide-text-4: #7a8291; --ide-text-5: #6e7a8e; --ide-text-6: #7b838e;
-  --ide-text-7: #727c8e; --ide-text-8: #7b8694; --ide-text-9: #6a7488;
+  --ide-text-1: #abb2bf; --ide-text-2: #9da5b4; --ide-text-3: #9299a4;
+  --ide-text-4: #a8b0ba; --ide-text-5: #9ca5b1; --ide-text-6: #939daa;
+  --ide-text-7: #8b95a4; --ide-text-8: #85909f; --ide-text-9: #828d9d;
   --ide-accent: #61afef; --ide-accent-dark: #2d5a80;
   --ide-accent-light: #8fc8f5; --ide-accent-bright: #56b6c2;
   --ide-accent-a5: rgba(97,175,239,0.05); --ide-accent-a6: rgba(97,175,239,0.06);
@@ -62,8 +62,8 @@
   --ide-bg-0: #060a0f; --ide-bg-1: #080c11; --ide-bg-2: #0a0e14;
   --ide-bg-3: #0d1117; --ide-bg-4: #0f141a; --ide-bg-5: #1a2130;
   --ide-text-1: #f1f3fc; --ide-text-2: #a8abb3; --ide-text-3: #94a3b8;
-  --ide-text-4: #72757d; --ide-text-5: #64748b; --ide-text-6: #475569;
-  --ide-text-7: #3d4f6b; --ide-text-8: #5a6e8a; --ide-text-9: #2d3748;
+  --ide-text-4: #8e9db2; --ide-text-5: #8393ab; --ide-text-6: #7a8ba5;
+  --ide-text-7: #72849f; --ide-text-8: #6c7f9b; --ide-text-9: #697d9a;
   --ide-accent: #00ffc2; --ide-accent-dark: #00654b;
   --ide-accent-light: #aaffdc; --ide-accent-bright: #00edb4;
   --ide-accent-a5: rgba(0,255,194,0.05); --ide-accent-a6: rgba(0,255,194,0.06);
@@ -95,8 +95,8 @@
   --ide-bg-0: #242933; --ide-bg-1: #272d38; --ide-bg-2: #2e3440;
   --ide-bg-3: #3b4252; --ide-bg-4: #434c5e; --ide-bg-5: #4c566a;
   --ide-text-1: #eceff4; --ide-text-2: #d8dee9; --ide-text-3: #b8c4d4;
-  --ide-text-4: #8a9bb5; --ide-text-5: #8da4c0; --ide-text-6: #8a9fb8;
-  --ide-text-7: #8096b0; --ide-text-8: #8a9fb8; --ide-text-9: #7590ac;
+  --ide-text-4: #b6c3d3; --ide-text-5: #a9b8cb; --ide-text-6: #9eafc4;
+  --ide-text-7: #94a7be; --ide-text-8: #8da2ba; --ide-text-9: #8a9fb8;
   --ide-accent: #88c0d0; --ide-accent-dark: #2e5e6a;
   --ide-accent-light: #a3d5e0; --ide-accent-bright: #8fbcbb;
   --ide-accent-a5: rgba(136,192,208,0.05); --ide-accent-a6: rgba(136,192,208,0.06);
@@ -128,8 +128,8 @@
   --ide-bg-0: #191a21; --ide-bg-1: #1d1e28; --ide-bg-2: #21222c;
   --ide-bg-3: #282a36; --ide-bg-4: #2d2f3d; --ide-bg-5: #44475a;
   --ide-text-1: #f8f8f2; --ide-text-2: #d4d4d0; --ide-text-3: #bfbdb6;
-  --ide-text-4: #8b8ca1; --ide-text-5: #8892c2; --ide-text-6: #828aae;
-  --ide-text-7: #767a9e; --ide-text-8: #848cb2; --ide-text-9: #727698;
+  --ide-text-4: #a6acc5; --ide-text-5: #9ba1be; --ide-text-6: #9299b8;
+  --ide-text-7: #8a91b3; --ide-text-8: #848caf; --ide-text-9: #8189ad;
   --ide-accent: #bd93f9; --ide-accent-dark: #5a3d80;
   --ide-accent-light: #d4b8ff; --ide-accent-bright: #50fa7b;
   --ide-accent-a5: rgba(189,147,249,0.05); --ide-accent-a6: rgba(189,147,249,0.06);
@@ -160,9 +160,9 @@
 [data-theme="one-dark"] {
   --ide-bg-0: #1b1e24; --ide-bg-1: #1e2127; --ide-bg-2: #21252b;
   --ide-bg-3: #282c34; --ide-bg-4: #2c313a; --ide-bg-5: #353b45;
-  --ide-text-1: #abb2bf; --ide-text-2: #9da5b4; --ide-text-3: #8b939e;
-  --ide-text-4: #7a8291; --ide-text-5: #6e7a8e; --ide-text-6: #7b838e;
-  --ide-text-7: #727c8e; --ide-text-8: #7b8694; --ide-text-9: #6a7488;
+  --ide-text-1: #abb2bf; --ide-text-2: #9da5b4; --ide-text-3: #9299a4;
+  --ide-text-4: #a8b0ba; --ide-text-5: #9ca5b1; --ide-text-6: #939daa;
+  --ide-text-7: #8b95a4; --ide-text-8: #85909f; --ide-text-9: #828d9d;
   --ide-accent: #61afef; --ide-accent-dark: #2d5a80;
   --ide-accent-light: #8fc8f5; --ide-accent-bright: #56b6c2;
   --ide-accent-a5: rgba(97,175,239,0.05); --ide-accent-a6: rgba(97,175,239,0.06);
@@ -194,8 +194,8 @@
   --ide-bg-0: #11111b; --ide-bg-1: #131320; --ide-bg-2: #181825;
   --ide-bg-3: #1e1e2e; --ide-bg-4: #252536; --ide-bg-5: #313244;
   --ide-text-1: #cdd6f4; --ide-text-2: #bac2de; --ide-text-3: #a6adc8;
-  --ide-text-4: #7f849c; --ide-text-5: #6c7086; --ide-text-6: #6a6d86;
-  --ide-text-7: #6c708a; --ide-text-8: #6a6d86; --ide-text-9: #626688;
+  --ide-text-4: #a0a3b5; --ide-text-5: #9698ad; --ide-text-6: #8e90a6;
+  --ide-text-7: #8689a0; --ide-text-8: #81849c; --ide-text-9: #7e819a;
   --ide-accent: #cba6f7; --ide-accent-dark: #5c3d80;
   --ide-accent-light: #e0c8ff; --ide-accent-bright: #94e2d5;
   --ide-accent-a5: rgba(203,166,247,0.05); --ide-accent-a6: rgba(203,166,247,0.06);

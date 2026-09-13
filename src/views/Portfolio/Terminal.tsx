@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useIDE } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
 import { mono, sans } from './constants/fonts';
+import { IconButton } from './shared';
 
 interface TermLine {
   prefix: string;
@@ -319,30 +320,22 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
             </button>
           ))}
           <div className="ml-auto flex items-center gap-2">
-            <button
+            <IconButton
               onClick={toggleTerminal}
               aria-label="Minimise terminal"
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--ide-text-6)',
-              }}
+              size={24}
+              color="var(--ide-text-6)"
             >
               <Minus size={12} />
-            </button>
-            <button
+            </IconButton>
+            <IconButton
               onClick={toggleTerminal}
               aria-label="Close terminal"
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--ide-text-6)',
-              }}
+              size={24}
+              color="var(--ide-text-6)"
             >
               <X size={12} />
-            </button>
+            </IconButton>
           </div>
         </div>
       )}

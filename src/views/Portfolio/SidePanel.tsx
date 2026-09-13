@@ -19,6 +19,7 @@ import { useIDE } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
 import { useResponsive } from './hooks/useResponsive';
 import { mono, sans } from './constants/fonts';
+import { IconButton } from './shared';
 
 function ExplorerPanel() {
   const pathname = usePathname();
@@ -336,19 +337,15 @@ function SearchPanel() {
           }}
         />
         {query && (
-          <button
+          <IconButton
             onClick={() => setQuery('')}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--ide-text-6)',
-              fontSize: 10,
-              padding: 0,
-            }}
+            aria-label="Clear search"
+            size={24}
+            color="var(--ide-text-6)"
+            style={{ fontSize: 10 }}
           >
             ✕
-          </button>
+          </IconButton>
         )}
       </div>
       <div

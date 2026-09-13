@@ -22,6 +22,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\" \"backend/**/*.js\" \"*.{ts,js,mjs,cjs,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx}\" \"backend/**/*.js\" \"*.{ts,js,mjs,cjs,json}\"",
     "sync-platform": "node scripts/sync-platform-deps.cjs",
+    "check-nginx-routes": "node scripts/check-nginx-routes.cjs",
     "test": "npm run test:dev",
     "test:unit": "bun test __tests__/unit/",
     "test:integration": "npx jest --testPathPattern __tests__/integration/ --runInBand --forceExit",
