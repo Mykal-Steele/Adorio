@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import SkeletonLoader from '@/components/ui/SkeletonLoader';
+import PostSkeleton from '@/views/Home/components/PostSkeleton';
 import PostsLoader from './PostsLoader';
 
 export const metadata: Metadata = {
@@ -10,11 +10,11 @@ export const metadata: Metadata = {
 
 export default function SocialPage() {
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="paper-theme min-h-screen">
       <Suspense
         fallback={
-          <div className="container mx-auto max-w-2xl px-4 py-8 pt-20">
-            <SkeletonLoader count={5} />
+          <div className="mx-auto max-w-5xl px-4 py-10 sm:px-8">
+            <PostSkeleton count={3} />
           </div>
         }
       >
