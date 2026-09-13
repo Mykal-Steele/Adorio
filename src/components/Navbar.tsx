@@ -54,7 +54,7 @@ const Navbar = () => {
         {/* Single bar */}
         <div className="flex items-center h-14 sm:h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0 mr-6">
+          <Link href="/social" className="flex items-center gap-2 shrink-0 mr-6">
             <motion.div whileHover={{ rotate: 15 }} whileTap={{ scale: 0.9 }}>
               <SparklesIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
             </motion.div>
