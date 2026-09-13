@@ -1,12 +1,5 @@
 import React from 'react';
-import DOMPurify from 'dompurify';
 import { MAX_PREVIEW_LENGTH } from '@/components/PostCard/constants';
-
-// DOMPurify only works in the browser (it needs a DOM)
-const sanitize = (str) => {
-  if (typeof window === 'undefined') return str || '';
-  return DOMPurify.sanitize(str || '');
-};
 
 const PostContent = ({ title, content = '', isExpanded, onToggleExpand }) => {
   const safeContent = content || '';
@@ -17,19 +10,14 @@ const PostContent = ({ title, content = '', isExpanded, onToggleExpand }) => {
       ? safeContent
       : safeContent.slice(0, MAX_PREVIEW_LENGTH) + '...';
 
-  const sanitizedTitle = sanitize(title || 'Untitled');
-  const sanitizedDisplayContent = sanitize(displayContent);
-
   return (
     <div>
-      <h3
-        className="mb-[10px] font-paper-serif text-[clamp(23px,2.4vw,28px)] font-bold leading-[1.14] tracking-[-.01em]"
-        dangerouslySetInnerHTML={{ __html: sanitizedTitle }}
-      />
-      <p
-        className="whitespace-pre-line break-words text-base leading-[1.62] text-[var(--paper-muted)]"
-        dangerouslySetInnerHTML={{ __html: sanitizedDisplayContent }}
-      />
+      <h3 className="mb-[10px] font-paper-serif text-[clamp(23px,2.4vw,28px)] font-bold leading-[1.14] tracking-[-.01em]">
+        {title || 'Untitled'}
+      </h3>
+      <p className="whitespace-pre-line break-words text-base leading-[1.62] text-[var(--paper-muted)]">
+        {displayContent}
+      </p>
       {shouldShowExpand && (
         <button
           onClick={onToggleExpand}
