@@ -309,6 +309,25 @@ export const portfolioData = {
       liveUrl: '/data-lookup',
     },
     {
+      id: 'social',
+      name: 'Social Feed',
+      status: 'STABLE',
+      language: 'TypeScript',
+      langColor: '#3178c6',
+      description:
+        "This site's actual social feed, at /social. JWT-authenticated users post text and Cloudinary-hosted images, like and comment on posts, and scroll an infinite feed that streams in over React Suspense — the first page renders server-side, then infinite scroll takes over client-side.",
+      archNote:
+        'PostsLoader is an async Server Component that SSR-fetches the first page and hands it to Home, which continues with an IntersectionObserver-driven infinite scroll. Likes are debounced 100ms client-side so rapid clicks only send the final state to the server.',
+      tags: ['#NEXTJS', '#SUSPENSE', '#MONGODB'],
+      stats: [
+        { label: 'Access', value: 'requires login' },
+        { label: 'Served at', value: '/social' },
+      ],
+      branch: 'main',
+      color: '#00ffc2',
+      liveUrl: '/social',
+    },
+    {
       id: 'smartcity',
       name: 'SmartCity',
       status: 'STABLE',
