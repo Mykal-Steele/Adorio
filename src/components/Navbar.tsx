@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { SparklesIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logout } from '@/store/userSlice';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -48,69 +48,79 @@ const Navbar = () => {
       initial={{ y: -64 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-      className="sticky top-0 z-50 bg-gray-950/95 backdrop-blur-lg border-b border-gray-800 shadow-lg"
+      className="font-paper-sans sticky top-0 z-50 border-b border-[rgba(60,44,24,.15)] bg-[var(--paper-cream)] text-[var(--paper-ink)] shadow-[0_2px_10px_rgba(60,44,24,.08)]"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Single bar */}
-        <div className="flex items-center h-14 sm:h-16">
-          {/* Logo */}
-          <Link href="/social" className="flex items-center gap-2 shrink-0 mr-6">
-            <motion.div whileHover={{ rotate: 15 }} whileTap={{ scale: 0.9 }}>
-              <SparklesIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
-            </motion.div>
-            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="flex h-14 items-center sm:h-16">
+          <Link
+            href="/social"
+            aria-label="Adorio, home"
+            className="mr-6 flex shrink-0 items-baseline gap-[6px]"
+          >
+            <span className="font-paper-serif text-xl font-bold italic tracking-[-.015em] sm:text-2xl">
               Adorio
+            </span>
+            <span
+              aria-hidden="true"
+              className="font-paper-serif text-lg font-bold leading-none sm:text-xl"
+            >
+              <span className="text-[#d1a413]">{'{'}</span>
+              <span className="text-[#7f9c3c]">{'_}'}</span>
             </span>
           </Link>
 
-          {/* Desktop nav, fills middle, links are centered within it */}
-          <div className="hidden sm:flex flex-1 items-center justify-center gap-0.5">
-            {links.map(({ href, text, external }) =>
-              external ? (
-                <a
-                  key={href}
-                  href={href}
-                  className="px-3 py-2 text-sm font-medium text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors whitespace-nowrap"
-                >
-                  {text}
+          <div className="hidden flex-1 items-center justify-center gap-0.5 sm:flex">
+            {links.map(({ href, text, external }) => {
+              const isActive = pathname === href;
+              const className =
+                'relative px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:text-[var(--paper-accent)]';
+              const label = (
+                <span className="relative inline-block px-[7px] py-[2px]">
+                  {isActive && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-x-[-1px] bottom-0 h-[8px] -rotate-[0.7deg] rounded-[2px_7px_3px_8px] bg-[var(--paper-yellow)]"
+                    />
+                  )}
+                  <span className="relative">{text}</span>
+                </span>
+              );
+              return external ? (
+                <a key={href} href={href} className={className}>
+                  {label}
                 </a>
               ) : (
                 <Link
                   key={href}
                   href={href}
-                  className="px-3 py-2 text-sm font-medium text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors whitespace-nowrap"
+                  aria-current={isActive ? 'page' : undefined}
+                  className={className}
                 >
-                  {text}
+                  {label}
                 </Link>
-              ),
-            )}
+              );
+            })}
           </div>
 
-          {/* Desktop action button */}
           {token ? (
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
+            <button
               onClick={handleLogout}
-              className="hidden sm:block ml-6 shrink-0 px-5 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 transition-opacity"
+              className="hidden shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)] sm:ml-6 sm:block"
             >
-              Logout
-            </motion.button>
+              Sign out
+            </button>
           ) : (
-            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
-              <Link
-                href="/register"
-                className="hidden sm:block ml-6 shrink-0 px-5 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 transition-opacity"
-              >
-                Get Started
-              </Link>
-            </motion.div>
+            <Link
+              href="/register"
+              className="hidden shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)] sm:ml-6 sm:block"
+            >
+              Get Started
+            </Link>
           )}
 
-          {/* Mobile hamburger */}
           <button
             onClick={() => setOpen((v) => !v)}
-            className="sm:hidden ml-auto p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+            className="ml-auto rounded-lg p-2 text-[var(--paper-ink)] transition-colors hover:bg-[var(--paper-yellow-soft)] sm:hidden"
             aria-label="Toggle navigation menu"
           >
             {open ? <XMarkIcon className="h-5 w-5" /> : <Bars3Icon className="h-5 w-5" />}
@@ -118,7 +128,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile dropdown */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -127,16 +136,16 @@ const Navbar = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="sm:hidden overflow-hidden border-t border-gray-800 bg-gray-950"
+            className="overflow-hidden border-t border-[rgba(60,44,24,.15)] bg-[var(--paper-cream)] sm:hidden"
           >
-            <div className="max-w-6xl mx-auto px-4 py-2 flex flex-col">
+            <div className="mx-auto flex max-w-6xl flex-col px-4 py-2">
               {links.map(({ href, text, external }) =>
                 external ? (
                   <a
                     key={href}
                     href={href}
                     onClick={close}
-                    className="px-3 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                    className="rounded-lg px-3 py-3 text-sm transition-colors hover:bg-[var(--paper-yellow-soft)]"
                   >
                     {text}
                   </a>
@@ -145,18 +154,18 @@ const Navbar = () => {
                     key={href}
                     href={href}
                     onClick={close}
-                    className="px-3 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                    className="rounded-lg px-3 py-3 text-sm transition-colors hover:bg-[var(--paper-yellow-soft)]"
                   >
                     {text}
                   </Link>
                 ),
               )}
 
-              <div className="mt-2 pt-2 border-t border-gray-800">
+              <div className="mt-2 border-t border-dashed border-[var(--paper-line)] pt-2">
                 {token ? (
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-3 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-950/30 rounded-lg transition-colors"
+                    className="w-full rounded-lg px-3 py-3 text-left text-sm font-medium text-[#8d3a33] transition-colors hover:bg-[var(--paper-yellow-soft)]"
                   >
                     Logout
                   </button>
@@ -164,7 +173,7 @@ const Navbar = () => {
                   <Link
                     href="/register"
                     onClick={close}
-                    className="block px-3 py-3 text-sm font-semibold text-purple-400 hover:text-purple-300 hover:bg-purple-950/30 rounded-lg transition-colors"
+                    className="block rounded-lg px-3 py-3 text-sm font-semibold text-[var(--paper-accent)] transition-colors hover:bg-[var(--paper-yellow-soft)]"
                   >
                     Get Started
                   </Link>
