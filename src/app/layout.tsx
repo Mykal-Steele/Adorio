@@ -30,6 +30,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap"
         />
+        {/* Social feed paper-craft theme fonts */}
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,700&family=Karla:ital,wght@0,400;0,500;0,700&family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&display=swap"
+        />
         <link rel="preconnect" href="https://res.cloudinary.com" />
       </head>
       <body className="bg-gray-950">
