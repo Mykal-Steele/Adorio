@@ -12,8 +12,6 @@ import { debounce } from 'lodash';
 import { isAbortError } from '../../utils/errorHandling';
 import { TITLE_CHARACTER_LIMIT } from './constants/title';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
 const ErrorToast = ({ error, onDismiss }) => (
   <motion.div
     initial={{ opacity: 0, y: -20 }}
@@ -45,6 +43,7 @@ const ComposeCard = ({
   content,
   isCreating,
   imagePreview,
+  fileInputRef,
   onTitleChange,
   onContentChange,
   onImageChange,
@@ -107,6 +106,7 @@ const ComposeCard = ({
           <CameraIcon className="h-4 w-4" />
           Clip in a screenshot
           <input
+            ref={fileInputRef}
             type="file"
             onChange={onImageChange}
             className="hidden"
@@ -126,6 +126,8 @@ const ComposeCard = ({
 
       {imagePreview && (
         <div className="relative mt-4 inline-block rotate-[-0.7deg] bg-[#f1e7d3] p-[10px] shadow-[0_2px_0_rgba(60,44,24,.12)]">
+          {/* imagePreview is always either '' or a same-origin blob: URL from
+              URL.createObjectURL() in handleImageChange below — never user-supplied text */}
           <img
             src={imagePreview}
             alt="Selected upload preview"
@@ -185,6 +187,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
   const [mounted, setMounted] = useState(false);
 
   const abortControllerRef = useRef(new AbortController());
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLike = async (postId, shouldBeLiked) => {
     try {
@@ -348,6 +351,10 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     }
     setImage(null);
     setImagePreview('');
+    // Reset the native input too, or reselecting the same file won't fire onChange
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   useEffect(() => {
@@ -408,6 +415,9 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
       setContent('');
       setImage(null);
       setImagePreview('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (err) {
       if (!isAbortError(err)) {
         setError({
@@ -431,10 +441,11 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
       ? `${filteredPosts.length} with photos`
       : `${posts.length} posts on the wall`;
 
-  const newTodayCount = useMemo(
-    () => posts.filter((p) => Date.now() - new Date(p.createdAt).getTime() < DAY_MS).length,
-    [posts],
-  );
+  const newTodayCount = useMemo(() => {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    return posts.filter((p) => new Date(p.createdAt) >= startOfToday).length;
+  }, [posts]);
 
   return (
     <div className="paper-theme min-h-screen">
@@ -471,6 +482,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
                 content={content}
                 isCreating={isCreating}
                 imagePreview={imagePreview}
+                fileInputRef={fileInputRef}
                 onTitleChange={(e) => setTitle(e.target.value)}
                 onContentChange={(e) => setContent(e.target.value)}
                 onImageChange={handleImageChange}
@@ -549,6 +561,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
                   {...post}
                   index={index}
                   currentUserId={user?._id}
+                  currentUsername={user?.username}
                   onLike={handleLike}
                   onCommentAdded={(updatedPost) => {
                     setPosts((prevPosts) =>
