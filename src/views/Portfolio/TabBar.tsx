@@ -7,6 +7,7 @@ import { useIDE } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
 import { sans } from './constants/fonts';
 import { usePendingNavPath } from './hooks/usePendingNavPath';
+import { IconButton } from './shared';
 
 const mainTabs = [
   { name: 'dashboard.tsx', path: '/', color: 'var(--ide-orange)' },
@@ -114,25 +115,20 @@ export function TabBar() {
                 <span style={{ color: dotColor(tab.name), fontSize: 8 }}>●</span>
                 {tab.name}
               </button>
-              <button
+              <IconButton
                 onClick={(e) => {
                   e.stopPropagation();
                   closeProjectTab(tab.id);
                   if (active) router.push('/projects');
                 }}
-                className="flex items-center justify-center mr-2"
-                style={{
-                  width: 16,
-                  height: 16,
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: 'var(--ide-text-6)',
-                  padding: 0,
-                }}
+                aria-label={`Close ${tab.name} tab`}
+                size={32}
+                color="var(--ide-text-6)"
+                className="mr-2"
+                style={{ height: '100%' }}
               >
                 <X size={10} />
-              </button>
+              </IconButton>
             </div>
           );
         })}

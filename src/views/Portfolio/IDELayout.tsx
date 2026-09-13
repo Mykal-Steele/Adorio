@@ -42,7 +42,7 @@ function DesktopShell({ children }: { children: ReactNode }) {
         <SidePanel />
         <div className="flex flex-col flex-1 overflow-hidden">
           <TabBar />
-          <div
+          <main
             className="flex-1 overflow-y-auto"
             style={{
               background: 'var(--ide-bg-4)',
@@ -51,7 +51,7 @@ function DesktopShell({ children }: { children: ReactNode }) {
             }}
           >
             {children}
-          </div>
+          </main>
           {terminalOpen && <Terminal />}
         </div>
         <RightPanel />
@@ -125,7 +125,7 @@ function TabletShell({ children }: { children: ReactNode }) {
         </div>
         <div className="flex flex-col flex-1 overflow-hidden">
           <TabBar />
-          <div
+          <main
             className="flex-1 overflow-y-auto"
             style={{
               background: 'var(--ide-bg-4)',
@@ -134,7 +134,7 @@ function TabletShell({ children }: { children: ReactNode }) {
             }}
           >
             {children}
-          </div>
+          </main>
           {terminalOpen && <Terminal />}
         </div>
       </div>
@@ -299,7 +299,7 @@ function MobileShell({ children }: { children: ReactNode }) {
       style={{ height: '100dvh', overflow: 'hidden', background: 'var(--ide-bg-2)' }}
     >
       <MobileHeader onMenuOpen={() => open('explorer')} />
-      <div
+      <main
         className="flex-1 overflow-y-auto"
         style={{
           background: 'var(--ide-bg-4)',
@@ -308,7 +308,7 @@ function MobileShell({ children }: { children: ReactNode }) {
         }}
       >
         {children}
-      </div>
+      </main>
       <MobileNav onMoreOpen={() => open('more')} />
       <MobileDrawer open={drawer === 'explorer'} onClose={close} title="Explorer" position="right">
         <SidePanel />
