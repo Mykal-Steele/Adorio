@@ -3,7 +3,7 @@
 import { Menu, Zap } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { sans } from '../constants/fonts';
-import { ThemeSwitcher } from '../shared';
+import { ThemeSwitcher, IconButton } from '../shared';
 
 interface MobileHeaderProps {
   onMenuOpen: () => void;
@@ -41,12 +41,9 @@ export function MobileHeader({ onMenuOpen }: MobileHeaderProps) {
       </div>
       <div className="flex items-center gap-2">
         <ThemeSwitcher />
-        <button
-          onClick={onMenuOpen}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
-        >
+        <IconButton onClick={onMenuOpen} aria-label="Open menu">
           <Menu size={20} color="var(--ide-text-3)" />
-        </button>
+        </IconButton>
       </div>
     </div>
   );
