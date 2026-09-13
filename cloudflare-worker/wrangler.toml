@@ -1,0 +1,9 @@
+name = "adorio-failover"
+main = "adorio-failover.js"
+compatibility_date = "2026-09-09"
+
+kv_namespaces = [
+  { binding = "FAILOVER_STATE", id = "1fdb740c49944c60a88c7ef127110c82" }
+]
+
+triggers.crons = ["*/5 * * * *"]
