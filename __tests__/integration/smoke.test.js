@@ -78,6 +78,21 @@ describe('Smoke, Environment, Security, SEO, Performance', () => {
       expect(res.status).toBe(301);
       expect(res.headers.location).toMatch(/\/cao\/$/);
     });
+
+    // Both routes are Next.js Route Handlers that nginx must exempt from the
+    // Express catch-all; a 404 here means that exemption regressed and the
+    // request fell through to Express instead, same as the original bug.
+    test.concurrent('/api/github-activity reaches Next.js, not the Express catch-all', async () => {
+      const res = await axios.get(`${BASE_URL}/api/github-activity`, { validateStatus: null });
+      expect(res.status).not.toBe(404);
+      expect(res.headers['content-type']).toMatch(/json/);
+    });
+
+    test.concurrent('/api/contact reaches Next.js, not the Express catch-all', async () => {
+      const res = await axios.post(`${BASE_URL}/api/contact`, {}, { validateStatus: null });
+      expect(res.status).not.toBe(404);
+      expect(res.status).toBe(400); // empty body fails Zod validation before any email is sent
+    });
   });
 
   // ── Environment ───────────────────────────────────────────────────────────
