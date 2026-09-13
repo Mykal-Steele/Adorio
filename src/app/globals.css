@@ -15,41 +15,74 @@
 /* Portfolio IDE theme tokens — one-dark defaults match the site default theme.
    next-themes overwrites these at runtime via [data-theme]. Tailwind can't drive runtime themes. */
 :root {
-  --ide-bg-0: #1b1e24; --ide-bg-1: #1e2127; --ide-bg-2: #21252b;
-  --ide-bg-3: #282c34; --ide-bg-4: #2c313a; --ide-bg-5: #353b45;
-  --ide-border-subtle: rgba(255,255,255,0.04);
-  --ide-border: rgba(255,255,255,0.06);
-  --ide-border-medium: rgba(255,255,255,0.08);
-  --ide-border-strong: rgba(255,255,255,0.1);
-  --ide-border-stronger: rgba(255,255,255,0.12);
-  --ide-text-1: #abb2bf; --ide-text-2: #9da5b4; --ide-text-3: #9299a4;
-  --ide-text-4: #a8b0ba; --ide-text-5: #9ca5b1; --ide-text-6: #939daa;
-  --ide-text-7: #8b95a4; --ide-text-8: #85909f; --ide-text-9: #828d9d;
-  --ide-accent: #61afef; --ide-accent-dark: #2d5a80;
-  --ide-accent-light: #8fc8f5; --ide-accent-bright: #56b6c2;
-  --ide-accent-a5: rgba(97,175,239,0.05); --ide-accent-a6: rgba(97,175,239,0.06);
-  --ide-accent-a8: rgba(97,175,239,0.08); --ide-accent-a10: rgba(97,175,239,0.1);
-  --ide-accent-a12: rgba(97,175,239,0.12); --ide-accent-a15: rgba(97,175,239,0.15);
-  --ide-accent-a20: rgba(97,175,239,0.2); --ide-accent-a25: rgba(97,175,239,0.25);
-  --ide-accent-a30: rgba(97,175,239,0.3);
-  --ide-accent-light-a15: rgba(143,200,245,0.15); --ide-accent-light-a40: rgba(143,200,245,0.4);
-  --ide-accent-light-a60: rgba(143,200,245,0.6); --ide-accent-light-a70: rgba(143,200,245,0.7);
-  --ide-orange: #d19a66; --ide-orange-light: #e0b68a;
-  --ide-orange-a12: rgba(209,154,102,0.12); --ide-orange-a18: rgba(209,154,102,0.18);
-  --ide-orange-a30: rgba(209,154,102,0.3); --ide-orange-a45: rgba(209,154,102,0.45);
+  --ide-bg-0: #1b1e24;
+  --ide-bg-1: #1e2127;
+  --ide-bg-2: #21252b;
+  --ide-bg-3: #282c34;
+  --ide-bg-4: #2c313a;
+  --ide-bg-5: #353b45;
+  --ide-border-subtle: rgba(255, 255, 255, 0.04);
+  --ide-border: rgba(255, 255, 255, 0.06);
+  --ide-border-medium: rgba(255, 255, 255, 0.08);
+  --ide-border-strong: rgba(255, 255, 255, 0.1);
+  --ide-border-stronger: rgba(255, 255, 255, 0.12);
+  --ide-text-1: #abb2bf;
+  --ide-text-2: #9da5b4;
+  --ide-text-3: #9299a4;
+  --ide-text-4: #a8b0ba;
+  --ide-text-5: #9ca5b1;
+  --ide-text-6: #939daa;
+  --ide-text-7: #8b95a4;
+  --ide-text-8: #85909f;
+  --ide-text-9: #828d9d;
+  --ide-accent: #61afef;
+  --ide-accent-dark: #2d5a80;
+  --ide-accent-light: #8fc8f5;
+  --ide-accent-bright: #56b6c2;
+  --ide-accent-a5: rgba(97, 175, 239, 0.05);
+  --ide-accent-a6: rgba(97, 175, 239, 0.06);
+  --ide-accent-a8: rgba(97, 175, 239, 0.08);
+  --ide-accent-a10: rgba(97, 175, 239, 0.1);
+  --ide-accent-a12: rgba(97, 175, 239, 0.12);
+  --ide-accent-a15: rgba(97, 175, 239, 0.15);
+  --ide-accent-a20: rgba(97, 175, 239, 0.2);
+  --ide-accent-a25: rgba(97, 175, 239, 0.25);
+  --ide-accent-a30: rgba(97, 175, 239, 0.3);
+  --ide-accent-light-a15: rgba(143, 200, 245, 0.15);
+  --ide-accent-light-a40: rgba(143, 200, 245, 0.4);
+  --ide-accent-light-a60: rgba(143, 200, 245, 0.6);
+  --ide-accent-light-a70: rgba(143, 200, 245, 0.7);
+  --ide-orange: #d19a66;
+  --ide-orange-light: #e0b68a;
+  --ide-orange-a12: rgba(209, 154, 102, 0.12);
+  --ide-orange-a18: rgba(209, 154, 102, 0.18);
+  --ide-orange-a30: rgba(209, 154, 102, 0.3);
+  --ide-orange-a45: rgba(209, 154, 102, 0.45);
   --ide-purple: #c678dd;
-  --ide-purple-a10: rgba(198,120,221,0.1); --ide-purple-a12: rgba(198,120,221,0.12);
-  --ide-purple-a15: rgba(198,120,221,0.15); --ide-purple-a25: rgba(198,120,221,0.25);
-  --ide-blue: #61afef; --ide-blue-light: #8fc8f5;
-  --ide-blue-a18: rgba(97,175,239,0.18); --ide-blue-a45: rgba(97,175,239,0.45);
-  --ide-green: #98c379; --ide-red: #e06c75; --ide-red-dark: #be5046;
-  --ide-red-a12: rgba(224,108,117,0.12); --ide-pink: #e06c75;
-  --ide-pink-a12: rgba(224,108,117,0.12); --ide-cyan: #56b6c2;
+  --ide-purple-a10: rgba(198, 120, 221, 0.1);
+  --ide-purple-a12: rgba(198, 120, 221, 0.12);
+  --ide-purple-a15: rgba(198, 120, 221, 0.15);
+  --ide-purple-a25: rgba(198, 120, 221, 0.25);
+  --ide-blue: #61afef;
+  --ide-blue-light: #8fc8f5;
+  --ide-blue-a18: rgba(97, 175, 239, 0.18);
+  --ide-blue-a45: rgba(97, 175, 239, 0.45);
+  --ide-green: #98c379;
+  --ide-red: #e06c75;
+  --ide-red-dark: #be5046;
+  --ide-red-a12: rgba(224, 108, 117, 0.12);
+  --ide-pink: #e06c75;
+  --ide-pink-a12: rgba(224, 108, 117, 0.12);
+  --ide-cyan: #56b6c2;
   --ide-ts-blue: #4d78cc;
-  --ide-ts-blue-a8: rgba(77,120,204,0.08); --ide-ts-blue-a10: rgba(77,120,204,0.1);
-  --ide-ts-blue-a20: rgba(77,120,204,0.2);
-  --ide-yellow: #e5c07b; --ide-syntax-string: #98c379; --ide-syntax-string2: #56b6c2;
-  --ide-line-number: rgba(92,99,112,0.5); --ide-scrollbar: #353b45;
+  --ide-ts-blue-a8: rgba(77, 120, 204, 0.08);
+  --ide-ts-blue-a10: rgba(77, 120, 204, 0.1);
+  --ide-ts-blue-a20: rgba(77, 120, 204, 0.2);
+  --ide-yellow: #e5c07b;
+  --ide-syntax-string: #98c379;
+  --ide-syntax-string2: #56b6c2;
+  --ide-line-number: rgba(92, 99, 112, 0.5);
+  --ide-scrollbar: #353b45;
   --ide-editor-font-size: 13px;
 }
 
@@ -58,169 +91,334 @@
    next-themes sets [data-theme="X"] on <html> synchronously via a blocking
    script before first paint, and it persists across client-side navigation. */
 
-[data-theme="midnight"] {
-  --ide-bg-0: #060a0f; --ide-bg-1: #080c11; --ide-bg-2: #0a0e14;
-  --ide-bg-3: #0d1117; --ide-bg-4: #0f141a; --ide-bg-5: #1a2130;
-  --ide-text-1: #f1f3fc; --ide-text-2: #a8abb3; --ide-text-3: #94a3b8;
-  --ide-text-4: #8e9db2; --ide-text-5: #8393ab; --ide-text-6: #7a8ba5;
-  --ide-text-7: #72849f; --ide-text-8: #6c7f9b; --ide-text-9: #697d9a;
-  --ide-accent: #00ffc2; --ide-accent-dark: #00654b;
-  --ide-accent-light: #aaffdc; --ide-accent-bright: #00edb4;
-  --ide-accent-a5: rgba(0,255,194,0.05); --ide-accent-a6: rgba(0,255,194,0.06);
-  --ide-accent-a8: rgba(0,255,194,0.08); --ide-accent-a10: rgba(0,255,194,0.1);
-  --ide-accent-a12: rgba(0,255,194,0.12); --ide-accent-a15: rgba(0,255,194,0.15);
-  --ide-accent-a20: rgba(0,255,194,0.2); --ide-accent-a25: rgba(0,255,194,0.25);
-  --ide-accent-a30: rgba(0,255,194,0.3);
-  --ide-accent-light-a15: rgba(170,255,220,0.15); --ide-accent-light-a40: rgba(170,255,220,0.4);
-  --ide-accent-light-a60: rgba(170,255,220,0.6); --ide-accent-light-a70: rgba(170,255,220,0.7);
-  --ide-orange: #fe9d00; --ide-orange-light: #ffbd4a;
-  --ide-orange-a12: rgba(254,157,0,0.12); --ide-orange-a18: rgba(254,157,0,0.18);
-  --ide-orange-a30: rgba(254,157,0,0.3); --ide-orange-a45: rgba(254,157,0,0.45);
+[data-theme='midnight'] {
+  --ide-bg-0: #060a0f;
+  --ide-bg-1: #080c11;
+  --ide-bg-2: #0a0e14;
+  --ide-bg-3: #0d1117;
+  --ide-bg-4: #0f141a;
+  --ide-bg-5: #1a2130;
+  --ide-text-1: #f1f3fc;
+  --ide-text-2: #a8abb3;
+  --ide-text-3: #94a3b8;
+  --ide-text-4: #8e9db2;
+  --ide-text-5: #8393ab;
+  --ide-text-6: #7a8ba5;
+  --ide-text-7: #72849f;
+  --ide-text-8: #6c7f9b;
+  --ide-text-9: #697d9a;
+  --ide-accent: #00ffc2;
+  --ide-accent-dark: #00654b;
+  --ide-accent-light: #aaffdc;
+  --ide-accent-bright: #00edb4;
+  --ide-accent-a5: rgba(0, 255, 194, 0.05);
+  --ide-accent-a6: rgba(0, 255, 194, 0.06);
+  --ide-accent-a8: rgba(0, 255, 194, 0.08);
+  --ide-accent-a10: rgba(0, 255, 194, 0.1);
+  --ide-accent-a12: rgba(0, 255, 194, 0.12);
+  --ide-accent-a15: rgba(0, 255, 194, 0.15);
+  --ide-accent-a20: rgba(0, 255, 194, 0.2);
+  --ide-accent-a25: rgba(0, 255, 194, 0.25);
+  --ide-accent-a30: rgba(0, 255, 194, 0.3);
+  --ide-accent-light-a15: rgba(170, 255, 220, 0.15);
+  --ide-accent-light-a40: rgba(170, 255, 220, 0.4);
+  --ide-accent-light-a60: rgba(170, 255, 220, 0.6);
+  --ide-accent-light-a70: rgba(170, 255, 220, 0.7);
+  --ide-orange: #fe9d00;
+  --ide-orange-light: #ffbd4a;
+  --ide-orange-a12: rgba(254, 157, 0, 0.12);
+  --ide-orange-a18: rgba(254, 157, 0, 0.18);
+  --ide-orange-a30: rgba(254, 157, 0, 0.3);
+  --ide-orange-a45: rgba(254, 157, 0, 0.45);
   --ide-purple: #a78bfa;
-  --ide-purple-a10: rgba(167,139,250,0.1); --ide-purple-a12: rgba(167,139,250,0.12);
-  --ide-purple-a15: rgba(167,139,250,0.15); --ide-purple-a25: rgba(167,139,250,0.25);
-  --ide-blue: #60a5fa; --ide-blue-light: #93c5fd;
-  --ide-blue-a18: rgba(96,165,250,0.18); --ide-blue-a45: rgba(96,165,250,0.45);
-  --ide-green: #4ade80; --ide-red: #d7383b; --ide-red-dark: #ce422b;
-  --ide-red-a12: rgba(215,56,59,0.12); --ide-pink: #ff9195;
-  --ide-pink-a12: rgba(255,145,149,0.12); --ide-cyan: #00acd7;
+  --ide-purple-a10: rgba(167, 139, 250, 0.1);
+  --ide-purple-a12: rgba(167, 139, 250, 0.12);
+  --ide-purple-a15: rgba(167, 139, 250, 0.15);
+  --ide-purple-a25: rgba(167, 139, 250, 0.25);
+  --ide-blue: #60a5fa;
+  --ide-blue-light: #93c5fd;
+  --ide-blue-a18: rgba(96, 165, 250, 0.18);
+  --ide-blue-a45: rgba(96, 165, 250, 0.45);
+  --ide-green: #4ade80;
+  --ide-red: #d7383b;
+  --ide-red-dark: #ce422b;
+  --ide-red-a12: rgba(215, 56, 59, 0.12);
+  --ide-pink: #ff9195;
+  --ide-pink-a12: rgba(255, 145, 149, 0.12);
+  --ide-cyan: #00acd7;
   --ide-ts-blue: #3178c6;
-  --ide-ts-blue-a8: rgba(49,120,198,0.08); --ide-ts-blue-a10: rgba(49,120,198,0.1);
-  --ide-ts-blue-a20: rgba(49,120,198,0.2);
-  --ide-yellow: #f7c131; --ide-syntax-string: #c3e88d; --ide-syntax-string2: #00fdc1;
-  --ide-line-number: rgba(114,117,125,0.3); --ide-scrollbar: #1a2130;
+  --ide-ts-blue-a8: rgba(49, 120, 198, 0.08);
+  --ide-ts-blue-a10: rgba(49, 120, 198, 0.1);
+  --ide-ts-blue-a20: rgba(49, 120, 198, 0.2);
+  --ide-yellow: #f7c131;
+  --ide-syntax-string: #c3e88d;
+  --ide-syntax-string2: #00fdc1;
+  --ide-line-number: rgba(114, 117, 125, 0.3);
+  --ide-scrollbar: #1a2130;
 }
 
-[data-theme="nord"] {
-  --ide-bg-0: #242933; --ide-bg-1: #272d38; --ide-bg-2: #2e3440;
-  --ide-bg-3: #3b4252; --ide-bg-4: #434c5e; --ide-bg-5: #4c566a;
-  --ide-text-1: #eceff4; --ide-text-2: #d8dee9; --ide-text-3: #b8c4d4;
-  --ide-text-4: #b6c3d3; --ide-text-5: #a9b8cb; --ide-text-6: #9eafc4;
-  --ide-text-7: #94a7be; --ide-text-8: #8da2ba; --ide-text-9: #8a9fb8;
-  --ide-accent: #88c0d0; --ide-accent-dark: #2e5e6a;
-  --ide-accent-light: #a3d5e0; --ide-accent-bright: #8fbcbb;
-  --ide-accent-a5: rgba(136,192,208,0.05); --ide-accent-a6: rgba(136,192,208,0.06);
-  --ide-accent-a8: rgba(136,192,208,0.08); --ide-accent-a10: rgba(136,192,208,0.1);
-  --ide-accent-a12: rgba(136,192,208,0.12); --ide-accent-a15: rgba(136,192,208,0.15);
-  --ide-accent-a20: rgba(136,192,208,0.2); --ide-accent-a25: rgba(136,192,208,0.25);
-  --ide-accent-a30: rgba(136,192,208,0.3);
-  --ide-accent-light-a15: rgba(163,213,224,0.15); --ide-accent-light-a40: rgba(163,213,224,0.4);
-  --ide-accent-light-a60: rgba(163,213,224,0.6); --ide-accent-light-a70: rgba(163,213,224,0.7);
-  --ide-orange: #d08770; --ide-orange-light: #dba48e;
-  --ide-orange-a12: rgba(208,135,112,0.12); --ide-orange-a18: rgba(208,135,112,0.18);
-  --ide-orange-a30: rgba(208,135,112,0.3); --ide-orange-a45: rgba(208,135,112,0.45);
+[data-theme='nord'] {
+  --ide-bg-0: #242933;
+  --ide-bg-1: #272d38;
+  --ide-bg-2: #2e3440;
+  --ide-bg-3: #3b4252;
+  --ide-bg-4: #434c5e;
+  --ide-bg-5: #4c566a;
+  --ide-text-1: #eceff4;
+  --ide-text-2: #d8dee9;
+  --ide-text-3: #b8c4d4;
+  --ide-text-4: #b6c3d3;
+  --ide-text-5: #a9b8cb;
+  --ide-text-6: #9eafc4;
+  --ide-text-7: #94a7be;
+  --ide-text-8: #8da2ba;
+  --ide-text-9: #8a9fb8;
+  --ide-accent: #88c0d0;
+  --ide-accent-dark: #2e5e6a;
+  --ide-accent-light: #a3d5e0;
+  --ide-accent-bright: #8fbcbb;
+  --ide-accent-a5: rgba(136, 192, 208, 0.05);
+  --ide-accent-a6: rgba(136, 192, 208, 0.06);
+  --ide-accent-a8: rgba(136, 192, 208, 0.08);
+  --ide-accent-a10: rgba(136, 192, 208, 0.1);
+  --ide-accent-a12: rgba(136, 192, 208, 0.12);
+  --ide-accent-a15: rgba(136, 192, 208, 0.15);
+  --ide-accent-a20: rgba(136, 192, 208, 0.2);
+  --ide-accent-a25: rgba(136, 192, 208, 0.25);
+  --ide-accent-a30: rgba(136, 192, 208, 0.3);
+  --ide-accent-light-a15: rgba(163, 213, 224, 0.15);
+  --ide-accent-light-a40: rgba(163, 213, 224, 0.4);
+  --ide-accent-light-a60: rgba(163, 213, 224, 0.6);
+  --ide-accent-light-a70: rgba(163, 213, 224, 0.7);
+  --ide-orange: #d08770;
+  --ide-orange-light: #dba48e;
+  --ide-orange-a12: rgba(208, 135, 112, 0.12);
+  --ide-orange-a18: rgba(208, 135, 112, 0.18);
+  --ide-orange-a30: rgba(208, 135, 112, 0.3);
+  --ide-orange-a45: rgba(208, 135, 112, 0.45);
   --ide-purple: #b48ead;
-  --ide-purple-a10: rgba(180,142,173,0.1); --ide-purple-a12: rgba(180,142,173,0.12);
-  --ide-purple-a15: rgba(180,142,173,0.15); --ide-purple-a25: rgba(180,142,173,0.25);
-  --ide-blue: #81a1c1; --ide-blue-light: #a3bdda;
-  --ide-blue-a18: rgba(129,161,193,0.18); --ide-blue-a45: rgba(129,161,193,0.45);
-  --ide-green: #a3be8c; --ide-red: #bf616a; --ide-red-dark: #a3424c;
-  --ide-red-a12: rgba(191,97,106,0.12); --ide-pink: #bf616a;
-  --ide-pink-a12: rgba(191,97,106,0.12); --ide-cyan: #8fbcbb;
+  --ide-purple-a10: rgba(180, 142, 173, 0.1);
+  --ide-purple-a12: rgba(180, 142, 173, 0.12);
+  --ide-purple-a15: rgba(180, 142, 173, 0.15);
+  --ide-purple-a25: rgba(180, 142, 173, 0.25);
+  --ide-blue: #81a1c1;
+  --ide-blue-light: #a3bdda;
+  --ide-blue-a18: rgba(129, 161, 193, 0.18);
+  --ide-blue-a45: rgba(129, 161, 193, 0.45);
+  --ide-green: #a3be8c;
+  --ide-red: #bf616a;
+  --ide-red-dark: #a3424c;
+  --ide-red-a12: rgba(191, 97, 106, 0.12);
+  --ide-pink: #bf616a;
+  --ide-pink-a12: rgba(191, 97, 106, 0.12);
+  --ide-cyan: #8fbcbb;
   --ide-ts-blue: #5e81ac;
-  --ide-ts-blue-a8: rgba(94,129,172,0.08); --ide-ts-blue-a10: rgba(94,129,172,0.1);
-  --ide-ts-blue-a20: rgba(94,129,172,0.2);
-  --ide-yellow: #ebcb8b; --ide-syntax-string: #a3be8c; --ide-syntax-string2: #88c0d0;
-  --ide-line-number: rgba(136,153,178,0.5); --ide-scrollbar: #4c566a;
+  --ide-ts-blue-a8: rgba(94, 129, 172, 0.08);
+  --ide-ts-blue-a10: rgba(94, 129, 172, 0.1);
+  --ide-ts-blue-a20: rgba(94, 129, 172, 0.2);
+  --ide-yellow: #ebcb8b;
+  --ide-syntax-string: #a3be8c;
+  --ide-syntax-string2: #88c0d0;
+  --ide-line-number: rgba(136, 153, 178, 0.5);
+  --ide-scrollbar: #4c566a;
 }
 
-[data-theme="dracula"] {
-  --ide-bg-0: #191a21; --ide-bg-1: #1d1e28; --ide-bg-2: #21222c;
-  --ide-bg-3: #282a36; --ide-bg-4: #2d2f3d; --ide-bg-5: #44475a;
-  --ide-text-1: #f8f8f2; --ide-text-2: #d4d4d0; --ide-text-3: #bfbdb6;
-  --ide-text-4: #a6acc5; --ide-text-5: #9ba1be; --ide-text-6: #9299b8;
-  --ide-text-7: #8a91b3; --ide-text-8: #848caf; --ide-text-9: #8189ad;
-  --ide-accent: #bd93f9; --ide-accent-dark: #5a3d80;
-  --ide-accent-light: #d4b8ff; --ide-accent-bright: #50fa7b;
-  --ide-accent-a5: rgba(189,147,249,0.05); --ide-accent-a6: rgba(189,147,249,0.06);
-  --ide-accent-a8: rgba(189,147,249,0.08); --ide-accent-a10: rgba(189,147,249,0.1);
-  --ide-accent-a12: rgba(189,147,249,0.12); --ide-accent-a15: rgba(189,147,249,0.15);
-  --ide-accent-a20: rgba(189,147,249,0.2); --ide-accent-a25: rgba(189,147,249,0.25);
-  --ide-accent-a30: rgba(189,147,249,0.3);
-  --ide-accent-light-a15: rgba(212,184,255,0.15); --ide-accent-light-a40: rgba(212,184,255,0.4);
-  --ide-accent-light-a60: rgba(212,184,255,0.6); --ide-accent-light-a70: rgba(212,184,255,0.7);
-  --ide-orange: #ffb86c; --ide-orange-light: #ffd4a0;
-  --ide-orange-a12: rgba(255,184,108,0.12); --ide-orange-a18: rgba(255,184,108,0.18);
-  --ide-orange-a30: rgba(255,184,108,0.3); --ide-orange-a45: rgba(255,184,108,0.45);
+[data-theme='dracula'] {
+  --ide-bg-0: #191a21;
+  --ide-bg-1: #1d1e28;
+  --ide-bg-2: #21222c;
+  --ide-bg-3: #282a36;
+  --ide-bg-4: #2d2f3d;
+  --ide-bg-5: #44475a;
+  --ide-text-1: #f8f8f2;
+  --ide-text-2: #d4d4d0;
+  --ide-text-3: #bfbdb6;
+  --ide-text-4: #a6acc5;
+  --ide-text-5: #9ba1be;
+  --ide-text-6: #9299b8;
+  --ide-text-7: #8a91b3;
+  --ide-text-8: #848caf;
+  --ide-text-9: #8189ad;
+  --ide-accent: #bd93f9;
+  --ide-accent-dark: #5a3d80;
+  --ide-accent-light: #d4b8ff;
+  --ide-accent-bright: #50fa7b;
+  --ide-accent-a5: rgba(189, 147, 249, 0.05);
+  --ide-accent-a6: rgba(189, 147, 249, 0.06);
+  --ide-accent-a8: rgba(189, 147, 249, 0.08);
+  --ide-accent-a10: rgba(189, 147, 249, 0.1);
+  --ide-accent-a12: rgba(189, 147, 249, 0.12);
+  --ide-accent-a15: rgba(189, 147, 249, 0.15);
+  --ide-accent-a20: rgba(189, 147, 249, 0.2);
+  --ide-accent-a25: rgba(189, 147, 249, 0.25);
+  --ide-accent-a30: rgba(189, 147, 249, 0.3);
+  --ide-accent-light-a15: rgba(212, 184, 255, 0.15);
+  --ide-accent-light-a40: rgba(212, 184, 255, 0.4);
+  --ide-accent-light-a60: rgba(212, 184, 255, 0.6);
+  --ide-accent-light-a70: rgba(212, 184, 255, 0.7);
+  --ide-orange: #ffb86c;
+  --ide-orange-light: #ffd4a0;
+  --ide-orange-a12: rgba(255, 184, 108, 0.12);
+  --ide-orange-a18: rgba(255, 184, 108, 0.18);
+  --ide-orange-a30: rgba(255, 184, 108, 0.3);
+  --ide-orange-a45: rgba(255, 184, 108, 0.45);
   --ide-purple: #ff79c6;
-  --ide-purple-a10: rgba(255,121,198,0.1); --ide-purple-a12: rgba(255,121,198,0.12);
-  --ide-purple-a15: rgba(255,121,198,0.15); --ide-purple-a25: rgba(255,121,198,0.25);
-  --ide-blue: #8be9fd; --ide-blue-light: #b5f0ff;
-  --ide-blue-a18: rgba(139,233,253,0.18); --ide-blue-a45: rgba(139,233,253,0.45);
-  --ide-green: #50fa7b; --ide-red: #ff5555; --ide-red-dark: #cc3333;
-  --ide-red-a12: rgba(255,85,85,0.12); --ide-pink: #ff79c6;
-  --ide-pink-a12: rgba(255,121,198,0.12); --ide-cyan: #8be9fd;
+  --ide-purple-a10: rgba(255, 121, 198, 0.1);
+  --ide-purple-a12: rgba(255, 121, 198, 0.12);
+  --ide-purple-a15: rgba(255, 121, 198, 0.15);
+  --ide-purple-a25: rgba(255, 121, 198, 0.25);
+  --ide-blue: #8be9fd;
+  --ide-blue-light: #b5f0ff;
+  --ide-blue-a18: rgba(139, 233, 253, 0.18);
+  --ide-blue-a45: rgba(139, 233, 253, 0.45);
+  --ide-green: #50fa7b;
+  --ide-red: #ff5555;
+  --ide-red-dark: #cc3333;
+  --ide-red-a12: rgba(255, 85, 85, 0.12);
+  --ide-pink: #ff79c6;
+  --ide-pink-a12: rgba(255, 121, 198, 0.12);
+  --ide-cyan: #8be9fd;
   --ide-ts-blue: #6272a4;
-  --ide-ts-blue-a8: rgba(98,114,164,0.08); --ide-ts-blue-a10: rgba(98,114,164,0.1);
-  --ide-ts-blue-a20: rgba(98,114,164,0.2);
-  --ide-yellow: #f1fa8c; --ide-syntax-string: #f1fa8c; --ide-syntax-string2: #50fa7b;
-  --ide-line-number: rgba(98,114,164,0.7); --ide-scrollbar: #44475a;
+  --ide-ts-blue-a8: rgba(98, 114, 164, 0.08);
+  --ide-ts-blue-a10: rgba(98, 114, 164, 0.1);
+  --ide-ts-blue-a20: rgba(98, 114, 164, 0.2);
+  --ide-yellow: #f1fa8c;
+  --ide-syntax-string: #f1fa8c;
+  --ide-syntax-string2: #50fa7b;
+  --ide-line-number: rgba(98, 114, 164, 0.7);
+  --ide-scrollbar: #44475a;
 }
 
-[data-theme="one-dark"] {
-  --ide-bg-0: #1b1e24; --ide-bg-1: #1e2127; --ide-bg-2: #21252b;
-  --ide-bg-3: #282c34; --ide-bg-4: #2c313a; --ide-bg-5: #353b45;
-  --ide-text-1: #abb2bf; --ide-text-2: #9da5b4; --ide-text-3: #9299a4;
-  --ide-text-4: #a8b0ba; --ide-text-5: #9ca5b1; --ide-text-6: #939daa;
-  --ide-text-7: #8b95a4; --ide-text-8: #85909f; --ide-text-9: #828d9d;
-  --ide-accent: #61afef; --ide-accent-dark: #2d5a80;
-  --ide-accent-light: #8fc8f5; --ide-accent-bright: #56b6c2;
-  --ide-accent-a5: rgba(97,175,239,0.05); --ide-accent-a6: rgba(97,175,239,0.06);
-  --ide-accent-a8: rgba(97,175,239,0.08); --ide-accent-a10: rgba(97,175,239,0.1);
-  --ide-accent-a12: rgba(97,175,239,0.12); --ide-accent-a15: rgba(97,175,239,0.15);
-  --ide-accent-a20: rgba(97,175,239,0.2); --ide-accent-a25: rgba(97,175,239,0.25);
-  --ide-accent-a30: rgba(97,175,239,0.3);
-  --ide-accent-light-a15: rgba(143,200,245,0.15); --ide-accent-light-a40: rgba(143,200,245,0.4);
-  --ide-accent-light-a60: rgba(143,200,245,0.6); --ide-accent-light-a70: rgba(143,200,245,0.7);
-  --ide-orange: #d19a66; --ide-orange-light: #e0b68a;
-  --ide-orange-a12: rgba(209,154,102,0.12); --ide-orange-a18: rgba(209,154,102,0.18);
-  --ide-orange-a30: rgba(209,154,102,0.3); --ide-orange-a45: rgba(209,154,102,0.45);
+[data-theme='one-dark'] {
+  --ide-bg-0: #1b1e24;
+  --ide-bg-1: #1e2127;
+  --ide-bg-2: #21252b;
+  --ide-bg-3: #282c34;
+  --ide-bg-4: #2c313a;
+  --ide-bg-5: #353b45;
+  --ide-text-1: #abb2bf;
+  --ide-text-2: #9da5b4;
+  --ide-text-3: #9299a4;
+  --ide-text-4: #a8b0ba;
+  --ide-text-5: #9ca5b1;
+  --ide-text-6: #939daa;
+  --ide-text-7: #8b95a4;
+  --ide-text-8: #85909f;
+  --ide-text-9: #828d9d;
+  --ide-accent: #61afef;
+  --ide-accent-dark: #2d5a80;
+  --ide-accent-light: #8fc8f5;
+  --ide-accent-bright: #56b6c2;
+  --ide-accent-a5: rgba(97, 175, 239, 0.05);
+  --ide-accent-a6: rgba(97, 175, 239, 0.06);
+  --ide-accent-a8: rgba(97, 175, 239, 0.08);
+  --ide-accent-a10: rgba(97, 175, 239, 0.1);
+  --ide-accent-a12: rgba(97, 175, 239, 0.12);
+  --ide-accent-a15: rgba(97, 175, 239, 0.15);
+  --ide-accent-a20: rgba(97, 175, 239, 0.2);
+  --ide-accent-a25: rgba(97, 175, 239, 0.25);
+  --ide-accent-a30: rgba(97, 175, 239, 0.3);
+  --ide-accent-light-a15: rgba(143, 200, 245, 0.15);
+  --ide-accent-light-a40: rgba(143, 200, 245, 0.4);
+  --ide-accent-light-a60: rgba(143, 200, 245, 0.6);
+  --ide-accent-light-a70: rgba(143, 200, 245, 0.7);
+  --ide-orange: #d19a66;
+  --ide-orange-light: #e0b68a;
+  --ide-orange-a12: rgba(209, 154, 102, 0.12);
+  --ide-orange-a18: rgba(209, 154, 102, 0.18);
+  --ide-orange-a30: rgba(209, 154, 102, 0.3);
+  --ide-orange-a45: rgba(209, 154, 102, 0.45);
   --ide-purple: #c678dd;
-  --ide-purple-a10: rgba(198,120,221,0.1); --ide-purple-a12: rgba(198,120,221,0.12);
-  --ide-purple-a15: rgba(198,120,221,0.15); --ide-purple-a25: rgba(198,120,221,0.25);
-  --ide-blue: #61afef; --ide-blue-light: #8fc8f5;
-  --ide-blue-a18: rgba(97,175,239,0.18); --ide-blue-a45: rgba(97,175,239,0.45);
-  --ide-green: #98c379; --ide-red: #e06c75; --ide-red-dark: #be5046;
-  --ide-red-a12: rgba(224,108,117,0.12); --ide-pink: #e06c75;
-  --ide-pink-a12: rgba(224,108,117,0.12); --ide-cyan: #56b6c2;
+  --ide-purple-a10: rgba(198, 120, 221, 0.1);
+  --ide-purple-a12: rgba(198, 120, 221, 0.12);
+  --ide-purple-a15: rgba(198, 120, 221, 0.15);
+  --ide-purple-a25: rgba(198, 120, 221, 0.25);
+  --ide-blue: #61afef;
+  --ide-blue-light: #8fc8f5;
+  --ide-blue-a18: rgba(97, 175, 239, 0.18);
+  --ide-blue-a45: rgba(97, 175, 239, 0.45);
+  --ide-green: #98c379;
+  --ide-red: #e06c75;
+  --ide-red-dark: #be5046;
+  --ide-red-a12: rgba(224, 108, 117, 0.12);
+  --ide-pink: #e06c75;
+  --ide-pink-a12: rgba(224, 108, 117, 0.12);
+  --ide-cyan: #56b6c2;
   --ide-ts-blue: #4d78cc;
-  --ide-ts-blue-a8: rgba(77,120,204,0.08); --ide-ts-blue-a10: rgba(77,120,204,0.1);
-  --ide-ts-blue-a20: rgba(77,120,204,0.2);
-  --ide-yellow: #e5c07b; --ide-syntax-string: #98c379; --ide-syntax-string2: #56b6c2;
-  --ide-line-number: rgba(92,99,112,0.5); --ide-scrollbar: #353b45;
+  --ide-ts-blue-a8: rgba(77, 120, 204, 0.08);
+  --ide-ts-blue-a10: rgba(77, 120, 204, 0.1);
+  --ide-ts-blue-a20: rgba(77, 120, 204, 0.2);
+  --ide-yellow: #e5c07b;
+  --ide-syntax-string: #98c379;
+  --ide-syntax-string2: #56b6c2;
+  --ide-line-number: rgba(92, 99, 112, 0.5);
+  --ide-scrollbar: #353b45;
 }
 
-[data-theme="catppuccin"] {
-  --ide-bg-0: #11111b; --ide-bg-1: #131320; --ide-bg-2: #181825;
-  --ide-bg-3: #1e1e2e; --ide-bg-4: #252536; --ide-bg-5: #313244;
-  --ide-text-1: #cdd6f4; --ide-text-2: #bac2de; --ide-text-3: #a6adc8;
-  --ide-text-4: #a0a3b5; --ide-text-5: #9698ad; --ide-text-6: #8e90a6;
-  --ide-text-7: #8689a0; --ide-text-8: #81849c; --ide-text-9: #7e819a;
-  --ide-accent: #cba6f7; --ide-accent-dark: #5c3d80;
-  --ide-accent-light: #e0c8ff; --ide-accent-bright: #94e2d5;
-  --ide-accent-a5: rgba(203,166,247,0.05); --ide-accent-a6: rgba(203,166,247,0.06);
-  --ide-accent-a8: rgba(203,166,247,0.08); --ide-accent-a10: rgba(203,166,247,0.1);
-  --ide-accent-a12: rgba(203,166,247,0.12); --ide-accent-a15: rgba(203,166,247,0.15);
-  --ide-accent-a20: rgba(203,166,247,0.2); --ide-accent-a25: rgba(203,166,247,0.25);
-  --ide-accent-a30: rgba(203,166,247,0.3);
-  --ide-accent-light-a15: rgba(224,200,255,0.15); --ide-accent-light-a40: rgba(224,200,255,0.4);
-  --ide-accent-light-a60: rgba(224,200,255,0.6); --ide-accent-light-a70: rgba(224,200,255,0.7);
-  --ide-orange: #fab387; --ide-orange-light: #fcc8a8;
-  --ide-orange-a12: rgba(250,179,135,0.12); --ide-orange-a18: rgba(250,179,135,0.18);
-  --ide-orange-a30: rgba(250,179,135,0.3); --ide-orange-a45: rgba(250,179,135,0.45);
+[data-theme='catppuccin'] {
+  --ide-bg-0: #11111b;
+  --ide-bg-1: #131320;
+  --ide-bg-2: #181825;
+  --ide-bg-3: #1e1e2e;
+  --ide-bg-4: #252536;
+  --ide-bg-5: #313244;
+  --ide-text-1: #cdd6f4;
+  --ide-text-2: #bac2de;
+  --ide-text-3: #a6adc8;
+  --ide-text-4: #a0a3b5;
+  --ide-text-5: #9698ad;
+  --ide-text-6: #8e90a6;
+  --ide-text-7: #8689a0;
+  --ide-text-8: #81849c;
+  --ide-text-9: #7e819a;
+  --ide-accent: #cba6f7;
+  --ide-accent-dark: #5c3d80;
+  --ide-accent-light: #e0c8ff;
+  --ide-accent-bright: #94e2d5;
+  --ide-accent-a5: rgba(203, 166, 247, 0.05);
+  --ide-accent-a6: rgba(203, 166, 247, 0.06);
+  --ide-accent-a8: rgba(203, 166, 247, 0.08);
+  --ide-accent-a10: rgba(203, 166, 247, 0.1);
+  --ide-accent-a12: rgba(203, 166, 247, 0.12);
+  --ide-accent-a15: rgba(203, 166, 247, 0.15);
+  --ide-accent-a20: rgba(203, 166, 247, 0.2);
+  --ide-accent-a25: rgba(203, 166, 247, 0.25);
+  --ide-accent-a30: rgba(203, 166, 247, 0.3);
+  --ide-accent-light-a15: rgba(224, 200, 255, 0.15);
+  --ide-accent-light-a40: rgba(224, 200, 255, 0.4);
+  --ide-accent-light-a60: rgba(224, 200, 255, 0.6);
+  --ide-accent-light-a70: rgba(224, 200, 255, 0.7);
+  --ide-orange: #fab387;
+  --ide-orange-light: #fcc8a8;
+  --ide-orange-a12: rgba(250, 179, 135, 0.12);
+  --ide-orange-a18: rgba(250, 179, 135, 0.18);
+  --ide-orange-a30: rgba(250, 179, 135, 0.3);
+  --ide-orange-a45: rgba(250, 179, 135, 0.45);
   --ide-purple: #f5c2e7;
-  --ide-purple-a10: rgba(245,194,231,0.1); --ide-purple-a12: rgba(245,194,231,0.12);
-  --ide-purple-a15: rgba(245,194,231,0.15); --ide-purple-a25: rgba(245,194,231,0.25);
-  --ide-blue: #89b4fa; --ide-blue-light: #b4d0fc;
-  --ide-blue-a18: rgba(137,180,250,0.18); --ide-blue-a45: rgba(137,180,250,0.45);
-  --ide-green: #a6e3a1; --ide-red: #f38ba8; --ide-red-dark: #d66a85;
-  --ide-red-a12: rgba(243,139,168,0.12); --ide-pink: #f38ba8;
-  --ide-pink-a12: rgba(243,139,168,0.12); --ide-cyan: #94e2d5;
+  --ide-purple-a10: rgba(245, 194, 231, 0.1);
+  --ide-purple-a12: rgba(245, 194, 231, 0.12);
+  --ide-purple-a15: rgba(245, 194, 231, 0.15);
+  --ide-purple-a25: rgba(245, 194, 231, 0.25);
+  --ide-blue: #89b4fa;
+  --ide-blue-light: #b4d0fc;
+  --ide-blue-a18: rgba(137, 180, 250, 0.18);
+  --ide-blue-a45: rgba(137, 180, 250, 0.45);
+  --ide-green: #a6e3a1;
+  --ide-red: #f38ba8;
+  --ide-red-dark: #d66a85;
+  --ide-red-a12: rgba(243, 139, 168, 0.12);
+  --ide-pink: #f38ba8;
+  --ide-pink-a12: rgba(243, 139, 168, 0.12);
+  --ide-cyan: #94e2d5;
   --ide-ts-blue: #74c7ec;
-  --ide-ts-blue-a8: rgba(116,199,236,0.08); --ide-ts-blue-a10: rgba(116,199,236,0.1);
-  --ide-ts-blue-a20: rgba(116,199,236,0.2);
-  --ide-yellow: #f9e2af; --ide-syntax-string: #a6e3a1; --ide-syntax-string2: #94e2d5;
-  --ide-line-number: rgba(88,91,112,0.5); --ide-scrollbar: #313244;
+  --ide-ts-blue-a8: rgba(116, 199, 236, 0.08);
+  --ide-ts-blue-a10: rgba(116, 199, 236, 0.1);
+  --ide-ts-blue-a20: rgba(116, 199, 236, 0.2);
+  --ide-yellow: #f9e2af;
+  --ide-syntax-string: #a6e3a1;
+  --ide-syntax-string2: #94e2d5;
+  --ide-line-number: rgba(88, 91, 112, 0.5);
+  --ide-scrollbar: #313244;
 }
 
 /* -webkit-font-smoothing has no Tailwind equivalent */
@@ -245,11 +443,21 @@ body {
 
 /* Custom animations — Tailwind only ships spin/ping/pulse/bounce */
 @keyframes rainbow {
-  0%   { color: var(--ide-accent); }
-  25%  { color: var(--ide-orange); }
-  50%  { color: var(--ide-purple); }
-  75%  { color: var(--ide-blue); }
-  100% { color: var(--ide-accent); }
+  0% {
+    color: var(--ide-accent);
+  }
+  25% {
+    color: var(--ide-orange);
+  }
+  50% {
+    color: var(--ide-purple);
+  }
+  75% {
+    color: var(--ide-blue);
+  }
+  100% {
+    color: var(--ide-accent);
+  }
 }
 .rainbow-icon {
   animation: rainbow 4s linear infinite;
@@ -260,43 +468,146 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 @keyframes typingDot {
-  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-  40%           { opacity: 1;   transform: scale(1); }
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes settingsFadeIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes slideInRight {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes slideOutRight {
-  from { transform: translateX(0); }
-  to   { transform: translateX(100%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes slideInBottom {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideOutBottom {
-  from { transform: translateY(0); }
-  to   { transform: translateY(100%); }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
 }
 
 @keyframes dropdownOpen {
-  from { opacity: 0; transform: scale(0.95) translateY(-4px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Paper-craft theme tokens — the color/font vocabulary for the social feed (/social)
+   and the site-wide Navbar. Custom properties are inert until referenced, so declaring
+   them on :root is safe even on pages that don't use any of them. */
+:root {
+  --paper-bg: #e5d8c0;
+  --paper-cream: #fdfaf3;
+  --paper-hero: #f3ecdd;
+  --paper-ink: #2b2723;
+  --paper-muted: #4a443c;
+  --paper-muted-2: #5c544a;
+  --paper-accent: #7a4f10;
+  --paper-accent-strong: #a8801a;
+  --paper-accent-deep: #6b4a06;
+  --paper-yellow: #f2c744;
+  --paper-yellow-soft: #faeec4;
+  --paper-highlight: #f5eeb8;
+  --paper-line: rgba(60, 44, 24, 0.3);
+}
+/* Paints the paper-craft page background — scoped to .paper-theme (currently just
+   /social) so the noise texture and Karla body font don't leak into the rest of the
+   still-dark site. */
+.paper-theme {
+  font-family: 'Karla', Helvetica, Arial, sans-serif;
+  background-color: var(--paper-bg);
+  /* Fractal-noise paper grain — no Tailwind equivalent for an inline SVG filter background */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.2'/%3E%3C/svg%3E");
+  color: var(--paper-ink);
+}
+.paper-theme ::selection {
+  background: var(--paper-yellow);
+  color: var(--paper-ink);
+}
+.paper-theme :focus-visible {
+  outline: 2px solid var(--paper-ink);
+  outline-offset: 2px;
+}
+.font-paper-serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+.font-paper-hand {
+  font-family: 'Caveat', cursive;
+}
+.font-paper-mono {
+  font-family: 'Courier Prime', monospace;
+}
+.font-paper-sans {
+  font-family: 'Karla', Helvetica, Arial, sans-serif;
+}
+/* Ruled notebook lines behind the compose textarea — repeating-linear-gradient has no Tailwind utility */
+.paper-ruled {
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0 31px,
+    var(--paper-line) 31px 32px
+  );
+  background-attachment: local;
+}
+/* Dashed section rule under the feed tabs — same reason, no Tailwind utility for repeating gradients */
+.paper-dashed-rule {
+  background-image: repeating-linear-gradient(90deg, var(--paper-line) 0 8px, transparent 8px 14px);
 }
 
 @layer utilities {
