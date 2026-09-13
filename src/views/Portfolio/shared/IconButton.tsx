@@ -23,15 +23,11 @@ export function IconButton({
     <button
       onClick={onClick}
       aria-label={ariaLabel}
-      className={`flex items-center justify-center shrink-0 ${className}`}
+      className={`flex shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 ${className}`}
       style={{
         width: size,
         height: size,
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
         color,
-        padding: 0,
         ...style,
       }}
     >

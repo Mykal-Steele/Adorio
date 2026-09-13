@@ -14,6 +14,20 @@ const NGINX_CONFIGS = ['nginx.production.conf', 'nginx.development.conf'].map((f
   path.join(__dirname, '..', f),
 );
 
+// Dynamic-segment routes (e.g. /api/foo/[id]) can't get an exact nginx
+// `location =` match — a real request carries an actual value, not the
+// literal `[id]`. Each one needs a human to add a `location <prefix>` block
+// proxying that subtree to Next.js, then register it here. An unregistered
+// dynamic route fails this check instead of being silently skipped, so a new
+// route can't reach production unrouted.
+const VERIFIED_DYNAMIC_ROUTES = {
+  // '/api/foo/[id]': '/api/foo/',
+};
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function findApiRoutes(dir, apiRoot = dir) {
   const routes = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -32,21 +46,42 @@ const routes = findApiRoutes(API_DIR);
 const dynamicRoutes = routes.filter((r) => r.includes('['));
 const staticRoutes = routes.filter((r) => !r.includes('['));
 
-if (dynamicRoutes.length > 0) {
-  console.log(
-    `Skipping ${dynamicRoutes.length} dynamic-segment route(s), not checkable against nginx exact-match blocks: ${dynamicRoutes.join(', ')}`,
-  );
-}
-
 let failed = false;
+
+for (const route of dynamicRoutes) {
+  if (!Object.prototype.hasOwnProperty.call(VERIFIED_DYNAMIC_ROUTES, route)) {
+    console.error(
+      `✗ ${route} is a dynamic API route with no verified nginx mapping.\n` +
+        `  A "location = <path>" block can't match it (real requests carry an actual\n` +
+        `  value, not the literal segment name), so it needs a "location <prefix>"\n` +
+        `  block proxying the whole subtree to Next.js in both nginx configs. Add that\n` +
+        `  block, then register the route in VERIFIED_DYNAMIC_ROUTES in this script.`,
+    );
+    failed = true;
+  }
+}
 
 for (const configPath of NGINX_CONFIGS) {
   const conf = fs.readFileSync(configPath, 'utf8');
   const confName = path.basename(configPath);
+
   for (const route of staticRoutes) {
-    const pattern = new RegExp(`location\\s*=\\s*${route.replace(/\//g, '\\/')}\\s*\\{`);
+    const pattern = new RegExp(`location\\s*=\\s*${escapeRegExp(route)}\\s*\\{`);
     if (!pattern.test(conf)) {
       console.error(`✗ ${confName} has no "location = ${route}" block`);
+      failed = true;
+    }
+  }
+
+  for (const route of dynamicRoutes) {
+    const nginxPrefix = VERIFIED_DYNAMIC_ROUTES[route];
+    if (!nginxPrefix) continue; // already reported above
+
+    const pattern = new RegExp(`location\\s+${escapeRegExp(nginxPrefix)}\\s*\\{`);
+    if (!pattern.test(conf)) {
+      console.error(
+        `✗ ${confName} has no "location ${nginxPrefix}" block for dynamic route ${route}`,
+      );
       failed = true;
     }
   }
@@ -60,5 +95,5 @@ if (failed) {
 }
 
 console.log(
-  `✓ All ${staticRoutes.length} Next.js API route(s) have matching nginx blocks in both configs`,
+  `✓ All ${staticRoutes.length} static + ${dynamicRoutes.length} verified dynamic Next.js API route(s) have matching nginx blocks in both configs`,
 );
