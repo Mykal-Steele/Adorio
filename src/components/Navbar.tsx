@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logout } from '@/store/userSlice';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 type NavItem = { href: string; text: string; external?: boolean };
 
@@ -44,12 +44,14 @@ const Navbar = () => {
       ];
 
   return (
-    <motion.nav
-      initial={{ y: -64 }}
-      animate={{ y: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-      className="font-paper-sans sticky top-0 z-50 border-b border-[rgba(60,44,24,.15)] bg-[var(--paper-cream)] text-[var(--paper-ink)] shadow-[0_2px_10px_rgba(60,44,24,.08)]"
-    >
+    // Deliberately a plain <nav>, not a motion component: animating this in with
+    // a transform (e.g. initial={{ y: -64 }}) doesn't reserve layout space, so
+    // for the brief window before the transform settles, the space it's about
+    // to occupy shows straight through to <body>'s own background instead of
+    // the navbar's — position:sticky elements still lay out at their
+    // untransformed position. That was invisible on the old dark navbar over a
+    // dark body; it's a visible dark flash on this cream one.
+    <nav className="font-paper-sans sticky top-0 z-50 bg-[var(--paper-cream)] text-[var(--paper-ink)]">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="flex h-14 items-center sm:h-16">
           <Link
@@ -183,7 +185,7 @@ const Navbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.nav>
+    </nav>
   );
 };
 

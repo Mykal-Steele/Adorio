@@ -15,6 +15,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchUserData } from '../../api';
 import { fetchLeaderboard, updateScore, fetchUserGameStats } from '../../api/gameApi';
+import { getToken } from '../../utils/tokenStorage';
 
 // Stateless game primitives, defined at module level so React doesn't recreate them every render.
 const DOT_RADIUS = 11;
@@ -1089,7 +1090,7 @@ const RyGame = () => {
           setHighPLevel(gameStats.peakPLevel || 0);
 
           // Try to get the full user profile if we have stats
-          if (localStorage.getItem('token')) {
+          if (getToken()) {
             try {
               const userData = await fetchUserData();
               if (userData) setCurrentUser(userData);
@@ -1120,7 +1121,7 @@ const RyGame = () => {
   useEffect(() => {
     if (!currentUser) return;
     const checkAuthInterval = setInterval(() => {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         setCurrentUser(null);
       }
