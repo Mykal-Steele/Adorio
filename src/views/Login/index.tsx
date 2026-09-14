@@ -4,8 +4,10 @@ import { useAppDispatch } from '../../store/hooks';
 import { login } from '../../api';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { SparklesIcon } from '@heroicons/react/24/outline';
 import { applyAuthSession, getAuthErrorMessage, getRedirectPaths } from '../../utils/authFlow';
+import AuthCard from '../../components/AuthCard';
+import EmailField from '../../components/AuthCard/EmailField';
+import PasswordField from '../../components/AuthCard/PasswordField';
 
 const Login = () => {
   const dispatch = useAppDispatch();
@@ -13,10 +15,12 @@ const Login = () => {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { from, redirect } = getRedirectPaths(searchParams);
+  const redirectQuery = redirect ? `?redirect=${encodeURIComponent(redirect)}` : '';
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,7 +29,7 @@ const Login = () => {
 
     try {
       const response = await login({ email, password });
-      if (applyAuthSession(dispatch, response)) {
+      if (applyAuthSession(dispatch, response, remember)) {
         router.replace(from);
       } else {
         setError('Invalid response from server. Please try again.');
@@ -38,100 +42,56 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
-      <div className="relative bg-gray-900/80 backdrop-blur-md border border-gray-800/50 rounded-2xl p-8 max-w-md w-full text-center space-y-6 overflow-hidden shadow-lg">
-        <div className="flex justify-center relative">
-          <SparklesIcon className="h-16 w-16 text-purple-400 relative z-10" />
-          <div className="absolute w-32 h-32 bg-purple-600/20 blur-[50px] rounded-full" />
-        </div>
+    <AuthCard mode="signin" redirectQuery={redirectQuery} formTitle="Sign in">
+      <form onSubmit={handleLogin}>
+        <EmailField value={email} onChange={setEmail} disabled={loading} />
+        <PasswordField
+          value={password}
+          onChange={setPassword}
+          autoComplete="current-password"
+          disabled={loading}
+        />
 
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
-          Welcome Back
-        </h1>
-
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3.5">
+          <label className="flex cursor-pointer items-center gap-[9px] text-[14.5px]">
             <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400"
-              required
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="h-[17px] w-[17px] cursor-pointer accent-[var(--paper-accent-strong)]"
             />
-          </div>
-
-          <div className="text-left">
-            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 rounded-lg bg-gray-800/40 border border-gray-700/50 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-400"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:opacity-90 transition-all focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 relative overflow-hidden group mt-4"
-          >
-            <span className="relative z-10">
-              {loading ? (
-                <svg
-                  className="animate-spin h-5 w-5 text-white mx-auto"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              ) : (
-                'Login'
-              )}
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </button>
-
-          {error && (
-            <p className="text-red-500 text-sm mt-4 text-center bg-red-900/20 p-2 rounded-lg">
-              {error}
-            </p>
-          )}
-        </form>
-
-        <div className="relative flex items-center justify-center">
-          <div className="flex-grow border-t border-gray-700/50"></div>
-          <span className="mx-4 text-gray-400">or</span>
-          <div className="flex-grow border-t border-gray-700/50"></div>
-        </div>
-
-        <p className="mt-4 text-center text-gray-400">
-          Don&apos;t have an account?{' '}
-          <Link
-            href={redirect ? `/register?redirect=${redirect}` : '/register'}
-            className="text-purple-400 hover:underline font-medium"
-          >
-            Sign up
+            Keep me signed in
+          </label>
+          <Link href="/contact" className="text-[14.5px]">
+            Forgot password?
           </Link>
-        </p>
-      </div>
-    </div>
+        </div>
+
+        {error && (
+          <p role="alert" className="mt-4 text-sm font-bold text-[#8d3a33]">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-[26px] w-full -rotate-[0.6deg] rounded-[4px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-[26px] py-[14px] font-paper-mono text-sm font-bold uppercase tracking-[.16em] shadow-[3px_4px_0_var(--paper-ink)] transition-transform hover:-translate-y-px disabled:opacity-60"
+        >
+          {loading ? 'Signing in...' : 'Sign in'}
+        </button>
+      </form>
+
+      <p className="mt-[18px] border-t border-dashed border-[var(--paper-line)] pt-4 text-[15px] text-[var(--paper-muted)]">
+        No account yet?{' '}
+        <Link
+          href={`/register${redirectQuery}`}
+          className="font-bold text-[var(--paper-accent)] underline underline-offset-[3px] hover:text-[var(--paper-ink)]"
+        >
+          Create one
+        </Link>
+      </p>
+    </AuthCard>
   );
 };
 
