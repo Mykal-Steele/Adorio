@@ -1,4 +1,5 @@
 import express from 'express';
+import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
@@ -34,6 +35,7 @@ const app = express();
 // Northflank sits behind Cloudflare (1 proxy hop)
 app.set('trust proxy', 1);
 
+app.use(helmet());
 app.use(morgan(':date[iso] :method :url :status :res[content-length]b - :response-time ms'));
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
