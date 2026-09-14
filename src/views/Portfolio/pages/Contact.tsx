@@ -46,7 +46,7 @@ const fields = [
 
 export function Contact() {
   const { isMobile } = useResponsive();
-  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', website: '' });
   const [focused, setFocused] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -152,6 +152,28 @@ export function Contact() {
 
         {!sent ? (
           <div className="space-y-3">
+            {/* Honeypot: invisible to real visitors, only a bot filling every field would touch this */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                left: '-9999px',
+                width: 1,
+                height: 1,
+                overflow: 'hidden',
+              }}
+            >
+              <label htmlFor="contact-website">Website</label>
+              <input
+                id="contact-website"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                value={form.website}
+                onChange={(e) => setForm((prev) => ({ ...prev, website: e.target.value }))}
+              />
+            </div>
+
             {fields.map((field) => (
               <div key={field.key}>
                 <label
@@ -292,7 +314,7 @@ export function Contact() {
             <button
               onClick={() => {
                 setSent(false);
-                setForm({ name: '', email: '', subject: '', message: '' });
+                setForm({ name: '', email: '', subject: '', message: '', website: '' });
                 setError(null);
               }}
               style={{
