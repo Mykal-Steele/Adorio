@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { contactSchema } from '@/schemas/contactSchema';
 
 export async function POST(req: NextRequest) {
-  const resend = new Resend(process.env.RESEND_API_KEY);
   const rawBody = await req.json().catch(() => null);
   if (!rawBody) return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
 
@@ -18,6 +17,7 @@ export async function POST(req: NextRequest) {
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: 'Portfolio Contact <noreply@adorio.space>',
       to: 'oakar@adorio.space',
