@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppDispatch } from '../../store/hooks';
 import { login } from '../../api';
 import Link from 'next/link';
@@ -18,9 +18,16 @@ const Login = () => {
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const errorRef = useRef<HTMLParagraphElement>(null);
 
   const { from, redirect } = getRedirectPaths(searchParams);
   const redirectQuery = redirect ? `?redirect=${encodeURIComponent(redirect)}` : '';
+
+  // Move focus to the error on submit failure so keyboard/screen-reader users
+  // aren't left stranded on the submit button with no indication of what happened.
+  useEffect(() => {
+    if (error) errorRef.current?.focus();
+  }, [error]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -68,7 +75,12 @@ const Login = () => {
         </div>
 
         {error && (
-          <p role="alert" className="mt-4 text-sm font-bold text-[#8d3a33]">
+          <p
+            ref={errorRef}
+            role="alert"
+            tabIndex={-1}
+            className="mt-4 text-sm font-bold text-[#8d3a33]"
+          >
             {error}
           </p>
         )}
