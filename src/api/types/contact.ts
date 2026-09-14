@@ -3,4 +3,5 @@ export type ContactMessagePayload = {
   email: string;
   subject: string;
   message: string;
+  website?: string;
 };
