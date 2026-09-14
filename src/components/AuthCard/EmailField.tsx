@@ -24,6 +24,7 @@ const EmailField = ({ value, onChange, disabled = false }: EmailFieldProps) => {
         onBlur={() => setTouched(true)}
         autoComplete="email"
         aria-invalid={invalid}
+        aria-describedby={invalid ? 'email-error' : undefined}
         disabled={disabled}
         required
         className={`w-full border-b-2 bg-transparent px-0.5 py-[9px] text-[17px] outline-none focus:border-[var(--paper-accent-strong)] ${
@@ -31,7 +32,11 @@ const EmailField = ({ value, onChange, disabled = false }: EmailFieldProps) => {
         }`}
       />
       {invalid && (
-        <span role="alert" className="mt-[7px] block text-[13.5px] font-bold text-[#8d3a33]">
+        <span
+          id="email-error"
+          role="alert"
+          className="mt-[7px] block text-[13.5px] font-bold text-[#8d3a33]"
+        >
           That email is missing something.
         </span>
       )}
