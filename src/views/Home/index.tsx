@@ -11,6 +11,7 @@ import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import { debounce } from 'lodash';
 import { isAbortError } from '../../utils/errorHandling';
 import { TITLE_CHARACTER_LIMIT } from './constants/title';
+import PaperTornEdge from '../../components/PaperTornEdge';
 
 const ErrorToast = ({ error, onDismiss }) => (
   <motion.div
@@ -452,6 +453,8 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
       <AnimatePresence>
         {error && <ErrorToast error={error} onDismiss={() => setError(null)} />}
       </AnimatePresence>
+
+      <PaperTornEdge />
 
       <section className="relative bg-[var(--paper-hero)] px-4 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16">
         <div className="mx-auto max-w-5xl">

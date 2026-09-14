@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAppDispatch } from '../store/hooks';
 import { setUser, setAuthLoaded } from '../store/userSlice';
 import { fetchUserData, refreshAccessToken } from '../api';
+import { getToken, getRefreshToken, setToken, clearAuthTokens } from '../utils/tokenStorage';
 
 const useAuthBootstrap = () => {
   const dispatch = useAppDispatch();
@@ -11,7 +12,7 @@ const useAuthBootstrap = () => {
     let isActive = true;
 
     const hydrateUser = async () => {
-      const storedToken = localStorage.getItem('token');
+      const storedToken = getToken();
 
       if (!storedToken) {
         if (isActive) {
@@ -27,21 +28,21 @@ const useAuthBootstrap = () => {
           dispatch(setUser({ user: userData, token: storedToken }));
         }
       } catch (error) {
-        const storedRefreshToken = localStorage.getItem('refreshToken');
+        const storedRefreshToken = getRefreshToken();
         if (storedRefreshToken) {
           try {
             const { token: newToken } = await refreshAccessToken(storedRefreshToken);
-            localStorage.setItem('token', newToken);
+            setToken(newToken);
             const userData = await fetchUserData();
             if (isActive) {
               dispatch(setUser({ user: userData, token: newToken }));
             }
             return;
           } catch {
-            localStorage.removeItem('refreshToken');
+            // fall through to clearAuthTokens() below
           }
         }
-        localStorage.removeItem('token');
+        clearAuthTokens();
         if (process.env.NODE_ENV !== 'production') {
           console.error('Failed to fetch user data:', error);
         }

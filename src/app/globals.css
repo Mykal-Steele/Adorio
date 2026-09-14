@@ -581,8 +581,8 @@ body {
   color: var(--paper-ink);
 }
 .paper-theme :focus-visible {
-  outline: 2px solid var(--paper-ink);
-  outline-offset: 2px;
+  outline: 3px solid var(--paper-ink);
+  outline-offset: 3px;
 }
 .font-paper-serif {
   font-family: 'Playfair Display', Georgia, serif;
@@ -596,8 +596,13 @@ body {
 .font-paper-sans {
   font-family: 'Karla', Helvetica, Arial, sans-serif;
 }
-/* Ruled notebook lines behind the compose textarea — repeating-linear-gradient has no Tailwind utility */
+/* Ruled notebook lines behind the compose textarea — repeating-linear-gradient has no Tailwind utility.
+   background-color must be set explicitly: browsers give <textarea> an opaque
+   default background, and background-image alone (unlike the `background`
+   shorthand) doesn't reset it, so the ruled lines were drawing on top of a
+   white box instead of the cream card behind it. */
 .paper-ruled {
+  background-color: transparent;
   background-image: repeating-linear-gradient(
     180deg,
     transparent 0 31px,
