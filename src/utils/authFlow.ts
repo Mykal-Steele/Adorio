@@ -1,5 +1,6 @@
 import { setUser } from '../store/userSlice';
 import type { User } from '../types';
+import { setAuthTokens } from './tokenStorage';
 
 type SearchParamsLike = {
   get(name: string): string | null;
@@ -24,15 +25,16 @@ export const getRedirectPaths = (searchParams: SearchParamsLike) => {
   };
 };
 
-export const applyAuthSession = (dispatch: (action: unknown) => void, response: AuthResponse) => {
+export const applyAuthSession = (
+  dispatch: (action: unknown) => void,
+  response: AuthResponse,
+  remember = true,
+) => {
   if (!isUser(response?.user) || !response?.token) {
     return false;
   }
 
-  localStorage.setItem('token', response.token);
-  if (response.refreshToken) {
-    localStorage.setItem('refreshToken', response.refreshToken);
-  }
+  setAuthTokens(response.token, response.refreshToken, remember);
   dispatch(setUser({ user: response.user, token: response.token }));
   return true;
 };
