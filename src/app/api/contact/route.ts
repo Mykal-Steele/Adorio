@@ -1,8 +1,16 @@
 import { Resend } from 'resend';
 import { NextRequest, NextResponse } from 'next/server';
 import { contactSchema } from '@/schemas/contactSchema';
+import { contactLimiter, getClientIp } from '@/lib/rateLimit';
 
 export async function POST(req: NextRequest) {
+  if (!contactLimiter.isAllowed(getClientIp(req))) {
+    return NextResponse.json(
+      { error: 'Too many messages sent. Please try again later.' },
+      { status: 429 },
+    );
+  }
+
   const rawBody = await req.json().catch(() => null);
   if (!rawBody) return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
 
@@ -11,7 +19,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
 
-  const { name, email, subject, message } = parsed.data;
+  const { name, email, subject, message, website } = parsed.data;
+
+  // Honeypot tripped — pretend success so the bot doesn't learn to avoid this field.
+  if (website?.trim()) {
+    return NextResponse.json({ success: true });
+  }
 
   const esc = (s: string) =>
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
