@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config/apiConfig';
 import { isAbortError, handleApiError } from '../utils/errorHandling';
+import { getToken } from '../utils/tokenStorage';
 
 const API = axios.create({
   baseURL: API_BASE_URL,
@@ -9,7 +10,7 @@ const API = axios.create({
 });
 
 API.interceptors.request.use((req) => {
-  const token = localStorage.getItem('token');
+  const token = getToken();
   if (token) req.headers.Authorization = `Bearer ${token}`;
   return req;
 });
