@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { User } from '../types';
+import { clearAuthTokens } from '../utils/tokenStorage';
 
 export interface UserState {
   user: User | null;
@@ -29,8 +30,7 @@ const userSlice = createSlice({
       state.user = null;
       state.token = null;
       state.isAuthLoading = false;
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
+      clearAuthTokens();
     },
   },
 });
