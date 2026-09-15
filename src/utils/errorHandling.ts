@@ -35,7 +35,7 @@ export const handleApiError = (error, customMessage = null, context = {}) => {
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    console.error(customMessage || 'api error', {
+    console.warn(customMessage || 'api error', {
       status: error.response?.status,
       data: error.response?.data,
       url: error.config?.url,
