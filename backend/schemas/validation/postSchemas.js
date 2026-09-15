@@ -18,4 +18,5 @@ export const addCommentSchema = z.object({
 export const getPostsQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(50).optional().default(5),
+  hasImage: z.coerce.boolean().optional(),
 });

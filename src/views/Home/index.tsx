@@ -217,7 +217,12 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getPosts(page, 3, abortControllerRef.current.signal);
+      const response = await getPosts(
+        page,
+        12,
+        abortControllerRef.current.signal,
+        filter === 'photos',
+      );
       const newPosts = response.posts || [];
       setPosts((prev) => (page === 1 ? newPosts : [...prev, ...newPosts]));
       setHasMore(response.hasMore);
@@ -233,11 +238,26 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
       setLoading(false);
       setIsFetchingMore(false);
     }
-  }, [page]);
+  }, [page, filter]);
 
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
+
+  // Switching filters queries a different set on the backend now (see fetchPosts),
+  // so the existing page needs to be thrown away and pagination restarted from
+  // page 1 for it — otherwise switching to Photos would either show a stale mix
+  // of results or try to append page 2 of the new filter onto page 1 of the old one.
+  const isFirstFilterRender = useRef(true);
+  useEffect(() => {
+    if (isFirstFilterRender.current) {
+      isFirstFilterRender.current = false;
+      return;
+    }
+    setPosts([]);
+    setPage(1);
+    setHasMore(true);
+  }, [filter]);
 
   useEffect(() => {
     return () => {
@@ -432,15 +452,22 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     }
   };
 
-  const filteredPosts = useMemo(
-    () => (filter === 'photos' ? posts.filter((p) => p.image) : posts),
-    [filter, posts],
-  );
+  // Two fixed columns instead of a CSS multi-column layout: a native `column-width`
+  // rebalances its entire contents from scratch whenever the total content changes,
+  // which visibly moves already-rendered posts into a different column every time
+  // a new page loads. Assigning each post to a column by its own stable index means
+  // a newly loaded post only ever appends to the end of a column — it never moves
+  // one that's already on screen.
+  const postColumns = useMemo(() => {
+    const columns: { post: (typeof posts)[number]; index: number }[][] = [[], []];
+    posts.forEach((post, index) => {
+      columns[index % 2].push({ post, index });
+    });
+    return columns;
+  }, [posts]);
 
   const countLabel =
-    filter === 'photos'
-      ? `${filteredPosts.length} with photos`
-      : `${posts.length} posts on the wall`;
+    filter === 'photos' ? `${posts.length} with photos` : `${posts.length} posts on the wall`;
 
   const newTodayCount = useMemo(() => {
     const startOfToday = new Date();
@@ -557,27 +584,33 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
           </div>
           <div aria-hidden="true" className="paper-dashed-rule h-0.5" />
 
-          <div className="mt-[clamp(34px,4vw,50px)] [column-gap:clamp(24px,3vw,38px)] [column-width:22rem]">
-            {loading && posts.length === 0 ? (
+          {loading && posts.length === 0 ? (
+            <div className="mt-[clamp(34px,4vw,50px)]">
               <PostSkeleton count={3} />
-            ) : (
-              filteredPosts.map((post, index) => (
-                <PostCard
-                  key={post._id}
-                  {...post}
-                  index={index}
-                  currentUserId={user?._id}
-                  currentUsername={user?.username}
-                  onLike={handleLike}
-                  onCommentAdded={(updatedPost) => {
-                    setPosts((prevPosts) =>
-                      prevPosts.map((p) => (p._id === updatedPost._id ? updatedPost : p)),
-                    );
-                  }}
-                />
-              ))
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="mt-[clamp(34px,4vw,50px)] grid grid-cols-1 gap-x-[clamp(24px,3vw,38px)] sm:grid-cols-2">
+              {postColumns.map((column, columnIndex) => (
+                <div key={columnIndex}>
+                  {column.map(({ post, index }) => (
+                    <PostCard
+                      key={post._id}
+                      {...post}
+                      index={index}
+                      currentUserId={user?._id}
+                      currentUsername={user?.username}
+                      onLike={handleLike}
+                      onCommentAdded={(updatedPost) => {
+                        setPosts((prevPosts) =>
+                          prevPosts.map((p) => (p._id === updatedPost._id ? updatedPost : p)),
+                        );
+                      }}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
 
           <div ref={lastPostRef} aria-hidden="true" />
 

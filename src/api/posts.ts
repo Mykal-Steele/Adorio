@@ -1,8 +1,8 @@
 import API, { request } from './index';
 
-export const getPosts = (page = 1, limit = 5, signal?: AbortSignal) =>
+export const getPosts = (page = 1, limit = 5, signal?: AbortSignal, hasImage?: boolean) =>
   request(
-    API.get(`/posts?page=${page}&limit=${limit}`, {
+    API.get(`/posts?page=${page}&limit=${limit}${hasImage ? '&hasImage=true' : ''}`, {
       signal,
       timeout: 10000,
     }),

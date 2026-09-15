@@ -30,12 +30,18 @@ export const createPost = async ({ userId, title, content, image }) => {
 };
 
 export const getPaginatedPosts = async (rawQuery) => {
-  const { page, limit } = validate(getPostsQuerySchema, rawQuery);
+  const { page, limit, hasImage } = validate(getPostsQuerySchema, rawQuery);
   const skip = (page - 1) * limit;
+  // Filtering has to happen in the query itself, not after fetching a page of
+  // unfiltered posts client-side — otherwise pagination and "has more" are
+  // computed against the wrong set, and a filtered view that matches only a
+  // handful of posts out of many keeps triggering more page loads long after
+  // it's actually run out of matching content.
+  const filter = hasImage ? { image: { $ne: null } } : {};
 
   const [posts, totalPosts] = await Promise.all([
-    findPostsPaginated({ skip, limit }),
-    countPosts(),
+    findPostsPaginated({ skip, limit, filter }),
+    countPosts(filter),
   ]);
 
   const normalizedPosts = posts.map(normalizePost).filter(Boolean);
