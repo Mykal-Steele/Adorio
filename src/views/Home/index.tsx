@@ -454,7 +454,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
         {error && <ErrorToast error={error} onDismiss={() => setError(null)} />}
       </AnimatePresence>
 
-      <PaperTornEdge />
+      <PaperTornEdge backdropColor="var(--paper-hero)" />
 
       <section className="relative bg-[var(--paper-hero)] px-4 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16">
         <div className="mx-auto max-w-5xl">
