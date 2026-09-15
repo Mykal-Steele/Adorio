@@ -11,7 +11,11 @@
 // there's nothing left for the valleys to contrast against). It also stops a
 // sticky version from showing arbitrary scrolled-past page content through
 // the gaps instead of a clean, consistent cut.
-const PaperTornEdge = ({ backdropColor = 'var(--paper-bg)' }: { backdropColor?: string }) => (
+type PaperTornEdgeProps = {
+  backdropColor?: string;
+};
+
+const PaperTornEdge = ({ backdropColor = 'var(--paper-bg)' }: PaperTornEdgeProps) => (
   <div
     className="sticky top-14 z-40 h-[23.4px] w-full sm:top-16 sm:h-9"
     style={{ backgroundColor: backdropColor }}
