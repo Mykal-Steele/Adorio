@@ -37,12 +37,13 @@ export function useImageLoader({ postImage, postId, instanceId }) {
     }
 
     try {
-      const baseUrl = postImage.url.split('?')[0];
-      const uniqueUrl = `${baseUrl}?postId=${postId}&instance=${instanceId}&t=${Date.now()}&r=${Math.random()
-        .toString(36)
-        .slice(2)}`;
+      // No cache-busting query string here: each upload now gets a unique Cloudinary
+      // public_id, so this URL is already unique and stable for this image forever.
+      // Appending a fresh timestamp/random param on every load defeated the browser's
+      // HTTP cache entirely, forcing a full re-download on every mount and re-render.
+      const url = postImage.url;
 
-      setImageState((prev) => ({ ...prev, url: uniqueUrl, postId }));
+      setImageState((prev) => ({ ...prev, url, postId }));
 
       const preloadImage = new Image();
       preloadImageRef.current = preloadImage;
@@ -72,7 +73,7 @@ export function useImageLoader({ postImage, postId, instanceId }) {
         }
       };
 
-      preloadImage.src = uniqueUrl;
+      preloadImage.src = url;
     } catch (error) {
       if (process.env.NODE_ENV !== 'production') {
         console.error(`[${instanceId}] Error loading image:`, error);

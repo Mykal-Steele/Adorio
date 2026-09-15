@@ -37,7 +37,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <link rel="preconnect" href="https://res.cloudinary.com" />
       </head>
-      <body className="bg-gray-950">
+      {/* suppressHydrationWarning: browser extensions (Grammarly, password managers, etc.)
+          inject attributes like data-gr-ext-installed onto <body> before React hydrates.
+          That's a real DOM difference React can't help mismatching, but it's harmless —
+          this only silences the warning for body's own attributes, not its children. */}
+      <body className="bg-gray-950" suppressHydrationWarning>
         <Providers>
           <ErrorBoundary>
             <Suspense fallback={null}>
