@@ -456,7 +456,10 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
 
       <PaperTornEdge />
 
-      <section className="relative bg-[var(--paper-hero)] px-4 pb-14 pt-12 sm:px-8 sm:pb-20 sm:pt-16">
+      {/* -mt pulls this section's background up to underlap the tear above it, so the
+          transparent valleys reveal this hero tan instead of the page's base tan showing
+          through before any content has scrolled underneath. */}
+      <section className="relative -mt-4 bg-[var(--paper-hero)] px-4 pb-14 pt-12 sm:-mt-6 sm:px-8 sm:pb-20 sm:pt-16">
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-wrap items-end justify-between gap-7">
             <div className="max-w-[54ch]">
