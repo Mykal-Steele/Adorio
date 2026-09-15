@@ -59,12 +59,12 @@ const Navbar = () => {
             aria-label="Adorio, home"
             className="mr-6 flex shrink-0 items-baseline gap-[6px]"
           >
-            <span className="font-paper-serif text-xl font-bold italic tracking-[-.015em] sm:text-2xl">
+            <span className="font-paper-serif text-2xl font-bold italic tracking-[-.015em] sm:text-3xl">
               Adorio
             </span>
             <span
               aria-hidden="true"
-              className="font-paper-serif text-lg font-bold leading-none sm:text-xl"
+              className="font-paper-serif text-xl font-bold leading-none sm:text-2xl"
             >
               <span className="text-[#d1a413]">{'{'}</span>
               <span className="text-[#7f9c3c]">{'_}'}</span>
