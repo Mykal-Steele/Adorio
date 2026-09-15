@@ -1,12 +1,25 @@
 // Torn-paper transition from the cream Navbar into a paper-themed page below it.
 // Sticky at the same offset as the Navbar's own height so it scrolls as one
-// unit with it instead of sliding away underneath. The wrapper's solid cream
-// background backs the SVG's jagged "valleys" — those are fully transparent by
-// design (that's what makes the tear read as a tear), so without a matching
-// backdrop they'd reveal whatever page content happens to be scrolled behind
-// them instead of a clean cut.
-const PaperTornEdge = () => (
-  <div className="sticky top-14 z-40 h-[23.4px] w-full bg-[var(--paper-cream)] sm:top-16 sm:h-9">
+// unit with it instead of sliding away underneath.
+//
+// The cream path only covers part of the SVG's height — the jagged "valleys"
+// cut out of its bottom edge are fully transparent by design, that's what
+// makes the tear read as a tear by revealing the color of whatever section
+// comes next. backdropColor fills that reveal: it must be the color of the
+// content right below this component, NOT the same cream as the path (paint
+// the wrapper the same cream as the foreground and the whole shape vanishes —
+// there's nothing left for the valleys to contrast against). It also stops a
+// sticky version from showing arbitrary scrolled-past page content through
+// the gaps instead of a clean, consistent cut.
+type PaperTornEdgeProps = {
+  backdropColor?: string;
+};
+
+const PaperTornEdge = ({ backdropColor = 'var(--paper-bg)' }: PaperTornEdgeProps) => (
+  <div
+    className="sticky top-14 z-40 h-[23.4px] w-full sm:top-16 sm:h-9"
+    style={{ backgroundColor: backdropColor }}
+  >
     <svg
       viewBox="0 0 1200 36"
       preserveAspectRatio="none"
