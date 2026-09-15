@@ -1,5 +1,8 @@
 # Adorio
 
+[![CI](https://github.com/Mykal-Steele/Adorio/actions/workflows/ci.yml/badge.svg)](https://github.com/Mykal-Steele/Adorio/actions/workflows/ci.yml)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.en.html)
+
 Social media app. Live at [adorio.space](https://adorio.space).
 
 **Stack:** Next.js 16 (App Router) + Express + MongoDB + Nginx in Docker.
