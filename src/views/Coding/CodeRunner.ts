@@ -2,7 +2,9 @@ import type { TestCase } from './types';
 
 export interface TestRunResult {
   name: string;
+  kind?: 'call' | 'stdio';
   args: unknown[];
+  stdin?: string;
   expected: unknown;
   output: unknown;
   passed: boolean;
@@ -383,72 +385,6 @@ export class CodeRunner {
         duration: performance.now() - start,
         error: this.extractErrorInfo(error, code),
         logs: [...logs],
-      };
-    }
-  }
-
-  // Legacy methods kept for compatibility
-  // Run a single test for a function
-  static runFunctionTest(fn, test) {
-    const start = performance.now();
-
-    try {
-      const output = fn(...test.args);
-      return {
-        args: test.args,
-        expected: test.expected,
-        output,
-        passed: this.isEqual(output, test.expected),
-        duration: performance.now() - start,
-        error: null,
-      };
-    } catch (error) {
-      return {
-        args: test.args,
-        expected: test.expected,
-        output: undefined,
-        passed: false,
-        duration: performance.now() - start,
-        error: error.message || String(error),
-      };
-    }
-  }
-
-  // Run a single test for a class method
-  static runClassTest(ClassConstructor, test, methodName) {
-    const start = performance.now();
-
-    try {
-      const instance = new ClassConstructor(...test.args);
-
-      if (typeof instance[methodName] !== 'function') {
-        return {
-          args: test.args,
-          expected: test.expected,
-          output: undefined,
-          passed: false,
-          duration: performance.now() - start,
-          error: `Method ${methodName} not found in class`,
-        };
-      }
-
-      const output = instance[methodName]();
-      return {
-        args: test.args,
-        expected: test.expected,
-        output,
-        passed: this.isEqual(output, test.expected),
-        duration: performance.now() - start,
-        error: null,
-      };
-    } catch (error) {
-      return {
-        args: test.args,
-        expected: test.expected,
-        output: undefined,
-        passed: false,
-        duration: performance.now() - start,
-        error: error.message || String(error),
       };
     }
   }
