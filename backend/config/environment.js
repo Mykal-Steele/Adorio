@@ -25,6 +25,10 @@ const environment = {
     key: normalize(process.env.CLOUDINARY_KEY),
     secret: normalize(process.env.CLOUDINARY_SECRET),
   },
+  piston: {
+    url: normalize(process.env.PISTON_URL),
+    token: normalize(process.env.PISTON_TOKEN),
+  },
 };
 
 const isProduction = environment.nodeEnv === 'production';
