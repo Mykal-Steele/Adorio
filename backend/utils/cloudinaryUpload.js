@@ -7,7 +7,7 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary.v2,
   params: {
     folder: 'feelio/posts',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
     quality: 'auto:best',
     transformation: [{ width: 1000, height: 1000, crop: 'limit' }, { fetch_format: 'auto' }],
     use_filename: true,
@@ -17,10 +17,10 @@ const storage = new CloudinaryStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  if (['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(file.mimetype)) {
+  if (['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/gif'].includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(ApiError.badRequest('Invalid file type. Only JPEG, PNG, and WEBP are allowed.'), false);
+    cb(ApiError.badRequest('Invalid file type. Only JPEG, PNG, WEBP, and GIF are allowed.'), false);
   }
 };
 
