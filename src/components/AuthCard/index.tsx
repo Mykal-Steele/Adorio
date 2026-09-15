@@ -39,10 +39,10 @@ const AuthCard = ({ mode, redirectQuery, formTitle, children }: AuthCardProps) =
   const isSignup = mode === 'signup';
 
   return (
-    <div className="paper-theme min-h-screen">
+    <div className="paper-theme flex min-h-[calc(100vh-56px)] flex-col sm:min-h-[calc(100vh-64px)]">
       <PaperTornEdge />
 
-      <main className="px-4 pb-[clamp(56px,7vw,88px)] pt-[clamp(10px,2vw,24px)] sm:px-8">
+      <main className="flex flex-1 items-center px-4 py-8 sm:px-8 sm:py-12">
         <div className="mx-auto grid max-w-[1080px] grid-cols-1 items-center gap-[clamp(32px,5vw,64px)] lg:grid-cols-2">
           <div>
             <p className="mb-3.5 inline-flex items-center gap-[10px] font-paper-mono text-xs uppercase tracking-[.2em] text-[#3d382f]">
