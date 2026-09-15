@@ -16,16 +16,19 @@ const ImageModal = ({ isVisible, imageUrl, title, onClose, instanceId }) => {
         onClick={onClose}
       >
         <motion.div
-          className="relative max-w-full max-h-full rounded-2xl overflow-hidden"
+          className="relative h-[min(85vh,650px)] w-[min(92vw,1000px)] rounded-2xl overflow-hidden"
           initial={{ scale: 0.95 }}
           animate={{ scale: 1 }}
           exit={{ scale: 0.95 }}
           onClick={(e) => e.stopPropagation()}
         >
+          {/* A fixed frame (not shrink-to-fit) so a small source image scales up to
+              a reasonable viewing size instead of floating tiny in the backdrop —
+              object-contain still preserves its aspect ratio inside the frame. */}
           <img
             src={imageUrl}
             alt={title || 'Post image'}
-            className="max-w-full max-h-[90vh] object-contain rounded-2xl"
+            className="h-full w-full object-contain rounded-2xl"
             crossOrigin="anonymous"
             referrerPolicy="no-referrer"
           />
