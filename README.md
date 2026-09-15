@@ -1,6 +1,9 @@
 # Adorio
 
-Social media app. Live at [adorio.space](https://adorio.space).
+[![CI](https://github.com/Mykal-Steele/Adorio/actions/workflows/ci.yml/badge.svg)](https://github.com/Mykal-Steele/Adorio/actions/workflows/ci.yml)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.en.html)
+
+Social app with a paper-craft feed and auth, plus my portfolio and a bunch of side projects hosted as subdomains. Live at [adorio.space](https://adorio.space).
 
 **Stack:** Next.js 16 (App Router) + Express + MongoDB + Nginx in Docker.
 
@@ -28,6 +31,8 @@ npm run dev:ai-slop    # AI sidecar only, if working on /cao
 - `backend/`: Express API. Most server work starts here.
 - `ai-slop/AI-Slop-For-CAO-exam/`: separate Vite app served at `/cao/`.
 - `backend-go/`: experimental backend. Ignore for normal product work.
+- `infra/`: Bicep templates for the Azure hosting setup. Applied by hand, not by CI.
+- `cloudflare-worker/`: failover worker that sits in front of the site.
 - `public/`: static assets.
 - `scripts/`: repo utilities.
 - `__tests__/`: integration tests.
@@ -44,7 +49,7 @@ node scripts/sync-platform-deps.cjs
 
 ```bash
 docker compose up --build                              # dev, port 8080
-docker compose -f docker-compose.prod.yml up --build  # prod, port 8080
+docker compose -f docker-compose.prod.yml up --build  # prod, port 80
 ```
 
 ## Build
@@ -78,12 +83,12 @@ npm run test:prod  # integration against prod containers
 
 ## Environment variables
 
-**Frontend:**
+**Next.js app** (root `.env`):
 
-| Variable                      | Purpose                                     |
-| ----------------------------- | ------------------------------------------- |
-| `BACKEND_INTERNAL_URL`        | SSR → Express URL (`http://localhost:3000`) |
-| `NEXT_PUBLIC_CLOUDINARY_NAME` | Cloudinary cloud name                       |
+| Variable                | Purpose                                     |
+| ------------------------ | ------------------------------------------- |
+| `BACKEND_INTERNAL_URL`  | SSR → Express URL (`http://localhost:3000`) |
+| `RESEND_API_KEY`        | Sends the contact form email                |
 
 **Backend** (`backend/.env`):
 
@@ -93,6 +98,7 @@ npm run test:prod  # integration against prod containers
 | `JWT_SECRET`                                                                  | Access token signing key                       |
 | `REFRESH_TOKEN_SECRET`                                                        | Refresh token key (falls back to `JWT_SECRET`) |
 | `CLIENT_URL`                                                                  | CORS origin                                    |
+| `PORT`                                                                        | Backend port (defaults to 3000)                |
 | `CLOUDINARY_NAME` / `CLOUDINARY_KEY` / `CLOUDINARY_SECRET` / `CLOUDINARY_URL` | Cloudinary                                     |
 
 **Docker build args:**
