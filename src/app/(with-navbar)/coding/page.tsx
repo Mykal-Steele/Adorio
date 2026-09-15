@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
-import Coding from '@/views/Coding';
+import ClassCatalog from '@/views/Coding/pages/ClassCatalog';
 
 export const metadata: Metadata = {
   title: 'Coding Challenges',
-  description:
-    'Solve JavaScript problems in your browser. Arrays, strings, algorithms, data structures.',
+  description: 'Pick a class and practice coding problems, written and graded in your browser.',
 };
 
 export default function CodingPage() {
-  return <Coding />;
+  return <ClassCatalog />;
 }

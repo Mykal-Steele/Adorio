@@ -1,18 +1,15 @@
 import type { Problem } from './types';
 import { ProblemDifficulty } from './constants/enums';
+import { ProblemClassId } from './constants/classes';
 
 const isProblemVisible = (problem) => problem?.isVisible !== false;
 
-/**
- * Coding problems data - easy to extend with new problems
- * Each problem follows a consistent structure for maintainability
- */
-export const problems = [
+export const problems: Problem[] = [
   {
     id: 'odd-numbers',
+    classId: ProblemClassId.ALGORITHMS,
     title: 'Generate Odd Numbers',
     difficulty: ProblemDifficulty.EASY,
-    functionName: 'printOddNumbers',
     description:
       'Return an array containing all odd numbers from 1 to n (inclusive). Return empty array if n < 1.',
     constraints: [
@@ -34,7 +31,11 @@ export const problems = [
         output: '[]',
       },
     ],
-    starterCode: `/**
+    languages: {
+      javascript: {
+        kind: 'call',
+        functionName: 'printOddNumbers',
+        starterCode: `/**
  * @param {number} n - The upper limit (inclusive)
  * @returns {number[]} Array of odd numbers from 1 to n
  */
@@ -42,49 +43,51 @@ function printOddNumbers(n) {
   // Your solution here
   
 }`,
-    tests: [
-      {
-        name: 'basic range',
-        args: [10],
-        expected: [1, 3, 5, 7, 9],
+        tests: [
+          {
+            name: 'basic range',
+            args: [10],
+            expected: [1, 3, 5, 7, 9],
+          },
+          {
+            name: 'small range',
+            args: [5],
+            expected: [1, 3, 5],
+          },
+          {
+            name: 'zero',
+            args: [0],
+            expected: [],
+          },
+          {
+            name: 'negative',
+            args: [-5],
+            expected: [],
+          },
+          {
+            name: 'single odd',
+            args: [1],
+            expected: [1],
+          },
+          {
+            name: 'single even',
+            args: [2],
+            expected: [1],
+          },
+          {
+            name: 'large range',
+            args: [20],
+            expected: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19],
+          },
+        ],
       },
-      {
-        name: 'small range',
-        args: [5],
-        expected: [1, 3, 5],
-      },
-      {
-        name: 'zero',
-        args: [0],
-        expected: [],
-      },
-      {
-        name: 'negative',
-        args: [-5],
-        expected: [],
-      },
-      {
-        name: 'single odd',
-        args: [1],
-        expected: [1],
-      },
-      {
-        name: 'single even',
-        args: [2],
-        expected: [1],
-      },
-      {
-        name: 'large range',
-        args: [20],
-        expected: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19],
-      },
-    ],
+    },
   },
   {
     id: 'reverse-string',
+    classId: ProblemClassId.ALGORITHMS,
     title: 'Reverse String',
     difficulty: ProblemDifficulty.EASY,
-    functionName: 'reverseString',
     description: 'Return the input string with characters in reverse order.',
     constraints: [
       'Input is always a string',
@@ -101,7 +104,11 @@ function printOddNumbers(n) {
         output: '""',
       },
     ],
-    starterCode: `/**
+    languages: {
+      javascript: {
+        kind: 'call',
+        functionName: 'reverseString',
+        starterCode: `/**
  * @param {string} str - The string to reverse
  * @returns {string} The reversed string
  */
@@ -109,49 +116,51 @@ function reverseString(str) {
   // Your solution here
   
 }`,
-    tests: [
-      {
-        name: 'basic',
-        args: ['hello'],
-        expected: 'olleh',
+        tests: [
+          {
+            name: 'basic',
+            args: ['hello'],
+            expected: 'olleh',
+          },
+          {
+            name: 'empty',
+            args: [''],
+            expected: '',
+          },
+          {
+            name: 'single',
+            args: ['a'],
+            expected: 'a',
+          },
+          {
+            name: 'palindrome',
+            args: ['racecar'],
+            expected: 'racecar',
+          },
+          {
+            name: 'spaces',
+            args: ['hello world'],
+            expected: 'dlrow olleh',
+          },
+          {
+            name: 'numbers',
+            args: ['12345'],
+            expected: '54321',
+          },
+          {
+            name: 'special chars',
+            args: ['a!b@c#'],
+            expected: '#c@b!a',
+          },
+        ],
       },
-      {
-        name: 'empty',
-        args: [''],
-        expected: '',
-      },
-      {
-        name: 'single',
-        args: ['a'],
-        expected: 'a',
-      },
-      {
-        name: 'palindrome',
-        args: ['racecar'],
-        expected: 'racecar',
-      },
-      {
-        name: 'spaces',
-        args: ['hello world'],
-        expected: 'dlrow olleh',
-      },
-      {
-        name: 'numbers',
-        args: ['12345'],
-        expected: '54321',
-      },
-      {
-        name: 'special chars',
-        args: ['a!b@c#'],
-        expected: '#c@b!a',
-      },
-    ],
+    },
   },
   {
     id: 'prime-generator-brute',
+    classId: ProblemClassId.ALGORITHMS,
     title: 'Generate Primes (Brute Force)',
     difficulty: ProblemDifficulty.MEDIUM,
-    functionName: 'generatePrimes',
     description:
       'Return array of all prime numbers from 2 to n (inclusive). Use brute force method.',
     constraints: [
@@ -174,7 +183,11 @@ function reverseString(str) {
         output: '[]',
       },
     ],
-    starterCode: `/**
+    languages: {
+      javascript: {
+        kind: 'call',
+        functionName: 'generatePrimes',
+        starterCode: `/**
  * @param {number} n - The upper limit (inclusive)
  * @returns {number[]} Array of prime numbers from 2 to n using brute force
  */
@@ -182,59 +195,53 @@ function generatePrimes(n) {
   // Your solution here
   
 }`,
-    tests: [
-      {
-        name: 'basic',
-        args: [10],
-        expected: [2, 3, 5, 7],
+        tests: [
+          {
+            name: 'basic',
+            args: [10],
+            expected: [2, 3, 5, 7],
+          },
+          {
+            name: 'edge_single',
+            args: [2],
+            expected: [2],
+          },
+          {
+            name: 'edge_empty',
+            args: [1],
+            expected: [],
+          },
+          {
+            name: 'zero',
+            args: [0],
+            expected: [],
+          },
+          {
+            name: 'small_prime',
+            args: [3],
+            expected: [2, 3],
+          },
+          {
+            name: 'medium',
+            args: [20],
+            expected: [2, 3, 5, 7, 11, 13, 17, 19],
+          },
+          {
+            name: 'larger',
+            args: [30],
+            expected: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29],
+          },
+        ],
       },
-      {
-        name: 'edge_single',
-        args: [2],
-        expected: [2],
-      },
-      {
-        name: 'edge_empty',
-        args: [1],
-        expected: [],
-      },
-      {
-        name: 'zero',
-        args: [0],
-        expected: [],
-      },
-      {
-        name: 'small_prime',
-        args: [3],
-        expected: [2, 3],
-      },
-      {
-        name: 'medium',
-        args: [20],
-        expected: [2, 3, 5, 7, 11, 13, 17, 19],
-      },
-      {
-        name: 'larger',
-        args: [30],
-        expected: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29],
-      },
-    ],
+    },
   },
   {
     id: 'prime-sieve',
+    classId: ProblemClassId.ALGORITHMS,
     title: 'Prime Generator (Sieve of Eratosthenes)',
     difficulty: ProblemDifficulty.MEDIUM,
     description:
       'Generate all prime numbers between 2 and n (inclusive) using the **Sieve of Eratosthenes algorithm**. Return an empty array if n < 2.',
-    functionName: 'sieveOfEratosthenes',
-    starterCode: `/**
- * @param {number} n - The upper limit (inclusive)
- * @returns {number[]} Array of prime numbers from 2 to n using Sieve of Eratosthenes
- */
-function sieveOfEratosthenes(n) {
-  // Your solution here
-  
-}`,
     constraints: [
       '0 <= n <= 100000',
       'Must use Sieve of Eratosthenes algorithm',
@@ -253,55 +260,68 @@ function sieveOfEratosthenes(n) {
         explanation: 'Sieve efficiently finds all primes up to 20.',
       },
     ],
-    tests: [
-      {
-        name: 'basic',
-        args: [10],
-        expected: [2, 3, 5, 7],
+    languages: {
+      javascript: {
+        kind: 'call',
+        functionName: 'sieveOfEratosthenes',
+        starterCode: `/**
+ * @param {number} n - The upper limit (inclusive)
+ * @returns {number[]} Array of prime numbers from 2 to n using Sieve of Eratosthenes
+ */
+function sieveOfEratosthenes(n) {
+  // Your solution here
+  
+}`,
+        tests: [
+          {
+            name: 'basic',
+            args: [10],
+            expected: [2, 3, 5, 7],
+          },
+          {
+            name: 'single',
+            args: [2],
+            expected: [2],
+          },
+          {
+            name: 'empty',
+            args: [1],
+            expected: [],
+          },
+          {
+            name: 'zero',
+            args: [0],
+            expected: [],
+          },
+          {
+            name: 'small',
+            args: [5],
+            expected: [2, 3, 5],
+          },
+          {
+            name: 'medium',
+            args: [15],
+            expected: [2, 3, 5, 7, 11, 13],
+          },
+          {
+            name: 'larger',
+            args: [20],
+            expected: [2, 3, 5, 7, 11, 13, 17, 19],
+          },
+          {
+            name: 'large',
+            args: [50],
+            expected: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47],
+          },
+        ],
       },
-      {
-        name: 'single',
-        args: [2],
-        expected: [2],
-      },
-      {
-        name: 'empty',
-        args: [1],
-        expected: [],
-      },
-      {
-        name: 'zero',
-        args: [0],
-        expected: [],
-      },
-      {
-        name: 'small',
-        args: [5],
-        expected: [2, 3, 5],
-      },
-      {
-        name: 'medium',
-        args: [15],
-        expected: [2, 3, 5, 7, 11, 13],
-      },
-      {
-        name: 'larger',
-        args: [20],
-        expected: [2, 3, 5, 7, 11, 13, 17, 19],
-      },
-      {
-        name: 'large',
-        args: [50],
-        expected: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47],
-      },
-    ],
+    },
   },
   {
     id: 'tower-of-hanoi',
+    classId: ProblemClassId.ALGORITHMS,
     title: 'Tower of Hanoi Solver',
     difficulty: ProblemDifficulty.HARD,
-    functionName: 'TowerOfHanoi',
-    methodName: 'play',
     description:
       'Implement Tower of Hanoi class. Constructor takes number of disks. Method play() solves puzzle and returns total move count.',
     constraints: [
@@ -325,7 +345,12 @@ function sieveOfEratosthenes(n) {
         output: '1',
       },
     ],
-    starterCode: `/**
+    languages: {
+      javascript: {
+        kind: 'call',
+        functionName: 'TowerOfHanoi',
+        methodName: 'play',
+        starterCode: `/**
  * Tower of Hanoi 
  * @param {number} numberOfDisks - Number of disks to solve for
  */
@@ -387,39 +412,41 @@ class TowerOfHanoi {
   }
 }
 `,
-    tests: [
-      {
-        name: 'one_disk',
-        args: [1],
-        expected: 1,
+        tests: [
+          {
+            name: 'one_disk',
+            args: [1],
+            expected: 1,
+          },
+          {
+            name: 'two_disks',
+            args: [2],
+            expected: 3,
+          },
+          {
+            name: 'three_disks',
+            args: [3],
+            expected: 7,
+          },
+          {
+            name: 'four_disks',
+            args: [4],
+            expected: 15,
+          },
+          {
+            name: 'five_disks',
+            args: [5],
+            expected: 31,
+          },
+        ],
       },
-      {
-        name: 'two_disks',
-        args: [2],
-        expected: 3,
-      },
-      {
-        name: 'three_disks',
-        args: [3],
-        expected: 7,
-      },
-      {
-        name: 'four_disks',
-        args: [4],
-        expected: 15,
-      },
-      {
-        name: 'five_disks',
-        args: [5],
-        expected: 31,
-      },
-    ],
+    },
   },
   {
     id: 'matrix-multiplication',
+    classId: ProblemClassId.ALGORITHMS,
     title: 'Matrix Multiplication',
     difficulty: ProblemDifficulty.MEDIUM,
-    functionName: 'multiplyMatrices',
     description:
       'Multiply two matrices A and B. Return the resulting matrix C where C[i][j] = sum of A[i][k] * B[k][j].',
     constraints: [
@@ -438,7 +465,11 @@ class TowerOfHanoi {
         output: '[[32]]',
       },
     ],
-    starterCode: `/**
+    languages: {
+      javascript: {
+        kind: 'call',
+        functionName: 'multiplyMatrices',
+        starterCode: `/**
  * @param {number[][]} A - First matrix (m × n)
  * @param {number[][]} B - Second matrix (n × p)
  * @returns {number[][]} Result matrix C (m × p)
@@ -447,99 +478,101 @@ function multiplyMatrices(A, B) {
   // Your solution here
   
 }`,
-    tests: [
-      {
-        name: 'basic_2x2',
-        args: [
-          [
-            [1, 2],
-            [3, 4],
-          ],
-          [
-            [5, 6],
-            [7, 8],
-          ],
-        ],
-        expected: [
-          [19, 22],
-          [43, 50],
+        tests: [
+          {
+            name: 'basic_2x2',
+            args: [
+              [
+                [1, 2],
+                [3, 4],
+              ],
+              [
+                [5, 6],
+                [7, 8],
+              ],
+            ],
+            expected: [
+              [19, 22],
+              [43, 50],
+            ],
+          },
+          {
+            name: 'vector_multiply',
+            args: [[[1, 2, 3]], [[4], [5], [6]]],
+            expected: [[32]],
+          },
+          {
+            name: 'rectangular',
+            args: [
+              [
+                [1, 2],
+                [3, 4],
+                [5, 6],
+              ],
+              [
+                [10, 20, 30, 40],
+                [50, 60, 70, 80],
+              ],
+            ],
+            expected: [
+              [110, 140, 170, 200],
+              [230, 300, 370, 440],
+              [350, 460, 570, 680],
+            ],
+          },
+          {
+            name: 'identity',
+            args: [
+              [
+                [1, 0],
+                [0, 1],
+              ],
+              [
+                [5, 6],
+                [7, 8],
+              ],
+            ],
+            expected: [
+              [5, 6],
+              [7, 8],
+            ],
+          },
+          {
+            name: 'single_element',
+            args: [[[3]], [[7]]],
+            expected: [[21]],
+          },
+          {
+            name: 'zero_matrix',
+            args: [
+              [
+                [0, 0],
+                [0, 0],
+              ],
+              [
+                [1, 2],
+                [3, 4],
+              ],
+            ],
+            expected: [
+              [0, 0],
+              [0, 0],
+            ],
+          },
+          {
+            name: 'different_dimensions',
+            args: [[[1, 2, 3, 4]], [[1], [1], [1], [1]]],
+            expected: [[10]],
+          },
         ],
       },
-      {
-        name: 'vector_multiply',
-        args: [[[1, 2, 3]], [[4], [5], [6]]],
-        expected: [[32]],
-      },
-      {
-        name: 'rectangular',
-        args: [
-          [
-            [1, 2],
-            [3, 4],
-            [5, 6],
-          ],
-          [
-            [10, 20, 30, 40],
-            [50, 60, 70, 80],
-          ],
-        ],
-        expected: [
-          [110, 140, 170, 200],
-          [230, 300, 370, 440],
-          [350, 460, 570, 680],
-        ],
-      },
-      {
-        name: 'identity',
-        args: [
-          [
-            [1, 0],
-            [0, 1],
-          ],
-          [
-            [5, 6],
-            [7, 8],
-          ],
-        ],
-        expected: [
-          [5, 6],
-          [7, 8],
-        ],
-      },
-      {
-        name: 'single_element',
-        args: [[[3]], [[7]]],
-        expected: [[21]],
-      },
-      {
-        name: 'zero_matrix',
-        args: [
-          [
-            [0, 0],
-            [0, 0],
-          ],
-          [
-            [1, 2],
-            [3, 4],
-          ],
-        ],
-        expected: [
-          [0, 0],
-          [0, 0],
-        ],
-      },
-      {
-        name: 'different_dimensions',
-        args: [[[1, 2, 3, 4]], [[1], [1], [1], [1]]],
-        expected: [[10]],
-      },
-    ],
+    },
   },
   {
     id: 'greatest-common-divisor',
+    classId: ProblemClassId.ALGORITHMS,
     title: 'Greatest Common Divisor',
     difficulty: ProblemDifficulty.MEDIUM,
-    functionName: 'findGCD',
     description:
       'Write a function `findGCD(a, b)` that returns the greatest common divisor (GCD) of two positive integers. The GCD is the largest positive integer that divides both numbers without a remainder.',
     constraints: [
@@ -569,7 +602,11 @@ function multiplyMatrices(A, B) {
         explanation: '25 divides 100 exactly, so the GCD is 25.',
       },
     ],
-    starterCode: `/**
+    languages: {
+      javascript: {
+        kind: 'call',
+        functionName: 'findGCD',
+        starterCode: `/**
  * @param {number} a - First positive integer
  * @param {number} b - Second positive integer
  * @returns {number} The greatest common divisor of a and b
@@ -578,44 +615,46 @@ function findGCD(a, b) {
   // Your solution here
   
 }`,
-    tests: [
-      {
-        name: 'basic example',
-        args: [20, 15],
-        expected: 5,
+        tests: [
+          {
+            name: 'basic example',
+            args: [20, 15],
+            expected: 5,
+          },
+          {
+            name: 'larger numbers',
+            args: [48, 18],
+            expected: 6,
+          },
+          {
+            name: 'coprime numbers',
+            args: [17, 13],
+            expected: 1,
+          },
+          {
+            name: 'one divides other',
+            args: [100, 25],
+            expected: 25,
+          },
+          {
+            name: 'same numbers',
+            args: [42, 42],
+            expected: 42,
+          },
+          {
+            name: 'small numbers',
+            args: [12, 8],
+            expected: 4,
+          },
+        ],
       },
-      {
-        name: 'larger numbers',
-        args: [48, 18],
-        expected: 6,
-      },
-      {
-        name: 'coprime numbers',
-        args: [17, 13],
-        expected: 1,
-      },
-      {
-        name: 'one divides other',
-        args: [100, 25],
-        expected: 25,
-      },
-      {
-        name: 'same numbers',
-        args: [42, 42],
-        expected: 42,
-      },
-      {
-        name: 'small numbers',
-        args: [12, 8],
-        expected: 4,
-      },
-    ],
+    },
   },
   {
     id: 'binary-tree-height',
+    classId: ProblemClassId.ALGORITHMS,
     title: 'Binary Tree Height',
     difficulty: ProblemDifficulty.MEDIUM,
-    functionName: 'treeHeight',
     description:
       'Given the root node of a binary tree, return the height of the tree using recursion. Height is the number of levels on the longest path from the root down to a leaf. Return 0 for an empty tree.',
     constraints: [
@@ -636,7 +675,11 @@ function findGCD(a, b) {
         output: '3',
       },
     ],
-    starterCode: `/**
+    languages: {
+      javascript: {
+        kind: 'call',
+        functionName: 'treeHeight',
+        starterCode: `/**
  * @param {{ value: any, left: object|null, right: object|null }|null} root - Root node of the binary tree
  * @returns {number} Height of the tree measured in levels
  */
@@ -644,103 +687,129 @@ function treeHeight(root) {
   // Your solution here
   
 }`,
-    tests: [
-      {
-        name: 'balanced tree',
-        args: [
+        tests: [
           {
-            value: 1,
-            left: {
-              value: 2,
-              left: { value: 4, left: null, right: null },
-              right: { value: 5, left: null, right: null },
-            },
-            right: {
-              value: 3,
-              left: null,
-              right: { value: 6, left: null, right: null },
-            },
-          },
-        ],
-        expected: 3,
-      },
-      {
-        name: 'single node',
-        args: [
-          {
-            value: 10,
-            left: null,
-            right: null,
-          },
-        ],
-        expected: 1,
-      },
-      {
-        name: 'right skewed',
-        args: [
-          {
-            value: 4,
-            left: null,
-            right: {
-              value: 5,
-              left: null,
-              right: {
-                value: 6,
-                left: null,
+            name: 'balanced tree',
+            args: [
+              {
+                value: 1,
+                left: {
+                  value: 2,
+                  left: {
+                    value: 4,
+                    left: null,
+                    right: null,
+                  },
+                  right: {
+                    value: 5,
+                    left: null,
+                    right: null,
+                  },
+                },
                 right: {
-                  value: 7,
+                  value: 3,
                   left: null,
-                  right: null,
+                  right: {
+                    value: 6,
+                    left: null,
+                    right: null,
+                  },
                 },
               },
-            },
+            ],
+            expected: 3,
           },
-        ],
-        expected: 4,
-      },
-      {
-        name: 'empty tree',
-        args: [null],
-        expected: 0,
-      },
-      {
-        name: 'unbalanced left heavy',
-        args: [
           {
-            value: 8,
-            left: {
-              value: 3,
-              left: {
-                value: 1,
+            name: 'single node',
+            args: [
+              {
+                value: 10,
                 left: null,
                 right: null,
               },
-              right: {
-                value: 6,
-                left: { value: 4, left: null, right: null },
-                right: { value: 7, left: null, right: null },
+            ],
+            expected: 1,
+          },
+          {
+            name: 'right skewed',
+            args: [
+              {
+                value: 4,
+                left: null,
+                right: {
+                  value: 5,
+                  left: null,
+                  right: {
+                    value: 6,
+                    left: null,
+                    right: {
+                      value: 7,
+                      left: null,
+                      right: null,
+                    },
+                  },
+                },
               },
-            },
-            right: {
-              value: 10,
-              left: null,
-              right: {
-                value: 14,
-                left: { value: 13, left: null, right: null },
-                right: null,
+            ],
+            expected: 4,
+          },
+          {
+            name: 'empty tree',
+            args: [null],
+            expected: 0,
+          },
+          {
+            name: 'unbalanced left heavy',
+            args: [
+              {
+                value: 8,
+                left: {
+                  value: 3,
+                  left: {
+                    value: 1,
+                    left: null,
+                    right: null,
+                  },
+                  right: {
+                    value: 6,
+                    left: {
+                      value: 4,
+                      left: null,
+                      right: null,
+                    },
+                    right: {
+                      value: 7,
+                      left: null,
+                      right: null,
+                    },
+                  },
+                },
+                right: {
+                  value: 10,
+                  left: null,
+                  right: {
+                    value: 14,
+                    left: {
+                      value: 13,
+                      left: null,
+                      right: null,
+                    },
+                    right: null,
+                  },
+                },
               },
-            },
+            ],
+            expected: 4,
           },
         ],
-        expected: 4,
       },
-    ],
+    },
   },
   {
     id: 'closest-pair-of-points',
+    classId: ProblemClassId.ALGORITHMS,
     title: 'Closest Pair of Points',
     difficulty: ProblemDifficulty.MEDIUM,
-    functionName: 'findClosestPair',
     description:
       'Given an array of 2D points, write a function `findClosestPair(points)` that finds the pair of points with the smallest distance between them. Return a string describing the result in the format: "closest points are index i and j coords: (x1,y1) and (x2,y2)".',
     constraints: [
@@ -762,7 +831,11 @@ function treeHeight(root) {
         explanation: 'Points [1, 1] and [2, 2] are closest.',
       },
     ],
-    starterCode: `/**
+    languages: {
+      javascript: {
+        kind: 'call',
+        functionName: 'findClosestPair',
+        starterCode: `/**
  * @param {number[][]} points - Array of 2D points represented as [x, y]
  * @returns {string} String describing the closest pair with indices and coordinates
  */
@@ -770,71 +843,73 @@ function findClosestPair(points) {
   // Your solution here
   
 }`,
-    tests: [
-      {
-        name: 'basic example',
-        args: [
-          [
-            [0, 0],
-            [5, 4],
-            [3, 1],
-            [10, 10],
-            [6, 2],
-          ],
+        tests: [
+          {
+            name: 'basic example',
+            args: [
+              [
+                [0, 0],
+                [5, 4],
+                [3, 1],
+                [10, 10],
+                [6, 2],
+              ],
+            ],
+            expected: 'closest points are index 1 and 4 coords: (5,4) and (6,2)',
+          },
+          {
+            name: 'three points',
+            args: [
+              [
+                [1, 1],
+                [4, 4],
+                [2, 2],
+              ],
+            ],
+            expected: 'closest points are index 0 and 2 coords: (1,1) and (2,2)',
+          },
+          {
+            name: 'two points only',
+            args: [
+              [
+                [0, 0],
+                [1, 0],
+              ],
+            ],
+            expected: 'closest points are index 0 and 1 coords: (0,0) and (1,0)',
+          },
+          {
+            name: 'negative coordinates',
+            args: [
+              [
+                [-1, -1],
+                [1, 1],
+                [0, 0],
+              ],
+            ],
+            expected: 'closest points are index 0 and 2 coords: (-1,-1) and (0,0)',
+          },
+          {
+            name: 'same x coordinate',
+            args: [
+              [
+                [2, 0],
+                [2, 3],
+                [2, 1],
+                [5, 5],
+              ],
+            ],
+            expected: 'closest points are index 0 and 2 coords: (2,0) and (2,1)',
+          },
         ],
-        expected: 'closest points are index 1 and 4 coords: (5,4) and (6,2)',
       },
-      {
-        name: 'three points',
-        args: [
-          [
-            [1, 1],
-            [4, 4],
-            [2, 2],
-          ],
-        ],
-        expected: 'closest points are index 0 and 2 coords: (1,1) and (2,2)',
-      },
-      {
-        name: 'two points only',
-        args: [
-          [
-            [0, 0],
-            [1, 0],
-          ],
-        ],
-        expected: 'closest points are index 0 and 1 coords: (0,0) and (1,0)',
-      },
-      {
-        name: 'negative coordinates',
-        args: [
-          [
-            [-1, -1],
-            [1, 1],
-            [0, 0],
-          ],
-        ],
-        expected: 'closest points are index 0 and 2 coords: (-1,-1) and (0,0)',
-      },
-      {
-        name: 'same x coordinate',
-        args: [
-          [
-            [2, 0],
-            [2, 3],
-            [2, 1],
-            [5, 5],
-          ],
-        ],
-        expected: 'closest points are index 0 and 2 coords: (2,0) and (2,1)',
-      },
-    ],
+    },
   },
   {
     id: 'word-search-matrix',
+    classId: ProblemClassId.ALGORITHMS,
     title: 'Word Search in Matrix',
     difficulty: ProblemDifficulty.HARD,
-    functionName: 'searchWord',
     description:
       'Write a function `searchWord(pattern, matrix)` that searches for a given pattern (string) in a 2D character matrix. The pattern can be found in 8 directions. If found, return "found at (row, column) from direction". If not found, return "not found".',
     constraints: [
@@ -862,7 +937,11 @@ function findClosestPair(points) {
         explanation: 'The word "xyz" cannot be found in any direction.',
       },
     ],
-    starterCode: `/**
+    languages: {
+      javascript: {
+        kind: 'call',
+        functionName: 'searchWord',
+        starterCode: `/**
  * @param {string} pattern - The word/pattern to search for
  * @param {string[][]} matrix - 2D array of characters
  * @returns {string} "found at (row, column) from direction" or "not found"
@@ -871,184 +950,186 @@ function searchWord(pattern, matrix) {
   // Your solution here
   
 }`,
-    tests: [
-      {
-        name: 'horizontal left to right',
-        args: [
-          'hello',
-          [
-            ['h', 'e', 'l', 'l', 'o'],
-            ['w', 'o', 'r', 'l', 'd'],
-          ],
+        tests: [
+          {
+            name: 'horizontal left to right',
+            args: [
+              'hello',
+              [
+                ['h', 'e', 'l', 'l', 'o'],
+                ['w', 'o', 'r', 'l', 'd'],
+              ],
+            ],
+            expected: 'found at (0, 0) from left to right',
+          },
+          {
+            name: 'horizontal right to left',
+            args: [
+              'olleh',
+              [
+                ['h', 'e', 'l', 'l', 'o'],
+                ['w', 'o', 'r', 'l', 'd'],
+              ],
+            ],
+            expected: 'found at (0, 4) from right to left',
+          },
+          {
+            name: 'vertical top to bottom',
+            args: [
+              'hw',
+              [
+                ['h', 'e', 'l'],
+                ['w', 'o', 'r'],
+                ['z', 'x', 'y'],
+              ],
+            ],
+            expected: 'found at (0, 0) from top to bottom',
+          },
+          {
+            name: 'vertical bottom to top',
+            args: [
+              'wh',
+              [
+                ['h', 'e', 'l'],
+                ['w', 'o', 'r'],
+                ['z', 'x', 'y'],
+              ],
+            ],
+            expected: 'found at (1, 0) from bottom to top',
+          },
+          {
+            name: 'diagonal top-left to bottom-right',
+            args: [
+              'cat',
+              [
+                ['c', 'x', 'z', 'p'],
+                ['y', 'a', 'q', 'r'],
+                ['m', 'n', 't', 's'],
+                ['u', 'v', 'w', 'k'],
+              ],
+            ],
+            expected: 'found at (0, 0) from top-left to bottom-right',
+          },
+          {
+            name: 'diagonal top-right to bottom-left',
+            args: [
+              'dog',
+              [
+                ['x', 'y', 'z', 'd'],
+                ['a', 'b', 'o', 'c'],
+                ['e', 'g', 'f', 'h'],
+                ['i', 'j', 'k', 'l'],
+              ],
+            ],
+            expected: 'found at (0, 3) from top-right to bottom-left',
+          },
+          {
+            name: 'diagonal bottom-left to top-right',
+            args: [
+              'fun',
+              [
+                ['a', 'b', 'n', 'd'],
+                ['e', 'u', 'g', 'h'],
+                ['f', 'j', 'k', 'l'],
+                ['m', 'o', 'p', 'q'],
+              ],
+            ],
+            expected: 'found at (2, 0) from bottom-left to top-right',
+          },
+          {
+            name: 'diagonal bottom-right to top-left',
+            args: [
+              'joy',
+              [
+                ['y', 'b', 'c', 'd'],
+                ['e', 'o', 'g', 'h'],
+                ['i', 'j', 'j', 'l'],
+                ['m', 'n', 'p', 'q'],
+              ],
+            ],
+            expected: 'found at (2, 2) from bottom-right to top-left',
+          },
+          {
+            name: 'word at edge - horizontal',
+            args: [
+              'edge',
+              [
+                ['a', 'b', 'c', 'd'],
+                ['e', 'd', 'g', 'e'],
+                ['f', 'g', 'h', 'i'],
+              ],
+            ],
+            expected: 'found at (1, 0) from left to right',
+          },
+          {
+            name: 'word at corner - diagonal',
+            args: [
+              'ace',
+              [
+                ['a', 'x', 'y'],
+                ['z', 'c', 'w'],
+                ['q', 'r', 'e'],
+              ],
+            ],
+            expected: 'found at (0, 0) from top-left to bottom-right',
+          },
+          {
+            name: 'overlapping letters different direction',
+            args: [
+              'sun',
+              [
+                ['s', 'a', 'b'],
+                ['u', 't', 'c'],
+                ['n', 'e', 'f'],
+              ],
+            ],
+            expected: 'found at (0, 0) from top to bottom',
+          },
+          {
+            name: 'pattern not found',
+            args: [
+              'xyz',
+              [
+                ['h', 'e', 'l', 'l', 'o'],
+                ['w', 'o', 'r', 'l', 'd'],
+              ],
+            ],
+            expected: 'not found',
+          },
+          {
+            name: 'empty pattern edge case',
+            args: [
+              '',
+              [
+                ['a', 'b'],
+                ['c', 'd'],
+              ],
+            ],
+            expected: 'not found',
+          },
+          {
+            name: 'longer word reverse diagonal',
+            args: [
+              'magic',
+              [
+                ['x', 'y', 'z', 'w', 'm'],
+                ['a', 'b', 'c', 'a', 'q'],
+                ['p', 'q', 'g', 'r', 's'],
+                ['t', 'i', 'u', 'v', 'w'],
+                ['c', 'x', 'y', 'z', 'a'],
+              ],
+            ],
+            expected: 'found at (0, 4) from top-right to bottom-left',
+          },
         ],
-        expected: 'found at (0, 0) from left to right',
       },
-      {
-        name: 'horizontal right to left',
-        args: [
-          'olleh',
-          [
-            ['h', 'e', 'l', 'l', 'o'],
-            ['w', 'o', 'r', 'l', 'd'],
-          ],
-        ],
-        expected: 'found at (0, 4) from right to left',
-      },
-      {
-        name: 'vertical top to bottom',
-        args: [
-          'hw',
-          [
-            ['h', 'e', 'l'],
-            ['w', 'o', 'r'],
-            ['z', 'x', 'y'],
-          ],
-        ],
-        expected: 'found at (0, 0) from top to bottom',
-      },
-      {
-        name: 'vertical bottom to top',
-        args: [
-          'wh',
-          [
-            ['h', 'e', 'l'],
-            ['w', 'o', 'r'],
-            ['z', 'x', 'y'],
-          ],
-        ],
-        expected: 'found at (1, 0) from bottom to top',
-      },
-      {
-        name: 'diagonal top-left to bottom-right',
-        args: [
-          'cat',
-          [
-            ['c', 'x', 'z', 'p'],
-            ['y', 'a', 'q', 'r'],
-            ['m', 'n', 't', 's'],
-            ['u', 'v', 'w', 'k'],
-          ],
-        ],
-        expected: 'found at (0, 0) from top-left to bottom-right',
-      },
-      {
-        name: 'diagonal top-right to bottom-left',
-        args: [
-          'dog',
-          [
-            ['x', 'y', 'z', 'd'],
-            ['a', 'b', 'o', 'c'],
-            ['e', 'g', 'f', 'h'],
-            ['i', 'j', 'k', 'l'],
-          ],
-        ],
-        expected: 'found at (0, 3) from top-right to bottom-left',
-      },
-      {
-        name: 'diagonal bottom-left to top-right',
-        args: [
-          'fun',
-          [
-            ['a', 'b', 'n', 'd'],
-            ['e', 'u', 'g', 'h'],
-            ['f', 'j', 'k', 'l'],
-            ['m', 'o', 'p', 'q'],
-          ],
-        ],
-        expected: 'found at (2, 0) from bottom-left to top-right',
-      },
-      {
-        name: 'diagonal bottom-right to top-left',
-        args: [
-          'joy',
-          [
-            ['y', 'b', 'c', 'd'],
-            ['e', 'o', 'g', 'h'],
-            ['i', 'j', 'j', 'l'],
-            ['m', 'n', 'p', 'q'],
-          ],
-        ],
-        expected: 'found at (2, 2) from bottom-right to top-left',
-      },
-      {
-        name: 'word at edge - horizontal',
-        args: [
-          'edge',
-          [
-            ['a', 'b', 'c', 'd'],
-            ['e', 'd', 'g', 'e'],
-            ['f', 'g', 'h', 'i'],
-          ],
-        ],
-        expected: 'found at (1, 0) from left to right',
-      },
-      {
-        name: 'word at corner - diagonal',
-        args: [
-          'ace',
-          [
-            ['a', 'x', 'y'],
-            ['z', 'c', 'w'],
-            ['q', 'r', 'e'],
-          ],
-        ],
-        expected: 'found at (0, 0) from top-left to bottom-right',
-      },
-      {
-        name: 'overlapping letters different direction',
-        args: [
-          'sun',
-          [
-            ['s', 'a', 'b'],
-            ['u', 't', 'c'],
-            ['n', 'e', 'f'],
-          ],
-        ],
-        expected: 'found at (0, 0) from top to bottom',
-      },
-      {
-        name: 'pattern not found',
-        args: [
-          'xyz',
-          [
-            ['h', 'e', 'l', 'l', 'o'],
-            ['w', 'o', 'r', 'l', 'd'],
-          ],
-        ],
-        expected: 'not found',
-      },
-      {
-        name: 'empty pattern edge case',
-        args: [
-          '',
-          [
-            ['a', 'b'],
-            ['c', 'd'],
-          ],
-        ],
-        expected: 'not found',
-      },
-      {
-        name: 'longer word reverse diagonal',
-        args: [
-          'magic',
-          [
-            ['x', 'y', 'z', 'w', 'm'],
-            ['a', 'b', 'c', 'a', 'q'],
-            ['p', 'q', 'g', 'r', 's'],
-            ['t', 'i', 'u', 'v', 'w'],
-            ['c', 'x', 'y', 'z', 'a'],
-          ],
-        ],
-        expected: 'found at (0, 4) from top-right to bottom-left',
-      },
-    ],
+    },
   },
   {
     id: 'string-pattern-matching',
+    classId: ProblemClassId.ALGORITHMS,
     title: 'Brute Force String Pattern Matching',
     difficulty: ProblemDifficulty.MEDIUM,
-    functionName: 'findPattern',
     description:
       'Write a function `findPattern(pattern, text)` that searches for a given pattern (substring) within a larger text string. Return "Found" if the pattern exists as a substring in the text, otherwise return "Not found".',
     constraints: [
@@ -1076,7 +1157,11 @@ function searchWord(pattern, matrix) {
         explanation: 'The pattern "test" exists in "this is a test case".',
       },
     ],
-    starterCode: `/**
+    languages: {
+      javascript: {
+        kind: 'call',
+        functionName: 'findPattern',
+        starterCode: `/**
  * @param {string} pattern - The pattern/substring to search for
  * @param {string} text - The text to search within
  * @returns {string} "Found" if pattern exists in text, "Not found" otherwise
@@ -1085,56 +1170,447 @@ function findPattern(pattern, text) {
   // Your solution here
   
 }`,
-    tests: [
+        tests: [
+          {
+            name: 'pattern at end',
+            args: ['hello', 'nnnhello'],
+            expected: 'Found',
+          },
+          {
+            name: 'pattern not found',
+            args: ['world', 'hello there'],
+            expected: 'Not found',
+          },
+          {
+            name: 'pattern in middle',
+            args: ['test', 'this is a test case'],
+            expected: 'Found',
+          },
+          {
+            name: 'pattern at beginning',
+            args: ['hello', 'hello world'],
+            expected: 'Found',
+          },
+          {
+            name: 'pattern equals text',
+            args: ['abc', 'abc'],
+            expected: 'Found',
+          },
+          {
+            name: 'pattern longer than text',
+            args: ['hello', 'hi'],
+            expected: 'Not found',
+          },
+          {
+            name: 'empty pattern',
+            args: ['', 'hello'],
+            expected: 'Found',
+          },
+          {
+            name: 'case sensitive',
+            args: ['Hello', 'hello world'],
+            expected: 'Not found',
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: 'prime-factorization',
+    classId: ProblemClassId.JAVA_FUNDAMENTALS,
+    title: 'Prime Factorization',
+    difficulty: ProblemDifficulty.EASY,
+    description:
+      'Read a single positive integer from stdin. Print all of its prime factors in ascending order on one line, separated by " * " (space, star, space).',
+    constraints: [
+      'Input is a single positive integer on one line',
+      'Print the factors in ascending order',
+      'Separate factors with a single space, a star, and a single space',
+    ],
+    examples: [
       {
-        name: 'pattern at end',
-        args: ['hello', 'nnnhello'],
-        expected: 'Found',
+        input: '360',
+        output: '2 * 2 * 2 * 3 * 3 * 5',
       },
       {
-        name: 'pattern not found',
-        args: ['world', 'hello there'],
-        expected: 'Not found',
-      },
-      {
-        name: 'pattern in middle',
-        args: ['test', 'this is a test case'],
-        expected: 'Found',
-      },
-      {
-        name: 'pattern at beginning',
-        args: ['hello', 'hello world'],
-        expected: 'Found',
-      },
-      {
-        name: 'pattern equals text',
-        args: ['abc', 'abc'],
-        expected: 'Found',
-      },
-      {
-        name: 'pattern longer than text',
-        args: ['hello', 'hi'],
-        expected: 'Not found',
-      },
-      {
-        name: 'empty pattern',
-        args: ['', 'hello'],
-        expected: 'Found',
-      },
-      {
-        name: 'case sensitive',
-        args: ['Hello', 'hello world'],
-        expected: 'Not found',
+        input: '14',
+        output: '2 * 7',
       },
     ],
+    languages: {
+      java: {
+        kind: 'stdio',
+        starterCode: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Your solution here
+
+    }
+}
+`,
+        tests: [
+          {
+            name: 'input 360',
+            stdin: '360\n',
+            expectedOutput: '2 * 2 * 2 * 3 * 3 * 5',
+          },
+          {
+            name: 'input 14',
+            stdin: '14\n',
+            expectedOutput: '2 * 7',
+          },
+          {
+            name: 'input 32',
+            stdin: '32\n',
+            expectedOutput: '2 * 2 * 2 * 2 * 2',
+          },
+          {
+            name: 'input 1001',
+            stdin: '1001\n',
+            expectedOutput: '7 * 11 * 13',
+          },
+          {
+            name: 'input 10000',
+            stdin: '10000\n',
+            expectedOutput: '2 * 2 * 2 * 2 * 5 * 5 * 5 * 5',
+          },
+          {
+            name: 'input 210',
+            stdin: '210\n',
+            expectedOutput: '2 * 3 * 5 * 7',
+          },
+          {
+            name: 'input 81',
+            stdin: '81\n',
+            expectedOutput: '3 * 3 * 3 * 3',
+          },
+          {
+            name: 'input 19946',
+            stdin: '19946\n',
+            expectedOutput: '2 * 9973',
+          },
+          {
+            name: 'input 11021',
+            stdin: '11021\n',
+            expectedOutput: '103 * 107',
+          },
+          {
+            name: 'input 3628800',
+            stdin: '3628800\n',
+            expectedOutput: '2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 3 * 3 * 3 * 3 * 5 * 5 * 7',
+          },
+          {
+            name: 'input 111111',
+            stdin: '111111\n',
+            expectedOutput: '3 * 7 * 11 * 13 * 37',
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: 'string-combination',
+    classId: ProblemClassId.JAVA_FUNDAMENTALS,
+    title: 'String Combination',
+    difficulty: ProblemDifficulty.EASY,
+    description:
+      'Read two lines from stdin. Reverse the second string, then build the output by alternating characters: the first character of string 1, the first character of the reversed string 2, the second character of string 1, and so on. Once one side runs out of characters, append the rest of the other side as-is.',
+    constraints: [
+      'Read whole lines (inputs may contain spaces)',
+      'Reverse the second string before interleaving',
+      'Append the remaining characters once one side is exhausted',
+    ],
+    examples: [
+      {
+        input: 'ABCD\n1234',
+        output: 'A4B3C2D1',
+      },
+    ],
+    languages: {
+      java: {
+        kind: 'stdio',
+        starterCode: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Your solution here
+
+    }
+}
+`,
+        tests: [
+          {
+            name: 'ABCD / 1234',
+            stdin: 'ABCD\n1234\n',
+            expectedOutput: 'A4B3C2D1',
+          },
+          {
+            name: 'Programming / Java',
+            stdin: 'Programming\nJava\n',
+            expectedOutput: 'ParvoagJramming',
+          },
+          {
+            name: 'A / IsTheFirstAlphabet InEnglish',
+            stdin: 'A\nIsTheFirstAlphabet InEnglish\n',
+            expectedOutput: 'AhsilgnEnI tebahplAtsriFehTsI',
+          },
+          {
+            name: 'YouGood??? / symbols',
+            stdin: 'YouGood???\n$#%&&@#@#%&#@$&\n',
+            expectedOutput: 'Y&o$u@G#o&o%d#?@?#?@&&%#$',
+          },
+          {
+            name: '1234 / abcdefghijk',
+            stdin: '1234\nabcdefghijk\n',
+            expectedOutput: '1k2j3i4hgfedcba',
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: 'molecular-mass',
+    classId: ProblemClassId.JAVA_FUNDAMENTALS,
+    title: 'Molecular Mass',
+    difficulty: ProblemDifficulty.MEDIUM,
+    description:
+      'Read a chemical formula from stdin and print its total molecular mass. Atomic masses: H = 1, C = 12, O = 16. A letter with no trailing number counts once; numbers may have multiple digits. If the formula contains anything else (an atom other than H/C/O, a lowercase letter, or a symbol), print exactly "Error".',
+    constraints: [
+      'Only H, C, and O are valid atoms',
+      "A number immediately after a letter is that atom's count; no number means a count of 1",
+      'Any unknown atom, lowercase letter, or symbol means the answer is exactly "Error"',
+    ],
+    examples: [
+      {
+        input: 'C2H5OH',
+        output: '46',
+      },
+      {
+        input: 'H2SO4',
+        output: 'Error',
+      },
+    ],
+    languages: {
+      java: {
+        kind: 'stdio',
+        starterCode: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Your solution here
+
+    }
+}
+`,
+        tests: [
+          {
+            name: 'H2O',
+            stdin: 'H2O\n',
+            expectedOutput: '18',
+          },
+          {
+            name: 'CO',
+            stdin: 'CO\n',
+            expectedOutput: '28',
+          },
+          {
+            name: 'O',
+            stdin: 'O\n',
+            expectedOutput: '16',
+          },
+          {
+            name: 'O2',
+            stdin: 'O2\n',
+            expectedOutput: '32',
+          },
+          {
+            name: 'C6H12O6',
+            stdin: 'C6H12O6\n',
+            expectedOutput: '180',
+          },
+          {
+            name: 'C100',
+            stdin: 'C100\n',
+            expectedOutput: '1200',
+          },
+          {
+            name: 'C2H5OH',
+            stdin: 'C2H5OH\n',
+            expectedOutput: '46',
+          },
+          {
+            name: 'unknown atom S',
+            stdin: 'H2SO4\n',
+            expectedOutput: 'Error',
+          },
+          {
+            name: 'lowercase',
+            stdin: 'h2o\n',
+            expectedOutput: 'Error',
+          },
+          {
+            name: 'symbol',
+            stdin: 'H2O!\n',
+            expectedOutput: 'Error',
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: 'box-office-revenue',
+    classId: ProblemClassId.JAVA_FUNDAMENTALS,
+    title: 'Box Office Revenue',
+    difficulty: ProblemDifficulty.MEDIUM,
+    description:
+      'Read n (fans in line) then the revenue target, on separate lines. Fans are numbered 1..n. Before serving each fan, stop if revenue has already reached the target. Otherwise: a fan who is a multiple of both 3 and 7 buys a Golden Ticket (revenue -$20); a multiple of 7 only buys a Backstage Pass ($150); a multiple of 3 only buys a Premium ticket ($80); anyone else buys a Standard ticket ($50). Print the final revenue prefixed with "$" on line 1, then the number of fans served on line 2.',
+    constraints: [
+      'Process fans in order starting from 1',
+      'Stop before serving a fan once revenue has already reached the target',
+      'Golden Ticket (3 and 7): -$20. Backstage Pass (7 only): $150. Premium (3 only): $80. Standard: $50',
+    ],
+    examples: [
+      {
+        input: '10\n300',
+        output: '$360\n6',
+      },
+    ],
+    languages: {
+      java: {
+        kind: 'stdio',
+        starterCode: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Your solution here
+
+    }
+}
+`,
+        tests: [
+          {
+            name: '10 fans, target 300',
+            stdin: '10\n300\n',
+            expectedOutput: '$360\n6',
+          },
+          {
+            name: '25 fans, target 1500',
+            stdin: '25\n1500\n',
+            expectedOutput: '$1540\n24',
+          },
+          {
+            name: '5 fans, target 1000',
+            stdin: '5\n1000\n',
+            expectedOutput: '$280\n5',
+          },
+          {
+            name: '10 fans, target 230',
+            stdin: '10\n230\n',
+            expectedOutput: '$230\n4',
+          },
+          {
+            name: '10 fans, target 500',
+            stdin: '10\n500\n',
+            expectedOutput: '$510\n7',
+          },
+          {
+            name: '30 fans, target 1400',
+            stdin: '30\n1400\n',
+            expectedOutput: '$1410\n22',
+          },
+          {
+            name: '1 fan, target 200',
+            stdin: '1\n200\n',
+            expectedOutput: '$50\n1',
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: 'seating-chart',
+    classId: ProblemClassId.JAVA_FUNDAMENTALS,
+    title: 'Seating Chart',
+    difficulty: ProblemDifficulty.MEDIUM,
+    description:
+      'Read R (rows) then C (seats per row), on separate lines. Rows and seats are numbered starting from 1. Categorize each seat by the first matching rule: row 1 is a Vantage seat (V, $100); the first or last seat in a row is an Aisle seat (A, $75); a seat where the row number equals the seat number is a Lucky seat (L, $50); everything else is a Standard seat (S, $30). Print the seating map (one row per line, seats separated by a single space), then a line reading "Total Potential Revenue: $<sum>".',
+    constraints: [
+      'Apply the rules in this order: Vantage, then Aisle, then Lucky, then Standard',
+      'Row 1 is always entirely Vantage seats',
+      'Print one venue row per output line, seats separated by a single space',
+    ],
+    examples: [
+      {
+        input: '4\n5',
+        output: 'V V V V V\nA L S S A\nA S L S A\nA S S L A\nTotal Potential Revenue: $1280',
+      },
+    ],
+    languages: {
+      java: {
+        kind: 'stdio',
+        starterCode: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Your solution here
+
+    }
+}
+`,
+        tests: [
+          {
+            name: '4 rows, 5 seats',
+            stdin: '4\n5\n',
+            expectedOutput:
+              'V V V V V\nA L S S A\nA S L S A\nA S S L A\nTotal Potential Revenue: $1280',
+          },
+          {
+            name: '3 rows, 3 seats',
+            stdin: '3\n3\n',
+            expectedOutput: 'V V V\nA L A\nA S A\nTotal Potential Revenue: $680',
+          },
+          {
+            name: '4 rows, 4 seats',
+            stdin: '4\n4\n',
+            expectedOutput: 'V V V V\nA L S A\nA S L A\nA S S A\nTotal Potential Revenue: $1070',
+          },
+          {
+            name: '1 row, 1 seat',
+            stdin: '1\n1\n',
+            expectedOutput: 'V\nTotal Potential Revenue: $100',
+          },
+          {
+            name: '5 rows, 1 seat',
+            stdin: '5\n1\n',
+            expectedOutput: 'V\nA\nA\nA\nA\nTotal Potential Revenue: $400',
+          },
+          {
+            name: '1 row, 6 seats',
+            stdin: '1\n6\n',
+            expectedOutput: 'V V V V V V\nTotal Potential Revenue: $600',
+          },
+          {
+            name: '3 rows, 6 seats',
+            stdin: '3\n6\n',
+            expectedOutput: 'V V V V V V\nA L S S S A\nA S L S S A\nTotal Potential Revenue: $1180',
+          },
+          {
+            name: '5 rows, 3 seats',
+            stdin: '5\n3\n',
+            expectedOutput: 'V V V\nA L A\nA S A\nA S A\nA S A\nTotal Potential Revenue: $1040',
+          },
+        ],
+      },
+    },
   },
 ];
 
-/**
- * Get problem by ID
- * @param {string} id - Problem identifier
- * @returns {Problem|null} Problem or null if not found
- */
 export const getProblem = (id: string, options: { includeHidden?: boolean } = {}) => {
   const { includeHidden = false } = options;
   const problem = problems.find((p) => p.id === id) || null;
@@ -1146,10 +1622,6 @@ export const getProblem = (id: string, options: { includeHidden?: boolean } = {}
   return problem;
 };
 
-/**
- * Get all available problems
- * @returns {Array<Problem>} All problems
- */
 export const getAllProblems = (options: { includeHidden?: boolean } = {}) => {
   const { includeHidden = false } = options;
 
@@ -1160,11 +1632,9 @@ export const getAllProblems = (options: { includeHidden?: boolean } = {}) => {
   return problems.filter(isProblemVisible);
 };
 
-/**
- * Sort problems by difficulty level
- * @param {boolean} hardestFirst - If true, sorts from hardest to easiest. If false, sorts from easiest to hardest
- * @returns {Array<Problem>} Sorted problems array
- */
+export const getProblemsByClass = (classId: string, options: { includeHidden?: boolean } = {}) =>
+  getAllProblems(options).filter((p) => p.classId === classId);
+
 export const getSortedProblems = (
   hardestFirst = false,
   options: { includeHidden?: boolean; problems?: Problem[] } = {},
