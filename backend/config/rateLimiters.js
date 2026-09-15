@@ -84,6 +84,19 @@ const uploadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Code execution limiter - 20 runs per 5 minutes per IP (each run costs real
+// compute on the Judge0 sandbox, so it's kept tight like secretLimiter)
+const codingLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 20,
+  message: {
+    error: 'Too many code runs from this IP, please slow down.',
+    retryAfter: '5 minutes',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export {
   standardLimiter,
   postLimiter,
@@ -92,4 +105,5 @@ export {
   authLimiter,
   secretLimiter,
   uploadLimiter,
+  codingLimiter,
 };
