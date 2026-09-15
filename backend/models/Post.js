@@ -11,23 +11,20 @@ const postPopulate = (query) =>
 
 export const createPost = (data) => Post.create(data);
 
-export const countPosts = () => Post.countDocuments();
+export const countPosts = (filter = {}) => Post.countDocuments(filter);
 
-export const findPostsPaginated = ({ skip, limit }) =>
+export const findPostsPaginated = ({ skip, limit, filter = {} }) =>
   postPopulate(
-    Post.find(
-      {},
-      {
-        title: 1,
-        content: 1,
-        user: 1,
-        likes: 1,
-        comments: 1,
-        image: 1,
-        createdAt: 1,
-        updatedAt: 1,
-      },
-    )
+    Post.find(filter, {
+      title: 1,
+      content: 1,
+      user: 1,
+      likes: 1,
+      comments: 1,
+      image: 1,
+      createdAt: 1,
+      updatedAt: 1,
+    })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
