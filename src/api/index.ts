@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config/apiConfig';
-import { isAbortError, handleApiError } from '../utils/errorHandling';
+import { handleApiError } from '../utils/errorHandling';
 import { getToken } from '../utils/tokenStorage';
 
 const API = axios.create({
@@ -17,12 +17,7 @@ API.interceptors.request.use((req) => {
 
 API.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (!isAbortError(error) && process.env.NODE_ENV !== 'production') {
-      console.error('api error:', error.config?.url, error.response?.status);
-    }
-    return Promise.reject(handleApiError(error));
-  },
+  (error) => Promise.reject(handleApiError(error)),
 );
 
 // Wrapper extracts data, interceptor handles errors
