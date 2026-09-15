@@ -44,7 +44,7 @@ const useAuthBootstrap = () => {
         }
         clearAuthTokens();
         if (process.env.NODE_ENV !== 'production') {
-          console.error('Failed to fetch user data:', error);
+          console.warn('Failed to fetch user data:', error);
         }
       } finally {
         if (isActive) {
