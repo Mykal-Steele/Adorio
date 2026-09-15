@@ -217,7 +217,12 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getPosts(page, 12, abortControllerRef.current.signal);
+      const response = await getPosts(
+        page,
+        12,
+        abortControllerRef.current.signal,
+        filter === 'photos',
+      );
       const newPosts = response.posts || [];
       setPosts((prev) => (page === 1 ? newPosts : [...prev, ...newPosts]));
       setHasMore(response.hasMore);
@@ -233,11 +238,26 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
       setLoading(false);
       setIsFetchingMore(false);
     }
-  }, [page]);
+  }, [page, filter]);
 
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
+
+  // Switching filters queries a different set on the backend now (see fetchPosts),
+  // so the existing page needs to be thrown away and pagination restarted from
+  // page 1 for it — otherwise switching to Photos would either show a stale mix
+  // of results or try to append page 2 of the new filter onto page 1 of the old one.
+  const isFirstFilterRender = useRef(true);
+  useEffect(() => {
+    if (isFirstFilterRender.current) {
+      isFirstFilterRender.current = false;
+      return;
+    }
+    setPosts([]);
+    setPage(1);
+    setHasMore(true);
+  }, [filter]);
 
   useEffect(() => {
     return () => {
@@ -432,11 +452,6 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     }
   };
 
-  const filteredPosts = useMemo(
-    () => (filter === 'photos' ? posts.filter((p) => p.image) : posts),
-    [filter, posts],
-  );
-
   // Two fixed columns instead of a CSS multi-column layout: a native `column-width`
   // rebalances its entire contents from scratch whenever the total content changes,
   // which visibly moves already-rendered posts into a different column every time
@@ -444,17 +459,15 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
   // a newly loaded post only ever appends to the end of a column — it never moves
   // one that's already on screen.
   const postColumns = useMemo(() => {
-    const columns: { post: (typeof filteredPosts)[number]; index: number }[][] = [[], []];
-    filteredPosts.forEach((post, index) => {
+    const columns: { post: (typeof posts)[number]; index: number }[][] = [[], []];
+    posts.forEach((post, index) => {
       columns[index % 2].push({ post, index });
     });
     return columns;
-  }, [filteredPosts]);
+  }, [posts]);
 
   const countLabel =
-    filter === 'photos'
-      ? `${filteredPosts.length} with photos`
-      : `${posts.length} posts on the wall`;
+    filter === 'photos' ? `${posts.length} with photos` : `${posts.length} posts on the wall`;
 
   const newTodayCount = useMemo(() => {
     const startOfToday = new Date();
