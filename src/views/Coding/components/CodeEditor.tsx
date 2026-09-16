@@ -3,7 +3,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { EditorView, keymap } from '@codemirror/view';
 import { indentWithTab } from '@codemirror/commands';
 import { javascript, javascriptLanguage, scopeCompletionSource } from '@codemirror/lang-javascript';
-import { StreamLanguage } from '@codemirror/language';
+import { StreamLanguage, indentService } from '@codemirror/language';
 import { java } from '@codemirror/legacy-modes/mode/clike';
 import { autocompletion, closeBrackets } from '@codemirror/autocomplete';
 import { paperEditorTheme } from '../constants/editorTheme';
@@ -15,6 +15,34 @@ const javaLanguage = StreamLanguage.define(java);
 // .data.of(...) only builds the extension — it still has to be in the
 // editor's `extensions` array below to actually take effect.
 const javaCompletions = javaLanguage.data.of({ autocomplete: javaCompletionSource });
+
+// The legacy CM5-style clike mode's own indent() is a rough brace-tracking
+// heuristic that regularly gets Enter-on-a-plain-statement wrong (dedents to
+// the enclosing block instead of matching the line above, like every real
+// editor does). Overriding with an explicit indentService replaces it
+// outright: match the previous non-blank line's indent, add one level if
+// that line opens a brace/paren/bracket it doesn't also close on the same
+// line, and drop one level if the line being indented opens with a closer.
+const javaIndent = indentService.of((context, pos) => {
+  const currentLine = context.state.doc.lineAt(pos);
+  const closesFirst = /^\s*[)\]}]/.test(currentLine.text);
+
+  let prevLineNumber = currentLine.number - 1;
+  while (prevLineNumber >= 1 && context.state.doc.line(prevLineNumber).text.trim() === '') {
+    prevLineNumber--;
+  }
+  if (prevLineNumber < 1) return closesFirst ? 0 : context.unit;
+
+  const prevLine = context.state.doc.line(prevLineNumber);
+  const prevTrimmed = prevLine.text.trim();
+  const prevIndent = /^[ \t]*/.exec(prevLine.text)?.[0].length ?? 0;
+  const opens = (prevTrimmed.match(/[{([]/g) ?? []).length;
+  const closes = (prevTrimmed.match(/[)\]}]/g) ?? []).length;
+
+  let indent = prevIndent + (opens > closes ? context.unit : 0);
+  if (closesFirst) indent = Math.max(0, indent - context.unit);
+  return indent;
+});
 
 // globalThis introspection gets JS completions for every real built-in
 // (Array, Object, Math, console, JSON, ...) and their members, not a
@@ -56,6 +84,7 @@ const CodeEditor = ({
     () => [
       language === Language.JAVA ? javaLanguage : javascript({ jsx: false }),
       language === Language.JAVA ? javaCompletions : jsGlobalCompletions,
+      ...(language === Language.JAVA ? [javaIndent] : []),
       autocompletion({ activateOnTyping: true }),
       closeBrackets(),
       disableGrammarly,
