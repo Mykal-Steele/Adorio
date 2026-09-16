@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { EditorView, keymap } from '@codemirror/view';
+import { Annotation, Transaction } from '@codemirror/state';
 import { indentWithTab } from '@codemirror/commands';
 import { javascript, javascriptLanguage, scopeCompletionSource } from '@codemirror/lang-javascript';
 import { StreamLanguage, indentService } from '@codemirror/language';
@@ -8,6 +9,7 @@ import { java } from '@codemirror/legacy-modes/mode/clike';
 import { autocompletion, closeBrackets } from '@codemirror/autocomplete';
 import { paperEditorTheme } from '../constants/editorTheme';
 import { javaCompletionSource } from '../constants/javaCompletions';
+import { formatCode } from '../utils/formatCode';
 import { Language } from '../types';
 import LanguagePicker from './LanguagePicker';
 
@@ -52,10 +54,40 @@ const jsGlobalCompletions = javascriptLanguage.data.of({
   autocomplete: scopeCompletionSource(globalThis),
 });
 
-// Grammarly (and similar extensions) treat CodeMirror's contenteditable
-// surface as a normal text field and inject its own UI into it, which reads
-// user code as prose and clutters the editor. These are Grammarly's own
-// documented opt-out attributes, applied directly to the editable DOM node.
+// Plain lineWrapping only: the earlier hanging-wrap attempt (padding-left +
+// negative text-indent via line decorations) shifted the selection layer's
+// highlight rectangles off the text, producing the blocky misaligned
+// selection in the bug report. Wrapped continuation lines starting at
+// column 0 is the lesser evil — CodeMirror has no built-in hanging indent.
+// Marks our own auto-format transactions so the format-on-newline listener
+// below doesn't react to its own formatting dispatch in a loop.
+const autoFormat = Annotation.define<boolean>();
+
+// Formats the whole document whenever the user inserts a newline (Enter or
+// paste). Formatting only whitespace means the cursor maps cleanly through
+// the change, and it's kept out of the undo history so a single undo still
+// removes just the newline.
+const formatOnNewline = EditorView.updateListener.of((update) => {
+  if (!update.docChanged) return;
+  if (update.transactions.some((tr) => tr.annotation(autoFormat))) return;
+  if (!update.transactions.some((tr) => tr.isUserEvent('input'))) return;
+
+  let insertedNewline = false;
+  update.changes.iterChanges((_fromA, _toA, _fromB, _toB, inserted) => {
+    if (inserted.toString().includes('\n')) insertedNewline = true;
+  });
+  if (!insertedNewline) return;
+
+  const current = update.state.doc.toString();
+  const formatted = formatCode(current);
+  if (formatted === current) return;
+
+  update.view.dispatch({
+    changes: { from: 0, to: update.state.doc.length, insert: formatted },
+    annotations: [autoFormat.of(true), Transaction.addToHistory.of(false)],
+  });
+});
+
 const disableGrammarly = EditorView.contentAttributes.of({
   spellcheck: 'false',
   'data-gramm': 'false',
@@ -91,10 +123,26 @@ const CodeEditor = ({
       // Without this, a long line pushes the scroller (and its parent card)
       // wider instead of wrapping, so the page grows sideways past the fold.
       EditorView.lineWrapping,
+      formatOnNewline,
       // Tab isn't bound to indentation by default, CodeMirror leaves it free
       // for accessibility (focus can Tab away). Opting in here is fine since
       // this is a dedicated code editor, not a form field.
-      keymap.of([indentWithTab]),
+      keymap.of([
+        indentWithTab,
+        {
+          key: 'Shift-Alt-f',
+          run: (view) => {
+            const current = view.state.doc.toString();
+            const formatted = formatCode(current);
+            if (formatted !== current) {
+              view.dispatch({
+                changes: { from: 0, to: view.state.doc.length, insert: formatted },
+              });
+            }
+            return true;
+          },
+        },
+      ]),
     ],
     [language],
   );
@@ -112,11 +160,20 @@ const CodeEditor = ({
         <h2 id="editor-h" className="font-paper-hand text-2xl text-[var(--paper-accent)]">
           your solution
         </h2>
-        <LanguagePicker
-          languages={availableLanguages}
-          activeLanguage={language}
-          onSelect={onLanguageChange}
-        />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onChange(formatCode(code))}
+            title="Format code (Shift+Alt+F)"
+            className="rounded-[3px] border-[1.5px] border-dashed border-[rgba(60,44,24,.5)] px-3 py-1 font-paper-mono text-xs font-bold uppercase tracking-[.1em] text-[var(--paper-muted)] transition-colors hover:border-[var(--paper-accent-strong)] hover:bg-[var(--paper-yellow-soft)]"
+          >
+            Format
+          </button>
+          <LanguagePicker
+            languages={availableLanguages}
+            activeLanguage={language}
+            onSelect={onLanguageChange}
+          />
+        </div>
       </div>
       <div className="overflow-hidden rounded-[2px] border-[1.5px] border-[var(--paper-ink)]">
         <CodeMirror
