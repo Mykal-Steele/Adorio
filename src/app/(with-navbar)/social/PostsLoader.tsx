@@ -1,5 +1,6 @@
 import { serverFetch } from '@/lib/serverFetch';
 import Home from '@/views/Home';
+import { POSTS_PAGE_SIZE } from '@/views/Home/constants/feed';
 import type { Post } from '@/types';
 
 export default async function PostsLoader() {
@@ -8,7 +9,7 @@ export default async function PostsLoader() {
 
   try {
     const data = await serverFetch<{ posts: Post[]; hasMore: boolean }>(
-      '/api/posts?page=1&limit=3',
+      `/api/posts?page=1&limit=${POSTS_PAGE_SIZE}`,
       { cache: 'no-store' },
     );
     initialPosts = data.posts ?? [];
