@@ -150,6 +150,11 @@ const Practice = ({ classId }: PracticeProps) => {
       setResults(null);
       if (activeProblem && activeVariant && nextCode !== activeVariant.starterCode) {
         saveCodeDebounced(activeProblem.id, language, nextCode);
+      } else {
+        // Typed back to exactly the starter code before the debounce fired —
+        // otherwise the stale queued save would still land and persist code
+        // that's no longer on screen.
+        saveCodeDebounced.cancel();
       }
     },
     [activeProblem, activeVariant, language, invalidateActiveExecution],
