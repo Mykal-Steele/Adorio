@@ -6,6 +6,7 @@ import {
   authenticateUser,
   sanitizeUser,
   deleteUserAccount,
+  searchUsers,
 } from '../services/userService.js';
 import { createAuthTokens, verifyRefreshToken } from '../services/authService.js';
 
@@ -43,4 +44,16 @@ const deleteUserHandler = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
-export { getCurrentUser, registerUser, loginUser, refreshToken, deleteUserHandler };
+const searchUsersHandler = asyncHandler(async (req, res) => {
+  const users = await searchUsers(req.query);
+  res.status(200).json(users);
+});
+
+export {
+  getCurrentUser,
+  registerUser,
+  loginUser,
+  refreshToken,
+  deleteUserHandler,
+  searchUsersHandler,
+};

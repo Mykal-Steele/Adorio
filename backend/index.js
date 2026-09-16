@@ -15,6 +15,7 @@ import {
   registrationLimiter,
   authLimiter,
   uploadLimiter,
+  searchLimiter,
 } from './config/rateLimiters.js';
 import './config/cloudinary.js';
 import errorHandler from './middleware/errorHandler.js';
@@ -58,6 +59,7 @@ app.use('/api/users/refresh-token', (req, res, next) => {
   return next();
 });
 app.use('/api/posts/:id/like', likeLimiter);
+app.use('/api/users/search', searchLimiter);
 app.use('/api/posts', (req, res, next) => {
   if (req.method === 'POST') {
     return postLimiter(req, res, next);

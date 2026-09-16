@@ -15,6 +15,9 @@ export interface Comment {
   text: string;
   user: Pick<User, '_id' | 'username'>;
   createdAt: string;
+  parentId?: string | null;
+  depth?: number;
+  mentions?: Pick<User, '_id' | 'username'>[];
 }
 
 export interface Post {

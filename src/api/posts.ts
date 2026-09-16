@@ -58,10 +58,16 @@ export const likePost = async (postId, shouldBeLiked) => {
   return pendingRequests[postId];
 };
 
-export const addComment = (postId, commentText) =>
+export const addComment = (
+  postId,
+  commentText,
+  opts?: { parentId?: string | null; mentions?: string[] },
+) =>
   request(
     API.post(`/posts/${postId}/comment`, {
       text: commentText,
+      ...(opts?.parentId ? { parentId: opts.parentId } : {}),
+      ...(opts?.mentions?.length ? { mentions: opts.mentions } : {}),
     }),
   );
 
