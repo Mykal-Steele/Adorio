@@ -85,7 +85,7 @@ jobs:
           echo "VITE_GEMINI_API_KEY=${{ secrets.VITE_GEMINI_API_KEY }}" >> .env.production
           echo "PISTON_URL=${{ secrets.PISTON_URL }}" >> .env.production
           echo "PISTON_TOKEN=${{ secrets.PISTON_TOKEN }}" >> .env.production
-          echo "PISTON_CA_CERT=${{ secrets.PISTON_CA_CERT }}" >> .env.production
+          printf 'PISTON_CA_CERT="%s"\n' "${{ secrets.PISTON_CA_CERT }}" >> .env.production
       - name: Run integration tests
         run: npm run test:prod
 

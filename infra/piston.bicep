@@ -167,28 +167,68 @@ curl -fsSk -X POST "$BASE_URL/api/v2/packages" \
   -H "Content-Type: application/json" -H "$AUTH_HEADER" \
   -d "{\"language\": \"java\", \"version\": \"$JAVA_VERSION\"}"
 
-# The install call above can return 200 while the package is still unpacking —
-# poll /api/v2/runtimes until Java actually shows up as an installed runtime
-# before flipping /health to 200, so the load balancer never routes a Java
-# submission at an instance that isn't actually ready to grade one.
+# /health only reflects "was ready once at boot" if the readiness marker is
+# ever just written once and left alone — if Piston crashes or loses Java
+# after that, nginx would keep returning 200 forever and the load balancer
+# would keep routing submissions at a dead instance. This script re-checks
+# Piston live and is run both right now (blocking, until Java first comes up)
+# and on a recurring systemd timer below (ongoing, so /health tracks reality).
+cat > /opt/piston/healthcheck.sh <<'HEALTHCHECK_EOF'
+#!/bin/bash
+set -uo pipefail
+AUTH_HEADER="X-Auth-Token: __PISTON_AUTH_TOKEN__"
+BASE_URL="https://localhost:__PROXY_PORT__"
+READY_FILE="/opt/piston/status/ready"
+
+COUNT=$(curl -fsSk -H "$AUTH_HEADER" "$BASE_URL/api/v2/runtimes" 2>/dev/null \
+  | jq -r '[.[] | select(.language=="java")] | length' 2>/dev/null)
+
+if [ -n "$COUNT" ] && [ "$COUNT" -gt 0 ] 2>/dev/null; then
+  echo ok > "$READY_FILE"
+else
+  rm -f "$READY_FILE"
+fi
+HEALTHCHECK_EOF
+chmod +x /opt/piston/healthcheck.sh
+
 JAVA_READY=0
 for i in $(seq 1 60); do
-  if COUNT=$(curl -fsSk -H "$AUTH_HEADER" "$BASE_URL/api/v2/runtimes" \
-      | jq -r '[.[] | select(.language=="java")] | length' 2>/dev/null); then
-    if [ "$COUNT" -gt 0 ] 2>/dev/null; then
-      JAVA_READY=1
-      break
-    fi
+  /opt/piston/healthcheck.sh
+  if [ -f status/ready ]; then
+    JAVA_READY=1
+    break
   fi
   sleep 2
 done
 
-if [ "$JAVA_READY" -eq 1 ]; then
-  echo ok > status/ready
-else
+if [ "$JAVA_READY" -ne 1 ]; then
   echo "Java runtime never became available after install" >&2
   exit 1
 fi
+
+cat > /etc/systemd/system/piston-healthcheck.service <<'SERVICE_EOF'
+[Unit]
+Description=Piston readiness check
+
+[Service]
+Type=oneshot
+ExecStart=/opt/piston/healthcheck.sh
+SERVICE_EOF
+
+cat > /etc/systemd/system/piston-healthcheck.timer <<'TIMER_EOF'
+[Unit]
+Description=Run the Piston readiness check periodically
+
+[Timer]
+OnUnitActiveSec=15s
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target
+TIMER_EOF
+
+systemctl daemon-reload
+systemctl enable --now piston-healthcheck.timer
 '''
 
 var renderedCloudInit = replace(
