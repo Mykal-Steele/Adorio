@@ -1,134 +1,126 @@
-import React from 'react';
 import { CodeRunner } from '../CodeRunner';
-import ResizableTerminal from './ResizableTerminal';
+import ConsoleOutput from './ConsoleOutput';
+import type { ExecuteResult, TestRunResult } from '../CodeRunner';
 
-/**
- * Test Results Display Component
- * Single responsibility: Display test execution results
- */
-const TestResults = ({ results, isRunning }) => {
+interface TestResultsProps {
+  results: ExecuteResult | null;
+  isRunning: boolean;
+}
+
+const formatDuration = (duration: number) => {
+  if (typeof duration !== 'number' || Number.isNaN(duration)) return '<0.01ms';
+  return `${Math.max(duration, 0.01).toFixed(2)}ms`;
+};
+
+const TestTicket = ({ test }: { test: TestRunResult }) => {
+  const isSuccess = test.passed && !test.error;
+
+  return (
+    <div
+      className={`rounded-[3px] border-[1.5px] p-4 ${
+        isSuccess ? 'border-[#4f6b2b] bg-[#eef3e3]' : 'border-[#8d3a33] bg-[#f8ece9]'
+      }`}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className={`text-sm font-bold ${isSuccess ? 'text-[#3c5220]' : 'text-[#7a2f29]'}`}>
+          {isSuccess ? '✓ Passed' : '✗ Failed'} — {test.name}
+        </span>
+        <span className="font-paper-mono text-xs text-[var(--paper-muted-2)]">
+          {formatDuration(test.duration)}
+        </span>
+      </div>
+
+      {test.kind === 'stdio' ? (
+        <div className="mt-2.5 space-y-2.5">
+          <div>
+            <p className="mb-1 font-paper-mono text-[11px] uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
+              stdin
+            </p>
+            <ConsoleOutput content={test.stdin ?? ''} minHeight={36} maxInitialHeight={120} />
+          </div>
+          <dl className="space-y-1 font-paper-mono text-[13px] leading-[1.6]">
+            <div>
+              <dt className="inline text-[var(--paper-muted-2)]">expected </dt>
+              <dd className="inline whitespace-pre-wrap">{String(test.expected)}</dd>
+            </div>
+            {!test.error && (
+              <div>
+                <dt className="inline text-[var(--paper-muted-2)]">actual </dt>
+                <dd className="inline whitespace-pre-wrap">{String(test.output)}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
+      ) : (
+        <dl className="mt-2.5 space-y-1 font-paper-mono text-[13px] leading-[1.6]">
+          <div>
+            <dt className="inline text-[var(--paper-muted-2)]">input </dt>
+            <dd className="inline">{CodeRunner.formatValue(test.args)}</dd>
+          </div>
+          <div>
+            <dt className="inline text-[var(--paper-muted-2)]">expected </dt>
+            <dd className="inline">{CodeRunner.formatValue(test.expected)}</dd>
+          </div>
+          {!test.error && (
+            <div>
+              <dt className="inline text-[var(--paper-muted-2)]">actual </dt>
+              <dd className="inline">{CodeRunner.formatValue(test.output)}</dd>
+            </div>
+          )}
+        </dl>
+      )}
+
+      {test.logs && test.logs.length > 0 && (
+        <div className="mt-3">
+          <p className="mb-1 font-paper-mono text-[11px] uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
+            console
+          </p>
+          <ConsoleOutput content={test.logs.join('\n')} />
+        </div>
+      )}
+
+      {test.error && (
+        <p className="mt-3 rounded-[2px] border border-[#8d3a33] bg-[#f3ded9] p-2.5 font-paper-mono text-[13px] text-[#7a2f29]">
+          {test.error}
+        </p>
+      )}
+    </div>
+  );
+};
+
+const TestResults = ({ results, isRunning }: TestResultsProps) => {
   if (isRunning) {
     return (
-      <div className="text-center py-8">
-        <div className="text-sm text-gray-400">Running tests...</div>
-      </div>
+      <p className="py-6 text-center font-paper-hand text-xl text-[var(--paper-muted)]">
+        running your solution&hellip;
+      </p>
     );
   }
 
   if (!results) {
     return (
-      <div className="text-sm text-gray-400">
-        Write your solution and click &ldquo;Run Tests&rdquo; to see results.
-      </div>
+      <p className="rounded-[3px] border border-dashed border-[var(--paper-line)] bg-[#f6f0df] px-4 py-5 text-center text-sm text-[var(--paper-muted)]">
+        Write your solution and click &ldquo;Run tests&rdquo; to see results here.
+      </p>
     );
   }
 
   if (results.status === 'error') {
     return (
-      <div className="p-4 bg-red-900/30 border border-red-600/40 rounded-lg">
-        <div className="text-red-300 font-semibold">Error</div>
-        <div className="text-sm text-red-200 mt-1">{results.error}</div>
+      <div className="rounded-[3px] border-[1.5px] border-[#8d3a33] bg-[#f3ded9] p-4">
+        <p className="font-paper-mono text-xs font-bold uppercase tracking-[.12em] text-[#7a2f29]">
+          Error
+        </p>
+        <p className="mt-1 text-sm text-[#7a2f29]">{results.error}</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-3">
       {results.tests.map((test, index) => (
-        <TestCase key={index} test={test} />
+        <TestTicket key={`${test.name ?? 'test'}-${index}`} test={test} />
       ))}
-    </div>
-  );
-};
-
-/**
- * Individual Test Case Display - Clean design matching page style
- */
-const TestCase = ({ test }) => {
-  const isSuccess = test.passed && !test.error;
-  const bgClass = isSuccess
-    ? 'border-emerald-500/40 bg-emerald-500/10'
-    : 'border-red-500/40 bg-red-500/10';
-
-  // Format duration consistently
-  const formatDuration = (duration) => {
-    if (typeof duration !== 'number' || isNaN(duration)) {
-      return '<0.01ms';
-    }
-
-    // If duration is 0 or very close to 0, show as less than 0.01ms
-    if (duration < 0.01) {
-      return '<0.01ms';
-    }
-
-    // For very small durations, round to 0.01ms minimum
-    const roundedDuration = Math.max(duration, 0.01);
-
-    // Ensure we always have at least 2 decimal places
-    return `${roundedDuration.toFixed(2)}ms`;
-  };
-
-  return (
-    <div className={`p-4 rounded-lg border ${bgClass}`}>
-      <div className="space-y-3">
-        {/* Status indicator */}
-        <div className="flex items-center justify-between">
-          <span
-            className={`text-sm font-medium ${isSuccess ? 'text-emerald-300' : 'text-red-300'}`}
-          >
-            {isSuccess ? '✓ Passed' : '✗ Failed'}
-          </span>
-          <span className="text-xs text-gray-400 font-mono">{formatDuration(test.duration)}</span>
-        </div>
-
-        {/* Input */}
-        <div>
-          <span className="text-gray-300 text-sm font-medium">Input: </span>
-          <span className="font-mono text-purple-200">{CodeRunner.formatValue(test.args)}</span>
-        </div>
-
-        {/* Console Output */}
-        {test.logs && test.logs.length > 0 && (
-          <div>
-            <span className="text-gray-300 text-sm font-medium">Output: </span>
-            <div className="mt-1">
-              <ResizableTerminal
-                content={test.logs.join('\n')}
-                minHeight={60}
-                maxInitialHeight={250}
-                maxHeight={800}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Expected and Actual */}
-        <div className="space-y-2">
-          <div>
-            <span className="text-gray-300 text-sm font-medium">Expected: </span>
-            <span className="font-mono text-emerald-200">
-              {CodeRunner.formatValue(test.expected)}
-            </span>
-          </div>
-
-          {!test.error && (
-            <div>
-              <span className="text-gray-300 text-sm font-medium">Actual: </span>
-              <span className={`font-mono ${isSuccess ? 'text-emerald-200' : 'text-red-200'}`}>
-                {CodeRunner.formatValue(test.output)}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Error message if any */}
-        {test.error && (
-          <div className="text-red-200 font-mono text-sm bg-red-900/20 p-3 rounded border border-red-600/30">
-            <span className="font-medium">Runtime Error: </span>
-            {test.error}
-          </div>
-        )}
-      </div>
     </div>
   );
 };
