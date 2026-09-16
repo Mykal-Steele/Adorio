@@ -21,22 +21,18 @@ import { Compartment } from '@codemirror/state';
 import type { KeyBinding } from '@codemirror/view';
 import { EditorView } from '@codemirror/view';
 
-// VSCode's Tab: with a selection (or the cursor sitting in the line's
-// leading whitespace) it indents the whole line; mid-line it just inserts
-// spaces up to the next tab stop at the cursor. CodeMirror's stock
-// indentWithTab always does the former, which is why Tab "tabbed the whole
-// line" no matter where the cursor was.
+// Tab with no selection inserts spaces at the cursor up to the next tab
+// stop — just like Space but tab-sized, and just like VSCode's default Tab.
+// It never re-indents the whole line: only a real selection indents (via
+// indentMore), so Tab in the middle of a line only affects text to the
+// right of the cursor. Shift-Tab still outdents the line.
 const vscodeTab: StateCommand = ({ state, dispatch }) => {
   if (state.readOnly) return false;
   const { from, to } = state.selection.main;
   if (from !== to) return indentMore({ state, dispatch });
 
-  const line = state.doc.lineAt(from);
-  if (/^\s*$/.test(line.text.slice(0, from - line.from))) {
-    return indentMore({ state, dispatch });
-  }
-
   const unit = getIndentUnit(state);
+  const line = state.doc.lineAt(from);
   const insert = ' '.repeat(unit - ((from - line.from) % unit));
   dispatch(
     state.update({
@@ -167,6 +163,8 @@ const snippetNavigation: KeyBinding[] = [
 export const vscodeKeymap: KeyBinding[] = [
   ...snippetNavigation,
   { key: 'Tab', run: vscodeTab, shift: indentLess },
+  { key: 'Mod-]', run: indentMore },
+  { key: 'Mod-[', run: indentLess },
   { key: 'Mod-/', run: toggleComment },
   { key: 'Shift-Mod-k', run: deleteLine },
   { key: 'Alt-ArrowUp', run: moveLineUp },

@@ -84,3 +84,44 @@ export const formatCode = (code: string): string => {
 
   return formatted.join('\n');
 };
+
+// Maps a cursor offset in `oldText` to the equivalent offset in `newText`
+// after `formatCode` ran. formatCode never adds/removes lines — it only
+// rewrites leading indentation (tabs -> spaces, brace-depth indent) and
+// trims trailing whitespace — so the cursor's line number is stable and
+// only its column needs adjusting by the indent delta. A cursor sitting in
+// (or at the end of) the old indent lands at the corresponding spot in the
+// new indent; a cursor in the code keeps its offset within the code. This
+// is what keeps Enter-auto-format from snapping the cursor to 0 the way a
+// bare whole-doc replace does.
+export const mapPosThroughFormat = (oldText: string, newText: string, pos: number): number => {
+  const oldLines = oldText.split('\n');
+  const newLines = newText.split('\n');
+  if (oldLines.length !== newLines.length) return Math.min(pos, newText.length);
+
+  let oldStart = 0;
+  let newStart = 0;
+  for (let i = 0; i < oldLines.length; i++) {
+    const oldLine = oldLines[i];
+    const newLine = newLines[i];
+    const oldEnd = oldStart + oldLine.length;
+
+    if (pos <= oldEnd) {
+      const col = pos - oldStart;
+      const oldIndent = /^[ \t]*/.exec(oldLine)?.[0].length ?? 0;
+      const newIndent = /^[ \t]*/.exec(newLine)?.[0].length ?? 0;
+      let newCol: number;
+      if (col <= oldIndent) {
+        newCol = col === oldIndent ? newIndent : Math.min(col, newIndent);
+      } else {
+        newCol = newIndent + (col - oldIndent);
+      }
+      newCol = Math.max(0, Math.min(newCol, newLine.length));
+      return newStart + newCol;
+    }
+
+    oldStart = oldEnd + 1;
+    newStart += newLine.length + 1;
+  }
+  return Math.min(pos, newText.length);
+};
