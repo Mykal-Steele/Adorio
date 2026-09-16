@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { EditorView, keymap } from '@codemirror/view';
 import { Annotation, Transaction } from '@codemirror/state';
@@ -10,9 +10,10 @@ import { paperEditorTheme } from '../constants/editorTheme';
 import { javaCompletionSource } from '../constants/javaCompletions';
 import { javaSnippetSource, jsSnippetSource } from '../constants/snippets';
 import { formatCode } from '../utils/formatCode';
-import { vscodeKeymap, wrapToggle } from '../utils/editorKeys';
+import { getEditorSettings, settingsCompartments, vscodeKeymap } from '../utils/editorKeys';
 import { Language } from '../types';
 import LanguagePicker from './LanguagePicker';
+import EditorSettings from './EditorSettings';
 
 const javaLanguage = StreamLanguage.define(java);
 // .data.of(...) only builds the extension — it still has to be in the
@@ -78,6 +79,7 @@ const autoFormat = Annotation.define<boolean>();
 // removes just the newline.
 const formatOnNewline = EditorView.updateListener.of((update) => {
   if (!update.docChanged) return;
+  if (!getEditorSettings().formatOnNewline) return;
   if (update.transactions.some((tr) => tr.annotation(autoFormat))) return;
   if (!update.transactions.some((tr) => tr.isUserEvent('input'))) return;
 
@@ -121,6 +123,10 @@ const CodeEditor = ({
   availableLanguages,
   onLanguageChange,
 }: CodeEditorProps) => {
+  // Live view handle for the settings panel (toggles dispatch compartment
+  // reconfigures directly — no editor rebuild, no lost undo history).
+  const viewRef = useRef<EditorView | null>(null);
+
   const extensions = useMemo(
     () => [
       language === Language.JAVA ? javaLanguage : javascript({ jsx: false }),
@@ -133,7 +139,7 @@ const CodeEditor = ({
       disableGrammarly,
       // Wrapping on by default (Alt+Z toggles): without it a long line
       // pushes the scroller and parent card sideways past the fold.
-      wrapToggle,
+      ...settingsCompartments,
       keymap.of([
         {
           key: 'Shift-Alt-f',
@@ -176,6 +182,7 @@ const CodeEditor = ({
           >
             Format
           </button>
+          <EditorSettings viewRef={viewRef} />
           <LanguagePicker
             languages={availableLanguages}
             activeLanguage={language}
@@ -196,6 +203,9 @@ const CodeEditor = ({
             lineNumbers: true,
           }}
           onChange={onChange}
+          onUpdate={(update) => {
+            viewRef.current = update.view;
+          }}
           aria-label={`Code editor for ${problemTitle}`}
         />
       </div>
