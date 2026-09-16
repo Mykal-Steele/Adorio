@@ -1366,9 +1366,9 @@ public class Main {
             expectedOutput: 'AhsilgnEnItebahplAtsriFehTsI',
           },
           {
-            name: 'CTST@USMIKT / CS@SIT KMUTT',
-            stdin: 'CTST@USMIKT\nCS@SIT KMUTT\n',
-            expectedOutput: 'CTTTSUTM@KU STMIISK@TSC',
+            name: 'CS@SIT / KMUTT',
+            stdin: 'CS@SIT\nKMUTT\n',
+            expectedOutput: 'CTST@USMIKT',
           },
           {
             name: 'YouGood??? / symbols',
