@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import { DIFFICULTY_CHIP_CLASS } from '../constants/enums';
+import RichText, { RichInline } from './RichText';
 import type { Problem } from '../types';
 
 interface ProblemDetailsProps {
@@ -29,9 +30,9 @@ const ProblemDetails = ({ problem }: ProblemDetailsProps) => (
       </span>
     </div>
 
-    <p className="mt-3 max-w-[68ch] text-[15.5px] leading-[1.6] text-[var(--paper-muted)]">
-      {problem.description}
-    </p>
+    <div className="mt-3 max-w-[68ch] text-[15.5px] leading-[1.6] text-[var(--paper-muted)]">
+      <RichText text={problem.description} />
+    </div>
 
     {problem.constraints && problem.constraints.length > 0 && (
       <div className="mt-5">
@@ -47,7 +48,7 @@ const ProblemDetails = ({ problem }: ProblemDetailsProps) => (
               >
                 &#10003;
               </span>
-              {constraint}
+              <RichInline text={constraint} />
             </li>
           ))}
         </ul>
@@ -91,7 +92,7 @@ const ProblemDetails = ({ problem }: ProblemDetailsProps) => (
                           colSpan={2}
                           className="whitespace-normal border-b border-[var(--paper-line)] p-2.5 font-paper-sans text-[13px] italic text-[var(--paper-muted)]"
                         >
-                          {example.explanation}
+                          <RichInline text={example.explanation} />
                         </td>
                       </tr>
                     )}
