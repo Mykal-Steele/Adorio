@@ -46,6 +46,14 @@ param cloudinaryUrl string
 @secure()
 param resendApiKey string
 
+@secure()
+@description('Piston load balancer URL (from piston.bicep outputs), e.g. http://adorio-piston.<region>.cloudapp.azure.com:2358')
+param pistonUrl string
+
+@secure()
+@description('Must match the token baked into the Piston nginx sidecar via piston.bicep')
+param pistonToken string
+
 param clientUrl string = 'https://adorio.space'
 param cloudinaryName string
 
@@ -139,6 +147,8 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
         { name: 'cloudinary-secret', value: cloudinarySecret }
         { name: 'cloudinary-url', value: cloudinaryUrl }
         { name: 'resend-api-key', value: resendApiKey }
+        { name: 'piston-url', value: pistonUrl }
+        { name: 'piston-token', value: pistonToken }
       ]
     }
     template: {
@@ -162,6 +172,8 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'CLOUDINARY_SECRET', secretRef: 'cloudinary-secret' }
             { name: 'CLOUDINARY_URL', secretRef: 'cloudinary-url' }
             { name: 'RESEND_API_KEY', secretRef: 'resend-api-key' }
+            { name: 'PISTON_URL', secretRef: 'piston-url' }
+            { name: 'PISTON_TOKEN', secretRef: 'piston-token' }
           ]
           probes: [
             {
