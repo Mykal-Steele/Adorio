@@ -8,17 +8,39 @@ const pistonHeaders = () => ({
   'X-Auth-Token': environment.piston.token,
 });
 
+// A Piston connection can succeed and then just never respond (no timeout of
+// its own on the client side) — bounded well under the nginx sidecar's own
+// proxy_read_timeout (60s, see infra/piston.bicep) so this fires first with a
+// clean ApiError instead of leaving a concurrency slot tied up indefinitely.
+const PISTON_TIMEOUT_MS = 30000;
+
+// Wraps fetch (connection failures, non-2xx, and malformed JSON bodies) so
+// every failure path here throws an ApiError like the rest of the service,
+// instead of a raw rejection reaching asyncHandler. Returns the parsed body.
+const pistonFetch = async (path, options) => {
+  let res;
+  try {
+    res = await fetch(`${environment.piston.url}${path}`, {
+      ...options,
+      signal: AbortSignal.timeout(PISTON_TIMEOUT_MS),
+    });
+  } catch {
+    throw ApiError.internalServerError('Could not reach the code execution service');
+  }
+  if (!res.ok) throw ApiError.internalServerError('Could not reach the code execution service');
+  try {
+    return await res.json();
+  } catch {
+    throw ApiError.internalServerError('Could not reach the code execution service');
+  }
+};
+
 let javaVersionCache = null;
 
 const resolveJavaVersion = async () => {
   if (javaVersionCache) return javaVersionCache;
 
-  const res = await fetch(`${environment.piston.url}/api/v2/runtimes`, {
-    headers: pistonHeaders(),
-  });
-  if (!res.ok) throw ApiError.internalServerError('Could not reach the code execution service');
-
-  const runtimes = await res.json();
+  const runtimes = await pistonFetch('/api/v2/runtimes', { headers: pistonHeaders() });
   const match = runtimes.find((r) => r.language === 'java');
   if (!match)
     throw ApiError.internalServerError('Java runtime is not installed on the execution service');
@@ -61,8 +83,8 @@ const normalizeOutput = (output) => {
     .join('\n');
 };
 
-const submitOne = async (version, code, stdin) => {
-  const res = await fetch(`${environment.piston.url}/api/v2/execute`, {
+const submitOne = (version, code, stdin) =>
+  pistonFetch('/api/v2/execute', {
     method: 'POST',
     headers: pistonHeaders(),
     body: JSON.stringify({
@@ -72,9 +94,6 @@ const submitOne = async (version, code, stdin) => {
       stdin,
     }),
   });
-  if (!res.ok) throw ApiError.internalServerError('Could not reach the code execution service');
-  return res.json();
-};
 
 const buildTestResult = (test, submission, duration) => {
   const run = submission.run ?? {};

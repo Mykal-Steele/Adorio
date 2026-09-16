@@ -169,15 +169,15 @@ All backend code uses ES Modules (`"type": "module"`). The pattern is strict **C
 
 **Folder layout:**
 
-| Path | What lives here |
-|---|---|
-| `backend/schemas/` | **Where all data structures are defined.** Two sub-folders: |
-| `backend/schemas/db/` | Mongoose schema definitions — shape of every DB document; `index.js` barrel-exports all |
-| `backend/schemas/validation/` | Zod validation schemas — shape of every request payload/query; `index.js` barrel-exports all |
-| `backend/schemas/index.js` | Re-exports all validation schemas (the entry-point services import from) |
-| `backend/models/` | Mongoose `model()` registration + named DB operation functions (CRUD, queries, aggregations); `index.js` barrel-exports all |
-| `backend/config/` | One-time setup only: DB connection, CORS, rate limiters, env, Cloudinary SDK config |
-| `backend/utils/` | Reusable helpers called in multiple places: `cloudinaryUpload`, `imageFormatter`, `validate`, `asyncHandler`, `ApiError`, `monitoring` |
+| Path                          | What lives here                                                                                                                        |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `backend/schemas/`            | **Where all data structures are defined.** Two sub-folders:                                                                            |
+| `backend/schemas/db/`         | Mongoose schema definitions — shape of every DB document; `index.js` barrel-exports all                                                |
+| `backend/schemas/validation/` | Zod validation schemas — shape of every request payload/query; `index.js` barrel-exports all                                           |
+| `backend/schemas/index.js`    | Re-exports all validation schemas (the entry-point services import from)                                                               |
+| `backend/models/`             | Mongoose `model()` registration + named DB operation functions (CRUD, queries, aggregations); `index.js` barrel-exports all            |
+| `backend/config/`             | One-time setup only: DB connection, CORS, rate limiters, env, Cloudinary SDK config                                                    |
+| `backend/utils/`              | Reusable helpers called in multiple places: `cloudinaryUpload`, `imageFormatter`, `validate`, `asyncHandler`, `ApiError`, `monitoring` |
 
 `ApiError` is the central error class; use its static factories (`ApiError.badRequest()`, `ApiError.unauthorized()`, etc.) rather than creating ad-hoc errors.
 
@@ -217,7 +217,7 @@ A separate React/TypeScript app built independently and served at `/cao/`. It ha
 | `VITE_GEMINI_API_KEY`            | ai-slop build             | Gemini API for exam prep                                 |
 | `NODE_ENV`                       | All                       | `development` \| `production`                            |
 
-Backend-specific values live in `backend/.env`.
+Backend-specific values live in the root `.env.development` / `.env.production` — see [Environment Files](#environment-files) below.
 
 ## Nginx Config Selection
 
@@ -243,9 +243,16 @@ The Dockerfile passes `--build-arg ENV=development|production` to copy either `n
 
 ## Environment Files
 
-| File               | Used when                                                    |
-| ------------------ | ------------------------------------------------------------ |
-| `.env`             | Local dev fallback                                           |
-| `.env.development` | `NODE_ENV=development` (Next.js picks this up automatically) |
-| `.env.production`  | `NODE_ENV=production` builds                                 |
-| `backend/.env`     | Express backend only — never read by Next.js                 |
+One centralized set at the repo root — frontend, backend, and Docker dev all read the same files. There is no `backend/.env`; `backend/config/environment.js` resolves the repo root from its own file location and loads the root files directly, regardless of the working directory it's started from.
+
+| File                           | Used when                                                                                                                                                         |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.env`                         | Docker Compose's own `${VAR}` substitution inside `docker-compose*.yml` (currently just `VITE_GEMINI_API_KEY`) — not app runtime config                           |
+| `.env.development`             | Local dev, all of it: native `npm run dev` / `npm run dev:backend`, and `docker compose up --build` (`env_file:`)                                                 |
+| `.env.production`              | Local "production-mode" testing only (`npm run bs`, `docker-compose.prod.yml`) — real prod secrets live in Azure Container App config, set via `infra/main.bicep` |
+| `ai-slop/.../.env.development` | The ai-slop Vite app's own build — only `VITE_GEMINI_API_KEY`, since that's the only var its code reads                                                           |
+| `backend-go/.env`              | The experimental (undeployed) Go backend — only `JWT_SECRET`/`MONGO_URI`, kept in sync manually                                                                   |
+| `scripts/.env`                 | `scripts/audit.mjs` only — a single `AUDIT_PASSWORD`, unrelated to the app                                                                                        |
+| `infra/.secrets/`              | Deploy-time secrets (SSH key, TLS keypair, Piston auth token) for redeploying `infra/piston.bicep` — never app runtime config, see its `README.md`                |
+
+All of the above are gitignored and local-only. Nothing here is what's actually running in production — that's Azure Container App secrets (`infra/main.bicep`) and, for the Northflank failover copy, its own separately-configured dashboard env vars — anything changed here that the app needs at runtime must be mirrored there too.

@@ -2,9 +2,10 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import AdSenseScript from '../../../components/AdSenseScript';
-import PaperTornEdge from '../../../components/PaperTornEdge';
-import { runCodingSubmission } from '../../../api';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import AdSenseScript from '@/components/AdSenseScript';
+import PaperTornEdge from '@/components/PaperTornEdge';
+import { runCodingSubmission } from '@/api';
 import ProblemList from '../components/ProblemList';
 import ProblemDetails from '../components/ProblemDetails';
 import ResultsPanel from '../components/ResultsPanel';
@@ -55,10 +56,15 @@ const Practice = ({ classId }: PracticeProps) => {
   const [editorKey, setEditorKey] = useState(0);
   const [solvedIds, setSolvedIds] = useState<Set<string>>(() => new Set());
 
-  const activeRunKeyRef = useRef<string | null>(null);
-  useEffect(() => {
-    activeRunKeyRef.current = activeProblem ? `${activeProblem.id}:${language}` : null;
-  }, [activeProblem, language]);
+  // Any in-flight run is only allowed to write its results if nothing has
+  // superseded it since — a code edit, a reset, or switching problem/language.
+  // Bumping the id (and dropping isRunning) makes a stale run's eventual
+  // resolution a no-op instead of a race that can clobber newer state.
+  const executionIdRef = useRef(0);
+  const invalidateActiveExecution = useCallback(() => {
+    executionIdRef.current += 1;
+    setIsRunning(false);
+  }, []);
 
   const recomputeSolved = useCallback(() => {
     setSolvedIds(new Set(classProblems.filter(isProblemSolved).map((p) => p.id)));
@@ -84,6 +90,7 @@ const Practice = ({ classId }: PracticeProps) => {
   }, [activeProblem?.id]);
 
   useEffect(() => {
+    invalidateActiveExecution();
     if (!activeProblem || !activeVariant) return;
     setEditorKey((k) => k + 1);
 
@@ -95,6 +102,7 @@ const Practice = ({ classId }: PracticeProps) => {
       setCode(activeVariant.starterCode);
       setResults(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeProblem, activeVariant, language]);
 
   const flushCurrentCode = useCallback(() => {
@@ -137,14 +145,19 @@ const Practice = ({ classId }: PracticeProps) => {
 
   const handleCodeChange = useCallback(
     (nextCode: string) => {
+      invalidateActiveExecution();
       setCode(nextCode);
       setResults(null);
-      const runKey = activeRunKeyRef.current;
-      if (runKey && activeProblem && activeVariant && nextCode !== activeVariant.starterCode) {
+      if (activeProblem && activeVariant && nextCode !== activeVariant.starterCode) {
         saveCodeDebounced(activeProblem.id, language, nextCode);
+      } else {
+        // Typed back to exactly the starter code before the debounce fired —
+        // otherwise the stale queued save would still land and persist code
+        // that's no longer on screen.
+        saveCodeDebounced.cancel();
       }
     },
-    [activeProblem, activeVariant, language],
+    [activeProblem, activeVariant, language, invalidateActiveExecution],
   );
 
   const handleRunTests = useCallback(async () => {
@@ -152,8 +165,8 @@ const Practice = ({ classId }: PracticeProps) => {
 
     const problemId = activeProblem.id;
     const runLanguage = language;
-    const runKey = `${problemId}:${runLanguage}`;
     const codeSnapshot = code;
+    const executionId = ++executionIdRef.current;
     setIsRunning(true);
 
     let testResults: ExecuteResult;
@@ -181,10 +194,10 @@ const Practice = ({ classId }: PracticeProps) => {
       };
     }
 
-    if (activeRunKeyRef.current !== runKey) {
-      setIsRunning(false);
-      return;
-    }
+    // Superseded by an edit, reset, or navigation while the run was in
+    // flight — invalidateActiveExecution already reset isRunning, and this
+    // result no longer describes the code currently on screen.
+    if (executionIdRef.current !== executionId) return;
 
     setResults(testResults);
     saveRunResult(problemId, runLanguage, codeSnapshot, testResults);
@@ -194,13 +207,14 @@ const Practice = ({ classId }: PracticeProps) => {
 
   const handleReset = useCallback(() => {
     if (!activeProblem || !activeVariant) return;
+    invalidateActiveExecution();
+    saveCodeDebounced.cancel();
     clearProgress(activeProblem.id, language);
     setCode(activeVariant.starterCode);
     setResults(null);
-    setIsRunning(false);
     setEditorKey((k) => k + 1);
     recomputeSolved();
-  }, [activeProblem, activeVariant, language, recomputeSolved]);
+  }, [activeProblem, activeVariant, language, recomputeSolved, invalidateActiveExecution]);
 
   const classSolvedCount = classProblems.filter((p) => solvedIds.has(p.id)).length;
 
@@ -211,6 +225,13 @@ const Practice = ({ classId }: PracticeProps) => {
 
       <section className="relative -mt-4 bg-[var(--paper-hero)] px-4 pb-10 pt-10 sm:-mt-6 sm:px-8 sm:pb-12 sm:pt-12">
         <div className="mx-auto max-w-6xl">
+          <Link
+            href="/coding"
+            className="mb-3 inline-flex items-center gap-1.5 rounded-[3px] border-[1.5px] border-dashed border-[rgba(60,44,24,.5)] px-3.5 py-2 text-[13px] font-medium text-[var(--paper-muted)] transition-colors hover:border-[var(--paper-accent-strong)] hover:bg-[var(--paper-yellow-soft)]"
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Back to classes
+          </Link>
           <p className="mb-2 font-paper-mono text-xs uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
             <Link href="/coding" className="hover:text-[var(--paper-accent)]">
               Practice problems
