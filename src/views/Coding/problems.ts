@@ -1306,6 +1306,11 @@ public class Main {
             expectedOutput: '2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 3 * 3 * 3 * 3 * 5 * 5 * 7',
           },
           {
+            name: 'prime 13',
+            stdin: '13\n',
+            expectedOutput: '13',
+          },
+          {
             name: 'input 111111',
             stdin: '111111\n',
             expectedOutput: '3 * 7 * 11 * 13 * 37',
@@ -1379,6 +1384,11 @@ public class Main {
             name: '1234 / abcdefghijk',
             stdin: '1234\nabcdefghijk\n',
             expectedOutput: '1k2j3i4hgfedcba',
+          },
+          {
+            name: 'spaces need full lines',
+            stdin: 'hi there\nXY\n',
+            expectedOutput: 'hYiX there',
           },
         ],
       },
