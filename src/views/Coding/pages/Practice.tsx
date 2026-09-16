@@ -148,7 +148,11 @@ const Practice = ({ classId }: PracticeProps) => {
     (nextCode: string) => {
       invalidateActiveExecution();
       setCode(nextCode);
-      setResults(null);
+      // Results intentionally stay on screen until the next Run press —
+      // clearing them on every keystroke made the test output unusable.
+      // The draft is still persisted on every edit (keeping the last run's
+      // results alongside it) via saveCode below, so a reload restores the
+      // latest code together with its last results.
       if (activeProblem && activeVariant && nextCode !== activeVariant.starterCode) {
         saveCodeDebounced(activeProblem.id, language, nextCode);
       } else {
