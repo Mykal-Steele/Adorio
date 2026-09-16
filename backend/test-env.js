@@ -18,6 +18,7 @@ console.log('');
 console.log('🧪 Piston Configuration:');
 console.log('URL:', environment.piston.url || '❌ Missing');
 console.log('Token:', environment.piston.token ? '✅ Set' : '❌ Missing');
+console.log('CA cert (PISTON_CA_CERT):', process.env.NODE_EXTRA_CA_CERTS ? '✅ Set' : '❌ Missing');
 console.log('');
 console.log('🌐 Allowed CORS Origins:');
 allowedOrigins.forEach((origin) => console.log('-', origin));
