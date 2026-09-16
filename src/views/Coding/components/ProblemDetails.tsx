@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { DIFFICULTY_CHIP_CLASS } from '../constants/enums';
 import type { Problem } from '../types';
 
@@ -58,27 +59,47 @@ const ProblemDetails = ({ problem }: ProblemDetailsProps) => (
         <p className="mb-2 font-paper-mono text-[11px] uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
           Examples
         </p>
-        <div className="flex flex-col gap-2.5">
-          {problem.examples.map((example) => (
-            <div
-              key={example.input}
-              className="rounded-[2px] border border-dashed border-[var(--paper-line)] bg-[#f6f0df] p-3 font-paper-mono text-[13px] leading-[1.7]"
-            >
-              <div>
-                <span className="text-[var(--paper-muted-2)]">in &rarr; </span>
-                {example.input}
-              </div>
-              <div>
-                <span className="text-[var(--paper-muted-2)]">out &rarr; </span>
-                {example.output}
-              </div>
-              {example.explanation && (
-                <div className="mt-1 font-paper-sans text-[13px] italic text-[var(--paper-muted)]">
-                  {example.explanation}
-                </div>
-              )}
-            </div>
-          ))}
+        <div className="overflow-x-auto rounded-[2px] border border-[var(--paper-line)]">
+          <table className="w-full border-collapse font-paper-mono text-[13px] leading-[1.6]">
+            <thead>
+              <tr className="bg-[#f6f0df]">
+                <th className="border-b border-r border-[var(--paper-line)] p-2.5 text-left text-[11px] uppercase tracking-[.1em] text-[var(--paper-muted-2)]">
+                  Input
+                </th>
+                <th className="border-b border-[var(--paper-line)] p-2.5 text-left text-[11px] uppercase tracking-[.1em] text-[var(--paper-muted-2)]">
+                  Expected Output
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {problem.examples.map((example, index) => {
+                const rowBg =
+                  index % 2 === 1 ? 'bg-[var(--paper-cream)]' : 'bg-[var(--paper-hero)]';
+                return (
+                  <Fragment key={example.input}>
+                    <tr className={rowBg}>
+                      <td className="whitespace-pre-wrap border-b border-r border-[var(--paper-line)] p-2.5 align-top">
+                        {example.input}
+                      </td>
+                      <td className="whitespace-pre-wrap border-b border-[var(--paper-line)] p-2.5 align-top">
+                        {example.output}
+                      </td>
+                    </tr>
+                    {example.explanation && (
+                      <tr className={rowBg}>
+                        <td
+                          colSpan={2}
+                          className="whitespace-normal border-b border-[var(--paper-line)] p-2.5 font-paper-sans text-[13px] italic text-[var(--paper-muted)]"
+                        >
+                          {example.explanation}
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     )}

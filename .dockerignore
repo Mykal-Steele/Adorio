@@ -5,3 +5,12 @@ dist
 .gitignore
 README.md
 .DS_Store
+
+# Secrets — env_file/build-args inject what the container needs at runtime;
+# these should never be copied into an image layer where anyone with
+# registry/pull access could extract them.
+.env
+.env.*
+infra/.secrets/
+*.pem
+*.key

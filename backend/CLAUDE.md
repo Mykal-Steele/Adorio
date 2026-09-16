@@ -10,7 +10,7 @@ npm run dev:backend          # start backend only on :3000
 npm run dev:full             # start frontend + backend together
 
 # From backend/ directly
-node --env-file=.env.development index.js
+NODE_ENV=development node index.js
 ```
 
 ## Commands
@@ -126,6 +126,7 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 ```
 
 **Rules — enforce these every time:**
+
 - Controllers never touch Mongoose, Zod, or business logic. Only `req`/`res`/`next`.
 - Services never call Mongoose directly — always go through a model function.
 - Models never contain business logic or Zod.
@@ -140,31 +141,31 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 
 ### All endpoints
 
-| Method | Path | Auth | Handler |
-|--------|------|------|---------|
-| GET | `/api/users/me` | required | getCurrentUser |
-| POST | `/api/users/register` | none | registerUser |
-| POST | `/api/users/login` | none | loginUser |
-| POST | `/api/users/refresh-token` | none | refreshToken |
-| POST | `/api/posts` | required | createPostHandler (+ multer upload) |
-| GET | `/api/posts` | none | getPostsHandler |
-| GET | `/api/posts/:id` | none | getSinglePostHandler |
-| PUT | `/api/posts/:id/like` | required | toggleLikeHandler |
-| POST | `/api/posts/:id/comment` | required | addCommentHandler |
-| GET | `/api/game/leaderboard` | none | getLeaderboardHandler |
-| POST | `/api/game/update-score` | optional | updateScoreHandler |
-| GET | `/api/game/user-stats` | optional | getUserStatsHandler |
-| POST | `/api/secretenv` | required | storeSecretMessage |
-| GET | `/api/secretenv` | **none** (by design) | retrieveSecretMessageHandler |
-| POST | `/api/stats/track` | optional | trackVisit (+ visitorIdentifier middleware) |
-| GET | `/api/stats/page-views` | required | getPageViewSummary |
-| GET | `/api/stats/recent` | required | getRecentVisitEntries |
-| GET | `/api/stats/visitor-stats` | required | getVisitorSummary |
-| GET | `/api/stats/visitor/:visitorId` | required | getVisitorDetailsInfo |
-| GET | `/api/stats/health` | none | getHealthStatus |
-| GET | `/api/stats/stats` | required | getSystemStats |
-| GET | `/api/health` | none | getHealthStatus (inline in index.js) |
-| GET | `/api/test-env` | none (dev only) | inline in index.js |
+| Method | Path                            | Auth                 | Handler                                     |
+| ------ | ------------------------------- | -------------------- | ------------------------------------------- |
+| GET    | `/api/users/me`                 | required             | getCurrentUser                              |
+| POST   | `/api/users/register`           | none                 | registerUser                                |
+| POST   | `/api/users/login`              | none                 | loginUser                                   |
+| POST   | `/api/users/refresh-token`      | none                 | refreshToken                                |
+| POST   | `/api/posts`                    | required             | createPostHandler (+ multer upload)         |
+| GET    | `/api/posts`                    | none                 | getPostsHandler                             |
+| GET    | `/api/posts/:id`                | none                 | getSinglePostHandler                        |
+| PUT    | `/api/posts/:id/like`           | required             | toggleLikeHandler                           |
+| POST   | `/api/posts/:id/comment`        | required             | addCommentHandler                           |
+| GET    | `/api/game/leaderboard`         | none                 | getLeaderboardHandler                       |
+| POST   | `/api/game/update-score`        | optional             | updateScoreHandler                          |
+| GET    | `/api/game/user-stats`          | optional             | getUserStatsHandler                         |
+| POST   | `/api/secretenv`                | required             | storeSecretMessage                          |
+| GET    | `/api/secretenv`                | **none** (by design) | retrieveSecretMessageHandler                |
+| POST   | `/api/stats/track`              | optional             | trackVisit (+ visitorIdentifier middleware) |
+| GET    | `/api/stats/page-views`         | required             | getPageViewSummary                          |
+| GET    | `/api/stats/recent`             | required             | getRecentVisitEntries                       |
+| GET    | `/api/stats/visitor-stats`      | required             | getVisitorSummary                           |
+| GET    | `/api/stats/visitor/:visitorId` | required             | getVisitorDetailsInfo                       |
+| GET    | `/api/stats/health`             | none                 | getHealthStatus                             |
+| GET    | `/api/stats/stats`              | required             | getSystemStats                              |
+| GET    | `/api/health`                   | none                 | getHealthStatus (inline in index.js)        |
+| GET    | `/api/test-env`                 | none (dev only)      | inline in index.js                          |
 
 ### Auth middleware variants (`verifyToken.js`)
 
@@ -175,14 +176,14 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 
 ### Rate limiters (`rateLimiters.js`)
 
-| Limiter | Window | Max | Applied to |
-|---------|--------|-----|------------|
-| `standardLimiter` | 15 min | 300 | all routes (global) |
-| `registrationLimiter` | 1 hour | 10 | POST /api/users/register |
-| `authLimiter` | 15 min | 10 | POST /api/users/login + refresh-token |
-| `postLimiter` | 10 min | 30 | POST /api/posts |
-| `likeLimiter` | 1 min | 60 | PUT /api/posts/:id/like |
-| `secretLimiter` | 5 min | 20 | GET /api/secretenv |
+| Limiter               | Window | Max | Applied to                            |
+| --------------------- | ------ | --- | ------------------------------------- |
+| `standardLimiter`     | 15 min | 300 | all routes (global)                   |
+| `registrationLimiter` | 1 hour | 10  | POST /api/users/register              |
+| `authLimiter`         | 15 min | 10  | POST /api/users/login + refresh-token |
+| `postLimiter`         | 10 min | 30  | POST /api/posts                       |
+| `likeLimiter`         | 1 min  | 60  | PUT /api/posts/:id/like               |
+| `secretLimiter`       | 5 min  | 20  | GET /api/secretenv                    |
 
 `app.set('trust proxy', 1)` is set in `index.js` — Northflank sits behind one Cloudflare hop.
 
@@ -190,20 +191,20 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 
 ## Key Packages
 
-| Package | Purpose |
-|---------|---------|
-| `express` | HTTP server |
-| `mongoose` | MongoDB ODM |
-| `zod` | Request validation (v4.x — `z.coerce.*` available) |
-| `jsonwebtoken` | JWT sign + verify |
-| `bcryptjs` | Password hashing (salt rounds: 10) |
-| `multer` + `multer-storage-cloudinary` | Image upload to Cloudinary |
-| `cloudinary` | Cloudinary SDK for image URL generation |
-| `express-rate-limit` | Per-IP rate limiting |
-| `cors` | CORS middleware |
-| `compression` | gzip response compression |
-| `cookie-parser` | Parse `req.cookies` (visitor ID cookie) |
-| `unique-names-generator` | Deterministic visitor nicknames in analytics |
+| Package                                | Purpose                                            |
+| -------------------------------------- | -------------------------------------------------- |
+| `express`                              | HTTP server                                        |
+| `mongoose`                             | MongoDB ODM                                        |
+| `zod`                                  | Request validation (v4.x — `z.coerce.*` available) |
+| `jsonwebtoken`                         | JWT sign + verify                                  |
+| `bcryptjs`                             | Password hashing (salt rounds: 10)                 |
+| `multer` + `multer-storage-cloudinary` | Image upload to Cloudinary                         |
+| `cloudinary`                           | Cloudinary SDK for image URL generation            |
+| `express-rate-limit`                   | Per-IP rate limiting                               |
+| `cors`                                 | CORS middleware                                    |
+| `compression`                          | gzip response compression                          |
+| `cookie-parser`                        | Parse `req.cookies` (visitor ID cookie)            |
+| `unique-names-generator`               | Deterministic visitor nicknames in analytics       |
 
 ---
 
@@ -234,6 +235,7 @@ A personal encrypted message vault. Users POST `{ message, password }` while aut
 Uploads go through `utils/cloudinaryUpload.js` (multer + multer-storage-cloudinary) to Cloudinary folder `feelio/posts`. On success `req.file` contains Cloudinary's snake_case response fields.
 
 `imageFormatter.js` handles two directions:
+
 - `extractUploadedImageMetadata(req.file)` — converts Cloudinary's snake_case to camelCase for DB storage
 - `normalizeExistingImage(dbImage)` — reads a DB image doc (may have legacy snake_case fields), regenerates optimized + thumbnail CDN URLs via SDK transforms, returns a consistent camelCase shape for API responses
 
@@ -277,18 +279,18 @@ throw new Error('Post not found');
 
 ## Environment Variables
 
-Loaded by `config/environment.js`. In dev reads `backend/.env.development`; in production env vars are injected by Northflank.
+Loaded by `config/environment.js`, which resolves the repo root from its own file location (works regardless of CWD) and reads `../../.env.development` in dev. In production (Azure Container Apps, and the Northflank failover copy) env vars are injected directly by the platform — no file involved. See the root `CLAUDE.md`'s Environment Files section for the full picture across all local env files.
 
-| Variable | Purpose |
-|----------|---------|
-| `PORT` | Express listen port (default 3000) |
-| `MONGO_URI` | MongoDB Atlas connection string |
-| `JWT_SECRET` | Signs 15-min access tokens; also used as HMAC key in secretenv |
-| `REFRESH_TOKEN_SECRET` | Signs 7-day refresh tokens (falls back to `JWT_SECRET`) |
-| `CLIENT_URL` | Dynamically added to CORS allowed origins |
-| `CLOUDINARY_NAME` | Cloudinary cloud name |
-| `CLOUDINARY_KEY` | Cloudinary API key |
-| `CLOUDINARY_SECRET` | Cloudinary API secret |
-| `NODE_ENV` | `development` or `production` |
+| Variable               | Purpose                                                        |
+| ---------------------- | -------------------------------------------------------------- |
+| `PORT`                 | Express listen port (default 3000)                             |
+| `MONGO_URI`            | MongoDB Atlas connection string                                |
+| `JWT_SECRET`           | Signs 15-min access tokens; also used as HMAC key in secretenv |
+| `REFRESH_TOKEN_SECRET` | Signs 7-day refresh tokens (falls back to `JWT_SECRET`)        |
+| `CLIENT_URL`           | Dynamically added to CORS allowed origins                      |
+| `CLOUDINARY_NAME`      | Cloudinary cloud name                                          |
+| `CLOUDINARY_KEY`       | Cloudinary API key                                             |
+| `CLOUDINARY_SECRET`    | Cloudinary API secret                                          |
+| `NODE_ENV`             | `development` or `production`                                  |
 
 Run `node backend/test-env.js` to verify all required vars are set before starting.
