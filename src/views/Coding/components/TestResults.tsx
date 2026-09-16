@@ -1,5 +1,6 @@
 import { CodeRunner } from '../CodeRunner';
 import ConsoleOutput from './ConsoleOutput';
+import { withFriendlyRetryNote } from '../utils/errorMessages';
 import type { ExecuteResult, TestRunResult } from '../CodeRunner';
 
 interface TestResultsProps {
@@ -80,8 +81,8 @@ const TestTicket = ({ test }: { test: TestRunResult }) => {
       )}
 
       {test.error && (
-        <p className="mt-3 rounded-[2px] border border-[#8d3a33] bg-[#f3ded9] p-2.5 font-paper-mono text-[13px] text-[#7a2f29]">
-          {test.error}
+        <p className="mt-3 whitespace-pre-wrap rounded-[2px] border border-[#8d3a33] bg-[#f3ded9] p-2.5 font-paper-mono text-[13px] text-[#7a2f29]">
+          {withFriendlyRetryNote(test.error)}
         </p>
       )}
     </div>
@@ -111,7 +112,7 @@ const TestResults = ({ results, isRunning }: TestResultsProps) => {
         <p className="font-paper-mono text-xs font-bold uppercase tracking-[.12em] text-[#7a2f29]">
           Error
         </p>
-        <p className="mt-1 text-sm text-[#7a2f29]">{results.error}</p>
+        <p className="mt-1 whitespace-pre-wrap text-sm text-[#7a2f29]">{results.error}</p>
       </div>
     );
   }
