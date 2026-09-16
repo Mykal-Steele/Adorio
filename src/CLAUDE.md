@@ -93,10 +93,15 @@ src/
 │           ├── PostImage.tsx     — Image with lazy load and click-to-expand
 │           ├── ImageModal.tsx    — Full-screen image lightbox
 │           ├── InteractionButtons.tsx — Like count + comment count buttons
-│           └── CommentSection/
-│               ├── index.tsx    — Scrollable comment list + form wrapper
-│               ├── CommentForm.tsx — Text input + emoji picker
-│               └── CommentItem.tsx — Single comment row
+  │           └── CommentSection/
+  │               ├── index.tsx    — Threaded comment list (oldest-first tree) + reply/mention form state
+  │               ├── CommentForm.tsx — Text input + emoji picker + mention suggestions dropdown
+  │               ├── utils/commentTree.ts — buildCommentTree, getEffectiveParent, getVisualDepth (depth cap 2, flatten deeper)
+  │               ├── hooks/useMentionAutocomplete.ts — @query detection, debounced user search, keyboard nav
+  │               └── components/
+  │                   ├── CommentItem.tsx — Recursive thread node (indent only, no connector lines)
+  │                   ├── MentionText.tsx — Bold-amber @username rendering
+  │                   └── MentionSuggestions.tsx — Autocomplete dropdown
 ├── config/                      — App-level configuration constants
 │   └── apiConfig.ts             — API_BASE_URL: /api in prod, http://localhost:3000/api in dev
 ├── hooks/                       — Shared React hooks (used across multiple views or globally)

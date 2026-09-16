@@ -13,6 +13,15 @@ export const addCommentSchema = z.object({
     .string()
     .min(1, 'Comment text is required')
     .max(5000, 'Comment must be 5,000 characters or fewer'),
+  parentId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, 'Invalid parent comment id')
+    .optional(),
+  mentions: z
+    .array(z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid mentioned user id'))
+    .max(10, 'Too many mentions')
+    .optional()
+    .default([]),
 });
 
 export const getPostsQuerySchema = z.object({

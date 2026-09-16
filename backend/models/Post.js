@@ -7,7 +7,8 @@ const postPopulate = (query) =>
   query
     .populate('user', ['username', 'isAdmin'])
     .populate('likes', ['username'])
-    .populate('comments.user', ['username', 'isAdmin']);
+    .populate('comments.user', ['username', 'isAdmin'])
+    .populate('comments.mentions', ['username']);
 
 export const createPost = (data) => Post.create(data);
 
@@ -33,6 +34,10 @@ export const findPostsPaginated = ({ skip, limit, filter = {} }) =>
 export const findPostById = (id) => postPopulate(Post.findById(id));
 
 export const findPostLikesById = (id) => Post.findById(id).select('likes').lean();
+
+// Comments only, no populates — for validating reply parents without paying
+// for the full user/likes/comments populate that the response path needs.
+export const findPostCommentsMeta = (id) => Post.findById(id).select('comments').lean();
 
 export const updatePostById = (id, update, options) => Post.findByIdAndUpdate(id, update, options);
 
