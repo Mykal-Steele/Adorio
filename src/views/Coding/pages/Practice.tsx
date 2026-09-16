@@ -148,7 +148,11 @@ const Practice = ({ classId }: PracticeProps) => {
     (nextCode: string) => {
       invalidateActiveExecution();
       setCode(nextCode);
-      setResults(null);
+      // Results intentionally stay on screen until the next Run press —
+      // clearing them on every keystroke made the test output unusable.
+      // The draft is still persisted on every edit (keeping the last run's
+      // results alongside it) via saveCode below, so a reload restores the
+      // latest code together with its last results.
       if (activeProblem && activeVariant && nextCode !== activeVariant.starterCode) {
         saveCodeDebounced(activeProblem.id, language, nextCode);
       } else {
@@ -162,7 +166,7 @@ const Practice = ({ classId }: PracticeProps) => {
   );
 
   const handleRunTests = useCallback(async () => {
-    if (!activeProblem || !activeVariant) return;
+    if (!activeProblem || !activeVariant || isRunning) return;
 
     const problemId = activeProblem.id;
     const runLanguage = language;
@@ -188,15 +192,18 @@ const Practice = ({ classId }: PracticeProps) => {
         );
       }
     } catch (err) {
-      const isUnauthorized =
-        err instanceof Error &&
-        'statusCode' in err &&
-        (err as { statusCode?: number }).statusCode === 401;
+      // verifyToken answers 403 for a bad/expired token (not 401), so both
+      // mean "not logged in" here — anything else is a genuine run failure.
+      const statusCode =
+        err instanceof Error && 'statusCode' in err
+          ? (err as { statusCode?: number }).statusCode
+          : undefined;
+      const isAuthError = statusCode === 401 || statusCode === 403;
       const rawMessage =
         err instanceof Error ? err.message : 'Failed to run your code. Please try again.';
       testResults = {
         status: 'error',
-        error: isUnauthorized
+        error: isAuthError
           ? 'Please log in (or create an account) to run your code.'
           : withFriendlyRetryNote(rawMessage),
         tests: [],
@@ -212,7 +219,7 @@ const Practice = ({ classId }: PracticeProps) => {
     saveRunResult(problemId, runLanguage, codeSnapshot, testResults);
     recomputeSolved();
     setIsRunning(false);
-  }, [activeProblem, activeVariant, language, code, recomputeSolved]);
+  }, [activeProblem, activeVariant, language, code, isRunning, recomputeSolved]);
 
   const handleReset = useCallback(() => {
     if (!activeProblem || !activeVariant) return;
@@ -224,6 +231,24 @@ const Practice = ({ classId }: PracticeProps) => {
     setEditorKey((k) => k + 1);
     recomputeSolved();
   }, [activeProblem, activeVariant, language, recomputeSolved, invalidateActiveExecution]);
+
+  const handleRunTestsRef = useRef(handleRunTests);
+  useEffect(() => {
+    handleRunTestsRef.current = handleRunTests;
+  }, [handleRunTests]);
+
+  // Ctrl/Cmd+Enter runs the tests from anywhere on the page — the standard
+  // shortcut on LeetCode/HackerRank, so there's no mouse round-trip to Run.
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleRunTestsRef.current();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const classSolvedCount = classProblems.filter((p) => solvedIds.has(p.id)).length;
 

@@ -147,7 +147,7 @@ src/
     │   │   ├── ResultsPanel.tsx — Test results summary
     │   │   └── TestResults.tsx  — Per-test result rows
     │   └── utils/
-    │       ├── codeRunnerWorker.ts — Web Worker implementation for isolated code execution
+    │       ├── formatCode.ts — brace-aware auto-formatter (newline/paste/button/shortcut)
     │       └── problemStorage.ts   — localStorage persistence for user code per problem
     └── Portfolio/               — VSCode-style IDE portfolio (public-facing, no auth)
         ├── IDELayout.tsx        — PortfolioShell, IDELayout, Desktop/Tablet/MobileShell
