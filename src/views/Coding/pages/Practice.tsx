@@ -14,6 +14,7 @@ import { getProblemsByClass } from '../problems';
 import { getClass } from '../constants/classes';
 import { CodeRunner, type ExecuteResult } from '../CodeRunner';
 import type { LanguageVariant } from '../types';
+import { withFriendlyRetryNote } from '../utils/errorMessages';
 import {
   loadProgress,
   saveCode,
@@ -191,13 +192,13 @@ const Practice = ({ classId }: PracticeProps) => {
         err instanceof Error &&
         'statusCode' in err &&
         (err as { statusCode?: number }).statusCode === 401;
+      const rawMessage =
+        err instanceof Error ? err.message : 'Failed to run your code. Please try again.';
       testResults = {
         status: 'error',
         error: isUnauthorized
           ? 'Please log in (or create an account) to run your code.'
-          : err instanceof Error
-            ? err.message
-            : 'Failed to run your code. Please try again.',
+          : withFriendlyRetryNote(rawMessage),
         tests: [],
       };
     }
