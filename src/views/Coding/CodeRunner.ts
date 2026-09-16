@@ -55,8 +55,13 @@ export class CodeRunner {
     }
   }
 
-  // Extract line number from error (simple approach)
-  static extractErrorInfo(error, code) {
+  // Extract line number from error, mapped back onto the user's own code.
+  // User code runs inside a `new Function` body with wrapper lines above it
+  // ("use strict" plus the console-proxy prelude), so a stack-trace line
+  // number points into the wrapper. The offset is derived from the actual
+  // wrapper text instead of hardcoded, so wrapper edits can't silently shift
+  // every reported line number.
+  static extractErrorInfo(error, code, wrappedCode = null) {
     let message = error.message || String(error);
     let lineInfo = '';
 
@@ -72,13 +77,11 @@ export class CodeRunner {
       for (const pattern of stackPatterns) {
         const match = error.stack.match(pattern);
         if (match) {
-          let lineNum = parseInt(match[1]);
-
-          // Adjust for wrapper code - our actual code starts after the wrapper
-          // The wrapper adds roughly 3-4 lines before user code
-          if (lineNum > 4) {
-            lineNum = lineNum - 4;
-          }
+          const reportedLine = parseInt(match[1]);
+          // The user's first line sits one past "use strict" plus every line
+          // of the wrapper that precedes their code.
+          const userFirstLine = wrappedCode ? wrappedCode.split(code)[0].split('\n').length + 1 : 5;
+          const lineNum = reportedLine - userFirstLine + 1;
 
           const codeLines = code.split('\n');
           if (lineNum > 0 && lineNum <= codeLines.length) {
@@ -128,87 +131,6 @@ export class CodeRunner {
     return { proxy, logs };
   }
 
-  // Get user function/class from code
-  static getUserCallable(code, functionName, consoleProxy = null) {
-    const wrappedCode = `
-      ${code}
-      if (typeof ${functionName} === 'function') {
-        return ${functionName};
-      } else {
-        throw new Error('Please define a ${
-          consoleProxy ? 'function or class' : 'function'
-        } named ${functionName}');
-      }
-    `;
-
-    if (consoleProxy) {
-      return new Function('console', `"use strict";\n${wrappedCode}`)(consoleProxy);
-    }
-    return new Function(`"use strict";\n${wrappedCode}`)();
-  }
-
-  // Execute code and capture output for terminal display
-  static async executeForOutput(code, functionName, sampleArgs = [], methodName = null) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const { proxy: consoleProxy, logs } = this.createConsoleProxy();
-
-        try {
-          // Inject console proxy into the code execution by wrapping the entire code
-          const wrappedCode = `
-            const console = arguments[0];
-            ${code}
-            if (typeof ${functionName} === 'function') {
-              return ${functionName};
-            } else {
-              throw new Error('Please define a ${
-                methodName ? 'class' : 'function'
-              } named ${functionName}');
-            }
-          `;
-
-          const userCallable = new Function(`"use strict";\n${wrappedCode}`)(consoleProxy);
-
-          if (typeof userCallable !== 'function') {
-            logs.push(
-              `❌ Error: Please define a ${
-                methodName ? 'class' : 'function'
-              } named ${functionName}`,
-            );
-            return resolve({ status: 'error', logs, returnValue: null });
-          }
-
-          let returnValue = null;
-          if (sampleArgs.length > 0) {
-            try {
-              if (methodName) {
-                // Class execution - create fresh instance
-                const instance = new userCallable(...sampleArgs);
-                if (typeof instance[methodName] === 'function') {
-                  returnValue = instance[methodName]();
-                  logs.push(`Return: ${this.formatValue(returnValue)}`);
-                } else {
-                  logs.push(`❌ Error: Method ${methodName} not found in class`);
-                }
-              } else {
-                // Function execution
-                returnValue = userCallable(...sampleArgs);
-                logs.push(`Return: ${this.formatValue(returnValue)}`);
-              }
-            } catch (error) {
-              logs.push(`❌ Runtime Error: ${this.extractErrorInfo(error, code)}`);
-            }
-          }
-
-          resolve({ status: 'success', logs, returnValue });
-        } catch (error) {
-          logs.push(`❌ Error: ${this.extractErrorInfo(error, code)}`);
-          resolve({ status: 'error', logs, returnValue: null });
-        }
-      }, 50);
-    });
-  }
-
   // Execute user code and run tests - now captures output for each test case
   static async execute(
     code: string,
@@ -222,10 +144,11 @@ export class CodeRunner {
           const testResults = tests.map((test, index) => {
             // Create a fresh console proxy for each test case
             const { proxy: consoleProxy, logs } = this.createConsoleProxy();
+            let wrappedCode: string | null = null;
 
             try {
               // Inject console proxy into the code execution for each test
-              const wrappedCode = `
+              wrappedCode = `
                 const console = arguments[0];
                 ${code}
                 if (typeof ${functionName} === 'function') {
@@ -264,6 +187,7 @@ export class CodeRunner {
                     logs,
                     index,
                     code,
+                    wrappedCode,
                   )
                 : this.runFunctionTestWithOutput(
                     userCallable,
@@ -272,6 +196,7 @@ export class CodeRunner {
                     logs,
                     index,
                     code,
+                    wrappedCode,
                   );
             } catch (error) {
               return {
@@ -281,7 +206,7 @@ export class CodeRunner {
                 output: undefined,
                 passed: false,
                 duration: 0,
-                error: this.extractErrorInfo(error, code),
+                error: this.extractErrorInfo(error, code, wrappedCode),
                 logs: [],
               };
             }
@@ -304,7 +229,7 @@ export class CodeRunner {
   }
 
   // Run a single test for a function with output capture
-  static runFunctionTestWithOutput(fn, test, consoleProxy, logs, index, code) {
+  static runFunctionTestWithOutput(fn, test, consoleProxy, logs, index, code, wrappedCode) {
     const start = performance.now();
 
     try {
@@ -327,7 +252,7 @@ export class CodeRunner {
         output: undefined,
         passed: false,
         duration: performance.now() - start,
-        error: this.extractErrorInfo(error, code),
+        error: this.extractErrorInfo(error, code, wrappedCode),
         logs: [...logs],
       };
     }
@@ -342,6 +267,7 @@ export class CodeRunner {
     logs,
     index,
     code,
+    wrappedCode,
   ) {
     const start = performance.now();
 
@@ -383,7 +309,7 @@ export class CodeRunner {
         output: undefined,
         passed: false,
         duration: performance.now() - start,
-        error: this.extractErrorInfo(error, code),
+        error: this.extractErrorInfo(error, code, wrappedCode),
         logs: [...logs],
       };
     }

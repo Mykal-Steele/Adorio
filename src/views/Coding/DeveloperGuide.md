@@ -5,7 +5,7 @@
 1. [`pages/ClassCatalog.tsx`](pages/ClassCatalog.tsx) (mounted at `/coding`) lists the classes from [`constants/classes.ts`](constants/classes.ts), each with its solved count via [`isProblemSolved`](utils/progress.ts).
 2. Picking a class routes to `/coding/[classId]`, which mounts [`pages/Practice.tsx`](pages/Practice.tsx) with that `classId`. `Practice` loads the class's problems via [`getProblemsByClass`](problems.ts), restoring the last-visited problem and any saved code/results via [`utils/progress.ts`](utils/progress.ts).
 3. `ProblemList` (scoped to the class) switches the active problem; picking a problem with no saved draft loads its starter code for the first language it defines. `LanguagePicker` (inside `CodeEditor`) switches between a problem's available languages when it defines more than one.
-4. `CodeEditor` (CodeMirror, themed by [`constants/editorTheme.ts`](constants/editorTheme.ts)) captures edits and autosaves the draft (debounced) via `progress.ts` — editing clears the on-screen results since they no longer describe the current code, but a problem's persisted "solved" status only changes on the next actual run or an explicit reset.
+4. `CodeEditor` (CodeMirror, themed by [`constants/editorTheme.ts`](constants/editorTheme.ts)) captures edits and autosaves the draft (debounced) via `progress.ts` — the last run's results stay on screen while editing until the next run press, and a problem's persisted "solved" status only changes on the next actual run or an explicit reset. The editor auto-formats on every newline insert (plus a Format button and Shift+Alt+F) via [`utils/formatCode.ts`](utils/formatCode.ts).
 5. Running tests dispatches on the active language variant's `kind`: `'call'` variants run in-browser via [`CodeRunner.execute`](CodeRunner.ts); `'stdio'` variants POST to `runCodingSubmission` (`src/api/coding.ts` → `POST /api/coding/run`), which the backend grades against a self-hosted Piston instance. Both feed the same `ResultsPanel` and `TestResults`.
 
 ## Modules & Responsibilities
@@ -34,7 +34,7 @@
 
 - `activeProblemId` / `language`: current selection; `language` resets to the problem's first available language whenever the problem changes.
 - `code`: bound to the editor, persisted via `progress.ts`.
-- `results`: populated from whichever runner `handleRunTests` dispatched to; cleared whenever the code is edited so it never describes stale code.
+- `results`: populated from whichever runner `handleRunTests` dispatched to; kept while the code is edited so it survives until the next run press (the persisted draft always keeps the latest code alongside the last results).
 - `solvedIds`: recomputed from persisted progress after every run and reset — not live "does the current code pass" state.
 - An internal execution id (bumped on every edit, reset, problem switch, and language switch) guards `handleRunTests`: if anything invalidates the run before it resolves, its result is discarded instead of overwriting newer state.
 - `editorKey`: forces a fresh CodeMirror instance (clean undo history) on problem switch or reset.
@@ -49,6 +49,6 @@
 ## Debugging Tips
 
 - Console output from `'call'` solutions appears inside each test result.
-- Runtime errors on `'call'` variants include approximate line numbers derived by `extractErrorInfo`; align starter templates to keep offsets stable.
+- Runtime errors on `'call'` variants include line numbers mapped back onto the user's code by `extractErrorInfo`, which derives the wrapper offset from the actual wrapper text — no manual offset upkeep needed.
 - Class-based `'call'` problems instantiate with spread `args`; the constructor signature should accept the provided tuple.
 - `'stdio'` failures surface Piston's `stderr` (or a signal/exit-code message) as `error`; compilation failures short-circuit the whole submission with `status: 'error'` before any test runs.
