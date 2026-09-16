@@ -53,13 +53,11 @@ const fontSizeCompartment = new Compartment();
 // toggling never rebuilds the editor or loses undo history.
 export interface EditorSettings {
   wrap: boolean;
-  formatOnNewline: boolean;
   fontSize: number;
 }
 
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
   wrap: true,
-  formatOnNewline: true,
   fontSize: 16,
 };
 
@@ -105,11 +103,6 @@ export const syncEditorSettings = (view: EditorView | null) => {
 export const setWrap = (view: EditorView | null, wrap: boolean) => {
   patchSettings({ wrap });
   syncEditorSettings(view);
-};
-
-export const setFormatOnNewline = (formatOnNewline: boolean) => {
-  // No view sync needed — the format listener reads this flag live.
-  patchSettings({ formatOnNewline });
 };
 
 export const setFontSize = (view: EditorView | null, fontSize: number) => {

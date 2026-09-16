@@ -152,7 +152,7 @@ src/
     │   │   ├── ResultsPanel.tsx — Test results summary
     │   │   └── TestResults.tsx  — Per-test result rows
     │   └── utils/
-    │       ├── formatCode.ts — brace-aware auto-formatter (newline/paste/button/shortcut)
+    │       ├── formatCode.ts — brace-aware formatter (manual Format button / Shift+Alt+F only)
     │       ├── editorKeys.ts — VSCode editing shortcuts (tab-at-cursor, comment/line keys)
     │       └── problemStorage.ts   — localStorage persistence for user code per problem
     └── Portfolio/               — VSCode-style IDE portfolio (public-facing, no auth)
