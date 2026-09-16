@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import tls from 'node:tls';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ApiError from '../utils/ApiError.js';
 
 // Cloud platforms (Azure Container Apps, Northflank) inject env vars directly —
 // no .env file involved there. Locally, both native `cd backend && npm run dev`
@@ -31,7 +32,9 @@ if (
   pistonUrl &&
   !pistonUrl.startsWith('https://')
 ) {
-  throw new Error('PISTON_URL must use https:// — the Piston deployment only accepts TLS');
+  throw ApiError.internalServerError(
+    'PISTON_URL must use https:// — the Piston deployment only accepts TLS',
+  );
 }
 
 // Piston's cert is self-signed and pinned here rather than issued by a public
