@@ -26,6 +26,7 @@ import secretEnvRoutes from './routes/secretEnvRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import monitoringRoutes from './routes/monitoringRoutes.js';
 import hostedFileRoutes from './routes/hostedFileRoutes.js';
+import codingRoutes from './routes/codingRoutes.js';
 import { getHealthStatus } from './controllers/analyticsController.js';
 
 process.env.TZ = 'UTC';
@@ -75,6 +76,7 @@ app.use('/api/secretenv', secretEnvRoutes);
 app.use('/api/stats', analyticsRoutes);
 app.use('/api', monitoringRoutes);
 app.use('/api/hosted', hostedFileRoutes);
+app.use('/api/coding', codingRoutes);
 
 app.get('/api/health', getHealthStatus);
 
