@@ -187,9 +187,17 @@ const Practice = ({ classId }: PracticeProps) => {
         );
       }
     } catch (err) {
+      const isUnauthorized =
+        err instanceof Error &&
+        'statusCode' in err &&
+        (err as { statusCode?: number }).statusCode === 401;
       testResults = {
         status: 'error',
-        error: err instanceof Error ? err.message : 'Failed to run your code. Please try again.',
+        error: isUnauthorized
+          ? 'Please log in (or create an account) to run your code.'
+          : err instanceof Error
+            ? err.message
+            : 'Failed to run your code. Please try again.',
         tests: [],
       };
     }
@@ -276,7 +284,7 @@ const Practice = ({ classId }: PracticeProps) => {
                 />
               </aside>
 
-              <div className="space-y-6">
+              <div className="min-w-0 space-y-6">
                 <ProblemDetails problem={activeProblem} />
 
                 <CodeEditor

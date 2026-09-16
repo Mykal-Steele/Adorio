@@ -77,6 +77,11 @@ const TYPES = [
   'TreeSet',
   'StringBuilder',
   'StringBuffer',
+  'StringJoiner',
+  'Deque',
+  'ArrayDeque',
+  'Queue',
+  'PriorityQueue',
   'Exception',
   'RuntimeException',
   'Comparator',
@@ -110,6 +115,71 @@ const MEMBERS: Record<string, Completion[]> = {
   out: ['println', 'print', 'printf'].map((label): Completion => ({ label, type: 'method' })),
 };
 
+// There's no type checker here, so `foo.` can't know whether `foo` is a
+// String, a StringBuilder, or a List — this is the instance-method surface
+// people actually type on local variables, offered for any receiver that
+// isn't a known class name above (matching real Java would need a language
+// server, not a static list).
+const INSTANCE_FALLBACK: Completion[] = [
+  'length',
+  'charAt',
+  'substring',
+  'indexOf',
+  'lastIndexOf',
+  'contains',
+  'startsWith',
+  'endsWith',
+  'equals',
+  'equalsIgnoreCase',
+  'compareTo',
+  'trim',
+  'strip',
+  'split',
+  'replace',
+  'replaceAll',
+  'toUpperCase',
+  'toLowerCase',
+  'toCharArray',
+  'toString',
+  'isEmpty',
+  'isBlank',
+  'hashCode',
+  'append',
+  'insert',
+  'deleteCharAt',
+  'reverse',
+  'add',
+  'addAll',
+  'addFirst',
+  'addLast',
+  'remove',
+  'removeFirst',
+  'removeLast',
+  'get',
+  'set',
+  'size',
+  'peek',
+  'peekFirst',
+  'peekLast',
+  'poll',
+  'pollFirst',
+  'pollLast',
+  'push',
+  'pop',
+  'put',
+  'getOrDefault',
+  'containsKey',
+  'containsValue',
+  'keySet',
+  'values',
+  'entrySet',
+  'forEach',
+  'stream',
+  'iterator',
+  'next',
+  'hasNext',
+].map((label): Completion => ({ label, type: 'method' }));
+
 const TOP_LEVEL = [...KEYWORDS, ...TYPES];
 
 export const javaCompletionSource = (context: CompletionContext): CompletionResult | null => {
@@ -117,14 +187,12 @@ export const javaCompletionSource = (context: CompletionContext): CompletionResu
   if (dotMatch) {
     const dotIndex = dotMatch.text.lastIndexOf('.');
     const receiver = dotMatch.text.slice(0, dotIndex);
-    const members = MEMBERS[receiver];
-    if (members) {
-      return {
-        from: dotMatch.from + dotIndex + 1,
-        options: members,
-        validFor: /^\w*$/,
-      };
-    }
+    const members = MEMBERS[receiver] ?? INSTANCE_FALLBACK;
+    return {
+      from: dotMatch.from + dotIndex + 1,
+      options: members,
+      validFor: /^\w*$/,
+    };
   }
 
   const word = context.matchBefore(/\w+/);
