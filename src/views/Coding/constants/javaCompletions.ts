@@ -116,7 +116,7 @@ const MEMBERS: Record<string, Completion[]> = {
 };
 
 // There's no type checker here, so `foo.` can't know whether `foo` is a
-// String, a StringBuilder, or a List — this is the instance-method surface
+// String, a StringBuilder, or a List, so this is the instance-method surface
 // people actually type on local variables, offered for any receiver that
 // isn't a known class name above (matching real Java would need a language
 // server, not a static list).
