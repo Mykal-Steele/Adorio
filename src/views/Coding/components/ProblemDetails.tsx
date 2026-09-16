@@ -76,7 +76,7 @@ const ProblemDetails = ({ problem }: ProblemDetailsProps) => (
                 const rowBg =
                   index % 2 === 1 ? 'bg-[var(--paper-cream)]' : 'bg-[var(--paper-hero)]';
                 return (
-                  <Fragment key={example.input}>
+                  <Fragment key={`${example.input}-${index}`}>
                     <tr className={rowBg}>
                       <td className="whitespace-pre-wrap border-b border-r border-[var(--paper-line)] p-2.5 align-top">
                         {example.input}
