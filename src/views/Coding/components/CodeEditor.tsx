@@ -9,7 +9,7 @@ import { autocompletion, closeBrackets } from '@codemirror/autocomplete';
 import { paperEditorTheme } from '../constants/editorTheme';
 import { javaCompletionSource } from '../constants/javaCompletions';
 import { javaSnippetSource, jsSnippetSource } from '../constants/snippets';
-import { formatCode } from '../utils/formatCode';
+import { formatCode, mapPosThroughFormat } from '../utils/formatCode';
 import { getEditorSettings, settingsCompartments, vscodeKeymap } from '../utils/editorKeys';
 import { Language } from '../types';
 import LanguagePicker from './LanguagePicker';
@@ -84,20 +84,49 @@ const formatOnNewline = EditorView.updateListener.of((update) => {
   if (!update.transactions.some((tr) => tr.isUserEvent('input'))) return;
 
   let insertedNewline = false;
+  let newlineCount = 0;
   update.changes.iterChanges((_fromA, _toA, _fromB, _toB, inserted) => {
-    if (inserted.toString().includes('\n')) insertedNewline = true;
+    const text = inserted.toString();
+    if (text.includes('\n')) {
+      insertedNewline = true;
+      newlineCount += text.split('\n').length - 1;
+    }
   });
-  if (!insertedNewline) return;
+  // Only a real Enter press (exactly one newline) auto-formats — a
+  // multi-line paste keeps the user's text untouched until they format
+  // explicitly, matching VSCode (whose format-on-paste is off by default).
+  if (!insertedNewline || newlineCount !== 1) return;
 
   const current = update.state.doc.toString();
   const formatted = formatCode(current);
   if (formatted === current) return;
 
+  const selection = update.state.selection;
   update.view.dispatch({
     changes: { from: 0, to: update.state.doc.length, insert: formatted },
+    selection: {
+      anchor: mapPosThroughFormat(current, formatted, selection.main.anchor),
+      head: mapPosThroughFormat(current, formatted, selection.main.head),
+    },
     annotations: [autoFormat.of(true), Transaction.addToHistory.of(false)],
   });
 });
+
+// Manual format (Shift+Alt+F / Format button): same cursor-preserving
+// whole-doc replace, but left in the undo history as one step.
+const dispatchPreservingFormat = (view: EditorView) => {
+  const current = view.state.doc.toString();
+  const formatted = formatCode(current);
+  if (formatted === current) return;
+  const selection = view.state.selection;
+  view.dispatch({
+    changes: { from: 0, to: view.state.doc.length, insert: formatted },
+    selection: {
+      anchor: mapPosThroughFormat(current, formatted, selection.main.anchor),
+      head: mapPosThroughFormat(current, formatted, selection.main.head),
+    },
+  });
+};
 
 const disableGrammarly = EditorView.contentAttributes.of({
   spellcheck: 'false',
@@ -137,6 +166,9 @@ const CodeEditor = ({
       autocompletion({ activateOnTyping: true }),
       closeBrackets(),
       disableGrammarly,
+      // VSCode-style Alt+Click multi-cursor (CodeMirror's default is
+      // Ctrl/Cmd+Click, which collides with browser shortcuts).
+      EditorView.clickAddsSelectionRange.of((event) => event.altKey),
       // Wrapping on by default (Alt+Z toggles): without it a long line
       // pushes the scroller and parent card sideways past the fold.
       ...settingsCompartments,
@@ -144,13 +176,7 @@ const CodeEditor = ({
         {
           key: 'Shift-Alt-f',
           run: (view) => {
-            const current = view.state.doc.toString();
-            const formatted = formatCode(current);
-            if (formatted !== current) {
-              view.dispatch({
-                changes: { from: 0, to: view.state.doc.length, insert: formatted },
-              });
-            }
+            dispatchPreservingFormat(view);
             return true;
           },
         },
@@ -164,7 +190,7 @@ const CodeEditor = ({
   return (
     <section
       aria-labelledby="editor-h"
-      className="relative rotate-[0.3deg] rounded-[3px] bg-[var(--paper-cream)] p-[clamp(16px,2vw,22px)] shadow-[0_14px_26px_-14px_rgba(60,44,24,.3),0_2px_0_rgba(60,44,24,.1)]"
+      className="relative z-20 rotate-[0.3deg] rounded-[3px] bg-[var(--paper-cream)] p-[clamp(16px,2vw,22px)] shadow-[0_14px_26px_-14px_rgba(60,44,24,.3),0_2px_0_rgba(60,44,24,.1)]"
     >
       <span
         aria-hidden="true"
@@ -176,7 +202,11 @@ const CodeEditor = ({
         </h2>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => onChange(formatCode(code))}
+            onClick={() => {
+              const view = viewRef.current;
+              if (view) dispatchPreservingFormat(view);
+              else onChange(formatCode(code));
+            }}
             title="Format code (Shift+Alt+F)"
             className="rounded-[3px] border-[1.5px] border-dashed border-[rgba(60,44,24,.5)] px-3 py-1 font-paper-mono text-xs font-bold uppercase tracking-[.1em] text-[var(--paper-muted)] transition-colors hover:border-[var(--paper-accent-strong)] hover:bg-[var(--paper-yellow-soft)]"
           >
@@ -196,6 +226,10 @@ const CodeEditor = ({
           height="380px"
           theme={paperEditorTheme}
           extensions={extensions}
+          // @uiw registers CodeMirror's stock indentWithTab ahead of user
+          // extensions, which would shadow our Tab handler below (whole-line
+          // indent everywhere). Disabled so vscodeTab owns Tab/Shift-Tab.
+          indentWithTab={false}
           basicSetup={{
             highlightActiveLine: true,
             highlightActiveLineGutter: true,
@@ -203,6 +237,9 @@ const CodeEditor = ({
             lineNumbers: true,
           }}
           onChange={onChange}
+          onCreateEditor={(view) => {
+            viewRef.current = view;
+          }}
           onUpdate={(update) => {
             viewRef.current = update.view;
           }}
