@@ -1221,16 +1221,20 @@ function findPattern(pattern, text) {
     title: 'Prime Factorization',
     difficulty: ProblemDifficulty.EASY,
     description:
-      'Read a single positive integer from stdin. Print all of its prime factors in ascending order on one line, separated by " * " (space, star, space).',
+      'Read a single positive integer from stdin and print its prime factorization.\n\n**Input format:** one line holding a single integer `n`, where `n > 1`.\n\n**Output format:** one line listing every prime factor in ascending order, joined by ` * ` (a star with one space on each side).\n\nFor example, `360` factors into `2 * 2 * 2 * 3 * 3 * 5`.',
     constraints: [
-      'Input is a single positive integer on one line',
-      'Print the factors in ascending order',
-      'Separate factors with a single space, a star, and a single space',
+      'Input is a single integer greater than 1',
+      'Print the prime factors in ascending order',
+      'Join the factors with a star, with one space on each side',
     ],
     examples: [
       {
         input: '360',
         output: '2 * 2 * 2 * 3 * 3 * 5',
+      },
+      {
+        input: '32',
+        output: '2 * 2 * 2 * 2 * 2',
       },
       {
         input: '14',
@@ -1302,6 +1306,11 @@ public class Main {
             expectedOutput: '2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 3 * 3 * 3 * 3 * 5 * 5 * 7',
           },
           {
+            name: 'prime 13',
+            stdin: '13\n',
+            expectedOutput: '13',
+          },
+          {
             name: 'input 111111',
             stdin: '111111\n',
             expectedOutput: '3 * 7 * 11 * 13 * 37',
@@ -1316,16 +1325,20 @@ public class Main {
     title: 'String Combination',
     difficulty: ProblemDifficulty.EASY,
     description:
-      'Read two lines from stdin. Reverse the second string, then build the output by alternating characters: the first character of string 1, the first character of the reversed string 2, the second character of string 1, and so on. Once one side runs out of characters, append the rest of the other side as-is.',
+      'Read two lines from stdin and merge them into one combined string.\n\nFirst, reverse the second line. Then build the output by alternating characters: the 1st character of line 1, the 1st character of the reversed line 2, the 2nd character of line 1, and so on. Once one side runs out of characters, append the rest of the other side unchanged.\n\n**Example:** line 1 is `ABCD` and line 2 is `1234` — reversed line 2 is `4321` — so the merged output is `A4B3C2D1`.',
     constraints: [
-      'Read whole lines (inputs may contain spaces)',
-      'Reverse the second string before interleaving',
-      'Append the remaining characters once one side is exhausted',
+      'Read exactly two whole lines (inputs may contain spaces, so read full lines)',
+      'Reverse the second line before merging',
+      'Alternate characters, then append the leftover tail of the longer side',
     ],
     examples: [
       {
         input: 'ABCD\n1234',
         output: 'A4B3C2D1',
+      },
+      {
+        input: 'Programming\nJava',
+        output: 'ParvoagJramming',
       },
     ],
     languages: {
@@ -1353,9 +1366,14 @@ public class Main {
             expectedOutput: 'ParvoagJramming',
           },
           {
-            name: 'A / IsTheFirstAlphabet InEnglish',
-            stdin: 'A\nIsTheFirstAlphabet InEnglish\n',
-            expectedOutput: 'AhsilgnEnI tebahplAtsriFehTsI',
+            name: 'A / IsTheFirstAlphabetInEnglish',
+            stdin: 'A\nIsTheFirstAlphabetInEnglish\n',
+            expectedOutput: 'AhsilgnEnItebahplAtsriFehTsI',
+          },
+          {
+            name: 'CS@SIT / KMUTT',
+            stdin: 'CS@SIT\nKMUTT\n',
+            expectedOutput: 'CTST@USMIKT',
           },
           {
             name: 'YouGood??? / symbols',
@@ -1367,6 +1385,11 @@ public class Main {
             stdin: '1234\nabcdefghijk\n',
             expectedOutput: '1k2j3i4hgfedcba',
           },
+          {
+            name: 'spaces need full lines',
+            stdin: 'hi there\nXY\n',
+            expectedOutput: 'hYiX there',
+          },
         ],
       },
     },
@@ -1377,13 +1400,17 @@ public class Main {
     title: 'Molecular Mass',
     difficulty: ProblemDifficulty.MEDIUM,
     description:
-      'Read a chemical formula from stdin and print its total molecular mass. Atomic masses: H = 1, C = 12, O = 16. A letter with no trailing number counts once; numbers may have multiple digits. If the formula contains anything else (an atom other than H/C/O, a lowercase letter, or a symbol), print exactly "Error".',
+      'Read a chemical formula from stdin and print its total molecular mass.\n\nAtomic masses: `H = 1`, `C = 12`, `O = 16`.\n\n- A letter may be followed by a count, which can have more than one digit (`C100` means 100 carbon atoms).\n- A letter with no number after it counts exactly once (the `O` in `H2O` is 1 oxygen).\n- Only `H`, `C`, and `O` are valid. Anything else — an unknown atom like `S`, a lowercase letter like `h`, or a symbol like `!` — makes the whole answer exactly `Error`.\n\n**Examples:** `H2O` gives `18`. `H2SO4` gives `Error` because `S` is unknown.',
     constraints: [
       'Only H, C, and O are valid atoms',
-      "A number immediately after a letter is that atom's count; no number means a count of 1",
-      'Any unknown atom, lowercase letter, or symbol means the answer is exactly "Error"',
+      'A number right after a letter is that atom’s count (multi-digit allowed); no number means 1',
+      'Any other character makes the output exactly Error',
     ],
     examples: [
+      {
+        input: 'H2O',
+        output: '18',
+      },
       {
         input: 'C2H5OH',
         output: '46',
@@ -1467,11 +1494,11 @@ public class Main {
     title: 'Box Office Revenue',
     difficulty: ProblemDifficulty.MEDIUM,
     description:
-      'Read n (fans in line) then the revenue target, on separate lines. Fans are numbered 1..n. Before serving each fan, stop if revenue has already reached the target. Otherwise: a fan who is a multiple of both 3 and 7 buys a Golden Ticket (revenue -$20); a multiple of 7 only buys a Backstage Pass ($150); a multiple of 3 only buys a Premium ticket ($80); anyone else buys a Standard ticket ($50). Print the final revenue prefixed with "$" on line 1, then the number of fans served on line 2.',
+      'There are `n` fans waiting in a single-file line, numbered `1` to `n`. Read `n` on line 1 and the target revenue on line 2, then serve the fans in order.\n\nAfter every fan, check the revenue total: as soon as it reaches or passes the target, the booth closes at once and the remaining fans get nothing. The check also happens before the first fan, so a target of `0` or less would serve nobody — but the given targets are always positive.\n\nEach fan’s ticket depends on their position (first matching rule wins):\n\n- Multiple of **both 3 and 7** (e.g. 21): Golden Ticket — free, and revenue **drops by $20** (`-20`).\n- Multiple of **7 only**: Backstage Pass — `$150`.\n- Multiple of **3 only**: Premium Upgrade — `$80`.\n- Anyone else: Standard Ticket — `$50`.\n\n**Output:** line 1 is `$` followed by the final revenue; line 2 is how many fans got a ticket (Golden Ticket winners count too).\n\n**Worked example:** `10` fans, target `300`. Fans 1–2 pay standard (total `100`), fan 3 pays premium (`180`), fans 4–5 pay standard (`280`), fan 6 pays premium (`360`). `360` reaches the target, so the booth closes: `$360` and `6` tickets.',
     constraints: [
-      'Process fans in order starting from 1',
-      'Stop before serving a fan once revenue has already reached the target',
-      'Golden Ticket (3 and 7): -$20. Backstage Pass (7 only): $150. Premium (3 only): $80. Standard: $50',
+      '1 <= n <= 10000; target is between $100 and $1,000,000',
+      'Serve fans in order starting from 1; stop as soon as revenue reaches the target',
+      'Golden (3 and 7): -20. Backstage (7 only): $150. Premium (3 only): $80. Standard: $50',
     ],
     examples: [
       {
@@ -1528,6 +1555,11 @@ public class Main {
             stdin: '1\n200\n',
             expectedOutput: '$50\n1',
           },
+          {
+            name: '100 fans, target 50',
+            stdin: '100\n50\n',
+            expectedOutput: '$50\n1',
+          },
         ],
       },
     },
@@ -1538,16 +1570,21 @@ public class Main {
     title: 'Seating Chart',
     difficulty: ProblemDifficulty.MEDIUM,
     description:
-      'Read R (rows) then C (seats per row), on separate lines. Rows and seats are numbered starting from 1. Categorize each seat by the first matching rule: row 1 is a Vantage seat (V, $100); the first or last seat in a row is an Aisle seat (A, $75); a seat where the row number equals the seat number is a Lucky seat (L, $50); everything else is a Standard seat (S, $30). Print the seating map (one row per line, seats separated by a single space), then a line reading "Total Potential Revenue: $<sum>".',
+      'The venue has `R` rows (front to back, numbered from 1) and `C` seats per row (left to right, numbered from 1). Read `R` on line 1 and `C` on line 2.\n\nCategorize every seat by the **first** rule that matches, from top to bottom:\n\n1. **Front Row** — any seat in row 1 is a VIP seat: symbol `V`, price `$100`.\n2. **Aisle Seats** — seat 1 or seat `C` of a row: symbol `A`, price `$75`.\n3. **Lucky Diagonal** — the row number equals the seat number (e.g. row 3, seat 3): symbol `L`, price `$50`.\n4. **Standard** — everything else: symbol `S`, price `$30`.\n\n**Output:** print the seating map — one line per row, seats separated by a single space — then a final line `Total Potential Revenue: $<sum>`.\n\n**Worked example:** `4` rows, `5` seats. Row 1 is all `V` (front row): `5 x $100 = $500`. Row 2 is `A L S S A`: `$75 + $50 + $30 + $30 + $75 = $260`. Rows 3 and 4 follow the same pattern (`$260` each). Total: `$500 + $260 + $260 + $260 = $1280`.',
     constraints: [
-      'Apply the rules in this order: Vantage, then Aisle, then Lucky, then Standard',
-      'Row 1 is always entirely Vantage seats',
+      '1 <= R <= 50; 1 <= C <= 50',
+      'Apply the rules in this order: Front Row, then Aisle, then Lucky Diagonal, then Standard',
+      'Row 1 is always entirely V seats',
       'Print one venue row per output line, seats separated by a single space',
     ],
     examples: [
       {
         input: '4\n5',
         output: 'V V V V V\nA L S S A\nA S L S A\nA S S L A\nTotal Potential Revenue: $1280',
+      },
+      {
+        input: '1\n1',
+        output: 'V\nTotal Potential Revenue: $100',
       },
     ],
     languages: {
