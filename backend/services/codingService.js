@@ -31,13 +31,19 @@ const pistonFetch = async (path, options) => {
       ...options,
       signal: AbortSignal.timeout(PISTON_TIMEOUT_MS),
     });
-  } catch {
+  } catch (error) {
+    console.error('Piston fetch failed', { path, cause: error.cause?.code || error.message });
     throw ApiError.internalServerError('Could not reach the code execution service');
   }
-  if (!res.ok) throw ApiError.internalServerError('Could not reach the code execution service');
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    console.error('Piston returned an error response', { path, status: res.status, body });
+    throw ApiError.internalServerError('Could not reach the code execution service');
+  }
   try {
     return await res.json();
-  } catch {
+  } catch (error) {
+    console.error('Piston response was not valid JSON', { path, message: error.message });
     throw ApiError.internalServerError('Could not reach the code execution service');
   }
 };
