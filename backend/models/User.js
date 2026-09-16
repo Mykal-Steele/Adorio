@@ -25,3 +25,14 @@ export const deleteUserById = (id) => User.findByIdAndDelete(id);
 
 export const findUsersByIds = (ids) =>
   User.find({ _id: { $in: ids } }, 'username email displayName').lean();
+
+export const searchUsersByUsernamePrefix = (query, limit = 8) => {
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Anchored (^) prefix scan over the unique username index: bounded work,
+  // stops after `limit` matches. Projection + lean keep the payload minimal.
+  return User.find({ username: { $regex: `^${escaped}`, $options: 'i' } }, 'username')
+    .sort({ username: 1 })
+    .limit(limit)
+    .maxTimeMS(2000)
+    .lean();
+};
