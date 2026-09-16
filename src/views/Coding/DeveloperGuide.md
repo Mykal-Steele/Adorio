@@ -26,7 +26,7 @@
 
 - `ProblemList`: lists the active class's problems, sortable by difficulty, marks the active one and any solved ones.
 - `ProblemDetails`: renders description, constraints, examples.
-- `CodeEditor`: CodeMirror wrapper; renders `LanguagePicker` when a problem defines more than one language and emits `onChange`/`onLanguageChange`.
+- `CodeEditor`: CodeMirror wrapper; renders `LanguagePicker` when a problem defines more than one language and emits `onChange`/`onLanguageChange`. Editing keys mirror VSCode (`utils/editorKeys.ts`: mid-line Tab inserts spaces, Ctrl+/ comments, Ctrl+Shift+K deletes a line, Alt+Up/Down moves lines, Shift+Alt+Up/Down duplicates, Alt+Z toggles wrap). IntelliSense is static lists, not a language server: Java keywords/types/dot-members (`constants/javaCompletions.ts`) plus snippet templates for both languages (`constants/snippets.ts`).
 - `ResultsPanel`: run/reset controls and the pass/fail summary.
 - `TestResults`: per-test pass/fail; renders `args`/`expected`/`output` for `'call'` results or `stdin`/`expected`/`output` for `'stdio'` results, plus captured console output (via `ConsoleOutput`).
 
