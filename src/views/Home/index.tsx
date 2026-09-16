@@ -11,6 +11,7 @@ import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import { debounce } from 'lodash';
 import { isAbortError } from '../../utils/errorHandling';
 import { TITLE_CHARACTER_LIMIT } from './constants/title';
+import { POSTS_PAGE_SIZE } from './constants/feed';
 import PaperTornEdge from '../../components/PaperTornEdge';
 
 const ErrorToast = ({ error, onDismiss }) => (
@@ -181,7 +182,9 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [hasMore, setHasMore] = useState(initialHasMore);
-  const [page, setPage] = useState(initialPosts.length > 0 ? 2 : 1);
+  // `page` tracks the last loaded page (page 1 comes from SSR). Infinite scroll
+  // increments it to load the next page, so it always starts at 1.
+  const [page, setPage] = useState(1);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [filter, setFilter] = useState<'all' | 'photos'>('all');
   // Prevent hydration mismatch: user-dependent UI only renders after client mount
@@ -219,7 +222,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     try {
       const response = await getPosts(
         page,
-        12,
+        POSTS_PAGE_SIZE,
         abortControllerRef.current.signal,
         filter === 'photos',
       );
@@ -240,7 +243,15 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     }
   }, [page, filter]);
 
+  // SSR already rendered page 1 — don't refetch it on mount or posts 4..N
+  // get skipped/overwritten by a mismatched page/limit. The next fetch is
+  // page 2 via infinite scroll. If SSR failed (no initial posts), fetch page 1.
+  const hasHydratedInitialPage = useRef(initialPosts.length > 0);
   useEffect(() => {
+    if (hasHydratedInitialPage.current) {
+      hasHydratedInitialPage.current = false;
+      return;
+    }
     fetchPosts();
   }, [fetchPosts]);
 
