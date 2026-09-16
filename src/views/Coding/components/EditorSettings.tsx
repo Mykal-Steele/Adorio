@@ -15,7 +15,8 @@ import {
 } from '../utils/editorKeys';
 
 const SHORTCUTS: Array<[string, string]> = [
-  ['Tab / Shift+Tab', 'Indent / outdent (mid-line Tab inserts spaces)'],
+  ['Tab / Shift-Tab', 'Insert spaces at cursor / outdent (selection indents)'],
+  ['Ctrl + ] / [', 'Indent / outdent line'],
   ['Ctrl+Space', 'Trigger suggestions'],
   ['Ctrl + /', 'Toggle line comment'],
   ['Ctrl + Shift + K', 'Delete line'],
