@@ -62,7 +62,7 @@ const CodeEditor = ({
       // Without this, a long line pushes the scroller (and its parent card)
       // wider instead of wrapping, so the page grows sideways past the fold.
       EditorView.lineWrapping,
-      // Tab isn't bound to indentation by default — CodeMirror leaves it free
+      // Tab isn't bound to indentation by default, CodeMirror leaves it free
       // for accessibility (focus can Tab away). Opting in here is fine since
       // this is a dedicated code editor, not a form field.
       keymap.of([indentWithTab]),
