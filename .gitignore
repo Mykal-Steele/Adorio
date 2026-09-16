@@ -42,3 +42,7 @@ reports/
 
 # Local audit password
 scripts/.env
+
+# Deploy-time secrets (SSH keys, TLS keypairs, tokens) — never app runtime
+# config, never committed. See infra/.secrets/README.md.
+infra/.secrets/

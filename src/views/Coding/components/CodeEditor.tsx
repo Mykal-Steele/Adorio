@@ -1,14 +1,38 @@
 import { useMemo } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
+import { EditorView } from '@codemirror/view';
+import { javascript, javascriptLanguage, scopeCompletionSource } from '@codemirror/lang-javascript';
 import { StreamLanguage } from '@codemirror/language';
 import { java } from '@codemirror/legacy-modes/mode/clike';
 import { autocompletion, closeBrackets } from '@codemirror/autocomplete';
 import { paperEditorTheme } from '../constants/editorTheme';
+import { javaCompletionSource } from '../constants/javaCompletions';
 import { Language } from '../types';
 import LanguagePicker from './LanguagePicker';
 
 const javaLanguage = StreamLanguage.define(java);
+// .data.of(...) only builds the extension — it still has to be in the
+// editor's `extensions` array below to actually take effect.
+const javaCompletions = javaLanguage.data.of({ autocomplete: javaCompletionSource });
+
+// globalThis introspection gets JS completions for every real built-in
+// (Array, Object, Math, console, JSON, ...) and their members, not a
+// hand-maintained list — this is what "knows the standard library" actually
+// looks like when the runtime can be introspected directly, unlike Java.
+const jsGlobalCompletions = javascriptLanguage.data.of({
+  autocomplete: scopeCompletionSource(globalThis),
+});
+
+// Grammarly (and similar extensions) treat CodeMirror's contenteditable
+// surface as a normal text field and inject its own UI into it, which reads
+// user code as prose and clutters the editor. These are Grammarly's own
+// documented opt-out attributes, applied directly to the editable DOM node.
+const disableGrammarly = EditorView.contentAttributes.of({
+  spellcheck: 'false',
+  'data-gramm': 'false',
+  'data-gramm_editor': 'false',
+  'data-enable-grammarly': 'false',
+});
 
 interface CodeEditorProps {
   code: string;
@@ -30,8 +54,10 @@ const CodeEditor = ({
   const extensions = useMemo(
     () => [
       language === Language.JAVA ? javaLanguage : javascript({ jsx: false }),
+      language === Language.JAVA ? javaCompletions : jsGlobalCompletions,
       autocompletion({ activateOnTyping: true }),
       closeBrackets(),
+      disableGrammarly,
     ],
     [language],
   );
