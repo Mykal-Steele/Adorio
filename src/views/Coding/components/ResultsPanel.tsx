@@ -89,6 +89,7 @@ const ResultsPanel = ({ results, isRunning, onRunTests, onReset }: ResultsPanelP
         <button
           onClick={onRunTests}
           disabled={isRunning}
+          title="Run tests (Ctrl+Enter)"
           className="flex -rotate-[0.6deg] items-center gap-1.5 rounded-[4px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-[13px] font-bold uppercase tracking-[.1em] shadow-[3px_4px_0_var(--paper-ink)] transition-transform hover:-translate-y-px disabled:opacity-60"
         >
           <PlayIcon className="h-4 w-4" />

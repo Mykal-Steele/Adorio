@@ -54,11 +54,12 @@ const jsGlobalCompletions = javascriptLanguage.data.of({
   autocomplete: scopeCompletionSource(globalThis),
 });
 
-// Plain lineWrapping only: the earlier hanging-wrap attempt (padding-left +
-// negative text-indent via line decorations) shifted the selection layer's
-// highlight rectangles off the text, producing the blocky misaligned
-// selection in the bug report. Wrapped continuation lines starting at
-// column 0 is the lesser evil — CodeMirror has no built-in hanging indent.
+// Plain EditorView.lineWrapping only: a hanging-wrap attempt (padding-left +
+// negative text-indent via line decorations) once shifted the selection
+// layer's highlight rectangles off the text, producing blocky misaligned
+// selections. Wrapped continuation lines starting at column 0 is the lesser
+// evil — CodeMirror has no built-in hanging indent.
+
 // Marks our own auto-format transactions so the format-on-newline listener
 // below doesn't react to its own formatting dispatch in a loop.
 const autoFormat = Annotation.define<boolean>();
