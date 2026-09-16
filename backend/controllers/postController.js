@@ -45,6 +45,8 @@ const addCommentHandler = asyncHandler(async (req, res) => {
     postId: req.params.id,
     userId: req.user.id,
     text: req.body.text,
+    parentId: req.body.parentId,
+    mentions: req.body.mentions,
   });
   res.status(201).json(populatedPost);
 });
