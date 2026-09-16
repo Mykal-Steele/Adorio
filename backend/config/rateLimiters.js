@@ -97,6 +97,20 @@ const codingLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Mention autocomplete limiter - 60 searches per minute per IP. Typing one
+// name fires a debounced burst of ~4-8 requests, so this is generous for
+// humans but stops scripts from dumping the user collection.
+const searchLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  message: {
+    error: 'Too many search requests from this IP, please slow down.',
+    retryAfter: '1 minute',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export {
   standardLimiter,
   postLimiter,
@@ -106,4 +120,5 @@ export {
   secretLimiter,
   uploadLimiter,
   codingLimiter,
+  searchLimiter,
 };

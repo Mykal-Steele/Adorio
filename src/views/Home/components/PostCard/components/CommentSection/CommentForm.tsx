@@ -2,6 +2,8 @@ import React, { useRef } from 'react';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import useClickOutside from '@/hooks/useClickOutside';
+import MentionSuggestions from './components/MentionSuggestions';
+import type { MentionCandidate } from './hooks/useMentionAutocomplete';
 
 // this form handles all the comment input stuff
 const CommentForm = ({
@@ -12,6 +14,30 @@ const CommentForm = ({
   showEmojiPicker,
   onToggleEmojiPicker,
   onEmojiSelect,
+  inputRef,
+  onInputKeyDown,
+  onInputSync,
+  mentionOpen,
+  suggestions,
+  activeSuggestion,
+  onSelectSuggestion,
+  onHoverSuggestion,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  isSubmitting: boolean;
+  showEmojiPicker: boolean;
+  onToggleEmojiPicker: (next: boolean) => void;
+  onEmojiSelect: (emoji: { native: string }) => void;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
+  onInputKeyDown?: (e: React.KeyboardEvent) => void;
+  onInputSync?: () => void;
+  mentionOpen?: boolean;
+  suggestions?: MentionCandidate[];
+  activeSuggestion?: number;
+  onSelectSuggestion?: (candidate: MentionCandidate) => void;
+  onHoverSuggestion?: (index: number) => void;
 }) => {
   const emojiPickerRef = useRef(null);
   // using my custom hook to close the emoji picker when clicking outside
@@ -21,12 +47,28 @@ const CommentForm = ({
     <form onSubmit={onSubmit} className="mb-4 flex items-center gap-3">
       <div className="relative flex-1">
         <input
+          ref={inputRef}
           type="text"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            onChange(e.target.value);
+            onInputSync?.();
+          }}
+          onKeyDown={onInputKeyDown}
+          onKeyUp={onInputSync}
+          onClick={onInputSync}
+          onSelect={onInputSync}
           placeholder="Add a comment..."
           className="w-full border-b-[1.5px] border-[rgba(60,44,24,.4)] bg-transparent py-2 pr-8 text-[15px] outline-none focus:border-[var(--paper-accent-strong)]"
         />
+        {mentionOpen && suggestions && onSelectSuggestion && onHoverSuggestion && (
+          <MentionSuggestions
+            suggestions={suggestions}
+            activeIndex={activeSuggestion ?? 0}
+            onSelect={onSelectSuggestion}
+            onHover={onHoverSuggestion}
+          />
+        )}
         <button
           type="button"
           onClick={() => onToggleEmojiPicker(!showEmojiPicker)}
