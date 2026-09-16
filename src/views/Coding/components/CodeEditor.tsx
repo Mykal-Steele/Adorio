@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
-import { EditorView } from '@codemirror/view';
+import { EditorView, keymap } from '@codemirror/view';
+import { indentWithTab } from '@codemirror/commands';
 import { javascript, javascriptLanguage, scopeCompletionSource } from '@codemirror/lang-javascript';
 import { StreamLanguage } from '@codemirror/language';
 import { java } from '@codemirror/legacy-modes/mode/clike';
@@ -58,6 +59,13 @@ const CodeEditor = ({
       autocompletion({ activateOnTyping: true }),
       closeBrackets(),
       disableGrammarly,
+      // Without this, a long line pushes the scroller (and its parent card)
+      // wider instead of wrapping, so the page grows sideways past the fold.
+      EditorView.lineWrapping,
+      // Tab isn't bound to indentation by default, CodeMirror leaves it free
+      // for accessibility (focus can Tab away). Opting in here is fine since
+      // this is a dedicated code editor, not a form field.
+      keymap.of([indentWithTab]),
     ],
     [language],
   );
