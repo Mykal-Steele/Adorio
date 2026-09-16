@@ -47,12 +47,16 @@ param cloudinaryUrl string
 param resendApiKey string
 
 @secure()
-@description('Piston load balancer URL (from piston.bicep outputs), e.g. http://adorio-piston.<region>.cloudapp.azure.com:2358')
+@description('Piston load balancer URL (from piston.bicep outputs), e.g. https://adorio-piston.<region>.cloudapp.azure.com:2358')
 param pistonUrl string
 
 @secure()
 @description('Must match the token baked into the Piston nginx sidecar via piston.bicep')
 param pistonToken string
+
+@secure()
+@description('Self-signed TLS cert (PEM, fullchain) baked into every Piston instance via piston.bicep\'s pistonTlsCert. Pinned here as an extra trusted CA (NODE_EXTRA_CA_CERTS) so the backend can verify HTTPS to Piston without a public CA.')
+param pistonCaCert string
 
 param clientUrl string = 'https://adorio.space'
 param cloudinaryName string
@@ -149,6 +153,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
         { name: 'resend-api-key', value: resendApiKey }
         { name: 'piston-url', value: pistonUrl }
         { name: 'piston-token', value: pistonToken }
+        { name: 'piston-ca-cert', value: pistonCaCert }
       ]
     }
     template: {
@@ -174,6 +179,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'RESEND_API_KEY', secretRef: 'resend-api-key' }
             { name: 'PISTON_URL', secretRef: 'piston-url' }
             { name: 'PISTON_TOKEN', secretRef: 'piston-token' }
+            { name: 'PISTON_CA_CERT', secretRef: 'piston-ca-cert' }
           ]
           probes: [
             {

@@ -8,16 +8,25 @@ const pistonHeaders = () => ({
   'X-Auth-Token': environment.piston.token,
 });
 
+// Wraps fetch so a DNS/TLS/connection failure throws an ApiError like every
+// other failure path here, instead of a raw rejection reaching asyncHandler.
+const pistonFetch = async (path, options) => {
+  let res;
+  try {
+    res = await fetch(`${environment.piston.url}${path}`, options);
+  } catch {
+    throw ApiError.internalServerError('Could not reach the code execution service');
+  }
+  if (!res.ok) throw ApiError.internalServerError('Could not reach the code execution service');
+  return res;
+};
+
 let javaVersionCache = null;
 
 const resolveJavaVersion = async () => {
   if (javaVersionCache) return javaVersionCache;
 
-  const res = await fetch(`${environment.piston.url}/api/v2/runtimes`, {
-    headers: pistonHeaders(),
-  });
-  if (!res.ok) throw ApiError.internalServerError('Could not reach the code execution service');
-
+  const res = await pistonFetch('/api/v2/runtimes', { headers: pistonHeaders() });
   const runtimes = await res.json();
   const match = runtimes.find((r) => r.language === 'java');
   if (!match)
@@ -62,7 +71,7 @@ const normalizeOutput = (output) => {
 };
 
 const submitOne = async (version, code, stdin) => {
-  const res = await fetch(`${environment.piston.url}/api/v2/execute`, {
+  const res = await pistonFetch('/api/v2/execute', {
     method: 'POST',
     headers: pistonHeaders(),
     body: JSON.stringify({
@@ -72,7 +81,6 @@ const submitOne = async (version, code, stdin) => {
       stdin,
     }),
   });
-  if (!res.ok) throw ApiError.internalServerError('Could not reach the code execution service');
   return res.json();
 };
 

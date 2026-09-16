@@ -85,7 +85,7 @@ const uploadLimiter = rateLimit({
 });
 
 // Code execution limiter - 20 runs per 5 minutes per IP (each run costs real
-// compute on the Judge0 sandbox, so it's kept tight like secretLimiter)
+// compute on the Piston sandbox, so it's kept tight like secretLimiter)
 const codingLimiter = rateLimit({
   windowMs: 5 * 60 * 1000,
   max: 20,
