@@ -9,7 +9,6 @@ import {
   getEditorSettings,
   resetEditorSettings,
   setFontSize,
-  setFormatOnNewline,
   setWrap,
   subscribeEditorSettings,
 } from '../utils/editorKeys';
@@ -118,12 +117,6 @@ const EditorSettings = ({ viewRef }: EditorSettingsProps) => {
               onChange={(next) => setWrap(viewRef.current, next)}
               label="Word wrap"
               hint="Wrap long lines (Alt+Z)"
-            />
-            <Toggle
-              checked={settings.formatOnNewline}
-              onChange={setFormatOnNewline}
-              label="Format on newline"
-              hint="Auto-format when you press Enter"
             />
           </div>
 
