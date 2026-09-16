@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import PaperTornEdge from '../../../components/PaperTornEdge';
+import PaperTornEdge from '@/components/PaperTornEdge';
 import { getClasses } from '../constants/classes';
 import { getProblemsByClass } from '../problems';
 import { isProblemSolved } from '../utils/progress';

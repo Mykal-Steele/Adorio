@@ -2,53 +2,53 @@
 
 ## High-Level Flow
 
-1. [`Coding`](index.tsx) loads the class list from [`constants/classes.ts`](constants/classes.ts) and that class's problems via [`getProblemsByClass`](problems.ts), restoring the last-visited class/problem and any saved code with [`utils/progress.ts`](utils/progress.ts).
-2. `ClassTabs` switches the active class; `ProblemList` (scoped to that class) switches the active problem, rehydrating starter code or a saved draft and clearing results.
-3. `CodeEditor` (CodeMirror, themed by [`constants/editorTheme.ts`](constants/editorTheme.ts)) captures edits and autosaves the draft (debounced) via `progress.ts` — editing after a run clears the on-screen results since they no longer describe the current code, but a problem's persisted "solved" status only changes on the next actual run or an explicit reset.
-4. Running tests calls [`CodeRunner.execute`](CodeRunner.ts), feeding `ResultsPanel` and `TestResults`.
+1. [`pages/ClassCatalog.tsx`](pages/ClassCatalog.tsx) (mounted at `/coding`) lists the classes from [`constants/classes.ts`](constants/classes.ts), each with its solved count via [`isProblemSolved`](utils/progress.ts).
+2. Picking a class routes to `/coding/[classId]`, which mounts [`pages/Practice.tsx`](pages/Practice.tsx) with that `classId`. `Practice` loads the class's problems via [`getProblemsByClass`](problems.ts), restoring the last-visited problem and any saved code/results via [`utils/progress.ts`](utils/progress.ts).
+3. `ProblemList` (scoped to the class) switches the active problem; picking a problem with no saved draft loads its starter code for the first language it defines. `LanguagePicker` (inside `CodeEditor`) switches between a problem's available languages when it defines more than one.
+4. `CodeEditor` (CodeMirror, themed by [`constants/editorTheme.ts`](constants/editorTheme.ts)) captures edits and autosaves the draft (debounced) via `progress.ts` — editing clears the on-screen results since they no longer describe the current code, but a problem's persisted "solved" status only changes on the next actual run or an explicit reset.
+5. Running tests dispatches on the active language variant's `kind`: `'call'` variants run in-browser via [`CodeRunner.execute`](CodeRunner.ts); `'stdio'` variants POST to `runCodingSubmission` (`src/api/coding.ts` → `POST /api/coding/run`), which the backend grades against a self-hosted Piston instance. Both feed the same `ResultsPanel` and `TestResults`.
 
 ## Modules & Responsibilities
 
 ### Data & Types
 
-- [`problems.ts`](problems.ts): the problem registry (id, classId, description, starterCode, tests, metadata).
-- [`constants/classes.ts`](constants/classes.ts): the class registry (currently just `Algorithms`) — add a new entry here, then tag problems with its `classId`, to introduce a new category of exercises.
-- [`types/index.ts`](types/index.ts): `Problem` and `ProblemClass` shapes.
-- [`utils/progress.ts`](utils/progress.ts): localStorage persistence — `saveCode`/`saveCodeDebounced` (draft only, preserves the last run's results), `saveRunResult` (code + results together, right after a run), `loadProgress`, `clearProgress`, `isSolved`, and the last-active class/problem pointers.
+- [`problems.ts`](problems.ts): the problem registry. Each `Problem` has an `id`, `classId`, description/difficulty/examples/constraints, and a `languages` map keyed by language id (`'javascript'`, `'java'`). `getProblemsByClass`, `getAllProblems`, and `getProblem` read from it; `getSortedProblems` orders a list by difficulty.
+- [`constants/classes.ts`](constants/classes.ts): the class registry (`Algorithms`, `Java Fundamentals`) — add a new entry here, then tag problems with its `classId`, to introduce a new category of exercises.
+- [`types/index.ts`](types/index.ts): `Problem`, `ProblemClass`, and the two language-variant shapes. A `CallLanguageVariant` (`kind: 'call'`) has `functionName` (plus `methodName` for class-based problems), `starterCode`, and `TestCase[]` (`args`/`expected`) — run entirely client-side. A `StdioLanguageVariant` (`kind: 'stdio'`) has `starterCode` and `StdioTestCase[]` (`stdin`/`expectedOutput`) — run server-side through Piston. A problem's `languages` map can mix both kinds (e.g. a JS `call` variant and a Java `stdio` variant on the same problem).
+- [`utils/progress.ts`](utils/progress.ts): localStorage persistence, keyed per `problemId:language` — `saveCode`/`saveCodeDebounced` (draft only, preserves the last run's results), `saveRunResult` (code + results together, right after a run), `loadProgress`, `clearProgress`, `isProblemSolved` (true if any language variant of a problem has a stored `success` result), and the last-active problem pointer per class.
 
-### Core Execution (`CodeRunner`)
+### Core Execution
 
-- `CodeRunner.isEqual`: deep comparison for primitives, arrays, objects, trimmed strings.
-- `CodeRunner.formatValue`: normalizes values for display.
-- `CodeRunner.extractErrorInfo`: parses stacks for approximate line numbers (offset by the execution wrapper).
-- `CodeRunner.createConsoleProxy`: captures `log`/`info`/`warn`/`error` per test run.
-- `CodeRunner.execute`: for each test, wraps the user's code, obtains the function/class via `getUserCallable`, and dispatches to `runFunctionTestWithOutput` or `runClassTestWithOutput`, aggregating pass/fail plus captured logs.
+- **`'call'` variants** — [`CodeRunner.execute`](CodeRunner.ts) wraps the user's JavaScript in a `new Function(...)`, resolves the named function/class directly (no separate lookup step), and for each test dispatches to `runFunctionTestWithOutput` or `runClassTestWithOutput`, aggregating pass/fail plus captured console logs. `CodeRunner.isEqual` does the pass/fail comparison (deep equality for arrays/objects, trimmed string compare); `extractErrorInfo` parses stack traces for approximate line numbers.
+- **`'stdio'` variants** — `runCodingSubmission` posts `{ problemId, language, code, tests }` to the backend. `backend/services/codingService.js` submits each test's `stdin` to Piston, compares normalized stdout against `expectedOutput` (trims blank lines and trailing whitespace, same rule the practice repo's own `MainTest.java` uses), and returns a `TestRunResult[]` shaped the same as the client-side runner's output so `TestResults` doesn't need to know which path produced it.
 
 ### UI Components
 
-- `ClassTabs`: switches the active class.
 - `ProblemList`: lists the active class's problems, sortable by difficulty, marks the active one and any solved ones.
 - `ProblemDetails`: renders description, constraints, examples.
-- `CodeEditor`: CodeMirror wrapper, emits `onChange`.
+- `CodeEditor`: CodeMirror wrapper; renders `LanguagePicker` when a problem defines more than one language and emits `onChange`/`onLanguageChange`.
 - `ResultsPanel`: run/reset controls and the pass/fail summary.
-- `TestResults`: per-test pass/fail, expected vs. actual, console output (via `ConsoleOutput`).
+- `TestResults`: per-test pass/fail; renders `args`/`expected`/`output` for `'call'` results or `stdin`/`expected`/`output` for `'stdio'` results, plus captured console output (via `ConsoleOutput`).
 
-### State & Actions (`Coding` component)
+### State & Actions (`Practice` component)
 
-- `activeClassId` / `activeProblemId`: current selection.
+- `activeProblemId` / `language`: current selection; `language` resets to the problem's first available language whenever the problem changes.
 - `code`: bound to the editor, persisted via `progress.ts`.
-- `results`: populated from `CodeRunner.execute`; cleared whenever the code is edited so it never describes stale code.
-- `solvedIds`: which problems currently pass, driven by the last run's stored result — updated on every run and on reset.
+- `results`: populated from whichever runner `handleRunTests` dispatched to; cleared whenever the code is edited so it never describes stale code.
+- `solvedIds`: recomputed from persisted progress after every run and reset — not live "does the current code pass" state.
+- An internal execution id (bumped on every edit, reset, problem switch, and language switch) guards `handleRunTests`: if anything invalidates the run before it resolves, its result is discarded instead of overwriting newer state.
 - `editorKey`: forces a fresh CodeMirror instance (clean undo history) on problem switch or reset.
 
 ## Extending Challenges
 
 1. To add a new class: add an entry to `constants/classes.ts`.
-2. To add a new problem: add an entry to `problems.ts` with a unique `id`, the `classId` it belongs to, `functionName` (plus `methodName` for class-based problems), `starterCode`, and a `tests` array (`name`, `args`, `expected`). `examples`/`constraints` are optional but recommended.
-3. Keep `functionName`/`methodName` unique per problem — user code runs inside a shared scope per test.
+2. To add a new problem: add an entry to `problems.ts` with a unique `id`, the `classId` it belongs to, and a `languages` map. For a `'call'` variant: `functionName` (plus `methodName` for class-based problems), `starterCode`, and a `tests` array (`name`, `args`, `expected`). For a `'stdio'` variant: `starterCode` and a `tests` array (`name`, `stdin`, `expectedOutput`). `examples`/`constraints` are optional but recommended.
+3. Keep `functionName`/`methodName` unique per problem for `'call'` variants — user code runs inside a shared scope per test.
+4. A `'stdio'` variant's `tests` are sent to the backend as-is and graded there — don't rely on anything client-side to validate them.
 
 ## Debugging Tips
 
-- Console output from user solutions appears inside each test result.
-- Runtime errors include approximate line numbers derived by `extractErrorInfo`; align starter templates to keep offsets stable.
-- Class-based problems instantiate with spread `args`; the constructor signature should accept the provided tuple.
+- Console output from `'call'` solutions appears inside each test result.
+- Runtime errors on `'call'` variants include approximate line numbers derived by `extractErrorInfo`; align starter templates to keep offsets stable.
+- Class-based `'call'` problems instantiate with spread `args`; the constructor signature should accept the provided tuple.
+- `'stdio'` failures surface Piston's `stderr` (or a signal/exit-code message) as `error`; compilation failures short-circuit the whole submission with `status: 'error'` before any test runs.
