@@ -1,7 +1,6 @@
 import { useMemo, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { EditorView, keymap } from '@codemirror/view';
-import { Annotation, Transaction } from '@codemirror/state';
 import { javascript, javascriptLanguage, scopeCompletionSource } from '@codemirror/lang-javascript';
 import { StreamLanguage, indentService } from '@codemirror/language';
 import { java } from '@codemirror/legacy-modes/mode/clike';
@@ -10,7 +9,7 @@ import { paperEditorTheme } from '../constants/editorTheme';
 import { javaCompletionSource } from '../constants/javaCompletions';
 import { javaSnippetSource, jsSnippetSource } from '../constants/snippets';
 import { formatCode, mapPosThroughFormat } from '../utils/formatCode';
-import { getEditorSettings, settingsCompartments, vscodeKeymap } from '../utils/editorKeys';
+import { settingsCompartments, vscodeKeymap } from '../utils/editorKeys';
 import { Language } from '../types';
 import LanguagePicker from './LanguagePicker';
 import EditorSettings from './EditorSettings';
@@ -31,8 +30,50 @@ const javaComments = javaLanguage.data.of({
 // the enclosing block instead of matching the line above, like every real
 // editor does). Overriding with an explicit indentService replaces it
 // outright: match the previous non-blank line's indent, add one level if
-// that line opens a brace/paren/bracket it doesn't also close on the same
-// line, and drop one level if the line being indented opens with a closer.
+// that line leaves a bracket unclosed, and drop one level if the line being
+// indented opens with a closer. Brackets inside string/char literals and
+// comments are skipped when counting, so a brace in e.g. "{" or // }
+// never shifts indentation. This is the whole Enter story — same as VSCode:
+// indent the new line, nothing more.
+const countNetOpens = (line: string): number => {
+  let depth = 0;
+  let inSingle = false;
+  let inDouble = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    const next = line[i + 1] ?? '';
+    if (inSingle || inDouble) {
+      if (ch === '\\') {
+        i++;
+        continue;
+      }
+      if ((inSingle && ch === "'") || (inDouble && ch === '"')) {
+        inSingle = false;
+        inDouble = false;
+      }
+      continue;
+    }
+    if (ch === '/' && next === '/') break;
+    if (ch === '/' && next === '*') {
+      const end = line.indexOf('*/', i + 2);
+      if (end === -1) break;
+      i = end + 1;
+      continue;
+    }
+    if (ch === "'") {
+      inSingle = true;
+      continue;
+    }
+    if (ch === '"') {
+      inDouble = true;
+      continue;
+    }
+    if (ch === '{' || ch === '(' || ch === '[') depth++;
+    else if (ch === '}' || ch === ')' || ch === ']') depth--;
+  }
+  return depth;
+};
+
 const javaIndent = indentService.of((context, pos) => {
   const currentLine = context.state.doc.lineAt(pos);
   const closesFirst = /^\s*[)\]}]/.test(currentLine.text);
@@ -41,15 +82,12 @@ const javaIndent = indentService.of((context, pos) => {
   while (prevLineNumber >= 1 && context.state.doc.line(prevLineNumber).text.trim() === '') {
     prevLineNumber--;
   }
-  if (prevLineNumber < 1) return closesFirst ? 0 : context.unit;
+  if (prevLineNumber < 1) return 0;
 
   const prevLine = context.state.doc.line(prevLineNumber);
-  const prevTrimmed = prevLine.text.trim();
   const prevIndent = /^[ \t]*/.exec(prevLine.text)?.[0].length ?? 0;
-  const opens = (prevTrimmed.match(/[{([]/g) ?? []).length;
-  const closes = (prevTrimmed.match(/[)\]}]/g) ?? []).length;
 
-  let indent = prevIndent + (opens > closes ? context.unit : 0);
+  let indent = prevIndent + (countNetOpens(prevLine.text) > 0 ? context.unit : 0);
   if (closesFirst) indent = Math.max(0, indent - context.unit);
   return indent;
 });
@@ -69,51 +107,11 @@ const jsSnippets = javascriptLanguage.data.of({ autocomplete: jsSnippetSource })
 // selections. Wrapped continuation lines starting at column 0 is the lesser
 // evil — CodeMirror has no built-in hanging indent.
 
-// Marks our own auto-format transactions so the format-on-newline listener
-// below doesn't react to its own formatting dispatch in a loop.
-const autoFormat = Annotation.define<boolean>();
-
-// Formats the whole document whenever the user inserts a newline (Enter or
-// paste). Formatting only whitespace means the cursor maps cleanly through
-// the change, and it's kept out of the undo history so a single undo still
-// removes just the newline.
-const formatOnNewline = EditorView.updateListener.of((update) => {
-  if (!update.docChanged) return;
-  if (!getEditorSettings().formatOnNewline) return;
-  if (update.transactions.some((tr) => tr.annotation(autoFormat))) return;
-  if (!update.transactions.some((tr) => tr.isUserEvent('input'))) return;
-
-  let insertedNewline = false;
-  let newlineCount = 0;
-  update.changes.iterChanges((_fromA, _toA, _fromB, _toB, inserted) => {
-    const text = inserted.toString();
-    if (text.includes('\n')) {
-      insertedNewline = true;
-      newlineCount += text.split('\n').length - 1;
-    }
-  });
-  // Only a real Enter press (exactly one newline) auto-formats — a
-  // multi-line paste keeps the user's text untouched until they format
-  // explicitly, matching VSCode (whose format-on-paste is off by default).
-  if (!insertedNewline || newlineCount !== 1) return;
-
-  const current = update.state.doc.toString();
-  const formatted = formatCode(current);
-  if (formatted === current) return;
-
-  const selection = update.state.selection;
-  update.view.dispatch({
-    changes: { from: 0, to: update.state.doc.length, insert: formatted },
-    selection: {
-      anchor: mapPosThroughFormat(current, formatted, selection.main.anchor),
-      head: mapPosThroughFormat(current, formatted, selection.main.head),
-    },
-    annotations: [autoFormat.of(true), Transaction.addToHistory.of(false)],
-  });
-});
-
-// Manual format (Shift+Alt+F / Format button): same cursor-preserving
-// whole-doc replace, but left in the undo history as one step.
+// Manual format only (Shift+Alt+F / Format button): a cursor-preserving
+// whole-doc replace, left in the undo history as one step. There is
+// deliberately no auto-format on Enter or paste — VSCode ships with both
+// off by default, and reformatting the whole document behind the user's
+// back is what made Enter feel broken.
 const dispatchPreservingFormat = (view: EditorView) => {
   const current = view.state.doc.toString();
   const formatted = formatCode(current);
@@ -182,7 +180,6 @@ const CodeEditor = ({
         },
         ...vscodeKeymap,
       ]),
-      formatOnNewline,
     ],
     [language],
   );
