@@ -19,6 +19,9 @@ const postSchema = new mongoose.Schema(
       {
         text: { type: String, required: true },
         user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        parentId: { type: mongoose.Schema.Types.ObjectId, default: null, index: true },
+        depth: { type: Number, default: 0 },
+        mentions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         createdAt: { type: Date, default: Date.now, index: true },
       },
     ],

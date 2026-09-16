@@ -144,6 +144,7 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 | Method | Path                            | Auth                 | Handler                                     |
 | ------ | ------------------------------- | -------------------- | ------------------------------------------- |
 | GET    | `/api/users/me`                 | required             | getCurrentUser                              |
+| GET    | `/api/users/search`             | required             | searchUsersHandler (mention autocomplete)   |
 | POST   | `/api/users/register`           | none                 | registerUser                                |
 | POST   | `/api/users/login`              | none                 | loginUser                                   |
 | POST   | `/api/users/refresh-token`      | none                 | refreshToken                                |
@@ -183,7 +184,8 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 | `authLimiter`         | 15 min | 10  | POST /api/users/login + refresh-token |
 | `postLimiter`         | 10 min | 30  | POST /api/posts                       |
 | `likeLimiter`         | 1 min  | 60  | PUT /api/posts/:id/like               |
-| `secretLimiter`       | 5 min  | 20  | GET /api/secretenv                    |
+| `secretLimiter`         | 5 min  | 20  | GET /api/secretenv                    |
+| `searchLimiter`         | 1 min  | 60  | GET /api/users/search                 |
 
 `app.set('trust proxy', 1)` is set in `index.js` — Northflank sits behind one Cloudflare hop.
 

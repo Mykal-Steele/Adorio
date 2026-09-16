@@ -9,6 +9,7 @@ import PostImage from './PostImage';
 import PostContent from './PostContent';
 import InteractionButtons from './InteractionButtons';
 import CommentSection from './components/CommentSection';
+import { getEffectiveParent } from './components/CommentSection/utils/commentTree';
 
 const ROTATIONS = [
   'rotate-[0.4deg]',
@@ -44,15 +45,11 @@ const PostCard = ({
   const showTape = index % 3 !== 2;
 
   const [showComments, setShowComments] = useState(false);
-  const [newComment, setNewComment] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [comments, setComments] = useState(() =>
     Array.isArray(initialComments) ? initialComments : [],
   );
   const [isContentExpanded, setIsContentExpanded] = useState(false);
-  const [expandedComments, setExpandedComments] = useState({});
   const [showImageModal, setShowImageModal] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [optimisticLikesCount, setOptimisticLikesCount] = useState(
     Array.isArray(likes) ? likes.length : 0,
   );
@@ -87,10 +84,6 @@ const PostCard = ({
 
   const handleToggleContent = useCallback(() => {
     setIsContentExpanded((prev) => !prev);
-  }, []);
-
-  const handleToggleComment = useCallback((commentId) => {
-    setExpandedComments((prev) => ({ ...prev, [commentId]: !prev[commentId] }));
   }, []);
 
   const handleLike = useCallback(async () => {
@@ -148,34 +141,31 @@ const PostCard = ({
     }
   }, [optimisticUserLiked, _id, onLike, currentUserId]);
 
-  const handleEmojiSelect = useCallback((emoji) => {
-    setNewComment((prev) => prev + emoji.native);
-    setShowEmojiPicker(false);
-  }, []);
-
   const handleCommentSubmit = useCallback(
-    async (e) => {
-      e.preventDefault();
-      if (!newComment?.trim() || isSubmitting) return;
+    async (commentText: string, opts: { parentId: string | null; mentions: string[] }) => {
+      const text = commentText?.trim();
+      if (!text) return;
 
+      const { parentId = null, depth } = opts.parentId
+        ? getEffectiveParent(comments, opts.parentId)
+        : { parentId: null, depth: 0 };
       const tempId = `temp-${Date.now()}`;
       const tempComment = {
         _id: tempId,
-        text: newComment,
+        text,
         user: { username: currentUsername || 'You', _id: currentUserId },
         createdAt: new Date().toISOString(),
+        parentId,
+        depth,
       };
 
       setComments((prevComments) => [
-        tempComment,
         ...(Array.isArray(prevComments) ? prevComments : []),
+        tempComment,
       ]);
 
-      const commentText = newComment;
-      setNewComment('');
-      setIsSubmitting(true);
       try {
-        const updatedPost = await addComment(_id, commentText);
+        const updatedPost = await addComment(_id, text, opts);
 
         if (updatedPost?.comments) {
           setComments(updatedPost.comments);
@@ -197,12 +187,10 @@ const PostCard = ({
             ? prevComments.filter((comment) => comment._id !== tempId)
             : [],
         );
-        setNewComment(commentText);
-      } finally {
-        setIsSubmitting(false);
+        throw err;
       }
     },
-    [_id, newComment, isSubmitting, currentUsername, currentUserId, onCommentAdded],
+    [_id, comments, currentUsername, currentUserId, onCommentAdded],
   );
 
   const safeImageUrl = useMemo(
@@ -270,16 +258,8 @@ const PostCard = ({
       <CommentSection
         visible={showComments}
         comments={comments || []}
-        newComment={newComment}
-        isSubmitting={isSubmitting}
-        showEmojiPicker={showEmojiPicker}
-        expandedComments={expandedComments}
         onClose={() => setShowComments(false)}
-        onSubmit={handleCommentSubmit}
-        onChangeComment={setNewComment}
-        onToggleEmojiPicker={setShowEmojiPicker}
-        onEmojiSelect={handleEmojiSelect}
-        onCommentToggle={handleToggleComment}
+        onSubmitComment={handleCommentSubmit}
       />
     </article>
   );

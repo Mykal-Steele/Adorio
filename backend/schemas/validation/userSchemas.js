@@ -14,3 +14,7 @@ export const loginSchema = z.object({
   email: z.string().min(1, 'Email is required'),
   password: z.string().min(1, 'Password is required'),
 });
+
+export const searchUsersQuerySchema = z.object({
+  q: z.string().trim().min(1, 'Search query is required').max(30),
+});

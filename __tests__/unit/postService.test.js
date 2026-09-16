@@ -14,6 +14,8 @@ const mockFindPostLikesById = mock(() => Promise.resolve(null));
 const mockUpdatePostById = mock(() => Promise.resolve(null));
 const mockPushCommentToPost = mock(() => Promise.resolve(null));
 const mockDeletePostById = mock(() => Promise.resolve());
+const mockFindUsersByIds = mock(() => Promise.resolve([]));
+const mockFindPostCommentsMeta = mock(() => Promise.resolve(null));
 
 mock.module('../../backend/models/index.js', () => ({
   createPost: mockCreatePost,
@@ -24,6 +26,8 @@ mock.module('../../backend/models/index.js', () => ({
   updatePostById: mockUpdatePostById,
   pushCommentToPost: mockPushCommentToPost,
   deletePostById: mockDeletePostById,
+  findUsersByIds: mockFindUsersByIds,
+  findPostCommentsMeta: mockFindPostCommentsMeta,
 }));
 
 const { createPost, getPaginatedPosts, getPostById, togglePostLike, deletePost, addCommentToPost } =
@@ -224,7 +228,7 @@ describe('addCommentToPost', () => {
   });
 
   test('throws 404 when post does not exist', async () => {
-    mockPushCommentToPost.mockImplementation(() => Promise.resolve(null));
+    mockFindPostCommentsMeta.mockImplementation(() => Promise.resolve(null));
     let caught;
     try {
       await addCommentToPost({ postId: 'missing', userId: 'u1', text: 'hi' });
@@ -235,6 +239,7 @@ describe('addCommentToPost', () => {
   });
 
   test('returns comments sorted newest first', async () => {
+    mockFindPostCommentsMeta.mockImplementation(() => Promise.resolve({ _id: 'p1', comments: [] }));
     const old = { text: 'old comment', createdAt: new Date('2024-01-01') };
     const recent = { text: 'recent comment', createdAt: new Date('2024-06-01') };
     mockPushCommentToPost.mockImplementation(() =>
@@ -243,5 +248,82 @@ describe('addCommentToPost', () => {
     const result = await addCommentToPost({ postId: 'p1', userId: 'u1', text: 'hi' });
     expect(result.comments[0].text).toBe('recent comment');
     expect(result.comments[1].text).toBe('old comment');
+  });
+
+  test('top-level comment is stored with depth 0 and no parent', async () => {
+    mockFindPostCommentsMeta.mockImplementation(() => Promise.resolve({ _id: 'p1', comments: [] }));
+    let pushed;
+    mockPushCommentToPost.mockImplementation((postId, comment) => {
+      pushed = comment;
+      return Promise.resolve(makePost({ comments: [] }));
+    });
+    await addCommentToPost({ postId: 'p1', userId: 'u1', text: 'hello' });
+    expect(pushed.depth).toBe(0);
+    expect(pushed.parentId).toBeNull();
+  });
+
+  test('reply to a root comment is stored with depth 1', async () => {
+    const parentId = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+    mockFindPostCommentsMeta.mockImplementation(() =>
+      Promise.resolve({ _id: 'p1', comments: [{ _id: parentId, depth: 0 }] }),
+    );
+    let pushed;
+    mockPushCommentToPost.mockImplementation((postId, comment) => {
+      pushed = comment;
+      return Promise.resolve(makePost({ comments: [] }));
+    });
+    await addCommentToPost({ postId: 'p1', userId: 'u1', text: 'reply', parentId });
+    expect(pushed.depth).toBe(1);
+    expect(pushed.parentId?.toString()).toBe(parentId);
+  });
+
+  test('reply beyond max depth flattens onto the level-2 ancestor', async () => {
+    const deepId = 'bbbbbbbbbbbbbbbbbbbbbbbb';
+    mockFindPostCommentsMeta.mockImplementation(() =>
+      Promise.resolve({ _id: 'p1', comments: [{ _id: deepId, depth: 2, parentId: 'root' }] }),
+    );
+    let pushed;
+    mockPushCommentToPost.mockImplementation((postId, comment) => {
+      pushed = comment;
+      return Promise.resolve(makePost({ comments: [] }));
+    });
+    await addCommentToPost({ postId: 'p1', userId: 'u1', text: 'deep reply', parentId: deepId });
+    expect(pushed.depth).toBe(2);
+    expect(pushed.parentId?.toString()).toBe(deepId);
+  });
+
+  test('throws 400 when parent comment is not on the post', async () => {
+    mockFindPostCommentsMeta.mockImplementation(() => Promise.resolve({ _id: 'p1', comments: [] }));
+    let caught;
+    try {
+      await addCommentToPost({
+        postId: 'p1',
+        userId: 'u1',
+        text: 'reply',
+        parentId: 'cccccccccccccccccccccccc',
+      });
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught?.statusCode).toBe(400);
+  });
+
+  test('drops mentions that do not match real users', async () => {
+    mockFindPostCommentsMeta.mockImplementation(() => Promise.resolve({ _id: 'p1', comments: [] }));
+    mockFindUsersByIds.mockImplementation(() =>
+      Promise.resolve([{ _id: { toString: () => 'dddddddddddddddddddddddd' } }]),
+    );
+    let pushed;
+    mockPushCommentToPost.mockImplementation((postId, comment) => {
+      pushed = comment;
+      return Promise.resolve(makePost({ comments: [] }));
+    });
+    await addCommentToPost({
+      postId: 'p1',
+      userId: 'u1',
+      text: '@alice hi',
+      mentions: ['dddddddddddddddddddddddd', 'eeeeeeeeeeeeeeeeeeeeeeee'],
+    });
+    expect(pushed.mentions).toEqual(['dddddddddddddddddddddddd']);
   });
 });

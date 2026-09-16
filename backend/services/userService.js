@@ -1,13 +1,14 @@
 import bcrypt from 'bcryptjs';
 import ApiError from '../utils/ApiError.js';
 import validate from '../utils/validate.js';
-import { registerSchema, loginSchema } from '../schemas/index.js';
+import { registerSchema, loginSchema, searchUsersQuerySchema } from '../schemas/index.js';
 import {
   findUserByEmailOrUsername,
   createUser,
   findUserById as dbFindUserById,
   findUserByEmail,
   deleteUserById,
+  searchUsersByUsernamePrefix,
 } from '../models/index.js';
 
 export const sanitizeUser = (user) => ({
@@ -42,6 +43,12 @@ export const deleteUserAccount = async (userId) => {
   const user = await dbFindUserById(userId);
   if (!user) throw ApiError.notFound('User not found');
   await deleteUserById(userId);
+};
+
+export const searchUsers = async (rawQuery) => {
+  const { q } = validate(searchUsersQuerySchema, rawQuery);
+  const users = await searchUsersByUsernamePrefix(q);
+  return users.map((u) => ({ _id: u._id, username: u.username }));
 };
 
 export const authenticateUser = async (rawBody) => {
