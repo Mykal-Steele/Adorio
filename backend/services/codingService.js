@@ -18,7 +18,10 @@ const PISTON_TIMEOUT_MS = 30000;
 // undocumented default means a version bump could silently change how long
 // a `while(true)` gets to run before the sandbox kills it. Setting them
 // explicitly makes the infinite-loop protection a decision, not an accident.
-const RUN_TIMEOUT_MS = 5000;
+// This deployment's Piston has a server-side cap of 3000ms on run_timeout
+// (PISTON_RUN_TIMEOUT, see infra/piston.bicep) - anything higher is rejected
+// with a 400, so this can't be raised without raising that cap too.
+const RUN_TIMEOUT_MS = 3000;
 const COMPILE_TIMEOUT_MS = 10000;
 
 // Wraps fetch (connection failures, non-2xx, and malformed JSON bodies) so
