@@ -14,6 +14,13 @@ const pistonHeaders = () => ({
 // clean ApiError instead of leaving a concurrency slot tied up indefinitely.
 const PISTON_TIMEOUT_MS = 30000;
 
+// Piston has its own internal defaults for these, but relying on an
+// undocumented default means a version bump could silently change how long
+// a `while(true)` gets to run before the sandbox kills it. Setting them
+// explicitly makes the infinite-loop protection a decision, not an accident.
+const RUN_TIMEOUT_MS = 5000;
+const COMPILE_TIMEOUT_MS = 10000;
+
 // Wraps fetch (connection failures, non-2xx, and malformed JSON bodies) so
 // every failure path here throws an ApiError like the rest of the service,
 // instead of a raw rejection reaching asyncHandler. Returns the parsed body.
@@ -92,6 +99,8 @@ const submitOne = (version, code, stdin) =>
       version,
       files: [{ name: 'Main.java', content: code }],
       stdin,
+      run_timeout: RUN_TIMEOUT_MS,
+      compile_timeout: COMPILE_TIMEOUT_MS,
     }),
   });
 
