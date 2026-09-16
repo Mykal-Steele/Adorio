@@ -1,22 +1,30 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { EditorView, keymap } from '@codemirror/view';
 import { Annotation, Transaction } from '@codemirror/state';
-import { indentWithTab } from '@codemirror/commands';
 import { javascript, javascriptLanguage, scopeCompletionSource } from '@codemirror/lang-javascript';
 import { StreamLanguage, indentService } from '@codemirror/language';
 import { java } from '@codemirror/legacy-modes/mode/clike';
 import { autocompletion, closeBrackets } from '@codemirror/autocomplete';
 import { paperEditorTheme } from '../constants/editorTheme';
 import { javaCompletionSource } from '../constants/javaCompletions';
+import { javaSnippetSource, jsSnippetSource } from '../constants/snippets';
 import { formatCode } from '../utils/formatCode';
+import { getEditorSettings, settingsCompartments, vscodeKeymap } from '../utils/editorKeys';
 import { Language } from '../types';
 import LanguagePicker from './LanguagePicker';
+import EditorSettings from './EditorSettings';
 
 const javaLanguage = StreamLanguage.define(java);
 // .data.of(...) only builds the extension — it still has to be in the
 // editor's `extensions` array below to actually take effect.
 const javaCompletions = javaLanguage.data.of({ autocomplete: javaCompletionSource });
+const javaSnippets = javaLanguage.data.of({ autocomplete: javaSnippetSource });
+// toggleComment (Ctrl+/) reads comment syntax from language data — the
+// legacy Java mode doesn't provide any, so declare it explicitly.
+const javaComments = javaLanguage.data.of({
+  commentTokens: { line: '//', block: { open: '/*', close: '*/' } },
+});
 
 // The legacy CM5-style clike mode's own indent() is a rough brace-tracking
 // heuristic that regularly gets Enter-on-a-plain-statement wrong (dedents to
@@ -53,6 +61,7 @@ const javaIndent = indentService.of((context, pos) => {
 const jsGlobalCompletions = javascriptLanguage.data.of({
   autocomplete: scopeCompletionSource(globalThis),
 });
+const jsSnippets = javascriptLanguage.data.of({ autocomplete: jsSnippetSource });
 
 // Plain EditorView.lineWrapping only: a hanging-wrap attempt (padding-left +
 // negative text-indent via line decorations) once shifted the selection
@@ -70,6 +79,7 @@ const autoFormat = Annotation.define<boolean>();
 // removes just the newline.
 const formatOnNewline = EditorView.updateListener.of((update) => {
   if (!update.docChanged) return;
+  if (!getEditorSettings().formatOnNewline) return;
   if (update.transactions.some((tr) => tr.annotation(autoFormat))) return;
   if (!update.transactions.some((tr) => tr.isUserEvent('input'))) return;
 
@@ -113,23 +123,24 @@ const CodeEditor = ({
   availableLanguages,
   onLanguageChange,
 }: CodeEditorProps) => {
+  // Live view handle for the settings panel (toggles dispatch compartment
+  // reconfigures directly — no editor rebuild, no lost undo history).
+  const viewRef = useRef<EditorView | null>(null);
+
   const extensions = useMemo(
     () => [
       language === Language.JAVA ? javaLanguage : javascript({ jsx: false }),
-      language === Language.JAVA ? javaCompletions : jsGlobalCompletions,
+      ...(language === Language.JAVA
+        ? [javaCompletions, javaSnippets, javaComments]
+        : [jsGlobalCompletions, jsSnippets]),
       ...(language === Language.JAVA ? [javaIndent] : []),
       autocompletion({ activateOnTyping: true }),
       closeBrackets(),
       disableGrammarly,
-      // Without this, a long line pushes the scroller (and its parent card)
-      // wider instead of wrapping, so the page grows sideways past the fold.
-      EditorView.lineWrapping,
-      formatOnNewline,
-      // Tab isn't bound to indentation by default, CodeMirror leaves it free
-      // for accessibility (focus can Tab away). Opting in here is fine since
-      // this is a dedicated code editor, not a form field.
+      // Wrapping on by default (Alt+Z toggles): without it a long line
+      // pushes the scroller and parent card sideways past the fold.
+      ...settingsCompartments,
       keymap.of([
-        indentWithTab,
         {
           key: 'Shift-Alt-f',
           run: (view) => {
@@ -143,7 +154,9 @@ const CodeEditor = ({
             return true;
           },
         },
+        ...vscodeKeymap,
       ]),
+      formatOnNewline,
     ],
     [language],
   );
@@ -169,6 +182,7 @@ const CodeEditor = ({
           >
             Format
           </button>
+          <EditorSettings viewRef={viewRef} />
           <LanguagePicker
             languages={availableLanguages}
             activeLanguage={language}
@@ -189,6 +203,9 @@ const CodeEditor = ({
             lineNumbers: true,
           }}
           onChange={onChange}
+          onUpdate={(update) => {
+            viewRef.current = update.view;
+          }}
           aria-label={`Code editor for ${problemTitle}`}
         />
       </div>

@@ -95,24 +95,114 @@ const TYPES = [
 
 // Dot-completion for the handful of classes practice problems actually reach
 // for — matched by the literal receiver text, not real type tracking.
+// detail/info give the VSCode-style signature + doc panel.
+interface MemberDoc {
+  label: string;
+  detail?: string;
+  info?: string;
+}
+
+const membersOf = (type: string, boost: number, docs: MemberDoc[]): Completion[] =>
+  docs.map(({ label, detail, info }) => ({ label, type, detail, info, boost }));
+
 const MEMBERS: Record<string, Completion[]> = {
-  System: ['out', 'err', 'in', 'exit', 'currentTimeMillis', 'arraycopy', 'getProperty'].map(
-    (label): Completion => ({ label, type: 'property' }),
-  ),
-  Math: ['abs', 'max', 'min', 'pow', 'sqrt', 'floor', 'ceil', 'round', 'random', 'PI', 'E'].map(
-    (label): Completion => ({ label, type: 'function' }),
-  ),
-  Integer: ['parseInt', 'valueOf', 'toString', 'compare', 'MAX_VALUE', 'MIN_VALUE'].map(
-    (label): Completion => ({ label, type: 'function' }),
-  ),
-  String: ['valueOf', 'format', 'join'].map((label): Completion => ({ label, type: 'function' })),
-  Arrays: ['sort', 'asList', 'toString', 'fill', 'copyOf', 'binarySearch'].map(
-    (label): Completion => ({ label, type: 'function' }),
-  ),
-  Collections: ['sort', 'reverse', 'max', 'min', 'emptyList', 'unmodifiableList', 'shuffle'].map(
-    (label): Completion => ({ label, type: 'function' }),
-  ),
-  out: ['println', 'print', 'printf'].map((label): Completion => ({ label, type: 'method' })),
+  System: membersOf('property', 1, [
+    {
+      label: 'out',
+      detail: 'PrintStream',
+      info: 'Standard output — out.println(...) prints a line.',
+    },
+    { label: 'err', detail: 'PrintStream', info: 'Standard error stream.' },
+    { label: 'in', detail: 'InputStream', info: 'Standard input stream.' },
+    {
+      label: 'exit',
+      detail: 'exit(int status)',
+      info: 'Terminates the JVM with the given status code.',
+    },
+    {
+      label: 'currentTimeMillis',
+      detail: 'currentTimeMillis() : long',
+      info: 'Current time in milliseconds since the epoch.',
+    },
+    {
+      label: 'arraycopy',
+      detail: 'arraycopy(src, srcPos, dest, destPos, length)',
+      info: 'Copies a range of array elements.',
+    },
+    {
+      label: 'getProperty',
+      detail: 'getProperty(String key) : String',
+      info: 'Gets the system property for the given key.',
+    },
+  ]),
+  Math: membersOf('function', 1, [
+    { label: 'abs', detail: 'abs(int a) : int', info: 'Absolute value.' },
+    { label: 'max', detail: 'max(a, b)', info: 'The greater of two values.' },
+    { label: 'min', detail: 'min(a, b)', info: 'The smaller of two values.' },
+    { label: 'pow', detail: 'pow(double a, double b) : double', info: 'a raised to the power b.' },
+    { label: 'sqrt', detail: 'sqrt(double a) : double', info: 'Square root.' },
+    { label: 'floor', detail: 'floor(double a) : double', info: 'Rounds down.' },
+    { label: 'ceil', detail: 'ceil(double a) : double', info: 'Rounds up.' },
+    { label: 'round', detail: 'round(double a) : long', info: 'Rounds to the nearest integer.' },
+    { label: 'random', detail: 'random() : double', info: 'Random double in [0, 1).' },
+    { label: 'PI', detail: 'double', info: 'The ratio of a circle.' },
+    { label: 'E', detail: 'double', info: "Euler's number." },
+  ]),
+  Integer: membersOf('function', 1, [
+    {
+      label: 'parseInt',
+      detail: 'parseInt(String s) : int',
+      info: 'Parses the string as a signed decimal integer.',
+    },
+    { label: 'valueOf', detail: 'valueOf(String s) : Integer', info: 'Returns an Integer object.' },
+    {
+      label: 'toString',
+      detail: 'toString(int i) : String',
+      info: 'String representation of the integer.',
+    },
+    { label: 'compare', detail: 'compare(int x, int y) : int', info: 'Compares two ints.' },
+    { label: 'MAX_VALUE', detail: 'int', info: 'Largest possible int: 2147483647.' },
+    { label: 'MIN_VALUE', detail: 'int', info: 'Smallest possible int: -2147483648.' },
+  ]),
+  String: membersOf('function', 1, [
+    { label: 'valueOf', detail: 'valueOf(Object o) : String' },
+    { label: 'format', detail: 'format(String fmt, Object... args) : String' },
+    { label: 'join', detail: 'join(CharSequence delim, ...) : String' },
+  ]),
+  Arrays: membersOf('function', 1, [
+    { label: 'sort', detail: 'sort(int[] a)', info: 'Sorts the array ascending.' },
+    {
+      label: 'asList',
+      detail: 'asList(T... a) : List<T>',
+      info: 'Fixed-size list view of the array.',
+    },
+    { label: 'toString', detail: 'toString(int[] a) : String' },
+    { label: 'fill', detail: 'fill(int[] a, int val)', info: 'Fills every element with val.' },
+    { label: 'copyOf', detail: 'copyOf(int[] a, int len) : int[]' },
+    {
+      label: 'binarySearch',
+      detail: 'binarySearch(int[] a, int key) : int',
+      info: 'Index of key in a sorted array, or negative if absent.',
+    },
+  ]),
+  Collections: membersOf('function', 1, [
+    { label: 'sort', detail: 'sort(List<T> list)', info: 'Sorts the list ascending.' },
+    { label: 'reverse', detail: 'reverse(List<?> list)' },
+    { label: 'max', detail: 'max(Collection<T> c) : T' },
+    { label: 'min', detail: 'min(Collection<T> c) : T' },
+    { label: 'emptyList', detail: 'emptyList() : List<T>' },
+    { label: 'unmodifiableList', detail: 'unmodifiableList(List<T> l) : List<T>' },
+    { label: 'shuffle', detail: 'shuffle(List<?> list)' },
+  ]),
+  out: membersOf('method', 2, [
+    {
+      label: 'println',
+      detail: 'println(String x) : void',
+      info: 'Prints a line to standard output.',
+    },
+    { label: 'print', detail: 'print(String x) : void', info: 'Prints without a newline.' },
+    { label: 'printf', detail: 'printf(String fmt, Object... args)', info: 'Formatted print.' },
+  ]),
 };
 
 // There's no type checker here, so `foo.` can't know whether `foo` is a
