@@ -232,6 +232,10 @@ const CodeEditor = ({
             highlightActiveLineGutter: true,
             foldGutter: true,
             lineNumbers: true,
+            // highlightSelectionMatches paints every occurrence of the selected
+            // text in a near-identical mustard wash, so unselected lines look
+            // selected. Off so only the real selection highlights.
+            highlightSelectionMatches: false,
           }}
           onChange={onChange}
           onCreateEditor={(view) => {
