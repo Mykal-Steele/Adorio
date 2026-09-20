@@ -90,6 +90,7 @@ export const getTransactionsQuerySchema = z.object({
     .regex(/^\d{4}-\d{2}$/, 'month must be YYYY-MM')
     .optional(),
   category: objectId.optional(),
+  type: z.enum(['income', 'expense']).optional(),
   search: z.string().trim().max(120).optional(),
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(50),
