@@ -42,7 +42,9 @@ export default function TransactionForm({
   }, [editingTransaction]);
 
   useEffect(() => {
-    if (!categoryId && categories.length > 0) {
+    if (categories.length === 0) return;
+    const stillExists = categories.some((c) => c._id === categoryId);
+    if (!categoryId || !stillExists) {
       setCategoryId(categories.find((c) => c.slug === 'other')?._id ?? categories[0]._id);
     }
   }, [categories, categoryId]);
