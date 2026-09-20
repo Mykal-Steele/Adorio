@@ -32,6 +32,7 @@ export interface FinanceOverview {
   dailyBudget: number;
   monthlySpend: number;
   monthlySpendAll: number;
+  monthlyIncome: number;
   todaySpend: number;
   daysRemaining: number;
   daysInMonth: number;
@@ -47,11 +48,13 @@ export interface FinanceTransactionsPage {
   totalTransactions: number;
   currentPage: number;
   totalPages: number;
+  summary: { totalIncome: number; totalExpense: number };
 }
 
 export interface FinanceTransactionsQuery {
   month?: string;
   category?: string;
+  type?: TransactionType;
   search?: string;
   page?: number;
   limit?: number;
