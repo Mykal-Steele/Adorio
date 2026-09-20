@@ -15,7 +15,7 @@ export function useFinanceData() {
   const [categories, setCategories] = useState<FinanceCategory[]>([]);
   const [transactions, setTransactions] = useState<FinanceTransaction[]>([]);
   const [hasMore, setHasMore] = useState(false);
-  const [totalTransactions, setTotalTransactions] = useState(0);
+  const [summary, setSummary] = useState({ totalIncome: 0, totalExpense: 0 });
   const [filters, setFilters] = useState<Omit<FinanceTransactionsQuery, 'page'>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -35,7 +35,7 @@ export function useFinanceData() {
       const page = await getFinanceTransactions(query);
       setTransactions((prev) => (append ? [...prev, ...page.transactions] : page.transactions));
       setHasMore(page.hasMore);
-      setTotalTransactions(page.totalTransactions);
+      setSummary(page.summary);
     },
     [],
   );
@@ -100,7 +100,7 @@ export function useFinanceData() {
     categories,
     transactions,
     hasMore,
-    totalTransactions,
+    summary,
     filters,
     isLoading,
     isLoadingMore,

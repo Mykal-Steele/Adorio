@@ -130,7 +130,13 @@ describe('Finance API', () => {
       expect(typeof overview.dailyBudget).toBe('number');
     });
 
-    test('PATCH /api/finance/transactions/:id updates a transaction', async () => {
+    test('creating an expense automatically decreases the balance', async () => {
+      const res = await axios.get(`${BASE_URL}/api/finance/settings`, { headers: authHeaders() });
+      // Rent (500) + Groceries (25) = 525 spent so far, starting balance 0
+      expect(res.data.data.balance).toBe(-525);
+    });
+
+    test('PATCH /api/finance/transactions/:id updates a transaction and adjusts the balance by the delta', async () => {
       const res = await axios.patch(
         `${BASE_URL}/api/finance/transactions/${rentTransactionId}`,
         { amount: 600 },
@@ -138,6 +144,12 @@ describe('Finance API', () => {
       );
       expect(res.status).toBe(200);
       expect(res.data.data.amount).toBe(600);
+
+      const settingsRes = await axios.get(`${BASE_URL}/api/finance/settings`, {
+        headers: authHeaders(),
+      });
+      // rent went from 500 to 600, an extra -100 on top of the previous -525
+      expect(settingsRes.data.data.balance).toBe(-625);
     });
 
     test('POST a transaction under the custom category, then delete the category reassigns it to other', async () => {
@@ -177,7 +189,11 @@ describe('Finance API', () => {
       expect(res.status).toBe(400);
     });
 
-    test('DELETE /api/finance/transactions/:id removes the transaction', async () => {
+    test('DELETE /api/finance/transactions/:id removes the transaction and reverses its balance effect', async () => {
+      const before = await axios.get(`${BASE_URL}/api/finance/settings`, {
+        headers: authHeaders(),
+      });
+
       const res = await axios.delete(`${BASE_URL}/api/finance/transactions/${rentTransactionId}`, {
         headers: authHeaders(),
       });
@@ -188,6 +204,10 @@ describe('Finance API', () => {
       });
       const found = list.data.data.transactions.some((t) => t._id === rentTransactionId);
       expect(found).toBe(false);
+
+      const after = await axios.get(`${BASE_URL}/api/finance/settings`, { headers: authHeaders() });
+      // Deleting a 600 expense should add 600 back to the balance
+      expect(after.data.data.balance).toBe(before.data.data.balance + 600);
     });
   });
 
