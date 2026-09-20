@@ -309,6 +309,25 @@ export const portfolioData = {
       liveUrl: '/data-lookup',
     },
     {
+      id: 'finance',
+      name: 'Runway',
+      status: 'STABLE',
+      language: 'TypeScript',
+      langColor: '#3178c6',
+      description:
+        'A personal finance tracker at /finance for logged-in accounts. Ported from a standalone localStorage-only artifact into a full-stack, per-user MongoDB-backed feature: balance and monthly budget tracking, categorized income/expense transactions, and a daily spending allowance that excludes fixed costs like rent from the day-to-day budget math.',
+      archNote:
+        'Three Mongoose collections (settings, categories, transactions) scoped per-user via JWT. Budget math (daily allowance, month-to-date spend, category breakdown) is computed in the service layer, not the client.',
+      tags: ['#REACT', '#MONGODB', '#FINANCE'],
+      stats: [
+        { label: 'Access', value: 'requires login' },
+        { label: 'Served at', value: '/finance' },
+      ],
+      branch: 'main',
+      color: '#22c55e',
+      liveUrl: '/finance',
+    },
+    {
       id: 'social',
       name: 'Social Feed',
       status: 'STABLE',
