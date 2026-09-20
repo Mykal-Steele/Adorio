@@ -51,3 +51,15 @@ export const reassignTransactionsCategory = (userId, fromCategoryId, toCategoryI
     { user: { $eq: userId }, category: { $eq: fromCategoryId } },
     { $set: { category: toCategoryId } },
   );
+
+// All-time income/expense totals for the given user, regardless of any
+// list filters — powers the History summary strip.
+export const sumTransactionsByType = async (userId) => {
+  const rows = await FinanceTransaction.aggregate([
+    { $match: { user: new mongoose.Types.ObjectId(userId) } },
+    { $group: { _id: '$type', total: { $sum: '$amount' } } },
+  ]);
+  const totals = { income: 0, expense: 0 };
+  for (const row of rows) totals[row._id] = row.total;
+  return totals;
+};
