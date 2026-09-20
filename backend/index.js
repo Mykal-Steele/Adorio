@@ -16,6 +16,7 @@ import {
   authLimiter,
   uploadLimiter,
   searchLimiter,
+  financeWriteLimiter,
 } from './config/rateLimiters.js';
 import './config/cloudinary.js';
 import errorHandler from './middleware/errorHandler.js';
@@ -28,7 +29,9 @@ import analyticsRoutes from './routes/analyticsRoutes.js';
 import monitoringRoutes from './routes/monitoringRoutes.js';
 import hostedFileRoutes from './routes/hostedFileRoutes.js';
 import codingRoutes from './routes/codingRoutes.js';
+import financeRoutes from './routes/financeRoutes.js';
 import { getHealthStatus } from './controllers/analyticsController.js';
+import { cleanupStaleTestUsers } from './services/userService.js';
 
 process.env.TZ = 'UTC';
 
@@ -70,6 +73,10 @@ app.use('/api/hosted', (req, res, next) => {
   if (req.method === 'POST') return uploadLimiter(req, res, next);
   return next();
 });
+app.use('/api/finance', (req, res, next) => {
+  if (['POST', 'PATCH', 'DELETE'].includes(req.method)) return financeWriteLimiter(req, res, next);
+  return next();
+});
 
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
@@ -79,6 +86,7 @@ app.use('/api/stats', analyticsRoutes);
 app.use('/api', monitoringRoutes);
 app.use('/api/hosted', hostedFileRoutes);
 app.use('/api/coding', codingRoutes);
+app.use('/api/finance', financeRoutes);
 
 app.get('/api/health', getHealthStatus);
 
@@ -110,9 +118,24 @@ const startServer = async () => {
     await connectDatabase();
     const port = environment.port;
     app.listen(port, () => console.log(`Server running on port ${port}`));
+    startTestUserJanitor();
   } catch (error) {
     console.error('Failed to start server', error);
   }
+};
+
+const startTestUserJanitor = () => {
+  const intervalMs = environment.testUserTtlMinutes * 60000;
+  const run = async () => {
+    try {
+      const { deletedCount } = await cleanupStaleTestUsers();
+      if (deletedCount > 0) console.log(`Test-user janitor removed ${deletedCount} stale accounts`);
+    } catch (error) {
+      console.error('Test-user janitor failed', error);
+    }
+  };
+  run();
+  setInterval(run, intervalMs);
 };
 
 startServer();
