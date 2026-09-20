@@ -42,8 +42,8 @@ export default function TransactionList({ transactions, onEdit, onChanged }: Tra
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <span
-                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: txn.category.color }}
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[var(--dot-color)]"
+                    style={{ '--dot-color': txn.category.color } as React.CSSProperties}
                   />
                   <span className="text-sm text-gray-200 truncate">{txn.title}</span>
                 </div>
