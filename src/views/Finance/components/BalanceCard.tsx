@@ -16,13 +16,21 @@ export default function BalanceCard({ overview, onUpdated }: BalanceCardProps) {
   const [error, setError] = useState('');
 
   const handleSave = async () => {
+    const parsedBalance = Number(balance);
+    const parsedMonthlyBudget = Number(monthlyBudget);
+    if (balance.trim() === '' || !Number.isFinite(parsedBalance)) {
+      setError('Enter a valid balance');
+      return;
+    }
+    if (monthlyBudget.trim() === '' || !Number.isFinite(parsedMonthlyBudget)) {
+      setError('Enter a valid monthly budget');
+      return;
+    }
+
     setIsSaving(true);
     setError('');
     try {
-      await updateFinanceSettings({
-        balance: Number(balance),
-        monthlyBudget: Number(monthlyBudget),
-      });
+      await updateFinanceSettings({ balance: parsedBalance, monthlyBudget: parsedMonthlyBudget });
       await onUpdated();
       setIsEditing(false);
     } catch (err) {

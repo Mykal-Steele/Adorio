@@ -64,6 +64,8 @@ const slugify = (name) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '') || 'category';
 
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const ensureUserCategoriesSeeded = async (userId) => {
   const count = await countCategoriesByUser(userId);
   if (count > 0) return;
@@ -115,6 +117,13 @@ export const updateCategory = async ({ userId, categoryId, ...rawBody }) => {
   return updateCategoryById(categoryId, update);
 };
 
+// Deletion and reassignment aren't wrapped in a Mongo session/transaction —
+// this codebase doesn't use multi-doc transactions anywhere (same risk class
+// as e.g. postService's like toggle). A transaction created for this
+// category in the narrow window between the ownership check in
+// createTransaction and this delete committing can end up pointing at a
+// deleted category id. Rare in practice; revisit with a session if it shows
+// up in the wild.
 export const deleteCategory = async ({ userId, categoryId }) => {
   const category = await findCategoryById(categoryId);
   if (!category) throw ApiError.notFound('Category not found');
@@ -169,7 +178,7 @@ export const getTransactions = async ({ userId, ...rawQuery }) => {
   const filter = {};
   if (month) filter.date = { $gte: `${month}-01`, $lte: `${month}-31` };
   if (category) filter.category = category;
-  if (search) filter.title = { $regex: search, $options: 'i' };
+  if (search) filter.title = { $regex: escapeRegExp(search), $options: 'i' };
 
   const skip = (page - 1) * limit;
   const [transactions, totalTransactions] = await Promise.all([

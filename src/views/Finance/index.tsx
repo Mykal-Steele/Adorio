@@ -16,10 +16,14 @@ export default function Finance() {
     overview,
     categories,
     transactions,
+    hasMore,
     filters,
     isLoading,
+    isLoadingMore,
     error,
+    filterError,
     applyFilters,
+    loadMoreTransactions,
     refetchAll,
     refetchOverview,
     refetchCategories,
@@ -66,6 +70,7 @@ export default function Finance() {
         />
 
         <TransactionFilters categories={categories} filters={filters} onChange={applyFilters} />
+        {filterError && <p className="text-red-400 text-sm">{filterError}</p>}
 
         <TransactionList
           transactions={transactions}
@@ -73,11 +78,21 @@ export default function Finance() {
           onChanged={() => refetchAll(filters)}
         />
 
+        {hasMore && (
+          <button
+            onClick={loadMoreTransactions}
+            disabled={isLoadingMore}
+            className="w-full py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm disabled:opacity-50"
+          >
+            {isLoadingMore ? 'Loading...' : 'Load more'}
+          </button>
+        )}
+
         <CategoryManager
           categories={categories}
           onChanged={async () => {
             await refetchCategories();
-            await refetchOverview();
+            await refetchAll(filters);
           }}
         />
       </div>

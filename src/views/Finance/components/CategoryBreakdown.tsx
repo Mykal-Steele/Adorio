@@ -28,11 +28,13 @@ export default function CategoryBreakdown({ overview }: CategoryBreakdownProps) 
             </div>
             <div className="h-1.5 rounded-full bg-gray-800 overflow-hidden">
               <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${max > 0 ? (entry.amount / max) * 100 : 0}%`,
-                  backgroundColor: entry.category.color,
-                }}
+                className="h-full w-[var(--bar-width)] rounded-full bg-[var(--bar-color)]"
+                style={
+                  {
+                    '--bar-width': `${max > 0 ? (entry.amount / max) * 100 : 0}%`,
+                    '--bar-color': entry.category.color,
+                  } as React.CSSProperties
+                }
               />
             </div>
           </div>

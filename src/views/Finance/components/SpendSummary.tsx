@@ -25,8 +25,8 @@ export default function SpendSummary({ overview }: SpendSummaryProps) {
         </div>
         <div className="h-2 rounded-full bg-gray-800 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
-            style={{ width: `${todayPercent}%` }}
+            className="h-full w-[var(--bar-width)] bg-gradient-to-r from-purple-500 to-blue-500"
+            style={{ '--bar-width': `${todayPercent}%` } as React.CSSProperties}
           />
         </div>
       </div>
@@ -40,8 +40,8 @@ export default function SpendSummary({ overview }: SpendSummaryProps) {
         </div>
         <div className="h-2 rounded-full bg-gray-800 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-purple-500 to-blue-500"
-            style={{ width: `${monthPercent}%` }}
+            className="h-full w-[var(--bar-width)] bg-gradient-to-r from-purple-500 to-blue-500"
+            style={{ '--bar-width': `${monthPercent}%` } as React.CSSProperties}
           />
         </div>
         <p className="text-xs text-gray-500 mt-1">
