@@ -111,6 +111,19 @@ const searchLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Finance write limiter - 100 changes per 10 minutes. Generous compared to
+// postLimiter since rapid transaction entry is normal usage, not abuse.
+const financeWriteLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 100,
+  message: {
+    error: 'Too many finance changes from this IP, please try again later.',
+    retryAfter: '10 minutes',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export {
   standardLimiter,
   postLimiter,
@@ -121,4 +134,5 @@ export {
   uploadLimiter,
   codingLimiter,
   searchLimiter,
+  financeWriteLimiter,
 };
