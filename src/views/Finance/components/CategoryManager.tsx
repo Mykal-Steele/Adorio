@@ -52,7 +52,10 @@ export default function CategoryManager({ categories, onChanged }: CategoryManag
             className="flex items-center justify-between p-2 rounded-lg bg-gray-800/40"
           >
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
+              <span
+                className="w-3 h-3 rounded-full bg-[var(--dot-color)]"
+                style={{ '--dot-color': category.color } as React.CSSProperties}
+              />
               <span className="text-sm text-gray-200">{category.name}</span>
               {category.excludeFromBudget && (
                 <span className="text-xs text-gray-500">(excluded from daily budget)</span>

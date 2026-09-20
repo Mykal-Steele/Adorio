@@ -31,7 +31,6 @@ import hostedFileRoutes from './routes/hostedFileRoutes.js';
 import codingRoutes from './routes/codingRoutes.js';
 import financeRoutes from './routes/financeRoutes.js';
 import { getHealthStatus } from './controllers/analyticsController.js';
-import { cleanupStaleTestUsers } from './services/userService.js';
 
 process.env.TZ = 'UTC';
 
@@ -118,24 +117,9 @@ const startServer = async () => {
     await connectDatabase();
     const port = environment.port;
     app.listen(port, () => console.log(`Server running on port ${port}`));
-    startTestUserJanitor();
   } catch (error) {
     console.error('Failed to start server', error);
   }
-};
-
-const startTestUserJanitor = () => {
-  const intervalMs = environment.testUserTtlMinutes * 60000;
-  const run = async () => {
-    try {
-      const { deletedCount } = await cleanupStaleTestUsers();
-      if (deletedCount > 0) console.log(`Test-user janitor removed ${deletedCount} stale accounts`);
-    } catch (error) {
-      console.error('Test-user janitor failed', error);
-    }
-  };
-  run();
-  setInterval(run, intervalMs);
 };
 
 startServer();

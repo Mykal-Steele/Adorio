@@ -14,9 +14,13 @@ export function useFinanceData() {
   const [overview, setOverview] = useState<FinanceOverview | null>(null);
   const [categories, setCategories] = useState<FinanceCategory[]>([]);
   const [transactions, setTransactions] = useState<FinanceTransaction[]>([]);
-  const [filters, setFilters] = useState<FinanceTransactionsQuery>({});
+  const [hasMore, setHasMore] = useState(false);
+  const [totalTransactions, setTotalTransactions] = useState(0);
+  const [filters, setFilters] = useState<Omit<FinanceTransactionsQuery, 'page'>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState('');
+  const [filterError, setFilterError] = useState('');
 
   const refetchOverview = useCallback(async () => {
     setOverview(await getFinanceOverview());
@@ -26,13 +30,18 @@ export function useFinanceData() {
     setCategories(await getFinanceCategories());
   }, []);
 
-  const refetchTransactions = useCallback(async (query: FinanceTransactionsQuery) => {
-    const page = await getFinanceTransactions(query);
-    setTransactions(page.transactions);
-  }, []);
+  const refetchTransactions = useCallback(
+    async (query: FinanceTransactionsQuery, { append = false } = {}) => {
+      const page = await getFinanceTransactions(query);
+      setTransactions((prev) => (append ? [...prev, ...page.transactions] : page.transactions));
+      setHasMore(page.hasMore);
+      setTotalTransactions(page.totalTransactions);
+    },
+    [],
+  );
 
   const refetchAll = useCallback(
-    async (query: FinanceTransactionsQuery = filters) => {
+    async (query: Omit<FinanceTransactionsQuery, 'page'> = filters) => {
       await Promise.all([refetchOverview(), refetchCategories(), refetchTransactions(query)]);
     },
     [filters, refetchOverview, refetchCategories, refetchTransactions],
@@ -60,26 +69,46 @@ export function useFinanceData() {
   }, []);
 
   const applyFilters = useCallback(
-    async (next: FinanceTransactionsQuery) => {
+    async (next: Omit<FinanceTransactionsQuery, 'page'>) => {
       setFilters(next);
+      setFilterError('');
       try {
         await refetchTransactions(next);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load transactions');
+        setFilterError(err instanceof Error ? err.message : 'Failed to load transactions');
       }
     },
     [refetchTransactions],
   );
 
+  const loadMoreTransactions = useCallback(async () => {
+    if (!hasMore || isLoadingMore) return;
+    setIsLoadingMore(true);
+    setFilterError('');
+    try {
+      const nextPage = Math.floor(transactions.length / (filters.limit ?? 50)) + 1;
+      await refetchTransactions({ ...filters, page: nextPage }, { append: true });
+    } catch (err) {
+      setFilterError(err instanceof Error ? err.message : 'Failed to load more transactions');
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [filters, hasMore, isLoadingMore, refetchTransactions, transactions.length]);
+
   return {
     overview,
     categories,
     transactions,
+    hasMore,
+    totalTransactions,
     filters,
     isLoading,
+    isLoadingMore,
     error,
+    filterError,
     setError,
     applyFilters,
+    loadMoreTransactions,
     refetchAll,
     refetchOverview,
     refetchCategories,
