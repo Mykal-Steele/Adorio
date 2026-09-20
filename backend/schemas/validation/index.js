@@ -5,3 +5,4 @@ export * from './secretEnvSchemas.js';
 export * from './analyticsSchemas.js';
 export * from './hostedFileSchemas.js';
 export * from './codingSchemas.js';
+export * from './financeSchemas.js';

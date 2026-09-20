@@ -18,12 +18,16 @@ const waitForBackend = async (retries = 30, interval = 2000) => {
   );
 };
 
-// Creates a unique user credential set per test file invocation
+// Creates a unique user credential set. A monotonic counter is appended so
+// two calls within the same millisecond (e.g. a test file registering two
+// users back to back) never collide on username/email.
+let credentialCounter = 0;
+
 const makeCredentials = () => {
-  const ts = Date.now();
+  const id = `${Date.now().toString(36)}${(credentialCounter++).toString(36)}`;
   return {
-    username: `user_${ts}`,
-    email: `user_${ts}@integration.test`,
+    username: `u${id}`.slice(0, 20),
+    email: `u${id}@integration.test`,
     password: 'Integration_Test_123!',
   };
 };
