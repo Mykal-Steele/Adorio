@@ -11,6 +11,7 @@ import {
 import {
   findSettingsByUser,
   upsertSettings,
+  incrementBalance,
   findCategoriesByUser,
   findCategoryById,
   findCategoryByUserAndSlug,
@@ -27,34 +28,35 @@ import {
   updateTransactionById,
   deleteTransactionById,
   reassignTransactionsCategory,
+  sumTransactionsByType,
 } from '../models/index.js';
 
 const DEFAULT_CATEGORIES = [
-  { slug: 'food', name: 'Food', color: '#f97316', excludeFromBudget: false, isDefault: true },
-  { slug: 'rent', name: 'Rent', color: '#ef4444', excludeFromBudget: true, isDefault: true },
+  { slug: 'food', name: 'Food', color: '#F2B84B', excludeFromBudget: false, isDefault: true },
+  { slug: 'rent', name: 'Rent', color: '#D4A94D', excludeFromBudget: true, isDefault: true },
   {
     slug: 'transport',
     name: 'Transport',
-    color: '#3b82f6',
+    color: '#5FA8D8',
     excludeFromBudget: false,
     isDefault: true,
   },
   {
     slug: 'shopping',
     name: 'Shopping',
-    color: '#a855f7',
+    color: '#C77DD1',
     excludeFromBudget: false,
     isDefault: true,
   },
-  { slug: 'health', name: 'Health', color: '#22c55e', excludeFromBudget: false, isDefault: true },
+  { slug: 'health', name: 'Health', color: '#5FD8B0', excludeFromBudget: false, isDefault: true },
   {
     slug: 'entertainment',
     name: 'Entertainment',
-    color: '#eab308',
+    color: '#F0705A',
     excludeFromBudget: false,
     isDefault: true,
   },
-  { slug: 'other', name: 'Other', color: '#6b7280', excludeFromBudget: false, isDefault: true },
+  { slug: 'other', name: 'Other', color: '#9CA3AF', excludeFromBudget: false, isDefault: true },
 ];
 
 const slugify = (name) =>
@@ -149,10 +151,23 @@ export const updateSettings = async ({ userId, ...rawBody }) => {
   return upsertSettings(userId, update);
 };
 
+// A transaction's effect on the balance: income adds, expense subtracts.
+const balanceEffect = (type, amount) => (type === 'income' ? amount : -amount);
+
 export const createTransaction = async ({ userId, ...rawBody }) => {
   const { title, amount, type, category, date } = validate(createTransactionSchema, rawBody);
   await assertOwnsCategory(userId, category);
-  return dbCreateTransaction({ user: userId, title, amount, type, category, date, ts: Date.now() });
+  const transaction = await dbCreateTransaction({
+    user: userId,
+    title,
+    amount,
+    type,
+    category,
+    date,
+    ts: Date.now(),
+  });
+  await incrementBalance(userId, balanceEffect(type, amount));
+  return transaction;
 };
 
 export const updateTransaction = async ({ userId, transactionId, ...rawBody }) => {
@@ -161,6 +176,14 @@ export const updateTransaction = async ({ userId, transactionId, ...rawBody }) =
   if (!transaction) throw ApiError.notFound('Transaction not found');
   if (transaction.user.toString() !== userId) throw ApiError.forbidden('Not authorized');
   if (update.category) await assertOwnsCategory(userId, update.category);
+
+  const oldEffect = balanceEffect(transaction.type, transaction.amount);
+  const newEffect = balanceEffect(
+    update.type ?? transaction.type,
+    update.amount ?? transaction.amount,
+  );
+  if (newEffect !== oldEffect) await incrementBalance(userId, newEffect - oldEffect);
+
   return updateTransactionById(transactionId, update);
 };
 
@@ -169,21 +192,27 @@ export const deleteTransaction = async ({ userId, transactionId }) => {
   if (!transaction) throw ApiError.notFound('Transaction not found');
   if (transaction.user.toString() !== userId) throw ApiError.forbidden('Not authorized');
   await deleteTransactionById(transactionId);
+  await incrementBalance(userId, -balanceEffect(transaction.type, transaction.amount));
 };
 
 export const getTransactions = async ({ userId, ...rawQuery }) => {
-  const { month, category, search, page, limit } = validate(getTransactionsQuerySchema, rawQuery);
+  const { month, category, type, search, page, limit } = validate(
+    getTransactionsQuerySchema,
+    rawQuery,
+  );
   await ensureUserCategoriesSeeded(userId);
 
   const filter = {};
   if (month) filter.date = { $gte: `${month}-01`, $lte: `${month}-31` };
-  if (category) filter.category = category;
+  if (category) filter.category = { $eq: category };
+  if (type) filter.type = { $eq: type };
   if (search) filter.title = { $regex: escapeRegExp(search), $options: 'i' };
 
   const skip = (page - 1) * limit;
-  const [transactions, totalTransactions] = await Promise.all([
+  const [transactions, totalTransactions, allTimeTotals] = await Promise.all([
     findTransactionsPaginated({ userId, filter, skip, limit }),
     countTransactions({ userId, filter }),
+    sumTransactionsByType(userId),
   ]);
 
   return {
@@ -192,6 +221,12 @@ export const getTransactions = async ({ userId, ...rawQuery }) => {
     totalTransactions,
     currentPage: page,
     totalPages: Math.max(Math.ceil(totalTransactions / limit), 1),
+    // All-time, unaffected by the filters above — matches the ported
+    // Runway UX where the summary strip always shows the full history.
+    summary: {
+      totalIncome: allTimeTotals.income,
+      totalExpense: allTimeTotals.expense,
+    },
   };
 };
 
@@ -219,11 +254,15 @@ export const getOverview = async (userId) => {
 
   let monthlySpend = 0;
   let monthlySpendAll = 0;
+  let monthlyIncome = 0;
   let todaySpend = 0;
   const categoryTotals = new Map();
 
   for (const txn of monthTransactions) {
-    if (txn.type !== 'expense') continue;
+    if (txn.type === 'income') {
+      monthlyIncome += txn.amount;
+      continue;
+    }
     monthlySpendAll += txn.amount;
     if (!txn.category?.excludeFromBudget) monthlySpend += txn.amount;
     if (txn.date === today) todaySpend += txn.amount;
@@ -249,6 +288,7 @@ export const getOverview = async (userId) => {
     dailyBudget,
     monthlySpend,
     monthlySpendAll,
+    monthlyIncome,
     todaySpend,
     daysRemaining: daysInMonth - currentDay + 1,
     daysInMonth,
