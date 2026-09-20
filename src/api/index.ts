@@ -89,5 +89,27 @@ export {
   deleteHostedFile,
   getAllHostedFilesAdmin,
 } from './hosting';
+export {
+  getFinanceOverview,
+  getFinanceSettings,
+  updateFinanceSettings,
+  getFinanceCategories,
+  createFinanceCategory,
+  updateFinanceCategory,
+  deleteFinanceCategory,
+  getFinanceTransactions,
+  createFinanceTransaction,
+  updateFinanceTransaction,
+  deleteFinanceTransaction,
+} from './finance';
+export type {
+  FinanceCategory,
+  FinanceTransaction,
+  FinanceSettings,
+  FinanceOverview,
+  FinanceTransactionsPage,
+  FinanceTransactionsQuery,
+  TransactionType,
+} from './finance';
 
 export default API;
