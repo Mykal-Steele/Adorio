@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import ApiError from '../utils/ApiError.js';
 import validate from '../utils/validate.js';
+import { environment } from '../config/environment.js';
 import { registerSchema, loginSchema, searchUsersQuerySchema } from '../schemas/index.js';
 import {
   findUserByEmailOrUsername,
@@ -8,6 +9,7 @@ import {
   findUserById as dbFindUserById,
   findUserByEmail,
   deleteUserById,
+  deleteStaleTestUsers,
   searchUsersByUsernamePrefix,
 } from '../models/index.js';
 
@@ -43,6 +45,12 @@ export const deleteUserAccount = async (userId) => {
   const user = await dbFindUserById(userId);
   if (!user) throw ApiError.notFound('User not found');
   await deleteUserById(userId);
+};
+
+export const cleanupStaleTestUsers = async () => {
+  const createdBefore = new Date(Date.now() - environment.testUserTtlMinutes * 60000);
+  const result = await deleteStaleTestUsers({ createdBefore });
+  return { deletedCount: result.deletedCount ?? 0 };
 };
 
 export const searchUsers = async (rawQuery) => {
