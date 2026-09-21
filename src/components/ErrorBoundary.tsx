@@ -28,19 +28,21 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren, ErrorBounda
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+        <div className="paper-theme flex min-h-screen items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gray-900/90 backdrop-blur-lg p-8 rounded-2xl border border-purple-500/20 max-w-md"
+            className="max-w-md -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-8 shadow-[6px_8px_0_var(--paper-ink)]"
           >
-            <h2 className="text-2xl font-bold text-purple-400 mb-4">Something went wrong</h2>
-            <p className="text-gray-300 mb-6">
+            <h2 className="font-paper-serif mb-4 text-2xl font-bold text-[var(--paper-ink)]">
+              Something went wrong
+            </h2>
+            <p className="mb-6 text-[var(--paper-muted)]">
               An unexpected error occurred. Please refresh the page.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="py-2 px-4 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors"
+              className="rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-4 py-2 font-paper-mono text-sm font-bold uppercase tracking-[.1em] text-[var(--paper-ink)] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)]"
             >
               Reload page
             </button>
