@@ -3,21 +3,24 @@ import { fmtMoneyPlain, statusColor, STATUS_COLORS } from '../utils/format';
 interface GaugeProps {
   spent: number;
   budget: number;
+  budgetIsSet?: boolean;
 }
 
 const RADIUS = 64;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-export default function Gauge({ spent, budget }: GaugeProps) {
-  const hasBudget = budget > 0;
-  const pct = hasBudget ? Math.min(spent / budget, 1) : 0;
+export default function Gauge({ spent, budget, budgetIsSet = budget > 0 }: GaugeProps) {
+  const hasBudget = budgetIsSet && budget > 0;
+  const pct = hasBudget ? Math.min(spent / budget, 1) : budgetIsSet ? 1 : 0;
   const offset = CIRCUMFERENCE * (1 - pct);
-  const color = hasBudget ? statusColor(pct) : 'var(--paper-muted-2)';
+  const color = budgetIsSet ? statusColor(pct) : 'var(--paper-muted-2)';
   const rawPct = hasBudget ? spent / budget : 0;
 
   let status: string;
-  if (!hasBudget) {
+  if (!budgetIsSet) {
     status = 'Set a monthly budget in Settings to auto-generate a daily allowance.';
+  } else if (budget <= 0) {
+    status = `Today's allowance is used up covering earlier overspending — ${fmtMoneyPlain(Math.abs(budget))} still owed.`;
   } else if (rawPct >= 1) {
     status = `Over today's allowance by ${fmtMoneyPlain(spent - budget)}.`;
   } else {
@@ -52,7 +55,11 @@ export default function Gauge({ spent, budget }: GaugeProps) {
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <div className="font-paper-mono text-[1.35rem] font-semibold">{fmtMoneyPlain(spent)}</div>
           <div className="font-paper-mono mt-0.5 text-[0.72rem] text-[var(--paper-muted-2)]">
-            {hasBudget ? `of ${fmtMoneyPlain(budget)}` : 'no budget set'}
+            {!budgetIsSet
+              ? 'no budget set'
+              : hasBudget
+                ? `of ${fmtMoneyPlain(budget)}`
+                : `${fmtMoneyPlain(Math.abs(budget))} owed`}
           </div>
         </div>
       </div>

@@ -26,6 +26,16 @@ export interface FinanceSettings {
   monthlyBudget: number;
 }
 
+export interface FinanceLedgerDay {
+  day: number;
+  date: string;
+  budget: number;
+  spent: number;
+  isTracked: boolean;
+  isToday: boolean;
+  isFuture: boolean;
+}
+
 export interface FinanceOverview {
   balance: number;
   monthlyBudget: number;
@@ -40,6 +50,14 @@ export interface FinanceOverview {
     category: Pick<FinanceCategory, 'name' | 'color' | 'excludeFromBudget'> & { id: string };
     amount: number;
   }[];
+  saved: number;
+  todayAllowance: number;
+  todayRemaining: number;
+  adjustedMonthlyBudget: number;
+  remainingThisMonth: number;
+  trackingStartDay: number;
+  isPartialMonth: boolean;
+  dailyLedger: FinanceLedgerDay[];
 }
 
 export interface FinanceTransactionsPage {

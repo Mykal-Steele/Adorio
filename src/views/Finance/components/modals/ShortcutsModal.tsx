@@ -2,10 +2,11 @@ import Overlay from './Overlay';
 import Kbd from '../Kbd';
 
 const ROWS: [string, string][] = [
-  ['Dashboard / History / Settings', '1 2 3'],
+  ['Dashboard / Calendar / History / Settings', '1 2 3 4'],
   ['Add expense', 'N'],
   ['Add income', 'I'],
   ['Edit balance', 'B'],
+  ['Calculator', 'C'],
   ['Search history', '/'],
   ['Close dialog', 'Esc'],
   ['Show this panel', '?'],
