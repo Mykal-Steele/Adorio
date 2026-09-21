@@ -66,6 +66,12 @@ const registerProvidersOnce = (monaco: typeof Monaco) => {
   monaco.languages.registerDocumentFormattingEditProvider('javascript', formattingProvider);
 };
 
+const MONACO_LANGUAGE_ID: Record<string, string> = {
+  [Language.JAVA]: 'java',
+  [Language.PYTHON]: 'python',
+  [Language.JAVASCRIPT]: 'javascript',
+};
+
 const applySettings = (editor: IStandaloneCodeEditor) => {
   const settings = getEditorSettings();
   editor.updateOptions({
@@ -124,7 +130,7 @@ const MonacoEditor = forwardRef<EditorHandle, EditorEngineProps>(
     return (
       <Editor
         height="380px"
-        language={language === Language.JAVA ? 'java' : 'javascript'}
+        language={MONACO_LANGUAGE_ID[language] ?? 'javascript'}
         value={code}
         theme={PAPER_MONACO_THEME_NAME}
         beforeMount={definePaperMonacoTheme}
