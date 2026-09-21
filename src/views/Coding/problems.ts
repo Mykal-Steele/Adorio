@@ -81,6 +81,29 @@ function printOddNumbers(n) {
           },
         ],
       },
+      python: {
+        kind: 'stdio',
+        starterCode: `# Read n (one integer) from stdin.
+# Print the odd numbers from 1 to n (inclusive), space-separated on one line.
+# Print an empty line if there are none.
+
+n = int(input())
+# Your solution here
+`,
+        tests: [
+          { name: 'basic range', stdin: '10\n', expectedOutput: '1 3 5 7 9' },
+          { name: 'small range', stdin: '5\n', expectedOutput: '1 3 5' },
+          { name: 'zero', stdin: '0\n', expectedOutput: '' },
+          { name: 'negative', stdin: '-5\n', expectedOutput: '' },
+          { name: 'single odd', stdin: '1\n', expectedOutput: '1' },
+          { name: 'single even', stdin: '2\n', expectedOutput: '1' },
+          {
+            name: 'large range',
+            stdin: '20\n',
+            expectedOutput: '1 3 5 7 9 11 13 15 17 19',
+          },
+        ],
+      },
     },
   },
   {
@@ -152,6 +175,23 @@ function reverseString(str) {
             args: ['a!b@c#'],
             expected: '#c@b!a',
           },
+        ],
+      },
+      python: {
+        kind: 'stdio',
+        starterCode: `# Read one line from stdin and print it reversed.
+
+s = input()
+# Your solution here
+`,
+        tests: [
+          { name: 'basic', stdin: 'hello\n', expectedOutput: 'olleh' },
+          { name: 'empty', stdin: '\n', expectedOutput: '' },
+          { name: 'single', stdin: 'a\n', expectedOutput: 'a' },
+          { name: 'palindrome', stdin: 'racecar\n', expectedOutput: 'racecar' },
+          { name: 'spaces', stdin: 'hello world\n', expectedOutput: 'dlrow olleh' },
+          { name: 'numbers', stdin: '12345\n', expectedOutput: '54321' },
+          { name: 'special chars', stdin: 'a!b@c#\n', expectedOutput: '#c@b!a' },
         ],
       },
     },
@@ -230,6 +270,30 @@ function generatePrimes(n) {
             name: 'larger',
             args: [30],
             expected: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29],
+          },
+        ],
+      },
+      python: {
+        kind: 'stdio',
+        starterCode: `# Read n (one integer) from stdin.
+# Print the primes from 2 to n (inclusive), space-separated, using brute force
+# (test each number for divisors up to its square root).
+# Print an empty line if there are none.
+
+n = int(input())
+# Your solution here
+`,
+        tests: [
+          { name: 'basic', stdin: '10\n', expectedOutput: '2 3 5 7' },
+          { name: 'edge_single', stdin: '2\n', expectedOutput: '2' },
+          { name: 'edge_empty', stdin: '1\n', expectedOutput: '' },
+          { name: 'zero', stdin: '0\n', expectedOutput: '' },
+          { name: 'small_prime', stdin: '3\n', expectedOutput: '2 3' },
+          { name: 'medium', stdin: '20\n', expectedOutput: '2 3 5 7 11 13 17 19' },
+          {
+            name: 'larger',
+            stdin: '30\n',
+            expectedOutput: '2 3 5 7 11 13 17 19 23 29',
           },
         ],
       },
@@ -312,6 +376,31 @@ function sieveOfEratosthenes(n) {
             name: 'large',
             args: [50],
             expected: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47],
+          },
+        ],
+      },
+      python: {
+        kind: 'stdio',
+        starterCode: `# Read n (one integer) from stdin.
+# Print the primes from 2 to n (inclusive), space-separated, using the
+# Sieve of Eratosthenes (mark multiples of each prime as composite).
+# Print an empty line if there are none.
+
+n = int(input())
+# Your solution here
+`,
+        tests: [
+          { name: 'basic', stdin: '10\n', expectedOutput: '2 3 5 7' },
+          { name: 'single', stdin: '2\n', expectedOutput: '2' },
+          { name: 'empty', stdin: '1\n', expectedOutput: '' },
+          { name: 'zero', stdin: '0\n', expectedOutput: '' },
+          { name: 'small', stdin: '5\n', expectedOutput: '2 3 5' },
+          { name: 'medium', stdin: '15\n', expectedOutput: '2 3 5 7 11 13' },
+          { name: 'larger', stdin: '20\n', expectedOutput: '2 3 5 7 11 13 17 19' },
+          {
+            name: 'large',
+            stdin: '50\n',
+            expectedOutput: '2 3 5 7 11 13 17 19 23 29 31 37 41 43 47',
           },
         ],
       },
@@ -440,6 +529,22 @@ class TowerOfHanoi {
           },
         ],
       },
+      python: {
+        kind: 'stdio',
+        starterCode: `# Read the number of disks (one integer) from stdin.
+# Print the minimum number of moves to solve Tower of Hanoi for that many disks.
+
+number_of_disks = int(input())
+# Your solution here
+`,
+        tests: [
+          { name: 'one_disk', stdin: '1\n', expectedOutput: '1' },
+          { name: 'two_disks', stdin: '2\n', expectedOutput: '3' },
+          { name: 'three_disks', stdin: '3\n', expectedOutput: '7' },
+          { name: 'four_disks', stdin: '4\n', expectedOutput: '15' },
+          { name: 'five_disks', stdin: '5\n', expectedOutput: '31' },
+        ],
+      },
     },
   },
   {
@@ -566,6 +671,60 @@ function multiplyMatrices(A, B) {
           },
         ],
       },
+      python: {
+        kind: 'stdio',
+        starterCode: `# Read matrix A, then matrix B, from stdin:
+#   rowsA colsA
+#   <rowsA lines of colsA space-separated ints>
+#   rowsB colsB
+#   <rowsB lines of colsB space-separated ints>
+# (rowsB == colsA is guaranteed.) Print the product matrix, one row per
+# line, values space-separated.
+
+rows_a, cols_a = map(int, input().split())
+a = [list(map(int, input().split())) for _ in range(rows_a)]
+rows_b, cols_b = map(int, input().split())
+b = [list(map(int, input().split())) for _ in range(rows_b)]
+# Your solution here
+`,
+        tests: [
+          {
+            name: 'basic_2x2',
+            stdin: '2 2\n1 2\n3 4\n2 2\n5 6\n7 8\n',
+            expectedOutput: '19 22\n43 50',
+          },
+          {
+            name: 'vector_multiply',
+            stdin: '1 3\n1 2 3\n3 1\n4\n5\n6\n',
+            expectedOutput: '32',
+          },
+          {
+            name: 'rectangular',
+            stdin: '3 2\n1 2\n3 4\n5 6\n2 4\n10 20 30 40\n50 60 70 80\n',
+            expectedOutput: '110 140 170 200\n230 300 370 440\n350 460 570 680',
+          },
+          {
+            name: 'identity',
+            stdin: '2 2\n1 0\n0 1\n2 2\n5 6\n7 8\n',
+            expectedOutput: '5 6\n7 8',
+          },
+          {
+            name: 'single_element',
+            stdin: '1 1\n3\n1 1\n7\n',
+            expectedOutput: '21',
+          },
+          {
+            name: 'zero_matrix',
+            stdin: '2 2\n0 0\n0 0\n2 2\n1 2\n3 4\n',
+            expectedOutput: '0 0\n0 0',
+          },
+          {
+            name: 'different_dimensions',
+            stdin: '1 4\n1 2 3 4\n4 1\n1\n1\n1\n1\n',
+            expectedOutput: '10',
+          },
+        ],
+      },
     },
   },
   {
@@ -646,6 +805,23 @@ function findGCD(a, b) {
             args: [12, 8],
             expected: 4,
           },
+        ],
+      },
+      python: {
+        kind: 'stdio',
+        starterCode: `# Read two positive integers a and b, space-separated on one line.
+# Print their greatest common divisor.
+
+a, b = map(int, input().split())
+# Your solution here
+`,
+        tests: [
+          { name: 'basic example', stdin: '20 15\n', expectedOutput: '5' },
+          { name: 'larger numbers', stdin: '48 18\n', expectedOutput: '6' },
+          { name: 'coprime numbers', stdin: '17 13\n', expectedOutput: '1' },
+          { name: 'one divides other', stdin: '100 25\n', expectedOutput: '25' },
+          { name: 'same numbers', stdin: '42 42\n', expectedOutput: '42' },
+          { name: 'small numbers', stdin: '12 8\n', expectedOutput: '4' },
         ],
       },
     },
@@ -803,6 +979,42 @@ function treeHeight(root) {
           },
         ],
       },
+      python: {
+        kind: 'stdio',
+        starterCode: `# Read one line: the tree in level order, space-separated, with the
+# literal token "null" for a missing child (e.g. "1 2 3 4 5 null 6" is the
+# tree   1
+#      /   \\
+#     2     3
+#    / \\     \\
+#   4   5     6
+# ). An empty tree is just "null". Print the tree's height (a single node
+# has height 1; an empty tree has height 0).
+
+line = input().strip()
+tokens = line.split() if line else []
+# Your solution here
+`,
+        tests: [
+          {
+            name: 'balanced tree',
+            stdin: '1 2 3 4 5 null 6 null null null null null null\n',
+            expectedOutput: '3',
+          },
+          { name: 'single node', stdin: '10 null null\n', expectedOutput: '1' },
+          {
+            name: 'right skewed',
+            stdin: '4 null 5 null 6 null 7 null null\n',
+            expectedOutput: '4',
+          },
+          { name: 'empty tree', stdin: 'null\n', expectedOutput: '0' },
+          {
+            name: 'unbalanced left heavy',
+            stdin: '8 3 10 1 6 null 14 null null 4 7 13 null null null null null null null\n',
+            expectedOutput: '4',
+          },
+        ],
+      },
     },
   },
   {
@@ -900,6 +1112,44 @@ function findClosestPair(points) {
               ],
             ],
             expected: 'closest points are index 0 and 2 coords: (2,0) and (2,1)',
+          },
+        ],
+      },
+      python: {
+        kind: 'stdio',
+        starterCode: `# Read n (one integer), then n lines each "x y" (space-separated ints).
+# Print: closest points are index {i} and {j} coords: ({x1},{y1}) and ({x2},{y2})
+# where i < j is the pair with the smallest distance (brute force is fine).
+
+n = int(input())
+points = [tuple(map(int, input().split())) for _ in range(n)]
+# Your solution here
+`,
+        tests: [
+          {
+            name: 'basic example',
+            stdin: '5\n0 0\n5 4\n3 1\n10 10\n6 2\n',
+            expectedOutput: 'closest points are index 1 and 4 coords: (5,4) and (6,2)',
+          },
+          {
+            name: 'three points',
+            stdin: '3\n1 1\n4 4\n2 2\n',
+            expectedOutput: 'closest points are index 0 and 2 coords: (1,1) and (2,2)',
+          },
+          {
+            name: 'two points only',
+            stdin: '2\n0 0\n1 0\n',
+            expectedOutput: 'closest points are index 0 and 1 coords: (0,0) and (1,0)',
+          },
+          {
+            name: 'negative coordinates',
+            stdin: '3\n-1 -1\n1 1\n0 0\n',
+            expectedOutput: 'closest points are index 0 and 2 coords: (-1,-1) and (0,0)',
+          },
+          {
+            name: 'same x coordinate',
+            stdin: '4\n2 0\n2 3\n2 1\n5 5\n',
+            expectedOutput: 'closest points are index 0 and 2 coords: (2,0) and (2,1)',
           },
         ],
       },
@@ -1123,6 +1373,96 @@ function searchWord(pattern, matrix) {
           },
         ],
       },
+      python: {
+        kind: 'stdio',
+        starterCode: `# Read: the pattern (one line, may be empty), then "rows cols", then
+# \`rows\` lines each a string of \`cols\` lowercase letters (no spaces).
+# Search all 8 directions; print "found at (row, column) from direction"
+# for the first match (row-major cell order, direction order up to you),
+# using these exact direction names: "left to right", "right to left",
+# "top to bottom", "bottom to top", "top-left to bottom-right",
+# "top-right to bottom-left", "bottom-left to top-right",
+# "bottom-right to top-left". Print "not found" if there's no match
+# (including when the pattern is empty).
+
+pattern = input()
+rows, cols = map(int, input().split())
+grid = [input() for _ in range(rows)]
+# Your solution here
+`,
+        tests: [
+          {
+            name: 'horizontal left to right',
+            stdin: 'hello\n2 5\nhello\nworld\n',
+            expectedOutput: 'found at (0, 0) from left to right',
+          },
+          {
+            name: 'horizontal right to left',
+            stdin: 'olleh\n2 5\nhello\nworld\n',
+            expectedOutput: 'found at (0, 4) from right to left',
+          },
+          {
+            name: 'vertical top to bottom',
+            stdin: 'hw\n3 3\nhel\nwor\nzxy\n',
+            expectedOutput: 'found at (0, 0) from top to bottom',
+          },
+          {
+            name: 'vertical bottom to top',
+            stdin: 'wh\n3 3\nhel\nwor\nzxy\n',
+            expectedOutput: 'found at (1, 0) from bottom to top',
+          },
+          {
+            name: 'diagonal top-left to bottom-right',
+            stdin: 'cat\n4 4\ncxzp\nyaqr\nmnts\nuvwk\n',
+            expectedOutput: 'found at (0, 0) from top-left to bottom-right',
+          },
+          {
+            name: 'diagonal top-right to bottom-left',
+            stdin: 'dog\n4 4\nxyzd\naboc\negfh\nijkl\n',
+            expectedOutput: 'found at (0, 3) from top-right to bottom-left',
+          },
+          {
+            name: 'diagonal bottom-left to top-right',
+            stdin: 'fun\n4 4\nabnd\neugh\nfjkl\nmopq\n',
+            expectedOutput: 'found at (2, 0) from bottom-left to top-right',
+          },
+          {
+            name: 'diagonal bottom-right to top-left',
+            stdin: 'joy\n4 4\nybcd\neogh\nijjl\nmnpq\n',
+            expectedOutput: 'found at (2, 2) from bottom-right to top-left',
+          },
+          {
+            name: 'word at edge - horizontal',
+            stdin: 'edge\n3 4\nabcd\nedge\nfghi\n',
+            expectedOutput: 'found at (1, 0) from left to right',
+          },
+          {
+            name: 'word at corner - diagonal',
+            stdin: 'ace\n3 3\naxy\nzcw\nqre\n',
+            expectedOutput: 'found at (0, 0) from top-left to bottom-right',
+          },
+          {
+            name: 'overlapping letters different direction',
+            stdin: 'sun\n3 3\nsab\nutc\nnef\n',
+            expectedOutput: 'found at (0, 0) from top to bottom',
+          },
+          {
+            name: 'pattern not found',
+            stdin: 'xyz\n2 5\nhello\nworld\n',
+            expectedOutput: 'not found',
+          },
+          {
+            name: 'empty pattern edge case',
+            stdin: '\n2 2\nab\ncd\n',
+            expectedOutput: 'not found',
+          },
+          {
+            name: 'longer word reverse diagonal',
+            stdin: 'magic\n5 5\nxyzwm\nabcaq\npqgrs\ntiuvw\ncxyza\n',
+            expectedOutput: 'found at (0, 4) from top-right to bottom-left',
+          },
+        ],
+      },
     },
   },
   {
@@ -1210,6 +1550,51 @@ function findPattern(pattern, text) {
             name: 'case sensitive',
             args: ['Hello', 'hello world'],
             expected: 'Not found',
+          },
+        ],
+      },
+      python: {
+        kind: 'stdio',
+        starterCode: `# Read the pattern (one line, may be empty), then the text (one line).
+# Print "Found" if pattern is a substring of text, otherwise "Not found".
+# Case-sensitive; an empty pattern always counts as found.
+
+pattern = input()
+text = input()
+# Your solution here
+`,
+        tests: [
+          {
+            name: 'pattern at end',
+            stdin: 'hello\nnnnhello\n',
+            expectedOutput: 'Found',
+          },
+          {
+            name: 'pattern not found',
+            stdin: 'world\nhello there\n',
+            expectedOutput: 'Not found',
+          },
+          {
+            name: 'pattern in middle',
+            stdin: 'test\nthis is a test case\n',
+            expectedOutput: 'Found',
+          },
+          {
+            name: 'pattern at beginning',
+            stdin: 'hello\nhello world\n',
+            expectedOutput: 'Found',
+          },
+          { name: 'pattern equals text', stdin: 'abc\nabc\n', expectedOutput: 'Found' },
+          {
+            name: 'pattern longer than text',
+            stdin: 'hello\nhi\n',
+            expectedOutput: 'Not found',
+          },
+          { name: 'empty pattern', stdin: '\nhello\n', expectedOutput: 'Found' },
+          {
+            name: 'case sensitive',
+            stdin: 'Hello\nhello world\n',
+            expectedOutput: 'Not found',
           },
         ],
       },

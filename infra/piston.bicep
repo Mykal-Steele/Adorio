@@ -167,12 +167,26 @@ curl -fsSk -X POST "$BASE_URL/api/v2/packages" \
   -H "Content-Type: application/json" -H "$AUTH_HEADER" \
   -d "{\"language\": \"java\", \"version\": \"$JAVA_VERSION\"}"
 
+# Python, same pattern as Java above — the backend's codingService.js
+# LANGUAGE_CONFIG expects both installed. Add a matching block here (and to
+# the two "java" selectors in healthcheck.sh below) for any future language.
+PYTHON_VERSION=$(curl -fsSk -H "$AUTH_HEADER" "$BASE_URL/api/v2/packages" | jq -r '[.[] | select(.language=="python")][0].language_version')
+if [ -z "$PYTHON_VERSION" ] || [ "$PYTHON_VERSION" = "null" ]; then
+  echo "Piston did not advertise a Python package version" >&2
+  exit 1
+fi
+
+curl -fsSk -X POST "$BASE_URL/api/v2/packages" \
+  -H "Content-Type: application/json" -H "$AUTH_HEADER" \
+  -d "{\"language\": \"python\", \"version\": \"$PYTHON_VERSION\"}"
+
 # /health only reflects "was ready once at boot" if the readiness marker is
-# ever just written once and left alone — if Piston crashes or loses Java
-# after that, nginx would keep returning 200 forever and the load balancer
-# would keep routing submissions at a dead instance. This script re-checks
-# Piston live and is run both right now (blocking, until Java first comes up)
-# and on a recurring systemd timer below (ongoing, so /health tracks reality).
+# ever just written once and left alone — if Piston crashes or loses a
+# runtime after that, nginx would keep returning 200 forever and the load
+# balancer would keep routing submissions at a dead instance. This script
+# re-checks Piston live and is run both right now (blocking, until every
+# required runtime first comes up) and on a recurring systemd timer below
+# (ongoing, so /health tracks reality).
 cat > /opt/piston/healthcheck.sh <<'HEALTHCHECK_EOF'
 #!/bin/bash
 set -uo pipefail
@@ -180,10 +194,12 @@ AUTH_HEADER="X-Auth-Token: __PISTON_AUTH_TOKEN__"
 BASE_URL="https://localhost:__PROXY_PORT__"
 READY_FILE="/opt/piston/status/ready"
 
-COUNT=$(curl -fsSk -H "$AUTH_HEADER" "$BASE_URL/api/v2/runtimes" 2>/dev/null \
-  | jq -r '[.[] | select(.language=="java")] | length' 2>/dev/null)
+RUNTIMES=$(curl -fsSk -H "$AUTH_HEADER" "$BASE_URL/api/v2/runtimes" 2>/dev/null)
+JAVA_COUNT=$(echo "$RUNTIMES" | jq -r '[.[] | select(.language=="java")] | length' 2>/dev/null)
+PYTHON_COUNT=$(echo "$RUNTIMES" | jq -r '[.[] | select(.language=="python")] | length' 2>/dev/null)
 
-if [ -n "$COUNT" ] && [ "$COUNT" -gt 0 ] 2>/dev/null; then
+if [ -n "$JAVA_COUNT" ] && [ "$JAVA_COUNT" -gt 0 ] 2>/dev/null \
+  && [ -n "$PYTHON_COUNT" ] && [ "$PYTHON_COUNT" -gt 0 ] 2>/dev/null; then
   echo ok > "$READY_FILE"
 else
   rm -f "$READY_FILE"
@@ -191,18 +207,18 @@ fi
 HEALTHCHECK_EOF
 chmod +x /opt/piston/healthcheck.sh
 
-JAVA_READY=0
+RUNTIMES_READY=0
 for i in $(seq 1 60); do
   /opt/piston/healthcheck.sh
   if [ -f status/ready ]; then
-    JAVA_READY=1
+    RUNTIMES_READY=1
     break
   fi
   sleep 2
 done
 
-if [ "$JAVA_READY" -ne 1 ]; then
-  echo "Java runtime never became available after install" >&2
+if [ "$RUNTIMES_READY" -ne 1 ]; then
+  echo "Java/Python runtimes never became available after install" >&2
   exit 1
 fi
 

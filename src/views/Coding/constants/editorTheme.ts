@@ -13,7 +13,12 @@ export const PAPER_EDITOR_PALETTE = {
   selection: 'rgba(242, 199, 68, 0.25)',
   lineHighlight: 'rgba(255, 255, 255, 0.05)',
   gutterBackground: '#1a1712',
-  gutterForeground: '#6b6252',
+  // #6b6252 (the original muted taupe) reads fine as body text on cream but
+  // was only 2.79:1 against this dark editor background — below WCAG AA's
+  // 4.5:1 for normal text. #948a76 keeps the same de-emphasized "dimmer than
+  // the main foreground" role (line numbers/comments still read as secondary
+  // next to #e8dfc9) while clearing 4.9:1.
+  gutterForeground: '#948a76',
   gutterActiveForeground: '#e8dfc9',
   keyword: '#e0b64f',
   string: '#a3b565',
@@ -22,7 +27,7 @@ export const PAPER_EDITOR_PALETTE = {
   number: '#c9784a',
   typeName: '#89a870',
   operator: '#b99a6b',
-  comment: '#6b6252',
+  comment: '#948a76',
   invalid: '#e07a68',
   fontFamily: "'Courier Prime', 'JetBrains Mono', monospace",
 } as const;
@@ -55,7 +60,7 @@ export const paperEditorTheme = createTheme({
     { tag: t.typeName, color: '#89a870' },
     { tag: [t.operator, t.operatorKeyword], color: '#b99a6b' },
     { tag: [t.url, t.escape, t.regexp, t.link], color: '#8fae7a' },
-    { tag: [t.meta, t.comment], color: '#6b6252', fontStyle: 'italic' },
+    { tag: [t.meta, t.comment], color: '#948a76', fontStyle: 'italic' },
     { tag: t.strong, fontWeight: 'bold' },
     { tag: t.emphasis, fontStyle: 'italic' },
     { tag: t.link, textDecoration: 'underline' },

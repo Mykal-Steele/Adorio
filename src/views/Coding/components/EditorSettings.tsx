@@ -4,12 +4,27 @@ import useClickOutside from '@/hooks/useClickOutside';
 import {
   MAX_FONT_SIZE,
   MIN_FONT_SIZE,
+  getEditorEngine,
   getEditorSettings,
   resetEditorSettings,
+  setEditorEngine,
   setFontSize,
   setWrap,
+  subscribeEditorEngine,
   subscribeEditorSettings,
+  type EditorEngine,
 } from '../utils/editorSettingsStore';
+
+const ENGINE_LABELS: Record<EditorEngine, string> = {
+  monaco: 'VS Code',
+  codemirror: 'Classic',
+};
+
+const ENGINE_DESCRIPTIONS: Record<EditorEngine, string> = {
+  monaco: "Monaco, VS Code's real editor — authentic IntelliSense, bracket matching, shortcuts.",
+  codemirror:
+    "This site's original lighter editor — an approximation of VS Code, not the real thing.",
+};
 
 const SHORTCUTS: Array<[string, string]> = [
   ['Tab / Shift-Tab', 'Insert spaces at cursor / outdent (selection indents)'],
@@ -70,6 +85,7 @@ const EditorSettings = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const settings = useSyncExternalStore(subscribeEditorSettings, getEditorSettings);
+  const engine = useSyncExternalStore(subscribeEditorEngine, getEditorEngine, () => 'monaco');
 
   useClickOutside(containerRef, () => setOpen(false));
 
@@ -104,12 +120,35 @@ const EditorSettings = () => {
           <p className="font-paper-mono text-[11px] font-bold uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
             Editor settings
           </p>
-          <p className="mt-1.5 text-xs leading-snug text-[var(--paper-muted)]">
-            The <strong>VS Code / Classic</strong> buttons above the editor switch which underlying
-            editor renders your code — <strong>VS Code</strong> is Monaco (VS Code's real editor,
-            authentic IntelliSense and shortcuts), <strong>Classic</strong> is this site&apos;s
-            original lighter editor. Both read and save the same code and the settings below.
-          </p>
+
+          <div className="mt-3">
+            <p className="text-[13.5px] font-bold text-[var(--paper-ink)]">Editor engine</p>
+            <div
+              role="radiogroup"
+              aria-label="Editor engine"
+              className="mt-1.5 flex overflow-hidden rounded-[3px] border-[1.5px] border-[rgba(60,44,24,.4)]"
+            >
+              {(Object.keys(ENGINE_LABELS) as EditorEngine[]).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="radio"
+                  aria-checked={engine === key}
+                  onClick={() => setEditorEngine(key)}
+                  className={`flex-1 py-1.5 font-paper-mono text-[11px] font-bold uppercase tracking-[.06em] transition-colors ${
+                    engine === key
+                      ? 'bg-[var(--paper-yellow)] text-[var(--paper-ink)]'
+                      : 'text-[var(--paper-muted)] hover:bg-[var(--paper-yellow-soft)]'
+                  }`}
+                >
+                  {ENGINE_LABELS[key]}
+                </button>
+              ))}
+            </div>
+            <p className="mt-1.5 text-xs leading-snug text-[var(--paper-muted)]">
+              {ENGINE_DESCRIPTIONS[engine]} Both read and save the same code and the settings below.
+            </p>
+          </div>
 
           <div className="mt-3 divide-y divide-[rgba(60,44,24,.15)] border-t border-[rgba(60,44,24,.15)] pt-1">
             <Toggle
