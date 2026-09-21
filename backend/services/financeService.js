@@ -257,6 +257,7 @@ export const getOverview = async (userId) => {
   let monthlyIncome = 0;
   let todaySpend = 0;
   const categoryTotals = new Map();
+  const budgetSpendByDate = new Map();
 
   for (const txn of monthTransactions) {
     if (txn.type === 'income') {
@@ -264,7 +265,10 @@ export const getOverview = async (userId) => {
       continue;
     }
     monthlySpendAll += txn.amount;
-    if (!txn.category?.excludeFromBudget) monthlySpend += txn.amount;
+    if (!txn.category?.excludeFromBudget) {
+      monthlySpend += txn.amount;
+      budgetSpendByDate.set(txn.date, (budgetSpendByDate.get(txn.date) || 0) + txn.amount);
+    }
     if (txn.date === today) todaySpend += txn.amount;
 
     const categoryId = txn.category?._id?.toString();
@@ -272,6 +276,50 @@ export const getOverview = async (userId) => {
       categoryTotals.set(categoryId, (categoryTotals.get(categoryId) || 0) + txn.amount);
     }
   }
+
+  // A user who starts partway through the month hasn't had a chance to
+  // spend (or save) anything before that point — crediting them with the
+  // full monthlyBudget from day 1 would wildly overstate what's left, while
+  // penalizing them for days before they even opened the tracker would be
+  // unfair. `trackingStartDay` (from when their settings doc was first
+  // created) clips both the budget and the day-by-day rollover to the
+  // portion of the month they've actually been using this.
+  const trackingStartDateString = toDateString(new Date(settings.createdAt || now));
+  const effectiveStartDateString =
+    trackingStartDateString > startDate ? trackingStartDateString : startDate;
+  const trackingStartDay = Number(effectiveStartDateString.slice(-2));
+
+  // "Saved" only accounts for fully-completed days — today's own spending
+  // shows up in the live gauge below, not here, so the number doesn't jitter
+  // as someone logs expenses through the day. Every completed day rolls its
+  // unused (or overspent) share of the daily budget into this running total;
+  // once it goes negative, that's real overspending against the plan.
+  let saved = 0;
+  for (let day = trackingStartDay; day < currentDay; day++) {
+    const dateString = `${year}-${pad2(monthIndex + 1)}-${pad2(day)}`;
+    saved += dailyBudget - (budgetSpendByDate.get(dateString) || 0);
+  }
+
+  const adjustedMonthlyBudget = dailyBudget * (daysInMonth - trackingStartDay + 1);
+  const remainingThisMonth = adjustedMonthlyBudget - monthlySpend;
+  const todayAllowance = dailyBudget + saved;
+  const todayRemaining = todayAllowance - todaySpend;
+  const isPartialMonth = trackingStartDay > 1;
+
+  const dailyLedger = Array.from({ length: daysInMonth }, (_, i) => {
+    const day = i + 1;
+    const dateString = `${year}-${pad2(monthIndex + 1)}-${pad2(day)}`;
+    const isTracked = day >= trackingStartDay && day <= currentDay;
+    return {
+      day,
+      date: dateString,
+      budget: isTracked ? dailyBudget : 0,
+      spent: isTracked ? budgetSpendByDate.get(dateString) || 0 : 0,
+      isTracked,
+      isToday: day === currentDay,
+      isFuture: day > currentDay,
+    };
+  });
 
   const categories = await getCategories(userId);
   const categoryBreakdown = categories
@@ -293,5 +341,13 @@ export const getOverview = async (userId) => {
     daysRemaining: daysInMonth - currentDay + 1,
     daysInMonth,
     categoryBreakdown,
+    saved,
+    todayAllowance,
+    todayRemaining,
+    adjustedMonthlyBudget,
+    remainingThisMonth,
+    trackingStartDay,
+    isPartialMonth,
+    dailyLedger,
   };
 };
