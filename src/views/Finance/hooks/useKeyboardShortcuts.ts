@@ -8,8 +8,10 @@ interface Handlers {
   openIncomeModal: () => void;
   openBalanceModal: () => void;
   openShortcuts: () => void;
+  openCalculator: () => void;
   focusHistorySearch: () => void;
   closeAnyOpen: () => boolean;
+  isModalOpen: boolean;
 }
 
 // Handlers close over per-render state (current tab, open modal, etc.), so
@@ -31,6 +33,10 @@ export function useKeyboardShortcuts(handlers: Handlers) {
         return;
       }
       if (isTyping) return;
+      // A modal (calculator, transaction form, ...) owns the keyboard while
+      // it's open — its own listener handles typing. Without this, "1"-"4"
+      // would still flip dashboard tabs underneath an open dialog.
+      if (h.isModalOpen) return;
 
       switch (e.key) {
         case '1':
@@ -38,10 +44,14 @@ export function useKeyboardShortcuts(handlers: Handlers) {
           e.preventDefault();
           break;
         case '2':
-          h.setTab('history');
+          h.setTab('calendar');
           e.preventDefault();
           break;
         case '3':
+          h.setTab('history');
+          e.preventDefault();
+          break;
+        case '4':
           h.setTab('settings');
           e.preventDefault();
           break;
@@ -58,6 +68,11 @@ export function useKeyboardShortcuts(handlers: Handlers) {
         case 'b':
         case 'B':
           h.openBalanceModal();
+          e.preventDefault();
+          break;
+        case 'c':
+        case 'C':
+          h.openCalculator();
           e.preventDefault();
           break;
         case '?':

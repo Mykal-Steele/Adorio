@@ -1,6 +1,7 @@
 import type { FinanceOverview, FinanceTransaction } from '@/api/finance';
 import Gauge from '../Gauge';
 import Kbd from '../Kbd';
+import SavingsBanner from '../SavingsBanner';
 import { fmtMoney, fmtMoneyPlain, formatShortDate, statusColor } from '../../utils/format';
 
 interface DashboardProps {
@@ -23,9 +24,11 @@ export default function Dashboard({
     year: 'numeric',
   });
 
-  const monthPct =
-    overview.monthlyBudget > 0 ? Math.min(overview.monthlySpend / overview.monthlyBudget, 1) : 0;
-  const remaining = overview.monthlyBudget - overview.monthlySpend;
+  const hasBudget = overview.monthlyBudget > 0;
+  const monthPct = hasBudget
+    ? Math.min(overview.monthlySpend / overview.adjustedMonthlyBudget, 1)
+    : 0;
+  const remaining = overview.remainingThisMonth;
   const excludedAmount = overview.monthlySpendAll - overview.monthlySpend;
   const excludedNames = overview.categoryBreakdown
     .filter((entry) => entry.category.excludeFromBudget && entry.amount > 0)
@@ -66,7 +69,17 @@ export default function Dashboard({
         {/* Daily gauge */}
         <Card className="flex flex-col items-center md:col-span-2">
           <CardLabel>Today&apos;s budget</CardLabel>
-          <Gauge spent={overview.todaySpend} budget={overview.dailyBudget} />
+          <Gauge
+            spent={overview.todaySpend}
+            budget={overview.todayAllowance}
+            budgetIsSet={hasBudget}
+          />
+          {overview.saved !== 0 && (
+            <div className="mt-1 text-xs text-[var(--paper-muted-2)]">
+              {fmtMoneyPlain(overview.dailyBudget)} base {overview.saved > 0 ? '+' : '−'}{' '}
+              {fmtMoneyPlain(Math.abs(overview.saved))} {overview.saved > 0 ? 'saved' : 'debt'}
+            </div>
+          )}
         </Card>
 
         {/* Monthly progress */}
@@ -87,9 +100,9 @@ export default function Dashboard({
             </span>
             <span>
               <strong className="text-[var(--paper-ink)]">
-                {overview.monthlyBudget > 0 ? fmtMoneyPlain(overview.monthlyBudget) : 'not set'}
+                {hasBudget ? fmtMoneyPlain(overview.adjustedMonthlyBudget) : 'not set'}
               </strong>{' '}
-              budget
+              {hasBudget && overview.isPartialMonth ? 'adjusted budget' : 'budget'}
             </span>
           </div>
           <div className="mt-3.5 flex justify-between text-xs text-[var(--paper-muted-2)]">
@@ -97,13 +110,20 @@ export default function Dashboard({
               {overview.daysRemaining} day{overview.daysRemaining === 1 ? '' : 's'} left this month
             </span>
             <span>
-              {overview.monthlyBudget > 0
+              {hasBudget
                 ? remaining >= 0
-                  ? `${fmtMoneyPlain(remaining)} remaining`
+                  ? `${fmtMoneyPlain(remaining)} left to spend`
                   : `${fmtMoneyPlain(Math.abs(remaining))} over budget`
                 : '—'}
             </span>
           </div>
+          {hasBudget && overview.isPartialMonth && (
+            <div className="mt-2.5 border-t border-dashed border-[var(--paper-line)] pt-2.5 text-xs leading-relaxed text-[var(--paper-muted-2)]">
+              Started tracking on the {overview.trackingStartDay}
+              {ordinalSuffix(overview.trackingStartDay)} — your budget is scaled to the days since
+              then, not the whole month.
+            </div>
+          )}
           {excludedNames.length > 0 && (
             <div className="mt-2.5 border-t border-dashed border-[var(--paper-line)] pt-2.5 text-xs leading-relaxed text-[var(--paper-muted-2)]">
               {fmtMoneyPlain(excludedAmount)} in {excludedNames.join(', ')} not counted toward this
@@ -111,6 +131,13 @@ export default function Dashboard({
             </div>
           )}
         </Card>
+
+        <SavingsBanner
+          saved={overview.saved}
+          hasBudget={hasBudget}
+          isPartialMonth={overview.isPartialMonth}
+          dailyLedger={overview.dailyLedger}
+        />
 
         {/* Category breakdown */}
         <Card className="md:col-span-3">
@@ -207,6 +234,21 @@ export default function Dashboard({
       </div>
     </section>
   );
+}
+
+function ordinalSuffix(n: number): string {
+  const v = n % 100;
+  if (v >= 11 && v <= 13) return 'th';
+  switch (n % 10) {
+    case 1:
+      return 'st';
+    case 2:
+      return 'nd';
+    case 3:
+      return 'rd';
+    default:
+      return 'th';
+  }
 }
 
 function Card({ className = '', children }: { className?: string; children: React.ReactNode }) {
