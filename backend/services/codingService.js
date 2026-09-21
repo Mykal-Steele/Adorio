@@ -24,6 +24,17 @@ const PISTON_TIMEOUT_MS = 30000;
 const RUN_TIMEOUT_MS = 3000;
 const COMPILE_TIMEOUT_MS = 10000;
 
+// Every language this backend can submit to Piston. Adding a new one is just
+// an entry here (the Piston language id Piston reports in /api/v2/runtimes,
+// and a plausible entry-file name — Piston doesn't enforce a naming
+// convention for interpreted languages, but a real-looking name keeps stack
+// traces readable) plus installing the package on the Piston VM itself (see
+// infra/piston.bicep) and adding 'language' to codingRunSchema's enum.
+const LANGUAGE_CONFIG = {
+  java: { pistonLanguage: 'java', fileName: 'Main.java' },
+  python: { pistonLanguage: 'python', fileName: 'main.py' },
+};
+
 // Wraps fetch (connection failures, non-2xx, and malformed JSON bodies) so
 // every failure path here throws an ApiError like the rest of the service,
 // instead of a raw rejection reaching asyncHandler. Returns the parsed body.
@@ -51,18 +62,24 @@ const pistonFetch = async (path, options) => {
   }
 };
 
-let javaVersionCache = null;
+// Keyed by our internal language id (not Piston's), so two internal ids that
+// happened to share a Piston language wouldn't collide.
+const versionCache = new Map();
 
-const resolveJavaVersion = async () => {
-  if (javaVersionCache) return javaVersionCache;
+const resolveVersion = async (language) => {
+  if (versionCache.has(language)) return versionCache.get(language);
 
+  const config = LANGUAGE_CONFIG[language];
   const runtimes = await pistonFetch('/api/v2/runtimes', { headers: pistonHeaders() });
-  const match = runtimes.find((r) => r.language === 'java');
-  if (!match)
-    throw ApiError.internalServerError('Java runtime is not installed on the execution service');
+  const match = runtimes.find((r) => r.language === config.pistonLanguage);
+  if (!match) {
+    throw ApiError.internalServerError(
+      `${language} runtime is not installed on the execution service`,
+    );
+  }
 
-  javaVersionCache = match.version;
-  return javaVersionCache;
+  versionCache.set(language, match.version);
+  return match.version;
 };
 
 // Caps how many of one submission's test cases hit the execution service at
@@ -99,14 +116,14 @@ const normalizeOutput = (output) => {
     .join('\n');
 };
 
-const submitOne = (version, code, stdin) =>
+const submitOne = (config, version, code, stdin) =>
   pistonFetch('/api/v2/execute', {
     method: 'POST',
     headers: pistonHeaders(),
     body: JSON.stringify({
-      language: 'java',
+      language: config.pistonLanguage,
       version,
-      files: [{ name: 'Main.java', content: code }],
+      files: [{ name: config.fileName, content: code }],
       stdin,
       run_timeout: RUN_TIMEOUT_MS,
       compile_timeout: COMPILE_TIMEOUT_MS,
@@ -141,11 +158,12 @@ const buildTestResult = (test, submission, duration) => {
 
 export const runSubmission = async ({ problemId, language, code, tests }) => {
   const validated = validate(codingRunSchema, { problemId, language, code, tests });
-  const version = await resolveJavaVersion();
+  const config = LANGUAGE_CONFIG[validated.language];
+  const version = await resolveVersion(validated.language);
 
   const [firstTest, ...restTests] = validated.tests;
   const firstStart = Date.now();
-  const firstSubmission = await submitOne(version, validated.code, firstTest.stdin);
+  const firstSubmission = await submitOne(config, version, validated.code, firstTest.stdin);
   const firstDuration = Date.now() - firstStart;
 
   if (firstSubmission.compile && firstSubmission.compile.code !== 0) {
@@ -162,7 +180,7 @@ export const runSubmission = async ({ problemId, language, code, tests }) => {
 
   const restResults = await mapWithConcurrency(restTests, TEST_CASE_CONCURRENCY, async (test) => {
     const start = Date.now();
-    const submission = await submitOne(version, validated.code, test.stdin);
+    const submission = await submitOne(config, version, validated.code, test.stdin);
     return buildTestResult(test, submission, Date.now() - start);
   });
 
