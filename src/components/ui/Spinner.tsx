@@ -14,11 +14,11 @@ const Spinner = ({ size = 'md', label, className = '' }: SpinnerProps) => {
   return (
     <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
       <div
-        className={`animate-spin rounded-full border-solid border-purple-500 border-r-transparent ${sizes[size]}`}
+        className={`animate-spin rounded-full border-solid border-[var(--paper-accent-strong,#a8801a)] border-r-transparent ${sizes[size]}`}
         role="status"
         aria-label={label || 'Loading'}
       />
-      {label && <p className="text-gray-300">{label}</p>}
+      {label && <p className="font-paper-mono text-[var(--paper-muted,#4a443c)]">{label}</p>}
     </div>
   );
 };
