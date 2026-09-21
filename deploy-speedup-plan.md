@@ -1,7 +1,10 @@
 # Deploy Speedup Plan — push-to-live faster
 
 Date: 2026-09-16
-Status: proposed, not implemented
+Status: P1, P2, P6, and P3 implemented (see `chore/deploy-speedup`). P4 and
+P5 still just proposed — P4 needs an explicit call on CI safety guarantees,
+P5 needs a way to track "last successfully deployed sha" that doesn't exist
+yet.
 Scope: `.github/workflows/ci.yml` + `Dockerfile` + `.dockerignore` only. No app code changes.
 
 ## 1. Where time goes now

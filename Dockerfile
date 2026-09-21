@@ -1,5 +1,12 @@
+# Base pinned by digest (not just the `24-alpine` tag) so Docker/BuildKit
+# can skip the registry pull-check on all three stages when nothing local
+# has changed, instead of hitting the registry every build to confirm the
+# tag still points at the same image. Bump this manually (or via a
+# Dependabot/renovate digest-update rule) when picking up a new alpine patch.
+FROM node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS base
+
 # Stage 1: Build Next.js frontend
-FROM node:24-alpine AS build-nextjs
+FROM base AS build-nextjs
 
 WORKDIR /app
 COPY package*.json ./
@@ -7,13 +14,13 @@ COPY package*.json ./
 ENV PUPPETEER_SKIP_DOWNLOAD=1
 RUN npm ci
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=production
-ENV BACKEND_INTERNAL_URL=http://localhost:3000
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    NODE_ENV=production \
+    BACKEND_INTERNAL_URL=http://localhost:3000
 RUN npm run build
 
 # Stage 2: Build AI-Slop
-FROM node:24-alpine AS build-ai-slop
+FROM base AS build-ai-slop
 
 WORKDIR /ai-slop
 ARG VITE_GEMINI_API_KEY
@@ -24,7 +31,7 @@ COPY ./ai-slop/AI-Slop-For-CAO-exam ./
 RUN npm run build
 
 # Stage 3: Production runtime
-FROM node:24-alpine
+FROM base
 
 RUN apk add --no-cache nginx
 
@@ -36,17 +43,20 @@ COPY --from=build-nextjs /app/public /nextjs/public
 # AI-Slop static files
 COPY --from=build-ai-slop /ai-slop/dist /usr/share/nginx/html/cao/
 
-# Express backend
-COPY ./backend /app/backend
+# Express backend — manifest first so an unrelated backend source edit
+# (no dependency change) doesn't bust the `npm ci` layer cache the way
+# copying the whole `./backend` tree before installing did.
+COPY ./backend/package*.json /app/backend/
 WORKDIR /app/backend
-RUN npm ci --only=production
+RUN npm ci --omit=dev --prefer-offline --no-audit --no-fund
+COPY ./backend /app/backend
 
 # Nginx config
 ARG ENV=production
 COPY nginx.${ENV}.conf /etc/nginx/nginx.conf
 
-ENV NODE_ENV=production
-ENV BACKEND_INTERNAL_URL=http://localhost:3000
+ENV NODE_ENV=production \
+    BACKEND_INTERNAL_URL=http://localhost:3000
 
 RUN printf '#!/bin/sh\nPORT=3000 node /app/backend/index.js &\nPORT=3001 HOSTNAME=0.0.0.0 node /nextjs/server.js &\nnginx -g "daemon off;"\n' > /start.sh && chmod +x /start.sh
 
