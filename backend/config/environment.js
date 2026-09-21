@@ -23,6 +23,20 @@ if (process.env.NODE_ENV === 'development') {
 
 const normalize = (value) => (typeof value === 'string' ? value.trim() : value);
 
+// `Number('-5') || fallback` still returns -5 (it's truthy), so a bad value
+// silently produces a future cutoff instead of falling back — a negative
+// leaderboard age hides every score, and a negative test-user TTL deletes
+// every matching account on the next cleanup run.
+const readPositiveInteger = (name, fallback) => {
+  const raw = normalize(process.env[name]);
+  if (!raw) return fallback;
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw ApiError.internalServerError(`${name} must be a positive integer`);
+  }
+  return parsed;
+};
+
 const pistonUrl = normalize(process.env.PISTON_URL);
 // Only enforced in production — the deployed Piston instance is TLS-only, but
 // a local dev Piston (or none at all) shouldn't crash the whole backend over
@@ -73,8 +87,8 @@ const environment = {
     url: pistonUrl,
     token: normalize(process.env.PISTON_TOKEN),
   },
-  leaderboardMaxAgeDays: Number(normalize(process.env.LEADERBOARD_MAX_AGE_DAYS)) || 30,
-  testUserTtlMinutes: Number(normalize(process.env.TEST_USER_TTL_MINUTES)) || 60,
+  leaderboardMaxAgeDays: readPositiveInteger('LEADERBOARD_MAX_AGE_DAYS', 30),
+  testUserTtlMinutes: readPositiveInteger('TEST_USER_TTL_MINUTES', 60),
 };
 
 const isProduction = environment.nodeEnv === 'production';
