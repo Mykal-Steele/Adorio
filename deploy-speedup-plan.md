@@ -65,39 +65,48 @@ Also reduces "Sending build context to Docker daemon 81 MB" time.
 
 ### P2. Fix Dockerfile layer-cache invalidation (~30s on no-dep-change pushes, low risk)
 
-Current `build-nextjs` stage does `COPY . .` before `npm ci`, so any file
-change busts the npm cache. Reorder to:
+Correction: `build-nextjs` and `build-ai-slop` already copy their
+`package*.json` and run `npm ci` before `COPY . .` — that part of the
+Dockerfile is fine as-is, no reorder needed there.
+
+The actual invalidation is in the **runtime stage**: it does
+`COPY ./backend /app/backend` (all backend source, including
+`package.json`) and only then runs `npm ci --only=production` — so any
+backend source edit (not just a dependency change) busts that install's
+cache. Fix by splitting the copy:
 
 ```dockerfile
-COPY package*.json ./
-COPY backend/package*.json ./backend/
-RUN npm ci --prefer-offline --no-audit --no-fund
-COPY src ./src
-COPY backend ./backend
-COPY public ./public
-# ... only files next build actually needs
+# Express backend
+COPY ./backend/package*.json /app/backend/
+WORKDIR /app/backend
+RUN npm ci --omit=dev --prefer-offline --no-audit --no-fund
+COPY ./backend /app/backend
 ```
 
-Same for `build-ai-slop` stage (package files first, source second).
 Combine the 5x single-line `ENV` into one `ENV` to cut layers.
-Change `npm ci --only=production` → `npm ci --omit=dev --prefer-offline --no-audit --no-fund`.
 
 Caution: keep `PUPPETEER_SKIP_DOWNLOAD=1` where it is.
 
 ### P3. Turn on build caching (30–60s, medium risk)
 
 Every push currently rebuilds from scratch: re-pulls `node:24-alpine` 3x,
-re-runs all `npm ci`. Two options:
+re-runs all `npm ci`.
 
-- (a) Minimal, keep ACR Tasks:
-  `az acr build --cache-from adorioacr.azurecr.io/adorio:latest ...`
-  plus `--build-arg BUILDKIT_INLINE_CACHE=1` on first seeded build.
-- (b) Faster, move build to GitHub runner:
-  `docker buildx` with `cache-from: type=registry` / `cache-to: type=inline`
-  (or `type=gha`), then `docker push`. Skips tar-upload + ACR queue +
-  cold agent. Typically 40–60s faster than ACR Tasks.
+Correction: `az acr build` has no `--cache-from` flag in the current Azure
+CLI reference — the (a) option below as originally written would fail
+before the build even starts. ACR Tasks doesn't expose a registry-cache
+flag through `az acr build`; the only realistic options are:
 
-Recommend (a) first, measure, then (b) if still slow.
+- (a) Move the build to the GitHub runner with `docker buildx` —
+  `cache-from: type=registry` / `cache-to: type=inline` (or `type=gha`),
+  then `docker push` to `adorioacr.azurecr.io`. Skips tar-upload + ACR
+  queue + cold agent. Typically 40–60s faster than ACR Tasks, and is the
+  only option here that actually gets layer caching.
+- (b) Stay on ACR Tasks with no build cache (current behavior) and accept
+  the ~90s image-layer overhead as a fixed cost.
+
+Recommend (a) directly — there's no working "minimal" ACR-Tasks-only
+caching path to try first.
 
 ### P4. Stop building 3x per push (biggest end-to-end win, needs decision)
 
@@ -111,18 +120,34 @@ Options:
   `build` → `deploy` directly. Cuts push-to-live to ~3–4 min.
 - (b) Keep gate but make `format/lint/build` parallel (already are) and let
   `deploy` skip redundant `next build` by reusing the `build` job artifact.
-- (c) Path filters: skip `deploy` when only `*.md`, `docs/**`, `ai-slop/**`
-  (for backend-only changes use prebuilt ai-slop, see P5).
+- (c) Path filters: skip `deploy` when only `*.md` or `docs/**` change.
+  Do not add `ai-slop/**` to this skip list — it's a real deployable
+  artifact (served at `/cao/`), so an ai-slop-only push still needs to
+  reach production; P5 below reuses the prebuilt ai-slop bundle only when
+  the diff has no `ai-slop/**` changes, which is a separate thing from
+  skipping deploy entirely.
 
 This changes CI safety guarantees — needs explicit approval.
 
 ### P5. Skip ai-slop rebuild when untouched (~12s, low risk)
 
 ai-slop rarely changes but costs ~12s every push (7s install + 5s vite).
-If `git diff --name-only` shows no `ai-slop/**` change, reuse last image:
+If `git diff --name-only` shows no `ai-slop/**` change, reuse the last
+built ai-slop bundle instead of rebuilding it.
+
+Correction: the workflow only ever publishes `adorio:${{ github.sha }}` —
+there is no `adorio:latest` tag being maintained, so
+`COPY --from=adorioacr.azurecr.io/adorio:latest ...` would either fail
+(no such tag) or, if something else happens to publish `latest`, silently
+mix a stale ai-slop bundle with the current app code. Reference the
+previous deploy's actual sha instead (e.g. pass the last successfully
+deployed `github.sha` in as a workflow input/repo variable, or read it
+back from the running Container App's current image) so the reused layer
+is a known-good, specific revision:
 
 ```dockerfile
-COPY --from=adorioacr.azurecr.io/adorio:latest /usr/share/nginx/html/cao/ /usr/share/nginx/html/cao/
+ARG PREVIOUS_IMAGE_SHA
+COPY --from=adorioacr.azurecr.io/adorio:${PREVIOUS_IMAGE_SHA} /usr/share/nginx/html/cao/ /usr/share/nginx/html/cao/
 ```
 
 instead of rebuilding the `build-ai-slop` stage. Implement as separate
@@ -130,13 +155,19 @@ tagged stage or conditional step in workflow.
 
 ### P6. Small cleanups (~10s total, trivial)
 
-- Remove `actions/setup-node` from `deploy` job. It is unused there
-  (only `az` + `node scripts/wait-for-url.cjs` run; system node suffices).
-  Saves ~6s.
+- Correction: keep `actions/setup-node` in `deploy`. The job runs
+  `node scripts/wait-for-url.cjs`, and `package.json` pins
+  `engines.node: >=24.0.0` — the GitHub-hosted runner's system Node isn't
+  guaranteed to satisfy that, so dropping this step risks the deploy
+  breaking on a runner image update rather than saving the ~6s.
 - Pin base image: `FROM node:24-alpine@sha256:<digest>` so Docker skips the
   pull check 3x per build. Update digest monthly via Dependabot/renovate.
-- Replace `RUN apk add --no-cache nginx` (~5s + layer) with a prebuilt
-  runtime base or `nginx:alpine`-derived stage.
+- Correction: don't swap the runtime stage to a plain `nginx:alpine`-derived
+  base — `/start.sh` runs `node /app/backend/index.js` and
+  `node /nextjs/server.js` alongside nginx, so the runtime image needs
+  Node too. Either keep the current `node:24-alpine` base and accept the
+  `apk add nginx` cost, or use a base that ships both nginx and Node (or
+  installs Node explicitly on top of `nginx:alpine`).
 - Leave `containerapp update` (18s) and `wait-for-url` (1s, 2s poll) alone —
   mostly Azure control-plane, not worth optimizing.
 
@@ -152,13 +183,14 @@ tagged stage or conditional step in workflow.
 ## 4. Suggested implementation order
 
 1. P1 (.dockerignore) — 5 min, zero behavior change.
-2. P2 (Dockerfile ordering + npm flags) — verify with one
+2. P2 (backend-copy split in the runtime stage) — verify with one
    `docker build` locally + one `az acr build` on a branch.
-3. P6 (drop setup-node in deploy, pin node digest).
-4. P3a (`--cache-from`), measure two pushes.
-5. P5 (conditional ai-slop) if ai-slop untouched pushes are common.
-6. P4 (CI gating) only after team agrees on safety tradeoff.
-7. P3b (buildx on runner) if ACR Tasks queue remains the bottleneck.
+3. P6 (pin node digest; keep setup-node and the node:24-alpine runtime base).
+4. P5 (conditional ai-slop, revision-pinned) if ai-slop-untouched pushes are common.
+5. P4 (CI gating) only after team agrees on safety tradeoff.
+6. P3 (buildx on the runner with registry/gha cache) if the ACR Tasks
+   queue remains the bottleneck — there's no lighter-weight ACR-only
+   caching option to try first.
 
 ## 5. Verification per step
 
@@ -171,5 +203,9 @@ tagged stage or conditional step in workflow.
 ## 6. Open questions (for later review)
 
 - Are we OK running integration on PRs only and deploying straight after build on main? (P4)
-- Keep ACR Tasks (simpler auth) or move to runner buildx + push (faster, needs ACR login handling)? (P3)
-- How often does ai-slop actually change — worth the conditional logic? (P5)
+- Keep ACR Tasks with no build cache (simpler auth, slower) or move to
+  runner buildx + push (faster, gets real layer caching, needs ACR login
+  handling on the runner)? (P3)
+- How often does ai-slop actually change, and is tracking "the last
+  successfully deployed sha" for the reuse step worth the added
+  workflow-state complexity? (P5)

@@ -153,6 +153,9 @@ export default function CalculatorModal({ onClose }: CalculatorModalProps) {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      // Don't hijack browser/OS shortcuts that happen to share a key with the
+      // calculator (Ctrl/Cmd+0 zoom reset, Ctrl+1..9 tab switching, etc.).
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
       const key = e.key;
       if (key >= '0' && key <= '9') {
         insert(key);
