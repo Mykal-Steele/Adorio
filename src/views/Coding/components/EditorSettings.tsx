@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import type { RefObject } from 'react';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
-import type { EditorView } from '@codemirror/view';
 import useClickOutside from '@/hooks/useClickOutside';
 import {
   MAX_FONT_SIZE,
@@ -11,7 +9,7 @@ import {
   setFontSize,
   setWrap,
   subscribeEditorSettings,
-} from '../utils/editorKeys';
+} from '../utils/editorSettingsStore';
 
 const SHORTCUTS: Array<[string, string]> = [
   ['Tab / Shift-Tab', 'Insert spaces at cursor / outdent (selection indents)'],
@@ -67,11 +65,7 @@ const Toggle = ({
   </button>
 );
 
-interface EditorSettingsProps {
-  viewRef: RefObject<EditorView | null>;
-}
-
-const EditorSettings = ({ viewRef }: EditorSettingsProps) => {
+const EditorSettings = () => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -110,11 +104,17 @@ const EditorSettings = ({ viewRef }: EditorSettingsProps) => {
           <p className="font-paper-mono text-[11px] font-bold uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
             Editor settings
           </p>
+          <p className="mt-1.5 text-xs leading-snug text-[var(--paper-muted)]">
+            The <strong>VS Code / Classic</strong> buttons above the editor switch which underlying
+            editor renders your code — <strong>VS Code</strong> is Monaco (VS Code's real editor,
+            authentic IntelliSense and shortcuts), <strong>Classic</strong> is this site&apos;s
+            original lighter editor. Both read and save the same code and the settings below.
+          </p>
 
-          <div className="mt-1 divide-y divide-[rgba(60,44,24,.15)]">
+          <div className="mt-3 divide-y divide-[rgba(60,44,24,.15)] border-t border-[rgba(60,44,24,.15)] pt-1">
             <Toggle
               checked={settings.wrap}
-              onChange={(next) => setWrap(viewRef.current, next)}
+              onChange={(next) => setWrap(next)}
               label="Word wrap"
               hint="Wrap long lines (Alt+Z)"
             />
@@ -124,7 +124,7 @@ const EditorSettings = ({ viewRef }: EditorSettingsProps) => {
             <span className="text-[13.5px] font-bold text-[var(--paper-ink)]">Font size</span>
             <span className="flex items-center gap-1.5">
               <button
-                onClick={() => setFontSize(viewRef.current, settings.fontSize - 1)}
+                onClick={() => setFontSize(settings.fontSize - 1)}
                 disabled={settings.fontSize <= MIN_FONT_SIZE}
                 aria-label="Decrease font size"
                 className="grid h-[26px] w-[26px] place-items-center rounded-[2px] border-[1.5px] border-[rgba(60,44,24,.4)] text-sm font-bold text-[var(--paper-ink)] transition-colors hover:bg-[var(--paper-yellow-soft)] disabled:opacity-40"
@@ -138,7 +138,7 @@ const EditorSettings = ({ viewRef }: EditorSettingsProps) => {
                 {settings.fontSize}px
               </span>
               <button
-                onClick={() => setFontSize(viewRef.current, settings.fontSize + 1)}
+                onClick={() => setFontSize(settings.fontSize + 1)}
                 disabled={settings.fontSize >= MAX_FONT_SIZE}
                 aria-label="Increase font size"
                 className="grid h-[26px] w-[26px] place-items-center rounded-[2px] border-[1.5px] border-[rgba(60,44,24,.4)] text-sm font-bold text-[var(--paper-ink)] transition-colors hover:bg-[var(--paper-yellow-soft)] disabled:opacity-40"
@@ -170,7 +170,7 @@ const EditorSettings = ({ viewRef }: EditorSettingsProps) => {
           </div>
 
           <button
-            onClick={() => resetEditorSettings(viewRef.current)}
+            onClick={() => resetEditorSettings()}
             className="mt-3 w-full rounded-[2px] border-[1.5px] border-dashed border-[rgba(60,44,24,.4)] py-1.5 font-paper-mono text-[11px] font-bold uppercase tracking-[.12em] text-[var(--paper-muted)] transition-colors hover:border-[var(--paper-accent-strong)] hover:bg-[var(--paper-yellow-soft)]"
           >
             Reset to defaults
