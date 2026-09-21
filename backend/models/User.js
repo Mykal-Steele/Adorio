@@ -13,15 +13,29 @@ export const findUserByEmailOrUsername = (email, username) =>
 
 export const createUser = (data) => User.create(data);
 
-export const findUsersWithScore = () =>
-  User.find({ 'rhythmGame.peakPLevel': { $gt: 0 } }, 'username rhythmGame')
-    .sort({ 'rhythmGame.peakPLevel': -1 })
-    .lean();
+export const findUsersWithScore = ({ playedSince } = {}) => {
+  const query = { 'rhythmGame.peakPLevel': { $gt: 0 } };
+  if (playedSince) query['rhythmGame.lastPlayed'] = { $gte: playedSince };
+  return User.find(query, 'username rhythmGame').sort({ 'rhythmGame.peakPLevel': -1 }).lean();
+};
 
 export const updateUserRhythm = (userId, rhythmData) =>
   User.findByIdAndUpdate(userId, { rhythmGame: rhythmData }, { new: true });
 
 export const deleteUserById = (id) => User.findByIdAndDelete(id);
+
+// Integration-test and QA accounts only: timestamp-suffixed usernames or
+// @integration.test emails. Admins are never matched. Used by the janitor to
+// expire test data — scores are embedded in User docs so a Mongo TTL index
+// would delete the user itself; this targeted delete is the safe equivalent.
+const TEST_USERNAME_PATTERN = /^(qatest_|testuser_|other_|user_)\d+$/;
+
+export const deleteStaleTestUsers = ({ createdBefore }) =>
+  User.deleteMany({
+    isAdmin: { $ne: true },
+    createdAt: { $lt: createdBefore },
+    $or: [{ username: TEST_USERNAME_PATTERN }, { email: /@integration\.test$/ }],
+  });
 
 export const findUsersByIds = (ids) =>
   User.find({ _id: { $in: ids } }, 'username email displayName').lean();

@@ -17,7 +17,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="paper-theme flex min-h-screen items-center justify-center">
         <Spinner size="md" label="Loading Adorio..." />
       </div>
     );

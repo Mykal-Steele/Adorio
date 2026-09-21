@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
-import { SparklesIcon } from '@heroicons/react/24/outline';
+import { MapIcon } from '@heroicons/react/24/outline';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { texts } from '../../assests/404/messages';
@@ -16,11 +16,6 @@ const NotFound = () => {
   const mouseY = useMotionValue(0);
   const smoothMouseX = useSpring(mouseX, { stiffness: 600, damping: 30 });
   const smoothMouseY = useSpring(mouseY, { stiffness: 600, damping: 30 });
-
-  const lightPosition = useTransform(
-    [smoothMouseX, smoothMouseY],
-    ([x, y]) => `calc(${x}px - 50%) calc(${y}px - 50%)`,
-  );
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
@@ -38,101 +33,64 @@ const NotFound = () => {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 bg-gray-950 flex items-center justify-center p-6 overflow-hidden"
+      className="paper-theme fixed inset-0 flex items-center justify-center overflow-hidden p-6"
       onMouseMove={handleMouseMove}
     >
-      {/* Dot-grid background via Tailwind arbitrary utilities */}
-      <div className="absolute inset-0 opacity-[0.15] pointer-events-none bg-[radial-gradient(circle,#6366f1_1px,transparent_1px)] bg-[length:32px_32px]" />
+      <div className="mb-10 flex items-baseline gap-2 sm:absolute sm:left-8 sm:top-8 sm:mb-0">
+        <span className="font-paper-serif text-2xl font-bold italic tracking-[-.015em]">
+          Adorio
+        </span>
+        <span aria-hidden="true" className="font-paper-serif text-xl font-bold leading-none">
+          <span className="text-[#d1a413]">{'{'}</span>
+          <span className="text-[#7f9c3c]">{'_}'}</span>
+        </span>
+      </div>
 
-      {/* Cursor spotlight */}
-      <motion.div
-        style={{ backgroundPosition: lightPosition }}
-        className="fixed inset-0 pointer-events-none bg-[radial-gradient(500px_at_50%_50%,rgba(129,140,248,0.12),transparent)]"
-      />
-
-      {/* Card */}
       <motion.div
         style={{
-          rotateX: useTransform(smoothMouseY, [0, vh], [8, -8]),
-          rotateY: useTransform(smoothMouseX, [0, vw], [-8, 8]),
+          rotateX: useTransform(smoothMouseY, [0, vh], [4, -4]),
+          rotateY: useTransform(smoothMouseX, [0, vw], [-4, 4]),
           transformPerspective: 1500,
         }}
-        className="relative w-full max-w-lg bg-gray-900/90 backdrop-blur-2xl border border-gray-700/50 rounded-3xl px-10 py-16 text-center shadow-2xl overflow-hidden"
+        className="relative w-full max-w-lg -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] px-10 py-14 text-center shadow-[6px_8px_0_var(--paper-ink)]"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-transparent to-blue-600/10 pointer-events-none" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
-
         <motion.div
-          style={{
-            x: useTransform(smoothMouseX, [0, vw], [-12, 12]),
-            y: useTransform(smoothMouseY, [0, vh], [-12, 12]),
-          }}
-          className="flex justify-center mb-6"
-        >
-          <div className="relative">
-            <SparklesIcon className="h-14 w-14 text-purple-400 relative z-10" />
-            <div className="absolute inset-0 w-24 h-24 -translate-x-5 -translate-y-5 bg-purple-600/20 blur-[40px] rounded-full" />
-          </div>
-        </motion.div>
-
-        <motion.p
-          style={{
-            x: useTransform(smoothMouseX, [0, vw], [-20, 20]),
-            y: useTransform(smoothMouseY, [0, vh], [-20, 20]),
-          }}
-          className="text-sm font-semibold text-purple-400 tracking-widest uppercase mb-2"
-        >
-          404 — Page not found
-        </motion.p>
-
-        <motion.h1
-          style={{
-            x: useTransform(smoothMouseX, [0, vw], [-16, 16]),
-            y: useTransform(smoothMouseY, [0, vh], [-16, 16]),
-          }}
-          className="text-4xl font-black text-white mb-4"
-        >
-          Lost in the Void
-        </motion.h1>
-
-        <motion.p
           style={{
             x: useTransform(smoothMouseX, [0, vw], [-8, 8]),
             y: useTransform(smoothMouseY, [0, vh], [-8, 8]),
           }}
-          className="text-gray-400 text-base italic mb-8 leading-relaxed"
+          className="mb-5 flex justify-center"
         >
-          {randomText}
-        </motion.p>
+          <span className="flex h-16 w-16 items-center justify-center rounded-full border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow-soft)]">
+            <MapIcon className="h-8 w-8 text-[var(--paper-accent)]" />
+          </span>
+        </motion.div>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <motion.button
+        <p className="font-paper-mono mb-2 text-xs font-bold uppercase tracking-[.2em] text-[var(--paper-accent-strong)]">
+          404 — page not found
+        </p>
+
+        <h1 className="font-paper-serif mb-4 text-4xl font-bold text-[var(--paper-ink)]">
+          Lost in the margins
+        </h1>
+
+        <p className="mb-8 text-base italic leading-relaxed text-[var(--paper-muted)]">
+          {randomText}
+        </p>
+
+        <div className="flex flex-col justify-center gap-3 sm:flex-row">
+          <button
             onClick={() => router.back()}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="px-6 py-3 rounded-xl border border-gray-700 text-gray-300 text-sm font-medium hover:bg-white/5 transition-colors"
+            className="rounded-[3px] border-[1.5px] border-[var(--paper-ink)] px-6 py-2.5 text-sm font-medium text-[var(--paper-ink)] transition-transform hover:-translate-y-px hover:bg-[rgba(43,39,35,0.04)]"
           >
             Go back
-          </motion.button>
-          <motion.button
+          </button>
+          <button
             onClick={() => router.push('/')}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold shadow-lg hover:shadow-purple-500/25 transition-all relative overflow-hidden group"
+            className="rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-6 py-2.5 font-paper-mono text-sm font-bold uppercase tracking-[.1em] text-[var(--paper-ink)] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)]"
           >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              Return home
-              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </span>
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </motion.button>
+            Return home
+          </button>
         </div>
       </motion.div>
     </div>

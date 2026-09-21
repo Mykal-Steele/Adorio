@@ -290,6 +290,8 @@ Loaded by `config/environment.js`, which resolves the repo root from its own fil
 | `JWT_SECRET`           | Signs 15-min access tokens; also used as HMAC key in secretenv |
 | `REFRESH_TOKEN_SECRET` | Signs 7-day refresh tokens (falls back to `JWT_SECRET`)        |
 | `CLIENT_URL`           | Dynamically added to CORS allowed origins                      |
+| `LEADERBOARD_MAX_AGE_DAYS` | Leaderboard only shows scores played within this window (default 30) |
+| `TEST_USER_TTL_MINUTES` | Janitor deletes test-pattern accounts older than this (default 60) |
 | `CLOUDINARY_NAME`      | Cloudinary cloud name                                          |
 | `CLOUDINARY_KEY`       | Cloudinary API key                                             |
 | `CLOUDINARY_SECRET`    | Cloudinary API secret                                          |

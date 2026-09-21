@@ -1,12 +1,14 @@
 import ApiError from '../utils/ApiError.js';
 import validate from '../utils/validate.js';
+import { environment } from '../config/environment.js';
 import { updateScoreSchema } from '../schemas/index.js';
 import { findUsersWithScore, findUserById, updateUserRhythm } from '../models/index.js';
 
 const difficultyRank = { hard: 3, normal: 2, easy: 1 };
 
 export const getLeaderboard = async () => {
-  const users = await findUsersWithScore();
+  const playedSince = new Date(Date.now() - environment.leaderboardMaxAgeDays * 86400000);
+  const users = await findUsersWithScore({ playedSince });
   return users.sort((a, b) => {
     if (b.rhythmGame.peakPLevel !== a.rhythmGame.peakPLevel) {
       return b.rhythmGame.peakPLevel - a.rhythmGame.peakPLevel;
@@ -31,6 +33,14 @@ export const updateUserScore = async ({ userId, rawBody }) => {
     return { peakPLevel: score, difficulty };
   }
 
+  // Not a new peak, but the player is still active — keep their existing
+  // best score visible on the recency-filtered leaderboard by refreshing
+  // lastPlayed instead of leaving it pinned to whenever they set that peak.
+  await updateUserRhythm(userId, {
+    peakPLevel: user.rhythmGame.peakPLevel,
+    difficulty: user.rhythmGame.difficulty,
+    lastPlayed: new Date(),
+  });
   return { peakPLevel: user.rhythmGame.peakPLevel, difficulty: user.rhythmGame.difficulty };
 };
 
