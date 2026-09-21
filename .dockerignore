@@ -6,6 +6,21 @@ dist
 README.md
 .DS_Store
 
+# Not needed inside the build context — cuts what ACR/buildx has to pack
+# and upload before the build even starts.
+.next
+.turbo
+backend-go/
+__tests__/
+coverage/
+reports/
+*.log
+ai-slop/**/node_modules
+ai-slop/**/dist
+.github/
+scripts/
+.husky/
+
 # Secrets — env_file/build-args inject what the container needs at runtime;
 # these should never be copied into an image layer where anyone with
 # registry/pull access could extract them.
