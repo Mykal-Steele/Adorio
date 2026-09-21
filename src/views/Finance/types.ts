@@ -1,3 +1,3 @@
-export type Tab = 'dashboard' | 'history' | 'settings';
+export type Tab = 'dashboard' | 'calendar' | 'history' | 'settings';
 
-export type ModalKind = 'transaction' | 'balance' | 'shortcuts' | null;
+export type ModalKind = 'transaction' | 'balance' | 'shortcuts' | 'calculator' | null;

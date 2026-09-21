@@ -12,11 +12,13 @@ import type { ModalKind, Tab } from './types';
 import Sidebar from './components/Sidebar';
 import Toast from './components/Toast';
 import Dashboard from './components/pages/Dashboard';
+import Calendar from './components/pages/Calendar';
 import History from './components/pages/History';
 import Settings from './components/pages/Settings';
 import TransactionModal from './components/modals/TransactionModal';
 import BalanceModal from './components/modals/BalanceModal';
 import ShortcutsModal from './components/modals/ShortcutsModal';
+import CalculatorModal from './components/modals/CalculatorModal';
 import ConfirmModal from './components/modals/ConfirmModal';
 
 export default function Finance() {
@@ -72,6 +74,7 @@ export default function Finance() {
 
   const openBalanceModal = useCallback(() => setOpenModal('balance'), []);
   const openShortcuts = useCallback(() => setOpenModal('shortcuts'), []);
+  const openCalculator = useCallback(() => setOpenModal('calculator'), []);
 
   const focusHistorySearch = useCallback(() => {
     setTimeout(() => searchInputRef.current?.focus(), 0);
@@ -91,8 +94,10 @@ export default function Finance() {
     openIncomeModal,
     openBalanceModal,
     openShortcuts,
+    openCalculator,
     focusHistorySearch,
     closeAnyOpen,
+    isModalOpen: openModal !== null || confirmState !== null,
   });
 
   const handleTransactionSaved = async (message: string) => {
@@ -154,12 +159,14 @@ export default function Finance() {
       <div className="mx-auto flex max-w-[1440px] flex-col md:flex-row">
         <Sidebar
           balance={overview.balance}
+          overview={overview}
           activeTab={activeTab}
           onTabChange={setActiveTab}
           onEditBalance={openBalanceModal}
           onAddExpense={openExpenseModal}
           onAddIncome={openIncomeModal}
           onOpenShortcuts={openShortcuts}
+          onOpenCalculator={openCalculator}
         />
 
         <main className="w-full max-w-[1180px] flex-1 px-4 pb-16 pt-8 md:px-10">
@@ -171,6 +178,7 @@ export default function Finance() {
               onEditTransaction={openEditTransaction}
             />
           )}
+          {activeTab === 'calendar' && <Calendar overview={overview} />}
           {activeTab === 'history' && (
             <>
               <History
@@ -220,6 +228,7 @@ export default function Finance() {
         />
       )}
       {openModal === 'shortcuts' && <ShortcutsModal onClose={closeModal} />}
+      {openModal === 'calculator' && <CalculatorModal onClose={closeModal} />}
       {confirmState && (
         <ConfirmModal
           title={confirmState.title}
