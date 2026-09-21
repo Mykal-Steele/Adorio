@@ -30,11 +30,13 @@ export default function Calendar({ overview }: CalendarProps) {
   );
   const [monthTransactions, setMonthTransactions] = useState<FinanceTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     if (!monthStr) return;
     setIsLoading(true);
+    setLoadError(false);
     (async () => {
       const all: FinanceTransaction[] = [];
       let page = 1;
@@ -46,9 +48,13 @@ export default function Calendar({ overview }: CalendarProps) {
         page += 1;
       }
       if (!cancelled) setMonthTransactions(all);
-    })().finally(() => {
-      if (!cancelled) setIsLoading(false);
-    });
+    })()
+      .catch(() => {
+        if (!cancelled) setLoadError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -63,6 +69,7 @@ export default function Calendar({ overview }: CalendarProps) {
     ? new Date(`${dailyLedger[0].date}T00:00:00Z`).toLocaleDateString('en-US', {
         month: 'long',
         year: 'numeric',
+        timeZone: 'UTC',
       })
     : '';
 
@@ -149,6 +156,10 @@ export default function Calendar({ overview }: CalendarProps) {
 
           {isLoading ? (
             <p className="text-sm text-[var(--paper-muted-2)]">Loading…</p>
+          ) : loadError ? (
+            <p className="text-sm text-[#8d3a33]">
+              Couldn&apos;t load this month&apos;s transactions.
+            </p>
           ) : selectedTransactions.length === 0 ? (
             <p className="text-sm text-[var(--paper-muted-2)]">Nothing logged this day.</p>
           ) : (

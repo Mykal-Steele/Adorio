@@ -252,31 +252,6 @@ export const getOverview = async (userId) => {
 
   const dailyBudget = daysInMonth > 0 ? settings.monthlyBudget / daysInMonth : 0;
 
-  let monthlySpend = 0;
-  let monthlySpendAll = 0;
-  let monthlyIncome = 0;
-  let todaySpend = 0;
-  const categoryTotals = new Map();
-  const budgetSpendByDate = new Map();
-
-  for (const txn of monthTransactions) {
-    if (txn.type === 'income') {
-      monthlyIncome += txn.amount;
-      continue;
-    }
-    monthlySpendAll += txn.amount;
-    if (!txn.category?.excludeFromBudget) {
-      monthlySpend += txn.amount;
-      budgetSpendByDate.set(txn.date, (budgetSpendByDate.get(txn.date) || 0) + txn.amount);
-    }
-    if (txn.date === today) todaySpend += txn.amount;
-
-    const categoryId = txn.category?._id?.toString();
-    if (categoryId) {
-      categoryTotals.set(categoryId, (categoryTotals.get(categoryId) || 0) + txn.amount);
-    }
-  }
-
   // A user who starts partway through the month hasn't had a chance to
   // spend (or save) anything before that point — crediting them with the
   // full monthlyBudget from day 1 would wildly overstate what's left, while
@@ -288,6 +263,39 @@ export const getOverview = async (userId) => {
   const effectiveStartDateString =
     trackingStartDateString > startDate ? trackingStartDateString : startDate;
   const trackingStartDay = Number(effectiveStartDateString.slice(-2));
+
+  let monthlySpend = 0;
+  let monthlySpendAll = 0;
+  let monthlyIncome = 0;
+  let todaySpend = 0;
+  let todayBudgetSpend = 0;
+  const categoryTotals = new Map();
+  const budgetSpendByDate = new Map();
+
+  for (const txn of monthTransactions) {
+    if (txn.type === 'income') {
+      monthlyIncome += txn.amount;
+      continue;
+    }
+    monthlySpendAll += txn.amount;
+    const isBudgetEligible = !txn.category?.excludeFromBudget;
+    // A transaction dated before tracking started (a backdated entry, most
+    // likely) isn't covered by `adjustedMonthlyBudget` — counting it here
+    // would eat into a budget that only spans the days actually tracked.
+    if (isBudgetEligible && txn.date >= effectiveStartDateString) {
+      monthlySpend += txn.amount;
+      budgetSpendByDate.set(txn.date, (budgetSpendByDate.get(txn.date) || 0) + txn.amount);
+    }
+    if (txn.date === today) {
+      todaySpend += txn.amount;
+      if (isBudgetEligible) todayBudgetSpend += txn.amount;
+    }
+
+    const categoryId = txn.category?._id?.toString();
+    if (categoryId) {
+      categoryTotals.set(categoryId, (categoryTotals.get(categoryId) || 0) + txn.amount);
+    }
+  }
 
   // "Saved" only accounts for fully-completed days — today's own spending
   // shows up in the live gauge below, not here, so the number doesn't jitter
@@ -303,7 +311,10 @@ export const getOverview = async (userId) => {
   const adjustedMonthlyBudget = dailyBudget * (daysInMonth - trackingStartDay + 1);
   const remainingThisMonth = adjustedMonthlyBudget - monthlySpend;
   const todayAllowance = dailyBudget + saved;
-  const todayRemaining = todayAllowance - todaySpend;
+  // Same eligibility rule as monthlySpend/budgetSpendByDate — an excluded
+  // category (rent, say) spent today shouldn't eat into the daily allowance
+  // that dailyBudget/saved are built from.
+  const todayRemaining = todayAllowance - todayBudgetSpend;
   const isPartialMonth = trackingStartDay > 1;
 
   const dailyLedger = Array.from({ length: daysInMonth }, (_, i) => {
