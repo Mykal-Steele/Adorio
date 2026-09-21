@@ -73,6 +73,8 @@ const environment = {
     url: pistonUrl,
     token: normalize(process.env.PISTON_TOKEN),
   },
+  leaderboardMaxAgeDays: Number(normalize(process.env.LEADERBOARD_MAX_AGE_DAYS)) || 30,
+  testUserTtlMinutes: Number(normalize(process.env.TEST_USER_TTL_MINUTES)) || 60,
 };
 
 const isProduction = environment.nodeEnv === 'production';
