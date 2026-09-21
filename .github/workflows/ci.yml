@@ -113,14 +113,17 @@ jobs:
       # Tasks for the build itself.
       - name: Log in to ACR
         run: az acr login --name adorioacr
-      - uses: docker/setup-buildx-action@v4
+      # Pinned to a full commit SHA, not a mutable version tag — this job
+      # requests an Azure OIDC token and reads a build-arg secret, so a
+      # compromised upstream tag would run with that access.
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       # Building here (instead of `az acr build`, which builds remotely on
       # ACR Tasks with no layer cache) is what actually gets a build cache:
       # GitHub's cache backend persists layers between runs, so a push with
       # no dependency changes reuses the npm-install and build layers
       # instead of redoing them from scratch every time.
       - name: Build and push image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           push: true
