@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'rea
 import CodeMirror from '@uiw/react-codemirror';
 import { EditorView, keymap } from '@codemirror/view';
 import { javascript, javascriptLanguage, scopeCompletionSource } from '@codemirror/lang-javascript';
+import { python } from '@codemirror/lang-python';
 import { StreamLanguage, indentService } from '@codemirror/language';
 import { java } from '@codemirror/legacy-modes/mode/clike';
 import { autocompletion, closeBrackets } from '@codemirror/autocomplete';
@@ -112,7 +113,14 @@ const jsSnippets = javascriptLanguage.data.of({ autocomplete: jsSnippetSource })
 // deliberately no auto-format on Enter or paste — VSCode ships with both
 // off by default, and reformatting the whole document behind the user's
 // back is what made Enter feel broken.
-const dispatchPreservingFormat = (view: EditorView) => {
+//
+// formatCode is brace-depth-based (Java/JS); Python's blocks are indentation,
+// not braces, so running it on Python would recompute indentation from `(`/
+// `[` call/list nesting and corrupt the program. No formatter for Python
+// until there's a real indentation-aware one — silently no-op is safer than
+// silently breaking the user's code.
+const dispatchPreservingFormat = (view: EditorView, language: string) => {
+  if (language === Language.PYTHON) return;
   const current = view.state.doc.toString();
   const formatted = formatCode(current);
   if (formatted === current) return;
@@ -142,11 +150,11 @@ const CodeMirrorEditor = forwardRef<EditorHandle, EditorEngineProps>(
       () => ({
         format: () => {
           const view = viewRef.current;
-          if (view) dispatchPreservingFormat(view);
-          else onChange(formatCode(code));
+          if (view) dispatchPreservingFormat(view, language);
+          else if (language !== Language.PYTHON) onChange(formatCode(code));
         },
       }),
-      [code, onChange],
+      [code, onChange, language],
     );
 
     // Re-applies the shared wrap/font-size settings whenever they change —
@@ -159,13 +167,26 @@ const CodeMirrorEditor = forwardRef<EditorHandle, EditorEngineProps>(
       return subscribeEditorSettings(() => syncEditorSettings(viewRef.current));
     }, []);
 
-    const extensions = useMemo(
-      () => [
-        language === Language.JAVA ? javaLanguage : javascript({ jsx: false }),
-        ...(language === Language.JAVA
-          ? [javaCompletions, javaSnippets, javaComments]
-          : [jsGlobalCompletions, jsSnippets]),
-        ...(language === Language.JAVA ? [javaIndent] : []),
+    const extensions = useMemo(() => {
+      // Python's own lang package ships proper indentation-sensitive indent
+      // logic already — unlike the legacy Java clike mode, it doesn't need
+      // (or want) the brace-counting javaIndent override.
+      let languageExtension;
+      let languageFeatures: unknown[];
+      if (language === Language.JAVA) {
+        languageExtension = javaLanguage;
+        languageFeatures = [javaCompletions, javaSnippets, javaComments, javaIndent];
+      } else if (language === Language.PYTHON) {
+        languageExtension = python();
+        languageFeatures = [];
+      } else {
+        languageExtension = javascript({ jsx: false });
+        languageFeatures = [jsGlobalCompletions, jsSnippets];
+      }
+
+      return [
+        languageExtension,
+        ...languageFeatures,
         autocompletion({ activateOnTyping: true }),
         closeBrackets(),
         disableGrammarly,
@@ -177,15 +198,14 @@ const CodeMirrorEditor = forwardRef<EditorHandle, EditorEngineProps>(
           {
             key: 'Shift-Alt-f',
             run: (view) => {
-              dispatchPreservingFormat(view);
+              dispatchPreservingFormat(view, language);
               return true;
             },
           },
           ...vscodeKeymap,
         ]),
-      ],
-      [language],
-    );
+      ];
+    }, [language]);
 
     return (
       <CodeMirror

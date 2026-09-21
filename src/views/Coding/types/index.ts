@@ -19,6 +19,7 @@ export interface ProblemExample {
 export const Language = {
   JAVASCRIPT: 'javascript',
   JAVA: 'java',
+  PYTHON: 'python',
 } as const;
 
 export interface CallLanguageVariant {
