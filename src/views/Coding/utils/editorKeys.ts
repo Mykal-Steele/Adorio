@@ -94,19 +94,21 @@ const snippetNavigation: KeyBinding[] = [
   },
 ];
 
-const toggleWrap: StateCommand = ({ state, dispatch }) => {
+// storeToggleWrap/storeChangeFontSize notify the settings-store subscriber
+// synchronously, which already dispatches via syncEditorSettings (see
+// CodeMirrorEditor.tsx) — dispatching again here would use this command's
+// now-stale captured `state` and CodeMirror rejects it. Let the subscriber be
+// the only one that ever dispatches.
+const toggleWrap: StateCommand = () => {
   storeToggleWrap();
-  dispatch(state.update({ effects: settingsEffects() }));
   return true;
 };
 
 const changeFontSize = (delta: number): StateCommand => {
-  return ({ state, dispatch }) => {
+  return () => {
     const before = getEditorSettings().fontSize;
     storeChangeFontSize(delta);
-    if (getEditorSettings().fontSize === before) return false;
-    dispatch(state.update({ effects: settingsEffects() }));
-    return true;
+    return getEditorSettings().fontSize !== before;
   };
 };
 

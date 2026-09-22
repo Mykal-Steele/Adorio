@@ -35,28 +35,42 @@ const ProblemList = ({
   const solvedCount = problems.filter((p) => solvedIds.has(p.id)).length;
   const activeProblem = problems.find((p) => p.id === activeProblemId);
 
+  const headerContent = (
+    <>
+      <span className="min-w-0">
+        <p className="font-paper-mono text-[11px] uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
+          {classLabel} &middot; {solvedCount}/{problems.length} solved
+        </p>
+        {!expanded && activeProblem && (
+          <p className="mt-0.5 truncate text-[13px] font-bold text-[var(--paper-ink)] lg:hidden">
+            {activeProblem.title}
+          </p>
+        )}
+      </span>
+      <ChevronDownIcon
+        className={`h-4 w-4 shrink-0 text-[var(--paper-muted)] transition-transform lg:hidden ${expanded ? 'rotate-180' : ''}`}
+      />
+    </>
+  );
+
   return (
     <div className="rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-4 shadow-[3px_4px_0_rgba(60,44,24,.16)] lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
+      {/* Below lg the list is a real collapsible disclosure. At lg it's
+          always visible (see the panel below), so this header is a static,
+          non-interactive row there instead of a button that could still be
+          keyboard-activated — toggling aria-expanded with nothing visibly
+          changing would give screen reader users a false disclosure state. */}
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        className="flex w-full items-center justify-between gap-2 text-left lg:pointer-events-none lg:cursor-default"
+        className="flex w-full items-center justify-between gap-2 text-left lg:hidden"
       >
-        <span className="min-w-0">
-          <p className="font-paper-mono text-[11px] uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
-            {classLabel} &middot; {solvedCount}/{problems.length} solved
-          </p>
-          {!expanded && activeProblem && (
-            <p className="mt-0.5 truncate text-[13px] font-bold text-[var(--paper-ink)] lg:hidden">
-              {activeProblem.title}
-            </p>
-          )}
-        </span>
-        <ChevronDownIcon
-          className={`h-4 w-4 shrink-0 text-[var(--paper-muted)] transition-transform lg:hidden ${expanded ? 'rotate-180' : ''}`}
-        />
+        {headerContent}
       </button>
+      <div className="hidden w-full items-center justify-between gap-2 lg:flex">
+        {headerContent}
+      </div>
 
       <div className={`${expanded ? 'block' : 'hidden'} mt-3 lg:block lg:mt-3`}>
         <div className="mb-3 flex items-center justify-end">
