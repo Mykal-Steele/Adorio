@@ -32,6 +32,13 @@ jobs:
       - run: npm run lint
       - run: npm run check-nginx-routes
 
+  infra-test:
+    name: Infra tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash infra/tests/piston-cloudinit.test.sh
+
   build:
     name: TypeScript + build
     runs-on: ubuntu-latest

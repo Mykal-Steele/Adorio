@@ -580,6 +580,22 @@ body {
   background: var(--paper-yellow);
   color: var(--paper-ink);
 }
+/* Code editors paint their own selection as a decoration layer (CodeMirror's
+   .cm-selectionBackground, Monaco's overlay divs) — real DOM text underneath
+   is still selectable, so the browser's native ::selection above ALSO fires
+   on it. The two overlays don't share geometry (native selection follows DOM
+   text-node/inline-box boundaries, which split differently around a
+   syntax-highlighted token like a bracket than the editor's own virtualized
+   selection rects do), so you get a visibly doubled/offset highlight, with
+   the native rule's near-black text color on top of it. Turning native
+   selection transparent inside the editor leaves the editor's own
+   (correctly positioned, non-text-recoloring) decoration as the only visible
+   highlight. */
+.paper-theme .cm-editor ::selection,
+.paper-theme .monaco-editor ::selection {
+  background: transparent;
+  color: inherit;
+}
 .paper-theme :focus-visible {
   outline: 3px solid var(--paper-ink);
   outline-offset: 3px;
