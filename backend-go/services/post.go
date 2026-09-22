@@ -75,6 +75,6 @@ func GetPaginatedPosts(limit int64, lastID string) ([]models.Post, string, bool,
 		nextCursor = posts[len(posts)-1].ID.Hex()
 	}
 
-	hasMore := len(posts) == int(limit)
+	hasMore := int64(len(posts)) == limit
 	return posts, nextCursor, hasMore, nil
 }

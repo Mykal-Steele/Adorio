@@ -18,6 +18,15 @@ interface NavigatorExtended extends Navigator {
 let fingerprintCache = null;
 let fingerprintPromise = null;
 
+const secureRandomString = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    const bytes = crypto.getRandomValues(new Uint8Array(9));
+    return Array.from(bytes, (b) => b.toString(36)).join('');
+  }
+
+  return Date.now().toString(36);
+};
+
 const getCanvasFingerprint = () => {
   try {
     if (!document.createElement || !HTMLCanvasElement) {
@@ -368,7 +377,7 @@ export const generateSessionId = () => {
   let sessionId = sessionStorage.getItem('adorio_session_id');
 
   if (!sessionId) {
-    sessionId = `${Date.now()}-${Math.random().toString(36).substring(2)}`;
+    sessionId = `${Date.now()}-${secureRandomString()}`;
     sessionStorage.setItem('adorio_session_id', sessionId);
   }
 
@@ -407,7 +416,7 @@ export const generateVisitorId = async () => {
     }
 
     return {
-      persistentId: `fallback-${Date.now()}-${Math.random().toString(36).substring(2)}`,
+      persistentId: `fallback-${Date.now()}-${secureRandomString()}`,
       sessionId: `session-${Date.now()}`,
       fingerprint: null,
       storageCapabilities: null,
@@ -452,7 +461,7 @@ const getPersistentId = async () => {
 };
 
 const createPersistentId = async () => {
-  const id = `${Date.now()}-${Math.random().toString(36).substring(2)}-${performance.now()}`;
+  const id = `${Date.now()}-${secureRandomString()}-${performance.now()}`;
 
   try {
     localStorage.setItem('adorio_persistent_id', id);
