@@ -8,7 +8,7 @@ import type { Completion, CompletionContext, CompletionResult } from '@codemirro
 // variable types or give signature help. A real Java IntelliSense would mean
 // running an actual language server (e.g. Eclipse JDT LS) and wiring it in
 // over LSP, which is a much larger project than an editor tweak.
-const KEYWORDS = [
+export const JAVA_KEYWORD_LABELS = [
   'abstract',
   'boolean',
   'break',
@@ -54,9 +54,10 @@ const KEYWORDS = [
   'try',
   'void',
   'while',
-].map((label): Completion => ({ label, type: 'keyword' }));
+];
+const KEYWORDS = JAVA_KEYWORD_LABELS.map((label): Completion => ({ label, type: 'keyword' }));
 
-const TYPES = [
+export const JAVA_TYPE_LABELS = [
   'String',
   'Integer',
   'Long',
@@ -91,12 +92,13 @@ const TYPES = [
   'Arrays',
   'Collections',
   'System',
-].map((label): Completion => ({ label, type: 'class' }));
+];
+const TYPES = JAVA_TYPE_LABELS.map((label): Completion => ({ label, type: 'class' }));
 
 // Dot-completion for the handful of classes practice problems actually reach
 // for — matched by the literal receiver text, not real type tracking.
 // detail/info give the VSCode-style signature + doc panel.
-interface MemberDoc {
+export interface MemberDoc {
   label: string;
   detail?: string;
   info?: string;
@@ -105,8 +107,11 @@ interface MemberDoc {
 const membersOf = (type: string, boost: number, docs: MemberDoc[]): Completion[] =>
   docs.map(({ label, detail, info }) => ({ label, type, detail, info, boost }));
 
-const MEMBERS: Record<string, Completion[]> = {
-  System: membersOf('property', 1, [
+// Raw docs, shared with the Monaco completion provider (constants/javaCompletionsMonaco.ts)
+// so the two engines suggest the same members instead of drifting apart. The
+// CodeMirror-specific `type`/`boost` metadata is layered on below, per key.
+export const JAVA_MEMBER_DOCS: Record<string, MemberDoc[]> = {
+  System: [
     {
       label: 'out',
       detail: 'PrintStream',
@@ -134,8 +139,8 @@ const MEMBERS: Record<string, Completion[]> = {
       detail: 'getProperty(String key) : String',
       info: 'Gets the system property for the given key.',
     },
-  ]),
-  Math: membersOf('function', 1, [
+  ],
+  Math: [
     { label: 'abs', detail: 'abs(int a) : int', info: 'Absolute value.' },
     { label: 'max', detail: 'max(a, b)', info: 'The greater of two values.' },
     { label: 'min', detail: 'min(a, b)', info: 'The smaller of two values.' },
@@ -147,8 +152,8 @@ const MEMBERS: Record<string, Completion[]> = {
     { label: 'random', detail: 'random() : double', info: 'Random double in [0, 1).' },
     { label: 'PI', detail: 'double', info: 'The ratio of a circle.' },
     { label: 'E', detail: 'double', info: "Euler's number." },
-  ]),
-  Integer: membersOf('function', 1, [
+  ],
+  Integer: [
     {
       label: 'parseInt',
       detail: 'parseInt(String s) : int',
@@ -163,13 +168,13 @@ const MEMBERS: Record<string, Completion[]> = {
     { label: 'compare', detail: 'compare(int x, int y) : int', info: 'Compares two ints.' },
     { label: 'MAX_VALUE', detail: 'int', info: 'Largest possible int: 2147483647.' },
     { label: 'MIN_VALUE', detail: 'int', info: 'Smallest possible int: -2147483648.' },
-  ]),
-  String: membersOf('function', 1, [
+  ],
+  String: [
     { label: 'valueOf', detail: 'valueOf(Object o) : String' },
     { label: 'format', detail: 'format(String fmt, Object... args) : String' },
     { label: 'join', detail: 'join(CharSequence delim, ...) : String' },
-  ]),
-  Arrays: membersOf('function', 1, [
+  ],
+  Arrays: [
     { label: 'sort', detail: 'sort(int[] a)', info: 'Sorts the array ascending.' },
     {
       label: 'asList',
@@ -184,8 +189,8 @@ const MEMBERS: Record<string, Completion[]> = {
       detail: 'binarySearch(int[] a, int key) : int',
       info: 'Index of key in a sorted array, or negative if absent.',
     },
-  ]),
-  Collections: membersOf('function', 1, [
+  ],
+  Collections: [
     { label: 'sort', detail: 'sort(List<T> list)', info: 'Sorts the list ascending.' },
     { label: 'reverse', detail: 'reverse(List<?> list)' },
     { label: 'max', detail: 'max(Collection<T> c) : T' },
@@ -193,8 +198,8 @@ const MEMBERS: Record<string, Completion[]> = {
     { label: 'emptyList', detail: 'emptyList() : List<T>' },
     { label: 'unmodifiableList', detail: 'unmodifiableList(List<T> l) : List<T>' },
     { label: 'shuffle', detail: 'shuffle(List<?> list)' },
-  ]),
-  out: membersOf('method', 2, [
+  ],
+  out: [
     {
       label: 'println',
       detail: 'println(String x) : void',
@@ -202,15 +207,27 @@ const MEMBERS: Record<string, Completion[]> = {
     },
     { label: 'print', detail: 'print(String x) : void', info: 'Prints without a newline.' },
     { label: 'printf', detail: 'printf(String fmt, Object... args)', info: 'Formatted print.' },
-  ]),
+  ],
 };
+
+// CodeMirror-shaped completions layered from the raw docs above — 'out'
+// (instance method calls) ranks above the class-level statics.
+const MEMBER_KIND: Record<string, { type: string; boost: number }> = {
+  out: { type: 'method', boost: 2 },
+};
+const MEMBERS: Record<string, Completion[]> = Object.fromEntries(
+  Object.entries(JAVA_MEMBER_DOCS).map(([receiver, docs]) => {
+    const { type, boost } = MEMBER_KIND[receiver] ?? { type: 'function', boost: 1 };
+    return [receiver, membersOf(receiver === 'System' ? 'property' : type, boost, docs)];
+  }),
+);
 
 // There's no type checker here, so `foo.` can't know whether `foo` is a
 // String, a StringBuilder, or a List, so this is the instance-method surface
 // people actually type on local variables, offered for any receiver that
 // isn't a known class name above (matching real Java would need a language
 // server, not a static list).
-const INSTANCE_FALLBACK: Completion[] = [
+export const JAVA_INSTANCE_FALLBACK_LABELS = [
   'length',
   'charAt',
   'substring',
@@ -268,7 +285,10 @@ const INSTANCE_FALLBACK: Completion[] = [
   'iterator',
   'next',
   'hasNext',
-].map((label): Completion => ({ label, type: 'method' }));
+];
+const INSTANCE_FALLBACK: Completion[] = JAVA_INSTANCE_FALLBACK_LABELS.map(
+  (label): Completion => ({ label, type: 'method' }),
+);
 
 const TOP_LEVEL = [...KEYWORDS, ...TYPES];
 
