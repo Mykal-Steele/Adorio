@@ -1512,7 +1512,9 @@ function buildHtmlReport(results, infra) {
     String(s ?? '')
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   const mCls = (ms, w, b) => (ms == null ? '' : ms < w ? 'good' : ms < b ? 'warn' : 'bad');
   const hms = (ms, w = 600, b = 1500) =>
     ms == null ? '<span class="dim">N/A</span>' : `<span class="${mCls(ms, w, b)}">${ms}ms</span>`;

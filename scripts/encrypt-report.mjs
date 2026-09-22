@@ -3,11 +3,11 @@
  * Usage: AUDIT_PASSWORD=<password> node scripts/encrypt-report.mjs
  *
  * Format written to public/performance-report.enc (base64):
- *   iv (12 bytes) | authTag (16 bytes) | ciphertext
+ *   salt (16 bytes) | iv (12 bytes) | authTag (16 bytes) | ciphertext
  */
 
 import { readdir, readFile, writeFile, mkdir } from 'fs/promises';
-import { createCipheriv, createHash, randomBytes } from 'crypto';
+import { createCipheriv, scryptSync, randomBytes } from 'crypto';
 import path from 'path';
 
 const password = process.env.AUDIT_PASSWORD;
@@ -39,13 +39,14 @@ if (!reports.length) {
 const reportFile = reports[0];
 const html = await readFile(path.join(reportsDir, reportFile));
 
-const key = createHash('sha256').update(password).digest();
+const salt = randomBytes(16);
+const key = scryptSync(password, salt, 32);
 const iv = randomBytes(12);
 const cipher = createCipheriv('aes-256-gcm', key, iv);
 const ciphertext = Buffer.concat([cipher.update(html), cipher.final()]);
 const authTag = cipher.getAuthTag();
 
-const payload = Buffer.concat([iv, authTag, ciphertext]);
+const payload = Buffer.concat([salt, iv, authTag, ciphertext]);
 
 await mkdir(path.join(process.cwd(), 'public'), { recursive: true });
 const outPath = path.join(process.cwd(), 'public', 'performance-report.enc');
