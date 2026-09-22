@@ -3,6 +3,19 @@ const BACKUP_ORIGIN = 'https://p01--adorio--y9gwmvv64g9t.code.run';
 const HEALTH_PATH = '/api/health';
 const KV_KEY = 'primary-health';
 const PRIMARY_TIMEOUT_MS = 5000;
+// /api/coding/run compiles and runs real code through Piston — legitimate
+// successful responses have been observed taking 5.6-5.9s, right at (and
+// over) the generic 5s budget above. Without this, a request that's simply
+// slow (not actually broken) gets treated as a primary failure: it's routed
+// to the Northflank backup for that one request, AND counted toward the
+// shared FAIL_THRESHOLD below, which can mark the *entire* domain unhealthy
+// off nothing but a couple of ordinary Java submissions. 20s covers the
+// backend's own worst-case budget (backend/services/codingService.js's
+// COMPILE_TIMEOUT_MS + RUN_TIMEOUT_MS per test, batched across
+// TEST_CASE_CONCURRENCY) with headroom, while still failing over well
+// before a real Piston/Azure outage would leave a user waiting.
+const SLOW_PATH_TIMEOUT_MS = 20000;
+const SLOW_PATHS = ['/api/coding/run'];
 const PROBE_TIMEOUT_MS = 5000;
 const FAIL_THRESHOLD = 2;
 const OK_THRESHOLD = 2;
@@ -77,8 +90,11 @@ export default {
     const state = await getState(env);
 
     if (state.healthy) {
+      const timeoutMs = SLOW_PATHS.some((path) => url.pathname.startsWith(path))
+        ? SLOW_PATH_TIMEOUT_MS
+        : PRIMARY_TIMEOUT_MS;
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), PRIMARY_TIMEOUT_MS);
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
         const primaryReq = new Request(PRIMARY_ORIGIN + url.pathname + url.search, request.clone());
         const res = await fetch(primaryReq, { signal: controller.signal });
