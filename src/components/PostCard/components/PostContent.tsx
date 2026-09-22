@@ -1,13 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MAX_PREVIEW_LENGTH } from '../constants';
-import DOMPurify from 'dompurify';
-
-// DOMPurify only works in the browser (it needs a DOM)
-const sanitize = (str) => {
-  if (typeof window === 'undefined') return str || '';
-  return DOMPurify.sanitize(str || '');
-};
 
 const PostContent = ({ title, content = '', isExpanded, onToggleExpand }) => {
   const safeContent = content || '';
@@ -18,12 +11,9 @@ const PostContent = ({ title, content = '', isExpanded, onToggleExpand }) => {
       ? safeContent
       : safeContent.slice(0, MAX_PREVIEW_LENGTH) + '...';
 
-  const sanitizedTitle = sanitize(title || 'Untitled');
-  const sanitizedDisplayContent = sanitize(displayContent);
-
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-gray-100">{sanitizedTitle}</h2>
+      <h2 className="text-xl font-bold text-gray-100">{title || 'Untitled'}</h2>
       <div className="relative">
         <AnimatePresence initial={false}>
           <motion.div
@@ -34,10 +24,7 @@ const PostContent = ({ title, content = '', isExpanded, onToggleExpand }) => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <p
-              className="text-gray-300 whitespace-pre-line break-words"
-              dangerouslySetInnerHTML={{ __html: sanitizedDisplayContent }}
-            />
+            <p className="text-gray-300 whitespace-pre-line break-words">{displayContent}</p>
           </motion.div>
         </AnimatePresence>
 

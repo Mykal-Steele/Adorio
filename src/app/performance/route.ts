@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
-import { createDecipheriv, createHash } from 'crypto';
+import { createDecipheriv, scryptSync } from 'crypto';
 import path from 'path';
 
 // 5 attempts per 15 minutes per IP
@@ -47,11 +47,12 @@ async function decryptReport(password: string): Promise<string> {
   const encPath = path.join(process.cwd(), 'public', 'performance-report.enc');
   const payload = Buffer.from(await readFile(encPath, 'utf8'), 'base64');
 
-  const iv = payload.subarray(0, 12);
-  const authTag = payload.subarray(12, 28);
-  const ciphertext = payload.subarray(28);
+  const salt = payload.subarray(0, 16);
+  const iv = payload.subarray(16, 28);
+  const authTag = payload.subarray(28, 44);
+  const ciphertext = payload.subarray(44);
 
-  const key = createHash('sha256').update(password).digest();
+  const key = scryptSync(password, salt, 32);
   const decipher = createDecipheriv('aes-256-gcm', key, iv);
   decipher.setAuthTag(authTag);
 
