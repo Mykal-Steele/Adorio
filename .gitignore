@@ -26,6 +26,8 @@ tsconfig.tsbuildinfo
 *.sw?
 
 .env.*
+!.env.example
+!ai-slop/**/.env.example
 jwtGen.js
 
 .env
