@@ -75,7 +75,19 @@ const CodeEditor = ({
           />
         </div>
       </div>
-      <div className="overflow-hidden rounded-[2px] border-[1.5px] border-[var(--paper-ink)]">
+      {/* Counter-rotates the outer section's rotate-[0.3deg] paper-tilt back
+          to upright for just the editor surface. Monaco (and CodeMirror)
+          render each line as its own absolutely-positioned row; rotating
+          that whole stack shifts every row's horizontal position by
+          row-offset × sin(0.3°) — a few tenths of a pixel per line, small
+          per-row but compounding down the file, which shows up as the
+          indent guides visibly drifting off-vertical. Real VS Code never
+          has to deal with this because it's never rotated. Canceling the
+          rotation here keeps the tilted "pinned note" look on the card's
+          border/header/tape while the actual text and guides render dead
+          straight, which is what a code editor has to do regardless of the
+          chrome around it. */}
+      <div className="-rotate-[0.3deg] overflow-hidden rounded-[2px] border-[1.5px] border-[var(--paper-ink)]">
         {engine === 'monaco' ? (
           <MonacoEditor
             ref={editorRef}
