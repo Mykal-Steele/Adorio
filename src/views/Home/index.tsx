@@ -131,7 +131,7 @@ const ComposeCard = ({
           {/* imagePreview is always either '' or a same-origin blob: URL from
               URL.createObjectURL() in handleImageChange below — never user-supplied text */}
           <img
-            src={imagePreview}
+            src={imagePreview} // lgtm[js/xss-through-dom] -- browser-generated blob: URL, not DOM text
             alt="Selected upload preview"
             className="h-48 max-w-full rounded-[1px] object-cover"
           />
