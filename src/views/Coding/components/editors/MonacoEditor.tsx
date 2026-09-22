@@ -120,6 +120,18 @@ const MonacoEditor = forwardRef<EditorHandle, EditorEngineProps>(
       registerProvidersOnce(monaco);
       applySettings(editor);
 
+      // Courier Prime/JetBrains Mono are Google Fonts loaded via <link> tags
+      // (async, font-display: swap) — Monaco measures character width for
+      // its own layout (indent guides, cursor position) as soon as it
+      // mounts, using whatever font is actually active in the DOM at that
+      // instant. If the custom font hasn't finished downloading yet, that's
+      // a fallback font's metrics; once the real font swaps in moments
+      // later, the rendered glyphs shift by a fraction of a pixel but
+      // Monaco's cached measurements don't, so indent guides drift out of
+      // alignment with the text. remeasureFonts() re-runs that measurement
+      // once every pending font load actually settles.
+      document.fonts.ready.then(() => monaco.editor.remeasureFonts());
+
       // VSCode's own default: Alt+Z toggles word wrap, Ctrl+=/- zoom the
       // editor font. Monaco doesn't bind either out of the box.
       editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.KeyZ, () => toggleWrap());
