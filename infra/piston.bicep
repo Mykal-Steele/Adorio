@@ -34,6 +34,9 @@ param pistonTlsCert string
 @description('Private key matching pistonTlsCert (PEM).')
 param pistonTlsKey string
 
+@description('Email notified when the load balancer marks every Piston backend unhealthy — same contact as the cost budget alert in budget.bicep')
+param alertContactEmail string = 'mykal.stele@gmail.com'
+
 var proxyPort = 2358
 
 // Raw (non-interpolating) multi-line string — placeholders are substituted via
@@ -170,7 +173,15 @@ curl -fsSk -X POST "$BASE_URL/api/v2/packages" \
 # Python, same pattern as Java above — the backend's codingService.js
 # LANGUAGE_CONFIG expects both installed. Add a matching block here (and to
 # the two "java" selectors in healthcheck.sh below) for any future language.
-PYTHON_VERSION=$(curl -fsSk -H "$AUTH_HEADER" "$BASE_URL/api/v2/packages" | jq -r '[.[] | select(.language=="python")][0].language_version')
+# Piston's package catalog lists every Python release (2.7.18 through 3.12.x)
+# all under language "python" — picking [0] grabs whichever the catalog
+# happens to list first, which has been the ancient 2.7.18 build. Sort by the
+# numeric version parts and take the highest so this always resolves to the
+# newest Python 3 release instead. (Piston also reports installed 2.x builds
+# back from /api/v2/runtimes under language "python2", not "python" — another
+# reason to never let this land on a 2.x version, since the healthcheck below
+# would then never see it as installed.)
+PYTHON_VERSION=$(curl -fsSk -H "$AUTH_HEADER" "$BASE_URL/api/v2/packages" | jq -r '[.[] | select(.language=="python")] | sort_by(.language_version | split(".") | map(tonumber)) | last | .language_version')
 if [ -z "$PYTHON_VERSION" ] || [ "$PYTHON_VERSION" = "null" ]; then
   echo "Piston did not advertise a Python package version" >&2
   exit 1
@@ -207,21 +218,15 @@ fi
 HEALTHCHECK_EOF
 chmod +x /opt/piston/healthcheck.sh
 
-RUNTIMES_READY=0
-for i in $(seq 1 60); do
-  /opt/piston/healthcheck.sh
-  if [ -f status/ready ]; then
-    RUNTIMES_READY=1
-    break
-  fi
-  sleep 2
-done
-
-if [ "$RUNTIMES_READY" -ne 1 ]; then
-  echo "Java/Python runtimes never became available after install" >&2
-  exit 1
-fi
-
+# The recurring timer is installed and started *before* the blocking
+# first-check loop below, not after — under set -e, a failed first check
+# exits the whole script, and anything written after that point (this timer
+# included) would never exist at all. With the timer already running,
+# a runtime that comes up late (or a package glitch that gets fixed later
+# without a full reimage) gets picked up on its own within 15s instead of
+# needing someone to SSH or run-command in and wire the timer up by hand.
+# OnBootSec gives it a first run on its own — OnUnitActiveSec alone never
+# fires until the service has been activated by systemd at least once.
 cat > /etc/systemd/system/piston-healthcheck.service <<'SERVICE_EOF'
 [Unit]
 Description=Piston readiness check
@@ -236,6 +241,7 @@ cat > /etc/systemd/system/piston-healthcheck.timer <<'TIMER_EOF'
 Description=Run the Piston readiness check periodically
 
 [Timer]
+OnBootSec=15s
 OnUnitActiveSec=15s
 AccuracySec=5s
 
@@ -245,6 +251,21 @@ TIMER_EOF
 
 systemctl daemon-reload
 systemctl enable --now piston-healthcheck.timer
+
+RUNTIMES_READY=0
+for i in $(seq 1 60); do
+  /opt/piston/healthcheck.sh
+  if [ -f status/ready ]; then
+    RUNTIMES_READY=1
+    break
+  fi
+  sleep 2
+done
+
+if [ "$RUNTIMES_READY" -ne 1 ]; then
+  echo "Java/Python runtimes never became available after install" >&2
+  exit 1
+fi
 '''
 
 var renderedCloudInit = replace(
@@ -366,6 +387,60 @@ resource lb 'Microsoft.Network/loadBalancers@2024-05-01' = {
           idleTimeoutInMinutes: 4
         }
       }
+    ]
+  }
+}
+
+// Without this, a backend going unhealthy (the exact failure mode that took
+// Piston down silently for hours) is invisible until someone happens to try
+// the coding page. DipAvailability is the LB's own "Health Probe Status"
+// metric — it drops below 100 the moment any backend fails the /health
+// probe, which is precisely the signal Azure itself uses to decide whether
+// to route traffic there at all.
+resource pistonAlerts 'Microsoft.Insights/actionGroups@2023-01-01' = {
+  name: '${name}-alerts-ag'
+  location: 'global'
+  properties: {
+    groupShortName: 'pistonAlrt'
+    enabled: true
+    emailReceivers: [
+      {
+        name: 'admin'
+        emailAddress: alertContactEmail
+        useCommonAlertSchema: true
+      }
+    ]
+  }
+}
+
+resource pistonHealthAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
+  name: '${name}-health-probe-alert'
+  location: 'global'
+  properties: {
+    description: 'Fires when the Piston load balancer marks a backend instance unhealthy on the /health probe.'
+    severity: 1
+    enabled: true
+    scopes: [lb.id]
+    evaluationFrequency: 'PT5M'
+    windowSize: 'PT15M'
+    targetResourceType: 'Microsoft.Network/loadBalancers'
+    targetResourceRegion: location
+    criteria: {
+      'odata.type': 'Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria'
+      allOf: [
+        {
+          name: 'BackendUnhealthy'
+          metricName: 'DipAvailability'
+          metricNamespace: 'Microsoft.Network/loadBalancers'
+          operator: 'LessThan'
+          threshold: 100
+          timeAggregation: 'Average'
+          criterionType: 'StaticThresholdCriterion'
+        }
+      ]
+    }
+    actions: [
+      { actionGroupId: pistonAlerts.id }
     ]
   }
 }
