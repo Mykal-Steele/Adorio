@@ -41,7 +41,9 @@ const registerProvidersOnce = (monaco: typeof Monaco) => {
   const formattingProvider: Monaco.languages.DocumentFormattingEditProvider = {
     provideDocumentFormattingEdits(model) {
       const current = model.getValue();
-      const formatted = formatCode(current);
+      // Registered once for both 'java' and 'javascript' (see below), so
+      // this reads the model's actual language rather than assuming one.
+      const formatted = formatCode(current, model.getLanguageId());
       if (formatted === current) return [];
       const oldLines = current.split('\n');
       const newLines = formatted.split('\n');
@@ -80,6 +82,19 @@ const applySettings = (editor: IStandaloneCodeEditor) => {
   });
 };
 
+// Java's actual convention (and every starter template in problems.ts) is
+// 4 spaces per level; JS in this app's own starter templates is 2. Indent
+// guides and auto-indent both key off tabSize, so a fixed 2 for every
+// language meant new Java blocks a student typed drifted out of alignment
+// with the pre-written 4-space starter code, and the indent-guide lines
+// visibly desynced. VSCode does the same per-language sizing (its own
+// defaults ship 4 for Java, 2 for JS/TS).
+const TAB_SIZE: Record<string, number> = {
+  [Language.JAVA]: 4,
+  [Language.PYTHON]: 4,
+  [Language.JAVASCRIPT]: 2,
+};
+
 const MonacoEditor = forwardRef<EditorHandle, EditorEngineProps>(
   ({ code, onChange, language, problemTitle }, ref) => {
     const editorRef = useRef<IStandaloneCodeEditor | null>(null);
@@ -114,8 +129,13 @@ const MonacoEditor = forwardRef<EditorHandle, EditorEngineProps>(
       editor.updateOptions({
         // Alt+Click multi-cursor and Ctrl+Space suggest are Monaco defaults
         // already — nothing to configure for those.
-        tabSize: 2,
+        tabSize: TAB_SIZE[language] ?? 2,
         insertSpaces: true,
+        // Practice.tsx remounts this component fresh on every language
+        // switch (see editorKey), so tabSize above is already correct for
+        // the language being mounted — detectIndentation sniffing the
+        // starter code's actual whitespace would just silently override it.
+        detectIndentation: false,
         autoClosingBrackets: 'always',
         bracketPairColorization: { enabled: true },
         minimap: { enabled: false },
