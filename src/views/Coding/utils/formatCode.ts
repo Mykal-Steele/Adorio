@@ -1,11 +1,22 @@
+// Java's convention (and every starter template in problems.ts) is 4 spaces
+// per level; this app's JS templates are 2. Both editor engines' live
+// indentation already keys off this per language (see CodeMirrorEditor's
+// indentUnit and MonacoEditor's TAB_SIZE) — formatCode has to match, or
+// pressing Format would immediately re-indent Java back down to 2 spaces
+// and undo that consistency.
+export const INDENT_WIDTH_BY_LANGUAGE: Record<string, number> = { java: 4 };
+const DEFAULT_INDENT_WIDTH = 2;
+
 // Minimal brace-aware formatter for the practice editor. Java and JS are
 // both brace languages, so one implementation covers both. This is not a
 // parser: it only normalizes leading indentation from bracket depth and
 // trims trailing whitespace, leaving everything else byte-identical.
 // Braces inside strings, template literals, and comments are skipped when
 // counting so they never shift indentation.
-export const formatCode = (code: string): string => {
-  const INDENT = '  ';
+export const formatCode = (code: string, language?: string): string => {
+  const INDENT = ' '.repeat(
+    (language && INDENT_WIDTH_BY_LANGUAGE[language]) || DEFAULT_INDENT_WIDTH,
+  );
   const lines = code.replace(/\t/g, INDENT).split('\n');
 
   let depth = 0;
