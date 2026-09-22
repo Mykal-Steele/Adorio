@@ -90,7 +90,11 @@ export default {
     const state = await getState(env);
 
     if (state.healthy) {
-      const timeoutMs = SLOW_PATHS.some((path) => url.pathname.startsWith(path))
+      // Exact match or a path-boundary prefix only — startsWith alone would
+      // also give something like /api/coding/runaway the slow budget.
+      const timeoutMs = SLOW_PATHS.some(
+        (path) => url.pathname === path || url.pathname.startsWith(path + '/'),
+      )
         ? SLOW_PATH_TIMEOUT_MS
         : PRIMARY_TIMEOUT_MS;
       const controller = new AbortController();
