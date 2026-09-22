@@ -3,7 +3,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { EditorView, keymap } from '@codemirror/view';
 import { javascript, javascriptLanguage, scopeCompletionSource } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
-import { StreamLanguage, indentService } from '@codemirror/language';
+import { StreamLanguage, indentService, indentUnit } from '@codemirror/language';
 import { java } from '@codemirror/legacy-modes/mode/clike';
 import { autocompletion, closeBrackets } from '@codemirror/autocomplete';
 import { paperEditorTheme } from '../../constants/editorTheme';
@@ -122,7 +122,7 @@ const jsSnippets = javascriptLanguage.data.of({ autocomplete: jsSnippetSource })
 const dispatchPreservingFormat = (view: EditorView, language: string) => {
   if (language === Language.PYTHON) return;
   const current = view.state.doc.toString();
-  const formatted = formatCode(current);
+  const formatted = formatCode(current, language);
   if (formatted === current) return;
   const selection = view.state.selection;
   view.dispatch({
@@ -151,7 +151,7 @@ const CodeMirrorEditor = forwardRef<EditorHandle, EditorEngineProps>(
         format: () => {
           const view = viewRef.current;
           if (view) dispatchPreservingFormat(view, language);
-          else if (language !== Language.PYTHON) onChange(formatCode(code));
+          else if (language !== Language.PYTHON) onChange(formatCode(code, language));
         },
       }),
       [code, onChange, language],
@@ -171,17 +171,30 @@ const CodeMirrorEditor = forwardRef<EditorHandle, EditorEngineProps>(
       // Python's own lang package ships proper indentation-sensitive indent
       // logic already — unlike the legacy Java clike mode, it doesn't need
       // (or want) the brace-counting javaIndent override.
+      // Java's convention (and every starter template in problems.ts) is 4
+      // spaces per level, matching VSCode's own per-language default; this
+      // app's JS templates are 2. CodeMirror's indentUnit facet defaults to
+      // 2 for everything, so without this, javaIndent's `context.unit`
+      // inserted 2-space levels into new lines a student typed while the
+      // pre-written starter code around it stayed at 4 — real, visible
+      // indentation drift within the same file.
       let languageExtension;
       let languageFeatures: unknown[];
       if (language === Language.JAVA) {
         languageExtension = javaLanguage;
-        languageFeatures = [javaCompletions, javaSnippets, javaComments, javaIndent];
+        languageFeatures = [
+          javaCompletions,
+          javaSnippets,
+          javaComments,
+          javaIndent,
+          indentUnit.of('    '),
+        ];
       } else if (language === Language.PYTHON) {
         languageExtension = python();
-        languageFeatures = [];
+        languageFeatures = [indentUnit.of('    ')];
       } else {
         languageExtension = javascript({ jsx: false });
-        languageFeatures = [jsGlobalCompletions, jsSnippets];
+        languageFeatures = [jsGlobalCompletions, jsSnippets, indentUnit.of('  ')];
       }
 
       return [

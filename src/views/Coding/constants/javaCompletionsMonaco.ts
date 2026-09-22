@@ -1,6 +1,6 @@
 import type * as Monaco from 'monaco-editor';
 import {
-  JAVA_INSTANCE_FALLBACK_LABELS,
+  JAVA_INSTANCE_FALLBACK_DOCS,
   JAVA_KEYWORD_LABELS,
   JAVA_MEMBER_DOCS,
   JAVA_TYPE_LABELS,
@@ -28,11 +28,9 @@ export function registerJavaCompletions(monaco: typeof Monaco) {
           startColumn: position.column - partial.length,
           endColumn: position.column,
         };
-        const suggestions = docs
-          ? docs.map((doc) => memberToItem(monaco, doc, range))
-          : JAVA_INSTANCE_FALLBACK_LABELS.map((label) =>
-              memberToItem(monaco, { label }, range, monaco.languages.CompletionItemKind.Method),
-            );
+        const suggestions = (docs ?? JAVA_INSTANCE_FALLBACK_DOCS).map((doc) =>
+          memberToItem(monaco, doc, range),
+        );
         return { suggestions };
       }
 

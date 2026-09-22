@@ -55,7 +55,7 @@ const CodeEditor = ({
             onClick={() => {
               const handle = editorRef.current;
               if (handle) handle.format();
-              else onChange(formatCode(code));
+              else onChange(formatCode(code, language));
             }}
             disabled={language === Language.PYTHON}
             title={
