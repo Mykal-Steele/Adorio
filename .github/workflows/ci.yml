@@ -148,3 +148,17 @@ jobs:
             --image adorioacr.azurecr.io/adorio:${{ github.sha }}
       - name: Verify deployment health
         run: node scripts/wait-for-url.cjs https://adorio.orangeground-7d1e6e2f.southeastasia.azurecontainerapps.io/api/health 180000 2000
+      # Next.js prerendered pages (like /) come back from origin with
+      # s-maxage=31536000, so Cloudflare caches them for up to a year.
+      # Every deploy ships a fresh _next/static/ folder with new hashed
+      # chunk names and drops the old ones, so a stale cached HTML page
+      # left pointing at last build's chunks 404s on every asset and
+      # never hydrates. Purge on every successful deploy so Cloudflare
+      # re-fetches HTML that matches what's actually on disk.
+      - name: Purge Cloudflare cache
+        run: |
+          curl -sS --fail-with-body -X POST \
+            "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}'
