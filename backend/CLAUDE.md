@@ -230,6 +230,34 @@ Three components work together:
 
 ---
 
+## Code runner logs
+
+`services/codeRunnerService.js` writes one JSON line per event, all with `"scope":"code-runner"`. Use them to see how the on-demand runner behaves and where it needs tuning.
+
+| Event                 | Fields                                              | Tells you                                             |
+| --------------------- | --------------------------------------------------- | ----------------------------------------------------- |
+| `start_requested`     | `trigger` (`session`, `run`, `hold`), `userId`      | How often the VM starts, and what woke it             |
+| `ready`               | `startupSeconds`                                    | How long people wait on a start                       |
+| `run_rejected`        | `userId`, `state`, `dailyLimitReached`              | Runs that were told to wait (should be rare)          |
+| `hold`                | `userId`, `minutes`, `keepUntil`                    | Admin holds                                           |
+| `stopped`             | `reason`, `onSeconds`, `usageDay`, `usageMinutes`   | How long each session ran, and the day's total on-time |
+| `daily_limit_blocked` | `trigger`, `userId`, `usageMinutes`                 | The daily cap is being hit, raise it or look for abuse |
+| `start_failed`, `power_state_failed`, `stop_check_failed` | `message` | Azure calls failing                                   |
+
+In Log Analytics (`adorio-prod-env-logs`):
+
+```kusto
+ContainerAppConsoleLogs_CL
+| where Log_s startswith '{"scope":"code-runner"'
+| extend e = parse_json(Log_s)
+| project TimeGenerated, event = tostring(e.event), e
+| order by TimeGenerated desc
+```
+
+The VM's own idle backstop logs to its journal: `journalctl -u piston-idle-stop.service` through `az vm run-command invoke`.
+
+---
+
 ## SecretEnv
 
 A personal encrypted message vault. Users POST `{ message, password }` while authenticated. The message is encrypted with AES-256-CBC using `password + user.email` as the key. The combined string is HMAC-SHA256 hashed (keyed with `JWT_SECRET`) and stored as the lookup key.

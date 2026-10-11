@@ -13,6 +13,10 @@ const codeRunnerStateSchema = new mongoose.Schema(
     // Minutes the VM has been on during usageDay (UTC, YYYY-MM-DD).
     usageDay: { type: String, required: true, default: '' },
     usageMinutes: { type: Number, required: true, default: 0, min: 0 },
+    // When the last start was requested and when Piston first answered after
+    // it. Only used to log how long a start took and how long a session ran.
+    lastStartAt: { type: Date, default: null },
+    lastReadyAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

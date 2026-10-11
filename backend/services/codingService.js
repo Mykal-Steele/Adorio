@@ -157,10 +157,10 @@ const buildTestResult = (test, submission, duration) => {
   };
 };
 
-export const runSubmission = async ({ problemId, language, code, tests }) => {
+export const runSubmission = async ({ problemId, language, code, tests }, userId) => {
   const validated = validate(codingRunSchema, { problemId, language, code, tests });
   const config = LANGUAGE_CONFIG[validated.language];
-  await prepareRunnerForSubmission();
+  await prepareRunnerForSubmission(userId);
   const version = await resolveVersion(validated.language);
 
   const [firstTest, ...restTests] = validated.tests;
