@@ -69,10 +69,22 @@ const Practice = ({ classId }: PracticeProps) => {
     wake: wakeRunner,
     hold: holdRunner,
   } = useCodeRunner(activeVariant?.kind === 'stdio');
+  // Pressing Run while the runner is still starting queues the run instead of
+  // refusing it. It fires by itself the moment the runner is ready, so nobody
+  // has to sit and watch for the button to come back.
+  const [runQueued, setRunQueued] = useState(false);
+  const runnerNotReady = Boolean(runnerStatus && runnerStatus.state !== 'ready');
+  const runnerUnavailable =
+    runnerNotReady &&
+    (runnerStatus?.state === 'offline' || Boolean(runnerStatus?.dailyLimitReached));
+  // Once the start has timed out, Run goes back to asking the server, which
+  // retries the start and answers with the real state.
+  const runnerStarting = runnerNotReady && !runnerUnavailable && !runnerTimedOut;
+  const runnerReady = runnerStatus?.state === 'ready';
   const getRunBlockedLabel = () => {
-    if (!runnerStatus || runnerStatus.state === 'ready') return null;
-    if (runnerStatus.state === 'offline' || runnerStatus.dailyLimitReached) return 'Runner offline';
-    return 'Runner starting…';
+    if (runnerUnavailable) return 'Runner offline';
+    if (runnerStarting && runQueued) return 'Queued…';
+    return null;
   };
   const runBlockedLabel = getRunBlockedLabel();
 
@@ -111,6 +123,7 @@ const Practice = ({ classId }: PracticeProps) => {
 
   useEffect(() => {
     invalidateActiveExecution();
+    setRunQueued(false);
     if (!activeProblem || !activeVariant) return;
     setEditorKey((k) => k + 1);
 
@@ -148,6 +161,8 @@ const Practice = ({ classId }: PracticeProps) => {
 
   const handleProblemSelect = useCallback(
     (problemId: string) => {
+      // A queued run belongs to the problem it was pressed on.
+      setRunQueued(false);
       flushCurrentCode();
       setActiveProblemId(problemId);
       setLastActiveProblem(classId, problemId);
@@ -157,6 +172,7 @@ const Practice = ({ classId }: PracticeProps) => {
 
   const handleLanguageChange = useCallback(
     (nextLanguage: string) => {
+      setRunQueued(false);
       flushCurrentCode();
       setLanguage(nextLanguage);
     },
@@ -186,6 +202,10 @@ const Practice = ({ classId }: PracticeProps) => {
 
   const handleRunTests = useCallback(async () => {
     if (!activeProblem || !activeVariant || isRunning || runBlockedLabel) return;
+    if (runnerStarting) {
+      setRunQueued(true);
+      return;
+    }
 
     const problemId = activeProblem.id;
     const runLanguage = language;
@@ -248,6 +268,7 @@ const Practice = ({ classId }: PracticeProps) => {
     code,
     isRunning,
     runBlockedLabel,
+    runnerStarting,
     wakeRunner,
     recomputeSolved,
   ]);
@@ -267,6 +288,21 @@ const Practice = ({ classId }: PracticeProps) => {
   useEffect(() => {
     handleRunTestsRef.current = handleRunTests;
   }, [handleRunTests]);
+
+  // Declared after the ref sync above so the queued run uses the handler from
+  // this render, the one that already sees the runner as ready.
+  // Only a confirmed "ready" releases the queue. If the start stops being in
+  // progress any other way (offline, timed out, status unknown) the queued
+  // run is dropped rather than fired at a runner that may not be there.
+  useEffect(() => {
+    if (!runQueued) return;
+    if (runnerReady) {
+      setRunQueued(false);
+      handleRunTestsRef.current();
+    } else if (!runnerStarting) {
+      setRunQueued(false);
+    }
+  }, [runQueued, runnerReady, runnerStarting]);
 
   // Ctrl/Cmd+Enter runs the tests from anywhere on the page — the standard
   // shortcut on LeetCode/HackerRank, so there's no mouse round-trip to Run.
@@ -358,6 +394,7 @@ const Practice = ({ classId }: PracticeProps) => {
                   status={runnerStatus}
                   timedOut={runnerTimedOut}
                   isAdmin={isAdmin}
+                  runQueued={runQueued}
                   onRetry={wakeRunner}
                   onHold={holdRunner}
                 />

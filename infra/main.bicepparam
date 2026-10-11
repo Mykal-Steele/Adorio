@@ -22,7 +22,8 @@ param resendApiKey = readEnvironmentVariable('RESEND_API_KEY')
 param pistonUrl = readEnvironmentVariable('PISTON_URL')
 param pistonToken = readEnvironmentVariable('PISTON_TOKEN')
 param pistonCaCert = readEnvironmentVariable('PISTON_CA_CERT')
-// Optional: leave unset to deploy without on-demand control of the Piston VM.
-param pistonVmResourceId = readEnvironmentVariable('PISTON_VM_RESOURCE_ID', '')
-param runnerControlIdentityId = readEnvironmentVariable('PISTON_CONTROL_IDENTITY_ID', '')
-param runnerControlIdentityClientId = readEnvironmentVariable('PISTON_CONTROL_CLIENT_ID', '')
+
+// On-demand control of the Piston VM. Both resources are created by
+// piston.bicep. Remove these two lines to deploy without it.
+param pistonVmName = 'adorio-piston-vm'
+param runnerControlIdentityName = 'adorio-piston-control-identity'

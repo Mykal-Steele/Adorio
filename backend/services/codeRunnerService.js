@@ -29,7 +29,7 @@ const STOP_CHECK_INTERVAL_MS = 60000;
 
 const NOT_READY_MESSAGES = {
   starting:
-    'The code runner is starting up. It takes about 30 seconds, then you can run your code.',
+    'The code runner is starting up. It takes about 24 seconds, then you can run your code.',
   stopping: 'The code runner is restarting. Try again in a minute.',
   off: 'The code runner could not be started. Try again in a minute.',
   offline:
