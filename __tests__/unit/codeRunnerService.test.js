@@ -29,12 +29,16 @@ const mockFindRunnerState = mock(() => Promise.resolve(null));
 const mockExtendRunnerKeepUntil = mock((key, keepUntil) => Promise.resolve({ key, keepUntil }));
 const mockClaimRunnerTick = mock(() => Promise.resolve(null));
 const mockAddRunnerUsageMinute = mock(() => Promise.resolve());
+const mockMarkRunnerStartRequested = mock(() => Promise.resolve());
+const mockMarkRunnerReady = mock(() => Promise.resolve(null));
 
 mock.module('../../backend/models/index.js', () => ({
   findRunnerState: mockFindRunnerState,
   extendRunnerKeepUntil: mockExtendRunnerKeepUntil,
   claimRunnerTick: mockClaimRunnerTick,
   addRunnerUsageMinute: mockAddRunnerUsageMinute,
+  markRunnerStartRequested: mockMarkRunnerStartRequested,
+  markRunnerReady: mockMarkRunnerReady,
 }));
 
 const {
@@ -49,6 +53,14 @@ const {
 
 const RUNTIMES = [{ language: 'java' }, { language: 'python' }];
 const originalFetch = globalThis.fetch;
+
+// The service writes one JSON line per runner event. Capture them instead of
+// printing, so tests can assert on what would reach the logs.
+const logged = [];
+const originalConsole = { info: console.info, error: console.error };
+console.info = (line) => logged.push(line);
+console.error = (line) => logged.push(line);
+const events = () => logged.map((line) => JSON.parse(line));
 const mockFetch = mock(() => Promise.resolve({ ok: true, json: () => Promise.resolve(RUNTIMES) }));
 
 // The service caches the runner state for a few seconds. Each test starts a
@@ -71,6 +83,8 @@ beforeEach(() => {
     mockExtendRunnerKeepUntil,
     mockClaimRunnerTick,
     mockAddRunnerUsageMinute,
+    mockMarkRunnerStartRequested,
+    mockMarkRunnerReady,
   ]) {
     fn.mockClear();
   }
@@ -81,11 +95,73 @@ beforeEach(() => {
   mockStartVm.mockImplementation(() => Promise.resolve());
   mockFindRunnerState.mockImplementation(() => Promise.resolve(null));
   mockClaimRunnerTick.mockImplementation(() => Promise.resolve(null));
+  mockMarkRunnerReady.mockImplementation(() => Promise.resolve(null));
+  logged.length = 0;
 });
 
 afterAll(() => {
   setSystemTime();
   globalThis.fetch = originalFetch;
+  console.info = originalConsole.info;
+  console.error = originalConsole.error;
+});
+
+// ── logging ────────────────────────────────────────────────────────────────────
+
+describe('runner event log', () => {
+  test('should log who started the runner and why', async () => {
+    await requestRunnerSession('user-1');
+    expect(events()).toContainEqual({
+      scope: 'code-runner',
+      event: 'start_requested',
+      trigger: 'session',
+      userId: 'user-1',
+    });
+    expect(mockMarkRunnerStartRequested).toHaveBeenCalledTimes(1);
+  });
+
+  test('should log the startup time once, the first time the runner is seen ready', async () => {
+    mockGetVmPowerState.mockImplementation(() => Promise.resolve('running'));
+    const startedDoc = { lastStartAt: new Date(clock - 24000), lastReadyAt: null };
+    mockFindRunnerState.mockImplementation(() => Promise.resolve(startedDoc));
+    mockMarkRunnerReady.mockImplementationOnce(() => Promise.resolve(startedDoc));
+
+    await getRunnerStatus();
+    await getRunnerStatus();
+
+    expect(events().filter((e) => e.event === 'ready')).toEqual([
+      { scope: 'code-runner', event: 'ready', startupSeconds: 24 },
+    ]);
+  });
+
+  test('should log a run that was turned away because the runner was not ready', async () => {
+    await prepareRunnerForSubmission('user-2').catch(() => {});
+    expect(events()).toContainEqual({
+      scope: 'code-runner',
+      event: 'run_rejected',
+      userId: 'user-2',
+      state: 'starting',
+      dailyLimitReached: false,
+    });
+  });
+
+  test('should log how long the runner was on when it is stopped', async () => {
+    const doc = {
+      keepUntil: new Date(clock - 1000),
+      lastStartAt: new Date(clock - 45 * 60000),
+      usageDay: '2026-10-12',
+      usageMinutes: 45,
+    };
+    mockClaimRunnerTick.mockImplementation(() => Promise.resolve(doc));
+    mockFindRunnerState.mockImplementation(() => Promise.resolve(doc));
+    mockGetVmPowerState.mockImplementation(() => Promise.resolve('running'));
+    await runRunnerStopCheck(now());
+    expect(events().find((e) => e.event === 'stopped')).toMatchObject({
+      reason: 'idle',
+      onSeconds: 2700,
+      usageMinutes: 45,
+    });
+  });
 });
 
 // ── getRunnerStatus ────────────────────────────────────────────────────────────
@@ -182,26 +258,28 @@ describe('requestRunnerSession', () => {
 
 describe('holdRunner', () => {
   test('should keep the runner on for the requested minutes and start it', async () => {
-    const status = await holdRunner({ minutes: 120 });
+    const status = await holdRunner('admin-1', { minutes: 120 });
     expect(mockExtendRunnerKeepUntil.mock.calls[0][1]).toEqual(new Date(clock + 120 * 60000));
     expect(mockStartVm).toHaveBeenCalledTimes(1);
     expect(status.state).toBe('starting');
   });
 
   test('should reject a hold longer than 4 hours', async () => {
-    await expect(holdRunner({ minutes: 241 })).rejects.toMatchObject({ statusCode: 400 });
+    await expect(holdRunner('admin-1', { minutes: 241 })).rejects.toMatchObject({
+      statusCode: 400,
+    });
     expect(mockStartVm).not.toHaveBeenCalled();
   });
 
   test('should reject unknown fields', async () => {
-    await expect(holdRunner({ minutes: 60, force: true })).rejects.toMatchObject({
+    await expect(holdRunner('admin-1', { minutes: 60, force: true })).rejects.toMatchObject({
       statusCode: 400,
     });
   });
 
   test('should refuse with 409 where the backend does not control the VM', async () => {
     environment.piston.vmResourceId = undefined;
-    await expect(holdRunner({ minutes: 60 })).rejects.toMatchObject({ statusCode: 409 });
+    await expect(holdRunner('admin-1', { minutes: 60 })).rejects.toMatchObject({ statusCode: 409 });
   });
 });
 

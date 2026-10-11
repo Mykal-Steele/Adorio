@@ -37,7 +37,7 @@ const getNotice = (status: CodeRunnerStatus, timedOut: boolean): Notice | null =
     };
   }
   return {
-    text: 'Starting the code runner. This takes about a minute, then you can run your code.',
+    text: 'Starting the code runner. This takes about 30 seconds, then you can run your code.',
     busy: true,
     canRetry: false,
   };

@@ -3,12 +3,12 @@ import { holdCodeRunner, requestCodeRunnerSession } from '@/api';
 import type { CodeRunnerStatus } from '@/api';
 import { useAppSelector } from '@/store/hooks';
 
-// A start from off takes about a minute, so the first check waits a little
-// and later ones are spaced out. A whole class can sit behind one school IP,
-// and every one of these requests counts toward that IP's rate limit.
+// A start from off measured 24 seconds, so the first check waits most of
+// that and later ones are spaced out. A whole class can sit behind one school
+// IP, and every one of these requests counts toward that IP's rate limit.
 const FIRST_POLL_MS = 15000;
-const POLL_MS = 10000;
-const MAX_POLLS = 30;
+const POLL_MS = 6000;
+const MAX_POLLS = 40;
 
 const isSettled = (status: CodeRunnerStatus) =>
   status.state === 'ready' || status.state === 'offline' || status.dailyLimitReached;

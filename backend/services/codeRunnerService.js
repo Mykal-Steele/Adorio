@@ -8,6 +8,8 @@ import {
   claimRunnerTick,
   extendRunnerKeepUntil,
   findRunnerState,
+  markRunnerReady,
+  markRunnerStartRequested,
 } from '../models/index.js';
 
 // The Piston VM is deallocated whenever nobody is running code, because a
@@ -26,7 +28,8 @@ const STATE_CACHE_MS = 3000;
 const STOP_CHECK_INTERVAL_MS = 60000;
 
 const NOT_READY_MESSAGES = {
-  starting: 'The code runner is starting up. It takes about a minute, then you can run your code.',
+  starting:
+    'The code runner is starting up. It takes about 30 seconds, then you can run your code.',
   stopping: 'The code runner is restarting. Try again in a minute.',
   off: 'The code runner could not be started. Try again in a minute.',
   offline:
@@ -36,6 +39,26 @@ const DAILY_LIMIT_MESSAGE =
   'The code runner has reached its limit for today. It will be back tomorrow.';
 
 export const isRunnerManaged = () => Boolean(environment.piston.vmResourceId);
+
+// One JSON object per line, all tagged scope "code-runner", so the whole life
+// of the runner can be pulled out of the Container App logs with one filter
+// and charted: how often it starts, what triggered it, how long a start takes,
+// how long it stays on, and every time someone was told to wait.
+const logRunnerEvent = (event, fields = {}) => {
+  console.info(JSON.stringify({ scope: 'code-runner', event, ...fields }));
+};
+const logRunnerError = (event, error, fields = {}) => {
+  console.error(
+    JSON.stringify({
+      scope: 'code-runner',
+      event,
+      level: 'error',
+      message: error.message,
+      ...fields,
+    }),
+  );
+};
+const secondsBetween = (from, to) => Math.round((to.getTime() - from.getTime()) / 1000);
 
 const utcDay = (date) => date.toISOString().slice(0, 10);
 const minutesFrom = (date, minutes) => new Date(date.getTime() + minutes * 60000);
@@ -68,7 +91,7 @@ const readRunnerState = async () => {
   try {
     power = await getVmPowerState();
   } catch (error) {
-    console.error('Could not read the code runner power state', { message: error.message });
+    logRunnerError('power_state_failed', error);
     return 'offline';
   }
   if (power === 'running') return (await pistonHasRuntimes()) ? 'ready' : 'starting';
@@ -90,21 +113,32 @@ const getRunnerState = () => {
   return stateCache.promise;
 };
 
-const startIfOff = async () => {
+// `cause` says who or what wanted the runner: { trigger: 'session' | 'run' |
+// 'hold', userId }. It is only used for the log line.
+const startIfOff = async (cause) => {
   const state = await getRunnerState();
   if (state !== 'off') return state;
+  const requestedAt = new Date();
   try {
     await startVm();
   } catch (error) {
     // Usually two people asking at the same moment: Azure rejects the second
     // start while the first is in progress. Report whatever is true now.
-    console.error('Could not start the code runner', { message: error.message });
+    logRunnerError('start_failed', error, cause);
     stateCache = { at: 0, promise: null };
     return getRunnerState();
   }
-  console.info('Code runner start requested');
+  await markRunnerStartRequested(RUNNER_KEY, requestedAt);
+  logRunnerEvent('start_requested', cause);
   setCachedState('starting');
   return 'starting';
+};
+
+// Logs how long the start took, the first time anyone sees the runner ready.
+const noteIfJustReady = async (state, doc, now) => {
+  if (state !== 'ready' || !doc?.lastStartAt || doc.lastReadyAt) return;
+  const first = await markRunnerReady(RUNNER_KEY, now);
+  if (first) logRunnerEvent('ready', { startupSeconds: secondsBetween(first.lastStartAt, now) });
 };
 
 const buildStatus = (state, doc, now) => ({
@@ -119,45 +153,58 @@ export const getRunnerStatus = async () => {
     getRunnerState(),
     isRunnerManaged() ? findRunnerState(RUNNER_KEY) : null,
   ]);
-  return buildStatus(state, doc, new Date());
+  const now = new Date();
+  await noteIfJustReady(state, doc, now);
+  return buildStatus(state, doc, now);
 };
 
 // Keeps the runner on for another idle window and starts it if it is off.
 // Once the day's limit is used up this stops extending and stops starting,
 // which is what caps the cost of someone (or some script) keeping it awake.
-const keepRunnerWarm = async () => {
+const keepRunnerWarm = async (cause) => {
   const now = new Date();
   const doc = await findRunnerState(RUNNER_KEY);
-  if (isDailyLimitReached(doc, now)) return buildStatus(await getRunnerState(), doc, now);
+  if (isDailyLimitReached(doc, now)) {
+    logRunnerEvent('daily_limit_blocked', { ...cause, usageMinutes: doc.usageMinutes });
+    return buildStatus(await getRunnerState(), doc, now);
+  }
 
   const extended = await extendRunnerKeepUntil(
     RUNNER_KEY,
     minutesFrom(now, environment.piston.idleMinutes),
   );
-  return buildStatus(await startIfOff(), extended, now);
+  const state = await startIfOff(cause);
+  await noteIfJustReady(state, extended, now);
+  return buildStatus(state, extended, now);
 };
 
-export const requestRunnerSession = () =>
-  isRunnerManaged() ? keepRunnerWarm() : getRunnerStatus();
+export const requestRunnerSession = (userId, trigger = 'session') =>
+  isRunnerManaged() ? keepRunnerWarm({ trigger, userId }) : getRunnerStatus();
 
 // Admin only (enforced at the route). Not subject to the daily limit: holding
 // the runner on for a class is a deliberate choice, not background usage.
-export const holdRunner = async (rawBody) => {
+export const holdRunner = async (userId, rawBody) => {
   const { minutes } = validate(codeRunnerHoldSchema, rawBody);
   if (!isRunnerManaged()) {
     throw ApiError.conflict('This server cannot start or stop the code runner');
   }
   const now = new Date();
   const extended = await extendRunnerKeepUntil(RUNNER_KEY, minutesFrom(now, minutes));
-  return buildStatus(await startIfOff(), extended, now);
+  logRunnerEvent('hold', { userId, minutes, keepUntil: extended.keepUntil });
+  return buildStatus(await startIfOff({ trigger: 'hold', userId }), extended, now);
 };
 
 // Called before every submission. A 409 (not a 5xx) on purpose: the Cloudflare
 // failover worker counts any 5xx from this backend as the primary being down,
 // and "the runner is still booting" must never fail the whole site over.
-export const prepareRunnerForSubmission = async () => {
-  const status = await requestRunnerSession();
+export const prepareRunnerForSubmission = async (userId) => {
+  const status = await requestRunnerSession(userId, 'run');
   if (status.state === 'ready') return;
+  logRunnerEvent('run_rejected', {
+    userId,
+    state: status.state,
+    dailyLimitReached: status.dailyLimitReached,
+  });
   const message = status.dailyLimitReached ? DAILY_LIMIT_MESSAGE : NOT_READY_MESSAGES[status.state];
   throw ApiError.conflict(message, {
     code: 'RUNNER_NOT_READY',
@@ -196,15 +243,20 @@ export const runRunnerStopCheck = async (now = new Date()) => {
 
   await deallocateVm();
   setCachedState('stopping');
-  console.info('Code runner idle, deallocating', { keepUntil: latest.keepUntil });
+  logRunnerEvent('stopped', {
+    reason: 'idle',
+    powerState: power,
+    keepUntil: latest.keepUntil,
+    onSeconds: latest.lastStartAt ? secondsBetween(latest.lastStartAt, now) : null,
+    usageDay: latest.usageDay,
+    usageMinutes: latest.usageMinutes,
+  });
 };
 
 export const startRunnerStopChecks = () => {
   if (!isRunnerManaged()) return;
   const timer = setInterval(() => {
-    runRunnerStopCheck().catch((error) => {
-      console.error('Code runner stop check failed', { message: error.message });
-    });
+    runRunnerStopCheck().catch((error) => logRunnerError('stop_check_failed', error));
   }, STOP_CHECK_INTERVAL_MS);
   timer.unref();
 };
