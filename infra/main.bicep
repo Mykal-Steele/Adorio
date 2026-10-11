@@ -58,14 +58,19 @@ param pistonToken string
 @description('Self-signed TLS cert (PEM, fullchain) baked into the Piston VM via piston.bicep\'s pistonTlsCert. Pinned here as an extra trusted CA so the backend can verify HTTPS to Piston without a public CA.')
 param pistonCaCert string
 
+// The three below are optional and go together. Leave them empty (a fork with
+// no Piston, or a first deploy before the VM exists) and the backend only
+// reports whether Piston answers.
 @description('Resource id of the Piston VM (pistonVmResourceId output of piston.bicep). Setting this is what lets the backend start the VM on demand and deallocate it when idle.')
-param pistonVmResourceId string
+param pistonVmResourceId string = ''
 
 @description('Resource id of the identity allowed to start and stop the Piston VM (runnerControlIdentityId output of piston.bicep)')
-param runnerControlIdentityId string
+param runnerControlIdentityId string = ''
 
 @description('Client id of that same identity (runnerControlIdentityClientId output of piston.bicep). The app has two identities, so the backend has to say which one it means.')
-param runnerControlIdentityClientId string
+param runnerControlIdentityClientId string = ''
+
+var runnerControlEnabled = !empty(pistonVmResourceId) && !empty(runnerControlIdentityId) && !empty(runnerControlIdentityClientId)
 
 param clientUrl string = 'https://adorio.space'
 param cloudinaryName string
@@ -127,10 +132,10 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
   location: location
   identity: {
     type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${containerAppPullIdentity.id}': {}
-      '${runnerControlIdentityId}': {}
-    }
+    userAssignedIdentities: union(
+      { '${containerAppPullIdentity.id}': {} },
+      runnerControlEnabled ? { '${runnerControlIdentityId}': {} } : {}
+    )
   }
   // Bicep can't infer this from the identity block above (role assignments aren't
   // referenced there), so it's spelled out: the AcrPull grant must exist before the
@@ -175,7 +180,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json('1.0')
             memory: '2Gi'
           }
-          env: [
+          env: concat([
             { name: 'NODE_ENV', value: 'production' }
             { name: 'BACKEND_INTERNAL_URL', value: 'http://localhost:3000' }
             { name: 'CLIENT_URL', value: clientUrl }
@@ -190,9 +195,10 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'PISTON_URL', secretRef: 'piston-url' }
             { name: 'PISTON_TOKEN', secretRef: 'piston-token' }
             { name: 'PISTON_CA_CERT', secretRef: 'piston-ca-cert' }
+          ], runnerControlEnabled ? [
             { name: 'PISTON_VM_RESOURCE_ID', value: pistonVmResourceId }
             { name: 'PISTON_CONTROL_CLIENT_ID', value: runnerControlIdentityClientId }
-          ]
+          ] : [])
           probes: [
             {
               type: 'Liveness'
