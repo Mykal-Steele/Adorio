@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CodeRunnerStatus } from '@/api';
 
 type RunnerStatusProps = {
   status: CodeRunnerStatus | null;
   timedOut: boolean;
   isAdmin: boolean;
+  // The user pressed Run while the runner was still starting.
+  runQueued: boolean;
   onRetry: () => void;
   onHold: (minutes: number) => Promise<void>;
 };
@@ -12,6 +14,69 @@ type RunnerStatusProps = {
 type Notice = { text: string; busy: boolean; canRetry: boolean };
 
 const HOLD_HOURS = [1, 2, 3];
+
+// Measured: 24 seconds from the start request until the runner takes code.
+const START_SECONDS = 24;
+const TICK_COUNT = 12;
+const TICKS = Array.from({ length: TICK_COUNT }, (_, index) => index);
+
+const getStartStep = (elapsed: number) => {
+  if (elapsed < 8) return 'Waking the machine';
+  if (elapsed < 18) return 'Loading Java and Python';
+  return 'Almost ready';
+};
+
+// A wait with a number on it and something visibly moving feels shorter than
+// the same wait behind a spinner, so this counts down from the measured start
+// time and inks in one box every two seconds. The last box never fills on its
+// own: it stays pulsing until the runner really is ready and this unmounts.
+const StartingProgress = ({ runQueued }: { runQueued: boolean }) => {
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    const startedAt = Date.now();
+    const timer = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startedAt) / 1000));
+    }, 500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const remaining = Math.max(START_SECONDS - elapsed, 0);
+  const filled = Math.min(Math.floor((elapsed / START_SECONDS) * TICK_COUNT), TICK_COUNT - 1);
+
+  return (
+    <div role="status" className="space-y-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <p className="font-medium">Starting the code runner. It takes {START_SECONDS} seconds.</p>
+        <p className="font-paper-mono text-xs font-bold uppercase tracking-[.1em]">
+          {remaining > 0 ? `${remaining}s left` : 'Any second now'}
+        </p>
+      </div>
+
+      <div aria-hidden="true" className="flex gap-1">
+        {TICKS.map((tick) => (
+          <span
+            key={tick}
+            className={`h-2.5 flex-1 rounded-[2px] border-[1.5px] border-[var(--paper-ink)] transition-colors duration-300 ${
+              tick < filled ? 'bg-[var(--paper-accent-strong)]' : 'bg-[var(--paper-cream)]'
+            } ${tick === filled ? 'animate-pulse bg-[var(--paper-yellow)]' : ''}`}
+          />
+        ))}
+      </div>
+
+      <p className="flex flex-wrap justify-between gap-x-4 gap-y-1 text-[var(--paper-muted)]">
+        <span className="font-paper-mono text-xs uppercase tracking-[.1em]">
+          {getStartStep(elapsed)}
+        </span>
+        <span>
+          {runQueued
+            ? 'Your run is queued. It starts by itself when the runner is up.'
+            : 'Keep writing. Press Run now and it goes the moment the runner is up.'}
+        </span>
+      </p>
+    </div>
+  );
+};
 
 const getNotice = (status: CodeRunnerStatus, timedOut: boolean): Notice | null => {
   if (status.state === 'ready') return null;
@@ -36,17 +101,20 @@ const getNotice = (status: CodeRunnerStatus, timedOut: boolean): Notice | null =
       canRetry: true,
     };
   }
-  return {
-    text: 'Starting the code runner. This takes about 30 seconds, then you can run your code.',
-    busy: true,
-    canRetry: false,
-  };
+  return { text: '', busy: true, canRetry: false };
 };
 
 const formatTime = (iso: string) =>
   new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-const RunnerStatus = ({ status, timedOut, isAdmin, onRetry, onHold }: RunnerStatusProps) => {
+const RunnerStatus = ({
+  status,
+  timedOut,
+  isAdmin,
+  runQueued,
+  onRetry,
+  onHold,
+}: RunnerStatusProps) => {
   const [holdError, setHoldError] = useState<string | null>(null);
   const [isHolding, setIsHolding] = useState(false);
 
@@ -75,14 +143,10 @@ const RunnerStatus = ({ status, timedOut, isAdmin, onRetry, onHold }: RunnerStat
 
   return (
     <div className="space-y-2.5 rounded-[3px] border-[1.5px] border-dashed border-[rgba(60,44,24,.5)] bg-[var(--paper-yellow-soft)] px-4 py-3 text-[13px] text-[var(--paper-accent-deep)]">
-      {notice && (
+      {notice?.busy && <StartingProgress runQueued={runQueued} />}
+
+      {notice && !notice.busy && (
         <p role="status" className="flex flex-wrap items-center gap-2">
-          {notice.busy && (
-            <span
-              aria-hidden="true"
-              className="h-2 w-2 animate-pulse rounded-full bg-[var(--paper-accent-strong)]"
-            />
-          )}
           <span>{notice.text}</span>
           {notice.canRetry && (
             <button
