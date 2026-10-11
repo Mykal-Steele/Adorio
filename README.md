@@ -155,7 +155,7 @@ Both sections below need these. Skip if you already have them.
 
   Bicep support (`az bicep build`, `az deployment group create`) comes bundled, `az` installs it on first use if it's missing.
 
-- **An SSH key pair**, for Piston's admin access. Skip if you already have one:
+- **An SSH key pair**. Azure needs a public key to create the Piston VM, though the VM accepts no inbound SSH (use `az vm run-command invoke` to run commands on it). Skip if you already have one:
 
   ```bash
   ssh-keygen -t ed25519 -f ~/.ssh/adorio-piston -C "your-email@example.com"
@@ -182,7 +182,6 @@ Runs Java/Python submissions on the Coding page. No shared instance, you deploy 
    PISTON_RESOURCE_GROUP=your-resource-group
    PISTON_AUTH_TOKEN=<openssl rand -hex 32>
    PISTON_ADMIN_SSH_PUBLIC_KEY=<contents of ~/.ssh/adorio-piston.pub from the prerequisites above>
-   PISTON_SSH_SOURCE_ADDRESS_PREFIX=<your IP, CIDR form, e.g. 203.0.113.4/32>
    ```
 
    `infra/.secrets/` is gitignored, keep it that way.
@@ -196,7 +195,6 @@ Runs Java/Python submissions on the Coding page. No shared instance, you deploy 
      --template-file infra/piston.bicep \
      --parameters \
        adminSshPublicKey="$PISTON_ADMIN_SSH_PUBLIC_KEY" \
-       sshSourceAddressPrefix="$PISTON_SSH_SOURCE_ADDRESS_PREFIX" \
        pistonAuthToken="$PISTON_AUTH_TOKEN" \
        pistonTlsCert="$(cat infra/.secrets/piston-tls-cert.pem)" \
        pistonTlsKey="$(cat infra/.secrets/piston-tls-key.pem)"
