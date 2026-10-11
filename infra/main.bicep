@@ -58,19 +58,23 @@ param pistonToken string
 @description('Self-signed TLS cert (PEM, fullchain) baked into the Piston VM via piston.bicep\'s pistonTlsCert. Pinned here as an extra trusted CA so the backend can verify HTTPS to Piston without a public CA.')
 param pistonCaCert string
 
-// The three below are optional and go together. Leave them empty (a fork with
+// The two below are optional and go together. Leave them empty (a fork with
 // no Piston, or a first deploy before the VM exists) and the backend only
-// reports whether Piston answers.
-@description('Resource id of the Piston VM (pistonVmResourceId output of piston.bicep). Setting this is what lets the backend start the VM on demand and deallocate it when idle.')
-param pistonVmResourceId string = ''
+// reports whether Piston answers. main.bicepparam sets both for this
+// deployment, so a re-apply through that file needs nothing extra.
+@description('Name of the Piston VM created by piston.bicep in this resource group. Setting this is what lets the backend start the VM on demand and deallocate it when idle.')
+param pistonVmName string = ''
 
-@description('Resource id of the identity allowed to start and stop the Piston VM (runnerControlIdentityId output of piston.bicep)')
-param runnerControlIdentityId string = ''
+@description('Name of the identity piston.bicep created to start and stop that VM')
+param runnerControlIdentityName string = ''
 
-@description('Client id of that same identity (runnerControlIdentityClientId output of piston.bicep). The app has two identities, so the backend has to say which one it means.')
-param runnerControlIdentityClientId string = ''
+var runnerControlEnabled = !empty(pistonVmName) && !empty(runnerControlIdentityName)
 
-var runnerControlEnabled = !empty(pistonVmResourceId) && !empty(runnerControlIdentityId) && !empty(runnerControlIdentityClientId)
+// Looked up rather than passed in, so the resource id and client id can never
+// drift from what piston.bicep actually created.
+resource runnerControlIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' existing = if (runnerControlEnabled) {
+  name: runnerControlIdentityName
+}
 
 param clientUrl string = 'https://adorio.space'
 param cloudinaryName string
@@ -134,7 +138,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
     type: 'UserAssigned'
     userAssignedIdentities: union(
       { '${containerAppPullIdentity.id}': {} },
-      runnerControlEnabled ? { '${runnerControlIdentityId}': {} } : {}
+      runnerControlEnabled ? { '${runnerControlIdentity.id}': {} } : {}
     )
   }
   // Bicep can't infer this from the identity block above (role assignments aren't
@@ -196,8 +200,9 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'PISTON_TOKEN', secretRef: 'piston-token' }
             { name: 'PISTON_CA_CERT', secretRef: 'piston-ca-cert' }
           ], runnerControlEnabled ? [
-            { name: 'PISTON_VM_RESOURCE_ID', value: pistonVmResourceId }
-            { name: 'PISTON_CONTROL_CLIENT_ID', value: runnerControlIdentityClientId }
+            { name: 'PISTON_VM_RESOURCE_ID', value: resourceId('Microsoft.Compute/virtualMachines', pistonVmName) }
+            // The app has two identities, so the backend has to say which one it means.
+            { name: 'PISTON_CONTROL_CLIENT_ID', value: runnerControlIdentity!.properties.clientId }
           ] : [])
           probes: [
             {
