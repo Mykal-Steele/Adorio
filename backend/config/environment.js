@@ -69,6 +69,18 @@ if (pistonCaCert) {
   tls.setDefaultCACertificates([...tls.getCACertificates('default'), pistonCaCert]);
 }
 
+// Set only where the backend is allowed to start and stop the Piston VM (the
+// Azure Container App, through its managed identity). Left unset everywhere
+// else (local dev, CI, the Northflank failover copy), where the backend just
+// reports whether Piston answers. The id is spliced into an Azure Resource
+// Manager URL, so anything that is not a plain VM resource id is rejected.
+const VM_RESOURCE_ID_PATTERN =
+  /^\/subscriptions\/[0-9a-f-]{36}\/resourceGroups\/[\w.()-]+\/providers\/Microsoft\.Compute\/virtualMachines\/[\w-]+$/i;
+const pistonVmResourceId = normalize(process.env.PISTON_VM_RESOURCE_ID);
+if (pistonVmResourceId && !VM_RESOURCE_ID_PATTERN.test(pistonVmResourceId)) {
+  throw ApiError.internalServerError('PISTON_VM_RESOURCE_ID is not a virtual machine resource id');
+}
+
 const environment = {
   nodeEnv: normalize(process.env.NODE_ENV) || 'development',
   port: normalize(process.env.PORT) || 3000,
@@ -86,6 +98,10 @@ const environment = {
   piston: {
     url: pistonUrl,
     token: normalize(process.env.PISTON_TOKEN),
+    vmResourceId: pistonVmResourceId,
+    controlClientId: normalize(process.env.PISTON_CONTROL_CLIENT_ID),
+    idleMinutes: readPositiveInteger('PISTON_IDLE_MINUTES', 30),
+    dailyLimitMinutes: readPositiveInteger('PISTON_DAILY_LIMIT_MINUTES', 480),
   },
   leaderboardMaxAgeDays: readPositiveInteger('LEADERBOARD_MAX_AGE_DAYS', 30),
   testUserTtlMinutes: readPositiveInteger('TEST_USER_TTL_MINUTES', 60),

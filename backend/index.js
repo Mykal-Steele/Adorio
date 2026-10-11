@@ -31,6 +31,7 @@ import hostedFileRoutes from './routes/hostedFileRoutes.js';
 import codingRoutes from './routes/codingRoutes.js';
 import financeRoutes from './routes/financeRoutes.js';
 import { getHealthStatus } from './controllers/analyticsController.js';
+import { startRunnerStopChecks } from './services/codeRunnerService.js';
 
 process.env.TZ = 'UTC';
 
@@ -117,6 +118,7 @@ const startServer = async () => {
     await connectDatabase();
     const port = environment.port;
     app.listen(port, () => console.log(`Server running on port ${port}`));
+    startRunnerStopChecks();
   } catch (error) {
     console.error('Failed to start server', error);
   }

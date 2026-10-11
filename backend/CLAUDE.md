@@ -165,6 +165,10 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 | GET    | `/api/stats/visitor/:visitorId` | required             | getVisitorDetailsInfo                       |
 | GET    | `/api/stats/health`             | none                 | getHealthStatus                             |
 | GET    | `/api/stats/stats`              | required             | getSystemStats                              |
+| POST   | `/api/coding/run`               | required             | runCodingSubmissionHandler (409 if the runner is not ready) |
+| GET    | `/api/coding/runner`            | required             | getCodeRunnerStatusHandler                  |
+| POST   | `/api/coding/runner/sessions`   | required             | requestCodeRunnerSessionHandler (keeps the runner on, starts it if off) |
+| POST   | `/api/coding/runner/holds`      | required + admin     | holdCodeRunnerHandler (keep on for 15 to 240 minutes) |
 | GET    | `/api/health`                   | none                 | getHealthStatus (inline in index.js)        |
 | GET    | `/api/test-env`                 | none (dev only)      | inline in index.js                          |
 
@@ -186,6 +190,8 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 | `likeLimiter`         | 1 min  | 60  | PUT /api/posts/:id/like               |
 | `secretLimiter`         | 5 min  | 20  | GET /api/secretenv                    |
 | `searchLimiter`         | 1 min  | 60  | GET /api/users/search                 |
+| `codingLimiter`         | 5 min  | 20  | POST /api/coding/run                  |
+| `codeRunnerLimiter`     | 1 min  | 30  | `/api/coding/runner/*` (per user, not per IP) |
 
 `app.set('trust proxy', 1)` is set in `index.js` — Northflank sits behind one Cloudflare hop.
 
@@ -221,6 +227,34 @@ Three components work together:
 3. **`analyticsService.js`** — stores visits in the `Visit` collection. Stats queries use MongoDB aggregation pipelines. Visitor display names are generated with `uniqueNamesGenerator` using a deterministic seed (fingerprint or `ipAddress-visitorId`) so the same visitor always gets the same nickname across requests.
 
 `monitoring.js` exports `monitor` (AnalyticsMonitor singleton — tracks avg processing time, error rate, health) and `rateLimiter` (in-memory per-IP rate limiter for the track endpoint, separate from `express-rate-limit`).
+
+---
+
+## Code runner logs
+
+`services/codeRunnerService.js` writes one JSON line per event, all with `"scope":"code-runner"`. Use them to see how the on-demand runner behaves and where it needs tuning.
+
+| Event                 | Fields                                              | Tells you                                             |
+| --------------------- | --------------------------------------------------- | ----------------------------------------------------- |
+| `start_requested`     | `trigger` (`session`, `run`, `hold`), `userId`      | How often the VM starts, and what woke it             |
+| `ready`               | `startupSeconds`                                    | How long people wait on a start                       |
+| `run_rejected`        | `userId`, `state`, `dailyLimitReached`              | Runs that were told to wait (should be rare)          |
+| `hold`                | `userId`, `minutes`, `keepUntil`                    | Admin holds                                           |
+| `stopped`             | `reason`, `onSeconds`, `usageDay`, `usageMinutes`   | How long each session ran, and the day's total on-time |
+| `daily_limit_blocked` | `trigger`, `userId`, `usageMinutes`                 | The daily cap is being hit, raise it or look for abuse |
+| `start_failed`, `power_state_failed`, `stop_check_failed` | `message` | Azure calls failing                                   |
+
+In Log Analytics (`adorio-prod-env-logs`):
+
+```kusto
+ContainerAppConsoleLogs_CL
+| where Log_s startswith '{"scope":"code-runner"'
+| extend e = parse_json(Log_s)
+| project TimeGenerated, event = tostring(e.event), e
+| order by TimeGenerated desc
+```
+
+The VM's own idle backstop logs to its journal: `journalctl -u piston-idle-stop.service` through `az vm run-command invoke`.
 
 ---
 
@@ -292,6 +326,11 @@ Loaded by `config/environment.js`, which resolves the repo root from its own fil
 | `CLIENT_URL`           | Dynamically added to CORS allowed origins                      |
 | `LEADERBOARD_MAX_AGE_DAYS` | Leaderboard only shows scores played within this window (default 30) |
 | `TEST_USER_TTL_MINUTES` | Janitor deletes test-pattern accounts older than this (default 60) |
+| `PISTON_URL` / `PISTON_TOKEN` / `PISTON_CA_CERT` | Piston endpoint, shared auth token, pinned TLS cert |
+| `PISTON_VM_RESOURCE_ID` | Azure resource id of the Piston VM. Set only on the Azure Container App; when set, the backend starts and deallocates the VM |
+| `PISTON_CONTROL_CLIENT_ID` | Client id of the managed identity allowed to do that |
+| `PISTON_IDLE_MINUTES`   | How long the VM stays on after the last run (default 30) |
+| `PISTON_DAILY_LIMIT_MINUTES` | Most minutes per UTC day the VM may be on without an admin hold (default 480) |
 | `CLOUDINARY_NAME`      | Cloudinary cloud name                                          |
 | `CLOUDINARY_KEY`       | Cloudinary API key                                             |
 | `CLOUDINARY_SECRET`    | Cloudinary API secret                                          |
