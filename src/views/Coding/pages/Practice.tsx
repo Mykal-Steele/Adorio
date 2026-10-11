@@ -77,7 +77,10 @@ const Practice = ({ classId }: PracticeProps) => {
   const runnerUnavailable =
     runnerNotReady &&
     (runnerStatus?.state === 'offline' || Boolean(runnerStatus?.dailyLimitReached));
-  const runnerStarting = runnerNotReady && !runnerUnavailable;
+  // Once the start has timed out, Run goes back to asking the server, which
+  // retries the start and answers with the real state.
+  const runnerStarting = runnerNotReady && !runnerUnavailable && !runnerTimedOut;
+  const runnerReady = runnerStatus?.state === 'ready';
   const getRunBlockedLabel = () => {
     if (runnerUnavailable) return 'Runner offline';
     if (runnerStarting && runQueued) return 'Queued…';
@@ -158,6 +161,8 @@ const Practice = ({ classId }: PracticeProps) => {
 
   const handleProblemSelect = useCallback(
     (problemId: string) => {
+      // A queued run belongs to the problem it was pressed on.
+      setRunQueued(false);
       flushCurrentCode();
       setActiveProblemId(problemId);
       setLastActiveProblem(classId, problemId);
@@ -167,6 +172,7 @@ const Practice = ({ classId }: PracticeProps) => {
 
   const handleLanguageChange = useCallback(
     (nextLanguage: string) => {
+      setRunQueued(false);
       flushCurrentCode();
       setLanguage(nextLanguage);
     },
@@ -285,11 +291,18 @@ const Practice = ({ classId }: PracticeProps) => {
 
   // Declared after the ref sync above so the queued run uses the handler from
   // this render, the one that already sees the runner as ready.
+  // Only a confirmed "ready" releases the queue. If the start stops being in
+  // progress any other way (offline, timed out, status unknown) the queued
+  // run is dropped rather than fired at a runner that may not be there.
   useEffect(() => {
-    if (!runQueued || runnerNotReady) return;
-    setRunQueued(false);
-    handleRunTestsRef.current();
-  }, [runQueued, runnerNotReady]);
+    if (!runQueued) return;
+    if (runnerReady) {
+      setRunQueued(false);
+      handleRunTestsRef.current();
+    } else if (!runnerStarting) {
+      setRunQueued(false);
+    }
+  }, [runQueued, runnerReady, runnerStarting]);
 
   // Ctrl/Cmd+Enter runs the tests from anywhere on the page — the standard
   // shortcut on LeetCode/HackerRank, so there's no mouse round-trip to Run.
