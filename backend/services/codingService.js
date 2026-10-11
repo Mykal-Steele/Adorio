@@ -2,6 +2,7 @@ import ApiError from '../utils/ApiError.js';
 import validate from '../utils/validate.js';
 import { codingRunSchema } from '../schemas/index.js';
 import { environment } from '../config/environment.js';
+import { prepareRunnerForSubmission } from './codeRunnerService.js';
 
 const pistonHeaders = () => ({
   'Content-Type': 'application/json',
@@ -159,6 +160,7 @@ const buildTestResult = (test, submission, duration) => {
 export const runSubmission = async ({ problemId, language, code, tests }) => {
   const validated = validate(codingRunSchema, { problemId, language, code, tests });
   const config = LANGUAGE_CONFIG[validated.language];
+  await prepareRunnerForSubmission();
   const version = await resolveVersion(validated.language);
 
   const [firstTest, ...restTests] = validated.tests;

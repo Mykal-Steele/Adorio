@@ -10,11 +10,14 @@ import ProblemList from '../components/ProblemList';
 import ProblemDetails from '../components/ProblemDetails';
 import ResultsPanel from '../components/ResultsPanel';
 import TestResults from '../components/TestResults';
+import RunnerStatus from '../components/RunnerStatus';
 import { getProblemsByClass } from '../problems';
 import { getClass } from '../constants/classes';
 import { CodeRunner, type ExecuteResult } from '../CodeRunner';
 import type { LanguageVariant } from '../types';
 import { withFriendlyRetryNote } from '../utils/errorMessages';
+import { useCodeRunner } from '../hooks/useCodeRunner';
+import { useAppSelector } from '@/store/hooks';
 import {
   loadProgress,
   saveCode,
@@ -56,6 +59,22 @@ const Practice = ({ classId }: PracticeProps) => {
   const [isRunning, setIsRunning] = useState(false);
   const [editorKey, setEditorKey] = useState(0);
   const [solvedIds, setSolvedIds] = useState<Set<string>>(() => new Set());
+
+  // JavaScript problems ('call') run in the browser. Only the Java/Python
+  // ones ('stdio') need the server-side runner switched on.
+  const isAdmin = useAppSelector((state) => Boolean(state.user.user?.isAdmin));
+  const {
+    status: runnerStatus,
+    timedOut: runnerTimedOut,
+    wake: wakeRunner,
+    hold: holdRunner,
+  } = useCodeRunner(activeVariant?.kind === 'stdio');
+  const getRunBlockedLabel = () => {
+    if (!runnerStatus || runnerStatus.state === 'ready') return null;
+    if (runnerStatus.state === 'offline' || runnerStatus.dailyLimitReached) return 'Runner offline';
+    return 'Runner starting…';
+  };
+  const runBlockedLabel = getRunBlockedLabel();
 
   // Any in-flight run is only allowed to write its results if nothing has
   // superseded it since — a code edit, a reset, or switching problem/language.
@@ -166,7 +185,7 @@ const Practice = ({ classId }: PracticeProps) => {
   );
 
   const handleRunTests = useCallback(async () => {
-    if (!activeProblem || !activeVariant || isRunning) return;
+    if (!activeProblem || !activeVariant || isRunning || runBlockedLabel) return;
 
     const problemId = activeProblem.id;
     const runLanguage = language;
@@ -199,6 +218,9 @@ const Practice = ({ classId }: PracticeProps) => {
           ? (err as { statusCode?: number }).statusCode
           : undefined;
       const isAuthError = statusCode === 401 || statusCode === 403;
+      // 409 is the server saying the runner was off (it idled out while this
+      // page sat open). The server has already started it; follow it again.
+      if (statusCode === 409) wakeRunner();
       const rawMessage =
         err instanceof Error ? err.message : 'Failed to run your code. Please try again.';
       testResults = {
@@ -219,7 +241,16 @@ const Practice = ({ classId }: PracticeProps) => {
     saveRunResult(problemId, runLanguage, codeSnapshot, testResults);
     recomputeSolved();
     setIsRunning(false);
-  }, [activeProblem, activeVariant, language, code, isRunning, recomputeSolved]);
+  }, [
+    activeProblem,
+    activeVariant,
+    language,
+    code,
+    isRunning,
+    runBlockedLabel,
+    wakeRunner,
+    recomputeSolved,
+  ]);
 
   const handleReset = useCallback(() => {
     if (!activeProblem || !activeVariant) return;
@@ -323,12 +354,21 @@ const Practice = ({ classId }: PracticeProps) => {
                   onLanguageChange={handleLanguageChange}
                 />
 
+                <RunnerStatus
+                  status={runnerStatus}
+                  timedOut={runnerTimedOut}
+                  isAdmin={isAdmin}
+                  onRetry={wakeRunner}
+                  onHold={holdRunner}
+                />
+
                 <ResultsPanel
                   key={`${activeProblem.id}-${language}`}
                   results={results}
                   isRunning={isRunning}
                   onRunTests={handleRunTests}
                   onReset={handleReset}
+                  runBlockedLabel={runBlockedLabel}
                 />
 
                 <TestResults results={results} isRunning={isRunning} />

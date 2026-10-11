@@ -81,7 +81,8 @@ export const storeSecret = (message, password) =>
   request(API.post('/secretenv', { message, password }));
 
 export { sendContactMessage } from './contact';
-export { runCodingSubmission } from './coding';
+export { runCodingSubmission, requestCodeRunnerSession, holdCodeRunner } from './coding';
+export type { CodeRunnerState, CodeRunnerStatus } from './coding';
 export { getPosts, createPost, likePost, addComment, getSinglePost } from './posts';
 export {
   uploadHostedFile,
