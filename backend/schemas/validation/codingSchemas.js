@@ -16,3 +16,15 @@ export const codingRunSchema = z
     tests: z.array(stdioTestCaseSchema).min(1).max(30),
   })
   .strict();
+
+// 4 hours is the longest a single hold can keep the runner on. The VM's own
+// idle backstop (idleBackstopSeconds in infra/piston.bicep) is set above this.
+export const codeRunnerHoldSchema = z
+  .object({
+    minutes: z
+      .number({ error: () => 'minutes must be a number' })
+      .int('minutes must be a whole number')
+      .min(15, 'A hold must be at least 15 minutes')
+      .max(240, 'A hold can be at most 4 hours'),
+  })
+  .strict();

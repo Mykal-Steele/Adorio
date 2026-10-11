@@ -88,6 +88,7 @@ The backend, Next.js standalone server, and Nginx all run in the same Docker con
 - **Deploys**: a separate user-assigned managed identity authenticates GitHub Actions via OIDC (no stored secret) with `AcrPush` + `Container Registry Tasks Contributor` (registry-scoped) and `Container Apps Contributor` (resource-group-scoped) — see `infra/main.bicep`
 - **Infra as code**: `infra/main.bicep` (app stack: environment, registry, container app, identities, RBAC) and `infra/budget.bicep` (subscription cost budget) — both applied manually via `az deployment group create` / `az deployment sub create`, **not** run automatically by CI. `infra/main.bicep`'s `containerImage` parameter has no default on purpose — always pass the currently-running image explicitly when re-applying it, or it'll reset the live app
 - **Budget guardrail**: subscription-level Azure Cost Management budget, $150/mo, email alerts at 50/80/100% actual spend and 100% forecasted — alert-only, does not cap or throttle spend automatically
+- **Code runner (Piston)**: one VM, `adorio-piston-vm` (`Standard_D4as_v5`), defined in `infra/piston.bicep`. It is deallocated whenever nobody is running Java/Python code, so it bills by the hour of real use. The backend starts it when a logged-in user opens a Java/Python problem, keeps it on for `PISTON_IDLE_MINUTES` (30) after each run, and deallocates it after that (`backend/services/codeRunnerService.js`). An admin can hold it on for a class from the practice page. Safeguards: a daily on-time cap (`PISTON_DAILY_LIMIT_MINUTES`, 480), and a timer on the VM itself that deallocates it after 5 hours without a submission in case the backend never does. The backend acts through its own identity (`adorio-piston-control-identity`) with a custom role limited to read, start, and deallocate on that one VM
 - **Database**: MongoDB Atlas (connection via `MONGO_URI`)
 - **Images**: Cloudinary
 
@@ -187,6 +188,10 @@ All backend code uses ES Modules (`"type": "module"`). The pattern is strict **C
 
 **Rate limits**: 300 req/15 min general; 30 req/10 min for post creation; 60 req/1 min for likes; 20 req/5 min for secret message retrieval.
 
+**Never answer 5xx for "the code runner is off or starting".** The Cloudflare failover worker treats any 5xx from the Azure backend as the primary being down, and two in a row fail the whole site over to Northflank. `/api/coding/run` answers 409 with `details.code = 'RUNNER_NOT_READY'` instead, and the runner status routes always answer 200 with a `state`.
+
+**The Northflank failover copy cannot start the code runner** (it has no Azure identity, and `PISTON_VM_RESOURCE_ID` is not set there). It reports the runner as `offline` unless the VM happens to be on, and the practice page shows a maintenance message. This is intended.
+
 **SecretEnv (`GET /api/secretenv`) is intentionally unauthenticated** — it is a personal, curl-friendly encrypted message saver. The password hash protects the content. Do not add auth middleware to this route.
 
 **Error handling pattern**: Frontend API layer uses Axios interceptor to catch all errors. Each API function uses a single `request()` wrapper that extracts `response.data`. Backend services throw `ApiError` instances; `asyncHandler` catches and forwards to Express error middleware. No manual try-catch unless handling specific cases (like debounced likes or fallback responses for anonymous users).
@@ -214,6 +219,9 @@ A separate React/TypeScript app built independently and served at `/cao/`. It ha
 | `MONGO_URI`                      | Backend                   | MongoDB Atlas connection string                          |
 | `JWT_SECRET`                     | Backend                   | Signs access tokens                                      |
 | `REFRESH_TOKEN_SECRET`           | Backend                   | Signs refresh tokens (falls back to `JWT_SECRET`)        |
+| `PISTON_URL/TOKEN/CA_CERT`       | Backend                   | Where Piston is, its shared token, its pinned TLS cert   |
+| `PISTON_VM_RESOURCE_ID`          | Backend (Azure only)      | Turns on start/stop control of the Piston VM             |
+| `PISTON_CONTROL_CLIENT_ID`       | Backend (Azure only)      | Which managed identity to use for that control           |
 | `CLIENT_URL`                     | Backend                   | CORS allowed origin                                      |
 | `CLOUDINARY_NAME/KEY/SECRET/URL` | Backend + Frontend        | Image upload/CDN                                         |
 | `VITE_GEMINI_API_KEY`            | ai-slop build             | Gemini API for exam prep                                 |

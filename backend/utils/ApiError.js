@@ -25,6 +25,10 @@ class ApiError extends Error {
     return new ApiError(message, 404);
   }
 
+  static conflict(message = 'Conflict', details) {
+    return new ApiError(message, 409, details);
+  }
+
   static tooManyRequests(message = 'Too many requests') {
     return new ApiError(message, 429);
   }

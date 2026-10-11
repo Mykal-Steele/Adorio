@@ -155,7 +155,7 @@ Both sections below need these. Skip if you already have them.
 
   Bicep support (`az bicep build`, `az deployment group create`) comes bundled, `az` installs it on first use if it's missing.
 
-- **An SSH key pair**, for Piston's admin access. Skip if you already have one:
+- **An SSH key pair**. Azure needs a public key to create the Piston VM, though the VM accepts no inbound SSH (use `az vm run-command invoke` to run commands on it). Skip if you already have one:
 
   ```bash
   ssh-keygen -t ed25519 -f ~/.ssh/adorio-piston -C "your-email@example.com"
@@ -182,7 +182,6 @@ Runs Java/Python submissions on the Coding page. No shared instance, you deploy 
    PISTON_RESOURCE_GROUP=your-resource-group
    PISTON_AUTH_TOKEN=<openssl rand -hex 32>
    PISTON_ADMIN_SSH_PUBLIC_KEY=<contents of ~/.ssh/adorio-piston.pub from the prerequisites above>
-   PISTON_SSH_SOURCE_ADDRESS_PREFIX=<your IP, CIDR form, e.g. 203.0.113.4/32>
    ```
 
    `infra/.secrets/` is gitignored, keep it that way.
@@ -196,13 +195,14 @@ Runs Java/Python submissions on the Coding page. No shared instance, you deploy 
      --template-file infra/piston.bicep \
      --parameters \
        adminSshPublicKey="$PISTON_ADMIN_SSH_PUBLIC_KEY" \
-       sshSourceAddressPrefix="$PISTON_SSH_SOURCE_ADDRESS_PREFIX" \
        pistonAuthToken="$PISTON_AUTH_TOKEN" \
        pistonTlsCert="$(cat infra/.secrets/piston-tls-cert.pem)" \
        pistonTlsKey="$(cat infra/.secrets/piston-tls-key.pem)"
    ```
 
-   Provisions a VM scale set behind a load balancer, installs Docker, boots Piston with Java and Python packages. Takes a few minutes. Use `az vmss run-command invoke` to check boot status if it's slow.
+   Provisions one VM with a static public IP, installs Docker, and boots Piston with Java and Python packages. Takes a few minutes. Use `az vm run-command invoke` to check boot status if it's slow.
+
+   The VM bills by the hour while it runs, and only for its disk and IP (about $6 a month) while deallocated. Left alone it deallocates itself after 5 hours without a submission.
 
 3. Set in `.env.development`, using the FQDN the deploy gives you:
 
@@ -214,13 +214,17 @@ Runs Java/Python submissions on the Coding page. No shared instance, you deploy 
 
    `PISTON_CA_CERT` is only enforced in production, optional locally.
 
-4. Changing the boot script: cloud-init only runs on first boot. Redeploying the template alone won't apply it, you need to also reimage:
+4. (Optional) Let the backend switch the VM on and off. Without this the VM is simply on or off, and the Coding page says the runner is offline while it is off. With it, opening a Java/Python problem starts the VM, each run keeps it on for 30 more minutes, and the backend deallocates it once idle.
+
+   This works only on Azure Container Apps, because it uses the app's managed identity. Pass three outputs of the deploy above to `infra/main.bicep`: `pistonVmResourceId`, `runnerControlIdentityId`, and `runnerControlIdentityClientId`.
+
+5. Changing the boot script: cloud-init only runs on first boot. Redeploying the template alone won't apply it, you need to also reimage:
 
    ```bash
-   az vmss reimage -g "$PISTON_RESOURCE_GROUP" -n adorio-piston-vmss --instance-ids 0
+   az vm reimage -g "$PISTON_RESOURCE_GROUP" -n adorio-piston-vm
    ```
 
-   Java/Python submissions go down briefly while that instance reprovisions.
+   Java/Python submissions go down while the VM reprovisions.
 
 ## Deploying your own copy to Azure
 
