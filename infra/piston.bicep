@@ -16,11 +16,8 @@ param dnsLabel string = name
 @description('Admin username for SSH')
 param adminUsername string = 'adorio'
 
-@description('SSH public key for the admin user (password auth is disabled)')
+@description('SSH public key for the admin user. Azure needs one to create a Linux VM with password login disabled, but nothing can reach port 22: the network security group below has no SSH rule. Use "az vm run-command invoke" to run commands on the VM.')
 param adminSshPublicKey string
-
-@description('CIDR allowed to SSH in, e.g. "203.0.113.4/32"')
-param sshSourceAddressPrefix string
 
 @secure()
 @description('Shared secret every request must send as X-Auth-Token. Piston has no built-in auth, so the nginx sidecar enforces this instead')
@@ -342,6 +339,8 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-05-01' = {
   }
 }
 
+// The proxy port is the only way in. There is deliberately no SSH rule: the VM
+// has its own public IP, so one would put port 22 on the internet.
 resource nsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   name: '${name}-nsg'
   location: location
@@ -357,19 +356,6 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
           sourcePortRange: '*'
           destinationPortRange: string(proxyPort)
           sourceAddressPrefix: '*'
-          destinationAddressPrefix: '*'
-        }
-      }
-      {
-        name: 'allow-ssh-admin-only'
-        properties: {
-          priority: 110
-          direction: 'Inbound'
-          access: 'Allow'
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '22'
-          sourceAddressPrefix: sshSourceAddressPrefix
           destinationAddressPrefix: '*'
         }
       }
