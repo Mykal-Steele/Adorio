@@ -47,7 +47,7 @@ param cloudinaryUrl string
 param resendApiKey string
 
 @secure()
-@description('Piston load balancer URL (from piston.bicep outputs), e.g. https://adorio-piston.<region>.cloudapp.azure.com:2358')
+@description('Piston URL (pistonUrl output of piston.bicep), e.g. https://adorio-piston.<region>.cloudapp.azure.com:2358')
 param pistonUrl string
 
 @secure()
@@ -55,8 +55,17 @@ param pistonUrl string
 param pistonToken string
 
 @secure()
-@description('Self-signed TLS cert (PEM, fullchain) baked into every Piston instance via piston.bicep\'s pistonTlsCert. Pinned here as an extra trusted CA (NODE_EXTRA_CA_CERTS) so the backend can verify HTTPS to Piston without a public CA.')
+@description('Self-signed TLS cert (PEM, fullchain) baked into the Piston VM via piston.bicep\'s pistonTlsCert. Pinned here as an extra trusted CA so the backend can verify HTTPS to Piston without a public CA.')
 param pistonCaCert string
+
+@description('Resource id of the Piston VM (pistonVmResourceId output of piston.bicep). Setting this is what lets the backend start the VM on demand and deallocate it when idle.')
+param pistonVmResourceId string
+
+@description('Resource id of the identity allowed to start and stop the Piston VM (runnerControlIdentityId output of piston.bicep)')
+param runnerControlIdentityId string
+
+@description('Client id of that same identity (runnerControlIdentityClientId output of piston.bicep). The app has two identities, so the backend has to say which one it means.')
+param runnerControlIdentityClientId string
 
 param clientUrl string = 'https://adorio.space'
 param cloudinaryName string
@@ -120,6 +129,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
     type: 'UserAssigned'
     userAssignedIdentities: {
       '${containerAppPullIdentity.id}': {}
+      '${runnerControlIdentityId}': {}
     }
   }
   // Bicep can't infer this from the identity block above (role assignments aren't
@@ -180,6 +190,8 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'PISTON_URL', secretRef: 'piston-url' }
             { name: 'PISTON_TOKEN', secretRef: 'piston-token' }
             { name: 'PISTON_CA_CERT', secretRef: 'piston-ca-cert' }
+            { name: 'PISTON_VM_RESOURCE_ID', value: pistonVmResourceId }
+            { name: 'PISTON_CONTROL_CLIENT_ID', value: runnerControlIdentityClientId }
           ]
           probes: [
             {
