@@ -202,7 +202,9 @@ Runs Java/Python submissions on the Coding page. No shared instance, you deploy 
        pistonTlsKey="$(cat infra/.secrets/piston-tls-key.pem)"
    ```
 
-   Provisions a VM scale set behind a load balancer, installs Docker, boots Piston with Java and Python packages. Takes a few minutes. Use `az vmss run-command invoke` to check boot status if it's slow.
+   Provisions one VM with a static public IP, installs Docker, and boots Piston with Java and Python packages. Takes a few minutes. Use `az vm run-command invoke` to check boot status if it's slow.
+
+   The VM bills by the hour while it runs, and only for its disk and IP (about $6 a month) while deallocated. Left alone it deallocates itself after 5 hours without a submission.
 
 3. Set in `.env.development`, using the FQDN the deploy gives you:
 
@@ -214,13 +216,17 @@ Runs Java/Python submissions on the Coding page. No shared instance, you deploy 
 
    `PISTON_CA_CERT` is only enforced in production, optional locally.
 
-4. Changing the boot script: cloud-init only runs on first boot. Redeploying the template alone won't apply it, you need to also reimage:
+4. (Optional) Let the backend switch the VM on and off. Without this the VM is simply on or off, and the Coding page says the runner is offline while it is off. With it, opening a Java/Python problem starts the VM, each run keeps it on for 30 more minutes, and the backend deallocates it once idle.
+
+   This works only on Azure Container Apps, because it uses the app's managed identity. Pass three outputs of the deploy above to `infra/main.bicep`: `pistonVmResourceId`, `runnerControlIdentityId`, and `runnerControlIdentityClientId`.
+
+5. Changing the boot script: cloud-init only runs on first boot. Redeploying the template alone won't apply it, you need to also reimage:
 
    ```bash
-   az vmss reimage -g "$PISTON_RESOURCE_GROUP" -n adorio-piston-vmss --instance-ids 0
+   az vm reimage -g "$PISTON_RESOURCE_GROUP" -n adorio-piston-vm
    ```
 
-   Java/Python submissions go down briefly while that instance reprovisions.
+   Java/Python submissions go down while the VM reprovisions.
 
 ## Deploying your own copy to Azure
 

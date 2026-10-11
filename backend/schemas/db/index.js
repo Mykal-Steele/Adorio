@@ -7,3 +7,4 @@ export { default as hostedFileSchema } from './hostedFileSchema.js';
 export { default as financeSettingsSchema } from './financeSettingsSchema.js';
 export { default as financeCategorySchema } from './financeCategorySchema.js';
 export { default as financeTransactionSchema } from './financeTransactionSchema.js';
+export { default as codeRunnerStateSchema } from './codeRunnerStateSchema.js';

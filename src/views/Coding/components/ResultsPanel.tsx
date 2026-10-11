@@ -7,6 +7,9 @@ interface ResultsPanelProps {
   isRunning: boolean;
   onRunTests: () => void;
   onReset: () => void;
+  // Set while the server-side runner can't take a run (still starting,
+  // offline). Shown on the Run button in place of its usual label.
+  runBlockedLabel?: string | null;
 }
 
 type Tone = 'pass' | 'warn' | 'error';
@@ -31,7 +34,13 @@ const TONE_CLASS: Record<Tone, string> = {
 
 const TONE_ICON: Record<Tone, string> = { pass: '✓', warn: '▲', error: '✗' };
 
-const ResultsPanel = ({ results, isRunning, onRunTests, onReset }: ResultsPanelProps) => {
+const ResultsPanel = ({
+  results,
+  isRunning,
+  onRunTests,
+  onReset,
+  runBlockedLabel = null,
+}: ResultsPanelProps) => {
   const [confirmingReset, setConfirmingReset] = useState(false);
   const summary = getSummary(results);
 
@@ -88,12 +97,12 @@ const ResultsPanel = ({ results, isRunning, onRunTests, onReset }: ResultsPanelP
 
         <button
           onClick={onRunTests}
-          disabled={isRunning}
+          disabled={isRunning || Boolean(runBlockedLabel)}
           title="Run tests (Ctrl/⌘+Enter)"
           className="flex -rotate-[0.6deg] items-center gap-1.5 rounded-[4px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-[13px] font-bold uppercase tracking-[.1em] shadow-[3px_4px_0_var(--paper-ink)] transition-transform hover:-translate-y-px disabled:opacity-60"
         >
           <PlayIcon className="h-4 w-4" />
-          {isRunning ? 'Running…' : 'Run tests'}
+          {runBlockedLabel ?? (isRunning ? 'Running…' : 'Run tests')}
         </button>
       </div>
     </div>

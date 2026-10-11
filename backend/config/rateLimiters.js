@@ -97,6 +97,22 @@ const codingLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Code runner status/start limiter - 30 requests per minute per user. These
+// routes are login-only, and a whole class often shares one school IP, so
+// this counts per account instead of per IP. A page waiting on a start polls
+// about 6 times a minute.
+const codeRunnerLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  keyGenerator: (req) => req.user.id,
+  message: {
+    error: 'Too many code runner requests, please slow down.',
+    retryAfter: '1 minute',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Mention autocomplete limiter - 60 searches per minute per IP. Typing one
 // name fires a debounced burst of ~4-8 requests, so this is generous for
 // humans but stops scripts from dumping the user collection.
@@ -133,6 +149,7 @@ export {
   secretLimiter,
   uploadLimiter,
   codingLimiter,
+  codeRunnerLimiter,
   searchLimiter,
   financeWriteLimiter,
 };
