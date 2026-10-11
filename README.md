@@ -216,7 +216,7 @@ Runs Java/Python submissions on the Coding page. No shared instance, you deploy 
 
 4. (Optional) Let the backend switch the VM on and off. Without this the VM is simply on or off, and the Coding page says the runner is offline while it is off. With it, opening a Java/Python problem starts the VM, each run keeps it on for 30 more minutes, and the backend deallocates it once idle.
 
-   This works only on Azure Container Apps, because it uses the app's managed identity. Pass three outputs of the deploy above to `infra/main.bicep`: `pistonVmResourceId`, `runnerControlIdentityId`, and `runnerControlIdentityClientId`.
+   This works only on Azure Container Apps, because it uses the app's managed identity. Pass two names to `infra/main.bicep`: `pistonVmName=adorio-piston-vm` and `runnerControlIdentityName=adorio-piston-control-identity` (`infra/main.bicepparam` already sets both).
 
 5. Changing the boot script: cloud-init only runs on first boot. Redeploying the template alone won't apply it, you need to also reimage:
 
