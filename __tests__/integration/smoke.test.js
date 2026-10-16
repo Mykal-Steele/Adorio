@@ -46,7 +46,7 @@ describe('Smoke, Environment, Security, SEO, Performance', () => {
       const jsErrors = [];
       page.on('pageerror', (err) => jsErrors.push(err.message));
       await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
-      expect(await page.title()).toBe('Oakar Oo — Full-Stack Developer | Adorio');
+      expect(await page.title()).toBe('Oakar Oo — Backend & Full-Stack Developer | Adorio');
       expect(jsErrors).toHaveLength(0);
       await page.close();
     }, 30_000);
