@@ -1,7 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, GithubIcon, LinkedinIcon, Mail, AlertCircle } from 'lucide-react';
+import {
+  Send,
+  GithubIcon,
+  LinkedinIcon,
+  Mail,
+  AlertCircle,
+  Facebook,
+  Instagram,
+  Code,
+  Coffee,
+} from 'lucide-react';
 import { sendContactMessage } from '../../../api';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
@@ -35,6 +45,42 @@ const channels = [
     href: `mailto:${portfolioData.email}`,
     description: 'Fastest way to reach me.',
     color: 'var(--ide-accent)',
+  },
+  {
+    id: 'facebook',
+    icon: <Facebook size={16} />,
+    label: 'Facebook',
+    value: portfolioData.facebook,
+    href: `https://${portfolioData.facebook}`,
+    description: 'Posts and event updates.',
+    color: '#1877f2',
+  },
+  {
+    id: 'instagram',
+    icon: <Instagram size={16} />,
+    label: 'Instagram',
+    value: portfolioData.instagram,
+    href: `https://${portfolioData.instagram}`,
+    description: 'Personal side.',
+    color: '#e1306c',
+  },
+  {
+    id: 'gist',
+    icon: <Code size={16} />,
+    label: 'Gist',
+    value: portfolioData.gist,
+    href: `https://${portfolioData.gist}`,
+    description: 'Snippets and notes.',
+    color: 'var(--ide-text-1)',
+  },
+  {
+    id: 'coffee',
+    icon: <Coffee size={16} />,
+    label: 'Buy Me a Coffee',
+    value: portfolioData.buymeacoffee,
+    href: `https://${portfolioData.buymeacoffee}`,
+    description: 'Support the work.',
+    color: '#ffdd00',
   },
 ];
 

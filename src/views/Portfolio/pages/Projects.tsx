@@ -129,6 +129,19 @@ export function Projects() {
                   <Badge color={sc.color} bg={sc.bg}>
                     {sc.label}
                   </Badge>
+                  {proj.aiAssisted && (
+                    <div
+                      style={{
+                        fontSize: 8,
+                        fontFamily: mono,
+                        color: 'var(--ide-purple)',
+                        marginTop: 4,
+                        letterSpacing: '0.08em',
+                      }}
+                    >
+                      AI-ASSISTED
+                    </div>
+                  )}
                 </div>
                 {!isMobile && (
                   <>

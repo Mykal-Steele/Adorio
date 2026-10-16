@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { Dashboard } from '@/views/Portfolio/pages/Dashboard';
 
 export const metadata: Metadata = {
-  title: 'Oakar Oo — Full-Stack Developer',
+  title: 'Oakar Oo — Backend & Full-Stack Developer',
   description:
-    'Full-stack developer based in Bangkok. I build CLI tools, web apps, and backend services with TypeScript, Go, Rust, and Bun.',
+    'Backend and full-stack developer based in Bangkok. I build CLI tools, web apps, and backend services with TypeScript, Java, and Bun.',
   keywords: [
     'Oakar Oo',
     'full-stack developer',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     'portfolio',
   ],
   openGraph: {
-    title: 'Oakar Oo — Full-Stack Developer',
+    title: 'Oakar Oo — Backend & Full-Stack Developer',
     description: 'Portfolio IDE: projects, stack, and open to opportunities.',
     url: 'https://adorio.space',
     siteName: 'Oakar Oo',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Oakar Oo — Full-Stack Developer',
+    title: 'Oakar Oo — Backend & Full-Stack Developer',
     description: 'Portfolio IDE: projects, stack, and open to opportunities.',
     images: ['https://i.ibb.co/KxH3wXDS/download-3.png'],
   },
