@@ -62,6 +62,20 @@ function getCodeSnippet(id: string) {
         },
         { n: '08', code: `    return risk_weighted(scores, replies, lam)`, type: 'normal' },
       ];
+    case 'cozytalk':
+      return [
+        { n: '01', code: `final room = ref.watch(matchmakingProvider);`, type: 'normal' },
+        { n: '02', code: `if (room.theme != null) applyTheme(room.theme);`, type: 'field' },
+        { n: '03', code: ``, type: 'empty' },
+        { n: '04', code: `// jukebox: shared music moved to YouTube`, type: 'comment' },
+        { n: '05', code: `await jukebox.play(room.track.youtubeId);`, type: 'field' },
+      ];
+    case 'titanic':
+      return [
+        { n: '01', code: `# explored in Orange, not code:`, type: 'comment' },
+        { n: '02', code: `# transport groups, cabin decks, spend features`, type: 'comment' },
+        { n: '03', code: `# presented with scatter plots`, type: 'comment' },
+      ];
     case 'archmaster':
       return [
         { n: '01', code: `const chunks = rankChunks(question, notes);`, type: 'normal' },
