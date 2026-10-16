@@ -42,8 +42,8 @@ export function About() {
             Open to Opportunities
           </Badge>
           <a
-            href="/OakarResume.pdf"
-            download="OakarResume.pdf"
+            href="/resume"
+            download="Oakar-Oo-Resume.pdf"
             className="flex items-center gap-1.5 transition-opacity hover:opacity-80"
             style={{
               fontSize: 9,
