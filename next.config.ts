@@ -30,6 +30,11 @@ const config: NextConfig = {
     ];
   },
 
+  // Old static resume path now served by the /resume proxy route.
+  async redirects() {
+    return [{ source: '/OakarResume.pdf', destination: '/resume', permanent: true }];
+  },
+
   async headers() {
     return [
       {
