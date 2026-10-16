@@ -18,7 +18,7 @@ const bootLines: TermLine[] = [
   { prefix: '$ ', text: 'whoami', color: 'var(--ide-accent)' },
   {
     prefix: '  ',
-    text: `oakar oo, Full-Stack Developer, KMUTT Bangkok`,
+    text: `oakar oo, Backend & Full-Stack Developer, KMUTT Bangkok`,
     color: 'var(--ide-accent-light)',
   },
   { prefix: '$ ', text: 'init --portfolio', color: 'var(--ide-accent)' },
@@ -125,22 +125,22 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
     stack: () => [
       {
         prefix: '  ',
-        text: 'Languages:  TypeScript · JavaScript · Go · Python · C++',
+        text: 'Languages:  TypeScript · JavaScript · Java · SQL · Go · Python',
         color: 'var(--ide-accent-light)',
       },
       {
         prefix: '  ',
-        text: 'Frontend:   React · Next.js · Astro · Tailwind 4.0',
+        text: 'Frontend:   React · Next.js · Tailwind 3.x',
         color: 'var(--ide-orange)',
       },
       {
         prefix: '  ',
-        text: 'Backend:    Hono · Bun/Elysia · Express · Node.js',
+        text: 'Backend:    Hono · Bun · Express · Node.js',
         color: 'var(--ide-purple)',
       },
       {
         prefix: '  ',
-        text: 'Tools:      Docker · Prisma · Git · CLI Development',
+        text: 'Tools:      Docker · Prisma · Nginx · Azure · Git',
         color: 'var(--ide-blue)',
       },
     ],

@@ -4,18 +4,18 @@ import { Projects } from '@/views/Portfolio/pages/Projects';
 export const metadata: Metadata = {
   title: 'Projects — Oakar Oo',
   description:
-    'CLI tools, full-stack apps, and backend services. create-adorex, ChromaBoard, Vexta, DiscordForge, and more.',
+    'CLI tools, full-stack apps, and backend services. create-adorex, ChronoChunk, CozyTalk, Vexta, CogniMax, and more.',
   keywords: [
     'Oakar Oo',
     'projects',
     'create-adorex',
     'NPM CLI',
-    'ChromaBoard',
+    'ChronoChunk',
     'Vexta',
-    'DiscordForge',
+    'CozyTalk',
+    'CogniMax',
     'TypeScript',
-    'C++',
-    'Rust',
+    'Java',
     'open source',
   ],
   openGraph: {

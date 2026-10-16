@@ -4,7 +4,7 @@ import { About } from '@/views/Portfolio/pages/About';
 export const metadata: Metadata = {
   title: 'About — Oakar Oo',
   description:
-    'CS student at KMUTT Bangkok. Building CLI tools and full-stack apps with TypeScript, Go, and Rust.',
+    'CS student at KMUTT Bangkok. Building CLI tools and full-stack apps with TypeScript, Java, and Bun.',
   keywords: [
     'Oakar Oo',
     'about',
@@ -15,8 +15,7 @@ export const metadata: Metadata = {
     'GDG',
     'FOSSASIA',
     'TypeScript',
-    'Go',
-    'Rust',
+    'Java',
   ],
   openGraph: {
     title: 'About — Oakar Oo',
@@ -29,7 +28,7 @@ export const metadata: Metadata = {
         url: 'https://i.ibb.co/KxH3wXDS/download-3.png',
         width: 1200,
         height: 630,
-        alt: 'Oakar Oo — Full-Stack Developer',
+        alt: 'Oakar Oo — Backend & Full-Stack Developer',
       },
     ],
   },

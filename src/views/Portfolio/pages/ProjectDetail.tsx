@@ -17,6 +17,7 @@ const EXT_BY_LANGUAGE: Record<string, string> = {
   Dart: '.dart',
   'C#': '.cs',
   HTML: '.html',
+  Orange: '.ows',
 };
 
 function getCodeSnippet(id: string) {
@@ -210,6 +211,11 @@ export function ProjectDetail({ id }: { id: string }) {
             >
               ■ {project.status}
             </Badge>
+            {project.aiAssisted && (
+              <Badge color="var(--ide-purple)" bg="var(--ide-purple-a15)">
+                AI-ASSISTED
+              </Badge>
+            )}
             <span
               style={{
                 fontSize: 10,
