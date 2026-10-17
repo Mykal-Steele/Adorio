@@ -21,10 +21,15 @@ type CachedResume = {
 let cache: CachedResume | null = null;
 let inflight: Promise<CachedResume | null> | null = null;
 
+// `no-cache` still lets Cloudflare + browsers store the PDF but forces revalidation,
+// so this handler sees every visit.
+const CACHE_CONTROL = 'no-cache';
+
 // Drive returns no ETag, so we fingerprint the file from its Last-Modified + size.
+// A derived validator isn't guaranteed unique per representation, so it's marked weak.
 function fingerprint(lastModified: string | null, contentLength: string | null) {
   if (!lastModified && !contentLength) return null;
-  return `"${lastModified ?? ''}-${contentLength ?? ''}"`;
+  return `W/"${lastModified ?? ''}-${contentLength ?? ''}"`;
 }
 
 // Weak comparison (RFC 9110): `*` matches anything, a list matches if any tag does,
@@ -34,6 +39,18 @@ function etagMatches(header: string | null, etag: string) {
   if (header.trim() === '*') return true;
   const strip = (tag: string) => tag.trim().replace(/^W\//, '');
   return header.split(',').some((tag) => strip(tag) === strip(etag));
+}
+
+// If-None-Match takes precedence over If-Modified-Since (RFC 9110 §13.1.3).
+function isNotModified(request: Request, resume: CachedResume) {
+  const ifNoneMatch = request.headers.get('if-none-match');
+  if (ifNoneMatch) return resume.etag ? etagMatches(ifNoneMatch, resume.etag) : false;
+
+  const ifModifiedSince = request.headers.get('if-modified-since');
+  if (!ifModifiedSince || !resume.lastModified) return false;
+  const since = Date.parse(ifModifiedSince);
+  const modified = Date.parse(resume.lastModified);
+  return !Number.isNaN(since) && !Number.isNaN(modified) && modified <= since;
 }
 
 async function getDriveFingerprint() {
@@ -89,17 +106,17 @@ export async function GET(request: Request) {
     return NextResponse.redirect(DRIVE_VIEW_URL, 302);
   }
 
-  if (resume.etag && etagMatches(request.headers.get('if-none-match'), resume.etag)) {
-    return new Response(null, {
-      status: 304,
-      headers: { ETag: resume.etag, 'Cache-Control': 'no-cache, must-revalidate' },
-    });
+  if (isNotModified(request, resume)) {
+    const headers = new Headers({ 'Cache-Control': CACHE_CONTROL });
+    if (resume.etag) headers.set('ETag', resume.etag);
+    if (resume.lastModified) headers.set('Last-Modified', resume.lastModified);
+    return new Response(null, { status: 304, headers });
   }
 
   const headers = new Headers();
   headers.set('Content-Type', 'application/pdf');
   headers.set('Content-Disposition', 'inline; filename="Oakar-Oo-Resume.pdf"');
-  headers.set('Cache-Control', 'no-cache, must-revalidate');
+  headers.set('Cache-Control', CACHE_CONTROL);
   if (resume.etag) headers.set('ETag', resume.etag);
   if (resume.lastModified) headers.set('Last-Modified', resume.lastModified);
 
