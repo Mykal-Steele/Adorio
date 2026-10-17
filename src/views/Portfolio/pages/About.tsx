@@ -24,7 +24,10 @@ export function About() {
         className={isMobile ? 'px-4 py-6' : 'px-8 py-8'}
         style={{ maxWidth: 700, margin: '0 auto' }}
       >
-        <PageHeader title="Oakar Oo — Full-Stack Developer" style={{ marginBottom: 20 }} />
+        <PageHeader
+          title="Oakar Oo — Backend & Full-Stack Developer"
+          style={{ marginBottom: 20 }}
+        />
 
         <div className="flex flex-wrap items-center gap-2 mb-10">
           <Badge
@@ -32,7 +35,7 @@ export function About() {
             bg="var(--ide-orange-a12)"
             borderColor="var(--ide-orange-a30)"
           >
-            KMUTT — CS Year 2
+            KMUTT — CS Year 3
           </Badge>
           <Badge
             color="var(--ide-accent)"
@@ -71,10 +74,28 @@ export function About() {
               marginBottom: 20,
             }}
           >
-            I study Computer Science at{' '}
-            <span style={{ fontWeight: 700, color: 'var(--ide-orange)' }}>KMUTT, Bangkok</span>.
-            Started coding in 2021 with TypeScript and React, mostly building Discord bots and small
-            web apps.
+            I got into programming at 15 through online HTML classes and Scratch (I also go by{' '}
+            <span style={{ fontWeight: 700, color: 'var(--ide-orange)' }}>Kruskal</span>). In 2021 I
+            started making simple games in Unity and played around in Roblox Studio. In 2023 I
+            learned programming basics properly with Python and LeetCode-style problems, and in 2024
+            I made my first Discord bot in Python.
+          </div>
+          <div
+            style={{
+              fontSize: 14,
+              fontFamily: vietnam,
+              color: 'var(--ide-text-2)',
+              lineHeight: 1.7,
+              marginBottom: 20,
+            }}
+          >
+            At <span style={{ fontWeight: 700, color: 'var(--ide-orange)' }}>KMUTT, Bangkok</span> I
+            picked up TypeScript, React, Express, Hono, and Bun, then Next.js, NestJS, and Orval.
+            Since then I&apos;ve built a lot with them, from a scaffolding CLI on npm to a
+            course-aware Discord bot. I led the financial team in a 50+ developer smart city
+            project, placed 2nd in the KMUTT IoT Hackathon, and now mentor first-year students in
+            Java. I&apos;m picking up Go on the side, and studying business administration online at
+            University of the People.
           </div>
           <div
             style={{
@@ -84,9 +105,9 @@ export function About() {
               lineHeight: 1.7,
             }}
           >
-            Now I mostly build CLI tools and full-stack apps. I use TypeScript with Hono and Bun for
-            most things, and I'm picking up Go and Python on the side. I led a 50+ developer fintech
-            integration project at university and placed 2nd in the KMUTT IOT Hackathon.
+            Outside of code I&apos;m studying Korean and keeping up with squats, push-ups, planks,
+            and treadmill running. I learn by building real things, usually with AI help, and I keep
+            adding pages to this site that help me and my classmates study.
           </div>
         </div>
 
@@ -172,6 +193,40 @@ export function About() {
           style={{ gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)' }}
         >
           {portfolioData.stack.map((group) => (
+            <IDECard key={group.category} className="p-4" bg="bg-3">
+              <div
+                style={{
+                  fontSize: 8,
+                  fontFamily: sans,
+                  color: group.color,
+                  letterSpacing: '0.12em',
+                  marginBottom: 8,
+                  paddingBottom: 6,
+                  borderBottom: `1px solid ${group.color}22`,
+                }}
+              >
+                {group.category}
+              </div>
+              {group.items.map((item) => (
+                <div
+                  key={item}
+                  className="flex items-center gap-2 mb-1"
+                  style={{ fontSize: 12, fontFamily: mono, color: 'var(--ide-text-4)' }}
+                >
+                  <span style={{ color: group.color, fontSize: 8 }}>▸</span>
+                  {item}
+                </div>
+              ))}
+            </IDECard>
+          ))}
+        </div>
+
+        <SectionLabel>Setup</SectionLabel>
+        <div
+          className="grid gap-4 mb-12"
+          style={{ gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)' }}
+        >
+          {portfolioData.setup.map((group) => (
             <IDECard key={group.category} className="p-4" bg="bg-3">
               <div
                 style={{

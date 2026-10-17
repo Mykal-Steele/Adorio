@@ -139,7 +139,7 @@ export function Dashboard() {
                 marginBottom: 8,
               }}
             >
-              // oakar oo — full-stack developer, Bangkok
+              // oakar oo — backend & full-stack developer, Bangkok
             </div>
             <div style={{ fontFamily: mono, fontSize: isMobile ? 12 : 14, marginBottom: 4 }}>
               <span style={{ color: 'var(--ide-pink)' }}>const </span>
@@ -163,7 +163,7 @@ export function Dashboard() {
               <div>
                 <span style={{ color: 'var(--ide-orange)' }}>role</span>
                 <span style={{ color: 'var(--ide-text-1)' }}>: </span>
-                <span style={{ color: 'var(--ide-accent)' }}>"Full-Stack Developer"</span>
+                <span style={{ color: 'var(--ide-accent)' }}>"Backend & Full-Stack Developer"</span>
                 <span style={{ color: 'var(--ide-text-1)' }}>,</span>
               </div>
               <div>
@@ -603,6 +603,7 @@ export function Dashboard() {
                   }}
                 >
                   ■ {proj.status}
+                  {proj.aiAssisted && <span style={{ color: 'var(--ide-purple)' }}> · AI</span>}
                 </span>
                 <ArrowRight size={10} color="var(--ide-text-7)" />
               </div>

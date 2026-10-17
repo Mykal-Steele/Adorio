@@ -17,6 +17,7 @@ const EXT_BY_LANGUAGE: Record<string, string> = {
   Dart: '.dart',
   'C#': '.cs',
   HTML: '.html',
+  Orange: '.ows',
 };
 
 function getCodeSnippet(id: string) {
@@ -60,6 +61,20 @@ function getCodeSnippet(id: string) {
           type: 'comment',
         },
         { n: '08', code: `    return risk_weighted(scores, replies, lam)`, type: 'normal' },
+      ];
+    case 'cozytalk':
+      return [
+        { n: '01', code: `final room = ref.watch(matchmakingProvider);`, type: 'normal' },
+        { n: '02', code: `if (room.theme != null) applyTheme(room.theme);`, type: 'field' },
+        { n: '03', code: ``, type: 'empty' },
+        { n: '04', code: `// jukebox: shared music moved to YouTube`, type: 'comment' },
+        { n: '05', code: `await jukebox.play(room.track.youtubeId);`, type: 'field' },
+      ];
+    case 'titanic':
+      return [
+        { n: '01', code: `# explored in Orange, not code:`, type: 'comment' },
+        { n: '02', code: `# transport groups, cabin decks, spend features`, type: 'comment' },
+        { n: '03', code: `# presented with scatter plots`, type: 'comment' },
       ];
     case 'archmaster':
       return [
@@ -210,6 +225,11 @@ export function ProjectDetail({ id }: { id: string }) {
             >
               ■ {project.status}
             </Badge>
+            {project.aiAssisted && (
+              <Badge color="var(--ide-purple)" bg="var(--ide-purple-a15)">
+                AI-ASSISTED
+              </Badge>
+            )}
             <span
               style={{
                 fontSize: 10,
