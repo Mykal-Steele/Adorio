@@ -69,11 +69,10 @@ function upsertEnvValue(content, key, value) {
     'm',
   );
   const rendered = renderValue(value);
-  if (pattern.test(content)) {
-    return { content: content.replace(pattern, `${key}=${rendered}`), added: false };
-  }
-  const sep = content === '' || content.endsWith('\n') ? '' : '\n';
-  return { content: `${content}${sep}${key}=${rendered}\n`, added: true };
+  // Replacer function, not a replacement string — otherwise `$&`, `$$`, etc.
+  // in a pasted value are interpreted by String.replace instead of written.
+  if (!pattern.test(content)) return { content, missing: true };
+  return { content: content.replace(pattern, () => `${key}=${rendered}`) };
 }
 
 function mask(value, reveal) {
@@ -95,6 +94,10 @@ function buildPlan(rotations) {
     const spec = SECRETS[key];
     if (!spec) {
       console.warn(`! ${key}: not in secrets.manifest.mjs — skipping`);
+      continue;
+    }
+    if (cfg.generate && spec.generate == null) {
+      console.warn(`! ${key}: automatic generation is disabled — use --set ${key}=VALUE`);
       continue;
     }
     plan.push({ key, spec, value: resolveValue(key, cfg) });
@@ -128,13 +131,17 @@ function writeFiles(plan) {
         continue;
       }
       const original = readFileSync(abs, 'utf8');
-      const { content, added } = upsertEnvValue(original, key, value);
+      const { content, missing } = upsertEnvValue(original, key, value);
+      if (missing) {
+        console.log(`  ~  ${rel}: ${key} not present, skipped`);
+        continue;
+      }
       if (content === original) {
         console.log(`  -  ${rel}: ${key} unchanged`);
         continue;
       }
       writeFileSync(abs, content);
-      console.log(`  ${added ? '+' : '~'}  ${rel}: ${key} ${added ? 'added' : 'updated'}`);
+      console.log(`  ~  ${rel}: ${key} updated`);
     }
   }
 }
@@ -142,7 +149,11 @@ function writeFiles(plan) {
 function pushGithub(plan) {
   const keys = plan.filter((p) => p.spec.github);
   for (const { key, value } of keys) {
-    execFileSync('gh', ['secret', 'set', key, '--body', value], { stdio: 'inherit' });
+    // Value on stdin, not argv — argv is visible to any local user via `ps`.
+    execFileSync('gh', ['secret', 'set', key], {
+      input: value,
+      stdio: ['pipe', 'inherit', 'inherit'],
+    });
     console.log(`  ~  github: ${key} set`);
   }
 }
@@ -151,6 +162,8 @@ function pushAzure(plan) {
   const secrets = plan.filter((p) => p.spec.azure?.secret);
   const envs = plan.filter((p) => p.spec.azure?.env);
 
+  // `az` has no stdin form for these commands, so the value is passed as an
+  // argv entry and is briefly visible in the process table while it runs.
   if (secrets.length) {
     const pairs = secrets.map((p) => `${p.spec.azure.secret}=${p.value}`);
     execFileSync(
