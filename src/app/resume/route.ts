@@ -19,11 +19,21 @@ type CachedResume = {
 };
 
 let cache: CachedResume | null = null;
+let inflight: Promise<CachedResume | null> | null = null;
 
 // Drive returns no ETag, so we fingerprint the file from its Last-Modified + size.
 function fingerprint(lastModified: string | null, contentLength: string | null) {
   if (!lastModified && !contentLength) return null;
   return `"${lastModified ?? ''}-${contentLength ?? ''}"`;
+}
+
+// Weak comparison (RFC 9110): `*` matches anything, a list matches if any tag does,
+// and `W/` prefixes are ignored.
+function etagMatches(header: string | null, etag: string) {
+  if (!header) return false;
+  if (header.trim() === '*') return true;
+  const strip = (tag: string) => tag.trim().replace(/^W\//, '');
+  return header.split(',').some((tag) => strip(tag) === strip(etag));
 }
 
 async function getDriveFingerprint() {
@@ -37,7 +47,7 @@ async function getDriveFingerprint() {
 }
 
 // Cheap check first: only download the full PDF when Drive's fingerprint changed.
-async function loadResume(): Promise<CachedResume | null> {
+async function refreshResume(): Promise<CachedResume | null> {
   const etag = await getDriveFingerprint().catch(() => null);
 
   if (etag === null) {
@@ -63,6 +73,15 @@ async function loadResume(): Promise<CachedResume | null> {
   return cache;
 }
 
+// Collapse concurrent visits onto a single Drive check/download instead of one per request.
+function loadResume(): Promise<CachedResume | null> {
+  if (inflight) return inflight;
+  inflight = refreshResume().finally(() => {
+    inflight = null;
+  });
+  return inflight;
+}
+
 export async function GET(request: Request) {
   const resume = await loadResume();
   if (!resume) {
@@ -70,7 +89,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(DRIVE_VIEW_URL, 302);
   }
 
-  if (resume.etag && request.headers.get('if-none-match') === resume.etag) {
+  if (resume.etag && etagMatches(request.headers.get('if-none-match'), resume.etag)) {
     return new Response(null, {
       status: 304,
       headers: { ETag: resume.etag, 'Cache-Control': 'no-cache, must-revalidate' },
