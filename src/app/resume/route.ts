@@ -4,38 +4,121 @@ import { NextResponse } from 'next/server';
 // Share URL: https://drive.google.com/file/d/1YNXbBncoZ0E7U8KUYsd1qf4p0l2nqHYm/view?usp=sharing
 // (File must stay shared as "Anyone with the link can view".)
 const FILE_ID = process.env.RESUME_DRIVE_FILE_ID || '1YNXbBncoZ0E7U8KUYsd1qf4p0l2nqHYm';
-const DRIVE_DOWNLOAD_URL = `https://drive.google.com/uc?export=download&id=${FILE_ID}`;
+const DRIVE_DOWNLOAD_URL = `https://drive.usercontent.google.com/download?id=${FILE_ID}&export=download`;
 const DRIVE_VIEW_URL = `https://drive.google.com/file/d/${FILE_ID}/view`;
 
-// Re-fetch from Drive at most once a day. Next caches the upstream response,
-// and the Cache-Control below lets Cloudflare + browsers cache it too —
-// so editing the Drive file rolls out to adorio.space/resume within ~24h
-// with no redeploy and ~1 upstream fetch/day.
-export const revalidate = 86400;
+// Run on every visit so we can revalidate against Drive. `no-cache` still lets
+// Cloudflare + browsers store the PDF, but forces them to revalidate with us first,
+// so this handler sees every visit and can refresh the cached copy when Drive changes.
+export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  let upstream: Response;
-  try {
-    upstream = await fetch(DRIVE_DOWNLOAD_URL, { next: { revalidate: 86400 } });
-  } catch {
+type CachedResume = {
+  body: ArrayBuffer;
+  lastModified: string | null;
+  etag: string | null;
+};
+
+let cache: CachedResume | null = null;
+let inflight: Promise<CachedResume | null> | null = null;
+
+// `no-cache` still lets Cloudflare + browsers store the PDF but forces revalidation,
+// so this handler sees every visit.
+const CACHE_CONTROL = 'no-cache';
+
+// Drive returns no ETag, so we fingerprint the file from its Last-Modified + size.
+// A derived validator isn't guaranteed unique per representation, so it's marked weak.
+function fingerprint(lastModified: string | null, contentLength: string | null) {
+  if (!lastModified && !contentLength) return null;
+  return `W/"${lastModified ?? ''}-${contentLength ?? ''}"`;
+}
+
+// Weak comparison (RFC 9110): `*` matches anything, a list matches if any tag does,
+// and `W/` prefixes are ignored.
+function etagMatches(header: string | null, etag: string) {
+  if (!header) return false;
+  if (header.trim() === '*') return true;
+  const strip = (tag: string) => tag.trim().replace(/^W\//, '');
+  return header.split(',').some((tag) => strip(tag) === strip(etag));
+}
+
+// If-None-Match takes precedence over If-Modified-Since (RFC 9110 §13.1.3).
+function isNotModified(request: Request, resume: CachedResume) {
+  const ifNoneMatch = request.headers.get('if-none-match');
+  if (ifNoneMatch) return resume.etag ? etagMatches(ifNoneMatch, resume.etag) : false;
+
+  const ifModifiedSince = request.headers.get('if-modified-since');
+  if (!ifModifiedSince || !resume.lastModified) return false;
+  const since = Date.parse(ifModifiedSince);
+  const modified = Date.parse(resume.lastModified);
+  return !Number.isNaN(since) && !Number.isNaN(modified) && modified <= since;
+}
+
+async function getDriveFingerprint() {
+  const res = await fetch(DRIVE_DOWNLOAD_URL, {
+    method: 'HEAD',
+    cache: 'no-store',
+    signal: AbortSignal.timeout(5000),
+  });
+  if (!res.ok) return null;
+  return fingerprint(res.headers.get('last-modified'), res.headers.get('content-length'));
+}
+
+// Cheap check first: only download the full PDF when Drive's fingerprint changed.
+async function refreshResume(): Promise<CachedResume | null> {
+  const etag = await getDriveFingerprint().catch(() => null);
+
+  if (etag === null) {
+    // Can't tell whether it changed — keep serving what we already have.
+    if (cache) return cache;
+  } else if (cache && etag === cache.etag) {
+    return cache;
+  }
+
+  const upstream = await fetch(DRIVE_DOWNLOAD_URL, {
+    cache: 'no-store',
+    signal: AbortSignal.timeout(15000),
+  }).catch(() => null);
+  if (!upstream?.ok || !upstream.body) return cache;
+
+  const lastModified = upstream.headers.get('last-modified');
+  const contentLength = upstream.headers.get('content-length');
+  cache = {
+    body: await upstream.arrayBuffer(),
+    lastModified,
+    etag: etag ?? fingerprint(lastModified, contentLength),
+  };
+  return cache;
+}
+
+// Collapse concurrent visits onto a single Drive check/download instead of one per request.
+function loadResume(): Promise<CachedResume | null> {
+  if (inflight) return inflight;
+  inflight = refreshResume().finally(() => {
+    inflight = null;
+  });
+  return inflight;
+}
+
+export async function GET(request: Request) {
+  const resume = await loadResume();
+  if (!resume) {
     // Never 5xx: the edge failover treats consecutive 5xx as primary-down.
     return NextResponse.redirect(DRIVE_VIEW_URL, 302);
   }
-  if (!upstream.ok || !upstream.body) {
-    return NextResponse.redirect(DRIVE_VIEW_URL, 302);
+
+  if (isNotModified(request, resume)) {
+    const headers = new Headers({ 'Cache-Control': CACHE_CONTROL });
+    if (resume.etag) headers.set('ETag', resume.etag);
+    if (resume.lastModified) headers.set('Last-Modified', resume.lastModified);
+    return new Response(null, { status: 304, headers });
   }
 
   const headers = new Headers();
   headers.set('Content-Type', 'application/pdf');
   headers.set('Content-Disposition', 'inline; filename="Oakar-Oo-Resume.pdf"');
-  headers.set(
-    'Cache-Control',
-    'public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400',
-  );
-  for (const h of ['content-length', 'last-modified', 'etag']) {
-    const v = upstream.headers.get(h);
-    if (v) headers.set(h, v);
-  }
+  headers.set('Cache-Control', CACHE_CONTROL);
+  if (resume.etag) headers.set('ETag', resume.etag);
+  if (resume.lastModified) headers.set('Last-Modified', resume.lastModified);
 
-  return new Response(upstream.body, { headers });
+  return new Response(resume.body, { headers });
 }
