@@ -158,6 +158,13 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 | GET    | `/api/game/user-stats`          | optional             | getUserStatsHandler                         |
 | POST   | `/api/secretenv`                | required             | storeSecretMessage                          |
 | GET    | `/api/secretenv`                | **none** (by design) | retrieveSecretMessageHandler                |
+| POST   | `/api/hosted/presign`           | required             | presign (reserves storage, checks Turnstile, returns an R2 presigned PUT URL) |
+| POST   | `/api/hosted/confirm`           | required             | confirm (verifies the object, trues up the reservation, un-hides it) |
+| GET    | `/api/hosted`                   | required             | listMine                                    |
+| GET    | `/api/hosted/usage`             | required             | usage (storage meter + Turnstile site key)  |
+| GET    | `/api/hosted/all`               | required + admin     | listAll                                     |
+| GET    | `/api/hosted/:slug`             | none                 | serveFile (302 to R2, or legacy inline HTML) |
+| DELETE | `/api/hosted/:slug`             | required             | deleteFile (also removes the R2 object)     |
 | POST   | `/api/stats/track`              | optional             | trackVisit (+ visitorIdentifier middleware) |
 | GET    | `/api/stats/page-views`         | required             | getPageViewSummary                          |
 | GET    | `/api/stats/recent`             | required             | getRecentVisitEntries                       |
@@ -190,6 +197,8 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 | `likeLimiter`         | 1 min  | 60  | PUT /api/posts/:id/like               |
 | `secretLimiter`         | 5 min  | 20  | GET /api/secretenv                    |
 | `searchLimiter`         | 1 min  | 60  | GET /api/users/search                 |
+| `uploadLimiter`         | 1 hour | 20  | POST /api/hosted (per IP)             |
+| `hostedUploadLimiter`   | 1 hour | 10  | POST /api/hosted/presign (per user)   |
 | `codingLimiter`         | 5 min  | 20  | POST /api/coding/run                  |
 | `codeRunnerLimiter`     | 1 min  | 30  | `/api/coding/runner/*` (per user, not per IP) |
 
@@ -266,6 +275,21 @@ A personal encrypted message vault. Users POST `{ message, password }` while aut
 
 ---
 
+## Hosted Files (R2)
+
+`/api/hosted` is a general file host (HTML, PDF, images, archives — anything, up to 100 MB). Files do **not** pass through the backend: the browser asks `POST /api/hosted/presign` for a presigned R2 PUT URL, uploads straight to R2 (bypassing Cloudflare's 100 MB edge cap), then calls `POST /api/hosted/confirm`. Each step is a separate request, so there is no single large body on the origin.
+
+- `utils/r2.js` builds the `S3Client` (R2 is region `auto`, `forcePathStyle`) and signs PUTs. The `requestChecksumCalculation: 'WHEN_REQUIRED'` / `responseChecksumValidation: 'WHEN_REQUIRED'` settings stop @aws-sdk v3 from scripting `x-amz-checksum-*` into the signature, which a browser PUT can't reproduce.
+- A doc is created at presign time with `pending: true` (hidden from `GET /api/hosted` and the admin list); `confirm` HEADs the object and flips it to `pending: false` with the real size.
+- `GET /api/hosted/:slug` (unauthenticated) increments views and 302-redirects to `R2_PUBLIC_URL/<key>`. Documents created before the R2 move still have their HTML in `content` and are served inline instead.
+- R2 is optional as a group: with `R2_ACCOUNT_ID`/`R2_ACCESS_KEY_ID`/`R2_SECRET_ACCESS_KEY` unset, `utils/r2.js` exports `r2Configured = false` and the presign endpoint returns a clear config error.
+
+**Storage cap.** A single `HostedStorage` ledger row (`models/HostedStorage.js`) holds the total bytes reserved across all files, and `HOSTED_STORAGE_LIMIT_BYTES` (default 9 GiB, under R2's 10 GB free tier) is the hard stop. `presign` reserves the declared size with one atomic `findOneAndUpdate` — an `$expr` filter (`totalBytes + size <= limit`) and the `$inc` in the same update — so simultaneous uploads can't each read the total, all find it under the limit, and collectively overshoot. `confirm` trues the reservation up to the object's real size (discarding the object if the difference would cross the cap), `delete` releases it, and a sweep at presign reclaims anything still `pending` after 2 hours. The ledger seeds itself from existing R2 docs on first use, and `GET /api/hosted/usage` returns `{ usedBytes, limitBytes, remainingBytes }` for the meter in the UI.
+
+**Bot check.** `utils/turnstile.js` verifies a Cloudflare Turnstile token at presign when `TURNSTILE_SITE_KEY`/`TURNSTILE_SECRET_KEY` are set; the UI fetches the site key from `/api/hosted/usage` and renders the widget only when it's present. Both keys blank = check skipped (local dev, CI, failover copy).
+
+---
+
 ## Image Handling
 
 Uploads go through `utils/cloudinaryUpload.js` (multer + multer-storage-cloudinary) to Cloudinary folder `feelio/posts`. On success `req.file` contains Cloudinary's snake_case response fields.
@@ -334,6 +358,10 @@ Loaded by `config/environment.js`, which resolves the repo root from its own fil
 | `CLOUDINARY_NAME`      | Cloudinary cloud name                                          |
 | `CLOUDINARY_KEY`       | Cloudinary API key                                             |
 | `CLOUDINARY_SECRET`    | Cloudinary API secret                                          |
+| `R2_ACCOUNT_ID` / `R2_BUCKET` / `R2_PUBLIC_URL` | Cloudflare R2 account, bucket, and public base URL for hosted files |
+| `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | R2 API token (S3-compatible) used to sign upload URLs and delete objects. All three of account/keys must be set or file hosting reports unconfigured |
+| `HOSTED_STORAGE_LIMIT_BYTES` | Hard cap on total hosted-file storage, in bytes (default 9 GiB) |
+| `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile keys for the upload bot check. Blank disables the check |
 | `NODE_ENV`             | `development` or `production`                                  |
 
 Run `node backend/test-env.js` to verify all required vars are set before starting.

@@ -103,6 +103,24 @@ const environment = {
     idleMinutes: readPositiveInteger('PISTON_IDLE_MINUTES', 30),
     dailyLimitMinutes: readPositiveInteger('PISTON_DAILY_LIMIT_MINUTES', 480),
   },
+  r2: {
+    accountId: normalize(process.env.R2_ACCOUNT_ID),
+    accessKeyId: normalize(process.env.R2_ACCESS_KEY_ID),
+    secretAccessKey: normalize(process.env.R2_SECRET_ACCESS_KEY),
+    bucket: normalize(process.env.R2_BUCKET),
+    publicUrl: normalize(process.env.R2_PUBLIC_URL)?.replace(/\/+$/, ''),
+  },
+  turnstile: {
+    siteKey: normalize(process.env.TURNSTILE_SITE_KEY),
+    secretKey: normalize(process.env.TURNSTILE_SECRET_KEY),
+  },
+  // Hard ceiling on total hosted-file storage. Defaults to 9 GiB, a gigabyte
+  // under R2's 10 GB free-storage allowance, so uploads stop well before the
+  // account can be billed for going over.
+  hostedStorageLimitBytes: readPositiveInteger(
+    'HOSTED_STORAGE_LIMIT_BYTES',
+    9 * 1024 * 1024 * 1024,
+  ),
   leaderboardMaxAgeDays: readPositiveInteger('LEADERBOARD_MAX_AGE_DAYS', 30),
   testUserTtlMinutes: readPositiveInteger('TEST_USER_TTL_MINUTES', 60),
 };

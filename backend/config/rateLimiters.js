@@ -84,6 +84,21 @@ const uploadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Hosted-file upload limiter - 10 presigns per hour per account. Keyed on the
+// user (not the IP) so a shared network can't be used to dodge it, and kept
+// tight because each upload can reserve up to 100 MB against the storage cap.
+const hostedUploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  keyGenerator: (req) => req.user.id,
+  message: {
+    error: 'Upload limit reached — 10 uploads per hour, please try again later.',
+    retryAfter: '1 hour',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Code execution limiter - 20 runs per 5 minutes per IP (each run costs real
 // compute on the Piston sandbox, so it's kept tight like secretLimiter)
 const codingLimiter = rateLimit({
@@ -148,6 +163,7 @@ export {
   authLimiter,
   secretLimiter,
   uploadLimiter,
+  hostedUploadLimiter,
   codingLimiter,
   codeRunnerLimiter,
   searchLimiter,

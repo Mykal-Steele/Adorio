@@ -58,6 +58,42 @@ param pistonToken string
 @description('Self-signed TLS cert (PEM, fullchain) baked into the Piston VM via piston.bicep\'s pistonTlsCert. Pinned here as an extra trusted CA so the backend can verify HTTPS to Piston without a public CA.')
 param pistonCaCert string
 
+// R2-backed file hosting (Cloudflare R2, S3 API). Optional as a group: leave
+// the account id and keys empty and the app deploys without it — the hosting
+// endpoints report as unconfigured, everything else still works.
+@description('Cloudflare account id that owns the R2 bucket (empty disables R2 file hosting)')
+param r2AccountId string = ''
+
+@secure()
+@description('R2 API token access key id (S3-compatible key, scoped to the bucket)')
+param r2AccessKeyId string = ''
+
+@secure()
+@description('R2 API token secret access key')
+param r2SecretAccessKey string = ''
+
+@description('R2 bucket that stores hosted files')
+param r2Bucket string = 'adorio-hosted'
+
+@description('Public base URL files are served from — the bucket\'s custom domain, no trailing slash')
+param r2PublicUrl string = 'https://files.adorio.space'
+
+var r2Enabled = !empty(r2AccountId) && !empty(r2AccessKeyId) && !empty(r2SecretAccessKey)
+
+// Cloudflare Turnstile bot check on uploads. Optional as a pair: leave both
+// empty and the upload form renders no widget and the backend skips the check.
+@description('Cloudflare Turnstile site key shown in the upload form (empty disables the bot check)')
+param turnstileSiteKey string = ''
+
+@secure()
+@description('Cloudflare Turnstile secret key used to verify upload tokens')
+param turnstileSecretKey string = ''
+
+var turnstileEnabled = !empty(turnstileSiteKey) && !empty(turnstileSecretKey)
+
+@description('Hard cap on total hosted-file storage in bytes (default 9 GiB, just under R2\'s 10 GB free tier)')
+param hostedStorageLimitBytes string = '9663676416'
+
 // The two below are optional and go together. Leave them empty (a fork with
 // no Piston, or a first deploy before the VM exists) and the backend only
 // reports whether Piston answers. main.bicepparam sets both for this
@@ -162,7 +198,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
           identity: containerAppPullIdentity.id
         }
       ]
-      secrets: [
+      secrets: concat([
         { name: 'mongo-uri', value: mongoUri }
         { name: 'jwt-secret', value: jwtSecret }
         { name: 'refresh-token-secret', value: refreshTokenSecret }
@@ -173,7 +209,12 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
         { name: 'piston-url', value: pistonUrl }
         { name: 'piston-token', value: pistonToken }
         { name: 'piston-ca-cert', value: pistonCaCert }
-      ]
+      ], r2Enabled ? [
+        { name: 'r2-access-key-id', value: r2AccessKeyId }
+        { name: 'r2-secret-access-key', value: r2SecretAccessKey }
+      ] : [], turnstileEnabled ? [
+        { name: 'turnstile-secret-key', value: turnstileSecretKey }
+      ] : [])
     }
     template: {
       containers: [
@@ -184,7 +225,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json('1.0')
             memory: '2Gi'
           }
-          env: concat([
+          env: concat(concat([
             { name: 'NODE_ENV', value: 'production' }
             { name: 'BACKEND_INTERNAL_URL', value: 'http://localhost:3000' }
             { name: 'CLIENT_URL', value: clientUrl }
@@ -199,10 +240,20 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'PISTON_URL', secretRef: 'piston-url' }
             { name: 'PISTON_TOKEN', secretRef: 'piston-token' }
             { name: 'PISTON_CA_CERT', secretRef: 'piston-ca-cert' }
+            { name: 'HOSTED_STORAGE_LIMIT_BYTES', value: hostedStorageLimitBytes }
           ], runnerControlEnabled ? [
             { name: 'PISTON_VM_RESOURCE_ID', value: resourceId('Microsoft.Compute/virtualMachines', pistonVmName) }
             // The app has two identities, so the backend has to say which one it means.
             { name: 'PISTON_CONTROL_CLIENT_ID', value: runnerControlIdentity!.properties.clientId }
+          ] : []), r2Enabled ? [
+            { name: 'R2_ACCOUNT_ID', value: r2AccountId }
+            { name: 'R2_BUCKET', value: r2Bucket }
+            { name: 'R2_PUBLIC_URL', value: r2PublicUrl }
+            { name: 'R2_ACCESS_KEY_ID', secretRef: 'r2-access-key-id' }
+            { name: 'R2_SECRET_ACCESS_KEY', secretRef: 'r2-secret-access-key' }
+          ] : [], turnstileEnabled ? [
+            { name: 'TURNSTILE_SITE_KEY', value: turnstileSiteKey }
+            { name: 'TURNSTILE_SECRET_KEY', secretRef: 'turnstile-secret-key' }
           ] : [])
           probes: [
             {
