@@ -27,3 +27,18 @@ param pistonCaCert = readEnvironmentVariable('PISTON_CA_CERT')
 // piston.bicep. Remove these two lines to deploy without it.
 param pistonVmName = 'adorio-piston-vm'
 param runnerControlIdentityName = 'adorio-piston-control-identity'
+
+// Cloudflare R2 file hosting. Defaults to '' so a deploy with these unset
+// simply leaves the feature off. Export the three vars before deploying to
+// turn it on.
+param r2AccountId = readEnvironmentVariable('R2_ACCOUNT_ID', '')
+param r2AccessKeyId = readEnvironmentVariable('R2_ACCESS_KEY_ID', '')
+param r2SecretAccessKey = readEnvironmentVariable('R2_SECRET_ACCESS_KEY', '')
+param r2Bucket = readEnvironmentVariable('R2_BUCKET', 'adorio-hosted')
+param r2PublicUrl = readEnvironmentVariable('R2_PUBLIC_URL', 'https://files.adorio.space')
+
+// Cloudflare Turnstile bot check on uploads. Defaults to '' so a deploy with
+// these unset leaves the check off.
+param turnstileSiteKey = readEnvironmentVariable('TURNSTILE_SITE_KEY', '')
+param turnstileSecretKey = readEnvironmentVariable('TURNSTILE_SECRET_KEY', '')
+param hostedStorageLimitBytes = readEnvironmentVariable('HOSTED_STORAGE_LIMIT_BYTES', '9663676416')

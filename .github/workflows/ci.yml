@@ -96,6 +96,14 @@ jobs:
           echo "PISTON_URL=${{ secrets.PISTON_URL }}" >> .env.production
           echo "PISTON_TOKEN=${{ secrets.PISTON_TOKEN }}" >> .env.production
           printf 'PISTON_CA_CERT="%s"\n' "${{ secrets.PISTON_CA_CERT }}" >> .env.production
+          echo "R2_ACCOUNT_ID=${{ secrets.R2_ACCOUNT_ID }}" >> .env.production
+          echo "R2_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }}" >> .env.production
+          echo "R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }}" >> .env.production
+          echo "R2_BUCKET=${{ secrets.R2_BUCKET }}" >> .env.production
+          echo "R2_PUBLIC_URL=${{ secrets.R2_PUBLIC_URL }}" >> .env.production
+          echo "TURNSTILE_SITE_KEY=${{ secrets.TURNSTILE_SITE_KEY }}" >> .env.production
+          echo "TURNSTILE_SECRET_KEY=${{ secrets.TURNSTILE_SECRET_KEY }}" >> .env.production
+          echo "HOSTED_STORAGE_LIMIT_BYTES=${{ secrets.HOSTED_STORAGE_LIMIT_BYTES }}" >> .env.production
       - name: Run integration tests
         run: npm run test:prod
 

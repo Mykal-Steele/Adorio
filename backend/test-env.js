@@ -20,6 +20,22 @@ console.log('URL:', environment.piston.url || '❌ Missing');
 console.log('Token:', environment.piston.token ? '✅ Set' : '❌ Missing');
 console.log('CA cert (PISTON_CA_CERT):', process.env.NODE_EXTRA_CA_CERTS ? '✅ Set' : '❌ Missing');
 console.log('');
+console.log('🗂️  R2 Hosted Files:');
+const r2Ready = Boolean(
+  environment.r2.accountId &&
+  environment.r2.accessKeyId &&
+  environment.r2.secretAccessKey &&
+  environment.r2.bucket,
+);
+console.log('Account ID:', environment.r2.accountId || '❌ Missing');
+console.log('Bucket:', environment.r2.bucket || '❌ Missing');
+console.log('Public URL:', environment.r2.publicUrl || '❌ Missing');
+console.log(
+  'Access keys:',
+  environment.r2.accessKeyId && environment.r2.secretAccessKey ? '✅ Set' : '❌ Missing',
+);
+console.log('Status:', r2Ready ? '✅ Configured' : '⚠️  Not configured (file hosting disabled)');
+console.log('');
 console.log('🌐 Allowed CORS Origins:');
 allowedOrigins.forEach((origin) => console.log('-', origin));
 console.log('');
