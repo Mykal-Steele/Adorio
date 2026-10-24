@@ -1,0 +1,13 @@
+name = "adorio-env"
+main = "index.js"
+compatibility_date = "2026-09-09"
+workers_dev = true
+
+[[routes]]
+pattern = "env.adorio.space"
+custom_domain = true
+
+[[rules]]
+type = "Text"
+globs = ["**/*.sh"]
+fallthrough = true

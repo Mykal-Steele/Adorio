@@ -192,7 +192,7 @@ All backend code uses ES Modules (`"type": "module"`). The pattern is strict **C
 
 **The Northflank failover copy cannot start the code runner** (it has no Azure identity, and `PISTON_VM_RESOURCE_ID` is not set there). It reports the runner as `offline` unless the VM happens to be on, and the practice page shows a maintenance message. This is intended.
 
-**SecretEnv (`GET /api/secretenv`) is intentionally unauthenticated** — it is a personal, curl-friendly encrypted message saver. The password hash protects the content. Do not add auth middleware to this route.
+**SecretEnv (`GET /api/secretenv`, `GET /api/secretenv/:name`) is intentionally unauthenticated** — it is a personal, curl-friendly encrypted message saver. Named envs use a passphrase with AES-256-GCM; legacy records use the old password+email hash. Do not add auth middleware to these routes.
 
 **Error handling pattern**: Frontend API layer uses Axios interceptor to catch all errors. Each API function uses a single `request()` wrapper that extracts `response.data`. Backend services throw `ApiError` instances; `asyncHandler` catches and forwards to Express error middleware. No manual try-catch unless handling specific cases (like debounced likes or fallback responses for anonymous users).
 
