@@ -66,7 +66,7 @@ backend/
 ├── models/
 │   ├── index.js                — Barrel: re-exports all named exports from every model file
 │   ├── Post.js                 — Post model + DB ops: createPost, countPosts, findPostsPaginated, findPostById, findPostLikesById, updatePostById, pushCommentToPost
-│   ├── SecretEnv.js            — SecretEnv model + DB ops: createSecretEnv, findSecretByPasswordHash
+│   ├── SecretEnv.js            — SecretEnv model + DB ops: createSecretEnv, findSecretByPasswordHash, findSecretByName, upsertSecretByName
 │   ├── User.js                 — User model + DB ops: findUserById, findUserByEmail, findUserByEmailOrUsername, createUser, findUsersWithScore, updateUserRhythm, findUsersByIds
 │   └── Visit.js                — Visit model + DB ops: createVisit, aggregateVisits, findRecentVisits, findVisitsByVisitorId
 ├── routes/
@@ -81,7 +81,7 @@ backend/
 │   │   ├── index.js            — Barrel: re-exports all Mongoose schema defaults
 │   │   ├── imageSchema.js      — Mongoose sub-document schema for post images (strict: false for legacy snake_case fields)
 │   │   ├── postSchema.js       — Mongoose schema for Post collection; uses imageSchema; date transform on toJSON/toObject
-│   │   ├── secretEnvSchema.js  — Mongoose schema for SecretEnv collection; indexes on userId + passwordHash
+│   │   ├── secretEnvSchema.js  — Mongoose schema for SecretEnv collection; indexes on userId, legacy passwordHash, and unique name
 │   │   ├── userSchema.js       — Mongoose schema for User collection; rhythmGame sub-doc; timestamps: true
 │   │   └── visitSchema.js      — Mongoose schema for Visit collection; screen/browser/network fingerprint sub-docs; compound indexes
 │   └── validation/
@@ -89,14 +89,14 @@ backend/
 │       ├── analyticsSchemas.js — pageViewsQuerySchema, recentVisitsQuerySchema, visitorStatsQuerySchema
 │       ├── gameSchemas.js      — updateScoreSchema
 │       ├── postSchemas.js      — createPostSchema, addCommentSchema, getPostsQuerySchema
-│       ├── secretEnvSchemas.js — createSecretSchema
+│       ├── secretEnvSchemas.js — createSecretSchema, secretNameSchema
 │       └── userSchemas.js      — registerSchema, loginSchema
 ├── services/
 │   ├── analyticsService.js     — recordVisit, getPageViewStats, getRecentVisits, getVisitorStats, getVisitorDetails; runs MongoDB aggregation pipelines; generates deterministic visitor nicknames
 │   ├── authService.js          — createAuthTokens (JWT access 15m + refresh 7d), verifyRefreshToken
 │   ├── gameService.js          — getLeaderboard, updateUserScore, getUserStats
 │   ├── postService.js          — createPost, getPaginatedPosts, getPostById, togglePostLike, addCommentToPost; normalizePost converts DB doc → response shape
-│   ├── secretEnvService.js     — createSecretMessage (AES-256-CBC encrypt), retrieveSecretMessage (decrypt via password hash lookup)
+│   ├── secretEnvService.js     — createSecretMessage (AES-256-GCM named envs + legacy CBC), retrieveSecretMessage, retrieveNamedSecretMessage
 │   └── userService.js          — createUserAccount, findUserById, authenticateUser, sanitizeUser
 └── utils/
     ├── ApiError.js             — Error class; static factories: badRequest (400), unauthorized (401), forbidden (403), notFound (404), tooManyRequests (429), internalServerError (500)
@@ -158,6 +158,7 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 | GET    | `/api/game/user-stats`          | optional             | getUserStatsHandler                         |
 | POST   | `/api/secretenv`                | required             | storeSecretMessage                          |
 | GET    | `/api/secretenv`                | **none** (by design) | retrieveSecretMessageHandler                |
+| GET    | `/api/secretenv/:name`          | **none** (by design) | retrieveSecretMessageHandler                |
 | POST   | `/api/stats/track`              | optional             | trackVisit (+ visitorIdentifier middleware) |
 | GET    | `/api/stats/page-views`         | required             | getPageViewSummary                          |
 | GET    | `/api/stats/recent`             | required             | getRecentVisitEntries                       |
@@ -260,9 +261,9 @@ The VM's own idle backstop logs to its journal: `journalctl -u piston-idle-stop.
 
 ## SecretEnv
 
-A personal encrypted message vault. Users POST `{ message, password }` while authenticated. The message is encrypted with AES-256-CBC using `password + user.email` as the key. The combined string is HMAC-SHA256 hashed (keyed with `JWT_SECRET`) and stored as the lookup key.
+A personal encrypted env/message vault. Authenticated users POST `{ name, message, password }`; the message is encrypted with AES-256-GCM using an async scrypt-derived key, and the passphrase is verified by the GCM auth tag. Named passphrases must be at least 8 printable ASCII characters and must not end with whitespace. `name` is a globally unique project slug, so the same user can rotate a named env by posting again. The older `{ message, password }` shape is still accepted and keeps the legacy AES-256-CBC + `password + user.email` hash path for existing records.
 
-**`GET /api/secretenv` is intentionally unauthenticated** — designed for `curl` retrieval. The `Authorization` header carries the raw retrieval password (not a JWT). `secretLimiter` (20 req/5 min) prevents brute force. Without the correct password the content cannot be decrypted even if the DB is read directly. Do not add JWT auth middleware to this route.
+**`GET /api/secretenv` and `GET /api/secretenv/:name` are intentionally unauthenticated** — designed for `curl` retrieval. For a named env the `Authorization` header carries `Bearer <passphrase>`; for a legacy record it carries the raw retrieval password (not a JWT). `secretLimiter` (20 req/5 min) prevents brute force, and a wrong passphrase/unknown name both return 404. Do not add JWT auth middleware to these routes.
 
 ---
 
@@ -307,7 +308,7 @@ throw new Error('Post not found');
 - Adding try-catch inside controllers — `asyncHandler` handles it
 - Importing from `authMiddleware.js` — import from `verifyToken.js` directly
 - Using `mongoose.model('Post')` anywhere outside `models/Post.js` — import the named function instead
-- Adding a `GET /api/secretenv` auth middleware — the no-auth design is intentional
+- Adding a `GET /api/secretenv` or `GET /api/secretenv/:name` auth middleware — the no-auth design is intentional
 - Section comment dividers (`// ─────────`) or obvious comments (`// find the user`)
 - Duplicating helper logic — check `utils/` before writing a new helper
 
@@ -321,7 +322,7 @@ Loaded by `config/environment.js`, which resolves the repo root from its own fil
 | ---------------------- | -------------------------------------------------------------- |
 | `PORT`                 | Express listen port (default 3000)                             |
 | `MONGO_URI`            | MongoDB Atlas connection string                                |
-| `JWT_SECRET`           | Signs 15-min access tokens; also used as HMAC key in secretenv |
+| `JWT_SECRET`           | Signs 15-min access tokens; also the HMAC key for legacy SecretEnv lookup |
 | `REFRESH_TOKEN_SECRET` | Signs 7-day refresh tokens (falls back to `JWT_SECRET`)        |
 | `CLIENT_URL`           | Dynamically added to CORS allowed origins                      |
 | `LEADERBOARD_MAX_AGE_DAYS` | Leaderboard only shows scores played within this window (default 30) |

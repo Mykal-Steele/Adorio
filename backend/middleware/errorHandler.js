@@ -30,7 +30,10 @@ const errorHandler = (err, req, res, _next) => {
   };
 
   if (!isProduction) {
-    logPayload.body = req.body;
+    const isSecretEnv = req.originalUrl?.startsWith('/api/secretenv');
+    logPayload.body = isSecretEnv
+      ? { ...req.body, message: '[redacted]', password: '[redacted]' }
+      : req.body;
     logPayload.stack = err.stack;
     console.error(`[${new Date().toISOString()}] API error`, logPayload);
   } else {

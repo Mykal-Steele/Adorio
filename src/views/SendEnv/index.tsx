@@ -2,15 +2,16 @@
 import React, { useState } from 'react';
 import { storeSecret } from '../../api';
 import { ClipboardIcon } from '@heroicons/react/24/outline';
-import AdSenseScript from '../../components/AdSenseScript';
 import PaperTornEdge from '../../components/PaperTornEdge';
 
 const SendEnv = () => {
+  const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [storedName, setStoredName] = useState('');
   const [retrievalCommand, setRetrievalCommand] = useState('');
   const [copied, setCopied] = useState(false);
 
@@ -21,15 +22,29 @@ const SendEnv = () => {
     setSuccess(false);
 
     try {
-      if (!message || !password) {
-        throw new Error('Please fill in both the message and password fields');
+      if (!name || !message || !password) {
+        throw new Error('Please fill in the project name, message, and passphrase');
       }
 
-      const response = await storeSecret(message, password);
+      if (!/^[a-z0-9][a-z0-9-]{2,39}$/.test(name)) {
+        throw new Error('Project name must be 3-40 lowercase letters, digits, or dashes');
+      }
+
+      if (password.length < 8) {
+        throw new Error('Passphrase must be at least 8 characters');
+      }
+
+      if (!/^[\x20-\x7e]*[\x21-\x7e]$/.test(password)) {
+        throw new Error('Passphrase must use printable ASCII and must not end with whitespace');
+      }
+
+      const response = await storeSecret(name, message, password);
 
       setSuccess(true);
+      setStoredName(response.name || name);
       setRetrievalCommand(response.retrievalCommand);
 
+      setName('');
       setMessage('');
       setPassword('');
     } catch (err) {
@@ -53,7 +68,6 @@ const SendEnv = () => {
 
   return (
     <div className="paper-theme min-h-screen">
-      <AdSenseScript />
       <PaperTornEdge />
 
       <section className="relative -mt-4 bg-[var(--paper-hero)] px-4 pb-12 pt-12 sm:-mt-6 sm:px-8 sm:pb-14 sm:pt-16">
@@ -65,8 +79,8 @@ const SendEnv = () => {
             Store a secret message
           </h1>
           <p className="mt-3.5 max-w-[56ch] text-[17px] leading-[1.62] text-[var(--paper-muted)]">
-            Write something down, lock it with a password, and get a one-line command to pull it
-            back later. Sign in to store it — your password and account email do the protecting.
+            Write something down, lock it with a passphrase, and pull it back later with a single
+            command. Sign in to store it — only the passphrase can decrypt it.
           </p>
         </div>
       </section>
@@ -87,9 +101,14 @@ const SendEnv = () => {
                 <h2 className="mt-1 font-paper-serif text-[27px] font-bold">
                   Your secret is tucked away
                 </h2>
-                <p className="mt-3 rounded-[2px] border border-[#4f6b3a] bg-[#e8eeda] px-4 py-3 text-sm text-[#3f552e]">
-                  Use this command to retrieve it later. Keep the password safe — there is no reset.
-                </p>
+                <div className="mt-3 rounded-[2px] border border-[#4f6b3a] bg-[#e8eeda] px-4 py-3 text-sm text-[#3f552e]">
+                  <p>
+                    Run this on the machine that needs the env file. When it asks, enter{' '}
+                    <code className="font-paper-mono font-bold">{storedName}</code> and the
+                    passphrase you just set.
+                  </p>
+                  <p className="mt-1.5">Keep the passphrase safe — there is no reset.</p>
+                </div>
 
                 <div className="relative mt-4">
                   <pre className="overflow-x-auto rounded-[2px] border border-[var(--paper-line)] bg-[var(--paper-hero)] p-3 pr-12 font-paper-mono text-[12.5px] leading-[1.6] text-[var(--paper-muted)]">
@@ -113,6 +132,7 @@ const SendEnv = () => {
                 <button
                   onClick={() => {
                     setSuccess(false);
+                    setStoredName('');
                     setRetrievalCommand('');
                   }}
                   className="mt-6 rounded-[3px] border-[1.5px] border-dashed border-[rgba(60,44,24,.5)] px-3.5 py-2 text-[13px] font-medium text-[var(--paper-muted)] transition-colors hover:border-[var(--paper-accent-strong)] hover:bg-[var(--paper-yellow-soft)]"
@@ -125,6 +145,29 @@ const SendEnv = () => {
                 <h2 className="font-paper-serif text-[27px] font-bold">New note</h2>
 
                 <label className="mt-[22px] block">
+                  <span className="mb-1.5 block font-paper-mono text-[11px] uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
+                    Project name
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="adorio-prod"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full border-[1.5px] border-[rgba(60,44,24,.4)] bg-transparent px-3 py-2.5 font-paper-mono text-base outline-none focus:border-[var(--paper-accent-strong)]"
+                    pattern="[a-z0-9][a-z0-9-]{2,39}"
+                    minLength={3}
+                    maxLength={40}
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    required
+                  />
+                  <span className="mt-1.5 block font-paper-hand text-[19px] leading-tight text-[var(--paper-accent)]">
+                    lowercase letters, digits, dashes &middot; 3–40 characters
+                  </span>
+                </label>
+
+                <label className="mt-5 block">
                   <span className="mb-1.5 block font-paper-mono text-[11px] uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
                     Secret message
                   </span>
@@ -139,18 +182,21 @@ const SendEnv = () => {
 
                 <label className="mt-5 block">
                   <span className="mb-1.5 block font-paper-mono text-[11px] uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
-                    Password
+                    Passphrase
                   </span>
                   <input
                     type="password"
-                    placeholder="Pick something you'll remember"
+                    placeholder="Five or six random words"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full border-[1.5px] border-[rgba(60,44,24,.4)] bg-transparent px-3 py-2.5 text-base outline-none focus:border-[var(--paper-accent-strong)]"
+                    minLength={8}
+                    autoComplete="new-password"
                     required
                   />
                   <span className="mt-1.5 block font-paper-hand text-[19px] leading-tight text-[var(--paper-accent)]">
-                    your account email is added to this password for encryption
+                    at least 8 printable ASCII characters, no trailing spaces &middot; nothing is
+                    stored that can reset it
                   </span>
                 </label>
 
