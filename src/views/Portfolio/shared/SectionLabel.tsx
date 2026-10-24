@@ -5,10 +5,10 @@ export function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <div
       style={{
-        fontSize: 9,
+        fontSize: 12,
         fontFamily: sans,
         fontWeight: 700,
-        color: 'var(--ide-text-6)',
+        color: 'var(--ide-text-4)',
         letterSpacing: '0.14em',
         marginBottom: 20,
         display: 'flex',

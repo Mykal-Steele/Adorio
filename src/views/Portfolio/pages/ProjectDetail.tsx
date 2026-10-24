@@ -168,7 +168,7 @@ export function ProjectDetail({ id }: { id: string }) {
         className="flex flex-col items-center justify-center h-full"
         style={{ color: 'var(--ide-text-5)', fontFamily: sans }}
       >
-        <div style={{ fontSize: 14, marginBottom: 12 }}>// Project not found</div>
+        <div style={{ fontSize: 18, marginBottom: 12 }}>// Project not found</div>
         <button
           onClick={() => router.push('/projects')}
           style={{
@@ -177,10 +177,10 @@ export function ProjectDetail({ id }: { id: string }) {
             border: 'none',
             cursor: 'pointer',
             fontFamily: mono,
-            fontSize: 12,
+            fontSize: 15,
           }}
         >
-          ← cd ../projects
+          ← Back to projects
         </button>
       </div>
     );
@@ -211,7 +211,7 @@ export function ProjectDetail({ id }: { id: string }) {
               margin: '0 0 8px',
             }}
           >
-            {project.name.replace(/-/g, '_')}
+            {project.name}
           </h1>
           <div
             style={{ width: 48, height: 3, background: 'var(--ide-orange)', marginBottom: 24 }}
@@ -225,14 +225,9 @@ export function ProjectDetail({ id }: { id: string }) {
             >
               ■ {project.status}
             </Badge>
-            {project.aiAssisted && (
-              <Badge color="var(--ide-purple)" bg="var(--ide-purple-a15)">
-                AI-ASSISTED
-              </Badge>
-            )}
             <span
               style={{
-                fontSize: 10,
+                fontSize: 13,
                 fontFamily: mono,
                 color: project.langColor,
                 background: `${project.langColor}18`,
@@ -241,16 +236,13 @@ export function ProjectDetail({ id }: { id: string }) {
             >
               _{project.language}
             </span>
-            <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-text-7)' }}>
-              ⎇ {project.branch}
-            </span>
             {project.npm && (
               <a
                 href={`https://${project.npm}`}
                 target="_blank"
                 rel="noreferrer"
                 style={{
-                  fontSize: 9,
+                  fontSize: 12,
                   fontFamily: sans,
                   color: '#cb3837',
                   background: 'rgba(203,56,55,0.1)',
@@ -271,16 +263,31 @@ export function ProjectDetail({ id }: { id: string }) {
 
           <div
             style={{
-              fontSize: 15,
+              fontSize: 17,
               fontFamily: vietnam,
               color: 'var(--ide-text-2)',
-              lineHeight: 1.8,
-              marginBottom: 32,
-              maxWidth: 520,
+              lineHeight: 1.6,
+              marginBottom: 24,
+              maxWidth: '70ch',
             }}
           >
             {project.description}
           </div>
+
+          {project.requiresAccount && (
+            <p
+              style={{
+                fontSize: 15,
+                fontFamily: vietnam,
+                color: 'var(--ide-text-4)',
+                margin: 0,
+                marginBottom: 32,
+              }}
+            >
+              This project needs an account to open. Ask me for a demo account if you want to try
+              it.
+            </p>
+          )}
 
           <div
             className="mb-8 px-5 py-5"
@@ -288,7 +295,7 @@ export function ProjectDetail({ id }: { id: string }) {
           >
             <div
               style={{
-                fontSize: 9,
+                fontSize: 11,
                 fontFamily: sans,
                 color: 'var(--ide-text-5)',
                 letterSpacing: '0.12em',
@@ -315,9 +322,9 @@ export function ProjectDetail({ id }: { id: string }) {
               <span
                 key={tag}
                 style={{
-                  fontSize: 10,
+                  fontSize: 12,
                   fontFamily: mono,
-                  color: 'var(--ide-text-5)',
+                  color: 'var(--ide-text-4)',
                   background: 'var(--ide-bg-3)',
                   border: '1px solid var(--ide-border-medium)',
                   padding: '3px 10px',
@@ -398,9 +405,9 @@ export function ProjectDetail({ id }: { id: string }) {
               rel="noreferrer"
               className="flex items-center gap-2 mt-4"
               style={{
-                fontSize: 10,
+                fontSize: 14,
                 fontFamily: mono,
-                color: 'var(--ide-text-6)',
+                color: 'var(--ide-text-4)',
                 textDecoration: 'none',
               }}
               onMouseEnter={(e) => {
@@ -410,7 +417,7 @@ export function ProjectDetail({ id }: { id: string }) {
                 (e.currentTarget as HTMLElement).style.color = 'var(--ide-text-6)';
               }}
             >
-              <ExternalLink size={10} />
+              <ExternalLink size={13} />
               {project.repoUrl}
             </a>
           )}
@@ -430,15 +437,17 @@ export function ProjectDetail({ id }: { id: string }) {
             <div className="flex items-center justify-between mb-4">
               <span
                 style={{
-                  fontSize: 9,
+                  fontSize: 11,
                   fontFamily: sans,
-                  color: 'var(--ide-text-5)',
+                  color: 'var(--ide-text-4)',
                   letterSpacing: '0.12em',
                 }}
               >
                 Facts
               </span>
-              <span style={{ fontSize: 8, background: sc.bg, color: sc.color, padding: '1px 6px' }}>
+              <span
+                style={{ fontSize: 11, background: sc.bg, color: sc.color, padding: '2px 8px' }}
+              >
                 {project.status}
               </span>
             </div>
@@ -446,10 +455,10 @@ export function ProjectDetail({ id }: { id: string }) {
             <IDECard className="mb-4 p-3">
               {project.stats.map((s) => (
                 <div key={s.label} className="flex items-center justify-between mb-2 last:mb-0">
-                  <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-6)' }}>
+                  <span style={{ fontSize: 13, fontFamily: sans, color: 'var(--ide-text-4)' }}>
                     {s.label}
                   </span>
-                  <span style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-1)' }}>
+                  <span style={{ fontSize: 14, fontFamily: mono, color: 'var(--ide-text-2)' }}>
                     {s.value}
                   </span>
                 </div>
@@ -464,7 +473,7 @@ export function ProjectDetail({ id }: { id: string }) {
                   background: 'var(--ide-accent)',
                   border: 'none',
                   cursor: 'pointer',
-                  fontSize: 11,
+                  fontSize: 15,
                   fontFamily: sans,
                   fontWeight: 700,
                   color: 'var(--ide-bg-2)',
@@ -487,10 +496,10 @@ export function ProjectDetail({ id }: { id: string }) {
                   background: project.liveUrl ? 'transparent' : 'var(--ide-orange)',
                   border: project.liveUrl ? '1px solid var(--ide-border-medium)' : 'none',
                   cursor: 'pointer',
-                  fontSize: 11,
+                  fontSize: 15,
                   fontFamily: sans,
                   fontWeight: 700,
-                  color: project.liveUrl ? 'var(--ide-text-4)' : 'var(--ide-bg-2)',
+                  color: project.liveUrl ? 'var(--ide-text-3)' : 'var(--ide-bg-2)',
                   letterSpacing: '0.08em',
                   marginBottom: 8,
                   textDecoration: 'none',

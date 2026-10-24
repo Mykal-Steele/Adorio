@@ -59,13 +59,13 @@ export function MobileNav({ onMoreOpen }: MobileNavProps) {
             }}
           >
             <Icon
-              size={18}
+              size={20}
               color={active ? 'var(--ide-accent)' : 'var(--ide-text-6)'}
               strokeWidth={active ? 2 : 1.5}
             />
             <span
               style={{
-                fontSize: 9,
+                fontSize: 11,
                 color: active ? 'var(--ide-accent)' : 'var(--ide-text-6)',
                 fontWeight: active ? 600 : 400,
                 letterSpacing: '0.04em',
@@ -87,8 +87,8 @@ export function MobileNav({ onMoreOpen }: MobileNavProps) {
           minWidth: 56,
         }}
       >
-        <MoreHorizontal size={18} color="var(--ide-text-6)" strokeWidth={1.5} />
-        <span style={{ fontSize: 9, color: 'var(--ide-text-6)', letterSpacing: '0.04em' }}>
+        <MoreHorizontal size={20} color="var(--ide-text-6)" strokeWidth={1.5} />
+        <span style={{ fontSize: 11, color: 'var(--ide-text-6)', letterSpacing: '0.04em' }}>
           More
         </span>
       </button>
