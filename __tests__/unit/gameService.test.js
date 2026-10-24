@@ -1,4 +1,4 @@
-import { mock, beforeEach } from 'bun:test';
+import { describe, test, expect, mock, beforeEach } from 'bun:test';
 
 // ── module mocks ───────────────────────────────────────────────────────────────
 
@@ -12,7 +12,7 @@ mock.module('../../backend/models/index.js', () => ({
   updateUserRhythm: mockUpdateUserRhythm,
 }));
 
-const { getLeaderboard, updateUserScore, getUserStats } =
+const { getLeaderboard, updateUserScore, updateUserAchievements, getUserStats } =
   await import('../../backend/services/gameService.js');
 
 // ── getLeaderboard ─────────────────────────────────────────────────────────────
@@ -50,6 +50,33 @@ describe('getLeaderboard', () => {
     mockFindUsersWithScore.mockImplementation(() => Promise.resolve([]));
     const result = await getLeaderboard();
     expect(result).toEqual([]);
+  });
+
+  test('adds rank and strips private fields', async () => {
+    mockFindUsersWithScore.mockImplementation(() =>
+      Promise.resolve([
+        {
+          _id: 'a',
+          username: 'alice',
+          email: 'a@a.com',
+          rhythmGame: { peakPLevel: 60, difficulty: 'hard', lastPlayed: new Date() },
+        },
+        { _id: 'b', username: 'bob', rhythmGame: { peakPLevel: 30, difficulty: 'easy' } },
+      ]),
+    );
+    const result = await getLeaderboard();
+    expect(result[0]).toEqual({
+      _id: 'a',
+      username: 'alice',
+      rank: 1,
+      rhythmGame: {
+        peakPLevel: 60,
+        difficulty: 'hard',
+        lastPlayed: expect.any(Date),
+      },
+    });
+    expect(result[1].rank).toBe(2);
+    expect(result[0]).not.toHaveProperty('email');
   });
 });
 
@@ -115,7 +142,7 @@ describe('updateUserScore', () => {
     expect(result.difficulty).toBe('hard');
   });
 
-  test('does NOT update the score when new score is lower than current peak', async () => {
+  test('keeps the peak when a lower score is submitted but refreshes activity', async () => {
     mockFindUserById.mockImplementation(() =>
       Promise.resolve({ rhythmGame: { peakPLevel: 200, difficulty: 'hard' } }),
     );
@@ -124,9 +151,20 @@ describe('updateUserScore', () => {
       userId: 'u1',
       rawBody: { score: 50, difficulty: 'easy' },
     });
-    expect(mockUpdateUserRhythm).not.toHaveBeenCalled();
+    expect(mockUpdateUserRhythm).toHaveBeenCalled();
     expect(result.peakPLevel).toBe(200);
     expect(result.difficulty).toBe('hard');
+  });
+
+  test('rejects fractional scores', async () => {
+    mockFindUserById.mockImplementation(() => Promise.resolve({ rhythmGame: null }));
+    let caught;
+    try {
+      await updateUserScore({ userId: 'u1', rawBody: { score: 1.5, difficulty: 'easy' } });
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught?.statusCode).toBe(400);
   });
 
   test('updates when user has no prior rhythm game data', async () => {
@@ -177,5 +215,84 @@ describe('getUserStats', () => {
     const result = await getUserStats('u1');
     expect(result.peakPLevel).toBe(0);
     expect(result.difficulty).toBe('normal');
+  });
+
+  test('includes default achievement flags', async () => {
+    mockFindUserById.mockImplementation(() => Promise.resolve({ rhythmGame: null }));
+    const result = await getUserStats('u1');
+    expect(result.achievements).toEqual({
+      firstPlay: false,
+      reach10PLevel: false,
+      reach25PLevel: false,
+      reach50PLevel: false,
+    });
+  });
+});
+
+// ── updateUserAchievements ─────────────────────────────────────────────────────
+
+describe('updateUserAchievements', () => {
+  beforeEach(() => {
+    mockFindUserById.mockImplementation(() => Promise.resolve(null));
+    mockUpdateUserRhythm.mockImplementation(() => Promise.resolve());
+    mockUpdateUserRhythm.mockClear();
+  });
+
+  test('requires auth', async () => {
+    let caught;
+    try {
+      await updateUserAchievements({ userId: null, rawBody: { achievements: {} } });
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught?.statusCode).toBe(401);
+  });
+
+  test('throws 404 when user is not found', async () => {
+    let caught;
+    try {
+      await updateUserAchievements({
+        userId: 'nonexistent',
+        rawBody: { achievements: { firstPlay: true } },
+      });
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught?.statusCode).toBe(404);
+  });
+
+  test('rejects unknown achievement keys', async () => {
+    mockFindUserById.mockImplementation(() => Promise.resolve({ rhythmGame: null }));
+    let caught;
+    try {
+      await updateUserAchievements({
+        userId: 'u1',
+        rawBody: { achievements: { hacked: true } },
+      });
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught?.statusCode).toBe(400);
+  });
+
+  test('merges new unlocks without ever unsetting existing one', async () => {
+    mockFindUserById.mockImplementation(() =>
+      Promise.resolve({ rhythmGame: { achievements: { firstPlay: true } } }),
+    );
+
+    const result = await updateUserAchievements({
+      userId: 'u1',
+      rawBody: { achievements: { firstPlay: false, reach10PLevel: true } },
+    });
+
+    expect(result.achievements).toEqual({
+      firstPlay: true,
+      reach10PLevel: true,
+      reach25PLevel: false,
+      reach50PLevel: false,
+    });
+    expect(mockUpdateUserRhythm).toHaveBeenCalledWith('u1', {
+      achievements: result.achievements,
+    });
   });
 });
