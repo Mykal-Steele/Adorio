@@ -49,7 +49,16 @@ export function TabBar() {
 
   const projectTabItems = openProjectTabs.map((id) => {
     const project = portfolioData.projects.find((p) => p.id === id);
-    const ext = project?.language === 'Rust' ? '.rs' : project?.language === 'Go' ? '.go' : '.ts';
+    const ext =
+      project?.language === 'Python'
+        ? '.py'
+        : project?.language === 'JavaScript'
+          ? '.js'
+          : project?.language === 'Java'
+            ? '.java'
+            : project?.language
+              ? '.ts'
+              : '.md';
     return { name: `${id}${ext}`, path: `/projects/${id}`, id };
   });
 

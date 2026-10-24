@@ -14,6 +14,7 @@ const FEATURED_IDS = ['chronochunk', 'coding-challenges', 'create-adorex'];
 const statusColors: Record<string, string> = {
   STABLE: 'var(--ide-accent)',
   BETA: 'var(--ide-orange)',
+  IN_PROGRESS: 'var(--ide-purple)',
   DEPRECATED: 'var(--ide-pink)',
 };
 

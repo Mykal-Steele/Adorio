@@ -1,12 +1,13 @@
 'use client';
 
-import { ArrowRight, Lock } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, ExternalLink, Lock } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
 import { useProjectNavigation } from '../hooks/useProjectNavigation';
 import { mono, sans, vietnam } from '../constants/fonts';
 import { statusConfig } from '../constants/status';
-import { Breadcrumb, Badge, IDECard, PageHeader } from '../shared';
+import { Breadcrumb, Badge, IDECard, PageHeader, SectionLabel } from '../shared';
 
 export function Projects() {
   const { openProject, prefetchProject } = useProjectNavigation();
@@ -17,7 +18,10 @@ export function Projects() {
       <Breadcrumb segments={['src', 'projects.tsx']} language="TypeScript JSX" />
 
       <div className={isMobile ? 'px-5 py-7' : 'px-8 py-9'}>
-        <PageHeader title="Projects" subtitle="CLI tools, full-stack apps, and backend services." />
+        <PageHeader
+          title="Projects"
+          subtitle="Backend services, tools, and the systems that keep them running."
+        />
 
         <IDECard className="mt-8 mb-8">
           {portfolioData.projects.map((proj, i) => {
@@ -56,9 +60,17 @@ export function Projects() {
                     >
                       {proj.name}
                     </span>
-                    <span style={{ fontFamily: mono, fontSize: 12, color: proj.langColor }}>
-                      {proj.language}
-                    </span>
+                    {proj.language && (
+                      <span
+                        style={{
+                          fontFamily: mono,
+                          fontSize: 12,
+                          color: proj.langColor ?? 'var(--ide-text-4)',
+                        }}
+                      >
+                        {proj.language}
+                      </span>
+                    )}
                     <Badge color={sc.color} bg={sc.bg} style={{ fontSize: 11 }}>
                       {sc.label}
                     </Badge>
@@ -94,6 +106,45 @@ export function Projects() {
             );
           })}
         </IDECard>
+
+        <div style={{ marginTop: 40 }}>
+          <SectionLabel>Other projects</SectionLabel>
+          <div className="flex flex-wrap gap-x-6 gap-y-3">
+            {portfolioData.otherProjects.map((proj) => {
+              const external = proj.href.startsWith('http');
+              const style = {
+                fontSize: 16,
+                fontFamily: vietnam,
+                color: 'var(--ide-text-3)',
+                textDecoration: 'none',
+              } as const;
+
+              return external ? (
+                <a
+                  key={proj.name}
+                  href={proj.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 hover:underline"
+                  style={style}
+                >
+                  {proj.name}
+                  <ExternalLink size={13} />
+                </a>
+              ) : (
+                <Link
+                  key={proj.name}
+                  href={proj.href}
+                  className="inline-flex items-center gap-1.5 hover:underline"
+                  style={style}
+                >
+                  {proj.name}
+                  <ArrowRight size={13} />
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       <div style={{ height: 48 }} />

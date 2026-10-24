@@ -94,12 +94,12 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
     stack: () => [
       {
         prefix: '  ',
-        text: 'Languages:  TypeScript · JavaScript · Java · SQL · Go · Python',
+        text: 'Languages:  TypeScript · JavaScript · Java · SQL · Python',
         color: 'var(--ide-accent-light)',
       },
       {
         prefix: '  ',
-        text: 'Frontend:   React · Next.js · Tailwind 3.x',
+        text: 'Web:        React · Next.js · Tailwind CSS',
         color: 'var(--ide-orange)',
       },
       {
@@ -109,7 +109,7 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
       },
       {
         prefix: '  ',
-        text: 'Tools:      Docker · Prisma · Nginx · Azure · Git',
+        text: 'Tools:      Docker · Prisma · Linux · Azure · Git',
         color: 'var(--ide-blue)',
       },
     ],
@@ -117,13 +117,15 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
     projects: () =>
       portfolioData.projects.map((p) => ({
         prefix: '  ',
-        text: `${p.name.padEnd(22)} ${p.language.padEnd(14)} ${p.status}`,
+        text: `${p.name.padEnd(22)} ${(p.language ?? 'Markdown').padEnd(14)} ${p.status}`,
         color:
           p.status === 'STABLE'
             ? 'var(--ide-accent)'
             : p.status === 'BETA'
               ? 'var(--ide-orange)'
-              : 'var(--ide-pink)',
+              : p.status === 'IN_PROGRESS'
+                ? 'var(--ide-purple)'
+                : 'var(--ide-pink)',
       })),
 
     skills: () =>

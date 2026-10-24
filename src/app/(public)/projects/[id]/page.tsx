@@ -10,12 +10,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const project = portfolioData.projects.find((p) => p.id === id);
   const title = project ? `${project.name} | Oakar Oo` : 'Project | Oakar Oo';
-  const description = project?.description ?? 'Project details.';
+  const description = project?.summary ?? 'Project details.';
   return {
     title,
     description,
     keywords: project
-      ? [project.name, 'Oakar Oo', project.language, ...project.tags.map((t) => t.replace('#', ''))]
+      ? [
+          project.name,
+          'Oakar Oo',
+          ...(project.language ? [project.language] : []),
+          ...project.tags.map((t) => t.replace('#', '')),
+        ]
       : ['Oakar Oo', 'project'],
     openGraph: {
       title,
