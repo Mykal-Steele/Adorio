@@ -31,7 +31,8 @@ function Screenshot({ shot }: { shot: ProjectShot }) {
       style={{
         margin: 0,
         background: 'var(--ide-bg-2)',
-        border: '1px solid var(--ide-border)',
+        border: '2px solid var(--nb-border)',
+        boxShadow: '4px 4px 0 var(--nb-shadow)',
       }}
     >
       <Image
@@ -45,7 +46,7 @@ function Screenshot({ shot }: { shot: ProjectShot }) {
       <figcaption
         style={{
           padding: '12px 16px',
-          borderTop: '1px solid var(--ide-border-subtle)',
+          borderTop: '2px solid var(--nb-border)',
           fontFamily: vietnam,
           fontSize: 14,
           lineHeight: 1.6,
@@ -141,7 +142,7 @@ export function ProjectDetail({ id }: { id: string }) {
 
           <p
             style={{
-              fontSize: 19,
+              fontSize: 18,
               fontFamily: vietnam,
               color: 'var(--ide-text-2)',
               lineHeight: 1.6,
@@ -303,8 +304,8 @@ export function ProjectDetail({ id }: { id: string }) {
                     fontSize: 12,
                     fontFamily: mono,
                     color: 'var(--ide-text-4)',
-                    background: 'var(--ide-bg-3)',
-                    border: '1px solid var(--ide-border-medium)',
+                    background: 'var(--ide-bg-0)',
+                    border: '1.5px solid var(--nb-border)',
                     padding: '3px 10px',
                   }}
                 >
@@ -319,18 +320,20 @@ export function ProjectDetail({ id }: { id: string }) {
           className="shrink-0"
           style={{
             width: isMobile ? '100%' : 260,
-            borderLeft: isMobile ? 'none' : '1px solid var(--ide-border)',
-            borderTop: isMobile ? '1px solid var(--ide-border)' : 'none',
+            borderLeft: isMobile ? 'none' : '2px solid var(--nb-border)',
+            borderTop: isMobile ? '2px solid var(--nb-border)' : 'none',
             background: 'var(--ide-bg-3)',
           }}
         >
           <div className="p-4">
             <div
               style={{
-                fontSize: 11,
+                fontSize: 12,
                 fontFamily: sans,
-                color: 'var(--ide-text-4)',
+                fontWeight: 700,
+                color: 'var(--ide-text-2)',
                 letterSpacing: '0.12em',
+                textTransform: 'uppercase',
                 marginBottom: 16,
               }}
             >
@@ -342,7 +345,14 @@ export function ProjectDetail({ id }: { id: string }) {
                 Status
               </span>
               <span
-                style={{ fontSize: 12, background: sc.bg, color: sc.color, padding: '2px 8px' }}
+                style={{
+                  fontSize: 12,
+                  background: sc.bg,
+                  color: sc.color,
+                  padding: '3px 8px',
+                  border: '1.5px solid var(--nb-border)',
+                  fontWeight: 700,
+                }}
               >
                 {project.status === 'IN_PROGRESS' ? 'In progress' : project.status}
               </span>
@@ -368,13 +378,14 @@ export function ProjectDetail({ id }: { id: string }) {
                 onClick={() => router.push(project.liveUrl!)}
                 className="w-full flex items-center justify-center gap-2 py-3 transition-opacity hover:opacity-90"
                 style={{
-                  background: 'var(--ide-accent)',
-                  border: 'none',
+                  background: 'var(--nb-accent)',
+                  border: '2px solid var(--nb-border)',
+                  boxShadow: '3px 3px 0 var(--nb-shadow)',
                   cursor: 'pointer',
                   fontSize: 14,
                   fontFamily: sans,
                   fontWeight: 700,
-                  color: 'var(--ide-bg-2)',
+                  color: 'var(--nb-on-accent)',
                   marginBottom: 8,
                 }}
               >
@@ -392,7 +403,8 @@ export function ProjectDetail({ id }: { id: string }) {
                     rel="noopener noreferrer"
                     className="w-full flex items-center justify-center gap-2 py-2.5 transition-opacity hover:opacity-90"
                     style={{
-                      border: '1px solid var(--ide-border-medium)',
+                      border: '2px solid var(--nb-border)',
+                      background: 'var(--ide-bg-0)',
                       fontSize: 13,
                       fontFamily: sans,
                       fontWeight: 600,
@@ -411,7 +423,8 @@ export function ProjectDetail({ id }: { id: string }) {
                     rel="noopener noreferrer"
                     className="w-full flex items-center justify-center gap-2 py-2.5 transition-opacity hover:opacity-90"
                     style={{
-                      border: '1px solid var(--ide-border-medium)',
+                      border: '2px solid var(--nb-border)',
+                      background: 'var(--ide-bg-0)',
                       fontSize: 13,
                       fontFamily: sans,
                       fontWeight: 600,
@@ -431,7 +444,8 @@ export function ProjectDetail({ id }: { id: string }) {
                     rel="noopener noreferrer"
                     className="w-full flex items-center justify-center gap-2 py-2.5 transition-opacity hover:opacity-90"
                     style={{
-                      border: '1px solid var(--ide-border-medium)',
+                      border: '2px solid var(--nb-border)',
+                      background: 'var(--ide-bg-0)',
                       fontSize: 13,
                       fontFamily: sans,
                       fontWeight: 600,

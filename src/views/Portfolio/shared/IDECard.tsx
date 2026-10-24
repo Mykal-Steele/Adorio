@@ -15,7 +15,8 @@ export function IDECard({ children, className = '', style, bg = 'bg-2', onClick 
       onClick={onClick}
       style={{
         background: `var(--ide-${bg})`,
-        border: '1px solid var(--ide-border)',
+        border: '2px solid var(--nb-border)',
+        boxShadow: '4px 4px 0 var(--nb-shadow)',
         ...style,
       }}
     >

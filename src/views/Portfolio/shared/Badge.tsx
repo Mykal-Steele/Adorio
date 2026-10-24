@@ -15,11 +15,12 @@ export function Badge({ children, color, bg, borderColor, style }: BadgeProps) {
       style={{
         fontSize: 11,
         fontFamily: sans,
-        fontWeight: 600,
-        letterSpacing: '0.06em',
+        fontWeight: 700,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
         color,
         background: bg || `${color}18`,
-        border: borderColor ? `1px solid ${borderColor}` : undefined,
+        border: `1.5px solid ${borderColor ?? 'var(--nb-border)'}`,
         padding: '3px 8px',
         ...style,
       }}

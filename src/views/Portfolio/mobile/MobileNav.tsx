@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Code2, User, FolderGit2, Mail, MoreHorizontal } from 'lucide-react';
+import { User, FolderGit2, Mail, MoreHorizontal } from 'lucide-react';
 import { sans } from '../constants/fonts';
 import { usePendingNavPath } from '../hooks/usePendingNavPath';
 
@@ -11,8 +11,7 @@ interface MobileNavProps {
 }
 
 const navItems = [
-  { path: '/', icon: Code2, label: 'Home' },
-  { path: '/about', icon: User, label: 'About' },
+  { path: '/', icon: User, label: 'About' },
   { path: '/projects', icon: FolderGit2, label: 'Projects' },
   { path: '/contact', icon: Mail, label: 'Contact' },
 ];

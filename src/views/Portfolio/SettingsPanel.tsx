@@ -44,8 +44,8 @@ export function SettingsPanel() {
           maxWidth: '92vw',
           maxHeight: '80vh',
           background: 'var(--ide-bg-2)',
-          border: '1px solid var(--ide-border-medium)',
-          boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+          border: '2px solid var(--nb-border)',
+          boxShadow: '8px 8px 0 var(--nb-shadow)',
           animation: 'settingsFadeIn 0.15s ease-out',
         }}
       >
@@ -55,7 +55,7 @@ export function SettingsPanel() {
           style={{
             height: 40,
             background: 'var(--ide-bg-0)',
-            borderBottom: '1px solid var(--ide-border)',
+            borderBottom: '2px solid var(--nb-border)',
           }}
         >
           <div className="flex items-center gap-2">

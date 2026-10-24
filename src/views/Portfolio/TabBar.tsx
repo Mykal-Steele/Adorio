@@ -10,8 +10,7 @@ import { usePendingNavPath } from './hooks/usePendingNavPath';
 import { IconButton } from './shared';
 
 const mainTabs = [
-  { name: 'dashboard.tsx', path: '/', color: 'var(--ide-orange)' },
-  { name: 'about_me.md', path: '/about', color: 'var(--ide-text-4)' },
+  { name: 'about_me.md', path: '/', color: 'var(--ide-text-4)' },
   { name: 'projects.json', path: '/projects', color: 'var(--ide-accent-light)' },
   { name: 'contact.sh', path: '/contact', color: 'var(--ide-purple)' },
 ];
@@ -67,9 +66,9 @@ export function TabBar() {
       className="shrink-0 flex items-end overflow-x-auto"
       style={{
         background: 'var(--ide-bg-3)',
-        borderBottom: '1px solid var(--ide-border)',
+        borderBottom: '2px solid var(--nb-border)',
         scrollbarWidth: 'none',
-        height: 36,
+        height: 40,
       }}
     >
       <div className="flex items-end h-full">
@@ -81,14 +80,15 @@ export function TabBar() {
               onClick={() => router.push(tab.path)}
               className="flex items-center gap-2 px-4 h-full shrink-0 transition-colors"
               style={{
-                background: active ? 'var(--ide-bg-4)' : 'transparent',
-                borderTop: active ? '1px solid var(--ide-accent)' : '1px solid transparent',
+                background: active ? 'var(--nb-accent)' : 'transparent',
+                borderTop: active ? '3px solid var(--nb-border)' : '3px solid transparent',
                 borderRight: '1px solid var(--ide-border)',
                 borderLeft: 'none',
                 borderBottom: 'none',
                 cursor: 'pointer',
-                color: active ? 'var(--ide-text-1)' : 'var(--ide-text-5)',
+                color: active ? 'var(--nb-on-accent)' : 'var(--ide-text-4)',
                 fontSize: 13,
+                fontWeight: active ? 700 : 500,
                 fontFamily: sans,
               }}
             >
@@ -104,8 +104,8 @@ export function TabBar() {
               key={tab.id}
               className="flex items-center h-full shrink-0"
               style={{
-                background: active ? 'var(--ide-bg-4)' : 'transparent',
-                borderTop: active ? '1px solid var(--ide-accent)' : '1px solid transparent',
+                background: active ? 'var(--nb-accent)' : 'transparent',
+                borderTop: active ? '3px solid var(--nb-border)' : '3px solid transparent',
                 borderRight: '1px solid var(--ide-border)',
               }}
             >
@@ -116,8 +116,9 @@ export function TabBar() {
                   background: 'transparent',
                   border: 'none',
                   cursor: 'pointer',
-                  color: active ? 'var(--ide-text-1)' : 'var(--ide-text-5)',
+                  color: active ? 'var(--nb-on-accent)' : 'var(--ide-text-4)',
                   fontSize: 13,
+                  fontWeight: active ? 700 : 500,
                   fontFamily: sans,
                 }}
               >
@@ -132,7 +133,7 @@ export function TabBar() {
                 }}
                 aria-label={`Close ${tab.name} tab`}
                 size={32}
-                color="var(--ide-text-6)"
+                color={active ? 'var(--nb-on-accent)' : 'var(--ide-text-6)'}
                 className="mr-2"
                 style={{ height: '100%' }}
               >

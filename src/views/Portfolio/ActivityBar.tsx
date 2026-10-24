@@ -22,7 +22,7 @@ export function ActivityBar() {
       style={{
         width: 48,
         background: 'var(--ide-bg-0)',
-        borderRight: '1px solid var(--ide-border)',
+        borderRight: '2px solid var(--nb-border)',
       }}
     >
       <div className="flex flex-col items-center gap-1">
@@ -38,18 +38,18 @@ export function ActivityBar() {
                 style={{
                   width: 40,
                   height: 40,
-                  background: isActive ? 'var(--ide-border)' : 'transparent',
+                  background: isActive ? 'var(--nb-accent)' : 'transparent',
                   borderTop: 'none',
                   borderRight: 'none',
                   borderBottom: 'none',
-                  borderLeft: isActive ? '2px solid var(--ide-orange)' : '2px solid transparent',
+                  borderLeft: isActive ? '3px solid var(--nb-border)' : '3px solid transparent',
                   cursor: 'pointer',
                 }}
                 onClick={() => setActiveSidePanel(id)}
               >
                 <Icon
                   size={18}
-                  color={isActive ? 'var(--ide-text-1)' : 'var(--ide-text-5)'}
+                  color={isActive ? 'var(--nb-on-accent)' : 'var(--ide-text-5)'}
                   strokeWidth={isActive ? 2 : 1.5}
                 />
               </button>
@@ -59,8 +59,9 @@ export function ActivityBar() {
                 style={{
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  background: 'var(--ide-bg-5)',
-                  border: '1px solid var(--ide-border-strong)',
+                  background: 'var(--ide-bg-0)',
+                  border: '2px solid var(--nb-border)',
+                  boxShadow: '3px 3px 0 var(--nb-shadow)',
                   fontSize: 11,
                   fontFamily: sans,
                   color: 'var(--ide-text-2)',

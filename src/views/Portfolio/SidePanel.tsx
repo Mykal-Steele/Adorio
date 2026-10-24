@@ -12,8 +12,7 @@ function ExplorerPanel() {
   const router = useRouter();
 
   const files = [
-    { name: 'dashboard.tsx', path: '/', icon: <FileText size={14} color="var(--ide-orange)" /> },
-    { name: 'about_me.md', path: '/about', icon: <FileText size={14} color="var(--ide-text-3)" /> },
+    { name: 'about_me.md', path: '/', icon: <FileText size={14} color="var(--ide-orange)" /> },
     {
       name: 'projects.json',
       path: '/projects',
@@ -60,11 +59,11 @@ function ExplorerPanel() {
             onClick={() => router.push(f.path)}
             className="w-full flex items-center gap-2 py-2 text-left transition-colors"
             style={{
-              background: isActive ? 'var(--ide-border)' : 'transparent',
+              background: isActive ? 'var(--nb-accent)' : 'transparent',
               borderTop: 'none',
               borderRight: 'none',
               borderBottom: 'none',
-              borderLeft: isActive ? '2px solid var(--ide-accent)' : '2px solid transparent',
+              borderLeft: isActive ? '4px solid var(--nb-border)' : '4px solid transparent',
               cursor: 'pointer',
               paddingLeft: isActive ? 22 : 24,
               paddingRight: 12,
@@ -83,8 +82,8 @@ function ExplorerPanel() {
               style={{
                 fontSize: 15,
                 fontFamily: sans,
-                color: isActive ? 'var(--ide-accent)' : 'var(--ide-text-3)',
-                fontWeight: isActive ? 600 : 400,
+                color: isActive ? 'var(--nb-on-accent)' : 'var(--ide-text-3)',
+                fontWeight: isActive ? 700 : 400,
               }}
             >
               {f.name}
@@ -272,17 +271,18 @@ export function SidePanel() {
       style={{
         width: isInDrawer ? '100%' : 220,
         background: 'var(--ide-bg-2)',
-        borderRight: isInDrawer ? 'none' : '1px solid var(--ide-border)',
+        borderRight: isInDrawer ? 'none' : '2px solid var(--nb-border)',
       }}
     >
       <div
         className="shrink-0 px-3 py-2"
         style={{
-          borderBottom: '1px solid var(--ide-border)',
+          borderBottom: '2px solid var(--nb-border)',
           fontSize: 11,
           fontFamily: sans,
-          color: 'var(--ide-text-4)',
+          color: 'var(--ide-text-3)',
           letterSpacing: '0.1em',
+          fontWeight: 700,
         }}
       >
         {labels[activeSidePanel]}

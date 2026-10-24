@@ -14,9 +14,10 @@ export function StatusBar() {
       style={{
         height: 28,
         background: 'var(--ide-bg-0)',
-        borderTop: '1px solid var(--ide-border)',
+        borderTop: '2px solid var(--nb-border)',
         fontFamily: sans,
-        fontSize: 12,
+        fontSize: 11,
+        letterSpacing: '0.04em',
         flexShrink: 0,
       }}
     >

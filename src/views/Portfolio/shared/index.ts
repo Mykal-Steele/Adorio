@@ -8,3 +8,4 @@ export { IDECard } from './IDECard';
 export { ThemeSwitcher } from './ThemeSwitcher';
 export { RouteLoadingSkeleton } from './RouteLoadingSkeleton';
 export { NavigationProgressBar } from './NavigationProgressBar';
+export { ProjectCard } from './ProjectCard';

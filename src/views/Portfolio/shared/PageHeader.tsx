@@ -27,7 +27,7 @@ export function PageHeader({ title, subtitle, style }: PageHeaderProps) {
       {subtitle && (
         <div
           style={{
-            fontSize: 17,
+            fontSize: 16,
             fontFamily: vietnam,
             color: 'var(--ide-text-3)',
             lineHeight: 1.6,

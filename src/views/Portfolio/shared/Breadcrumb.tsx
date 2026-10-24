@@ -11,10 +11,10 @@ export function Breadcrumb({ segments, language }: BreadcrumbProps) {
     <div
       className="flex items-center gap-2 px-6 py-2"
       style={{
-        borderBottom: '1px solid var(--ide-border-subtle)',
+        borderBottom: '2px solid var(--nb-border)',
         fontFamily: sans,
         fontSize: 12,
-        color: 'var(--ide-text-4)',
+        color: 'var(--ide-text-3)',
         letterSpacing: '0.06em',
         background: 'var(--ide-bg-4)',
       }}
@@ -29,7 +29,18 @@ export function Breadcrumb({ segments, language }: BreadcrumbProps) {
         );
       })}
       <span
-        style={{ marginLeft: 'auto', fontSize: 11, fontFamily: mono, color: 'var(--ide-text-5)' }}
+        style={{
+          marginLeft: 'auto',
+          fontSize: 10,
+          fontFamily: mono,
+          fontWeight: 700,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          color: 'var(--nb-on-accent)',
+          border: '1.5px solid var(--nb-border)',
+          padding: '2px 7px',
+          background: 'var(--nb-accent)',
+        }}
       >
         {language}
       </span>

@@ -6,9 +6,10 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 // Theme metadata. The actual CSS variables live in globals.css as [data-theme="X"] blocks.
 // Here we only keep the JS-side metadata needed by the UI (labels, accent swatches).
 
-export type ThemeName = 'midnight' | 'nord' | 'dracula' | 'one-dark' | 'catppuccin';
+export type ThemeName = 'paper' | 'midnight' | 'nord' | 'dracula' | 'one-dark' | 'catppuccin';
 
 export const themeLabels: Record<ThemeName, string> = {
+  paper: 'Paper',
   midnight: 'Midnight',
   nord: 'Nord',
   dracula: 'Dracula',
@@ -17,6 +18,7 @@ export const themeLabels: Record<ThemeName, string> = {
 };
 
 export const themeAccents: Record<ThemeName, string> = {
+  paper: '#f2c744',
   midnight: '#00ffc2',
   nord: '#88c0d0',
   dracula: '#bd93f9',
@@ -86,8 +88,8 @@ export function useTheme() {
 
   if (!ctx) throw new Error('useTheme must be used inside ThemeProvider');
 
-  // next-themes returns undefined on the server before hydration; fall back to one-dark.
-  const theme = (nextTheme as ThemeName) ?? 'one-dark';
+  // next-themes returns undefined on the server before hydration; fall back to paper.
+  const theme = (nextTheme as ThemeName) ?? 'paper';
   const setTheme = (t: ThemeName) => nextSetTheme(t);
 
   return { theme, setTheme, fontSize: ctx.fontSize, setFontSize: ctx.setFontSize };

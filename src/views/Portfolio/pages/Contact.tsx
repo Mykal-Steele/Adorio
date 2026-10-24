@@ -6,7 +6,7 @@ import { sendContactMessage } from '../../../api';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
 import { mono, sans, vietnam } from '../constants/fonts';
-import { Breadcrumb, PageHeader } from '../shared';
+import { Breadcrumb, PageHeader, SectionLabel } from '../shared';
 
 const channels = [
   {
@@ -106,15 +106,19 @@ export function Contact() {
               className="text-left p-4 transition-all block"
               style={{
                 background: 'var(--ide-bg-2)',
-                border: '1px solid var(--ide-border)',
+                border: '2px solid var(--nb-border)',
+                boxShadow: '3px 3px 0 var(--nb-shadow)',
                 cursor: 'pointer',
                 textDecoration: 'none',
+                transition: 'transform 120ms ease, box-shadow 120ms ease',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = `${ch.color}44`;
+                (e.currentTarget as HTMLElement).style.transform = 'translate(-2px, -2px)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '5px 5px 0 var(--nb-shadow)';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = 'var(--ide-border)';
+                (e.currentTarget as HTMLElement).style.transform = 'translate(0, 0)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '3px 3px 0 var(--nb-shadow)';
               }}
             >
               <div className="flex items-center gap-2 mb-2" style={{ color: ch.color }}>
@@ -147,17 +151,7 @@ export function Contact() {
           ))}
         </div>
 
-        <div
-          style={{
-            fontSize: 12,
-            fontFamily: sans,
-            color: 'var(--ide-text-4)',
-            letterSpacing: '0.1em',
-            marginBottom: 12,
-          }}
-        >
-          Send a message
-        </div>
+        <SectionLabel>Send a message</SectionLabel>
 
         {!sent ? (
           <div className="space-y-3">
@@ -207,8 +201,8 @@ export function Contact() {
                   placeholder={field.placeholder}
                   style={{
                     width: '100%',
-                    background: 'var(--ide-bg-1)',
-                    border: `1px solid ${focused === field.key ? 'var(--ide-accent-a30)' : 'var(--ide-border)'}`,
+                    background: 'var(--ide-bg-0)',
+                    border: `2px solid ${focused === field.key ? 'var(--ide-accent)' : 'var(--nb-border)'}`,
                     padding: '10px 12px',
                     fontSize: 16,
                     fontFamily: mono,
@@ -243,8 +237,8 @@ export function Contact() {
                 rows={4}
                 style={{
                   width: '100%',
-                  background: 'var(--ide-bg-1)',
-                  border: `1px solid ${focused === 'message' ? 'var(--ide-accent-a30)' : 'var(--ide-border)'}`,
+                  background: 'var(--ide-bg-0)',
+                  border: `2px solid ${focused === 'message' ? 'var(--ide-accent)' : 'var(--nb-border)'}`,
                   padding: '10px 12px',
                   fontSize: 16,
                   fontFamily: mono,
@@ -260,8 +254,7 @@ export function Contact() {
                 className="flex items-center gap-2 px-3 py-2"
                 style={{
                   background: 'var(--ide-red-a12)',
-                  border: '1px solid var(--ide-red)',
-                  borderRadius: 2,
+                  border: '2px solid var(--ide-red)',
                 }}
               >
                 <AlertCircle size={12} color="var(--ide-red)" />
@@ -276,13 +269,14 @@ export function Contact() {
               disabled={sending}
               className="flex items-center gap-2 px-6 py-3 transition-opacity hover:opacity-90"
               style={{
-                background: sending ? 'var(--ide-accent-a30)' : 'var(--ide-accent-light)',
-                border: 'none',
+                background: sending ? 'var(--ide-accent-a30)' : 'var(--nb-accent)',
+                border: '2px solid var(--nb-border)',
+                boxShadow: '3px 3px 0 var(--nb-shadow)',
                 cursor: sending ? 'not-allowed' : 'pointer',
                 fontSize: 15,
                 fontFamily: sans,
                 fontWeight: 700,
-                color: 'var(--ide-accent-dark)',
+                color: sending ? 'var(--ide-text-2)' : 'var(--nb-on-accent)',
                 letterSpacing: '0.08em',
               }}
             >
@@ -295,7 +289,8 @@ export function Contact() {
             className="p-6"
             style={{
               background: 'var(--ide-accent-a6)',
-              border: '1px solid var(--ide-accent-a20)',
+              border: '2px solid var(--nb-border)',
+              boxShadow: '4px 4px 0 var(--nb-shadow)',
             }}
           >
             <div

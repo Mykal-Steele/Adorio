@@ -17,9 +17,8 @@ interface TermLine {
 type CommandFn = (args: string[]) => TermLine[];
 
 const ROUTE_MAP: Record<string, string> = {
-  dashboard: '/',
   home: '/',
-  about: '/about',
+  about: '/',
   projects: '/projects',
   contact: '/contact',
 };
@@ -71,8 +70,7 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
 
     ls: () => [
       { prefix: '  ', text: 'src/', color: 'var(--ide-orange)' },
-      { prefix: '  ', text: '  dashboard.tsx   →  /', color: 'var(--ide-text-3)' },
-      { prefix: '  ', text: '  about_me.md     →  /about', color: 'var(--ide-text-3)' },
+      { prefix: '  ', text: '  about_me.md     →  /', color: 'var(--ide-text-3)' },
       { prefix: '  ', text: '  projects.json   →  /projects', color: 'var(--ide-text-3)' },
       { prefix: '  ', text: '  contact.sh      →  /contact', color: 'var(--ide-text-3)' },
     ],
@@ -230,13 +228,13 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
       style={{
         height: embedded ? '100%' : 200,
         background: 'var(--ide-bg-1)',
-        borderTop: embedded ? 'none' : '1px solid var(--ide-border)',
+        borderTop: embedded ? 'none' : '2px solid var(--nb-border)',
       }}
     >
       {!embedded && (
         <div
           className="flex items-center gap-4 px-3"
-          style={{ height: 28, borderBottom: '1px solid var(--ide-border)', flexShrink: 0 }}
+          style={{ height: 32, borderBottom: '2px solid var(--nb-border)', flexShrink: 0 }}
         >
           <span
             style={{
@@ -300,7 +298,7 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
       </div>
       <div
         className="flex items-center gap-2 px-4 py-1.5 shrink-0"
-        style={{ borderTop: '1px solid var(--ide-border-subtle)' }}
+        style={{ borderTop: '2px solid var(--nb-border)' }}
       >
         <span
           style={{

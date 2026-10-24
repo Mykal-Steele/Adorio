@@ -69,13 +69,13 @@ export function MobileDrawer({
             : { top: 0, right: 0, bottom: 0, width: '80vw', maxWidth: 320 }),
           animation: closing ? closeAnim : openAnim,
           background: 'var(--ide-bg-2)',
-          borderTop: isBottom ? '1px solid var(--ide-border)' : 'none',
-          borderLeft: !isBottom ? '1px solid var(--ide-border)' : 'none',
+          borderTop: isBottom ? '2px solid var(--nb-border)' : 'none',
+          borderLeft: !isBottom ? '2px solid var(--nb-border)' : 'none',
         }}
       >
         <div
           className="flex items-center justify-between px-4 shrink-0"
-          style={{ height: 48, borderBottom: '1px solid var(--ide-border)' }}
+          style={{ height: 48, borderBottom: '2px solid var(--nb-border)' }}
         >
           <span
             style={{

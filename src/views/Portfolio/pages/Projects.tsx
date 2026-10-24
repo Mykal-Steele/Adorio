@@ -1,21 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, ExternalLink, Lock } from 'lucide-react';
+import { ArrowRight, ExternalLink } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
-import { useProjectNavigation } from '../hooks/useProjectNavigation';
-import { mono, sans, vietnam } from '../constants/fonts';
-import { statusConfig } from '../constants/status';
-import { Breadcrumb, Badge, IDECard, PageHeader, SectionLabel } from '../shared';
+import { mono, vietnam } from '../constants/fonts';
+import { Breadcrumb, PageHeader, ProjectCard, SectionLabel } from '../shared';
 
 export function Projects() {
-  const { openProject, prefetchProject } = useProjectNavigation();
   const { isMobile } = useResponsive();
 
   return (
     <div className="min-h-full">
-      <Breadcrumb segments={['src', 'projects.tsx']} language="TypeScript JSX" />
+      <Breadcrumb segments={['src', 'projects.json']} language="JSON" />
 
       <div className={isMobile ? 'px-5 py-7' : 'px-8 py-9'}>
         <PageHeader
@@ -23,127 +20,79 @@ export function Projects() {
           subtitle="Backend services, tools, and the systems that keep them running."
         />
 
-        <IDECard className="mt-8 mb-8">
-          {portfolioData.projects.map((proj, i) => {
-            const sc = statusConfig[proj.status] || statusConfig.STABLE;
-            const isLast = i === portfolioData.projects.length - 1;
-            return (
-              <button
-                key={proj.id}
-                onClick={() => openProject(proj.id)}
-                className="w-full text-left px-5 py-5 transition-colors"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: !isLast ? '1px solid var(--ide-border-subtle)' : 'none',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => {
-                  prefetchProject(proj.id);
-                  (e.currentTarget as HTMLElement).style.background = 'var(--ide-bg-3)';
-                }}
-                onTouchStart={() => prefetchProject(proj.id)}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'transparent';
-                }}
-              >
-                <div className="flex items-start justify-between gap-4 mb-2">
-                  <div className="flex items-center gap-3 flex-wrap min-w-0">
-                    <span
-                      style={{
-                        fontFamily: sans,
-                        fontSize: 19,
-                        fontWeight: 700,
-                        letterSpacing: '-0.02em',
-                        color: 'var(--ide-text-1)',
-                      }}
-                    >
-                      {proj.name}
-                    </span>
-                    {proj.language && (
-                      <span
-                        style={{
-                          fontFamily: mono,
-                          fontSize: 12,
-                          color: proj.langColor ?? 'var(--ide-text-4)',
-                        }}
-                      >
-                        {proj.language}
-                      </span>
-                    )}
-                    <Badge color={sc.color} bg={sc.bg} style={{ fontSize: 11 }}>
-                      {sc.label}
-                    </Badge>
-                    {proj.requiresAccount && (
-                      <span
-                        className="inline-flex items-center gap-1"
-                        style={{ fontFamily: sans, fontSize: 12, color: 'var(--ide-text-5)' }}
-                      >
-                        <Lock size={11} />
-                        Requires an account
-                      </span>
-                    )}
-                  </div>
-                  <ArrowRight
-                    size={16}
-                    color="var(--ide-text-5)"
-                    style={{ flexShrink: 0, marginTop: 4 }}
-                  />
-                </div>
-                <p
-                  style={{
-                    fontFamily: vietnam,
-                    fontSize: 16,
-                    lineHeight: 1.6,
-                    color: 'var(--ide-text-3)',
-                    margin: 0,
-                    maxWidth: '78ch',
-                  }}
-                >
-                  {proj.summary}
-                </p>
-              </button>
-            );
-          })}
-        </IDECard>
+        <div
+          className="grid gap-5"
+          style={{
+            marginTop: 36,
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+          }}
+        >
+          {portfolioData.projects.map((project) => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
+        </div>
 
-        <div style={{ marginTop: 40 }}>
+        <div style={{ marginTop: 56 }}>
           <SectionLabel>Other projects</SectionLabel>
-          <div className="flex flex-wrap gap-x-6 gap-y-3">
-            {portfolioData.otherProjects.map((proj) => {
-              const external = proj.href.startsWith('http');
+          <div className="flex flex-wrap gap-3">
+            {portfolioData.otherProjects.map((project) => {
+              const external = project.href.startsWith('http');
               const style = {
-                fontSize: 16,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 7,
+                padding: '7px 11px',
+                fontSize: 14,
                 fontFamily: vietnam,
-                color: 'var(--ide-text-3)',
+                color: 'var(--ide-text-2)',
                 textDecoration: 'none',
+                background: 'var(--ide-bg-0)',
+                border: '2px solid var(--nb-border)',
+                boxShadow: '2px 2px 0 var(--nb-shadow)',
               } as const;
 
               return external ? (
                 <a
-                  key={proj.name}
-                  href={proj.href}
+                  key={project.name}
+                  href={project.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 hover:underline"
+                  className="inline-flex items-center gap-1.5"
                   style={style}
                 >
-                  {proj.name}
+                  {project.name}
                   <ExternalLink size={13} />
                 </a>
               ) : (
-                <Link
-                  key={proj.name}
-                  href={proj.href}
-                  className="inline-flex items-center gap-1.5 hover:underline"
-                  style={style}
-                >
-                  {proj.name}
+                <Link key={project.name} href={project.href} style={style}>
+                  {project.name}
                   <ArrowRight size={13} />
                 </Link>
               );
             })}
           </div>
+        </div>
+
+        <div className="flex items-center gap-2" style={{ marginTop: 28 }}>
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              background: 'var(--nb-accent)',
+              border: '1.5px solid var(--nb-border)',
+            }}
+          />
+          <span
+            style={{
+              fontFamily: mono,
+              fontSize: 11,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: 'var(--ide-text-4)',
+            }}
+          >
+            {portfolioData.projects.length} projects · open a card for the full case study
+          </span>
         </div>
       </div>
 

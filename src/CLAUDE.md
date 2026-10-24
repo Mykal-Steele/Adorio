@@ -38,8 +38,7 @@ src/
 │   ├── algo/page.tsx            — Mounts views/Algo
 │   ├── (public)/                — Route group: portfolio IDE (no navbar, PortfolioShell wraps children)
 │   │   ├── layout.tsx           — Wraps children in PortfolioShell from views/Portfolio/IDELayout
-│   │   ├── page.tsx             — / → mounts views/Portfolio/pages/Dashboard
-│   │   ├── about/page.tsx       — /about → mounts views/Portfolio/pages/About
+│   │   ├── page.tsx             — / → mounts views/Portfolio/pages/About
 │   │   ├── contact/page.tsx     — /contact → mounts views/Portfolio/pages/Contact
 │   │   └── projects/
 │   │       ├── page.tsx         — /projects → mounts views/Portfolio/pages/Projects
@@ -161,13 +160,13 @@ src/
         ├── SidePanel.tsx        — 220px left panel with 4 sub-panels
         ├── SettingsPanel.tsx    — Settings sub-panel
         ├── TabBar.tsx           — Tab row with main + dynamic project tabs
-        ├── TitleBar.tsx         — 44px top bar with logo + ThemeSwitcher
+        ├── TitleBar.tsx         — 48px top bar with Portfolio label + ThemeSwitcher
         ├── RightPanel.tsx       — 280px right panel (metrics + Ask Oo chat)
         ├── StatusBar.tsx        — 24px bottom status bar
         ├── Terminal.tsx         — Boot terminal with interactive commands
         ├── context/
         │   ├── IDEContext.tsx   — activeSidePanel, terminalOpen, openProjectTabs
-        │   └── ThemeContext.tsx — 5 themes (midnight/nord/dracula/one-dark/catppuccin), CSS vars on documentElement
+        │   └── ThemeContext.tsx — 6 themes (paper/midnight/nord/dracula/one-dark/catppuccin), CSS vars on documentElement
         ├── data/portfolio.ts    — All portfolio content (projects, commits, PRs, skills, AI responses)
         ├── constants/
         │   ├── fonts.ts         — Font family strings
@@ -182,6 +181,7 @@ src/
         │   ├── IDECard.tsx      — Card component with IDE styling
         │   ├── LineNumbers.tsx  — Gutter line number display
         │   ├── PageHeader.tsx   — Section header
+        │   ├── ProjectCard.tsx  — Project cover, metadata, and tags card
         │   ├── SectionLabel.tsx — Sub-section label
         │   └── ThemeSwitcher.tsx — Theme selector dropdown
         ├── mobile/
@@ -189,9 +189,8 @@ src/
         │   ├── MobileHeader.tsx — Mobile top bar
         │   └── MobileNav.tsx    — Mobile navigation links
         └── pages/               — Portfolio route content (mounted by app/(public)/ pages)
-            ├── Dashboard.tsx    — / : commit stream, PR list, project gallery
-            ├── About.tsx        — /about: bio, stack, timeline, community
-            ├── Projects.tsx     — /projects: project grid + stats
+            ├── About.tsx        — /: bio, social links, featured projects, stack, timeline, community
+            ├── Projects.tsx     — /projects: visual project card grid
             ├── ProjectDetail.tsx — /projects/[id]: detailed project view
             └── Contact.tsx      — /contact: channels + message form (uses contactSchema)
 ```

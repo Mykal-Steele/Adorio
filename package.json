@@ -14,7 +14,7 @@
     "dev:backend": "npm run backend",
     "backend": "cd backend && npm run dev",
     "bs": "npm run build && npm run start",
-    "build": "next build && cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public",
+    "build": "next build && rm -rf .next/standalone/.next/static .next/standalone/public && mkdir -p .next/standalone/.next/static .next/standalone/public && cp -r .next/static/. .next/standalone/.next/static/ && cp -r public/. .next/standalone/public/",
     "start": "PORT=3001 node .next/standalone/server.js",
     "start:all": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"cd backend && npm start\" \"PORT=3001 node .next/standalone/server.js\"",
     "typecheck": "tsc --noEmit",

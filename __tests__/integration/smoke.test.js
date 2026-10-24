@@ -174,7 +174,7 @@ describe('Smoke, Environment, Security, SEO, Performance', () => {
       expect(res.data).toContain('<urlset');
     });
 
-    test.each(['/about', '/projects', '/contact'])(
+    test.each(['/', '/projects', '/projects/chronochunk', '/contact'])(
       '%s loads without JS errors',
       async (path) => {
         const page = await browser.newPage();

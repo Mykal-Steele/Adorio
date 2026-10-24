@@ -1,7 +1,6 @@
 'use client';
 
-import { Menu, Zap } from 'lucide-react';
-import { portfolioData } from '../data/portfolio';
+import { Menu } from 'lucide-react';
 import { sans } from '../constants/fonts';
 import { ThemeSwitcher, IconButton } from '../shared';
 
@@ -16,28 +15,21 @@ export function MobileHeader({ onMenuOpen }: MobileHeaderProps) {
       style={{
         height: 48,
         background: 'var(--ide-bg-0)',
-        borderBottom: '1px solid var(--ide-border)',
+        borderBottom: '2px solid var(--nb-border)',
         fontFamily: sans,
       }}
     >
       <div className="flex items-center gap-2">
-        <div
-          className="flex items-center justify-center"
-          style={{ width: 24, height: 24, background: 'var(--ide-accent)' }}
-        >
-          <Zap size={12} color="var(--ide-accent-dark)" strokeWidth={2.5} />
-        </div>
         <span
           style={{
             color: 'var(--ide-text-1)',
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: 700,
-            letterSpacing: '0.05em',
+            letterSpacing: '0.02em',
           }}
         >
-          {portfolioData.handle}
+          Portfolio
         </span>
-        <span style={{ color: 'var(--ide-text-4)', fontSize: 13 }}> // IDE</span>
       </div>
       <div className="flex items-center gap-2">
         <ThemeSwitcher />

@@ -46,6 +46,8 @@ export interface Project {
   liveUrl?: string;
   links?: ProjectLink[];
   requiresAccount?: boolean;
+  coverImage?: string;
+  coverAlt?: string;
   screenshots?: ProjectShot[];
 }
 
@@ -87,7 +89,7 @@ export const portfolioData = {
   handle: 'OAKAR_OO',
   role: 'Backend Developer',
   headline:
-    'CS student at KMUTT. I build backends and the setup that keeps them running: APIs, databases, deployment, and developer experience. Mostly TypeScript, Express/Hono, Prisma, and PostgreSQL.',
+    'CS student at KMUTT, Bangkok. I build backends and the setup that keeps them running: APIs, databases, deployment, and developer experience. Mostly TypeScript, Express/Hono, Prisma, and PostgreSQL.',
   branch: 'main/production',
   email: 'oakar@adorio.space',
   github: 'github.com/Mykal-Steele',
@@ -216,6 +218,9 @@ export const portfolioData = {
       ],
       color: '#fe9d00',
       repoUrl: 'github.com/Mykal-Steele/ChronoChunk',
+      coverImage: '/projects/chronochunk/study-guide.webp',
+      coverAlt:
+        'ChronoChunk Discord conversation returning an HDFS study guide PDF with a system diagram.',
       screenshots: [
         {
           src: '/projects/chronochunk/study-guide.webp',

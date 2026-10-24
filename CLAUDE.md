@@ -120,7 +120,7 @@ Secrets stored in GitHub: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPT
 
 ### Portfolio IDE (`src/views/Portfolio/`)
 
-The public-facing portfolio lives at `/`, `/about`, `/projects`, `/projects/[id]`, and `/contact`. It is a VSCode-style IDE layout with a multi-theme system.
+The public-facing portfolio lives at `/`, `/projects`, `/projects/[id]`, and `/contact`. It is a VSCode-style IDE layout with a neo-brutalist paper theme (plus five dark themes).
 
 **Entry point**: `src/app/(public)/layout.tsx` wraps all portfolio routes with `PortfolioShell` (from `IDELayout.tsx`), which composes `ThemeProvider → IDEProvider → IDELayout`. The shell stays mounted across page navigations — only `children` swaps, preventing flicker. Login/register are in `(with-navbar)` so they are unaffected.
 
@@ -129,32 +129,31 @@ The public-facing portfolio lives at `/`, `/about`, `/projects`, `/projects/[id]
 ```
 src/views/Portfolio/
 ├── IDELayout.tsx          — PortfolioShell, IDELayout, DesktopShell, TabletShell, MobileShell
-├── TitleBar.tsx            — 44px top bar with logo + ThemeSwitcher
+├── TitleBar.tsx            — 48px top bar with Portfolio label + ThemeSwitcher
 ├── ActivityBar.tsx         — 48px left icon column (Explorer/Profile/Git/Skills/Settings)
 ├── SidePanel.tsx           — 220px left panel with 4 sub-panels
 ├── SettingsPanel.tsx       — Settings sub-panel rendered inside SidePanel
-├── TabBar.tsx              — 36px tab row with main + dynamic project tabs
+├── TabBar.tsx              — 40px tab row with main + dynamic project tabs
 ├── RightPanel.tsx          — 280px right panel (System metrics + Ask Oo chat)
 ├── StatusBar.tsx           — 24px bottom status bar
 ├── Terminal.tsx            — Animated boot terminal with interactive commands
 ├── context/
 │   ├── IDEContext.tsx      — activeSidePanel, terminalOpen, openProjectTabs
-│   └── ThemeContext.tsx    — 5 themes (midnight/nord/dracula/one-dark/catppuccin), CSS vars injected via document.documentElement
+│   └── ThemeContext.tsx    — 6 themes (paper/midnight/nord/dracula/one-dark/catppuccin), CSS vars injected via document.documentElement
 ├── hooks/useResponsive.ts  — SSR-safe breakpoint (initializes to 'desktop', reads window in useEffect)
 ├── data/portfolio.ts       — All portfolio content (projects, commits, PRs, skills, aiResponses)
 ├── constants/fonts.ts      — Font family strings
 ├── constants/status.ts     — statusConfig + codeColors for syntax highlighting
-├── shared/                 — Badge, IDECard, Breadcrumb, LineNumbers, PageHeader, SectionLabel, ThemeSwitcher
+├── shared/                 — Badge, IDECard, Breadcrumb, LineNumbers, PageHeader, ProjectCard, SectionLabel, ThemeSwitcher
 ├── mobile/                 — MobileHeader, MobileNav, MobileDrawer
 └── pages/
-    ├── Dashboard.tsx       — / (commit stream, PR list, project gallery)
-    ├── About.tsx           — /about (bio, stack, timeline, community)
-    ├── Projects.tsx        — /projects (project list + stats)
+    ├── About.tsx           — / (bio, social links, featured projects, stack, timeline, community)
+    ├── Projects.tsx        — /projects (visual project card grid)
     ├── ProjectDetail.tsx   — /projects/[id] (accepts id prop)
     └── Contact.tsx         — /contact (channels + message form)
 ```
 
-**Theme system**: CSS variables are set on `document.documentElement` at runtime by `ThemeProvider`. `globals.css` has the midnight defaults for SSR/flash prevention. The user's choice is persisted in `localStorage` under `ide-theme`.
+**Theme system**: CSS variables are set on `document.documentElement` at runtime by `ThemeProvider`. `globals.css` has the one-dark fallback plus a `paper` neo-brutalist theme (the default). The user's choice is persisted by next-themes in `localStorage` under `theme`.
 
 **Navigation**: All Vike `navigate()` calls replaced with `useRouter().push()` from `next/navigation`. Route params passed as props (not from routeContext).
 

@@ -30,21 +30,22 @@ export function ThemeSwitcher({ showLabel = false }: ThemeSwitcherProps) {
         aria-label="Switch Theme"
         className="rainbow-btn flex items-center justify-center gap-1.5"
         style={{
-          background: open ? 'var(--ide-border-medium)' : 'var(--ide-border-subtle)',
-          border: '1px solid var(--ide-border)',
+          background: open ? 'var(--nb-accent)' : 'var(--ide-bg-0)',
+          border: '2px solid var(--nb-border)',
+          boxShadow: '2px 2px 0 var(--nb-shadow)',
           cursor: 'pointer',
-          padding: showLabel ? '2px 6px' : 16,
-          borderRadius: 4,
+          padding: showLabel ? '4px 9px' : 16,
+          borderRadius: 0,
           fontSize: 10,
           fontFamily: sans,
           letterSpacing: '0.04em',
-          color: open ? 'var(--ide-text-1)' : 'var(--ide-text-5)',
+          color: open ? 'var(--nb-on-accent)' : 'var(--ide-text-5)',
         }}
       >
         <Palette
           size={showLabel ? 12 : 14}
           className={open ? '' : 'rainbow-icon'}
-          style={open ? { color: 'var(--ide-text-1)' } : undefined}
+          style={open ? { color: 'var(--nb-on-accent)' } : undefined}
         />
         {showLabel && <span className={open ? '' : 'rainbow-icon'}>THEME</span>}
       </button>
@@ -53,12 +54,12 @@ export function ThemeSwitcher({ showLabel = false }: ThemeSwitcherProps) {
           className="absolute right-0 z-50"
           style={{
             top: 'calc(100% + 6px)',
-            background: 'var(--ide-bg-2)',
-            border: '1px solid var(--ide-border-medium)',
-            borderRadius: 4,
+            background: 'var(--ide-bg-0)',
+            border: '2px solid var(--nb-border)',
+            borderRadius: 0,
             minWidth: 180,
             padding: '4px 0',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+            boxShadow: '5px 5px 0 var(--nb-shadow)',
             animation: 'dropdownOpen 0.14s ease-out',
             transformOrigin: 'top right',
           }}
@@ -83,12 +84,13 @@ export function ThemeSwitcher({ showLabel = false }: ThemeSwitcherProps) {
               }}
               className="w-full flex items-center gap-2 px-3 py-1.5"
               style={{
-                background: theme === t ? 'var(--ide-border)' : 'transparent',
+                background: theme === t ? 'var(--nb-accent)' : 'transparent',
                 border: 'none',
                 cursor: 'pointer',
                 fontSize: 11,
                 fontFamily: sans,
-                color: theme === t ? 'var(--ide-accent)' : 'var(--ide-text-2)',
+                color: theme === t ? 'var(--nb-on-accent)' : 'var(--ide-text-2)',
+                fontWeight: theme === t ? 700 : 400,
                 textAlign: 'left',
               }}
               onMouseEnter={(e) => {

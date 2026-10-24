@@ -12,9 +12,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Portfolio IDE theme tokens — one-dark defaults match the site default theme.
+/* Portfolio IDE theme tokens — the root block is the pre-hydration fallback.
    next-themes overwrites these at runtime via [data-theme]. Tailwind can't drive runtime themes. */
 :root {
+  --nb-border: var(--ide-text-1);
+  --nb-shadow: rgba(0, 0, 0, 0.55);
+  --nb-accent: var(--ide-yellow);
+  --nb-on-accent: #2b2723;
+  --nb-paper: var(--ide-bg-2);
+
   --ide-bg-0: #1b1e24;
   --ide-bg-1: #1e2127;
   --ide-bg-2: #21252b;
@@ -355,6 +361,83 @@
   --ide-scrollbar: #353b45;
 }
 
+[data-theme='paper'] {
+  --nb-border: #2b2723;
+  --nb-shadow: #2b2723;
+  --nb-accent: #f2c744;
+  --nb-on-accent: #2b2723;
+  --nb-paper: #fdfaf3;
+
+  --ide-bg-0: #fdfaf3;
+  --ide-bg-1: #f8f1e4;
+  --ide-bg-2: #f3e9d8;
+  --ide-bg-3: #fbf5e9;
+  --ide-bg-4: #e5d8c0;
+  --ide-bg-5: #d9c8ab;
+  --ide-border-subtle: rgba(43, 39, 35, 0.12);
+  --ide-border: rgba(43, 39, 35, 0.22);
+  --ide-border-medium: rgba(43, 39, 35, 0.3);
+  --ide-border-strong: rgba(43, 39, 35, 0.4);
+  --ide-border-stronger: rgba(43, 39, 35, 0.55);
+  --ide-text-1: #2b2723;
+  --ide-text-2: #3a342d;
+  --ide-text-3: #4a443c;
+  --ide-text-4: #5c544a;
+  --ide-text-5: #6b6154;
+  --ide-text-6: #7a6f60;
+  --ide-text-7: #887b69;
+  --ide-text-8: #968874;
+  --ide-text-9: #a39580;
+  --ide-accent: #7a4f10;
+  --ide-accent-dark: #5a3908;
+  --ide-accent-light: #a8801a;
+  --ide-accent-bright: #c99a1f;
+  --ide-accent-a5: rgba(122, 79, 16, 0.05);
+  --ide-accent-a6: rgba(122, 79, 16, 0.06);
+  --ide-accent-a8: rgba(122, 79, 16, 0.08);
+  --ide-accent-a10: rgba(122, 79, 16, 0.1);
+  --ide-accent-a12: rgba(122, 79, 16, 0.12);
+  --ide-accent-a15: rgba(122, 79, 16, 0.15);
+  --ide-accent-a20: rgba(122, 79, 16, 0.2);
+  --ide-accent-a25: rgba(122, 79, 16, 0.25);
+  --ide-accent-a30: rgba(122, 79, 16, 0.3);
+  --ide-accent-light-a15: rgba(168, 128, 26, 0.15);
+  --ide-accent-light-a40: rgba(168, 128, 26, 0.4);
+  --ide-accent-light-a60: rgba(168, 128, 26, 0.6);
+  --ide-accent-light-a70: rgba(168, 128, 26, 0.7);
+  --ide-orange: #a8801a;
+  --ide-orange-light: #c99a1f;
+  --ide-orange-a12: rgba(168, 128, 26, 0.12);
+  --ide-orange-a18: rgba(168, 128, 26, 0.18);
+  --ide-orange-a30: rgba(168, 128, 26, 0.3);
+  --ide-orange-a45: rgba(168, 128, 26, 0.45);
+  --ide-purple: #6d3f7c;
+  --ide-purple-a10: rgba(109, 63, 124, 0.1);
+  --ide-purple-a12: rgba(109, 63, 124, 0.12);
+  --ide-purple-a15: rgba(109, 63, 124, 0.15);
+  --ide-purple-a25: rgba(109, 63, 124, 0.25);
+  --ide-blue: #2f5f8a;
+  --ide-blue-light: #4a7da8;
+  --ide-blue-a18: rgba(47, 95, 138, 0.18);
+  --ide-blue-a45: rgba(47, 95, 138, 0.45);
+  --ide-green: #4f6b32;
+  --ide-red: #a1493f;
+  --ide-red-dark: #84362e;
+  --ide-red-a12: rgba(161, 73, 63, 0.12);
+  --ide-pink: #9d3c56;
+  --ide-pink-a12: rgba(157, 60, 86, 0.12);
+  --ide-cyan: #2f6f6a;
+  --ide-ts-blue: #2f5f8a;
+  --ide-ts-blue-a8: rgba(47, 95, 138, 0.08);
+  --ide-ts-blue-a10: rgba(47, 95, 138, 0.1);
+  --ide-ts-blue-a20: rgba(47, 95, 138, 0.2);
+  --ide-yellow: #b8860b;
+  --ide-syntax-string: #4f6b32;
+  --ide-syntax-string2: #2f6f6a;
+  --ide-line-number: rgba(92, 80, 64, 0.5);
+  --ide-scrollbar: #d9c8ab;
+}
+
 [data-theme='catppuccin'] {
   --ide-bg-0: #11111b;
   --ide-bg-1: #131320;
@@ -441,10 +524,10 @@ body {
 
 /* Theme-aware hover backgrounds — values use CSS vars, !important overrides base resets */
 .ide-hover:hover {
-  background: rgba(255, 255, 255, 0.04) !important;
+  background: var(--ide-border-subtle) !important;
 }
 .ide-hover-icon:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: var(--ide-border) !important;
 }
 
 /* Custom animations — Tailwind only ships spin/ping/pulse/bounce */
