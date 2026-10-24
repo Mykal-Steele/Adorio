@@ -26,6 +26,13 @@ export const createSecretSchema = z
         path: ['password'],
       });
     }
+    if (data.name && !/^[\x20-\x7e]*[\x21-\x7e]$/.test(data.password)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Passphrase must use printable ASCII and must not end with whitespace',
+        path: ['password'],
+      });
+    }
   });
 
 export const secretNameSchema = z.object({ name: secretName });

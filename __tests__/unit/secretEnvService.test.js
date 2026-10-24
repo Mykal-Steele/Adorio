@@ -1,4 +1,5 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import * as realModels from '../../backend/models/index.js';
 
 const mockFindUserById = mock();
 const mockCreateSecretEnv = mock();
@@ -7,6 +8,7 @@ const mockFindSecretByName = mock();
 const mockUpsertSecretByName = mock();
 
 mock.module('../../backend/models/index.js', () => ({
+  ...realModels,
   findUserById: mockFindUserById,
   createSecretEnv: mockCreateSecretEnv,
   findSecretByPasswordHash: mockFindSecretByPasswordHash,
@@ -75,6 +77,26 @@ describe('createSecretMessage with a project name', () => {
         rawBody: { name: 'good-name', message: 'x', password: 'short' },
       }),
     ).rejects.toMatchObject({ statusCode: 400 });
+  });
+
+  test('rejects non-ASCII and trailing-whitespace passphrases', async () => {
+    for (const password of ['correct horse ', 'correct horse\t', 'correct hörse']) {
+      await expect(
+        createSecretMessage({
+          userId: 'user-1',
+          rawBody: { name: 'good-name', message: 'x', password },
+        }),
+      ).rejects.toMatchObject({ statusCode: 400 });
+    }
+  });
+
+  test('allows leading whitespace in a named passphrase', async () => {
+    const result = await createSecretMessage({
+      userId: 'user-1',
+      rawBody: { name: 'leading-space', message: 'x', password: '  correct horse' },
+    });
+
+    expect(result).toEqual({ name: 'leading-space' });
   });
 });
 

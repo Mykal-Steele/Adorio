@@ -30,6 +30,14 @@ const SendEnv = () => {
         throw new Error('Project name must be 3-40 lowercase letters, digits, or dashes');
       }
 
+      if (password.length < 8) {
+        throw new Error('Passphrase must be at least 8 characters');
+      }
+
+      if (!/^[\x20-\x7e]*[\x21-\x7e]$/.test(password)) {
+        throw new Error('Passphrase must use printable ASCII and must not end with whitespace');
+      }
+
       const response = await storeSecret(name, message, password);
 
       setSuccess(true);
@@ -187,7 +195,8 @@ const SendEnv = () => {
                     required
                   />
                   <span className="mt-1.5 block font-paper-hand text-[19px] leading-tight text-[var(--paper-accent)]">
-                    at least 8 characters &middot; nothing is stored that can reset it
+                    at least 8 printable ASCII characters, no trailing spaces &middot; nothing is
+                    stored that can reset it
                   </span>
                 </label>
 

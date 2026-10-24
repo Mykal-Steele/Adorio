@@ -261,7 +261,7 @@ The VM's own idle backstop logs to its journal: `journalctl -u piston-idle-stop.
 
 ## SecretEnv
 
-A personal encrypted env/message vault. Authenticated users POST `{ name, message, password }`; the message is encrypted with AES-256-GCM using an async scrypt-derived key, and the passphrase is verified by the GCM auth tag. `name` is a globally unique project slug, so the same user can rotate a named env by posting again. The older `{ message, password }` shape is still accepted and keeps the legacy AES-256-CBC + `password + user.email` hash path for existing records.
+A personal encrypted env/message vault. Authenticated users POST `{ name, message, password }`; the message is encrypted with AES-256-GCM using an async scrypt-derived key, and the passphrase is verified by the GCM auth tag. Named passphrases must be at least 8 printable ASCII characters and must not end with whitespace. `name` is a globally unique project slug, so the same user can rotate a named env by posting again. The older `{ message, password }` shape is still accepted and keeps the legacy AES-256-CBC + `password + user.email` hash path for existing records.
 
 **`GET /api/secretenv` and `GET /api/secretenv/:name` are intentionally unauthenticated** — designed for `curl` retrieval. For a named env the `Authorization` header carries `Bearer <passphrase>`; for a legacy record it carries the raw retrieval password (not a JWT). `secretLimiter` (20 req/5 min) prevents brute force, and a wrong passphrase/unknown name both return 404. Do not add JWT auth middleware to these routes.
 

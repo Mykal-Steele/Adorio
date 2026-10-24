@@ -57,12 +57,19 @@ tmp=$(mktemp "$file.XXXXXX") || {
   printf 'Could not create a temporary file next to %s.\n' "$file" >&2
   exit 1
 }
-trap 'rm -f "$tmp"' 0 1 2 15
-if ! curl -fsS -H "Authorization: Bearer $pass" "$api?name=$name" -o "$tmp"; then
+hdr=$(mktemp "$file.hdr.XXXXXX") || {
+  rm -f "$tmp"
+  printf 'Could not create a temporary header file.\n' >&2
+  exit 1
+}
+trap 'rm -f "$tmp" "$hdr"' 0 1 2 15
+printf 'Authorization: Bearer %s\n' "$pass" > "$hdr"
+if ! curl -fsS -H @"$hdr" "$api?name=$name" -o "$tmp"; then
   printf 'Retrieval failed. Check the project name and passphrase.\n' >&2
   exit 1
 fi
 chmod 600 "$tmp"
 mv "$tmp" "$file"
+rm -f "$hdr"
 trap - 0 1 2 15
 printf 'Wrote %s (%s bytes)\n' "$file" "$(wc -c < "$file" | tr -d ' ')" >&2
