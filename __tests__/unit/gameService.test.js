@@ -292,7 +292,21 @@ describe('updateUserAchievements', () => {
       reach50PLevel: false,
     });
     expect(mockUpdateUserRhythm).toHaveBeenCalledWith('u1', {
-      achievements: result.achievements,
+      'achievements.reach10PLevel': true,
     });
+  });
+
+  test('skips the write when no new achievement is unlocked', async () => {
+    mockFindUserById.mockImplementation(() =>
+      Promise.resolve({ rhythmGame: { achievements: { firstPlay: true } } }),
+    );
+
+    const result = await updateUserAchievements({
+      userId: 'u1',
+      rawBody: { achievements: { firstPlay: true } },
+    });
+
+    expect(result.achievements.firstPlay).toBe(true);
+    expect(mockUpdateUserRhythm).not.toHaveBeenCalled();
   });
 });

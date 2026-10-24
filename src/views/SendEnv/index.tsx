@@ -66,7 +66,7 @@ const SendEnv = () => {
           </h1>
           <p className="mt-3.5 max-w-[56ch] text-[17px] leading-[1.62] text-[var(--paper-muted)]">
             Write something down, lock it with a password, and get a one-line command to pull it
-            back later. No account needed here — the password does the protecting.
+            back later. Sign in to store it — your password and account email do the protecting.
           </p>
         </div>
       </section>
@@ -150,7 +150,7 @@ const SendEnv = () => {
                     required
                   />
                   <span className="mt-1.5 block font-paper-hand text-[19px] leading-tight text-[var(--paper-accent)]">
-                    your username is added to this password for encryption
+                    your account email is added to this password for encryption
                   </span>
                 </label>
 
@@ -172,7 +172,7 @@ const SendEnv = () => {
           </div>
 
           <p className="mt-6 text-center font-paper-hand text-xl text-[var(--paper-muted)]">
-            no account, no email, no reminders
+            account required to store &middot; no email reminders
           </p>
         </div>
       </main>

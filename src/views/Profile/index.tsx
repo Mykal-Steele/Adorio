@@ -114,7 +114,8 @@ const Profile = () => {
             </div>
             {posts.length > 0 && (
               <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-[18px] py-3 font-paper-hand text-2xl leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
-                {posts.length} pinned up
+                {posts.length}
+                {hasMore ? '+' : ''} pinned up
               </p>
             )}
           </div>

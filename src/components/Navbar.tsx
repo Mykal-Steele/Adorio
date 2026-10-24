@@ -156,7 +156,7 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <div className="hidden flex-1 items-center justify-center gap-0.5 lg:flex">
+          <div className="hidden flex-1 items-center justify-center gap-0.5 xl:flex">
             {links.map(({ href, text, external }) => {
               const isActive = pathname === href;
               return external ? (
@@ -180,7 +180,7 @@ const Navbar = () => {
                 type="button"
                 onClick={() => setMoreOpen((value) => !value)}
                 aria-expanded={moreOpen}
-                aria-haspopup="true"
+                aria-controls="navbar-more-panel"
                 className={linkClassName}
               >
                 <span className="relative inline-flex items-center gap-0.5 px-[7px] py-[2px]">
@@ -202,7 +202,7 @@ const Navbar = () => {
 
               {moreOpen && (
                 <div
-                  role="menu"
+                  id="navbar-more-panel"
                   className="absolute right-0 top-full z-50 mt-1 w-[540px] origin-top-right rounded-[4px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-4 shadow-[3px_4px_0_var(--paper-ink)]"
                 >
                   <div className="grid grid-cols-2 gap-x-6 gap-y-4">
@@ -223,7 +223,6 @@ const Navbar = () => {
                               <li key={item.href}>
                                 {item.external ? (
                                   <a
-                                    role="menuitem"
                                     href={item.href}
                                     onClick={() => setMoreOpen(false)}
                                     className={className}
@@ -235,7 +234,6 @@ const Navbar = () => {
                                   </a>
                                 ) : (
                                   <Link
-                                    role="menuitem"
                                     href={item.href}
                                     onClick={() => setMoreOpen(false)}
                                     className={className}
@@ -258,14 +256,14 @@ const Navbar = () => {
           {token ? (
             <button
               onClick={handleLogout}
-              className="hidden shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)] lg:ml-6 lg:block"
+              className="hidden shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)] xl:ml-6 xl:block"
             >
               Sign out
             </button>
           ) : (
             <Link
               href="/register"
-              className="hidden shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)] lg:ml-6 lg:block"
+              className="hidden shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)] xl:ml-6 xl:block"
             >
               Get Started
             </Link>
@@ -273,7 +271,7 @@ const Navbar = () => {
 
           <button
             onClick={() => setOpen((value) => !value)}
-            className="ml-auto rounded-lg p-2 text-[var(--paper-ink)] transition-colors hover:bg-[var(--paper-yellow-soft)] lg:hidden"
+            className="ml-auto rounded-lg p-2 text-[var(--paper-ink)] transition-colors hover:bg-[var(--paper-yellow-soft)] xl:hidden"
             aria-label="Toggle navigation menu"
           >
             {open ? <XMarkIcon className="h-5 w-5" /> : <Bars3Icon className="h-5 w-5" />}
@@ -289,7 +287,7 @@ const Navbar = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden border-t border-[rgba(60,44,24,.15)] bg-[var(--paper-cream)] lg:hidden"
+            className="overflow-hidden border-t border-[rgba(60,44,24,.15)] bg-[var(--paper-cream)] xl:hidden"
           >
             <div className="mx-auto flex max-h-[calc(100vh-4rem)] max-w-6xl flex-col overflow-y-auto px-4 py-2">
               {links.map(({ href, text, external }) =>

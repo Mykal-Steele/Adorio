@@ -118,6 +118,12 @@ describe('Game API', () => {
     test('achievements cannot be unset', async () => {
       await axios.post(
         `${BASE_URL}/api/game/achievements`,
+        { achievements: { firstPlay: true, reach10PLevel: true } },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+
+      await axios.post(
+        `${BASE_URL}/api/game/achievements`,
         { achievements: { firstPlay: false, reach10PLevel: false } },
         { headers: { Authorization: `Bearer ${accessToken}` } },
       );

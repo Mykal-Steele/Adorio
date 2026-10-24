@@ -71,11 +71,15 @@ export const updateUserAchievements = async ({ userId, rawBody }) => {
   if (!user) throw ApiError.notFound('User not found');
 
   const merged = normalizeAchievements(user.rhythmGame?.achievements);
+  const unlocked = {};
   for (const key of ACHIEVEMENT_KEYS) {
-    if (achievements[key]) merged[key] = true;
+    if (achievements[key] && !merged[key]) {
+      merged[key] = true;
+      unlocked[`achievements.${key}`] = true;
+    }
   }
 
-  await updateUserRhythm(userId, { achievements: merged });
+  if (Object.keys(unlocked).length > 0) await updateUserRhythm(userId, unlocked);
   return { achievements: merged };
 };
 

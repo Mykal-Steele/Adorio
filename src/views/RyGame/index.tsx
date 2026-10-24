@@ -156,6 +156,17 @@ const readStoredAchievements = () => {
   }
 };
 
+const readStoredVolume = () => {
+  if (typeof window === 'undefined') return 0.3;
+  try {
+    const raw = localStorage.getItem('rhythmDotsVolume');
+    const saved = raw === null ? NaN : Number(raw);
+    return Number.isFinite(saved) && saved >= 0 && saved <= 1 ? saved : 0.3;
+  } catch {
+    return 0.3;
+  }
+};
+
 const formatTime = (seconds) => {
   const total = Math.max(0, Math.floor(seconds || 0));
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
@@ -169,12 +180,7 @@ const RyGame = () => {
   const [audioHasLoaded, setAudioHasLoaded] = useState(false);
   const [audioLoadError, setAudioLoadError] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [volume, setVolume] = useState(() => {
-    if (typeof window === 'undefined') return 0.3;
-    const raw = localStorage.getItem('rhythmDotsVolume');
-    const saved = raw === null ? NaN : Number(raw);
-    return Number.isFinite(saved) && saved >= 0 && saved <= 1 ? saved : 0.3;
-  });
+  const [volume, setVolume] = useState(readStoredVolume);
   const [message, setMessage] = useState('Loading...');
   const [gameIsActive, setGameIsActive] = useState(false);
   const [pLevel, setPLevel] = useState(0);
@@ -612,7 +618,11 @@ const RyGame = () => {
 
   const persistAchievements = useCallback((next) => {
     setAchievements(next);
-    localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(next));
+    try {
+      localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(next));
+    } catch (error) {
+      console.warn('Could not persist achievements locally:', error);
+    }
     if (getToken()) updateAchievements(next).catch(() => {});
   }, []);
 
@@ -1056,7 +1066,11 @@ const RyGame = () => {
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume;
-    localStorage.setItem('rhythmDotsVolume', String(volume));
+    try {
+      localStorage.setItem('rhythmDotsVolume', String(volume));
+    } catch (error) {
+      console.warn('Could not persist volume:', error);
+    }
   }, [volume]);
 
   useEffect(() => {
@@ -1171,14 +1185,20 @@ const RyGame = () => {
             ]),
           );
           setAchievements(mergedAchievements);
-          localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(mergedAchievements));
+          try {
+            localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(mergedAchievements));
+          } catch (error) {
+            console.warn('Could not persist achievements locally:', error);
+          }
 
           const hasUnsynced = Object.keys(DEFAULT_ACHIEVEMENTS).some(
             (key) => mergedAchievements[key] && !serverAchievements[key],
           );
           if (hasUnsynced && getToken() && !achievementsSyncedRef.current) {
             achievementsSyncedRef.current = true;
-            updateAchievements(mergedAchievements).catch(() => {});
+            updateAchievements(mergedAchievements).then((result) => {
+              if (result?.saved === false) achievementsSyncedRef.current = false;
+            });
           }
 
           // Try to get the full user profile if we have stats
