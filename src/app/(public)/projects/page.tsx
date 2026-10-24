@@ -4,7 +4,7 @@ import { Projects } from '@/views/Portfolio/pages/Projects';
 export const metadata: Metadata = {
   title: 'Projects | Oakar Oo',
   description:
-    'CLI tools, full-stack apps, and backend services. create-adorex, ChronoChunk, CozyTalk, Vexta, CogniMax, and more.',
+    'Backend services, tools, and the systems behind them. ChronoChunk, Smart City, Coding Challenges, NFC Attendance, create-adorex, and more.',
   keywords: [
     'Oakar Oo',
     'projects',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Projects | Oakar Oo',
-    description: 'CLI tools, full-stack apps, and backend services.',
+    description: 'Backend services, tools, and the systems behind them.',
     url: 'https://adorio.space/projects',
     siteName: 'Oakar Oo',
     type: 'website',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary',
     title: 'Projects | Oakar Oo',
-    description: 'CLI tools, full-stack apps, and backend services.',
+    description: 'Backend services, tools, and the systems behind them.',
   },
 };
 

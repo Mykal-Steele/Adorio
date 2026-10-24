@@ -4,7 +4,7 @@ import { About } from '@/views/Portfolio/pages/About';
 export const metadata: Metadata = {
   title: 'About | Oakar Oo',
   description:
-    'CS student at KMUTT Bangkok. Building CLI tools and full-stack apps with TypeScript, Java, and Bun.',
+    'CS student at KMUTT Bangkok. I build backends and the setup that keeps them running with TypeScript, Express, Hono, Prisma, and PostgreSQL.',
   keywords: [
     'Oakar Oo',
     'about',
@@ -13,13 +13,14 @@ export const metadata: Metadata = {
     'Bangkok',
     'Microsoft Student Ambassador',
     'GDG',
-    'FOSSASIA',
     'TypeScript',
     'Java',
+    'PostgreSQL',
   ],
   openGraph: {
     title: 'About | Oakar Oo',
-    description: 'CS student at KMUTT Bangkok. Building CLI tools and full-stack apps.',
+    description:
+      'CS student at KMUTT Bangkok. I build backends and the setup that keeps them running.',
     url: 'https://adorio.space/about',
     siteName: 'Oakar Oo',
     type: 'profile',
@@ -28,14 +29,15 @@ export const metadata: Metadata = {
         url: 'https://i.ibb.co/KxH3wXDS/download-3.png',
         width: 1200,
         height: 630,
-        alt: 'Oakar Oo, Backend and Full-Stack Developer',
+        alt: 'Oakar Oo, Backend Developer',
       },
     ],
   },
   twitter: {
     card: 'summary',
     title: 'About | Oakar Oo',
-    description: 'CS student at KMUTT Bangkok. Building CLI tools and full-stack apps.',
+    description:
+      'CS student at KMUTT Bangkok. I build backends and the setup that keeps them running.',
   },
 };
 
