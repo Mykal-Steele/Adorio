@@ -6,6 +6,7 @@ import {
   KeyIcon,
   TrophyIcon,
   FireIcon,
+  SpeakerWaveIcon,
   CheckBadgeIcon,
   HeartIcon,
   ChartBarIcon,
@@ -13,8 +14,14 @@ import {
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
+import PaperTornEdge from '../../components/PaperTornEdge';
 import { fetchUserData } from '../../api';
-import { fetchLeaderboard, updateScore, fetchUserGameStats } from '../../api/gameApi';
+import {
+  fetchLeaderboard,
+  updateScore,
+  updateAchievements,
+  fetchUserGameStats,
+} from '../../api/gameApi';
 import { getToken } from '../../utils/tokenStorage';
 
 // Stateless game primitives, defined at module level so React doesn't recreate them every render.
@@ -103,36 +110,66 @@ class HitEffect {
 }
 
 const colors = {
-  defaultLeftColor: new Color(176, 61, 254, 0.95),
-  defaultRightColor: new Color(99, 90, 255, 0.95),
+  defaultLeftColor: new Color(226, 168, 66, 0.95),
+  defaultRightColor: new Color(122, 158, 92, 0.95),
   rainbowLeftColorSet: [
-    new Color(212, 152, 255, 0.95),
-    new Color(233, 120, 248, 0.95),
-    new Color(254, 108, 208, 0.95),
-    new Color(255, 40, 148, 0.95),
+    new Color(226, 168, 66, 0.95),
+    new Color(210, 120, 70, 0.95),
+    new Color(178, 88, 80, 0.95),
+    new Color(242, 199, 68, 0.95),
   ],
   rainbowRightColorSet: [
-    new Color(149, 160, 255, 0.95),
-    new Color(116, 185, 255, 0.95),
-    new Color(76, 209, 255, 0.95),
-    new Color(54, 231, 255, 0.95),
+    new Color(122, 158, 92, 0.95),
+    new Color(88, 148, 130, 0.95),
+    new Color(84, 130, 150, 0.95),
+    new Color(150, 150, 96, 0.95),
   ],
-  blackColor: new Color(15, 23, 42, 0.95),
-  whiteColor: new Color(240, 245, 255, 0.95),
+  blackColor: new Color(43, 39, 35, 0.95),
+  whiteColor: new Color(253, 250, 243, 0.95),
   backgroundColorSet: [
-    new Color(9, 14, 26, 0.97),
-    new Color(91, 33, 182, 0.4),
-    new Color(67, 56, 202, 0.4),
-    new Color(37, 99, 235, 0.4),
-    new Color(147, 51, 234, 0.4),
-    new Color(79, 70, 229, 0.4),
-    new Color(59, 130, 246, 0.4),
+    new Color(20, 18, 16, 0.97),
+    new Color(74, 44, 24, 0.4),
+    new Color(58, 52, 24, 0.4),
+    new Color(26, 56, 52, 0.4),
+    new Color(70, 32, 30, 0.4),
+    new Color(52, 30, 44, 0.4),
+    new Color(34, 48, 56, 0.4),
   ],
-  hitEffects: [
-    new Color(201, 122, 255, 1),
-    new Color(123, 156, 255, 1),
-    new Color(255, 122, 224, 1),
-  ],
+  hitEffects: [new Color(242, 199, 68, 1), new Color(210, 120, 70, 1), new Color(122, 158, 92, 1)],
+};
+
+const ACHIEVEMENTS_STORAGE_KEY = 'rhythmDotsAchievements';
+const DEFAULT_ACHIEVEMENTS = {
+  firstPlay: false,
+  reach10PLevel: false,
+  reach25PLevel: false,
+  reach50PLevel: false,
+};
+
+const readStoredAchievements = () => {
+  if (typeof window === 'undefined') return { ...DEFAULT_ACHIEVEMENTS };
+  try {
+    const parsed = JSON.parse(localStorage.getItem(ACHIEVEMENTS_STORAGE_KEY) || '{}');
+    return { ...DEFAULT_ACHIEVEMENTS, ...parsed };
+  } catch {
+    return { ...DEFAULT_ACHIEVEMENTS };
+  }
+};
+
+const readStoredVolume = () => {
+  if (typeof window === 'undefined') return 0.3;
+  try {
+    const raw = localStorage.getItem('rhythmDotsVolume');
+    const saved = raw === null ? NaN : Number(raw);
+    return Number.isFinite(saved) && saved >= 0 && saved <= 1 ? saved : 0.3;
+  } catch {
+    return 0.3;
+  }
+};
+
+const formatTime = (seconds) => {
+  const total = Math.max(0, Math.floor(seconds || 0));
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 };
 
 const RyGame = () => {
@@ -141,18 +178,16 @@ const RyGame = () => {
   const audioRef = useRef(null);
   const gameLoopRef = useRef(null);
   const [audioHasLoaded, setAudioHasLoaded] = useState(false);
+  const [audioLoadError, setAudioLoadError] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [volume, setVolume] = useState(readStoredVolume);
   const [message, setMessage] = useState('Loading...');
   const [gameIsActive, setGameIsActive] = useState(false);
   const [pLevel, setPLevel] = useState(0);
   const [highPLevel, setHighPLevel] = useState(0);
   const [maxPLevel, setMaxPLevel] = useState(0);
   const [showTutorial, setShowTutorial] = useState(false);
-  const [achievements, setAchievements] = useState({
-    firstPlay: false,
-    reach10PLevel: false,
-    reach25PLevel: false,
-    reach50PLevel: false,
-  });
+  const [achievements, setAchievements] = useState(readStoredAchievements);
   const [showAchievement, setShowAchievement] = useState(null);
   const [difficulty, setDifficulty] = useState('normal');
   const [hitEffects, setHitEffects] = useState([]);
@@ -161,6 +196,7 @@ const RyGame = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const achievementsSyncedRef = useRef(false);
   // Game constants and refs
   const game = useRef({
     messageHeight: 50,
@@ -254,9 +290,9 @@ const RyGame = () => {
       drawSolidCircle(tempPos, game.dotRadius);
       game.context.restore();
 
-      // white outline for better contrast
+      // cream outline for better contrast
       game.context.save();
-      game.context.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      game.context.strokeStyle = 'rgba(253, 250, 243, 0.7)';
       game.context.lineWidth = 1;
       drawCircleOutline(tempPos, game.dotRadius + 1);
       game.context.restore();
@@ -388,7 +424,7 @@ const RyGame = () => {
     game.context.shadowOffsetX = 2;
     game.context.shadowOffsetY = 2;
     game.context.shadowBlur = 3;
-    game.context.shadowColor = 'rgba(0, 0, 0, 0.7)';
+    game.context.shadowColor = 'rgba(20, 18, 16, 0.7)';
     game.context.fillText(text, pos.x, pos.y);
     game.context.restore();
   };
@@ -506,11 +542,6 @@ const RyGame = () => {
       setHighPLevel(parseInt(savedHighPLevel));
     }
 
-    const savedAchievements = localStorage.getItem('rhythmDotsAchievements');
-    if (savedAchievements) {
-      setAchievements(JSON.parse(savedAchievements));
-    }
-
     // Check if this is the first visit to show tutorial
     const firstVisit = localStorage.getItem('rhythmDotsFirstVisit');
     if (!firstVisit) {
@@ -552,14 +583,18 @@ const RyGame = () => {
 
         if (response && !response.anonymous) {
           // Only update UI if it's an authenticated user
-          setCurrentUser((prev) => ({
-            ...prev,
-            rhythmGame: {
-              ...prev?.rhythmGame,
-              peakPLevel: Math.max(score, prev?.rhythmGame?.peakPLevel || 0),
-              difficulty,
-            },
-          }));
+          setCurrentUser((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  rhythmGame: {
+                    ...prev.rhythmGame,
+                    peakPLevel: Math.max(score, prev.rhythmGame?.peakPLevel || 0),
+                    difficulty,
+                  },
+                }
+              : prev,
+          );
         }
 
         // Always update the leaderboard after a score update
@@ -576,63 +611,55 @@ const RyGame = () => {
     if (maxPLevel > highPLevel) {
       setHighPLevel(maxPLevel);
       localStorage.setItem('rhythmDotsHighPLevel', maxPLevel.toString());
-
-      // Update server with new high score if logged in
-      if (currentUser) {
-        updateUserScore(maxPLevel, difficulty);
-      }
-
       return true;
     }
     return false;
-  }, [maxPLevel, highPLevel, currentUser, updateUserScore, difficulty]);
+  }, [maxPLevel, highPLevel]);
+
+  const persistAchievements = useCallback((next) => {
+    setAchievements(next);
+    try {
+      localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(next));
+    } catch (error) {
+      console.warn('Could not persist achievements locally:', error);
+    }
+    if (getToken()) updateAchievements(next).catch(() => {});
+  }, []);
 
   // Check for achievements
   const checkAchievements = useCallback(() => {
     const newAchievements = { ...achievements };
     let achievementUnlocked = null;
 
-    // First play achievement
-    if (!newAchievements.firstPlay) {
-      newAchievements.firstPlay = true;
-      achievementUnlocked = {
-        name: 'First Play',
-        description: 'Started your rhythm journey',
-        icon: <SparklesIcon className="h-6 w-6 text-yellow-300" />,
-      };
-    }
-
-    // P-Level achievements
-    if (!newAchievements.reach10PLevel && pLevel >= 10) {
+    if (!newAchievements.reach10PLevel && maxPLevel >= 10) {
       newAchievements.reach10PLevel = true;
       achievementUnlocked = {
         name: 'Beginner',
         description: 'Reached P-Level 10',
-        icon: <CheckBadgeIcon className="h-6 w-6 text-blue-400" />,
+        icon: <CheckBadgeIcon className="h-6 w-6 text-[var(--paper-accent)]" />,
       };
     }
 
-    if (!newAchievements.reach25PLevel && pLevel >= 25) {
+    if (!newAchievements.reach25PLevel && maxPLevel >= 25) {
       newAchievements.reach25PLevel = true;
       achievementUnlocked = {
         name: 'Getting Good',
         description: 'Reached P-Level 25',
-        icon: <TrophyIcon className="h-6 w-6 text-purple-400" />,
+        icon: <TrophyIcon className="h-6 w-6 text-[var(--paper-accent)]" />,
       };
     }
 
-    if (!newAchievements.reach50PLevel && pLevel >= 50) {
+    if (!newAchievements.reach50PLevel && maxPLevel >= 50) {
       newAchievements.reach50PLevel = true;
       achievementUnlocked = {
         name: 'Rhythm Master',
         description: 'Reached P-Level 50!',
-        icon: <FireIcon className="h-6 w-6 text-amber-500" />,
+        icon: <FireIcon className="h-6 w-6 text-[var(--paper-accent-deep)]" />,
       };
     }
 
     if (achievementUnlocked) {
-      setAchievements(newAchievements);
-      localStorage.setItem('rhythmDotsAchievements', JSON.stringify(newAchievements));
+      persistAchievements(newAchievements);
       setShowAchievement(achievementUnlocked);
 
       // Hide achievement notification after 3 seconds
@@ -640,7 +667,11 @@ const RyGame = () => {
         setShowAchievement(null);
       }, 3000);
     }
-  }, [achievements, pLevel]);
+  }, [achievements, maxPLevel, persistAchievements]);
+
+  useEffect(() => {
+    checkAchievements();
+  }, [checkAchievements]);
 
   // Generate quests based on player skill level
   const generateSkillBasedQuests = useCallback(() => {
@@ -670,31 +701,38 @@ const RyGame = () => {
 
   // Memoize the game-related functions
   const startGame = useCallback(() => {
-    if (audioRef.current && game.audioHasLoaded) {
-      audioRef.current.play();
-      setGameIsActive(true);
-      setMessage(''); // Empty message instead of showing P-Level
-      setShowGameOverScreen(false);
+    const audio = audioRef.current;
+    if (!audio || !audioHasLoaded) return;
 
-      // Trigger first play achievement if it's the player's first time
-      if (!achievements.firstPlay) {
-        const newAchievements = { ...achievements, firstPlay: true };
-        setAchievements(newAchievements);
-        localStorage.setItem('rhythmDotsAchievements', JSON.stringify(newAchievements));
+    setGameIsActive(true);
+    setMessage('');
+    setShowGameOverScreen(false);
 
-        setShowAchievement({
-          name: 'First Play',
-          description: 'Started your rhythm journey',
-          icon: <SparklesIcon className="h-6 w-6 text-yellow-300" />,
-        });
-
-        // Hide after 3 seconds
-        setTimeout(() => {
-          setShowAchievement(null);
-        }, 3000);
-      }
+    const playback = audio.play();
+    if (playback && typeof playback.catch === 'function') {
+      playback.catch((error) => {
+        if (error?.name === 'AbortError') return;
+        setGameIsActive(false);
+        setMessage('Press space to play!');
+      });
     }
-  }, [game.audioHasLoaded, achievements]);
+
+    // Trigger first play achievement if it's the player's first time
+    if (!achievements.firstPlay) {
+      persistAchievements({ ...achievements, firstPlay: true });
+
+      setShowAchievement({
+        name: 'First Play',
+        description: 'Started your rhythm journey',
+        icon: <SparklesIcon className="h-6 w-6 text-[var(--paper-accent)]" />,
+      });
+
+      // Hide after 3 seconds
+      setTimeout(() => {
+        setShowAchievement(null);
+      }, 3000);
+    }
+  }, [audioHasLoaded, achievements, persistAchievements]);
 
   const stopGame = useCallback(() => {
     if (audioRef.current) {
@@ -705,6 +743,7 @@ const RyGame = () => {
 
   const resetGame = useCallback(() => {
     setGameIsActive(false);
+    setElapsedTime(0);
     setPLevel(0);
     setMaxPLevel(0);
     setHitEffects([]);
@@ -728,10 +767,10 @@ const RyGame = () => {
   }, [game, updateLinePosList]);
 
   const resetAudio = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    if (audio.readyState > 0) audio.currentTime = 0;
   }, []);
 
   const resetGameAndAudio = useCallback(() => {
@@ -739,10 +778,22 @@ const RyGame = () => {
     resetAudio();
   }, [resetGame, resetAudio]);
 
+  const markAudioReady = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || audio.readyState < 2 || game.audioHasLoaded) return;
+
+    game.audioHasLoaded = true;
+    setAudioHasLoaded(true);
+    setMessage('Press space to play!');
+    resetGameAndAudio();
+  }, [game, resetGameAndAudio]);
+
   const handleKeyDownEvent = useCallback(
     (event) => {
       let keyCode = event.which;
       if (keyCode === 59) keyCode = 186; // Firefox fix
+
+      if (showTutorial) return;
 
       if (keyCode === 27) {
         // Escape
@@ -756,7 +807,7 @@ const RyGame = () => {
       if (keyCode === 32) {
         // Space
         event.preventDefault(); // Prevent default space bar behavior
-        if (game.audioHasLoaded && !gameIsActive) {
+        if (audioHasLoaded && !gameIsActive) {
           resetGameAndAudio();
           startGame();
         }
@@ -801,11 +852,6 @@ const RyGame = () => {
 
             // Save last hit time for animations
             game.lastHitTime = Date.now();
-
-            // Check achievements after score update - using timeout to batch updates
-            requestAnimationFrame(() => {
-              checkAchievements();
-            });
           }
         }
       }
@@ -813,12 +859,13 @@ const RyGame = () => {
     [
       game,
       gameIsActive,
+      audioHasLoaded,
+      showTutorial,
       startGame,
       stopGame,
       resetGameAndAudio,
       pLevel,
       checkHighPLevel,
-      checkAchievements,
       createHitEffect,
       getDot,
     ],
@@ -910,7 +957,7 @@ const RyGame = () => {
     ctx.fillRect(0, 0, game.canvasWidth, game.canvasHeight);
 
     // grid pattern in bg
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.strokeStyle = 'rgba(253, 250, 243, 0.05)';
     ctx.lineWidth = 1;
 
     // bigger grid = better fps
@@ -929,14 +976,12 @@ const RyGame = () => {
       ctx.stroke();
     }
 
-    // score display
-    setMessage(''); // Empty message instead of showing P-Level
     drawMessage();
 
     // draw the main game elements
     ctx.lineWidth = 3;
     ctx.shadowBlur = 12;
-    ctx.shadowColor = 'rgba(139, 92, 246, 0.7)';
+    ctx.shadowColor = 'rgba(242, 199, 68, 0.35)';
 
     for (let i = 0; i < game.numberOfColumns; i++) {
       setContextColorByColumn(i);
@@ -982,7 +1027,7 @@ const RyGame = () => {
     canvas.style.height = `${game.canvasHeight}px`;
 
     const ctx = canvas.getContext('2d', { alpha: false });
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     game.context = ctx;
     ctx.font = 'bold 16px Inter, system-ui, sans-serif';
     ctx.lineWidth = 3;
@@ -998,21 +1043,62 @@ const RyGame = () => {
     }
     game.linePosList = linePosList;
     updateLinePosList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- canvas init runs once; `game` and `updateLinePosList` are refs/stable.
+  }, []);
 
-    // Add event listeners
+  useEffect(() => {
     window.addEventListener('keydown', handleKeyDownEvent);
+    return () => window.removeEventListener('keydown', handleKeyDownEvent);
+  }, [handleKeyDownEvent]);
 
-    // Start game loop
+  useEffect(() => {
+    if (!game.context) return;
+
     gameLoopRef.current = requestAnimationFrame(gameLoop);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDownEvent);
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- canvas init runs once; `game` and `updateLinePosList` are refs/stable.
-  }, [handleKeyDownEvent, gameLoop]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- requestAnimationFrame loop reads from the stable `game` ref.
+  }, [gameLoop]);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = volume;
+    try {
+      localStorage.setItem('rhythmDotsVolume', String(volume));
+    } catch (error) {
+      console.warn('Could not persist volume:', error);
+    }
+  }, [volume]);
+
+  useEffect(() => {
+    if (!gameIsActive) return;
+
+    const syncElapsed = () => setElapsedTime(audioRef.current?.currentTime || 0);
+    syncElapsed();
+    const interval = setInterval(syncElapsed, 250);
+
+    return () => clearInterval(interval);
+  }, [gameIsActive]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    markAudioReady();
+
+    audio.addEventListener('loadeddata', markAudioReady);
+    audio.addEventListener('canplay', markAudioReady);
+    audio.addEventListener('canplaythrough', markAudioReady);
+
+    return () => {
+      audio.removeEventListener('loadeddata', markAudioReady);
+      audio.removeEventListener('canplay', markAudioReady);
+      audio.removeEventListener('canplaythrough', markAudioReady);
+    };
+  }, [markAudioReady]);
 
   // Create key-to-note mapping for visualization
   const keyMap = [
@@ -1061,7 +1147,7 @@ const RyGame = () => {
       setShowAchievement({
         name: 'Daily Quest Complete!',
         description: dailyQuest.description,
-        icon: <CheckBadgeIcon className="h-6 w-6 text-green-400" />,
+        icon: <CheckBadgeIcon className="h-6 w-6 text-[#4f6b3a]" />,
       });
 
       setTimeout(() => {
@@ -1072,11 +1158,9 @@ const RyGame = () => {
 
   // Check if we need to update the user's score when the game ends
   useEffect(() => {
-    // When game over screen is shown, update user score if it's a new personal best
-    if (showGameOverScreen && maxPLevel > (currentUser?.rhythmGame?.peakPLevel || 0)) {
-      updateUserScore(maxPLevel, difficulty);
-    }
-  }, [showGameOverScreen, maxPLevel, difficulty, currentUser, updateUserScore]);
+    if (!showGameOverScreen || maxPLevel <= 0 || !getToken()) return;
+    updateUserScore(maxPLevel, difficulty);
+  }, [showGameOverScreen, maxPLevel, difficulty, updateUserScore]);
 
   // Get current user on mount
   useEffect(() => {
@@ -1088,6 +1172,34 @@ const RyGame = () => {
         // If we got valid non-anonymous stats, use them
         if (gameStats && !gameStats.anonymous) {
           setHighPLevel(gameStats.peakPLevel || 0);
+
+          const serverAchievements = {
+            ...DEFAULT_ACHIEVEMENTS,
+            ...(gameStats.achievements || {}),
+          };
+          const localAchievements = readStoredAchievements();
+          const mergedAchievements = Object.fromEntries(
+            Object.keys(DEFAULT_ACHIEVEMENTS).map((key) => [
+              key,
+              Boolean(localAchievements[key] || serverAchievements[key]),
+            ]),
+          );
+          setAchievements(mergedAchievements);
+          try {
+            localStorage.setItem(ACHIEVEMENTS_STORAGE_KEY, JSON.stringify(mergedAchievements));
+          } catch (error) {
+            console.warn('Could not persist achievements locally:', error);
+          }
+
+          const hasUnsynced = Object.keys(DEFAULT_ACHIEVEMENTS).some(
+            (key) => mergedAchievements[key] && !serverAchievements[key],
+          );
+          if (hasUnsynced && getToken() && !achievementsSyncedRef.current) {
+            achievementsSyncedRef.current = true;
+            updateAchievements(mergedAchievements).then((result) => {
+              if (result?.saved === false) achievementsSyncedRef.current = false;
+            });
+          }
 
           // Try to get the full user profile if we have stats
           if (getToken()) {
@@ -1134,8 +1246,10 @@ const RyGame = () => {
   const renderLeaderboard = useCallback(() => {
     if (!Array.isArray(leaderboard) || leaderboard.length === 0) {
       return (
-        <div className="text-center py-8">
-          <p className="text-gray-400">No scores yet. Be the first!</p>
+        <div className="py-8 text-center">
+          <p className="font-paper-hand text-xl text-[var(--paper-muted)]">
+            No scores yet. Be the first!
+          </p>
         </div>
       );
     }
@@ -1147,27 +1261,27 @@ const RyGame = () => {
       return (
         <div
           key={player._id || `player-${index}`}
-          className={`p-3 rounded-lg border ${
+          className={`rounded-[2px] border px-3 py-2.5 ${
             currentUser?.username === player?.username
-              ? 'border-purple-500/30 bg-purple-900/10'
+              ? 'border-[var(--paper-accent-strong)] bg-[var(--paper-yellow-soft)]'
               : index === 0
-                ? 'border-amber-500/20 bg-amber-900/5'
-                : 'border-gray-700/30'
+                ? 'border-[#a8801a] bg-[#fbf4dd]'
+                : 'border-[var(--paper-line)] bg-[var(--paper-cream)]'
           }`}
         >
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <span
-                className={`text-xs font-medium ${
-                  index === 0 ? 'text-amber-400' : 'text-gray-400'
+                className={`font-paper-mono text-[10px] ${
+                  index === 0 ? 'text-[var(--paper-accent-deep)]' : 'text-[var(--paper-muted-2)]'
                 }`}
               >
-                #{index + 1}
+                #{player.rank ?? index + 1}
               </span>
-              <span className="ml-2 text-sm text-gray-200 truncate max-w-[120px]">
+              <span className="ml-2 max-w-[120px] truncate text-sm font-medium">
                 {player?.username || 'Anonymous'}
                 {currentUser?.username === player?.username && (
-                  <span className="text-xs text-purple-400 ml-1">(you)</span>
+                  <span className="ml-1 text-xs text-[var(--paper-accent)]">(you)</span>
                 )}
               </span>
             </div>
@@ -1175,15 +1289,15 @@ const RyGame = () => {
               <span
                 className={`text-sm font-bold ${
                   player?.rhythmGame?.peakPLevel >= 50
-                    ? 'text-amber-400'
+                    ? 'text-[var(--paper-accent-deep)]'
                     : player?.rhythmGame?.peakPLevel >= 25
-                      ? 'text-purple-400'
-                      : 'text-blue-400'
+                      ? 'text-[var(--paper-accent)]'
+                      : 'text-[var(--paper-muted-2)]'
                 }`}
               >
                 {player?.rhythmGame?.peakPLevel || 0}
               </span>
-              <span className="ml-2 text-xs bg-gray-800 px-1.5 py-0.5 rounded text-gray-400">
+              <span className="ml-2 rounded-[2px] border border-[var(--paper-line)] px-1.5 py-0.5 font-paper-mono text-[9px] uppercase tracking-[.08em] text-[var(--paper-muted-2)]">
                 {player?.rhythmGame?.difficulty || 'normal'}
               </span>
             </div>
@@ -1194,526 +1308,560 @@ const RyGame = () => {
   }, [leaderboard, currentUser]);
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col lg:flex-row">
-      {/* Main Game Content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="relative bg-gray-900/80 backdrop-blur-md border border-gray-800/50 rounded-2xl p-6 w-full max-w-4xl text-center space-y-6 shadow-lg">
-          {/* Animated title with proper text visibility */}
-          <div className="flex justify-center items-center gap-3 mb-4">
-            <div className="relative">
-              <SparklesIcon className="h-8 w-8 text-purple-400 animate-pulse" />
-              <div className="absolute inset-0 bg-purple-500 blur-xl opacity-20 rounded-full"></div>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-300 to-purple-400">
-              RHYTHM DOTS
-            </h1>
-            <div className="relative">
-              <MusicalNoteIcon className="h-8 w-8 text-blue-400 animate-pulse" />
-              <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 rounded-full"></div>
-            </div>
-          </div>
-
-          {/* Game status indicator */}
-          <div className="absolute top-6 right-6 flex items-center">
-            <div
-              className={`h-3 w-3 rounded-full ${
-                gameIsActive ? 'bg-green-400 animate-pulse' : 'bg-red-400'
-              } mr-2`}
-            ></div>
-            <span className="text-xs text-gray-400">{gameIsActive ? 'Playing' : 'Ready'}</span>
-          </div>
-
-          {/* Updated left sidebar to show only necessary information */}
-          <div className="absolute top-6 left-6 flex flex-col gap-2 z-30">
-            <div
-              className="bg-gray-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-gray-700/30"
-              style={{
-                minWidth: Math.max(100, 20 + String(highPLevel).length * 10) + 'px',
-              }}
-            >
-              <span className="text-sm font-medium text-amber-300">Best P-Level: </span>
-              <span className="text-white font-bold">{highPLevel}</span>
-            </div>
-
-            {gameIsActive && (
-              <div
-                className={`bg-gray-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border ${
-                  pLevel >= 5 ? 'border-orange-500/50 animate-pulse' : 'border-gray-700/30'
-                }`}
-                style={{
-                  minWidth: Math.max(100, 20 + String(pLevel).length * 10) + 'px',
-                }}
-              >
-                <span
-                  className={`text-sm font-medium ${
-                    pLevel >= 10
-                      ? 'text-orange-400'
-                      : pLevel >= 5
-                        ? 'text-amber-300'
-                        : 'text-blue-300'
-                  }`}
-                >
-                  P-Level:{' '}
-                </span>
-                <span className="text-white font-bold">{pLevel}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Achievement notification */}
-          <AnimatePresence>
-            {showAchievement && (
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 50 }}
-                className="fixed top-20 right-6 z-50 max-w-xs"
-              >
-                <div className="bg-gray-800/80 backdrop-blur-md px-4 py-3 rounded-xl border border-purple-500/50 shadow-lg flex items-center gap-3">
-                  <div className="bg-gray-900/50 p-2 rounded-lg">{showAchievement.icon}</div>
-                  <div className="text-left">
-                    <h3 className="text-purple-300 font-bold text-sm">{showAchievement.name}</h3>
-                    <p className="text-gray-300 text-xs">{showAchievement.description}</p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Canvas wrapper with stylized border */}
-          <div className="relative rounded-lg overflow-hidden border-2 border-gray-800/50 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-blue-900/5 to-indigo-900/10 pointer-events-none"></div>
-            <canvas
-              ref={canvasRef}
-              width={game.canvasWidth}
-              height={game.canvasHeight}
-              className="max-w-full max-h-full mx-auto bg-gray-950"
+    <div className="paper-theme min-h-screen">
+      <PaperTornEdge />
+      <div className="flex flex-col lg:flex-row">
+        {/* Main Game Content */}
+        <div className="flex flex-1 flex-col items-center p-4 pt-7">
+          <div className="relative w-full max-w-4xl space-y-6 rounded-[3px] bg-[var(--paper-cream)] p-6 text-center shadow-[0_14px_26px_-14px_rgba(60,44,24,.3),0_2px_0_rgba(60,44,24,.1)]">
+            <span
+              aria-hidden="true"
+              className="absolute -top-3 left-1/2 h-[26px] w-24 -translate-x-1/2 rotate-[-3deg] border-x border-dashed border-[rgba(60,44,24,.3)] bg-[rgba(242,199,68,.7)] shadow-[0_1px_3px_rgba(60,44,24,.2)]"
             />
 
-            {/* Game over screen updated to focus on P-Level */}
-            {showGameOverScreen && (
-              <div className="absolute inset-0 bg-gray-900/90 backdrop-blur-sm flex flex-col items-center justify-center z-10">
-                <div className="bg-gray-800/90 border border-gray-700/50 rounded-xl p-6 shadow-lg max-w-sm">
-                  <h3 className="text-xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent mb-3">
-                    Game Over
-                  </h3>
-                  <p className="text-gray-300 text-lg mb-2">{gameOverMessage}</p>
-                  {pLevel > 0 && (
-                    <div className="flex flex-col gap-2 mb-4">
-                      <div className="flex justify-between items-center">
-                        <p className="text-gray-400 text-sm">Final P-Level:</p>
-                        <p className="text-white font-bold text-lg">{pLevel}</p>
-                      </div>
-
-                      <div className="flex justify-between items-center">
-                        <p className="text-gray-400 text-sm">Peak P-Level:</p>
-                        <p className="text-white font-bold text-lg">{maxPLevel}</p>
-                      </div>
-
-                      <div className="flex justify-between items-center">
-                        <p className="text-gray-400 text-sm">All-time Best:</p>
-                        <p className="text-purple-300 font-bold">{highPLevel}</p>
-                      </div>
-                    </div>
-                  )}
-                  <button
-                    onClick={() => {
-                      resetGameAndAudio();
-                      setShowGameOverScreen(false);
-                      setMessage('Press space to play!');
-                    }}
-                    className="mt-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-2 rounded-lg hover:opacity-90 transition-all"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Other overlays */}
-            {!gameIsActive && !showGameOverScreen && audioHasLoaded && (
-              <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
-                <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-6 shadow-lg max-w-sm">
-                  <h3 className="text-xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent mb-3">
-                    Ready to Play?
-                  </h3>
-                  <p className="text-gray-300 text-sm mb-4">
-                    Press <span className="text-purple-400 font-bold">SPACE</span> to start the
-                    rhythm game!
-                  </p>
-                  <div className="animate-bounce mt-2">
-                    <div className="h-10 w-10 rounded-full bg-purple-600/20 flex items-center justify-center mx-auto">
-                      <KeyIcon className="h-5 w-5 text-purple-400" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Loading indicator */}
-            {!audioHasLoaded && (
-              <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-10">
-                <div className="flex flex-col items-center">
-                  <div className="animate-spin h-10 w-10 mb-4">
-                    <div className="h-10 w-10 rounded-full border-4 border-purple-400 border-t-transparent"></div>
-                  </div>
-                  <p className="text-gray-300">Loading audio...</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Song Progress Bar */}
-          <div className="w-full px-2">
-            <div className="flex justify-between items-center text-xs text-gray-500 mb-1">
-              <span>0:00</span>
-              <span>
-                {gameIsActive
-                  ? `${Math.floor((game.audioCurrentTime / game.songDuration) * 100)}%`
-                  : 'Progress'}
-              </span>
-              <span>3:23</span>
+            <div className="mb-1 flex items-center justify-center gap-3">
+              <SparklesIcon className="h-7 w-7 text-[var(--paper-accent)]" />
+              <h1 className="font-paper-serif text-[clamp(28px,4vw,38px)] font-bold leading-[1.05] tracking-[-.02em]">
+                Rhythm Dots
+              </h1>
+              <MusicalNoteIcon className="h-7 w-7 text-[var(--paper-accent)]" />
             </div>
-            <div className="w-full h-3 bg-gray-800/60 rounded-full overflow-hidden border border-gray-700/30">
+
+            {/* Game status indicator */}
+            <div className="absolute right-5 top-3 flex items-center">
               <div
-                className="h-full bg-gradient-to-r from-purple-600 to-blue-500 rounded-full relative"
+                className={`mr-2 h-2.5 w-2.5 rounded-full ${
+                  gameIsActive ? 'bg-[#6b8e3d] animate-pulse' : 'bg-[#a9564f]'
+                }`}
+              ></div>
+              <span className="font-paper-mono text-[10px] uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
+                {gameIsActive ? 'Playing' : 'Ready'}
+              </span>
+            </div>
+
+            {/* Updated left sidebar to show only necessary information */}
+            <div className="absolute top-6 left-6 flex flex-col gap-2 z-30">
+              <div
+                className="rounded-[2px] border border-[var(--paper-line)] bg-[var(--paper-hero)] px-3 py-1.5"
                 style={{
-                  width: `${(game.audioCurrentTime / game.songDuration) * 100}%`,
-                  transition: 'width 0.3s linear',
+                  minWidth: Math.max(100, 20 + String(highPLevel).length * 10) + 'px',
                 }}
               >
-                {/* Pulsing glow effect on the progress bar */}
-                <div className="absolute inset-0 animate-pulse">
-                  <div className="h-full w-8 bg-white/20 blur-md transform -translate-x-4"></div>
+                <span className="font-paper-mono text-[10px] uppercase tracking-[.1em] text-[var(--paper-muted-2)]">
+                  Best{' '}
+                </span>
+                <span className="font-paper-serif text-base font-bold">{highPLevel}</span>
+              </div>
+
+              {gameIsActive && (
+                <div
+                  className={`rounded-[2px] border bg-[var(--paper-hero)] px-3 py-1.5 ${
+                    pLevel >= 5
+                      ? 'border-[var(--paper-accent-strong)] animate-pulse'
+                      : 'border-[var(--paper-line)]'
+                  }`}
+                  style={{
+                    minWidth: Math.max(100, 20 + String(pLevel).length * 10) + 'px',
+                  }}
+                >
+                  <span className="font-paper-mono text-[10px] uppercase tracking-[.1em] text-[var(--paper-muted-2)]">
+                    P-Level{' '}
+                  </span>
+                  <span className="font-paper-serif text-base font-bold">{pLevel}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Achievement notification */}
+            <AnimatePresence>
+              {showAchievement && (
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 50 }}
+                  className="fixed top-20 right-6 z-50 max-w-xs"
+                >
+                  <div className="flex items-center gap-3 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] px-4 py-3 shadow-[3px_4px_0_var(--paper-ink)]">
+                    <div className="rounded-[2px] bg-[var(--paper-yellow-soft)] p-2">
+                      {showAchievement.icon}
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-paper-serif text-sm font-bold text-[var(--paper-accent-deep)]">
+                        {showAchievement.name}
+                      </h3>
+                      <p className="text-xs text-[var(--paper-muted)]">
+                        {showAchievement.description}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Canvas wrapper with stylized border */}
+            <div className="relative overflow-hidden rounded-[2px] border-[1.5px] border-[var(--paper-ink)] shadow-[0_14px_26px_-16px_rgba(60,44,24,.45)]">
+              <canvas
+                ref={canvasRef}
+                width={game.canvasWidth}
+                height={game.canvasHeight}
+                className="mx-auto max-h-full max-w-full bg-[#141210]"
+              />
+
+              {/* Game over screen updated to focus on P-Level */}
+              {showGameOverScreen && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[rgba(43,39,35,.62)]">
+                  <div className="max-w-sm rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-6 text-left shadow-[4px_5px_0_var(--paper-ink)]">
+                    <h3 className="mb-3 font-paper-serif text-xl font-bold">Game Over</h3>
+                    <p className="mb-2 font-paper-hand text-xl text-[var(--paper-muted)]">
+                      {gameOverMessage}
+                    </p>
+                    {pLevel > 0 && (
+                      <div className="mb-4 flex flex-col gap-2">
+                        <div className="flex items-center justify-between border-b border-dashed border-[var(--paper-line)] pb-1.5">
+                          <p className="font-paper-mono text-[10px] uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
+                            Final P-Level
+                          </p>
+                          <p className="font-paper-serif text-lg font-bold">{pLevel}</p>
+                        </div>
+
+                        <div className="flex items-center justify-between border-b border-dashed border-[var(--paper-line)] pb-1.5">
+                          <p className="font-paper-mono text-[10px] uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
+                            Peak P-Level
+                          </p>
+                          <p className="font-paper-serif text-lg font-bold">{maxPLevel}</p>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <p className="font-paper-mono text-[10px] uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
+                            All-time Best
+                          </p>
+                          <p className="font-paper-serif font-bold text-[var(--paper-accent-deep)]">
+                            {highPLevel}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => {
+                        resetGameAndAudio();
+                        setShowGameOverScreen(false);
+                        setMessage('Press space to play!');
+                      }}
+                      className="mt-2 -rotate-[0.6deg] rounded-[4px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-6 py-2 font-paper-mono text-[12px] font-bold uppercase tracking-[.12em] shadow-[3px_4px_0_var(--paper-ink)] transition-transform hover:-translate-y-px"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Other overlays */}
+              {!gameIsActive && !showGameOverScreen && audioHasLoaded && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[rgba(43,39,35,.55)]">
+                  <div className="max-w-sm rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-6 text-center shadow-[4px_5px_0_var(--paper-ink)]">
+                    <h3 className="mb-3 font-paper-serif text-xl font-bold">Ready to play?</h3>
+                    <p className="mb-4 text-sm text-[var(--paper-muted)]">
+                      Press{' '}
+                      <span className="font-paper-mono font-bold text-[var(--paper-accent-deep)]">
+                        SPACE
+                      </span>{' '}
+                      to start the rhythm game.
+                    </p>
+                    <div className="mt-2 animate-bounce">
+                      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] border-dashed border-[var(--paper-accent-strong)] bg-[var(--paper-yellow-soft)]">
+                        <KeyIcon className="h-5 w-5 text-[var(--paper-accent)]" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Loading indicator */}
+              {!audioHasLoaded && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-[rgba(43,39,35,.55)]">
+                  <div className="flex flex-col items-center">
+                    {audioLoadError ? (
+                      <p className="max-w-xs text-center font-paper-hand text-xl text-[var(--paper-cream)]">
+                        audio couldn&apos;t load — refresh to try again
+                      </p>
+                    ) : (
+                      <>
+                        <div className="mb-4 h-10 w-10 animate-spin rounded-full border-[3px] border-[var(--paper-yellow)] border-t-transparent"></div>
+                        <p className="font-paper-hand text-xl text-[var(--paper-cream)]">
+                          loading audio…
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Song Progress Bar */}
+            <div className="w-full px-1">
+              <div className="mb-1 flex items-center justify-between font-paper-mono text-[10px] uppercase tracking-[.1em] text-[var(--paper-muted-2)]">
+                <span>{formatTime(elapsedTime)}</span>
+                <span>
+                  {gameIsActive
+                    ? `${Math.floor((elapsedTime / game.songDuration) * 100)}%`
+                    : 'Progress'}
+                </span>
+                <span>{formatTime(game.songDuration)}</span>
+              </div>
+              <div className="h-3 w-full overflow-hidden rounded-full border border-[var(--paper-line)] bg-[rgba(60,44,24,.12)]">
+                <div
+                  className="relative h-full rounded-full bg-[var(--paper-yellow)]"
+                  style={{
+                    width: `${(elapsedTime / game.songDuration) * 100}%`,
+                    transition: 'width 0.3s linear',
+                  }}
+                >
+                  <div className="absolute inset-0 animate-pulse">
+                    <div className="h-full w-8 -translate-x-4 bg-white/40 blur-md"></div>
+                  </div>
                 </div>
               </div>
+              <div className="mt-2 flex items-center justify-end gap-2">
+                <SpeakerWaveIcon className="h-4 w-4 text-[var(--paper-muted-2)]" />
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={volume}
+                  onChange={(event) => setVolume(Number(event.target.value))}
+                  aria-label="Volume"
+                  className="h-1.5 w-32 cursor-pointer accent-[var(--paper-accent-strong)]"
+                />
+                <span className="w-9 text-right font-paper-mono text-[10px] uppercase tracking-[.1em] text-[var(--paper-muted-2)]">
+                  {Math.round(volume * 100)}%
+                </span>
+              </div>
             </div>
-          </div>
 
-          <audio
-            ref={audioRef}
-            src="/The%20Boy%20Who%20Fought%20the%20Lightning.mp3"
-            onLoadedData={() => {
-              game.audioHasLoaded = true;
-              setAudioHasLoaded(true);
-              setMessage('Press space to play!');
-              resetGameAndAudio();
-            }}
-          />
+            <audio
+              ref={audioRef}
+              src="/The%20Boy%20Who%20Fought%20the%20Lightning.mp3"
+              preload="auto"
+              onLoadedData={markAudioReady}
+              onCanPlay={markAudioReady}
+              onCanPlayThrough={markAudioReady}
+              onError={() => setAudioLoadError(true)}
+            />
 
-          {/* Tutorial modal */}
-          {showTutorial && (
-            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-              <div className="bg-gray-900/90 border border-purple-500/30 rounded-xl p-6 max-w-lg w-full">
-                <h3 className="text-xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent mb-4">
-                  How to Play Rhythm Dots
-                </h3>
+            {/* Tutorial modal */}
+            {showTutorial && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+                <div className="w-full max-w-lg rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-6 shadow-[4px_5px_0_var(--paper-ink)]">
+                  <h3 className="mb-4 font-paper-serif text-xl font-bold">
+                    How to play Rhythm Dots
+                  </h3>
 
-                <div className="space-y-4 text-gray-300 text-sm">
-                  <p>
-                    1. Press <span className="text-purple-400 font-bold">SPACE</span> to start the
-                    game
+                  <div className="space-y-3 text-sm text-[var(--paper-muted)]">
+                    <p>
+                      1. Press{' '}
+                      <span className="font-paper-mono font-bold text-[var(--paper-accent-deep)]">
+                        SPACE
+                      </span>{' '}
+                      to start the game
+                    </p>
+                    <p>2. Dots travel down the lines toward the circles</p>
+                    <p>3. When a dot reaches a circle, press its key on your keyboard</p>
+                    <p>4. Build up your streak for bonus points</p>
+                    <p>5. Complete daily quests and unlock achievements</p>
+
+                    <div className="pt-4">
+                      <button
+                        onClick={() => setShowTutorial(false)}
+                        className="-rotate-[0.6deg] rounded-[4px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-6 py-2 font-paper-mono text-[12px] font-bold uppercase tracking-[.12em] shadow-[3px_4px_0_var(--paper-ink)] transition-transform hover:-translate-y-px"
+                      >
+                        Got it!
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Game info and controls */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Game instructions */}
+              <div className="relative overflow-hidden rounded-[3px] bg-[var(--paper-cream)] p-5 shadow-[0_10px_20px_-16px_rgba(60,44,24,.35),0_2px_0_rgba(60,44,24,.08)] md:col-span-2">
+                <div className="relative z-10 space-y-4 text-sm text-[var(--paper-muted)]">
+                  <div className="flex justify-between font-paper-mono text-[10px] uppercase tracking-[.1em] text-[var(--paper-muted-2)]">
+                    <p>Credit to Jack Eisenmann (aka ostracod)</p>
+                    <p>Music by Soleviio</p>
+                  </div>
+
+                  <p className="font-medium text-[var(--paper-accent-deep)]">
+                    Hit the corresponding key when a dot lands in a circle.
                   </p>
-                  <p>2. Dots will travel down the lines toward the circles</p>
-                  <p>
-                    3. When a dot reaches a circle, press the corresponding key on your keyboard
-                  </p>
-                  <p>4. Build up your streak for bonus points!</p>
-                  <p>5. Complete daily quests and unlock achievements</p>
 
-                  <div className="pt-4">
+                  {/* Keyboard visualization */}
+                  <div className="mx-auto grid max-w-md grid-rows-2 gap-2">
+                    {keyMap.map((row, rowIndex) => (
+                      <div key={rowIndex} className="flex justify-center gap-1">
+                        {row.map((key, keyIndex) => (
+                          <div
+                            key={keyIndex}
+                            className={`flex h-8 w-8 items-center justify-center rounded-[2px] border font-paper-mono text-xs font-bold ${
+                              keyIndex < 4
+                                ? 'border-[var(--paper-accent-strong)] bg-[var(--paper-yellow-soft)] text-[var(--paper-accent-deep)]'
+                                : 'border-[var(--paper-line)] bg-[var(--paper-hero)] text-[var(--paper-muted)]'
+                            }`}
+                          >
+                            {key}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Controls */}
+                  <div className="mt-4 flex flex-wrap justify-center gap-3">
+                    <div className="flex items-center rounded-[2px] border border-dashed border-[rgba(60,44,24,.45)] px-3 py-2 text-[var(--paper-muted)]">
+                      <KeyIcon className="mr-2 h-4 w-4 text-[var(--paper-accent)]" />
+                      <span>
+                        <b>SPACE</b> to start
+                      </span>
+                    </div>
+                    <div className="flex items-center rounded-[2px] border border-dashed border-[rgba(60,44,24,.45)] px-3 py-2 text-[var(--paper-muted)]">
+                      <KeyIcon className="mr-2 h-4 w-4 text-[var(--paper-accent)]" />
+                      <span>
+                        <b>ESC</b> to reset
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Daily Quest & Achievements Panel */}
+              <div className="relative overflow-hidden rounded-[3px] bg-[var(--paper-cream)] p-5 shadow-[0_10px_20px_-16px_rgba(60,44,24,.35),0_2px_0_rgba(60,44,24,.08)]">
+                <div className="relative z-10 space-y-4">
+                  {/* Difficulty selector */}
+                  <div className="mb-4">
+                    <h3 className="mb-2 font-paper-mono text-[11px] uppercase tracking-[.14em] text-[var(--paper-muted-2)]">
+                      Difficulty
+                    </h3>
+                    <div className="flex justify-center gap-2">
+                      {['easy', 'normal', 'hard'].map((level) => (
+                        <button
+                          key={level}
+                          onClick={() => !gameIsActive && setDifficulty(level)}
+                          className={`rounded-[2px] px-3 py-1.5 font-paper-mono text-[10px] uppercase tracking-[.08em] capitalize transition-colors ${
+                            difficulty === level
+                              ? 'border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] font-bold shadow-[2px_2px_0_var(--paper-ink)]'
+                              : 'border border-dashed border-[rgba(60,44,24,.45)] text-[var(--paper-muted)] hover:bg-[var(--paper-yellow-soft)]'
+                          } ${gameIsActive ? 'cursor-not-allowed opacity-50' : ''}`}
+                          disabled={gameIsActive}
+                        >
+                          {level}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Daily Quest */}
+                  <div>
+                    <h3 className="mb-2 font-paper-mono text-[11px] uppercase tracking-[.14em] text-[var(--paper-muted-2)]">
+                      Daily Quest
+                    </h3>
+
+                    {dailyQuest && (
+                      <div
+                        className={`rounded-[2px] border p-3 ${
+                          dailyQuest.completed
+                            ? 'border-[#4f6b3a] bg-[#e8eeda]'
+                            : 'border-[rgba(60,44,24,.4)] bg-[var(--paper-hero)]'
+                        }`}
+                      >
+                        <div className="flex items-start gap-2">
+                          {dailyQuest.completed ? (
+                            <CheckBadgeIcon className="mt-0.5 h-5 w-5 text-[#4f6b3a]" />
+                          ) : (
+                            <TrophyIcon className="mt-0.5 h-5 w-5 text-[var(--paper-accent)]" />
+                          )}
+                          <div className="text-left">
+                            <p className="text-xs text-[var(--paper-muted)]">
+                              {dailyQuest.description}
+                            </p>
+                            <div className="mt-2 h-2 w-full overflow-hidden rounded-full border border-[var(--paper-line)] bg-[rgba(60,44,24,.1)]">
+                              <div
+                                className="h-full rounded-full bg-[var(--paper-yellow)]"
+                                style={{
+                                  width: `${Math.min(
+                                    100,
+                                    ((dailyQuest.description.includes('streak')
+                                      ? maxPLevel
+                                      : pLevel) /
+                                      dailyQuest.goal) *
+                                      100,
+                                  )}%`,
+                                }}
+                              ></div>
+                            </div>
+                            <div className="mt-1 flex justify-between font-paper-mono text-[9px] text-[var(--paper-muted-2)]">
+                              <span>0</span>
+                              <span>{dailyQuest.goal}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Achievements */}
+                  <div>
+                    <h3 className="mb-2 font-paper-mono text-[11px] uppercase tracking-[.14em] text-[var(--paper-muted-2)]">
+                      Achievements
+                    </h3>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div
+                        className={`rounded-[2px] border p-2 ${
+                          achievements.firstPlay
+                            ? 'border-[var(--paper-accent-strong)] bg-[var(--paper-yellow-soft)]'
+                            : 'border-dashed border-[rgba(60,44,24,.35)] bg-[var(--paper-hero)]'
+                        }`}
+                      >
+                        <div className="flex flex-col items-center">
+                          <SparklesIcon
+                            className={`h-5 w-5 ${
+                              achievements.firstPlay
+                                ? 'text-[var(--paper-accent)]'
+                                : 'text-[var(--paper-muted-2)] opacity-50'
+                            }`}
+                          />
+                          <p className="mt-1 font-paper-mono text-[9px] uppercase tracking-[.06em] text-[var(--paper-muted-2)]">
+                            First Play
+                          </p>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`rounded-[2px] border p-2 ${
+                          achievements.reach10PLevel
+                            ? 'border-[var(--paper-accent-strong)] bg-[var(--paper-yellow-soft)]'
+                            : 'border-dashed border-[rgba(60,44,24,.35)] bg-[var(--paper-hero)]'
+                        }`}
+                      >
+                        <div className="flex flex-col items-center">
+                          <CheckBadgeIcon
+                            className={`h-5 w-5 ${
+                              achievements.reach10PLevel
+                                ? 'text-[var(--paper-accent)]'
+                                : 'text-[var(--paper-muted-2)] opacity-50'
+                            }`}
+                          />
+                          <p className="mt-1 font-paper-mono text-[9px] uppercase tracking-[.06em] text-[var(--paper-muted-2)]">
+                            10 P-Level
+                          </p>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`rounded-[2px] border p-2 ${
+                          achievements.reach25PLevel
+                            ? 'border-[var(--paper-accent-strong)] bg-[var(--paper-yellow-soft)]'
+                            : 'border-dashed border-[rgba(60,44,24,.35)] bg-[var(--paper-hero)]'
+                        }`}
+                      >
+                        <div className="flex flex-col items-center">
+                          <TrophyIcon
+                            className={`h-5 w-5 ${
+                              achievements.reach25PLevel
+                                ? 'text-[var(--paper-accent)]'
+                                : 'text-[var(--paper-muted-2)] opacity-50'
+                            }`}
+                          />
+                          <p className="mt-1 font-paper-mono text-[9px] uppercase tracking-[.06em] text-[var(--paper-muted-2)]">
+                            25 P-Level
+                          </p>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`rounded-[2px] border p-2 ${
+                          achievements.reach50PLevel
+                            ? 'border-[var(--paper-accent-strong)] bg-[var(--paper-yellow-soft)]'
+                            : 'border-dashed border-[rgba(60,44,24,.35)] bg-[var(--paper-hero)]'
+                        }`}
+                      >
+                        <div className="flex flex-col items-center">
+                          <FireIcon
+                            className={`h-5 w-5 ${
+                              achievements.reach50PLevel
+                                ? 'text-[var(--paper-accent)]'
+                                : 'text-[var(--paper-muted-2)] opacity-50'
+                            }`}
+                          />
+                          <p className="mt-1 font-paper-mono text-[9px] uppercase tracking-[.06em] text-[var(--paper-muted-2)]">
+                            50 P-Level
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tutorial button */}
+                  <div className="mt-4">
                     <button
-                      onClick={() => setShowTutorial(false)}
-                      className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium px-6 py-2 rounded-lg hover:opacity-90 transition-all"
+                      onClick={() => setShowTutorial(true)}
+                      className="w-full rounded-[2px] border-[1.5px] border-dashed border-[rgba(60,44,24,.5)] py-2 font-paper-mono text-[10px] font-bold uppercase tracking-[.1em] text-[var(--paper-muted)] transition-colors hover:border-[var(--paper-accent-strong)] hover:bg-[var(--paper-yellow-soft)]"
                     >
-                      Got it!
+                      How to Play
                     </button>
                   </div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        </div>
 
-          {/* Game info and controls */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Game instructions */}
-            <div className="p-5 bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/30 relative overflow-hidden md:col-span-2">
-              {/* Background decorative elements */}
-              <div className="absolute top-0 right-0 h-20 w-20 bg-purple-600/10 rounded-full blur-xl -mr-10 -mt-10"></div>
-              <div className="absolute bottom-0 left-0 h-16 w-16 bg-blue-600/10 rounded-full blur-xl -ml-8 -mb-8"></div>
-
-              <div className="text-gray-300 text-sm space-y-4 relative z-10">
-                <div className="flex justify-between text-gray-400 text-xs">
-                  <p>Credit to Jack Eisenmann (aka ostracod)</p>
-                  <p>Music by Soleviio</p>
-                </div>
-
-                <p className="text-purple-300 font-medium">
-                  Hit the corresponding key when a dot lands in a circle
-                </p>
-
-                {/* Keyboard visualization */}
-                <div className="grid grid-rows-2 gap-2 max-w-md mx-auto">
-                  {keyMap.map((row, rowIndex) => (
-                    <div key={rowIndex} className="flex justify-center gap-1">
-                      {row.map((key, keyIndex) => (
-                        <div
-                          key={keyIndex}
-                          className={`w-8 h-8 flex items-center justify-center rounded border ${
-                            keyIndex < 4
-                              ? 'border-purple-500/50 bg-purple-900/20 text-purple-300'
-                              : 'border-blue-500/50 bg-blue-900/20 text-blue-300'
-                          } text-xs font-bold`}
-                        >
-                          {key}
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Controls */}
-                <div className="flex justify-center gap-4 mt-4">
-                  <div className="flex items-center bg-gray-700/30 px-3 py-2 rounded-lg border border-gray-700/50 text-purple-300">
-                    <KeyIcon className="h-4 w-4 mr-2" />
-                    <span>
-                      <b>SPACE</b> to start
-                    </span>
-                  </div>
-                  <div className="flex items-center bg-gray-700/30 px-3 py-2 rounded-lg border border-gray-700/50 text-purple-300">
-                    <KeyIcon className="h-4 w-4 mr-2" />
-                    <span>
-                      <b>ESC</b> to reset
-                    </span>
-                  </div>
-                </div>
+        {/* Leaderboard Panel - Changed from fixed positioning to responsive flex */}
+        <div className="p-4 lg:w-80 lg:min-w-80 lg:max-w-80">
+          <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-hidden rounded-[3px] bg-[var(--paper-cream)] shadow-[0_14px_26px_-14px_rgba(60,44,24,.3),0_2px_0_rgba(60,44,24,.1)]">
+            <div className="sticky top-0 border-b border-dashed border-[var(--paper-line)] bg-[var(--paper-cream)] p-3">
+              <div className="flex items-center gap-2">
+                <TrophyIcon className="h-4 w-4 text-[var(--paper-accent)]" />
+                <h2 className="font-paper-serif text-base font-bold">Leaderboard</h2>
+                <span className="ml-auto font-paper-mono text-[9px] uppercase tracking-[.1em] text-[var(--paper-muted-2)]">
+                  {isLoadingLeaderboard ? 'Updating…' : 'Live'}
+                </span>
               </div>
             </div>
 
-            {/* Daily Quest & Achievements Panel */}
-            <div className="p-5 bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/30 relative overflow-hidden">
-              <div className="absolute top-0 right-0 h-20 w-20 bg-blue-600/10 rounded-full blur-xl -mr-10 -mt-10"></div>
-
-              <div className="space-y-4 relative z-10">
-                {/* Difficulty selector */}
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent mb-2">
-                    Difficulty
-                  </h3>
-                  <div className="flex gap-2 justify-center">
-                    {['easy', 'normal', 'hard'].map((level) => (
-                      <button
-                        key={level}
-                        onClick={() => !gameIsActive && setDifficulty(level)}
-                        className={`px-3 py-1.5 text-xs rounded-md capitalize ${
-                          difficulty === level
-                            ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                            : 'bg-gray-800/70 text-gray-400 hover:text-gray-300'
-                        } ${gameIsActive ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={gameIsActive}
-                      >
-                        {level}
-                      </button>
-                    ))}
-                  </div>
+            <div className="overflow-y-auto p-3" style={{ maxHeight: '60vh' }}>
+              {isLoadingLeaderboard ? (
+                <div className="flex justify-center py-4">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--paper-accent)] border-t-transparent" />
                 </div>
+              ) : (
+                <div className="space-y-2">{renderLeaderboard()}</div>
+              )}
 
-                {/* Daily Quest */}
-                <div>
-                  <h3 className="text-sm font-medium bg-gradient-to-r from-amber-300 to-orange-300 bg-clip-text text-transparent mb-2">
-                    Daily Quest
-                  </h3>
-
-                  {dailyQuest && (
-                    <div
-                      className={`bg-gray-800/60 p-3 rounded-lg border ${
-                        dailyQuest.completed ? 'border-green-500/40' : 'border-amber-500/30'
-                      }`}
-                    >
-                      <div className="flex items-start gap-2">
-                        {dailyQuest.completed ? (
-                          <CheckBadgeIcon className="h-5 w-5 text-green-400 mt-0.5" />
-                        ) : (
-                          <TrophyIcon className="h-5 w-5 text-amber-400 mt-0.5" />
-                        )}
-                        <div className="text-left">
-                          <p className="text-xs text-gray-300">{dailyQuest.description}</p>
-                          <div className="mt-2 w-full bg-gray-700/50 h-2 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
-                              style={{
-                                width: `${Math.min(
-                                  100,
-                                  ((dailyQuest.description.includes('streak')
-                                    ? maxPLevel
-                                    : pLevel) /
-                                    dailyQuest.goal) *
-                                    100,
-                                )}%`,
-                              }}
-                            ></div>
-                          </div>
-                          <div className="flex justify-between text-[10px] text-gray-400 mt-1">
-                            <span>0</span>
-                            <span>{dailyQuest.goal}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+              {!currentUser && (
+                <div className="mt-3 rounded-[2px] border border-dashed border-[rgba(60,44,24,.4)] bg-[var(--paper-hero)] p-2">
+                  <p className="text-xs text-[var(--paper-muted)]">
+                    Sign in to appear on the leaderboard
+                  </p>
                 </div>
+              )}
 
-                {/* Achievements */}
-                <div>
-                  <h3 className="text-sm font-medium bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent mb-2">
-                    Achievements
-                  </h3>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div
-                      className={`p-2 rounded-lg border ${
-                        achievements.firstPlay
-                          ? 'bg-gray-800/60 border-purple-500/30'
-                          : 'bg-gray-800/20 border-gray-700/30'
-                      }`}
-                    >
-                      <div className="flex flex-col items-center">
-                        <SparklesIcon
-                          className={`h-5 w-5 ${
-                            achievements.firstPlay ? 'text-yellow-300' : 'text-gray-500'
-                          }`}
-                        />
-                        <p className="text-[10px] text-gray-400 mt-1">First Play</p>
-                      </div>
-                    </div>
-
-                    <div
-                      className={`p-2 rounded-lg border ${
-                        achievements.reach10PLevel
-                          ? 'bg-gray-800/60 border-blue-500/30'
-                          : 'bg-gray-800/20 border-gray-700/30'
-                      }`}
-                    >
-                      <div className="flex flex-col items-center">
-                        <CheckBadgeIcon
-                          className={`h-5 w-5 ${
-                            achievements.reach10PLevel ? 'text-blue-400' : 'text-gray-500'
-                          }`}
-                        />
-                        <p className="text-[10px] text-gray-400 mt-1">10 P-Level</p>
-                      </div>
-                    </div>
-
-                    <div
-                      className={`p-2 rounded-lg border ${
-                        achievements.reach25PLevel
-                          ? 'bg-gray-800/60 border-purple-500/30'
-                          : 'bg-gray-800/20 border-gray-700/30'
-                      }`}
-                    >
-                      <div className="flex flex-col items-center">
-                        <TrophyIcon
-                          className={`h-5 w-5 ${
-                            achievements.reach25PLevel ? 'text-purple-400' : 'text-gray-500'
-                          }`}
-                        />
-                        <p className="text-[10px] text-gray-400 mt-1">25 P-Level</p>
-                      </div>
-                    </div>
-
-                    <div
-                      className={`p-2 rounded-lg border ${
-                        achievements.reach50PLevel
-                          ? 'bg-gray-800/60 border-amber-500/30'
-                          : 'bg-gray-800/20 border-gray-700/30'
-                      }`}
-                    >
-                      <div className="flex flex-col items-center">
-                        <FireIcon
-                          className={`h-5 w-5 ${
-                            achievements.reach50PLevel ? 'text-amber-500' : 'text-gray-500'
-                          }`}
-                        />
-                        <p className="text-[10px] text-gray-400 mt-1">50 P-Level</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tutorial button */}
-                <div className="mt-4">
-                  <button
-                    onClick={() => setShowTutorial(true)}
-                    className="w-full py-2 text-xs bg-gray-800/60 hover:bg-gray-800/80 text-gray-300 rounded-lg border border-gray-700/50"
-                  >
-                    How to Play
-                  </button>
-                </div>
+              <div className="mt-3 flex items-center justify-between font-paper-mono text-[9px] uppercase tracking-[.08em] text-[var(--paper-muted-2)]">
+                <span>{new Date().toLocaleDateString()}</span>
+                <button
+                  onClick={fetchLeaderboardData}
+                  className="flex items-center text-[var(--paper-accent)] hover:text-[var(--paper-ink)]"
+                >
+                  <ArrowTrendingUpIcon className="mr-1 h-3 w-3" />
+                  Refresh
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Leaderboard Panel - Changed from fixed positioning to responsive flex */}
-      <div className="p-4 lg:w-80 lg:min-w-80 lg:max-w-80">
-        <div className="bg-gray-900/90 backdrop-blur-lg rounded-xl border border-gray-700/50 shadow-2xl overflow-hidden max-h-[calc(100vh-8rem)] sticky top-20">
-          <div className="p-3 border-b border-gray-700/50 bg-gradient-to-b from-gray-900/50 to-transparent sticky top-0">
-            <div className="flex items-center gap-2">
-              <TrophyIcon className="h-4 w-4 text-amber-400" />
-              <h2 className="text-base font-bold bg-gradient-to-r from-amber-300 to-orange-400 bg-clip-text text-transparent">
-                Leaderboard
-              </h2>
-              <span className="text-xs text-gray-400 ml-auto">
-                {isLoadingLeaderboard ? 'Updating...' : 'Live'}
-              </span>
-            </div>
-          </div>
-
-          <div className="p-3 overflow-y-auto" style={{ maxHeight: '60vh' }}>
-            {isLoadingLeaderboard ? (
-              <div className="flex justify-center py-4">
-                <div className="animate-spin h-5 w-5">
-                  <div className="h-5 w-5 rounded-full border-2 border-purple-400 border-t-transparent" />
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">{renderLeaderboard()}</div>
-            )}
-
-            {!currentUser && (
-              <div className="mt-3 p-2 border border-blue-500/20 bg-blue-900/10 rounded-lg">
-                <p className="text-xs text-blue-300">Sign in to appear on the leaderboard</p>
-              </div>
-            )}
-
-            <div className="mt-3 text-xs text-gray-500 flex items-center justify-between">
-              <span>{new Date().toLocaleDateString()}</span>
-              <button
-                onClick={fetchLeaderboardData}
-                className="text-blue-400 hover:text-blue-300 flex items-center"
-              >
-                <ArrowTrendingUpIcon className="h-3 w-3 mr-1" />
-                Refresh
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <style jsx={true}>{`
-        @keyframes flowingBackgroundTitle {
-          0% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
-        }
-      `}</style>
     </div>
   );
 };

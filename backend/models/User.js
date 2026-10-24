@@ -13,14 +13,26 @@ export const findUserByEmailOrUsername = (email, username) =>
 
 export const createUser = (data) => User.create(data);
 
-export const findUsersWithScore = ({ playedSince } = {}) => {
+export const findUsersWithScore = ({ playedSince, limit = 100 } = {}) => {
   const query = { 'rhythmGame.peakPLevel': { $gt: 0 } };
   if (playedSince) query['rhythmGame.lastPlayed'] = { $gte: playedSince };
-  return User.find(query, 'username rhythmGame').sort({ 'rhythmGame.peakPLevel': -1 }).lean();
+  return User.find(
+    query,
+    'username rhythmGame.peakPLevel rhythmGame.difficulty rhythmGame.lastPlayed',
+  )
+    .sort({ 'rhythmGame.peakPLevel': -1 })
+    .limit(limit)
+    .lean();
 };
 
-export const updateUserRhythm = (userId, rhythmData) =>
-  User.findByIdAndUpdate(userId, { rhythmGame: rhythmData }, { new: true });
+export const updateUserRhythm = (userId, rhythmData) => {
+  const updates = Object.fromEntries(
+    Object.entries(rhythmData)
+      .filter(([, value]) => value !== undefined)
+      .map(([key, value]) => [`rhythmGame.${key}`, value]),
+  );
+  return User.findByIdAndUpdate(userId, { $set: updates }, { new: true });
+};
 
 export const deleteUserById = (id) => User.findByIdAndDelete(id);
 

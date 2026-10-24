@@ -84,5 +84,62 @@ describe('Game API', () => {
       expect(res.status).toBe(200);
       expect(res.data.peakPLevel).toBe(42);
     });
+
+    test('POST /api/game/achievements requires auth', async () => {
+      const res = await axios.post(
+        `${BASE_URL}/api/game/achievements`,
+        { achievements: { firstPlay: true } },
+        { validateStatus: null },
+      );
+      expect(res.status).toBe(401);
+    });
+
+    test('achievements persist and survive a score update', async () => {
+      const saved = await axios.post(
+        `${BASE_URL}/api/game/achievements`,
+        { achievements: { firstPlay: true, reach10PLevel: true } },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+      expect(saved.status).toBe(200);
+      expect(saved.data.achievements).toMatchObject({ firstPlay: true, reach10PLevel: true });
+
+      await axios.post(
+        `${BASE_URL}/api/game/update-score`,
+        { score: 43, difficulty: 'normal' },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+
+      const stats = await axios.get(`${BASE_URL}/api/game/user-stats`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      expect(stats.data.achievements).toMatchObject({ firstPlay: true, reach10PLevel: true });
+    });
+
+    test('achievements cannot be unset', async () => {
+      await axios.post(
+        `${BASE_URL}/api/game/achievements`,
+        { achievements: { firstPlay: true, reach10PLevel: true } },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+
+      await axios.post(
+        `${BASE_URL}/api/game/achievements`,
+        { achievements: { firstPlay: false, reach10PLevel: false } },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+      );
+
+      const stats = await axios.get(`${BASE_URL}/api/game/user-stats`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      expect(stats.data.achievements).toMatchObject({ firstPlay: true, reach10PLevel: true });
+    });
+
+    test('leaderboard entries include a rank and no private fields', async () => {
+      const res = await axios.get(`${BASE_URL}/api/game/leaderboard`);
+      const entry = res.data.find((u) => u.username === creds.username);
+      expect(entry.rank).toBeGreaterThan(0);
+      expect(entry).not.toHaveProperty('email');
+      expect(entry).not.toHaveProperty('password');
+    });
   });
 });

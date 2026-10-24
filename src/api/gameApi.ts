@@ -27,6 +27,14 @@ export const updateScore = async (score, difficulty) => {
   }
 };
 
+export const updateAchievements = async (achievements) => {
+  try {
+    return await request(API.post('/game/achievements', { achievements }));
+  } catch {
+    return { saved: false };
+  }
+};
+
 export const fetchUserGameStats = async () => {
   try {
     return await request(API.get('/game/user-stats'));
