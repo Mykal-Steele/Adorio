@@ -1,13 +1,12 @@
 'use client';
 
-import { Folder, GitBranch, Puzzle, User, Settings } from 'lucide-react';
+import { Folder, Puzzle, User, Settings } from 'lucide-react';
 import { useIDE, type SidePanelType } from './context/IDEContext';
 import { sans } from './constants/fonts';
 
 const items: { id: SidePanelType; Icon: typeof Folder; label: string }[] = [
   { id: 'explorer', Icon: Folder, label: 'EXPLORER' },
-  { id: 'git', Icon: GitBranch, label: 'SOURCE CONTROL' },
-  { id: 'skills', Icon: Puzzle, label: 'EXTENSIONS' },
+  { id: 'skills', Icon: Puzzle, label: 'SKILLS' },
   { id: 'profile', Icon: User, label: 'PROFILE' },
 ];
 
@@ -50,11 +49,10 @@ export function ActivityBar() {
               >
                 <Icon
                   size={18}
-                  color={isActive ? 'var(--ide-text-1)' : 'var(--ide-text-6)'}
+                  color={isActive ? 'var(--ide-text-1)' : 'var(--ide-text-5)'}
                   strokeWidth={isActive ? 2 : 1.5}
                 />
               </button>
-              {/* Tooltip */}
               <div
                 className="absolute left-full ml-2 px-2 py-1 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
                 role="tooltip"
@@ -63,9 +61,9 @@ export function ActivityBar() {
                   transform: 'translateY(-50%)',
                   background: 'var(--ide-bg-5)',
                   border: '1px solid var(--ide-border-strong)',
-                  fontSize: 9,
+                  fontSize: 11,
                   fontFamily: sans,
-                  color: 'var(--ide-text-3)',
+                  color: 'var(--ide-text-2)',
                   letterSpacing: '0.08em',
                   whiteSpace: 'nowrap',
                   zIndex: 50,
@@ -94,7 +92,7 @@ export function ActivityBar() {
               cursor: 'pointer',
             }}
           >
-            <Settings size={18} color="var(--ide-text-6)" strokeWidth={1.5} />
+            <Settings size={18} color="var(--ide-text-5)" strokeWidth={1.5} />
           </button>
           <div
             className="absolute left-full ml-2 px-2 py-1 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
@@ -104,9 +102,9 @@ export function ActivityBar() {
               transform: 'translateY(-50%)',
               background: 'var(--ide-bg-5)',
               border: '1px solid var(--ide-border-strong)',
-              fontSize: 9,
+              fontSize: 11,
               fontFamily: sans,
-              color: 'var(--ide-text-3)',
+              color: 'var(--ide-text-2)',
               letterSpacing: '0.08em',
               whiteSpace: 'nowrap',
               zIndex: 50,

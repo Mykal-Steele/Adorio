@@ -9,7 +9,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const project = portfolioData.projects.find((p) => p.id === id);
-  const title = project ? `${project.name} — Oakar Oo` : 'Project — Oakar Oo';
+  const title = project ? `${project.name} | Oakar Oo` : 'Project | Oakar Oo';
   const description = project?.description ?? 'Project details.';
   return {
     title,

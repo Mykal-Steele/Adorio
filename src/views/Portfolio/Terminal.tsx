@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { X, Minus, Send } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useIDE } from './context/IDEContext';
@@ -14,24 +14,6 @@ interface TermLine {
   color: string;
 }
 
-const bootLines: TermLine[] = [
-  { prefix: '$ ', text: 'whoami', color: 'var(--ide-accent)' },
-  {
-    prefix: '  ',
-    text: `oakar oo, Backend & Full-Stack Developer, KMUTT Bangkok`,
-    color: 'var(--ide-accent-light)',
-  },
-  { prefix: '$ ', text: 'init --portfolio', color: 'var(--ide-accent)' },
-  { prefix: '  ✓ ', text: 'shell mounted', color: 'var(--ide-green)' },
-  { prefix: '  ✓ ', text: 'theme loaded', color: 'var(--ide-green)' },
-  { prefix: '  ✓ ', text: 'routes ready', color: 'var(--ide-green)' },
-  { prefix: '$ ', text: 'availability --check', color: 'var(--ide-accent)' },
-  { prefix: '  → ', text: 'Status: Open to Opportunities', color: 'var(--ide-purple)' },
-  { prefix: '  → ', text: 'TYPE:   Internship · Part-time · Collab', color: 'var(--ide-text-3)' },
-  { prefix: '  → ', text: 'TZ:     UTC+7 Bangkok', color: 'var(--ide-text-3)' },
-  { prefix: '  → ', text: 'RESP:   < 24h', color: 'var(--ide-text-3)' },
-];
-
 type CommandFn = (args: string[]) => TermLine[];
 
 const ROUTE_MAP: Record<string, string> = {
@@ -42,30 +24,33 @@ const ROUTE_MAP: Record<string, string> = {
   contact: '/contact',
 };
 
+const INTRO: TermLine = {
+  prefix: '  ',
+  text: "Type 'help' for commands.",
+  color: 'var(--ide-text-4)',
+};
+
 function makeCommands(navigate: (path: string) => void): Record<string, CommandFn> {
   return {
     help: () => {
-      // Left column is 14 chars wide (command + args), padded to align descriptions.
       const cmds: [string, string][] = [
-        ['whoami', 'identity & availability'],
-        ['status', 'live project metrics'],
+        ['whoami', 'identity'],
         ['ls', 'list portfolio pages'],
-        ['pwd', 'current location'],
         ['open <page>', 'navigate to a page'],
         ['stack', 'tech stack overview'],
         ['projects', 'list all projects'],
-        ['skills', 'installed packages'],
+        ['skills', 'list skills'],
         ['contact', 'reach out'],
         ['date', 'current date & time'],
         ['clear', 'clear terminal'],
       ];
       return [
-        { prefix: '  ', text: 'Available commands:', color: 'var(--ide-text-5)' },
+        { prefix: '  ', text: 'Available commands:', color: 'var(--ide-text-4)' },
         { prefix: '  ', text: '', color: 'var(--ide-text-4)' },
         ...cmds.map(([cmd, desc]) => ({
           prefix: '  ',
           text: `${cmd.padEnd(16)}${desc}`,
-          color: 'var(--ide-text-4)',
+          color: 'var(--ide-text-3)',
         })),
       ];
     },
@@ -84,28 +69,12 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
       },
     ],
 
-    status: () => [
-      {
-        prefix: '  ✓ ',
-        text: 'Adorio             ONLINE     uptime check /api/uptime',
-        color: 'var(--ide-green)',
-      },
-    ],
-
     ls: () => [
       { prefix: '  ', text: 'src/', color: 'var(--ide-orange)' },
-      { prefix: '  ', text: '  dashboard.tsx   →  /', color: 'var(--ide-text-4)' },
-      { prefix: '  ', text: '  about_me.md     →  /about', color: 'var(--ide-text-4)' },
-      { prefix: '  ', text: '  projects.json   →  /projects', color: 'var(--ide-text-4)' },
-      { prefix: '  ', text: '  contact.sh      →  /contact', color: 'var(--ide-text-4)' },
-    ],
-
-    pwd: () => [
-      {
-        prefix: '  ',
-        text: `/home/${portfolioData.handle.toLowerCase()}/portfolio`,
-        color: 'var(--ide-accent-light)',
-      },
+      { prefix: '  ', text: '  dashboard.tsx   →  /', color: 'var(--ide-text-3)' },
+      { prefix: '  ', text: '  about_me.md     →  /about', color: 'var(--ide-text-3)' },
+      { prefix: '  ', text: '  projects.json   →  /projects', color: 'var(--ide-text-3)' },
+      { prefix: '  ', text: '  contact.sh      →  /contact', color: 'var(--ide-text-3)' },
     ],
 
     open: (args) => {
@@ -115,7 +84,7 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
         const available = Object.keys(ROUTE_MAP).join(', ');
         return [
           { prefix: '  ✗ ', text: `unknown page: "${page}"`, color: 'var(--ide-pink)' },
-          { prefix: '  → ', text: `available: ${available}`, color: 'var(--ide-text-5)' },
+          { prefix: '  → ', text: `available: ${available}`, color: 'var(--ide-text-4)' },
         ];
       }
       navigate(route);
@@ -157,14 +126,12 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
               : 'var(--ide-pink)',
       })),
 
-    skills: () => {
-      const active = portfolioData.skills.filter((s) => s.active);
-      return active.map((s) => ({
-        prefix: '  ✓ ',
-        text: `${s.name.padEnd(20)} ${s.version.padEnd(14)} [${s.category}]`,
+    skills: () =>
+      portfolioData.skills.map((s) => ({
+        prefix: '  · ',
+        text: `${s.name.padEnd(20)} [${s.category}]`,
         color: 'var(--ide-text-3)',
-      }));
-    },
+      })),
 
     contact: () => [
       { prefix: '  ', text: `github:   ${portfolioData.github}`, color: 'var(--ide-text-3)' },
@@ -187,7 +154,7 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
         }),
         color: 'var(--ide-accent-light)',
       },
-      { prefix: '  ', text: 'TZ: Asia/Bangkok (UTC+7)', color: 'var(--ide-text-5)' },
+      { prefix: '  ', text: 'TZ: Asia/Bangkok (UTC+7)', color: 'var(--ide-text-4)' },
     ],
   };
 }
@@ -195,33 +162,13 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
 export function Terminal({ embedded }: { embedded?: boolean }) {
   const { toggleTerminal } = useIDE();
   const router = useRouter();
-  const [lines, setLines] = useState<TermLine[]>([]);
+  const [lines, setLines] = useState<TermLine[]>([INTRO]);
   const [input, setInput] = useState('');
-  const [booted, setBooted] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const [histIdx, setHistIdx] = useState(-1);
-  const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const commands = useCallback(() => makeCommands((path) => router.push(path)), [router]);
-
-  useEffect(() => {
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < bootLines.length) {
-        setLines((prev) => [...prev, bootLines[i]]);
-        i++;
-      } else {
-        setBooted(true);
-        clearInterval(interval);
-      }
-    }, 180);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [lines]);
 
   const handleCommand = useCallback(() => {
     const raw = input.trim();
@@ -273,6 +220,8 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
     }
   };
 
+  const fontSize = 'var(--ide-editor-font-size, 13px)';
+
   return (
     <div
       className="shrink-0 flex flex-col"
@@ -287,54 +236,32 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
           className="flex items-center gap-4 px-3"
           style={{ height: 28, borderBottom: '1px solid var(--ide-border)', flexShrink: 0 }}
         >
-          <button
+          <span
             style={{
-              background: 'none',
-              borderTop: 'none',
-              borderRight: 'none',
-              borderLeft: 'none',
-              borderBottom: '2px solid var(--ide-accent)',
-              cursor: 'pointer',
               color: 'var(--ide-text-1)',
-              fontSize: 10,
+              fontSize: 12,
               fontFamily: sans,
               fontWeight: 600,
-              paddingBottom: 2,
             }}
           >
             Terminal
-          </button>
-          {['Problems (0)', 'Output'].map((t) => (
-            <button
-              key={t}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--ide-text-6)',
-                fontSize: 10,
-                fontFamily: sans,
-              }}
-            >
-              {t}
-            </button>
-          ))}
+          </span>
           <div className="ml-auto flex items-center gap-2">
             <IconButton
               onClick={toggleTerminal}
               aria-label="Minimise terminal"
-              size={24}
-              color="var(--ide-text-6)"
+              size={28}
+              color="var(--ide-text-5)"
             >
-              <Minus size={12} />
+              <Minus size={13} />
             </IconButton>
             <IconButton
               onClick={toggleTerminal}
               aria-label="Close terminal"
-              size={24}
-              color="var(--ide-text-6)"
+              size={28}
+              color="var(--ide-text-5)"
             >
-              <X size={12} />
+              <X size={13} />
             </IconButton>
           </div>
         </div>
@@ -345,10 +272,10 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
         onClick={() => inputRef.current?.focus()}
       >
         {lines.map((line, i) => (
-          <div key={i} className="flex items-start" style={{ lineHeight: '20px' }}>
+          <div key={i} className="flex items-start" style={{ lineHeight: '22px' }}>
             <span
               style={{
-                fontSize: 'var(--ide-editor-font-size, 11px)',
+                fontSize,
                 fontFamily: mono,
                 color: line?.color ?? 'var(--ide-text-3)',
                 whiteSpace: 'pre',
@@ -359,7 +286,7 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
             </span>
             <span
               style={{
-                fontSize: 'var(--ide-editor-font-size, 11px)',
+                fontSize,
                 fontFamily: mono,
                 color: line?.color ?? 'var(--ide-text-3)',
               }}
@@ -368,55 +295,50 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
             </span>
           </div>
         ))}
-        <div ref={bottomRef} />
       </div>
-      {booted && (
-        <div
-          className="flex items-center gap-2 px-4 py-1.5 shrink-0"
-          style={{ borderTop: '1px solid var(--ide-border-subtle)' }}
+      <div
+        className="flex items-center gap-2 px-4 py-1.5 shrink-0"
+        style={{ borderTop: '1px solid var(--ide-border-subtle)' }}
+      >
+        <span
+          style={{
+            fontSize,
+            fontFamily: mono,
+            color: 'var(--ide-accent)',
+            flexShrink: 0,
+          }}
         >
-          <span
-            style={{
-              fontSize: 'var(--ide-editor-font-size, 11px)',
-              fontFamily: mono,
-              color: 'var(--ide-accent)',
-              flexShrink: 0,
-            }}
-          >
-            root@{portfolioData.handle}:~$
-          </span>
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="type 'help' for commands..."
-            autoFocus
-            aria-label="Terminal input"
-            style={{
-              flex: 1,
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              fontSize: 'var(--ide-editor-font-size, 11px)',
-              fontFamily: mono,
-              color: 'var(--ide-text-2)',
-            }}
-          />
-          <button
-            onClick={handleCommand}
-            aria-label="Run command"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              color: input.trim() ? 'var(--ide-accent)' : 'var(--ide-text-7)',
-            }}
-          >
-            <Send size={11} />
-          </button>
-        </div>
-      )}
+          $
+        </span>
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="type 'help' for commands..."
+          aria-label="Terminal input"
+          style={{
+            flex: 1,
+            background: 'transparent',
+            border: 'none',
+            fontSize,
+            fontFamily: mono,
+            color: 'var(--ide-text-2)',
+          }}
+        />
+        <button
+          onClick={handleCommand}
+          aria-label="Run command"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            color: input.trim() ? 'var(--ide-accent)' : 'var(--ide-text-6)',
+          }}
+        >
+          <Send size={12} />
+        </button>
+      </div>
     </div>
   );
 }

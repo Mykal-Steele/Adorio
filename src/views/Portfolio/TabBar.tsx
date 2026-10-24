@@ -79,7 +79,7 @@ export function TabBar() {
                 borderBottom: 'none',
                 cursor: 'pointer',
                 color: active ? 'var(--ide-text-1)' : 'var(--ide-text-5)',
-                fontSize: 11,
+                fontSize: 13,
                 fontFamily: sans,
               }}
             >
@@ -108,7 +108,7 @@ export function TabBar() {
                   border: 'none',
                   cursor: 'pointer',
                   color: active ? 'var(--ide-text-1)' : 'var(--ide-text-5)',
-                  fontSize: 11,
+                  fontSize: 13,
                   fontFamily: sans,
                 }}
               >

@@ -1,17 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Send,
-  GithubIcon,
-  LinkedinIcon,
-  Mail,
-  AlertCircle,
-  Facebook,
-  Instagram,
-  Code,
-  Coffee,
-} from 'lucide-react';
+import { Send, GithubIcon, LinkedinIcon, Mail, AlertCircle, Code } from 'lucide-react';
 import { sendContactMessage } from '../../../api';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
@@ -47,24 +37,6 @@ const channels = [
     color: 'var(--ide-accent)',
   },
   {
-    id: 'facebook',
-    icon: <Facebook size={16} />,
-    label: 'Facebook',
-    value: portfolioData.facebook,
-    href: `https://${portfolioData.facebook}`,
-    description: 'Posts and event updates.',
-    color: '#1877f2',
-  },
-  {
-    id: 'instagram',
-    icon: <Instagram size={16} />,
-    label: 'Instagram',
-    value: portfolioData.instagram,
-    href: `https://${portfolioData.instagram}`,
-    description: 'Personal side.',
-    color: '#e1306c',
-  },
-  {
     id: 'gist',
     icon: <Code size={16} />,
     label: 'Gist',
@@ -72,15 +44,6 @@ const channels = [
     href: `https://${portfolioData.gist}`,
     description: 'Snippets and notes.',
     color: 'var(--ide-text-1)',
-  },
-  {
-    id: 'coffee',
-    icon: <Coffee size={16} />,
-    label: 'Buy Me a Coffee',
-    value: portfolioData.buymeacoffee,
-    href: `https://${portfolioData.buymeacoffee}`,
-    description: 'Support the work.',
-    color: '#ffdd00',
   },
 ];
 
@@ -132,7 +95,7 @@ export function Contact() {
 
         <div
           className="grid gap-3 mb-10"
-          style={{ gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)' }}
+          style={{ gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)' }}
         >
           {channels.map((ch) => (
             <a
@@ -158,7 +121,7 @@ export function Contact() {
                 {ch.icon}
                 <span
                   style={{
-                    fontSize: 10,
+                    fontSize: 13,
                     fontFamily: sans,
                     fontWeight: 700,
                     letterSpacing: '0.08em',
@@ -169,15 +132,15 @@ export function Contact() {
               </div>
               <div
                 style={{
-                  fontSize: 11,
+                  fontSize: 13,
                   fontFamily: mono,
-                  color: 'var(--ide-text-5)',
+                  color: 'var(--ide-text-4)',
                   marginBottom: 6,
                 }}
               >
                 {ch.value}
               </div>
-              <div style={{ fontSize: 10, fontFamily: vietnam, color: 'var(--ide-text-6)' }}>
+              <div style={{ fontSize: 14, fontFamily: vietnam, color: 'var(--ide-text-4)' }}>
                 {ch.description}
               </div>
             </a>
@@ -186,9 +149,9 @@ export function Contact() {
 
         <div
           style={{
-            fontSize: 9,
+            fontSize: 12,
             fontFamily: sans,
-            color: 'var(--ide-text-6)',
+            color: 'var(--ide-text-4)',
             letterSpacing: '0.1em',
             marginBottom: 12,
           }}
@@ -226,9 +189,9 @@ export function Contact() {
                   htmlFor={`contact-${field.key}`}
                   style={{
                     display: 'block',
-                    fontSize: 9,
+                    fontSize: 12,
                     fontFamily: mono,
-                    color: focused === field.key ? 'var(--ide-accent)' : 'var(--ide-text-6)',
+                    color: focused === field.key ? 'var(--ide-accent)' : 'var(--ide-text-4)',
                     marginBottom: 4,
                     transition: 'color 0.15s',
                   }}
@@ -246,11 +209,10 @@ export function Contact() {
                     width: '100%',
                     background: 'var(--ide-bg-1)',
                     border: `1px solid ${focused === field.key ? 'var(--ide-accent-a30)' : 'var(--ide-border)'}`,
-                    padding: '8px 12px',
-                    fontSize: 12,
+                    padding: '10px 12px',
+                    fontSize: 16,
                     fontFamily: mono,
                     color: 'var(--ide-text-2)',
-                    outline: 'none',
                     transition: 'border-color 0.15s',
                   }}
                 />
@@ -262,9 +224,9 @@ export function Contact() {
                 htmlFor="contact-message"
                 style={{
                   display: 'block',
-                  fontSize: 9,
+                  fontSize: 12,
                   fontFamily: mono,
-                  color: focused === 'message' ? 'var(--ide-accent)' : 'var(--ide-text-6)',
+                  color: focused === 'message' ? 'var(--ide-accent)' : 'var(--ide-text-4)',
                   marginBottom: 4,
                   transition: 'color 0.15s',
                 }}
@@ -283,11 +245,10 @@ export function Contact() {
                   width: '100%',
                   background: 'var(--ide-bg-1)',
                   border: `1px solid ${focused === 'message' ? 'var(--ide-accent-a30)' : 'var(--ide-border)'}`,
-                  padding: '8px 12px',
-                  fontSize: 12,
+                  padding: '10px 12px',
+                  fontSize: 16,
                   fontFamily: mono,
                   color: 'var(--ide-text-2)',
-                  outline: 'none',
                   resize: 'vertical',
                   transition: 'border-color 0.15s',
                 }}
@@ -304,7 +265,7 @@ export function Contact() {
                 }}
               >
                 <AlertCircle size={12} color="var(--ide-red)" />
-                <span style={{ fontSize: 11, fontFamily: sans, color: 'var(--ide-red)' }}>
+                <span style={{ fontSize: 13, fontFamily: sans, color: 'var(--ide-red)' }}>
                   {error}
                 </span>
               </div>
@@ -318,7 +279,7 @@ export function Contact() {
                 background: sending ? 'var(--ide-accent-a30)' : 'var(--ide-accent-light)',
                 border: 'none',
                 cursor: sending ? 'not-allowed' : 'pointer',
-                fontSize: 11,
+                fontSize: 15,
                 fontFamily: sans,
                 fontWeight: 700,
                 color: 'var(--ide-accent-dark)',
@@ -339,7 +300,7 @@ export function Contact() {
           >
             <div
               style={{
-                fontSize: 11,
+                fontSize: 14,
                 fontFamily: mono,
                 color: 'var(--ide-accent)',
                 marginBottom: 8,
@@ -349,13 +310,13 @@ export function Contact() {
             </div>
             <div
               style={{
-                fontSize: 13,
+                fontSize: 16,
                 fontFamily: vietnam,
                 color: 'var(--ide-text-2)',
                 lineHeight: 1.6,
               }}
             >
-              Got it. I&apos;ll get back to you within 24 hours.
+              Got it. I&apos;ll reply as soon as I can.
             </div>
             <button
               onClick={() => {
@@ -369,7 +330,7 @@ export function Contact() {
                 border: 'none',
                 cursor: 'pointer',
                 color: 'var(--ide-accent)',
-                fontSize: 10,
+                fontSize: 13,
                 fontFamily: mono,
               }}
             >

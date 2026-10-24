@@ -30,14 +30,14 @@ export function MobileHeader({ onMenuOpen }: MobileHeaderProps) {
         <span
           style={{
             color: 'var(--ide-text-1)',
-            fontSize: 12,
+            fontSize: 14,
             fontWeight: 700,
             letterSpacing: '0.05em',
           }}
         >
           {portfolioData.handle}
         </span>
-        <span style={{ color: 'var(--ide-text-6)', fontSize: 12 }}> // IDE</span>
+        <span style={{ color: 'var(--ide-text-4)', fontSize: 13 }}> // IDE</span>
       </div>
       <div className="flex items-center gap-2">
         <ThemeSwitcher />

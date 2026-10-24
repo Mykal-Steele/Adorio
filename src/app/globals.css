@@ -433,6 +433,12 @@ body {
   overflow: hidden;
 }
 
+/* Keyboard focus must stay visible through the IDE's inline styles */
+.ide-layout :focus-visible {
+  outline: 2px solid var(--ide-accent);
+  outline-offset: 2px;
+}
+
 /* Theme-aware hover backgrounds — values use CSS vars, !important overrides base resets */
 .ide-hover:hover {
   background: rgba(255, 255, 255, 0.04) !important;

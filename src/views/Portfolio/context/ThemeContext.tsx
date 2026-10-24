@@ -3,7 +3,7 @@
 import { useTheme as useNextTheme } from 'next-themes';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// Theme metadata — actual CSS variables live in globals.css as [data-theme="X"] blocks.
+// Theme metadata. The actual CSS variables live in globals.css as [data-theme="X"] blocks.
 // Here we only keep the JS-side metadata needed by the UI (labels, accent swatches).
 
 export type ThemeName = 'midnight' | 'nord' | 'dracula' | 'one-dark' | 'catppuccin';
@@ -24,7 +24,7 @@ export const themeAccents: Record<ThemeName, string> = {
   catppuccin: '#cba6f7',
 };
 
-// Font size context — font size is the only IDE setting not handled by next-themes,
+// Font size context. Font size is the only IDE setting not handled by next-themes,
 // so we keep a tiny React context for it. Everything else (theme name, persistence,
 // SSR blocking script) is delegated to next-themes via the root Providers.tsx.
 
@@ -77,7 +77,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// useTheme hook — combines next-themes (theme name + setTheme) with our fontSize context.
+// useTheme hook combines next-themes (theme name + setTheme) with our fontSize context.
 // Consumers import this and get the same API shape as before.
 
 export function useTheme() {

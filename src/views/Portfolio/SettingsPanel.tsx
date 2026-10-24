@@ -267,51 +267,6 @@ export function SettingsPanel() {
               </div>
             </div>
           </div>
-
-          {/* About section */}
-          <div className="px-6 py-5">
-            <div
-              style={{
-                fontSize: 8,
-                fontFamily: sans,
-                color: 'var(--ide-text-6)',
-                letterSpacing: '0.14em',
-                fontWeight: 700,
-                marginBottom: 16,
-              }}
-            >
-              ABOUT
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontFamily: sans,
-                    color: 'var(--ide-text-3)',
-                    marginBottom: 2,
-                  }}
-                >
-                  Portfolio IDE
-                </div>
-                <div style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-7)' }}>
-                  v2.0.0-stable · Oakar Oo
-                </div>
-              </div>
-              <div
-                style={{
-                  fontSize: 9,
-                  fontFamily: mono,
-                  color: 'var(--ide-accent)',
-                  background: 'var(--ide-accent-a8)',
-                  padding: '2px 8px',
-                  border: '1px solid var(--ide-accent-a20)',
-                }}
-              >
-                STABLE
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

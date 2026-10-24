@@ -13,7 +13,7 @@ export function Badge({ children, color, bg, borderColor, style }: BadgeProps) {
   return (
     <span
       style={{
-        fontSize: 9,
+        fontSize: 11,
         fontFamily: sans,
         fontWeight: 600,
         letterSpacing: '0.06em',

@@ -1,19 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { GitCommit, GitPullRequest, ArrowRight, Zap, ExternalLink } from 'lucide-react';
-import { portfolioData } from '../data/portfolio';
+import { ArrowRight, ExternalLink, Github, Linkedin, Mail, Download } from 'lucide-react';
+import { portfolioData, type Project } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
 import { useProjectNavigation } from '../hooks/useProjectNavigation';
 import { mono, sans, vietnam } from '../constants/fonts';
-import { Breadcrumb, Badge, LineNumbers } from '../shared';
+import { Breadcrumb, Badge } from '../shared';
 
-const prColors: Record<string, { bg: string; text: string }> = {
-  open: { bg: 'var(--ide-accent-a12)', text: 'var(--ide-accent)' },
-  merged: { bg: 'var(--ide-purple-a15)', text: 'var(--ide-purple)' },
-  closed: { bg: 'var(--ide-pink-a12)', text: 'var(--ide-pink)' },
-};
+const FEATURED_IDS = ['chronochunk', 'coding-challenges', 'create-adorex'];
 
 const statusColors: Record<string, string> = {
   STABLE: 'var(--ide-accent)',
@@ -21,661 +17,341 @@ const statusColors: Record<string, string> = {
   DEPRECATED: 'var(--ide-pink)',
 };
 
-interface GithubCommit {
-  sha: string;
-  message: string;
-  repo: string;
-  branch: string;
-  url: string;
-  timestamp: string;
-}
+const heroLinks = [
+  {
+    label: 'Resume',
+    href: '/resume',
+    download: 'Oakar-Oo-Resume.pdf',
+    icon: Download,
+    primary: true,
+    external: false,
+  },
+  {
+    label: 'GitHub',
+    href: `https://${portfolioData.github}`,
+    icon: Github,
+    primary: false,
+    external: true,
+  },
+  {
+    label: 'LinkedIn',
+    href: `https://${portfolioData.linkedin}`,
+    icon: Linkedin,
+    primary: false,
+    external: true,
+  },
+  {
+    label: 'Email',
+    href: `mailto:${portfolioData.email}`,
+    icon: Mail,
+    primary: false,
+    external: false,
+  },
+];
 
-interface GithubPullRequest {
-  id: number;
-  repo: string;
-  title: string;
-  status: 'open' | 'merged' | 'closed';
-  action: string;
-  url: string;
-  timestamp: string;
-}
+function ProjectLinks({ project }: { project: Project }) {
+  const links: { label: string; href: string; external: boolean }[] = [];
+  if (project.liveUrl) links.push({ label: 'Live', href: project.liveUrl, external: false });
+  if (project.repoUrl)
+    links.push({ label: 'GitHub', href: `https://${project.repoUrl}`, external: true });
+  if (project.npm) links.push({ label: 'npm', href: `https://${project.npm}`, external: true });
 
-const LS_COMMITS = 'gh_activity_commits';
-const LS_PRS = 'gh_activity_prs';
-const LS_TS = 'gh_activity_ts';
-
-function readCache<T>(key: string): T | null {
-  try {
-    return JSON.parse(localStorage.getItem(key) ?? 'null');
-  } catch {
-    return null;
-  }
-}
-function writeCache(key: string, value: unknown) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    /* quota */
-  }
-}
-
-function formatRelativeTime(iso: string): string {
-  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months}mo ago`;
-  return `${Math.floor(months / 12)}y ago`;
-}
-
-function useGithubActivity() {
-  const [commits, setCommits] = useState<GithubCommit[] | null>(null);
-  const [pullRequests, setPullRequests] = useState<GithubPullRequest[] | null>(null);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    const cachedCommits = readCache<GithubCommit[]>(LS_COMMITS);
-    if (cachedCommits) setCommits(cachedCommits);
-    const cachedPrs = readCache<GithubPullRequest[]>(LS_PRS);
-    if (cachedPrs) setPullRequests(cachedPrs);
-  }, []);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch('/api/github-activity');
-        const json = await res.json();
-        if (!res.ok || json.error) {
-          setError(true);
-          return;
-        }
-        setCommits(json.commits ?? []);
-        setPullRequests(json.pullRequests ?? []);
-        setError(false);
-        writeCache(LS_COMMITS, json.commits ?? []);
-        writeCache(LS_PRS, json.pullRequests ?? []);
-        if (json.ts) writeCache(LS_TS, json.ts);
-      } catch {
-        setError(true);
-      }
-    };
-    const t1 = setTimeout(load, 1500);
-    const t2 = setInterval(load, 60_000);
-    return () => {
-      clearTimeout(t1);
-      clearInterval(t2);
-    };
-  }, []);
-
-  return { commits, pullRequests, error };
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      {links.map((link) =>
+        link.external ? (
+          <a
+            key={link.label}
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 hover:underline"
+            style={{
+              fontSize: 15,
+              fontFamily: sans,
+              color: 'var(--ide-accent)',
+              textDecoration: 'none',
+            }}
+          >
+            {link.label}
+            <ExternalLink size={13} />
+          </a>
+        ) : (
+          <Link
+            key={link.label}
+            href={link.href}
+            className="inline-flex items-center gap-1.5 hover:underline"
+            style={{
+              fontSize: 15,
+              fontFamily: sans,
+              color: 'var(--ide-accent)',
+              textDecoration: 'none',
+            }}
+          >
+            {link.label}
+            <ArrowRight size={13} />
+          </Link>
+        ),
+      )}
+    </div>
+  );
 }
 
 export function Dashboard() {
   const router = useRouter();
   const { openProject, prefetchProject } = useProjectNavigation();
   const { isMobile, isTablet } = useResponsive();
-  const { commits, pullRequests, error } = useGithubActivity();
+
+  const featured = FEATURED_IDS.map((id) =>
+    portfolioData.projects.find((project) => project.id === id),
+  ).filter((project): project is Project => Boolean(project));
 
   return (
     <div className="min-h-full">
       <Breadcrumb segments={['src', 'dashboard.tsx']} language="TypeScript JSX" />
 
-      <div
-        className="relative"
+      <section
+        className={isMobile ? 'px-5 py-8' : 'px-8 py-10'}
         style={{ background: 'var(--ide-bg-3)', borderBottom: '1px solid var(--ide-border)' }}
       >
-        <div className="flex">
-          {!isMobile && <LineNumbers count={18} />}
-          <div className={`flex-1 ${isMobile ? 'px-4 py-6' : 'px-6 py-8'}`}>
-            <div
-              style={{
-                fontSize: 13,
-                fontFamily: mono,
-                color: 'var(--ide-text-6)',
-                marginBottom: 8,
-              }}
-            >
-              // oakar oo — backend & full-stack developer, Bangkok
-            </div>
-            <div style={{ fontFamily: mono, fontSize: isMobile ? 12 : 14, marginBottom: 4 }}>
-              <span style={{ color: 'var(--ide-pink)' }}>const </span>
-              <span style={{ color: 'var(--ide-accent-light)' }}>developer</span>
-              <span style={{ color: 'var(--ide-pink)' }}> = </span>
-              <span style={{ color: 'var(--ide-text-1)' }}>{'{'}</span>
-            </div>
-            <div
-              style={{
-                paddingLeft: isMobile ? 16 : 32,
-                fontFamily: mono,
-                fontSize: isMobile ? 12 : 14,
-              }}
-            >
-              <div>
-                <span style={{ color: 'var(--ide-orange)' }}>name</span>
-                <span style={{ color: 'var(--ide-text-1)' }}>: </span>
-                <span style={{ color: 'var(--ide-syntax-string)' }}>"oakar oo"</span>
-                <span style={{ color: 'var(--ide-text-1)' }}>,</span>
-              </div>
-              <div>
-                <span style={{ color: 'var(--ide-orange)' }}>role</span>
-                <span style={{ color: 'var(--ide-text-1)' }}>: </span>
-                <span style={{ color: 'var(--ide-accent)' }}>"Backend & Full-Stack Developer"</span>
-                <span style={{ color: 'var(--ide-text-1)' }}>,</span>
-              </div>
-              <div>
-                <span style={{ color: 'var(--ide-orange)' }}>location</span>
-                <span style={{ color: 'var(--ide-text-1)' }}>: </span>
-                <span style={{ color: 'var(--ide-accent)' }}>"Bangkok, Thailand — KMUTT CS"</span>
-                <span style={{ color: 'var(--ide-text-1)' }}>,</span>
-              </div>
-              <div>
-                <span style={{ color: 'var(--ide-orange)' }}>tagline</span>
-                <span style={{ color: 'var(--ide-pink)' }}>: </span>
-                <span style={{ color: 'var(--ide-pink)' }}>{'() =>'} </span>
-                <span style={{ color: 'var(--ide-text-1)' }}>{'{'}</span>
-              </div>
-            </div>
-
-            <div
-              className="my-4 pl-8"
-              style={{ borderLeft: '4px solid var(--ide-orange)', overflowX: 'auto' }}
-            >
-              <pre
-                style={{
-                  fontFamily: mono,
-                  fontSize: isMobile ? 9 : isTablet ? 11 : 14,
-                  color: 'var(--ide-accent-light)',
-                  lineHeight: 1.3,
-                  margin: 0,
-                }}
-              >{`    ___       __          _
-   /   | ____/ /___  ____(_)___
-  / /| |/ __  / __ \\/ __/ / __ \\
- / ___ / /_/ / /_/ / / / / /_/ /
-/_/  |_|\\__,_/\\____/_/ /_/\\____/`}</pre>
-            </div>
-
-            <div
-              style={{
-                paddingLeft: isMobile ? 16 : 32,
-                fontFamily: mono,
-                fontSize: isMobile ? 12 : 14,
-              }}
-            >
-              <div>
-                <span style={{ color: 'var(--ide-text-1)' }}>{'}'}</span>
-              </div>
-            </div>
-            <div
-              style={{ fontFamily: mono, fontSize: isMobile ? 12 : 14, color: 'var(--ide-text-1)' }}
-            >
-              {'}'}
-            </div>
-
-            <div className="flex flex-wrap gap-2 mt-6 mb-6">
-              {portfolioData.community.map((c) => (
-                <Badge
-                  key={c.short}
-                  color={c.color}
-                  borderColor={`${c.color}40`}
-                  style={{ padding: '2px 7px' }}
-                >
-                  {c.short}
-                </Badge>
-              ))}
-            </div>
-
-            <div className={`flex items-center gap-4 ${isMobile ? 'flex-col items-stretch' : ''}`}>
-              <button
-                onClick={() => router.push('/about')}
-                className="flex items-center gap-2 px-6 py-3 transition-opacity hover:opacity-90"
-                style={{
-                  background: 'var(--ide-accent-light)',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontFamily: sans,
-                  fontWeight: 700,
-                  color: 'var(--ide-accent-dark)',
-                  letterSpacing: '0.08em',
-                }}
-              >
-                Read about <ArrowRight size={14} />
-              </button>
-              <button
-                onClick={() => router.push('/projects')}
-                className="flex items-center gap-2 px-6 py-3 transition-opacity hover:opacity-80"
-                style={{
-                  background: 'transparent',
-                  border: '1px solid var(--ide-border-stronger)',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontFamily: sans,
-                  fontWeight: 600,
-                  color: 'var(--ide-text-4)',
-                  letterSpacing: '0.08em',
-                }}
-              >
-                View repos <ExternalLink size={12} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Dashboard Grid */}
-      <div className="grid gap-0" style={{ gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
-        {/* Commits */}
-        <div
+        <h1
           style={{
-            borderRight: '1px solid var(--ide-border)',
-            borderBottom: '1px solid var(--ide-border)',
+            fontFamily: sans,
+            fontSize: isMobile ? 34 : 44,
+            fontWeight: 700,
+            letterSpacing: '-0.03em',
+            color: 'var(--ide-text-1)',
+            margin: 0,
+            marginBottom: 10,
           }}
         >
-          <div
-            className="flex items-center justify-between px-6 py-4"
-            style={{ borderBottom: '1px solid var(--ide-border-subtle)' }}
-          >
-            <div className="flex items-center gap-2">
-              <GitCommit size={13} color="var(--ide-accent)" />
-              <span
-                style={{
-                  fontSize: 11,
-                  fontFamily: sans,
-                  color: 'var(--ide-text-1)',
-                  fontWeight: 600,
-                  letterSpacing: '0.06em',
-                }}
-              >
-                Commit Stream
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-accent)' }}>
-                main
-              </span>
-              <span
-                style={{
-                  fontSize: 9,
-                  background: 'var(--ide-accent-a12)',
-                  color: 'var(--ide-accent)',
-                  padding: '1px 6px',
-                }}
-              >
-                STABLE
-              </span>
-            </div>
-          </div>
-          <div className="px-6 py-4">
-            {commits === null && !error && (
-              <div className="flex flex-col gap-4 mb-4">
-                {[0, 1, 2].map((i) => (
-                  <div key={i} className="animate-pulse flex flex-col gap-2">
-                    <div style={{ height: 10, width: '75%', background: 'var(--ide-border)' }} />
-                    <div
-                      style={{ height: 8, width: '35%', background: 'var(--ide-border-subtle)' }}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-            {commits === null && error && (
-              <div
-                style={{ fontSize: 11, fontFamily: sans, color: 'var(--ide-text-6)' }}
-                className="mb-4"
-              >
-                Couldn&apos;t reach GitHub right now.
-              </div>
-            )}
-            {commits !== null && commits.length === 0 && (
-              <div
-                style={{ fontSize: 11, fontFamily: sans, color: 'var(--ide-text-6)' }}
-                className="mb-4"
-              >
-                No recent public commits.
-              </div>
-            )}
-            {commits !== null &&
-              commits.slice(0, 5).map((c, i, arr) => {
-                const branchColor =
-                  c.branch === 'main'
-                    ? 'var(--ide-accent)'
-                    : c.branch.startsWith('fix')
-                      ? 'var(--ide-orange)'
-                      : 'var(--ide-purple)';
-                return (
-                  <a
-                    key={`${c.repo}-${c.sha}`}
-                    href={c.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 mb-4 transition-opacity hover:opacity-80"
-                    style={{
-                      paddingBottom: i < arr.length - 1 ? 16 : 0,
-                      borderBottom:
-                        i < arr.length - 1 ? '1px solid var(--ide-border-subtle)' : 'none',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    <div style={{ marginTop: 3 }}>
-                      <GitCommit size={12} color="var(--ide-text-7)" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div
-                        style={{
-                          fontSize: 12,
-                          fontFamily: sans,
-                          color: 'var(--ide-text-2)',
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        {c.message}
-                      </div>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span style={{ fontSize: 10, fontFamily: mono, color: branchColor }}>
-                          {c.repo.split('/')[1] ?? c.repo}
-                        </span>
-                        <span
-                          style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-7)' }}
-                        >
-                          #{c.sha}
-                        </span>
-                        <span
-                          style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-7)' }}
-                        >
-                          {formatRelativeTime(c.timestamp)}
-                        </span>
-                      </div>
-                    </div>
-                  </a>
-                );
-              })}
-            <button
-              onClick={() => router.push('/projects')}
-              style={{
-                background: 'none',
-                border: '1px solid var(--ide-border-medium)',
-                cursor: 'pointer',
-                color: 'var(--ide-text-5)',
-                fontSize: 10,
-                fontFamily: sans,
-                padding: '6px 16px',
-                width: '100%',
-                letterSpacing: '0.06em',
-              }}
-            >
-              View full log →
-            </button>
-          </div>
-        </div>
-
-        {/* Pull Requests */}
-        <div style={{ borderBottom: '1px solid var(--ide-border)' }}>
-          <div
-            className="flex items-center justify-between px-6 py-4"
-            style={{ borderBottom: '1px solid var(--ide-border-subtle)' }}
-          >
-            <div className="flex items-center gap-2">
-              <GitPullRequest size={13} color="var(--ide-purple)" />
-              <span
-                style={{
-                  fontSize: 11,
-                  fontFamily: sans,
-                  color: 'var(--ide-text-1)',
-                  fontWeight: 600,
-                  letterSpacing: '0.06em',
-                }}
-              >
-                Pull Requests
-              </span>
-            </div>
-            <span
-              style={{
-                fontSize: 9,
-                background: 'var(--ide-purple-a12)',
-                color: 'var(--ide-purple)',
-                padding: '1px 6px',
-              }}
-            >
-              {pullRequests ? pullRequests.filter((p) => p.status === 'open').length : '—'} OPEN
-            </span>
-          </div>
-          <div className="px-6 py-4">
-            {pullRequests === null && !error && (
-              <div className="flex flex-col gap-4">
-                {[0, 1].map((i) => (
-                  <div key={i} className="animate-pulse flex flex-col gap-2">
-                    <div style={{ height: 10, width: '80%', background: 'var(--ide-border)' }} />
-                    <div
-                      style={{ height: 8, width: '30%', background: 'var(--ide-border-subtle)' }}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-            {pullRequests === null && error && (
-              <div style={{ fontSize: 11, fontFamily: sans, color: 'var(--ide-text-6)' }}>
-                Couldn&apos;t reach GitHub right now.
-              </div>
-            )}
-            {pullRequests !== null && pullRequests.length === 0 && (
-              <div style={{ fontSize: 11, fontFamily: sans, color: 'var(--ide-text-6)' }}>
-                No recent pull request activity.
-              </div>
-            )}
-            {pullRequests !== null &&
-              pullRequests.map((pr, i, arr) => {
-                const isOpen = pr.status === 'open';
-                const isMerged = pr.status === 'merged';
-                return (
-                  <a
-                    key={`${pr.repo}-${pr.id}`}
-                    href={pr.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mb-4 block transition-opacity hover:opacity-80"
-                    style={{
-                      paddingBottom: i < arr.length - 1 ? 16 : 0,
-                      borderBottom:
-                        i < arr.length - 1 ? '1px solid var(--ide-border-subtle)' : 'none',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <GitPullRequest
-                        size={12}
-                        color={
-                          isOpen
-                            ? 'var(--ide-accent)'
-                            : isMerged
-                              ? 'var(--ide-purple)'
-                              : 'var(--ide-text-6)'
-                        }
-                        style={{ marginTop: 2, flexShrink: 0 }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge
-                            color={(prColors[pr.status] || prColors.open).text}
-                            bg={(prColors[pr.status] || prColors.open).bg}
-                            style={{ padding: '2px 7px' }}
-                          >
-                            {pr.status.toUpperCase()}
-                          </Badge>
-                          <span
-                            style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-7)' }}
-                          >
-                            #{pr.id}
-                          </span>
-                        </div>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontFamily: sans,
-                            color: 'var(--ide-text-2)',
-                            lineHeight: 1.4,
-                          }}
-                        >
-                          {pr.title}
-                        </div>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span
-                            style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-orange)' }}
-                          >
-                            {pr.repo.split('/')[1] ?? pr.repo}
-                          </span>
-                          <span
-                            style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-7)' }}
-                          >
-                            {formatRelativeTime(pr.timestamp)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </a>
-                );
-              })}
-          </div>
-        </div>
-      </div>
-
-      {/* Project Gallery */}
-      <div style={{ borderBottom: '1px solid var(--ide-border)' }}>
-        <div
-          className="flex items-center justify-between px-6 py-4"
-          style={{ borderBottom: '1px solid var(--ide-border-subtle)' }}
+          {portfolioData.name}
+        </h1>
+        <p
+          style={{
+            fontFamily: vietnam,
+            fontSize: isMobile ? 17 : 19,
+            lineHeight: 1.6,
+            color: 'var(--ide-text-2)',
+            maxWidth: '62ch',
+            margin: 0,
+            marginBottom: 24,
+          }}
         >
-          <div className="flex items-center gap-2">
-            <Zap size={13} color="var(--ide-orange)" />
-            <span
-              style={{
-                fontSize: 11,
-                fontFamily: sans,
-                color: 'var(--ide-text-1)',
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-              }}
-            >
-              Project Gallery
-            </span>
-          </div>
-          <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-text-5)' }}>
-            TOTAL: {String(portfolioData.projects.length).padStart(3, '0')}
-          </span>
+          {portfolioData.headline}
+        </p>
+
+        <div className="flex flex-wrap gap-3">
+          {heroLinks.map(({ label, href, download, icon: Icon, primary, external }) => {
+            const style = {
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '10px 18px',
+              fontSize: 15,
+              fontFamily: sans,
+              fontWeight: 600,
+              textDecoration: 'none',
+              border: primary ? 'none' : '1px solid var(--ide-border-stronger)',
+              background: primary ? 'var(--ide-accent)' : 'transparent',
+              color: primary ? 'var(--ide-bg-1)' : 'var(--ide-text-2)',
+            } as const;
+
+            return external ? (
+              <a key={label} href={href} target="_blank" rel="noopener noreferrer" style={style}>
+                <Icon size={15} />
+                {label}
+              </a>
+            ) : (
+              <a key={label} href={href} download={download} style={style}>
+                <Icon size={15} />
+                {label}
+              </a>
+            );
+          })}
         </div>
+      </section>
+
+      <section
+        className={isMobile ? 'px-5 py-6' : 'px-8 py-7'}
+        style={{ borderBottom: '1px solid var(--ide-border)' }}
+      >
+        <h2
+          style={{
+            fontFamily: sans,
+            fontSize: 13,
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'var(--ide-text-5)',
+            margin: 0,
+            marginBottom: 14,
+          }}
+        >
+          Now
+        </h2>
+        <ul className="flex flex-col gap-3" style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+          {portfolioData.now.map((item) => (
+            <li key={item.label} className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span
+                style={{
+                  fontFamily: vietnam,
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: 'var(--ide-text-2)',
+                }}
+              >
+                {item.label}
+              </span>
+              <span style={{ fontFamily: vietnam, fontSize: 16, color: 'var(--ide-text-4)' }}>
+                {item.detail}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className={isMobile ? 'px-5 py-7' : 'px-8 py-8'}>
+        <div className="flex items-center justify-between gap-4 mb-5">
+          <h2
+            style={{
+              fontFamily: sans,
+              fontSize: 13,
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: 'var(--ide-text-5)',
+              margin: 0,
+            }}
+          >
+            Featured projects
+          </h2>
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-1.5 hover:underline"
+            style={{
+              fontFamily: sans,
+              fontSize: 15,
+              color: 'var(--ide-accent)',
+              textDecoration: 'none',
+            }}
+          >
+            All projects
+            <ArrowRight size={14} />
+          </Link>
+        </div>
+
         <div
-          className="grid px-6 py-4 gap-4"
+          className="grid gap-4"
           style={{
             gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
           }}
         >
-          {portfolioData.projects.slice(0, 3).map((proj) => (
-            <button
-              key={proj.id}
-              onClick={() => openProject(proj.id)}
-              className="text-left p-4 transition-all"
+          {featured.map((project) => (
+            <article
+              key={project.id}
+              className="flex flex-col p-5"
               style={{
                 background: 'var(--ide-bg-2)',
                 border: '1px solid var(--ide-border)',
-                cursor: 'pointer',
-                borderRadius: 4,
-              }}
-              onMouseEnter={(e) => {
-                prefetchProject(proj.id);
-                (e.currentTarget as HTMLElement).style.borderColor = 'var(--ide-orange-a30)';
-              }}
-              onTouchStart={() => prefetchProject(proj.id)}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = 'var(--ide-border)';
               }}
             >
-              <div className="flex items-center justify-between mb-2">
-                <span
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <button
+                  onClick={() => openProject(project.id)}
+                  onMouseEnter={() => prefetchProject(project.id)}
+                  onTouchStart={() => prefetchProject(project.id)}
+                  className="text-left hover:underline"
                   style={{
-                    fontSize: 9,
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 0,
                     fontFamily: sans,
-                    color: statusColors[proj.status] || 'var(--ide-accent)',
-                    letterSpacing: '0.06em',
+                    fontSize: 20,
+                    fontWeight: 700,
+                    letterSpacing: '-0.02em',
+                    color: 'var(--ide-text-1)',
                   }}
                 >
-                  ■ {proj.status}
-                  {proj.aiAssisted && <span style={{ color: 'var(--ide-purple)' }}> · AI</span>}
+                  {project.name}
+                </button>
+                <span
+                  style={{
+                    flexShrink: 0,
+                    fontFamily: sans,
+                    fontSize: 12,
+                    letterSpacing: '0.06em',
+                    color: statusColors[project.status] || 'var(--ide-accent)',
+                  }}
+                >
+                  {project.status}
                 </span>
-                <ArrowRight size={10} color="var(--ide-text-7)" />
               </div>
-              <div
+
+              <p
                 style={{
-                  fontSize: 13,
-                  fontFamily: sans,
-                  color: 'var(--ide-text-1)',
-                  fontWeight: 700,
-                  marginBottom: 6,
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                {proj.name}
-              </div>
-              <div
-                style={{
-                  fontSize: 10,
                   fontFamily: vietnam,
-                  color: 'var(--ide-text-5)',
-                  lineHeight: 1.5,
-                  marginBottom: 10,
+                  fontSize: 16,
+                  lineHeight: 1.6,
+                  color: 'var(--ide-text-3)',
+                  margin: 0,
+                  marginBottom: 16,
                 }}
               >
-                {proj.description.slice(0, 80)}...
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {proj.tags.slice(0, 3).map((t) => (
+                {project.summary}
+              </p>
+
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {project.tags.map((tag) => (
                   <span
-                    key={t}
+                    key={tag}
                     style={{
-                      fontSize: 9,
                       fontFamily: mono,
-                      color: 'var(--ide-text-6)',
-                      background: 'var(--ide-bg-3)',
-                      padding: '1px 5px',
+                      fontSize: 11,
+                      color: 'var(--ide-text-4)',
+                      background: 'var(--ide-bg-4)',
+                      padding: '2px 6px',
                     }}
                   >
-                    {t}
+                    {tag}
                   </span>
                 ))}
               </div>
-              <div className="flex items-center gap-3 mt-3">
-                <span style={{ fontSize: 9, fontFamily: mono, color: proj.langColor }}>
-                  {proj.language}
-                </span>
-                <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-7)' }}>
-                  {proj.stats[0]?.value}
-                </span>
+
+              <div className="mt-auto pt-3" style={{ borderTop: '1px solid var(--ide-border)' }}>
+                <ProjectLinks project={project} />
               </div>
-            </button>
+            </article>
           ))}
         </div>
-        <div className="px-6 pb-4">
+
+        <div className="flex flex-wrap gap-3 mt-6">
           <button
-            onClick={() => router.push('/projects')}
-            className="flex items-center justify-center gap-2 w-full py-3 transition-opacity hover:opacity-90"
+            onClick={() => router.push('/about')}
+            className="inline-flex items-center gap-2 hover:underline"
             style={{
-              background: 'var(--ide-accent-a6)',
-              border: '1px solid var(--ide-accent-a15)',
+              background: 'none',
+              border: 'none',
               cursor: 'pointer',
-              fontSize: 11,
+              padding: 0,
               fontFamily: sans,
-              color: 'var(--ide-accent)',
-              letterSpacing: '0.08em',
+              fontSize: 16,
               fontWeight: 600,
+              color: 'var(--ide-text-2)',
             }}
           >
-            View all repositories <ArrowRight size={12} />
+            About me
+            <ArrowRight size={15} />
           </button>
+          <Badge
+            color="var(--ide-accent)"
+            style={{ fontSize: 12, padding: '3px 9px', alignSelf: 'center' }}
+          >
+            Open to internships
+          </Badge>
         </div>
-      </div>
+      </section>
 
       <div style={{ height: 48 }} />
     </div>

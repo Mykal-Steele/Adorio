@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Projects } from '@/views/Portfolio/pages/Projects';
 
 export const metadata: Metadata = {
-  title: 'Projects — Oakar Oo',
+  title: 'Projects | Oakar Oo',
   description:
     'CLI tools, full-stack apps, and backend services. create-adorex, ChronoChunk, CozyTalk, Vexta, CogniMax, and more.',
   keywords: [
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     'open source',
   ],
   openGraph: {
-    title: 'Projects — Oakar Oo',
+    title: 'Projects | Oakar Oo',
     description: 'CLI tools, full-stack apps, and backend services.',
     url: 'https://adorio.space/projects',
     siteName: 'Oakar Oo',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'Projects — Oakar Oo',
+    title: 'Projects | Oakar Oo',
     description: 'CLI tools, full-stack apps, and backend services.',
   },
 };

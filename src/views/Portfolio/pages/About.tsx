@@ -6,13 +6,6 @@ import { useResponsive } from '../hooks/useResponsive';
 import { mono, sans, vietnam } from '../constants/fonts';
 import { Breadcrumb, Badge, IDECard, PageHeader, SectionLabel } from '../shared';
 
-const timelineStatusColors: Record<string, string> = {
-  IN_PROGRESS: 'var(--ide-orange)',
-  SHIPPED: 'var(--ide-accent)',
-  MILESTONE: 'var(--ide-purple)',
-  INIT: 'var(--ide-blue)',
-};
-
 export function About() {
   const { isMobile } = useResponsive();
 
@@ -25,7 +18,8 @@ export function About() {
         style={{ maxWidth: 700, margin: '0 auto' }}
       >
         <PageHeader
-          title="Oakar Oo — Backend & Full-Stack Developer"
+          title="Oakar Oo"
+          subtitle="Backend and full-stack developer"
           style={{ marginBottom: 20 }}
         />
 
@@ -35,7 +29,7 @@ export function About() {
             bg="var(--ide-orange-a12)"
             borderColor="var(--ide-orange-a30)"
           >
-            KMUTT — CS Year 3
+            KMUTT · CS Year 3
           </Badge>
           <Badge
             color="var(--ide-accent)"
@@ -49,17 +43,17 @@ export function About() {
             download="Oakar-Oo-Resume.pdf"
             className="flex items-center gap-1.5 transition-opacity hover:opacity-80"
             style={{
-              fontSize: 9,
+              fontSize: 12,
               fontFamily: sans,
               fontWeight: 700,
               letterSpacing: '0.06em',
               color: 'var(--ide-accent-dark)',
               background: 'var(--ide-accent-light)',
-              padding: '3px 10px',
+              padding: '4px 12px',
               textDecoration: 'none',
             }}
           >
-            <Download size={10} />
+            <Download size={12} />
             Resume
           </a>
         </div>
@@ -67,11 +61,12 @@ export function About() {
         <div style={{ marginBottom: 48 }}>
           <div
             style={{
-              fontSize: 14,
+              fontSize: 17,
               fontFamily: vietnam,
               color: 'var(--ide-text-2)',
-              lineHeight: 1.7,
+              lineHeight: 1.6,
               marginBottom: 20,
+              maxWidth: '68ch',
             }}
           >
             I got into programming at 15 through online HTML classes and Scratch (I also go by{' '}
@@ -82,11 +77,12 @@ export function About() {
           </div>
           <div
             style={{
-              fontSize: 14,
+              fontSize: 17,
               fontFamily: vietnam,
               color: 'var(--ide-text-2)',
-              lineHeight: 1.7,
+              lineHeight: 1.6,
               marginBottom: 20,
+              maxWidth: '68ch',
             }}
           >
             At <span style={{ fontWeight: 700, color: 'var(--ide-orange)' }}>KMUTT, Bangkok</span> I
@@ -99,15 +95,14 @@ export function About() {
           </div>
           <div
             style={{
-              fontSize: 14,
+              fontSize: 17,
               fontFamily: vietnam,
               color: 'var(--ide-text-2)',
-              lineHeight: 1.7,
+              lineHeight: 1.6,
+              maxWidth: '68ch',
             }}
           >
-            Outside of code I&apos;m studying Korean and keeping up with squats, push-ups, planks,
-            and treadmill running. I learn by building real things, usually with AI help, and I keep
-            adding pages to this site that help me and my classmates study.
+            Outside of code: learning Korean and working out.
           </div>
         </div>
 
@@ -124,7 +119,7 @@ export function About() {
                 <div>
                   <div
                     style={{
-                      fontSize: 13,
+                      fontSize: 17,
                       fontFamily: sans,
                       color: 'var(--ide-text-1)',
                       fontWeight: 700,
@@ -134,7 +129,7 @@ export function About() {
                   </div>
                   <div
                     style={{
-                      fontSize: 11,
+                      fontSize: 14,
                       fontFamily: sans,
                       color: 'var(--ide-accent)',
                       marginTop: 2,
@@ -145,12 +140,12 @@ export function About() {
                 </div>
                 <span
                   style={{
-                    fontSize: 9,
+                    fontSize: 12,
                     fontFamily: mono,
-                    color: 'var(--ide-text-6)',
+                    color: 'var(--ide-text-4)',
                     background: 'var(--ide-bg-2)',
                     border: '1px solid var(--ide-border)',
-                    padding: '2px 8px',
+                    padding: '3px 9px',
                     whiteSpace: 'nowrap',
                   }}
                 >
@@ -172,9 +167,9 @@ export function About() {
                     </span>
                     <span
                       style={{
-                        fontSize: 12,
+                        fontSize: 16,
                         fontFamily: vietnam,
-                        color: 'var(--ide-text-4)',
+                        color: 'var(--ide-text-3)',
                         lineHeight: 1.6,
                       }}
                     >
@@ -196,10 +191,10 @@ export function About() {
             <IDECard key={group.category} className="p-4" bg="bg-3">
               <div
                 style={{
-                  fontSize: 8,
+                  fontSize: 12,
                   fontFamily: sans,
                   color: group.color,
-                  letterSpacing: '0.12em',
+                  letterSpacing: '0.1em',
                   marginBottom: 8,
                   paddingBottom: 6,
                   borderBottom: `1px solid ${group.color}22`,
@@ -211,7 +206,7 @@ export function About() {
                 <div
                   key={item}
                   className="flex items-center gap-2 mb-1"
-                  style={{ fontSize: 12, fontFamily: mono, color: 'var(--ide-text-4)' }}
+                  style={{ fontSize: 15, fontFamily: mono, color: 'var(--ide-text-3)' }}
                 >
                   <span style={{ color: group.color, fontSize: 8 }}>▸</span>
                   {item}
@@ -230,10 +225,10 @@ export function About() {
             <IDECard key={group.category} className="p-4" bg="bg-3">
               <div
                 style={{
-                  fontSize: 8,
+                  fontSize: 12,
                   fontFamily: sans,
                   color: group.color,
-                  letterSpacing: '0.12em',
+                  letterSpacing: '0.1em',
                   marginBottom: 8,
                   paddingBottom: 6,
                   borderBottom: `1px solid ${group.color}22`,
@@ -245,47 +240,12 @@ export function About() {
                 <div
                   key={item}
                   className="flex items-center gap-2 mb-1"
-                  style={{ fontSize: 12, fontFamily: mono, color: 'var(--ide-text-4)' }}
+                  style={{ fontSize: 15, fontFamily: mono, color: 'var(--ide-text-3)' }}
                 >
                   <span style={{ color: group.color, fontSize: 8 }}>▸</span>
                   {item}
                 </div>
               ))}
-            </IDECard>
-          ))}
-        </div>
-
-        <div
-          className="grid gap-4 mb-12"
-          style={{ gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)' }}
-        >
-          {[
-            { label: 'Projects Shipped', value: String(portfolioData.projects.length) },
-            { label: 'NPM Packages', value: '1' },
-            { label: 'Community Roles', value: String(portfolioData.community.length) },
-          ].map((stat) => (
-            <IDECard key={stat.label} className="p-4" bg="bg-3">
-              <div
-                style={{
-                  fontSize: 8,
-                  fontFamily: sans,
-                  color: 'var(--ide-text-5)',
-                  letterSpacing: '0.1em',
-                  marginBottom: 6,
-                }}
-              >
-                {stat.label}
-              </div>
-              <div
-                style={{
-                  fontSize: 28,
-                  fontFamily: sans,
-                  fontWeight: 700,
-                  color: 'var(--ide-accent-light)',
-                }}
-              >
-                {stat.value}
-              </div>
             </IDECard>
           ))}
         </div>
@@ -306,11 +266,11 @@ export function About() {
             >
               <div
                 style={{
-                  fontSize: 12,
+                  fontSize: 13,
                   fontFamily: mono,
-                  color: 'var(--ide-text-6)',
+                  color: 'var(--ide-text-4)',
                   flexShrink: 0,
-                  width: 36,
+                  width: 40,
                 }}
               >
                 {item.year}
@@ -323,21 +283,15 @@ export function About() {
                   flexShrink: 0,
                 }}
               />
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge
-                    color={timelineStatusColors[item.status]}
-                    style={{ fontSize: 8, padding: '1px 6px' }}
-                  >
-                    {item.status}
-                  </Badge>
-                  <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-text-7)' }}>
-                    #{item.hash}
-                  </span>
-                </div>
-                <div style={{ fontSize: 13, fontFamily: sans, color: 'var(--ide-text-2)' }}>
-                  {item.event}
-                </div>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontFamily: vietnam,
+                  lineHeight: 1.6,
+                  color: 'var(--ide-text-2)',
+                }}
+              >
+                {item.event}
               </div>
             </div>
           ))}
@@ -357,7 +311,7 @@ export function About() {
             >
               <div
                 style={{
-                  fontSize: 9,
+                  fontSize: 12,
                   fontFamily: sans,
                   color: c.color,
                   letterSpacing: '0.1em',
@@ -368,10 +322,10 @@ export function About() {
               </div>
               <div
                 style={{
-                  fontSize: 12,
+                  fontSize: 16,
                   fontFamily: vietnam,
                   color: 'var(--ide-text-2)',
-                  lineHeight: 1.5,
+                  lineHeight: 1.6,
                 }}
               >
                 {c.name}

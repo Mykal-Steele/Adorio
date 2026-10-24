@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import { Contact } from '@/views/Portfolio/pages/Contact';
 
 export const metadata: Metadata = {
-  title: 'Contact — Oakar Oo',
+  title: 'Contact | Oakar Oo',
   description: 'Get in touch. Open to internships, part-time roles, and collaboration.',
   keywords: ['Oakar Oo', 'contact', 'hire', 'internship', 'collaboration', 'Bangkok developer'],
   openGraph: {
-    title: 'Contact — Oakar Oo',
+    title: 'Contact | Oakar Oo',
     description: 'Open to internships, part-time roles, and collaboration.',
     url: 'https://adorio.space/contact',
     siteName: 'Oakar Oo',
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'Contact — Oakar Oo',
+    title: 'Contact | Oakar Oo',
     description: 'Open to internships, part-time roles, and collaboration.',
   },
 };

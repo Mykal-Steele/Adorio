@@ -2,14 +2,11 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react';
 
-export type SidePanelType = 'explorer' | 'profile' | 'git' | 'skills';
-export type RightPanelTab = 'system' | 'askme';
+export type SidePanelType = 'explorer' | 'profile' | 'skills';
 
 const IDEContext = createContext<{
   activeSidePanel: SidePanelType;
   setActiveSidePanel: (panel: SidePanelType) => void;
-  rightPanelTab: RightPanelTab;
-  setRightPanelTab: (tab: RightPanelTab) => void;
   terminalOpen: boolean;
   toggleTerminal: () => void;
   openProjectTabs: string[];
@@ -21,8 +18,7 @@ const IDEContext = createContext<{
 
 export function IDEProvider({ children }: { children: ReactNode }) {
   const [activeSidePanel, setActiveSidePanel] = useState<SidePanelType>('explorer');
-  const [rightPanelTab, setRightPanelTab] = useState<RightPanelTab>('system');
-  const [terminalOpen, setTerminalOpen] = useState(true);
+  const [terminalOpen, setTerminalOpen] = useState(false);
   const [openProjectTabs, setOpenProjectTabs] = useState<string[]>([]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -42,8 +38,6 @@ export function IDEProvider({ children }: { children: ReactNode }) {
       value={{
         activeSidePanel,
         setActiveSidePanel,
-        rightPanelTab,
-        setRightPanelTab,
         terminalOpen,
         toggleTerminal,
         openProjectTabs,
