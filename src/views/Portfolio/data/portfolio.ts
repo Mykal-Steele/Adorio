@@ -313,6 +313,20 @@ export const portfolioData = {
       ],
       color: '#00ffc2',
       repoUrl: 'github.com/CSC290-2025/backend',
+      image: {
+        src: '/projects/smartcity-financial/dashboard.webp',
+        alt: 'The wallet dashboard with the available balance, connected services, and recent transactions.',
+      },
+      screenshots: [
+        {
+          src: '/projects/smartcity-financial/top-up.webp',
+          alt: 'The Top Up Wallet page with the balance, destination choices, a metro card ID, and preset amounts.',
+          caption:
+            'Top-up: pick a destination (wallet, insurance card, or metro card) and an amount.',
+          width: 1425,
+          height: 1600,
+        },
+      ],
     },
     {
       id: 'coding-challenges',

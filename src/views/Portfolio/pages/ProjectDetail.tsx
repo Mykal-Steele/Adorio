@@ -49,9 +49,12 @@ function BulletList({ items }: { items: string[] }) {
   );
 }
 
-// Tall photos sit three to a row, wide screenshots take the full width
-function shotSpan(shot: ProjectShot) {
-  return shot.height > shot.width ? 2 : 6;
+// Wide screenshots take the full width. Tall ones sit three to a row, two when there
+// are only two, and a single one is centered.
+function shotColumn(shot: ProjectShot, tallCount: number) {
+  if (shot.height <= shot.width) return 'span 6';
+  if (tallCount === 1) return '2 / span 4';
+  return tallCount >= 3 ? 'span 2' : 'span 3';
 }
 
 function Screenshot({ shot }: { shot: ProjectShot }) {
@@ -109,6 +112,7 @@ export function ProjectDetail({ id }: { id: string }) {
   const cover =
     project.image && !screenshots.some((shot) => shot.src === project.image?.src) ? project : null;
   const builtWith = skillsForProject(project);
+  const tallCount = screenshots.filter((shot) => shot.height > shot.width).length;
   const hasLinks = Boolean(project.repoUrl || project.npm || project.links?.length);
   const secondaryLinks = [
     ...(project.repoUrl
@@ -249,7 +253,10 @@ export function ProjectDetail({ id }: { id: string }) {
               style={{ gap: 24, marginTop: 8, gridTemplateColumns: 'repeat(6, minmax(0, 1fr))' }}
             >
               {screenshots.map((shot) => (
-                <div key={shot.src} style={{ gridColumn: `span ${isMobile ? 6 : shotSpan(shot)}` }}>
+                <div
+                  key={shot.src}
+                  style={{ gridColumn: isMobile ? 'span 6' : shotColumn(shot, tallCount) }}
+                >
                   <Screenshot shot={shot} />
                 </div>
               ))}
