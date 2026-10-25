@@ -2,22 +2,22 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ArrowLeft, ExternalLink, Github, Package, PlayCircle } from 'lucide-react';
 import { portfolioData, type ProjectShot } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
 import { mono, sans, serif } from '../constants/fonts';
-import {
-  body,
-  buttonHover,
-  eyebrow,
-  linkHover,
-  primaryButton,
-  secondaryButton,
-  textLink,
-} from '../constants/type';
+import { body, eyebrow } from '../constants/type';
 import { skillsForProject } from '../data/skills';
-import { IDECard, LogoTile, PageHeader, ProjectImage, StatusLabel } from '../shared';
+import {
+  IDECard,
+  Lightbox,
+  Tape,
+  LogoTile,
+  PageHeader,
+  ProjectImage,
+  StatusLabel,
+} from '../shared';
 
 const sectionHeading = {
   fontFamily: serif,
@@ -57,10 +57,31 @@ function shotColumn(shot: ProjectShot, tallCount: number) {
   return tallCount >= 3 ? 'span 2' : 'span 3';
 }
 
-function Screenshot({ shot }: { shot: ProjectShot }) {
+function Screenshot({ shot, onOpen }: { shot: ProjectShot; onOpen: () => void }) {
   return (
-    <IDECard tape style={{ margin: 0, padding: 8, height: '100%' }}>
-      <figure style={{ margin: 0 }}>
+    <figure
+      className="pf-card relative"
+      style={{
+        margin: 0,
+        padding: 8,
+        height: '100%',
+        background: 'var(--ide-bg-3)',
+        borderRadius: 3,
+      }}
+    >
+      <Tape />
+      <button
+        onClick={onOpen}
+        aria-label={`View full size: ${shot.alt}`}
+        className="block w-full"
+        style={{
+          padding: 0,
+          border: 'none',
+          background: 'none',
+          cursor: 'zoom-in',
+          overflow: 'hidden',
+        }}
+      >
         <Image
           src={shot.src}
           alt={shot.alt}
@@ -74,24 +95,25 @@ function Screenshot({ shot }: { shot: ProjectShot }) {
             border: '1px solid var(--ide-border)',
           }}
         />
-        <figcaption
-          style={{
-            padding: '12px 8px 4px',
-            fontFamily: sans,
-            fontSize: 15,
-            lineHeight: 1.55,
-            color: 'var(--ide-text-4)',
-          }}
-        >
-          {shot.caption}
-        </figcaption>
-      </figure>
-    </IDECard>
+      </button>
+      <figcaption
+        style={{
+          padding: '12px 8px 4px',
+          fontFamily: sans,
+          fontSize: 15,
+          lineHeight: 1.55,
+          color: 'var(--ide-text-4)',
+        }}
+      >
+        {shot.caption}
+      </figcaption>
+    </figure>
   );
 }
 
 export function ProjectDetail({ id }: { id: string }) {
   const { isMobile } = useResponsive();
+  const [openShot, setOpenShot] = useState<ProjectShot | null>(null);
 
   const project = portfolioData.projects.find((p) => p.id === id);
 
@@ -99,7 +121,7 @@ export function ProjectDetail({ id }: { id: string }) {
     return (
       <div className="flex h-full flex-col items-center justify-center" style={{ gap: 12 }}>
         <div style={{ ...sectionHeading, margin: 0 }}>Project not found</div>
-        <Link href="/projects" className={linkHover} style={textLink}>
+        <Link href="/projects" className="pf-link">
           <ArrowLeft size={16} />
           Back to projects
         </Link>
@@ -257,117 +279,81 @@ export function ProjectDetail({ id }: { id: string }) {
                   key={shot.src}
                   style={{ gridColumn: isMobile ? 'span 6' : shotColumn(shot, tallCount) }}
                 >
-                  <Screenshot shot={shot} />
+                  <Screenshot shot={shot} onOpen={() => setOpenShot(shot)} />
                 </div>
               ))}
             </div>
           </Section>
         )}
-
-        {project.tags.length > 0 && (
-          <p style={{ ...body, fontSize: 15, color: 'var(--ide-text-5)', marginTop: 48 }}>
-            {project.tags.join('  ')}
-          </p>
-        )}
       </article>
 
-      <aside
-        className="shrink-0"
-        style={{
-          width: isMobile ? '100%' : 280,
-          position: isMobile ? 'static' : 'sticky',
-          top: 32,
-        }}
-      >
-        <IDECard tape style={{ padding: 24 }}>
-          <p style={{ ...eyebrow, marginBottom: 16 }}>At a glance</p>
+      {(liveUrl || hasLinks || project.note) && (
+        <aside
+          className="shrink-0"
+          style={{
+            width: isMobile ? '100%' : 280,
+            position: isMobile ? 'static' : 'sticky',
+            top: 32,
+          }}
+        >
+          <IDECard tape style={{ padding: 24 }}>
+            {liveUrl && (
+              <Link
+                href={liveUrl}
+                {...(liveUrl.startsWith('http')
+                  ? { target: '_blank', rel: 'noopener noreferrer' }
+                  : {})}
+                className="pf-btn-primary w-full"
+              >
+                <PlayCircle size={15} />
+                Open live
+              </Link>
+            )}
 
-          <dl className="flex flex-col" style={{ gap: 12, margin: 0 }}>
-            <div className="flex items-center justify-between" style={{ gap: 12 }}>
-              <dt style={{ fontFamily: sans, fontSize: 15, color: 'var(--ide-text-4)' }}>Status</dt>
-              <dd style={{ margin: 0 }}>
-                <StatusLabel status={project.status} />
-              </dd>
-            </div>
-            {project.stats.map((s) => (
-              <div key={s.label} className="flex items-center justify-between" style={{ gap: 12 }}>
-                <dt style={{ fontFamily: sans, fontSize: 15, color: 'var(--ide-text-4)' }}>
-                  {s.label}
-                </dt>
-                <dd
-                  style={{
-                    margin: 0,
-                    fontFamily: sans,
-                    fontSize: 15,
-                    fontWeight: 700,
-                    color: 'var(--ide-text-2)',
-                    textAlign: 'right',
-                  }}
-                >
-                  {s.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
+            {hasLinks && (
+              <ul
+                className="flex flex-col"
+                style={{
+                  gap: 12,
+                  margin: 0,
+                  marginTop: liveUrl ? 16 : 0,
+                  padding: 0,
+                  listStyle: 'none',
+                }}
+              >
+                {secondaryLinks.map(({ href, label, icon: Icon }) => (
+                  <li key={href}>
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pf-btn w-full"
+                    >
+                      <Icon size={15} />
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
 
-          {liveUrl && (
-            <Link
-              href={liveUrl}
-              {...(liveUrl.startsWith('http')
-                ? { target: '_blank', rel: 'noopener noreferrer' }
-                : {})}
-              className="w-full transition-transform duration-150 hover:-translate-y-px active:scale-[0.97]"
-              style={{ ...primaryButton, marginTop: 24 }}
-            >
-              <PlayCircle size={15} />
-              Open live
-            </Link>
-          )}
-
-          {hasLinks && (
-            <ul
-              className="flex flex-col"
-              style={{
-                gap: 12,
-                margin: 0,
-                marginTop: 24,
-                paddingTop: 20,
-                listStyle: 'none',
-                borderTop: '1px solid var(--ide-border)',
-              }}
-            >
-              {secondaryLinks.map(({ href, label, icon: Icon }) => (
-                <li key={href}>
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`w-full ${buttonHover}`}
-                    style={secondaryButton}
-                  >
-                    <Icon size={15} />
-                    {label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {project.note && (
-            <p
-              style={{
-                fontFamily: sans,
-                fontSize: 14,
-                lineHeight: 1.6,
-                color: 'var(--ide-text-5)',
-                margin: '16px 0 0',
-              }}
-            >
-              {project.note}
-            </p>
-          )}
-        </IDECard>
-      </aside>
+            {project.note && (
+              <p
+                style={{
+                  fontFamily: sans,
+                  fontSize: 14,
+                  lineHeight: 1.6,
+                  color: 'var(--ide-text-5)',
+                  margin: '16px 0 0',
+                }}
+              >
+                {project.note}
+              </p>
+            )}
+          </IDECard>
+        </aside>
+      )}
+      {openShot && <Lightbox shot={openShot} onClose={() => setOpenShot(null)} />}
     </div>
   );
 }

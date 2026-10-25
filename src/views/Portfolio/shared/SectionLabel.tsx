@@ -11,10 +11,18 @@ export function SectionLabel({ children }: { children: ReactNode }) {
         lineHeight: 1.2,
         letterSpacing: '-0.01em',
         color: 'var(--ide-text-1)',
-        margin: '0 0 24px',
+        margin: '0 0 32px',
       }}
     >
-      {children}
+      <span
+        style={{
+          padding: '0 4px',
+          background:
+            'linear-gradient(transparent 80%, var(--ide-yellow) 80%, var(--ide-yellow) 92%, transparent 92%)',
+        }}
+      >
+        {children}
+      </span>
     </h2>
   );
 }

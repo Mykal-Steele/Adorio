@@ -49,10 +49,11 @@ Follow the Tailwind recommended order (enforced by Prettier plugin if configured
 
 ## Custom Fonts
 
-Three fonts are used. Portfolio components take them from `src/views/Portfolio/constants/fonts.ts`:
+Four fonts are used. Portfolio components take them from `src/views/Portfolio/constants/fonts.ts`:
 - Playfair Display: headings (`serif`)
 - Karla: body and UI text (`sans`)
-- Courier Prime: small labels and the terminal (`mono`)
+- Courier Prime: the main button and the terminal (`mono`)
+- Patrick Hand: only the handwritten theme hint (`hand`)
 
 Load any new Google Font with the `<link>` tags in `src/app/layout.tsx`.
 

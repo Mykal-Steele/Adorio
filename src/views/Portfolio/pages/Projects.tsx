@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
-import { buttonHover, secondaryButton } from '../constants/type';
 import { PageHeader, ProjectCard, SectionLabel } from '../shared';
 
 export function Projects() {
@@ -43,18 +42,12 @@ export function Projects() {
           {portfolioData.otherProjects.map((project) => (
             <li key={project.name}>
               {project.href.startsWith('http') ? (
-                <a
-                  href={project.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={buttonHover}
-                  style={secondaryButton}
-                >
+                <a href={project.href} target="_blank" rel="noopener noreferrer" className="pf-btn">
                   {project.name}
                   <ExternalLink size={14} />
                 </a>
               ) : (
-                <Link href={project.href} className={buttonHover} style={secondaryButton}>
+                <Link href={project.href} className="pf-btn">
                   {project.name}
                   <ArrowRight size={14} />
                 </Link>

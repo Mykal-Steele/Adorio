@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Lock } from 'lucide-react';
 import type { Project } from '../data/portfolio';
 import { sans, serif } from '../constants/fonts';
-import { eyebrow } from '../constants/type';
+import { eyebrow, preview } from '../constants/type';
 import { Tape } from './IDECard';
 import { ProjectImage } from './ProjectImage';
 import { StatusLabel } from './StatusLabel';
@@ -18,7 +18,7 @@ export function ProjectCard({ project }: { project: Project }) {
     <Link
       href={href}
       onMouseEnter={() => router.prefetch(href)}
-      className="group relative flex h-full flex-col transition-shadow duration-200 [box-shadow:var(--ide-card-shadow)] hover:[box-shadow:var(--ide-card-shadow-hover)]"
+      className="pf-card group relative flex h-full flex-col"
       style={{
         padding: 12,
         background: 'var(--ide-bg-3)',
@@ -28,7 +28,9 @@ export function ProjectCard({ project }: { project: Project }) {
       }}
     >
       <Tape />
-      <ProjectImage project={project} sizes="(max-width: 900px) 100vw, 480px" />
+      <div style={{ overflow: 'hidden' }}>
+        <ProjectImage project={project} sizes="(max-width: 900px) 100vw, 480px" />
+      </div>
 
       <div className="flex flex-1 flex-col" style={{ padding: '20px 12px 12px' }}>
         <div className="flex flex-wrap items-center" style={{ gap: 12 }}>
@@ -43,7 +45,7 @@ export function ProjectCard({ project }: { project: Project }) {
         </div>
 
         <h3
-          className="group-hover:underline underline-offset-4"
+          className="decoration-[var(--ide-yellow)] decoration-[3px] underline-offset-4 group-hover:underline"
           style={{
             fontFamily: serif,
             fontSize: 24,
@@ -66,7 +68,7 @@ export function ProjectCard({ project }: { project: Project }) {
             margin: '8px 0 0',
           }}
         >
-          {project.summary}
+          {preview(project.summary)}
         </p>
 
         <p

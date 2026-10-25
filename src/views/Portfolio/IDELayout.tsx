@@ -19,6 +19,7 @@ import { portfolioData } from './data/portfolio';
 import { sans } from './constants/fonts';
 import { eyebrow } from './constants/type';
 import { NavigationProgressBar } from './shared/NavigationProgressBar';
+import { SettingsButton } from './shared';
 
 function DesktopShell({ children }: { children: ReactNode }) {
   const { terminalOpen, sidePanelOpen } = useIDE();
@@ -64,7 +65,7 @@ function TabletShell({ children }: { children: ReactNode }) {
         <div
           className="shrink-0 flex flex-col items-center justify-between py-2"
           style={{
-            width: 48,
+            width: 52,
             background: 'var(--ide-bg-1)',
             borderRight: '1px solid var(--ide-border)',
           }}
@@ -86,6 +87,7 @@ function TabletShell({ children }: { children: ReactNode }) {
               <Folder size={18} color={explorerOpen ? 'var(--ide-text-1)' : 'var(--ide-text-5)'} />
             </button>
           </div>
+          <SettingsButton />
         </div>
         <div className="flex flex-col flex-1 overflow-hidden">
           <TabBar />

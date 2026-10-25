@@ -15,12 +15,12 @@ const rowStyle = {
   display: 'flex',
   alignItems: 'center',
   gap: 8,
-  height: 32,
+  height: 36,
   paddingRight: 12,
   border: 'none',
   cursor: 'pointer',
   fontFamily: sans,
-  fontSize: 14,
+  fontSize: 15.5,
   textAlign: 'left',
 } as const;
 
@@ -37,7 +37,7 @@ function FileRow({ path, name, depth }: { path: string; name: string; depth: num
       className={active ? '' : 'ide-hover'}
       style={{
         ...rowStyle,
-        paddingLeft: 12 + depth * 16,
+        paddingLeft: 14 + depth * 18,
         background: active ? 'var(--ide-border-subtle)' : 'transparent',
         boxShadow: active ? 'inset 2px 0 0 var(--ide-yellow)' : 'none',
         color: active ? 'var(--ide-text-1)' : 'var(--ide-text-3)',
@@ -76,7 +76,7 @@ function Folder({
         }}
       >
         <ChevronRight
-          size={14}
+          size={16}
           color="var(--ide-text-5)"
           style={{ transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 150ms ease' }}
         />
@@ -99,7 +99,7 @@ export function SidePanel() {
       aria-label="Explorer"
       className="shrink-0 flex flex-col overflow-hidden"
       style={{
-        width: isInDrawer ? '100%' : 240,
+        width: isInDrawer ? '100%' : 268,
         background: 'var(--ide-bg-1)',
         borderRight: isInDrawer ? 'none' : '1px solid var(--ide-border)',
       }}
@@ -109,7 +109,7 @@ export function SidePanel() {
           className="shrink-0 px-3 py-2"
           style={{
             borderBottom: '1px solid var(--ide-border)',
-            fontSize: 13,
+            fontSize: 14,
             fontFamily: sans,
             fontWeight: 700,
             color: 'var(--ide-text-4)',

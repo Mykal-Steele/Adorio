@@ -8,9 +8,10 @@ import { eyebrow } from '../constants/type';
 
 interface ThemeSwitcherProps {
   showLabel?: boolean;
+  onOpen?: () => void;
 }
 
-export function ThemeSwitcher({ showLabel = false }: ThemeSwitcherProps) {
+export function ThemeSwitcher({ showLabel = false, onOpen }: ThemeSwitcherProps) {
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -26,7 +27,10 @@ export function ThemeSwitcher({ showLabel = false }: ThemeSwitcherProps) {
   return (
     <div ref={ref} className="relative" data-guide="theme-switcher">
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setOpen((v) => !v);
+          onOpen?.();
+        }}
         title="Switch Theme"
         aria-label="Switch Theme"
         className="ide-hover flex items-center justify-center gap-1.5"

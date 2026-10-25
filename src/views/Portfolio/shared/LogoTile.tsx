@@ -35,17 +35,12 @@ export function LogoTile({ id, name, href }: { id: string; name: string; href?: 
   );
 
   return href ? (
-    <Link
-      href={href}
-      aria-label={name}
-      className="group relative transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.97]"
-      style={tileStyle}
-    >
+    <Link href={href} aria-label={name} className="pf-tile group relative" style={tileStyle}>
       <TechLogo id={id} />
       {tooltip}
     </Link>
   ) : (
-    <span tabIndex={0} aria-label={name} className="group relative" style={tileStyle}>
+    <span tabIndex={0} aria-label={name} className="pf-tile group relative" style={tileStyle}>
       <TechLogo id={id} />
       {tooltip}
     </span>

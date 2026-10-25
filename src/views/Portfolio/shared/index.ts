@@ -11,3 +11,5 @@ export { ProjectImage } from './ProjectImage';
 export { FileIcon } from './FileIcon';
 export { LogoTile } from './LogoTile';
 export { TechLogo, skillIdForLanguage } from './TechLogo';
+export { Lightbox } from './Lightbox';
+export { SettingsButton } from './SettingsButton';

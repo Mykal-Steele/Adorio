@@ -145,7 +145,7 @@ src/views/Portfolio/
 ├── constants/fonts.ts      — Font family strings
 ├── constants/status.ts     — statusConfig (display label per project status)
 ├── constants/type.ts       — shared text and button styles (eyebrow, body, primaryButton, textLink)
-├── shared/                 — IDECard (with Tape), FileIcon, LogoTile, PageHeader, ProjectCard, ProjectImage, SectionLabel, StatusLabel, TechLogo, ThemeSwitcher
+├── shared/                 — IDECard (with Tape), FileIcon, Lightbox, LogoTile, PageHeader, ProjectCard, ProjectImage, SectionLabel, StatusLabel, TechLogo, ThemeHint, ThemeSwitcher
 ├── mobile/                 — MobileHeader, MobileNav, MobileDrawer
 └── pages/
     ├── About.tsx           — / (bio, social links, featured projects, stack, timeline, community)
@@ -159,7 +159,9 @@ src/views/Portfolio/
 
 **Navigation**: All Vike `navigate()` calls replaced with `useRouter().push()` from `next/navigation`. Route params passed as props (not from routeContext).
 
-**Fonts**: the same set as the paper pages. Playfair Display for headings, Karla for body and UI text, Courier Prime for small labels and the terminal. Loaded with `<link>` tags in `src/app/layout.tsx`.
+**Fonts**: the same set as the paper pages. Playfair Display for headings, Karla for body and UI text, Courier Prime for the main button and the terminal, and Patrick Hand only for the handwritten theme hint. Loaded with `<link>` tags in `src/app/layout.tsx`.
+
+**Interaction states**: buttons, links, cards, logo tiles, and photo prints use the `.pf-btn-primary`, `.pf-btn`, `.pf-link`, `.pf-card`, `.pf-tile`, and `.pf-print` classes in `globals.css`. Inline styles would override any `:hover`, so keep transforms and shadows for these elements in the classes, not in `style={{}}`.
 
 ### Backend Architecture (`backend/`)
 

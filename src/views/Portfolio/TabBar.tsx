@@ -34,7 +34,7 @@ export function TabBar() {
       aria-label="Open files"
       className="shrink-0 flex items-stretch overflow-x-auto"
       style={{
-        height: 40,
+        height: 44,
         background: 'var(--ide-bg-1)',
         borderBottom: '1px solid var(--ide-border)',
         scrollbarWidth: 'none',
@@ -46,7 +46,7 @@ export function TabBar() {
         return (
           <div
             key={path}
-            className="group flex shrink-0 items-center"
+            className={`group flex shrink-0 items-center ${active ? '' : 'ide-hover'}`}
             style={{
               background: active ? 'var(--ide-bg-0)' : 'transparent',
               borderRight: '1px solid var(--ide-border)',
@@ -63,7 +63,7 @@ export function TabBar() {
                 border: 'none',
                 cursor: 'pointer',
                 color: active ? 'var(--ide-text-1)' : 'var(--ide-text-4)',
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: active ? 700 : 400,
                 fontFamily: sans,
               }}

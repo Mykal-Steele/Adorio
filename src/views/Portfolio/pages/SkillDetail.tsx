@@ -6,8 +6,8 @@ import { portfolioData } from '../data/portfolio';
 import { experienceForSkill, projectsForSkill } from '../data/skills';
 import { useResponsive } from '../hooks/useResponsive';
 import { sans, serif } from '../constants/fonts';
-import { body, eyebrow, linkHover, textLink } from '../constants/type';
-import { FileIcon, SectionLabel, TechLogo } from '../shared';
+import { body, eyebrow } from '../constants/type';
+import { ProjectImage, SectionLabel, TechLogo } from '../shared';
 
 export function SkillDetail({ id }: { id: string }) {
   const { isMobile } = useResponsive();
@@ -17,7 +17,7 @@ export function SkillDetail({ id }: { id: string }) {
     return (
       <div className="flex h-full flex-col items-center justify-center" style={{ gap: 12 }}>
         <p style={{ ...body, fontWeight: 700 }}>No skill called {id}</p>
-        <Link href="/" className={linkHover} style={textLink}>
+        <Link href="/" className="pf-link">
           <ArrowLeft size={16} />
           Back to about_me.md
         </Link>
@@ -26,7 +26,7 @@ export function SkillDetail({ id }: { id: string }) {
   }
 
   const projects = projectsForSkill(skill);
-  const mentions = experienceForSkill(skill);
+  const roles = [...new Set(experienceForSkill(skill).map((m) => m.role))];
   const story = skill.story.split(/\n\s*\n/).filter(Boolean);
 
   return (
@@ -79,41 +79,36 @@ export function SkillDetail({ id }: { id: string }) {
         <section style={{ marginTop: 64 }}>
           <SectionLabel>Projects</SectionLabel>
           <ul
-            className="flex flex-col"
-            style={{ gap: 12, margin: 0, padding: 0, listStyle: 'none' }}
+            className="grid"
+            style={{
+              gap: 24,
+              margin: 0,
+              padding: 0,
+              listStyle: 'none',
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))',
+            }}
           >
             {projects.map((project) => (
               <li key={project.id}>
                 <Link
                   href={`/projects/${project.id}`}
-                  className="group flex items-start transition-shadow duration-200 [box-shadow:var(--ide-card-shadow)] hover:[box-shadow:var(--ide-card-shadow-hover)]"
-                  style={{
-                    gap: 16,
-                    padding: '16px 20px',
-                    background: 'var(--ide-bg-3)',
-                    borderRadius: 3,
-                    textDecoration: 'none',
-                  }}
+                  className="pf-card block"
+                  style={{ padding: 8, background: 'var(--ide-bg-3)', borderRadius: 3 }}
                 >
-                  <span style={{ marginTop: 5 }}>
-                    <FileIcon path={`/projects/${project.id}`} />
-                  </span>
-                  <span>
-                    <span
-                      className="group-hover:underline underline-offset-4"
-                      style={{
-                        display: 'block',
-                        fontFamily: serif,
-                        fontSize: 20,
-                        fontWeight: 700,
-                        color: 'var(--ide-text-1)',
-                      }}
-                    >
-                      {project.name}
-                    </span>
-                    <span style={{ ...body, display: 'block', fontSize: 15, marginTop: 2 }}>
-                      {project.summary}
-                    </span>
+                  <div style={{ overflow: 'hidden' }}>
+                    <ProjectImage project={project} sizes="(max-width: 900px) 100vw, 340px" />
+                  </div>
+                  <span
+                    style={{
+                      display: 'block',
+                      padding: '12px 6px 4px',
+                      fontFamily: serif,
+                      fontSize: 20,
+                      fontWeight: 700,
+                      color: 'var(--ide-text-1)',
+                    }}
+                  >
+                    {project.name}
                   </span>
                 </Link>
               </li>
@@ -122,26 +117,18 @@ export function SkillDetail({ id }: { id: string }) {
         </section>
       )}
 
-      {mentions.length > 0 && (
+      {roles.length > 0 && (
         <section style={{ marginTop: 64 }}>
           <SectionLabel>At work</SectionLabel>
           <ul
-            className="flex flex-col"
-            style={{ gap: 20, margin: 0, padding: 0, listStyle: 'none' }}
+            className="flex flex-wrap"
+            style={{ gap: 12, margin: 0, padding: 0, listStyle: 'none' }}
           >
-            {mentions.map(({ role, org, highlight }) => (
-              <li key={highlight}>
-                <p style={{ ...body, fontSize: 16 }}>{highlight}</p>
-                <p
-                  style={{
-                    fontFamily: sans,
-                    fontSize: 14,
-                    color: 'var(--ide-text-5)',
-                    margin: '4px 0 0',
-                  }}
-                >
-                  {role}, {org}
-                </p>
+            {roles.map((role) => (
+              <li key={role}>
+                <Link href="/" className="pf-btn">
+                  {role}
+                </Link>
               </li>
             ))}
           </ul>

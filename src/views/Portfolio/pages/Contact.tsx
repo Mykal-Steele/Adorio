@@ -6,7 +6,7 @@ import { sendContactMessage } from '../../../api';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
 import { mono, sans } from '../constants/fonts';
-import { body, primaryButton } from '../constants/type';
+import { body } from '../constants/type';
 import { IDECard, PageHeader, SectionLabel } from '../shared';
 
 const channels = [
@@ -238,12 +238,8 @@ export function Contact() {
                 <button
                   onClick={handleSubmit}
                   disabled={sending}
-                  className="transition-transform hover:-translate-y-px disabled:translate-y-0"
-                  style={{
-                    ...primaryButton,
-                    opacity: sending ? 0.6 : 1,
-                    cursor: sending ? 'not-allowed' : 'pointer',
-                  }}
+                  className="pf-btn-primary"
+                  style={sending ? { opacity: 0.6, cursor: 'not-allowed' } : undefined}
                 >
                   <Send size={14} />
                   {sending ? 'Sending...' : 'Send'}

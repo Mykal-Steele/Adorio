@@ -12,9 +12,12 @@
   --ide-ink: rgba(0, 0, 0, 0.85);
   --ide-card-shadow: 0 14px 26px -14px rgba(0, 0, 0, 0.6), 0 2px 0 rgba(0, 0, 0, 0.25);
   --ide-card-shadow-hover: 0 20px 32px -14px rgba(0, 0, 0, 0.7), 0 2px 0 rgba(0, 0, 0, 0.25);
-  --ide-tape: color-mix(in srgb, var(--ide-yellow) 35%, transparent);
-  --ide-tape-edge: rgba(255, 255, 255, 0.18);
-  --ide-note: color-mix(in srgb, var(--ide-yellow) 16%, var(--ide-bg-3));
+  /* Yellow mixed into a dark surface turns brown, so the soft tints use each theme's accent */
+  --ide-tape: color-mix(in srgb, var(--ide-accent) 45%, transparent);
+  --ide-tape-edge: color-mix(in srgb, var(--ide-accent) 70%, white);
+  --ide-note: color-mix(in srgb, var(--ide-accent) 12%, var(--ide-bg-3));
+  --ide-ink-shadow: color-mix(in srgb, var(--ide-yellow) 45%, black);
+  --ide-highlight: color-mix(in srgb, var(--ide-accent) 26%, transparent);
   --ide-margin-line: color-mix(in srgb, var(--ide-red) 45%, transparent);
 
   --ide-bg-0: #1b1e24;
@@ -363,7 +366,9 @@
   --ide-card-shadow-hover: 0 20px 32px -14px rgba(60, 44, 24, 0.38), 0 2px 0 rgba(60, 44, 24, 0.1);
   --ide-tape: rgba(242, 199, 68, 0.7);
   --ide-tape-edge: rgba(60, 44, 24, 0.3);
+  --ide-ink-shadow: #2b2723;
   --ide-note: #faeec4;
+  --ide-highlight: rgba(242, 199, 68, 0.45);
   --ide-margin-line: rgba(196, 72, 60, 0.4);
 
   --ide-bg-0: #f3ecdd;
@@ -522,10 +527,192 @@ body {
 
 /* Theme-aware hover backgrounds — values use CSS vars, !important overrides base resets */
 .ide-hover:hover {
-  background: var(--ide-border-subtle) !important;
+  background: color-mix(in srgb, var(--ide-text-1) 8%, transparent) !important;
 }
 .ide-hover-icon:hover {
   background: var(--ide-border) !important;
+}
+
+/* Portfolio interaction states. Hover and press live here because the portfolio's
+   inline styles would override any :hover written as a Tailwind class. */
+.pf-btn,
+.pf-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 140ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 140ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+.pf-btn-primary {
+  padding: 10px 20px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ide-on-yellow);
+  background: var(--ide-yellow);
+  border: 1.5px solid var(--ide-ink);
+  box-shadow: 3px 4px 0 var(--ide-ink-shadow);
+}
+.pf-btn-primary:hover {
+  transform: translate(-1px, -2px);
+  box-shadow: 5px 6px 0 var(--ide-ink-shadow);
+}
+.pf-btn {
+  padding: 10px 18px;
+  font-family: 'Karla', Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ide-text-1);
+  background: var(--ide-bg-3);
+  border: 1.5px solid var(--ide-text-3);
+  box-shadow: 0 0 0 var(--ide-text-1);
+}
+.pf-btn:hover {
+  background: var(--ide-note);
+  border-color: var(--ide-text-1);
+  transform: translate(-1px, -2px);
+  box-shadow: 3px 4px 0 var(--ide-text-1);
+}
+.pf-btn-primary:active,
+.pf-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 0 0 0 var(--ide-ink);
+  transition-duration: 60ms;
+}
+.pf-btn svg,
+.pf-btn-primary svg {
+  transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.pf-btn:hover svg,
+.pf-btn-primary:hover svg {
+  transform: scale(1.15);
+}
+
+/* Highlighter: a yellow underline that fills behind the text on hover */
+.pf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 3px;
+  font-family: 'Karla', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ide-text-1);
+  text-decoration: none;
+  background-image:
+    linear-gradient(var(--ide-yellow), var(--ide-yellow)),
+    linear-gradient(var(--ide-highlight), var(--ide-highlight));
+  background-repeat: no-repeat;
+  background-position:
+    0 100%,
+    0 100%;
+  background-size:
+    100% 3px,
+    100% 0;
+  transition: background-size 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.pf-link:hover {
+  background-size:
+    100% 3px,
+    100% 100%;
+}
+
+.pf-card {
+  box-shadow: var(--ide-card-shadow);
+  transition:
+    transform 220ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.pf-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--ide-card-shadow-hover);
+}
+.pf-card:active {
+  transform: translateY(-1px);
+}
+.pf-card img {
+  transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.pf-card:hover img {
+  transform: scale(1.03);
+}
+
+/* Taped photo prints sit tilted and straighten up when you point at them */
+.pf-print {
+  transform: rotate(var(--tilt, 0deg));
+  box-shadow: var(--ide-card-shadow);
+  transition:
+    transform 300ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 300ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.pf-print:hover {
+  transform: rotate(0deg) scale(1.015);
+  box-shadow: var(--ide-card-shadow-hover);
+}
+
+.pf-tile {
+  transition:
+    transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.pf-tile:hover {
+  transform: translateY(-3px);
+  border-color: var(--ide-text-3);
+  box-shadow: 0 8px 14px -8px rgba(0, 0, 0, 0.35);
+}
+.pf-tile:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* The one entrance on the page: the sticky note lands on the desk */
+.pf-note {
+  transform: rotate(var(--tilt, 0deg));
+  animation: noteDrop 700ms cubic-bezier(0.23, 1, 0.32, 1) 150ms both;
+}
+@keyframes noteDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-28px) rotate(calc(var(--tilt, 0deg) + 7deg)) scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--tilt, 0deg));
+  }
+}
+
+@keyframes lightboxIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-btn,
+  .pf-btn-primary,
+  .pf-link,
+  .pf-card,
+  .pf-card img,
+  .pf-print,
+  .pf-tile,
+  .pf-note {
+    transition: none;
+    animation: none;
+  }
 }
 
 /* Custom animations, Tailwind only ships spin/ping/pulse/bounce */

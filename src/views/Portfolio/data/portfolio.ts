@@ -1,10 +1,5 @@
 // Portfolio data is the single source of truth for all portfolio UI.
 
-export interface ProjectStat {
-  label: string;
-  value: string;
-}
-
 export interface ProjectDecision {
   title: string;
   reason: string;
@@ -44,7 +39,6 @@ export interface Project {
   numbers?: string[];
   note?: string;
   tags: string[];
-  stats: ProjectStat[];
   color: string;
   npm?: string;
   repoUrl?: string;
@@ -70,6 +64,8 @@ export interface ExperienceItem {
   org: string;
   period: string;
   highlights: string[];
+  // The project page holds the build details, so the role doesn't repeat them
+  projectId?: string;
 }
 
 export interface NowItem {
@@ -98,7 +94,6 @@ export const portfolioData = {
   role: 'Backend Developer',
   headline:
     'CS student at KMUTT, Bangkok. I build backends and the setup that keeps them running: APIs, databases, deployment, and developer experience. Mostly TypeScript, Express/Hono, Prisma, and PostgreSQL.',
-  branch: 'main/production',
   email: 'oakar@adorio.space',
   github: 'github.com/Mykal-Steele',
   linkedin: 'linkedin.com/in/oakaroo',
@@ -143,17 +138,15 @@ export const portfolioData = {
       highlights: [
         'Mentor 18 first-year CS students with weekly sessions on programming logic, syntax, and OOP',
         'Run code review, debugging help, and exam prep as a hybrid class, with code and notes shared in Microsoft Teams',
-        'Built the Java practice problems for the class, running on a self-hosted Piston instance',
       ],
+      projectId: 'coding-challenges',
     },
     {
       role: 'Research Intern',
       org: 'IC2 (Innovative Cognitive Computing) Lab, KMUTT · CogniMax Chess Research',
       period: 'Jun 2026 to Jul 2026',
-      highlights: [
-        'Built CogniMax, a chess engine that picks moves by expected value against a target Elo, using maia3 human-move probabilities and Stockfish evaluation',
-        'Across 4,120 games at 11 skill levels (Elo 600 to 2600) it won faster than a same-depth Stockfish baseline at every level. Games were about 20% shorter on average, up to 31%',
-      ],
+      highlights: [],
+      projectId: 'cognimax',
     },
     {
       role: 'Web Development Mentor',
@@ -164,25 +157,21 @@ export const portfolioData = {
         'Mentored a 3-student team through coursework and a 3-day hackathon: schema design, API, and deployment',
         'Graded all ~60 students at the final hackathon: team presentations plus 1:1 grading on the code each student wrote',
       ],
+      projectId: 'create-adorex',
     },
     {
       role: 'Financial Team Lead',
       org: 'KMUTT Integrated Project (Smart City)',
       period: 'Aug to Dec 2025',
-      highlights: [
-        'Led the 3-person financial team in a 50+ student class building one smart city platform: wallets, top-ups, transfers, and SCB payments',
-        'Built the module with Hono, Prisma, Zod OpenAPI, and TypeScript, using atomic balance updates and one transaction for user and wallet creation',
-        'Integrated SCB OAuth token caching, payload encryption, and PromptPay QR, and moved live updates to Pusher Channels',
-      ],
+      highlights: [],
+      projectId: 'smartcity-financial',
     },
     {
       role: 'Hardware and Backend Engineer',
       org: 'KMUTT IoT Hackathon (2nd Place)',
       period: 'Jan 2026',
-      highlights: [
-        'Built an NFC attendance system: ESP32 firmware with a PN532 reader and touch screen UI, under 1 second per scan',
-        'Wrote much of the Express and Neon Postgres backend, with HTTPS polling from the device and Socket.io for live dashboard updates',
-      ],
+      highlights: [],
+      projectId: 'nfc-attendance',
     },
   ] as ExperienceItem[],
 
@@ -219,10 +208,6 @@ export const portfolioData = {
         'The bot runs on one small Azure VM.',
       ],
       tags: ['#PYTHON', '#DISCORD', '#SQLITE', '#AZURE'],
-      stats: [
-        { label: 'Regular users', value: '3 to 5' },
-        { label: 'Hosting', value: 'Azure VM' },
-      ],
       color: '#fe9d00',
       repoUrl: 'github.com/Mykal-Steele/ChronoChunk',
       image: {
@@ -304,13 +289,8 @@ export const portfolioData = {
         'Metro card top-ups automatically charge the card owner. Donations take a 3% fee.',
         'Moved live updates to Pusher Channels.',
       ],
-      numbers: ['50+ students in the class.', '3-person financial team.', '3% fee on donations.'],
       note: 'My commits are under OakarOo / Mykal-Steele.',
       tags: ['#HONO', '#PRISMA', '#ZOD', '#TYPESCRIPT'],
-      stats: [
-        { label: 'Team', value: '3 people' },
-        { label: 'Class', value: '50+ students' },
-      ],
       color: '#00ffc2',
       repoUrl: 'github.com/CSC290-2025/backend',
       image: {
@@ -351,7 +331,6 @@ export const portfolioData = {
         },
       ],
       tags: ['#JAVA', '#JAVASCRIPT', '#CODEMIRROR', '#PISTON'],
-      stats: [{ label: 'Served at', value: '/coding' }],
       color: '#00ffc2',
       liveUrl: '/coding',
       image: {
@@ -383,16 +362,8 @@ export const portfolioData = {
         },
       ],
       changes: ['The professor liked removing the QR step.'],
-      numbers: [
-        '2nd place, KMUTT SIT IoT Hackathon, January 2026.',
-        'Team of three.',
-        'Under 1 second per scan.',
-      ],
+      numbers: ['2nd place, KMUTT SIT IoT Hackathon, January 2026.'],
       tags: ['#ESP32', '#EXPRESS', '#POSTGRES', '#SOCKETIO'],
-      stats: [
-        { label: 'Result', value: '2nd place' },
-        { label: 'Team', value: '3 people' },
-      ],
       color: '#fe9d00',
       links: [
         {
@@ -463,10 +434,6 @@ export const portfolioData = {
       ],
       numbers: ['30 to 40 students used it as the class template.'],
       tags: ['#NPM', '#CLI', '#EXPRESS', '#PRISMA'],
-      stats: [
-        { label: 'Users', value: '30 to 40' },
-        { label: 'Served on', value: 'npm' },
-      ],
       color: '#00ffc2',
       npm: 'npmjs.com/package/create-adorex',
       image: {
@@ -497,7 +464,6 @@ export const portfolioData = {
         },
       ],
       tags: ['#NEXTJS', '#SUSPENSE', '#MONGODB'],
-      stats: [{ label: 'Served at', value: '/social' }],
       color: '#00ffc2',
       liveUrl: '/social',
       image: {
@@ -535,10 +501,6 @@ export const portfolioData = {
         'Won faster than a same-depth Stockfish baseline at every level.',
       ],
       tags: ['#PYTHON', '#CHESS', '#PYTORCH', '#RESEARCH'],
-      stats: [
-        { label: 'Games', value: '4,120' },
-        { label: 'Skill levels', value: '11' },
-      ],
       color: '#fe9d00',
       repoUrl: 'github.com/Mykal-Steele/CogniMax',
     },
@@ -549,7 +511,6 @@ export const portfolioData = {
       summary: 'A project with UniCorp, a student developer group.',
       role: 'Building it with UniCorp.',
       tags: [],
-      stats: [{ label: 'Team', value: 'UniCorp' }],
       color: '#8b5cf6',
       liveUrl: 'https://loom.psstee.me/',
       image: {
@@ -606,10 +567,9 @@ export const portfolioData = {
     {
       year: '2026',
       events: [
-        'Placed 2nd at the KMUTT IoT Hackathon and mentored first-year students in web development.',
         'Published create-adorex on npm and became a Microsoft Student Ambassador.',
-        'Built CozyTalk with a team, then did an IC2 research internship and built CogniMax.',
-        'Started a business administration degree at University of the People, and now mentor in Java and build Uniloom with UniCorp.',
+        'Built CozyTalk with a team.',
+        'Started a business administration degree at University of the People.',
       ],
     },
     {
@@ -617,7 +577,6 @@ export const portfolioData = {
       events: [
         'Learned TypeScript, React, Express, Hono, and Bun at KMUTT, then Next.js.',
         'Created Adorio and started ChronoChunk.',
-        'Led the financial team on a 50+ student smart city class project.',
       ],
     },
     {
