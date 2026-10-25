@@ -1,51 +1,43 @@
 'use client';
 
 import { useState, useEffect, ReactNode } from 'react';
-import {
-  Folder,
-  Bot,
-  Terminal as TerminalIcon,
-  GithubIcon,
-  LinkedinIcon,
-  GitBranch,
-} from 'lucide-react';
+import { Folder, Terminal as TerminalIcon, GithubIcon, LinkedinIcon } from 'lucide-react';
 
 import { TitleBar } from './TitleBar';
 import { ActivityBar } from './ActivityBar';
 import { SidePanel } from './SidePanel';
 import { TabBar } from './TabBar';
-import { RightPanel, AskMePanel } from './RightPanel';
 import { StatusBar } from './StatusBar';
 import { Terminal } from './Terminal';
-import { SettingsPanel } from './SettingsPanel';
 import { useIDE } from './context/IDEContext';
 import { useResponsive } from './hooks/useResponsive';
 import { MobileHeader } from './mobile/MobileHeader';
 import { MobileNav } from './mobile/MobileNav';
 import { MobileDrawer } from './mobile/MobileDrawer';
-import { ThemeProvider } from './context/ThemeContext';
 import { IDEProvider } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
-import { sans, mono } from './constants/fonts';
+import { sans } from './constants/fonts';
+import { eyebrow } from './constants/type';
 import { NavigationProgressBar } from './shared/NavigationProgressBar';
+import { SettingsButton } from './shared';
 
 function DesktopShell({ children }: { children: ReactNode }) {
-  const { terminalOpen, isSettingsOpen } = useIDE();
+  const { terminalOpen, sidePanelOpen } = useIDE();
   return (
     <div
       className="flex flex-col"
-      style={{ height: '100vh', overflow: 'hidden', background: 'var(--ide-bg-2)' }}
+      style={{ height: '100vh', overflow: 'hidden', background: 'var(--ide-bg-1)' }}
     >
       <TitleBar />
       <div className="flex flex-1 overflow-hidden">
         <ActivityBar />
-        <SidePanel />
+        {sidePanelOpen && <SidePanel />}
         <div className="flex flex-col flex-1 overflow-hidden">
           <TabBar />
           <main
             className="flex-1 overflow-y-auto"
             style={{
-              background: 'var(--ide-bg-4)',
+              background: 'var(--ide-bg-0)',
               scrollbarWidth: 'thin',
               scrollbarColor: 'var(--ide-bg-5) transparent',
             }}
@@ -54,81 +46,55 @@ function DesktopShell({ children }: { children: ReactNode }) {
           </main>
           {terminalOpen && <Terminal />}
         </div>
-        <RightPanel />
       </div>
       <StatusBar />
-      {isSettingsOpen && <SettingsPanel />}
     </div>
   );
 }
 
 function TabletShell({ children }: { children: ReactNode }) {
-  const { terminalOpen, isSettingsOpen } = useIDE();
-  const [tabletDrawer, setTabletDrawer] = useState<'side' | 'right' | null>(null);
+  const { terminalOpen } = useIDE();
+  const [explorerOpen, setExplorerOpen] = useState(false);
   return (
     <div
       className="flex flex-col"
-      style={{ height: '100vh', overflow: 'hidden', background: 'var(--ide-bg-2)' }}
+      style={{ height: '100vh', overflow: 'hidden', background: 'var(--ide-bg-1)' }}
     >
       <TitleBar />
       <div className="flex flex-1 overflow-hidden">
         <div
           className="shrink-0 flex flex-col items-center justify-between py-2"
           style={{
-            width: 48,
-            background: 'var(--ide-bg-0)',
+            width: 52,
+            background: 'var(--ide-bg-1)',
             borderRight: '1px solid var(--ide-border)',
           }}
         >
           <div className="flex flex-col items-center gap-1">
             <button
               aria-label="Toggle explorer panel"
-              onClick={() => setTabletDrawer((d) => (d === 'side' ? null : 'side'))}
+              onClick={() => setExplorerOpen((v) => !v)}
               className="flex items-center justify-center"
               style={{
                 width: 40,
                 height: 40,
-                background: tabletDrawer === 'side' ? 'var(--ide-border)' : 'transparent',
+                background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
-                borderLeft:
-                  tabletDrawer === 'side' ? '2px solid var(--ide-orange)' : '2px solid transparent',
+                borderLeft: explorerOpen ? '2px solid var(--ide-yellow)' : '2px solid transparent',
               }}
             >
-              <Folder
-                size={18}
-                color={tabletDrawer === 'side' ? 'var(--ide-text-1)' : 'var(--ide-text-6)'}
-              />
-            </button>
-            <button
-              aria-label="Toggle system panel"
-              onClick={() => setTabletDrawer((d) => (d === 'right' ? null : 'right'))}
-              className="flex items-center justify-center"
-              style={{
-                width: 40,
-                height: 40,
-                background: tabletDrawer === 'right' ? 'var(--ide-border)' : 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                borderLeft:
-                  tabletDrawer === 'right'
-                    ? '2px solid var(--ide-orange)'
-                    : '2px solid transparent',
-              }}
-            >
-              <Bot
-                size={18}
-                color={tabletDrawer === 'right' ? 'var(--ide-text-1)' : 'var(--ide-text-6)'}
-              />
+              <Folder size={18} color={explorerOpen ? 'var(--ide-text-1)' : 'var(--ide-text-5)'} />
             </button>
           </div>
+          <SettingsButton />
         </div>
         <div className="flex flex-col flex-1 overflow-hidden">
           <TabBar />
           <main
             className="flex-1 overflow-y-auto"
             style={{
-              background: 'var(--ide-bg-4)',
+              background: 'var(--ide-bg-0)',
               scrollbarWidth: 'thin',
               scrollbarColor: 'var(--ide-bg-5) transparent',
             }}
@@ -140,54 +106,37 @@ function TabletShell({ children }: { children: ReactNode }) {
       </div>
       <StatusBar />
       <MobileDrawer
-        open={tabletDrawer === 'side'}
-        onClose={() => setTabletDrawer(null)}
+        open={explorerOpen}
+        onClose={() => setExplorerOpen(false)}
         title="Explorer"
         position="right"
       >
         <SidePanel />
       </MobileDrawer>
-      <MobileDrawer
-        open={tabletDrawer === 'right'}
-        onClose={() => setTabletDrawer(null)}
-        title="System & Ask Oo"
-        position="right"
-      >
-        <RightPanel />
-      </MobileDrawer>
-      {isSettingsOpen && <SettingsPanel />}
     </div>
   );
 }
 
-type MobileDrawerType = 'explorer' | 'askme' | 'terminal' | 'more' | null;
+type MobileDrawerType = 'explorer' | 'terminal' | 'more' | null;
 
 function MobileMoreMenu({
   onOpenTerminal,
-  onOpenAskOo,
   onOpenExplorer,
   onClose,
 }: {
   onOpenTerminal: () => void;
-  onOpenAskOo: () => void;
   onOpenExplorer: () => void;
   onClose: () => void;
 }) {
   const menuItems = [
     {
-      icon: <TerminalIcon size={16} color="var(--ide-accent)" />,
+      icon: <TerminalIcon size={16} color="var(--ide-text-3)" />,
       label: 'Terminal',
       sub: 'Interactive command line',
       action: onOpenTerminal,
     },
     {
-      icon: <Bot size={16} color="var(--ide-purple)" />,
-      label: 'Ask Oo',
-      sub: "Chat with Oakar's knowledge base",
-      action: onOpenAskOo,
-    },
-    {
-      icon: <Folder size={16} color="var(--ide-orange)" />,
+      icon: <Folder size={16} color="var(--ide-text-3)" />,
       label: 'File Explorer',
       sub: 'Browse portfolio files',
       action: onOpenExplorer,
@@ -214,32 +163,22 @@ function MobileMoreMenu({
           <div>
             <div
               style={{
-                fontSize: 12,
+                fontSize: 15,
                 fontFamily: sans,
                 color: 'var(--ide-text-1)',
-                fontWeight: 600,
+                fontWeight: 700,
               }}
             >
               {item.label}
             </div>
-            <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-6)' }}>
+            <div style={{ fontSize: 13, fontFamily: sans, color: 'var(--ide-text-4)' }}>
               {item.sub}
             </div>
           </div>
         </button>
       ))}
       <div className="px-4 pt-4 pb-2" style={{ borderTop: '1px solid var(--ide-border)' }}>
-        <div
-          style={{
-            fontSize: 9,
-            fontFamily: sans,
-            color: 'var(--ide-text-7)',
-            letterSpacing: '0.1em',
-            marginBottom: 8,
-          }}
-        >
-          LINKS
-        </div>
+        <div style={{ ...eyebrow, fontSize: 11, marginBottom: 8 }}>Links</div>
         <div className="flex flex-col gap-2">
           <a
             href={`https://${portfolioData.github}`}
@@ -247,9 +186,9 @@ function MobileMoreMenu({
             rel="noreferrer"
             className="flex items-center gap-2"
             style={{
-              fontSize: 11,
-              fontFamily: mono,
-              color: 'var(--ide-text-4)',
+              fontSize: 15,
+              fontFamily: sans,
+              color: 'var(--ide-text-3)',
               textDecoration: 'none',
             }}
           >
@@ -262,26 +201,15 @@ function MobileMoreMenu({
             rel="noreferrer"
             className="flex items-center gap-2"
             style={{
-              fontSize: 11,
-              fontFamily: mono,
-              color: 'var(--ide-text-4)',
+              fontSize: 15,
+              fontFamily: sans,
+              color: 'var(--ide-text-3)',
               textDecoration: 'none',
             }}
           >
-            <LinkedinIcon size={14} color="#0077b5" />
+            <LinkedinIcon size={14} color="var(--ide-text-5)" />
             LinkedIn
           </a>
-        </div>
-      </div>
-      <div
-        className="mx-4 mt-4 px-3 py-2"
-        style={{ background: 'var(--ide-accent-dark)', borderRadius: 4 }}
-      >
-        <div className="flex items-center gap-2">
-          <GitBranch size={10} color="var(--ide-accent-light)" />
-          <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-accent-light)' }}>
-            ROOT@{portfolioData.handle}:~$
-          </span>
         </div>
       </div>
     </div>
@@ -289,20 +217,19 @@ function MobileMoreMenu({
 }
 
 function MobileShell({ children }: { children: ReactNode }) {
-  const { isSettingsOpen } = useIDE();
   const [drawer, setDrawer] = useState<MobileDrawerType>(null);
   const open = (type: MobileDrawerType) => setDrawer(type);
   const close = () => setDrawer(null);
   return (
     <div
       className="flex flex-col"
-      style={{ height: '100dvh', overflow: 'hidden', background: 'var(--ide-bg-2)' }}
+      style={{ height: '100dvh', overflow: 'hidden', background: 'var(--ide-bg-1)' }}
     >
       <MobileHeader onMenuOpen={() => open('explorer')} />
       <main
         className="flex-1 overflow-y-auto"
         style={{
-          background: 'var(--ide-bg-4)',
+          background: 'var(--ide-bg-0)',
           scrollbarWidth: 'thin',
           scrollbarColor: 'var(--ide-bg-5) transparent',
         }}
@@ -316,7 +243,6 @@ function MobileShell({ children }: { children: ReactNode }) {
       <MobileDrawer open={drawer === 'more'} onClose={close} title="Menu">
         <MobileMoreMenu
           onOpenTerminal={() => open('terminal')}
-          onOpenAskOo={() => open('askme')}
           onOpenExplorer={() => open('explorer')}
           onClose={close}
         />
@@ -326,12 +252,6 @@ function MobileShell({ children }: { children: ReactNode }) {
           <Terminal embedded />
         </div>
       </MobileDrawer>
-      <MobileDrawer open={drawer === 'askme'} onClose={close} title="Ask Oo">
-        <div style={{ height: '70vh' }}>
-          <AskMePanel />
-        </div>
-      </MobileDrawer>
-      {isSettingsOpen && <SettingsPanel />}
     </div>
   );
 }
@@ -348,10 +268,10 @@ function IDELayoutInner({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Don't render any shell until we know the real breakpoint — prevents
+  // Don't render any shell until we know the real breakpoint. This prevents
   // DesktopShell flashing on mobile before useResponsive reads window.innerWidth.
   if (!mounted) {
-    return <div style={{ height: '100dvh', background: 'var(--ide-bg-2)' }} />;
+    return <div style={{ height: '100dvh', background: 'var(--ide-bg-1)' }} />;
   }
 
   const Shell = isMobile ? MobileShell : isTablet ? TabletShell : DesktopShell;
@@ -370,10 +290,8 @@ export function IDELayout({ children }: { children: ReactNode }) {
 
 export function PortfolioShell({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider>
-      <IDEProvider>
-        <IDELayout>{children}</IDELayout>
-      </IDEProvider>
-    </ThemeProvider>
+    <IDEProvider>
+      <IDELayout>{children}</IDELayout>
+    </IDEProvider>
   );
 }

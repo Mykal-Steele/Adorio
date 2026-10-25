@@ -68,9 +68,10 @@ export function MobileDrawer({
             ? { bottom: 0, left: 0, right: 0, maxHeight: '85vh' }
             : { top: 0, right: 0, bottom: 0, width: '80vw', maxWidth: 320 }),
           animation: closing ? closeAnim : openAnim,
-          background: 'var(--ide-bg-2)',
+          background: 'var(--ide-bg-1)',
           borderTop: isBottom ? '1px solid var(--ide-border)' : 'none',
           borderLeft: !isBottom ? '1px solid var(--ide-border)' : 'none',
+          borderRadius: isBottom ? '12px 12px 0 0' : 0,
         }}
       >
         <div
@@ -79,11 +80,10 @@ export function MobileDrawer({
         >
           <span
             style={{
-              fontSize: 10,
+              fontSize: 15,
               fontFamily: sans,
-              color: 'var(--ide-text-3)',
-              letterSpacing: '0.08em',
-              fontWeight: 600,
+              color: 'var(--ide-text-1)',
+              fontWeight: 700,
             }}
           >
             {title}

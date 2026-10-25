@@ -32,7 +32,11 @@ const config: NextConfig = {
 
   // Old static resume path now served by the /resume proxy route.
   async redirects() {
-    return [{ source: '/OakarResume.pdf', destination: '/resume', permanent: true }];
+    return [
+      { source: '/OakarResume.pdf', destination: '/resume', permanent: true },
+      { source: '/about', destination: '/', permanent: true },
+      { source: '/projects/social', destination: '/projects/adorio', permanent: true },
+    ];
   },
 
   async headers() {

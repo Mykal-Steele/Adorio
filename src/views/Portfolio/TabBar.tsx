@@ -2,137 +2,109 @@
 
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { X } from 'lucide-react';
+import { CopyX, X } from 'lucide-react';
 import { useIDE } from './context/IDEContext';
-import { portfolioData } from './data/portfolio';
+import { fileNameForPath } from './data/files';
 import { sans } from './constants/fonts';
 import { usePendingNavPath } from './hooks/usePendingNavPath';
-import { IconButton } from './shared';
-
-const mainTabs = [
-  { name: 'dashboard.tsx', path: '/', color: 'var(--ide-orange)' },
-  { name: 'about_me.md', path: '/about', color: 'var(--ide-text-4)' },
-  { name: 'projects.json', path: '/projects', color: 'var(--ide-accent-light)' },
-  { name: 'contact.sh', path: '/contact', color: 'var(--ide-purple)' },
-];
-
-function dotColor(name: string): string {
-  if (name.endsWith('.tsx') || name.endsWith('.ts')) return 'var(--ide-orange)';
-  if (name.endsWith('.json')) return 'var(--ide-accent-light)';
-  if (name.endsWith('.md')) return 'var(--ide-text-4)';
-  if (name.endsWith('.sh')) return 'var(--ide-purple)';
-  if (name.endsWith('.rs')) return 'var(--ide-red-dark)';
-  if (name.endsWith('.go')) return 'var(--ide-cyan)';
-  return 'var(--ide-text-4)';
-}
+import { FileIcon, IconButton } from './shared';
 
 export function TabBar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { openProjectTabs, closeProjectTab } = useIDE();
+  const { openTabs, closeTab, closeOtherTabs } = useIDE();
   const pendingPath = usePendingNavPath();
-  const effectivePath = pendingPath ?? pathname;
+  const activePath = pendingPath ?? pathname;
 
   useEffect(() => {
-    mainTabs.forEach((tab) => router.prefetch(tab.path));
-  }, [router]);
+    openTabs.forEach((path) => router.prefetch(path));
+  }, [router, openTabs]);
 
-  useEffect(() => {
-    openProjectTabs.forEach((id) => router.prefetch(`/projects/${id}`));
-  }, [router, openProjectTabs]);
-
-  const isActive = (path: string) => {
-    if (path === '/' && effectivePath === '/') return true;
-    if (path !== '/' && effectivePath.startsWith(path)) return true;
-    return false;
+  const close = (path: string) => {
+    const index = openTabs.indexOf(path);
+    const next = openTabs[index + 1] ?? openTabs[index - 1] ?? '/';
+    // The page on screen always keeps a tab, so its last tab can't close onto itself
+    if (path === activePath && next === path) return;
+    closeTab(path);
+    if (path === activePath) router.push(next);
   };
 
-  const projectTabItems = openProjectTabs.map((id) => {
-    const project = portfolioData.projects.find((p) => p.id === id);
-    const ext = project?.language === 'Rust' ? '.rs' : project?.language === 'Go' ? '.go' : '.ts';
-    return { name: `${id}${ext}`, path: `/projects/${id}`, id };
-  });
-
   return (
-    <div
-      className="shrink-0 flex items-end overflow-x-auto"
+    <nav
+      aria-label="Open files"
+      className="flex shrink-0 items-stretch"
       style={{
-        background: 'var(--ide-bg-3)',
+        height: 44,
+        background: 'var(--ide-bg-1)',
         borderBottom: '1px solid var(--ide-border)',
-        scrollbarWidth: 'none',
-        height: 36,
       }}
     >
-      <div className="flex items-end h-full">
-        {mainTabs.map((tab) => {
-          const active = isActive(tab.path);
-          return (
-            <button
-              key={tab.path}
-              onClick={() => router.push(tab.path)}
-              className="flex items-center gap-2 px-4 h-full shrink-0 transition-colors"
-              style={{
-                background: active ? 'var(--ide-bg-4)' : 'transparent',
-                borderTop: active ? '1px solid var(--ide-accent)' : '1px solid transparent',
-                borderRight: '1px solid var(--ide-border)',
-                borderLeft: 'none',
-                borderBottom: 'none',
-                cursor: 'pointer',
-                color: active ? 'var(--ide-text-1)' : 'var(--ide-text-5)',
-                fontSize: 11,
-                fontFamily: sans,
-              }}
-            >
-              <span style={{ color: dotColor(tab.name), fontSize: 8 }}>●</span>
-              {tab.name}
-            </button>
-          );
-        })}
-        {projectTabItems.map((tab) => {
-          const active = effectivePath === tab.path;
+      <button
+        onClick={closeOtherTabs}
+        disabled={openTabs.length < 2}
+        aria-label="Close other tabs"
+        title="Close other tabs"
+        className={`pf-tab flex shrink-0 items-center justify-center ${openTabs.length < 2 ? '' : 'ide-hover'}`}
+        style={{
+          width: 44,
+          border: 'none',
+          borderRight: '1px solid var(--ide-border)',
+          background: 'transparent',
+          color: 'var(--ide-text-4)',
+          opacity: openTabs.length < 2 ? 0.4 : 1,
+          cursor: openTabs.length < 2 ? 'default' : 'pointer',
+        }}
+      >
+        <CopyX size={16} />
+      </button>
+      <div
+        className="flex min-w-0 flex-1 items-stretch overflow-x-auto"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {openTabs.map((path) => {
+          const active = path === activePath;
+          const name = fileNameForPath(path);
           return (
             <div
-              key={tab.id}
-              className="flex items-center h-full shrink-0"
+              key={path}
+              className={`group relative flex shrink-0 items-center ${active ? '' : 'ide-hover'}`}
               style={{
-                background: active ? 'var(--ide-bg-4)' : 'transparent',
-                borderTop: active ? '1px solid var(--ide-accent)' : '1px solid transparent',
+                background: active ? 'var(--ide-bg-0)' : 'transparent',
                 borderRight: '1px solid var(--ide-border)',
+                boxShadow: active ? 'inset 0 -2px 0 var(--ide-yellow)' : 'none',
               }}
             >
+              {/* Spans the whole tab so its focus ring circles the close button too */}
               <button
-                onClick={() => router.push(tab.path)}
-                className="flex items-center gap-2 px-3 h-full"
+                aria-current={active ? 'page' : undefined}
+                onClick={() => router.push(path)}
+                className="pf-tab pf-tab-open flex h-full items-center gap-2 pr-10 pl-4"
                 style={{
                   background: 'transparent',
                   border: 'none',
                   cursor: 'pointer',
-                  color: active ? 'var(--ide-text-1)' : 'var(--ide-text-5)',
-                  fontSize: 11,
+                  color: active ? 'var(--ide-text-1)' : 'var(--ide-text-4)',
+                  fontSize: 15,
+                  fontWeight: active ? 700 : 400,
                   fontFamily: sans,
                 }}
               >
-                <span style={{ color: dotColor(tab.name), fontSize: 8 }}>●</span>
-                {tab.name}
+                <FileIcon path={path} />
+                {name}
               </button>
               <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  closeProjectTab(tab.id);
-                  if (active) router.push('/projects');
-                }}
-                aria-label={`Close ${tab.name} tab`}
-                size={32}
-                color="var(--ide-text-6)"
-                className="mr-2"
-                style={{ height: '100%' }}
+                onClick={() => close(path)}
+                aria-label={`Close ${name}`}
+                size={28}
+                color="var(--ide-text-5)"
+                className={`pf-tab ide-hover-icon absolute top-1/2 right-1.5 -translate-y-1/2 rounded ${active ? '' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'}`}
               >
-                <X size={10} />
+                <X size={13} />
               </IconButton>
             </div>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }

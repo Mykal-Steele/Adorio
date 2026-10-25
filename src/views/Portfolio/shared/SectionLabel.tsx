@@ -1,23 +1,30 @@
-import { sans } from '../constants/fonts';
+import { serif } from '../constants/fonts';
 import type { ReactNode } from 'react';
 
 export function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <div
+    <h2
       style={{
-        fontSize: 9,
-        fontFamily: sans,
+        fontFamily: serif,
+        fontSize: 'clamp(30px, 4vw, 40px)',
         fontWeight: 700,
-        color: 'var(--ide-text-6)',
-        letterSpacing: '0.14em',
-        marginBottom: 20,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
+        lineHeight: 1.15,
+        letterSpacing: '-0.01em',
+        color: 'var(--ide-text-1)',
+        margin: '0 0 32px',
       }}
     >
-      <div style={{ width: 20, height: 1, background: 'var(--ide-orange)' }} />
-      {children}
-    </div>
+      {/* The stroke sits below the descenders so it never crosses letters like g, j, p */}
+      <span
+        style={{
+          display: 'inline-block',
+          paddingBottom: 10,
+          background:
+            'linear-gradient(var(--ide-yellow), var(--ide-yellow)) left bottom / 100% 4px no-repeat',
+        }}
+      >
+        {children}
+      </span>
+    </h2>
   );
 }
