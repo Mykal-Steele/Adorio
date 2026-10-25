@@ -6,6 +6,7 @@ import { useState, type ReactNode } from 'react';
 import { ArrowLeft, ExternalLink, Github, Package, PlayCircle } from 'lucide-react';
 import { portfolioData, type ProjectShot } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
+import { useContentWidth } from '../hooks/useContentWidth';
 import { mono, sans, serif } from '../constants/fonts';
 import { body, eyebrow } from '../constants/type';
 import { skillsForProject } from '../data/skills';
@@ -113,6 +114,7 @@ function Screenshot({ shot, onOpen }: { shot: ProjectShot; onOpen: () => void })
 
 export function ProjectDetail({ id }: { id: string }) {
   const { isMobile } = useResponsive();
+  const stacked = useContentWidth() < 880;
   const [openShot, setOpenShot] = useState<ProjectShot | null>(null);
 
   const project = portfolioData.projects.find((p) => p.id === id);
@@ -148,7 +150,7 @@ export function ProjectDetail({ id }: { id: string }) {
 
   return (
     <div
-      className={`flex ${isMobile ? 'flex-col px-4 pt-8 pb-16' : 'items-start px-8 pt-16 pb-24'}`}
+      className={`flex ${stacked ? 'flex-col' : 'items-start'} ${isMobile ? 'px-4 pt-8 pb-16' : 'px-8 pt-16 pb-24'}`}
       style={{ gap: 48, maxWidth: 1096, margin: '0 auto' }}
     >
       <article className="min-w-0 flex-1" style={{ maxWidth: 720 }}>
@@ -291,8 +293,8 @@ export function ProjectDetail({ id }: { id: string }) {
         <aside
           className="shrink-0"
           style={{
-            width: isMobile ? '100%' : 280,
-            position: isMobile ? 'static' : 'sticky',
+            width: stacked ? '100%' : 280,
+            position: stacked ? 'static' : 'sticky',
             top: 32,
           }}
         >

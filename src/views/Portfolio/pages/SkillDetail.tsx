@@ -5,12 +5,14 @@ import { ArrowLeft } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { experienceForSkill, projectsForSkill } from '../data/skills';
 import { useResponsive } from '../hooks/useResponsive';
+import { useContentWidth } from '../hooks/useContentWidth';
 import { sans, serif } from '../constants/fonts';
 import { body, eyebrow } from '../constants/type';
 import { ProjectImage, SectionLabel, TechLogo } from '../shared';
 
 export function SkillDetail({ id }: { id: string }) {
   const { isMobile } = useResponsive();
+  const oneColumn = useContentWidth() < 640;
   const skill = portfolioData.skills.find((s) => s.id === id);
 
   if (!skill) {
@@ -85,7 +87,7 @@ export function SkillDetail({ id }: { id: string }) {
               margin: 0,
               padding: 0,
               listStyle: 'none',
-              gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))',
+              gridTemplateColumns: oneColumn ? '1fr' : 'repeat(2, minmax(0, 1fr))',
             }}
           >
             {projects.map((project) => (

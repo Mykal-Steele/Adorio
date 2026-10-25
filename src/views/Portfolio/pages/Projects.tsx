@@ -4,10 +4,12 @@ import Link from 'next/link';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
+import { useContentWidth } from '../hooks/useContentWidth';
 import { PageHeader, ProjectCard, SectionLabel } from '../shared';
 
 export function Projects() {
   const { isMobile } = useResponsive();
+  const oneColumn = useContentWidth() < 640;
 
   return (
     <div
@@ -25,7 +27,7 @@ export function Projects() {
         style={{
           gap: isMobile ? 32 : 40,
           marginTop: 48,
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+          gridTemplateColumns: oneColumn ? '1fr' : 'repeat(2, 1fr)',
         }}
       >
         {portfolioData.projects.map((project) => (

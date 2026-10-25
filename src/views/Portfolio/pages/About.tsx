@@ -7,6 +7,7 @@ import { Download, Github, Linkedin, Mail } from 'lucide-react';
 import { portfolioData, type Project, type SkillGroup } from '../data/portfolio';
 import { skillsForProject } from '../data/skills';
 import { useResponsive } from '../hooks/useResponsive';
+import { useContentWidth } from '../hooks/useContentWidth';
 import { sans, serif } from '../constants/fonts';
 import { body, eyebrow, preview } from '../constants/type';
 import { LogoTile, ProjectImage, SectionLabel, StatusLabel, Tape } from '../shared';
@@ -145,7 +146,8 @@ function Hero({ isMobile }: { isMobile: boolean }) {
             padding: '28px 24px 24px',
             background: 'var(--ide-note)',
             boxShadow: 'var(--ide-card-shadow)',
-            marginTop: isMobile ? 0 : 16,
+            marginTop: isMobile ? 0 : 96,
+            maxWidth: isMobile ? 360 : undefined,
           } as CSSProperties
         }
       >
@@ -255,7 +257,7 @@ function ExperienceProject({ project }: { project: Project }) {
     <Link
       href={`/projects/${project.id}`}
       className="pf-card block self-start"
-      style={{ padding: 8, background: 'var(--ide-bg-0)', borderRadius: 3 }}
+      style={{ maxWidth: 260, padding: 8, background: 'var(--ide-bg-0)', borderRadius: 3 }}
     >
       <div style={{ overflow: 'hidden' }}>
         <ProjectImage project={project} sizes="220px" />
@@ -584,6 +586,7 @@ function Community({ isMobile }: { isMobile: boolean }) {
 
 export function About() {
   const { isMobile } = useResponsive();
+  const stacked = useContentWidth() < 880;
   const featured = FEATURED_IDS.map((id) =>
     portfolioData.projects.find((project) => project.id === id),
   ).filter((project): project is Project => Boolean(project));
@@ -591,7 +594,7 @@ export function About() {
   return (
     <div>
       <Band first isMobile={isMobile}>
-        <Hero isMobile={isMobile} />
+        <Hero isMobile={stacked} />
       </Band>
 
       <Band isMobile={isMobile}>
@@ -602,7 +605,7 @@ export function About() {
               key={project.id}
               project={project}
               flip={i % 2 === 1}
-              isMobile={isMobile}
+              isMobile={stacked}
             />
           ))}
         </div>
@@ -640,22 +643,22 @@ export function About() {
 
       <Band isMobile={isMobile}>
         <SectionLabel>Experience</SectionLabel>
-        <Experience isMobile={isMobile} />
+        <Experience isMobile={stacked} />
       </Band>
 
       <Band isMobile={isMobile}>
         <SectionLabel>Tech stack</SectionLabel>
-        <TechSheet isMobile={isMobile} />
+        <TechSheet isMobile={stacked} />
       </Band>
 
       <Band isMobile={isMobile}>
         <SectionLabel>Career log</SectionLabel>
-        <CareerLog isMobile={isMobile} />
+        <CareerLog isMobile={stacked} />
       </Band>
 
       <Band isMobile={isMobile}>
         <SectionLabel>Community</SectionLabel>
-        <Community isMobile={isMobile} />
+        <Community isMobile={stacked} />
       </Band>
     </div>
   );

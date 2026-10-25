@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useIDE } from './context/IDEContext';
+import { useContentWidth } from './hooks/useContentWidth';
 import { serif } from './constants/fonts';
 import { ThemeHint } from './shared/ThemeHint';
 import { ThemeSwitcher } from './shared';
 
 export function TitleBar() {
   const { themeHintEnabled, setThemeHintEnabled } = useIDE();
+  const roomy = useContentWidth() >= 880;
   // Opening the theme menu hides the hint until the next load
   const [closed, setClosed] = useState(false);
 
@@ -37,7 +39,7 @@ export function TitleBar() {
       </span>
 
       <ThemeSwitcher showLabel onOpen={() => setClosed(true)} />
-      {themeHintEnabled && !closed && (
+      {themeHintEnabled && !closed && roomy && (
         <ThemeHint onDismissForever={() => setThemeHintEnabled(false)} />
       )}
     </div>
