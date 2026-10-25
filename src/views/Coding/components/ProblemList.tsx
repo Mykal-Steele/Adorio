@@ -58,7 +58,7 @@ const ProblemList = ({
       {/* Below lg the list is a real collapsible disclosure. At lg it's
           always visible (see the panel below), so this header is a static,
           non-interactive row there instead of a button that could still be
-          keyboard-activated — toggling aria-expanded with nothing visibly
+          keyboard-activated, toggling aria-expanded with nothing visibly
           changing would give screen reader users a false disclosure state. */}
       <button
         type="button"
@@ -122,7 +122,7 @@ const ProblemList = ({
                     }`}
                   >
                     {problem.difficulty}
-                    {solved && <span className="sr-only"> — solved</span>}
+                    {solved && <span className="sr-only"> (solved)</span>}
                   </span>
                 </button>
               </li>

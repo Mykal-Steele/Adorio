@@ -20,7 +20,7 @@ export default function Gauge({ spent, budget, budgetIsSet = budget > 0 }: Gauge
   if (!budgetIsSet) {
     status = 'Set a monthly budget in Settings to auto-generate a daily allowance.';
   } else if (budget <= 0) {
-    status = `Today's allowance is used up covering earlier overspending — ${fmtMoneyPlain(Math.abs(budget))} still owed.`;
+    status = `Today's allowance went to earlier overspending. ${fmtMoneyPlain(Math.abs(budget))} is still owed.`;
   } else if (rawPct >= 1) {
     status = `Over today's allowance by ${fmtMoneyPlain(spent - budget)}.`;
   } else {

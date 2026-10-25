@@ -124,7 +124,7 @@ const ComposeCard = ({
       {imagePreview && (
         <div className="relative mt-4 inline-block rotate-[-0.7deg] bg-[#f1e7d3] p-[10px] shadow-[0_2px_0_rgba(60,44,24,.12)]">
           {/* imagePreview is always either '' or a same-origin blob: URL from
-              URL.createObjectURL() in handleImageChange below — never user-supplied text */}
+              URL.createObjectURL() in handleImageChange below, never user-supplied text */}
           <img
             src={imagePreview} // lgtm[js/xss-through-dom] -- browser-generated blob: URL, not DOM text
             alt="Selected upload preview"
@@ -238,7 +238,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     }
   }, [page, filter]);
 
-  // SSR already rendered page 1 — don't refetch it on mount or posts 4..N
+  // SSR already rendered page 1, don't refetch it on mount or posts 4..N
   // get skipped/overwritten by a mismatched page/limit. The next fetch is
   // page 2 via infinite scroll. If SSR failed (no initial posts), fetch page 1.
   const hasHydratedInitialPage = useRef(initialPosts.length > 0);
@@ -252,7 +252,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
 
   // Switching filters queries a different set on the backend now (see fetchPosts),
   // so the existing page needs to be thrown away and pagination restarted from
-  // page 1 for it — otherwise switching to Photos would either show a stale mix
+  // page 1 for it, otherwise switching to Photos would either show a stale mix
   // of results or try to append page 2 of the new filter onto page 1 of the old one.
   const isFirstFilterRender = useRef(true);
   useEffect(() => {
@@ -462,7 +462,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
   // rebalances its entire contents from scratch whenever the total content changes,
   // which visibly moves already-rendered posts into a different column every time
   // a new page loads. Assigning each post to a column by its own stable index means
-  // a newly loaded post only ever appends to the end of a column — it never moves
+  // a newly loaded post only ever appends to the end of a column, it never moves
   // one that's already on screen.
   const postColumns = useMemo(() => {
     const columns: { post: (typeof posts)[number]; index: number }[][] = [[], []];

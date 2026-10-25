@@ -36,14 +36,6 @@ export const likePost = async (postId, shouldBeLiked) => {
         return null;
       }
 
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(
-          `Sending FINAL like state for post ${postId}: ${
-            finalIntent.shouldBeLiked ? 'LIKED' : 'UNLIKED'
-          }`,
-        );
-      }
-
       const response = await API.put(`/posts/${postId}/like`, {
         shouldBeLiked: finalIntent.shouldBeLiked,
       });

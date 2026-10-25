@@ -133,7 +133,7 @@ const Navbar = () => {
     // a transform (e.g. initial={{ y: -64 }}) doesn't reserve layout space, so
     // for the brief window before the transform settles, the space it's about
     // to occupy shows straight through to <body>'s own background instead of
-    // the navbar's — position:sticky elements still lay out at their
+    // the navbar's, position:sticky elements still lay out at their
     // untransformed position. That was invisible on the old dark navbar over a
     // dark body; it's a visible dark flash on this cream one.
     <nav className="font-paper-sans sticky top-0 z-50 bg-[var(--paper-cream)] text-[var(--paper-ink)]">

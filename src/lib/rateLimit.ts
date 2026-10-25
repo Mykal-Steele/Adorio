@@ -1,5 +1,5 @@
 // In-memory sliding-window rate limiter for Next.js Route Handlers.
-// Mirrors backend/utils/monitoring.js's RateLimiter class — same approach,
+// Mirrors backend/utils/monitoring.js's RateLimiter class, same approach,
 // separate implementation since the Next.js server and Express backend are
 // different processes that share no code (see backend/AGENTS.md).
 class RateLimiter {
@@ -34,8 +34,7 @@ class RateLimiter {
 
 export const contactLimiter = new RateLimiter(5, 10 * 60 * 1000); // 5 per 10 min per IP
 
-// Same header precedence the Express backend uses (analyticsController.js) —
-// Cloudflare's header is authoritative since every request is proxied through it.
+// Same header precedence the Express backend uses (analyticsController.js), // Cloudflare's header is authoritative since every request is proxied through it.
 export function getClientIp(req: Request): string {
   const headers = req.headers;
   return (

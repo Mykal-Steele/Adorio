@@ -1,9 +1,9 @@
-// Engine-agnostic editor preferences — shared by both the CodeMirror and
+// Engine-agnostic editor preferences, shared by both the CodeMirror and
 // Monaco implementations (and the settings panel, via useSyncExternalStore)
 // so switching engines mid-session keeps the same wrap/font-size/engine
 // choice instead of resetting it. Each engine's own component subscribes and
 // applies these through its own API (CodeMirror compartments, Monaco
-// updateOptions) — this file knows nothing about either editor.
+// updateOptions), this file knows nothing about either editor.
 export interface EditorSettings {
   wrap: boolean;
   fontSize: number;
@@ -51,7 +51,7 @@ export const resetEditorSettings = () => patchSettings({ ...DEFAULT_EDITOR_SETTI
 export type EditorEngine = 'monaco' | 'codemirror';
 
 const ENGINE_STORAGE_KEY = 'coding_editor_engine';
-// Monaco is VS Code's actual editor — real selection/bracket/cursor
+// Monaco is VS Code's actual editor, real selection/bracket/cursor
 // behavior instead of an approximation, so it's the default for anyone who
 // hasn't picked yet.
 const DEFAULT_ENGINE: EditorEngine = 'monaco';

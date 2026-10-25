@@ -15,7 +15,7 @@ export default async function PostsLoader() {
     initialPosts = data.posts ?? [];
     initialHasMore = data.hasMore ?? true;
   } catch {
-    // SSR fetch failed — Home will fetch client-side as fallback
+    // SSR fetch failed, Home will fetch client-side as fallback
   }
 
   return <Home initialPosts={initialPosts} initialHasMore={initialHasMore} />;

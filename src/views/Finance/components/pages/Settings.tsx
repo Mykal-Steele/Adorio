@@ -49,7 +49,7 @@ export default function Settings({
     if (budgetInput.trim() === '' || !Number.isFinite(v) || v < 0)
       return showToast('Enter a valid budget.');
     await updateFinanceSettings({ monthlyBudget: v });
-    await onSettingsSaved('Monthly budget updated — daily allowance recalculated.');
+    await onSettingsSaved('Monthly budget updated. Daily allowance recalculated.');
   };
 
   const toggleCounts = async (category: FinanceCategory, counts: boolean) => {
@@ -140,8 +140,8 @@ export default function Settings({
         </label>
         <p className="mb-3.5 text-[0.78rem] text-[var(--paper-muted-2)]">
           Turn off &quot;counts toward budget&quot; for costs like rent that you don&apos;t want
-          inflating your daily allowance — the amount still comes out of your balance, it&apos;s
-          just left out of the budget math.
+          inflating your daily allowance, the amount still comes out of your balance, it&apos;s just
+          left out of the budget math.
         </p>
 
         <div className="mb-4 flex flex-col">

@@ -42,7 +42,7 @@ describe('registerSchema', () => {
     fail(registerSchema, { ...base, email: 'not-an-email' }));
   test('rejects email without domain', () => fail(registerSchema, { ...base, email: 'user@' }));
   test('rejects email longer than 254 chars', () =>
-    fail(registerSchema, { ...base, email: 'a'.repeat(248) + '@b.com' }));
+    fail(registerSchema, { ...base, email: 'a'.repeat(249) + '@b.com' }));
 
   test('rejects empty password', () => fail(registerSchema, { ...base, password: '' }));
   test('rejects missing fields', () => fail(registerSchema, {}));
