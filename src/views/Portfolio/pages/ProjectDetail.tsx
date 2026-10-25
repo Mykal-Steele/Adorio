@@ -4,20 +4,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 import { ArrowLeft, ExternalLink, Github, Package, PlayCircle } from 'lucide-react';
+import { liveLabel } from '../data/links';
 import { portfolioData, type ProjectShot } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
 import { useContentWidth } from '../hooks/useContentWidth';
 import { mono, sans, serif } from '../constants/fonts';
 import { body, eyebrow } from '../constants/type';
-import { skillsForProject } from '../data/skills';
 import {
   IDECard,
   Lightbox,
+  LiveTag,
   Tape,
-  LogoTile,
   PageHeader,
   ProjectImage,
   StatusLabel,
+  TechLogo,
 } from '../shared';
 
 const sectionHeading = {
@@ -46,6 +47,47 @@ function BulletList({ items }: { items: string[] }) {
           {item}
         </li>
       ))}
+    </ul>
+  );
+}
+
+const chipStyle = {
+  gap: 8,
+  padding: '6px 12px',
+  fontSize: 15,
+} as const;
+
+// Skills on this site link to their page; anything else is plain text
+function BuiltWith({ stack }: { stack: string[] }) {
+  return (
+    <ul className="flex flex-wrap" style={{ gap: 10, margin: 0, padding: 0, listStyle: 'none' }}>
+      {stack.map((name) => {
+        const skill = portfolioData.skills.find((s) => s.name === name);
+        return (
+          <li key={name}>
+            {skill ? (
+              <Link href={`/skills/${skill.id}`} className="pf-btn" style={chipStyle}>
+                <TechLogo id={skill.id} size={16} />
+                {name}
+              </Link>
+            ) : (
+              <span
+                className="inline-flex items-center"
+                style={{
+                  ...chipStyle,
+                  fontFamily: sans,
+                  fontWeight: 700,
+                  color: 'var(--ide-text-2)',
+                  border: '1.5px dashed var(--ide-border-strong)',
+                  borderRadius: 4,
+                }}
+              >
+                {name}
+              </span>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -135,7 +177,6 @@ export function ProjectDetail({ id }: { id: string }) {
   const screenshots = project.screenshots ?? [];
   const cover =
     project.image && !screenshots.some((shot) => shot.src === project.image?.src) ? project : null;
-  const builtWith = skillsForProject(project);
   const tallCount = screenshots.filter((shot) => shot.height > shot.width).length;
   const hasLinks = Boolean(project.repoUrl || project.npm || project.links?.length);
   const secondaryLinks = [
@@ -154,9 +195,15 @@ export function ProjectDetail({ id }: { id: string }) {
       style={{ gap: 48, maxWidth: 1096, margin: '0 auto' }}
     >
       <article className="min-w-0 flex-1" style={{ maxWidth: 720 }}>
+        <Link href="/projects" className="pf-btn" style={{ marginBottom: 32 }}>
+          <ArrowLeft size={15} />
+          All projects
+        </Link>
+
         <PageHeader
           eyebrow={
             <span className="inline-flex flex-wrap items-center" style={{ gap: 16 }}>
+              {liveUrl && <LiveTag href={liveUrl} />}
               {project.language && <span>{project.language}</span>}
               <StatusLabel status={project.status} />
             </span>
@@ -165,18 +212,33 @@ export function ProjectDetail({ id }: { id: string }) {
           subtitle={project.summary}
         />
 
-        {builtWith.length > 0 && (
-          <div className="flex flex-wrap" style={{ gap: 10, marginTop: 24 }}>
-            {builtWith.map((skill) => (
-              <LogoTile
-                key={skill.id}
-                id={skill.id}
-                name={skill.name}
-                href={`/skills/${skill.id}`}
-              />
-            ))}
-          </div>
-        )}
+        <section
+          aria-labelledby="result"
+          style={{
+            position: 'relative',
+            marginTop: 32,
+            padding: '24px 24px 20px',
+            background: 'var(--ide-note)',
+            boxShadow: 'var(--ide-card-shadow)',
+          }}
+        >
+          <Tape />
+          <h2 id="result" style={{ ...eyebrow, fontSize: 13 }}>
+            Result
+          </h2>
+          <p
+            style={{
+              fontFamily: sans,
+              fontSize: 18,
+              fontWeight: 500,
+              lineHeight: 1.6,
+              color: 'var(--ide-text-1)',
+              margin: '6px 0 0',
+            }}
+          >
+            {project.result}
+          </p>
+        </section>
 
         {cover && (
           <div
@@ -192,35 +254,26 @@ export function ProjectDetail({ id }: { id: string }) {
           </div>
         )}
 
-        {project.requiresAccount && (
-          <p
-            style={{
-              ...body,
-              fontSize: 15,
-              color: 'var(--ide-text-4)',
-              marginTop: 16,
-              paddingLeft: 12,
-              borderLeft: '2px solid var(--ide-yellow)',
-            }}
-          >
-            This project needs an account to open. Ask me for a demo account if you want to try it.
-          </p>
-        )}
+        <Section title="Built with">
+          <BuiltWith stack={project.stack} />
+        </Section>
 
-        {project.problem && (
-          <Section title="The problem">
-            <p style={body}>{project.problem}</p>
-          </Section>
-        )}
+        <Section title="The problem">
+          <p style={body}>{project.problem}</p>
+        </Section>
 
-        {project.role && (
-          <Section title="My role">
-            <p style={body}>{project.role}</p>
+        <Section title="What I built">
+          <p style={body}>{project.role}</p>
+        </Section>
+
+        {project.features && project.features.length > 0 && (
+          <Section title="How it works">
+            <BulletList items={project.features} />
           </Section>
         )}
 
         {project.decisions && project.decisions.length > 0 && (
-          <Section title="Decisions">
+          <Section title="Key decisions">
             <ol
               className="flex flex-col"
               style={{ gap: 24, margin: 0, padding: 0, listStyle: 'none' }}
@@ -258,15 +311,15 @@ export function ProjectDetail({ id }: { id: string }) {
           </Section>
         )}
 
-        {project.changes && project.changes.length > 0 && (
-          <Section title="What changed">
-            <BulletList items={project.changes} />
+        {project.numbers && project.numbers.length > 0 && (
+          <Section title="By the numbers">
+            <BulletList items={project.numbers} />
           </Section>
         )}
 
-        {project.numbers && project.numbers.length > 0 && (
-          <Section title="Numbers">
-            <BulletList items={project.numbers} />
+        {project.limits && (
+          <Section title="Limits">
+            <p style={body}>{project.limits}</p>
           </Section>
         )}
 
@@ -308,8 +361,22 @@ export function ProjectDetail({ id }: { id: string }) {
                 className="pf-btn-primary w-full"
               >
                 <PlayCircle size={15} />
-                Open live
+                Open live site
               </Link>
+            )}
+            {liveUrl && (
+              <p
+                style={{
+                  fontFamily: sans,
+                  fontSize: 14,
+                  color: 'var(--ide-text-4)',
+                  textAlign: 'center',
+                  margin: '8px 0 0',
+                  overflowWrap: 'anywhere',
+                }}
+              >
+                {liveLabel(liveUrl)}
+              </p>
             )}
 
             {hasLinks && (

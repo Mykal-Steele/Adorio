@@ -14,14 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    keywords: project
-      ? [
-          project.name,
-          'Oakar Oo',
-          ...(project.language ? [project.language] : []),
-          ...project.tags.map((t) => t.replace('#', '')),
-        ]
-      : ['Oakar Oo', 'project'],
+    keywords: project ? [project.name, 'Oakar Oo', ...project.stack] : ['Oakar Oo', 'project'],
     openGraph: {
       title,
       description,

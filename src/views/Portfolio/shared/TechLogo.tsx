@@ -1,16 +1,21 @@
 import {
   siArchlinux,
   siBun,
+  siCloudflare,
   siDocker,
   siExpress,
+  siFigma,
   siGit,
+  siGithubactions,
   siGnubash,
   siHono,
   siHyprland,
   siJavascript,
   siLinux,
   siMongodb,
+  siNestjs,
   siNextdotjs,
+  siNginx,
   siNodedotjs,
   siPnpm,
   siPostgresql,
@@ -18,6 +23,7 @@ import {
   siPython,
   siReact,
   siSqlite,
+  siSwagger,
   siTailwindcss,
   siTypescript,
   siVim,
@@ -35,6 +41,7 @@ const ICONS: Record<string, SimpleIcon> = {
   nodejs: siNodedotjs,
   bun: siBun,
   express: siExpress,
+  nestjs: siNestjs,
   hono: siHono,
   postgresql: siPostgresql,
   sqlite: siSqlite,
@@ -43,6 +50,11 @@ const ICONS: Record<string, SimpleIcon> = {
   git: siGit,
   linux: siLinux,
   docker: siDocker,
+  nginx: siNginx,
+  githubactions: siGithubactions,
+  cloudflare: siCloudflare,
+  swagger: siSwagger,
+  figma: siFigma,
   archlinux: siArchlinux,
   hyprland: siHyprland,
   vim: siVim,
@@ -54,7 +66,11 @@ const ICONS: Record<string, SimpleIcon> = {
 const LETTERS: Record<string, string> = { java: 'Java', sql: 'SQL', azure: 'Az', mise: 'mi' };
 
 // Brand colors too pale to see on paper
-const COLOR_OVERRIDES: Record<string, string> = { linux: 'var(--ide-text-1)', hyprland: '#1a8fb0' };
+const COLOR_OVERRIDES: Record<string, string> = {
+  linux: 'var(--ide-text-1)',
+  hyprland: '#1a8fb0',
+  swagger: '#4f8a10',
+};
 
 // Near-black brand colors vanish on the dark themes, so they follow the text color
 function brandColor(hex: string) {

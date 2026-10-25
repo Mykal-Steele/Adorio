@@ -33,20 +33,25 @@ export interface Project {
   status: ProjectStatus;
   language?: string;
   langColor?: string;
+  // What it is, in one or two sentences
   summary: string;
-  problem?: string;
-  role?: string;
+  problem: string;
+  // What I built, as opposed to the team
+  role: string;
+  // The outcome a recruiter should remember
+  result: string;
+  // Skill names here link the project to /skills/<id>
+  stack: string[];
+  features?: string[];
   decisions?: ProjectDecision[];
-  changes?: string[];
   numbers?: string[];
+  limits?: string;
   note?: string;
-  tags: string[];
   color: string;
   npm?: string;
   repoUrl?: string;
   liveUrl?: string;
   links?: ProjectLink[];
-  requiresAccount?: boolean;
   image?: ProjectImage;
   screenshots?: ProjectShot[];
 }
@@ -54,7 +59,6 @@ export interface Project {
 export interface OtherProject {
   name: string;
   href: string;
-  requiresAccount?: boolean;
 }
 
 export interface TimelineItem {
@@ -76,7 +80,8 @@ export interface NowItem {
   detail: string;
 }
 
-export type SkillGroup = 'Languages' | 'Web' | 'Backend' | 'Data' | 'Tools';
+// Same groups as the Skills section of the resume, so the two lists stay in sync
+export type SkillGroup = 'Languages' | 'Web & Backend' | 'Databases' | 'Tools & Infra';
 
 export interface Skill {
   id: string;
@@ -192,37 +197,124 @@ export const portfolioData = {
 
   projects: [
     {
+      id: 'adorio',
+      name: 'Adorio',
+      status: 'STABLE',
+      language: 'TypeScript',
+      langColor: '#3178c6',
+      summary:
+        'My own platform. It started as a social feed for me and my classmates and grew to run this portfolio, coding practice, and my other apps. I build, host, and deploy all of it.',
+      problem:
+        'I wanted a place for me and my classmates to post updates and photos without using another platform. As I added more apps, I needed them under one domain, deployed automatically, and still up when the main server has a problem.',
+      role: 'Solo project. I built the social feed (posts, likes, threaded comments with @mentions, image uploads, and login with refresh tokens), the Express backend, the Next.js frontend, and all of the infrastructure.',
+      result:
+        'Running since February 2025. Every push to main is tested against production containers and deployed with no manual steps, and if Azure goes down, Cloudflare switches traffic to a backup copy on Northflank on its own.',
+      stack: [
+        'TypeScript',
+        'Next.js',
+        'React',
+        'Tailwind CSS',
+        'Node.js',
+        'Express',
+        'MongoDB',
+        'Docker',
+        'Nginx',
+        'Azure',
+        'Cloudflare',
+        'GitHub Actions',
+        'Zod',
+        'Cloudinary',
+      ],
+      features: [
+        'The feed renders its first 12 posts on the server and streams them in, then infinite scroll takes over. Likes wait 100 ms, so fast clicks send one request.',
+        'The backend is split into controllers, services, models, and schemas. Zod checks every request, and login, posting, likes, and code runs each have a rate limit.',
+        'One container runs Nginx, the Express API, and the Next.js server on Azure Container Apps, with health checks and scaling from 1 to 3 copies.',
+        'GitHub Actions checks format and lint, builds, runs integration tests against production containers, deploys to Azure without a stored password (OIDC), waits for the health check, and clears the Cloudflare cache.',
+        'A Cloudflare Worker sends traffic to Azure. Two failed requests in a row switch it to the Northflank copy, and a check every 5 minutes switches it back once Azure is healthy.',
+        'The Azure setup is written in Bicep, with a $150 monthly budget and spending alerts.',
+      ],
+      decisions: [
+        {
+          title: 'One container for the whole site',
+          reason:
+            'Nginx, the API, and the Next.js server ship as one image and talk over localhost, so a deploy is one image and one health check.',
+        },
+        {
+          title: 'Failover instead of a second region',
+          reason:
+            'A Worker and a backup copy on Northflank keep the site up during an Azure outage without paying for two Azure regions.',
+        },
+        {
+          title: 'Moved hosts as it grew',
+          reason:
+            'Render in February 2025, a DigitalOcean server in May 2026, and Azure Container Apps in August 2026, once the site needed scaling, managed TLS, and deploys without SSH.',
+        },
+      ],
+      numbers: [
+        'Over 1,200 commits since January 2025, all mine.',
+        '195 unit tests and 76 integration tests.',
+      ],
+      color: '#00ffc2',
+      repoUrl: 'github.com/Mykal-Steele/Adorio',
+      liveUrl: 'https://adorio.space',
+      image: {
+        src: '/projects/social/cover.webp',
+        alt: 'The /social feed on adorio.space with the post composer and recent posts pinned to the wall.',
+      },
+    },
+    {
       id: 'chronochunk',
       name: 'ChronoChunk',
       status: 'BETA',
       language: 'Python',
       langColor: '#3572A5',
       summary:
-        'A Discord bot for my KMUTT classes that answers course questions from scraped class material and cites the source.',
+        'A Discord bot for my KMUTT classes. It answers course questions from the real class material (lecture recordings, slides, assignments, and files the professors upload) and says where each answer came from.',
       problem:
-        'Answering one course question meant digging through Teams posts, SharePoint lecture transcripts, the textbook, and the syllabus. I wanted one place to ask, with a citation so the answer can be checked.',
-      role: 'Solo developer. I built the scraping and retrieval, citation handling, PDF study guides with practice questions, diagrams, music playback, and channel summaries.',
+        'Finding the answer to one course question meant scrolling through hours of lecture recordings and slide decks spread across Teams and SharePoint. A general chatbot answers from memory and can make things up. I wanted one place to ask that answers from our own material and cites it, so anyone can check the answer.',
+      role: 'Solo project. I built the sync that pulls class material into a searchable database, the search itself, the step that decides when a question needs course material, study mode, and the deployment on Azure.',
+      result:
+        'Classmates use it to study for 9 courses. Its answers come from about 183 hours of lecture transcripts plus the slides and assignments, and each one cites the textbook page, slide, or lecture timestamp it used.',
+      stack: [
+        'Python',
+        'SQLite',
+        'Docker',
+        'Azure',
+        'GitHub Actions',
+        'discord.py',
+        'Azure OpenAI',
+        'sqlite-vec',
+      ],
+      features: [
+        'A sync on my PC pulls lecture transcripts, slides, and assignments from Teams and SharePoint. Transcripts are cut into chunks of about 75 seconds and slides into one chunk per page.',
+        'Search combines meaning-based search (embeddings in sqlite-vec) with keyword search (SQLite FTS5) and merges the two rankings. Adding keyword search is what got the English test set to 9 out of 10.',
+        'Slide pages are also read as images so tables and charts can be found, and Thai slides are translated to English.',
+        'Study mode writes quizzes of up to 100 questions with an answer key, PDF study guides, and system diagrams.',
+        'It also plays music, sums up a channel with /tldr, and can search the web.',
+      ],
       decisions: [
         {
-          title: 'SQLite for storage and cache',
+          title: 'SQLite for everything',
           reason:
-            'I needed something lightweight that keeps data when the bot restarts and works as a cache for scraped material.',
+            'Vectors, keyword search, and bot data all live in SQLite, so there is no separate database server to run on a small VM.',
+        },
+        {
+          title: 'Spending caps',
+          reason:
+            'AI calls stop at $2.50 a day, $20 a month, and a limit per user, so one heavy user cannot run up the bill.',
         },
         {
           title: 'Docker Compose on one small Azure VM',
           reason:
-            'One deployment target keeps the bot and its dependencies together. Daily backups and a health-check endpoint cover restarts.',
+            'The bot runs on a VM with 1 GiB of RAM. A health check runs every minute and the database is backed up daily, keeping the newest 7.',
         },
       ],
-      changes: [
-        'Course answers cite the source: a textbook page, a lecture timestamp, or a syllabus page.',
-        'PDF study guides can include practice questions, and the bot can draw system diagrams.',
-      ],
       numbers: [
-        'About 3 to 5 classmates use it regularly, with a few more using it privately.',
-        'The bot runs on one small Azure VM.',
+        'About 3 to 5 classmates use it regularly.',
+        'Two courses alone came to 3,944 chunks, embedded for about $0.015.',
+        'Search takes about 51 ms over 50,000 chunks.',
+        '995 tests, run with ruff and pyright on every push.',
       ],
-      tags: ['#PYTHON', '#DISCORD', '#SQLITE', '#AZURE'],
       color: '#fe9d00',
       repoUrl: 'github.com/Mykal-Steele/ChronoChunk',
       image: {
@@ -278,10 +370,29 @@ export const portfolioData = {
       language: 'TypeScript',
       langColor: '#3178c6',
       summary:
-        'Wallets, top-ups, transfers, and SCB payments for a 50+ student class building one smart city platform.',
+        'The wallet and payment part of a smart city platform built by a 50+ student class at KMUTT. City services like the metro and insurance cards are paid from it.',
       problem:
-        'The class platform needed one financial module for wallets, top-ups, user-to-user transfers, and SCB payments. Two transfers at the same time must not corrupt a balance, and a user must never exist without a wallet.',
-      role: 'Led the 3-person financial team and built the whole financial flow: top-ups, the SCB bank integration, the React transaction screens, and live status updates over WebSockets, later moved to Pusher Channels. My work is in src/modules/Financial of the CSC290 backend.',
+        'Every service in the class platform needed one way to hold and move money: wallets, top-ups, transfers between users, and real bank payments. Two transfers at the same time must not corrupt a balance, and a user must never exist without a wallet.',
+      role: 'Led the 3-person financial team. I built the wallet and top-up flow, user-to-user transfers, and the SCB bank integration on the backend, and the financial page, top-up page with QR payment, transaction history, and transfer screen on the frontend. Teammates built the metro and insurance card parts.',
+      result:
+        'Students could top up a wallet with a real PromptPay QR code from SCB and pay city services from it. The module has 32 API endpoints, and I wrote most of the wallet and SCB code (24 of 27 wallet commits and 22 of 23 SCB commits).',
+      stack: [
+        'TypeScript',
+        'Hono',
+        'Prisma',
+        'PostgreSQL',
+        'React',
+        'Swagger / OpenAPI',
+        'Zod',
+        'Pusher Channels',
+        'SCB API',
+      ],
+      features: [
+        'SCB integration: OAuth tokens are cached until they expire, payment data is encrypted with the SCB public key, and top-ups create a PromptPay QR code (QR v1, because v2 was under maintenance).',
+        "Metro card top-ups charge the card owner's wallet. Donations take a 3% fee.",
+        'Payment status first reached the browser through Server-Sent Events. I later moved it to Pusher Channels.',
+        "Every endpoint is described with zod-openapi, so the Swagger docs and the frontend's generated API client come from the same schema.",
+      ],
       decisions: [
         {
           title: 'Atomic balance changes',
@@ -294,18 +405,16 @@ export const portfolioData = {
             'Creating a user and their wallet runs in one Prisma transaction, so there is never a user without a wallet.',
         },
         {
-          title: 'One active wallet per user',
+          title: 'One wallet per user',
           reason:
-            'A constraint enforces one wallet per user, and a transfer checks that the wallet is active first.',
+            'The service refuses a second wallet for the same user, and a transfer checks that the wallet is active first.',
         },
       ],
-      changes: [
-        'SCB integration: OAuth token generation with caching, data encryption with the SCB public key, and PromptPay QR creation. We used QR v1 because v2 was under maintenance.',
-        'Metro card top-ups automatically charge the card owner. Donations take a 3% fee.',
-        'Moved live updates to Pusher Channels.',
+      numbers: [
+        '83 backend commits and 38 frontend commits from me between October and December 2025.',
+        'About 2,700 lines added to the backend module and about 3,000 to the frontend.',
       ],
-      note: 'My commits are under OakarOo / Mykal-Steele.',
-      tags: ['#HONO', '#PRISMA', '#ZOD', '#TYPESCRIPT', '#REACT'],
+      note: 'My commits are under OakarOo / Mykal-Steele. The class site is offline now, so there is no live demo.',
       color: '#00ffc2',
       repoUrl: 'github.com/CSC290-2025/backend',
       image: {
@@ -330,22 +439,47 @@ export const portfolioData = {
       language: 'TypeScript',
       langColor: '#3178c6',
       summary:
-        'Java and JavaScript practice problems with a CodeMirror editor and per-problem tests.',
+        'A practice site for programming classes. Students solve problems in an in-browser editor and their code is checked against tests right away.',
       problem:
-        'I wanted the Java class I mentor to practice problems that match the course, and a place to work through JavaScript algorithms with a friend.',
-      role: 'Made the Java problems and the JavaScript set. Built the editor, test runner, and progress storage.',
+        'Students in the Java class I mentor needed practice that matches the course, with instant feedback instead of waiting for me to check their code. Paid code-runner APIs charge per run, which does not work for a whole class running code.',
+      role: 'Solo. I wrote the problems and their tests, built the editor page and test runner, and set up the sandbox on Azure that runs Java and Python.',
+      result:
+        'The Java class I mentor practices on it during class. The sandbox costs about $6 a month because it only runs while someone is coding.',
+      stack: [
+        'TypeScript',
+        'Java',
+        'Python',
+        'JavaScript',
+        'Next.js',
+        'React',
+        'Express',
+        'Azure',
+        'CodeMirror',
+        'Piston',
+      ],
+      features: [
+        '16 problems: 11 algorithm problems that each come in JavaScript and Python, plus 5 Java problems that follow the course.',
+        'JavaScript tests run in the browser. Java and Python code goes to the backend, which runs it on Piston and checks the output of each test.',
+        'Opening a Java or Python problem starts the sandbox VM. It turns off after 30 minutes without a run, and a daily limit plus a timer on the VM itself stop it from running all night.',
+        'While the sandbox is starting, the API answers "not ready" instead of a server error, so the site\'s failover does not mistake it for an outage.',
+        'Progress is saved per problem and language in the browser.',
+      ],
       decisions: [
         {
           title: 'Self-hosted Piston',
           reason:
-            'Paid code-runner APIs charge per run, so Java and Python run on a Piston instance I host on an Azure VM.',
+            'Paid code-runner APIs charge per run, so Java and Python run on a Piston sandbox I host on an Azure VM.',
+        },
+        {
+          title: 'One VM that is off by default',
+          reason:
+            'An always-on scale set and load balancer cost about $60 a month sitting idle. One VM that starts on demand costs $0.22 for each hour it runs.',
         },
         {
           title: 'JavaScript in the browser',
           reason: 'JavaScript problems run locally, so only Java and Python need the sandbox.',
         },
       ],
-      tags: ['#JAVA', '#JAVASCRIPT', '#CODEMIRROR', '#PISTON'],
       color: '#00ffc2',
       liveUrl: '/coding',
       image: {
@@ -360,25 +494,40 @@ export const portfolioData = {
       language: 'TypeScript',
       langColor: '#3178c6',
       summary:
-        'NFC attendance for a KMUTT IoT hackathon. Students tap a phone or card instead of scanning a QR code.',
+        'An attendance system built at a KMUTT IoT hackathon. Students check in by tapping an NFC card on a reader box instead of scanning a QR code.',
       problem:
-        'Every student had to scan a QR code to check in. A tap is faster and removes that step.',
-      role: 'Team of three. I wrote the ESP32 firmware (state machine, touch screen UI, audio feedback, PN532 reader, under 1 second per scan) and much of the backend and frontend.',
+        'Checking in meant every student scanning a QR code on their phone, which is slow with a full room. A tap on a reader is faster and needs no phone at the door.',
+      role: 'Team of three. I wrote all of the ESP32 firmware for the reader box, and most of the backend and frontend: about 70% and 60% of the commits, including the check-in logic, card registration, and the register-card page.',
+      result:
+        '2nd place (1st runner-up) at the KMUTT SIT IoT Hackathon 2026. A check-in takes under a second from tap to confirmation on the box.',
+      stack: [
+        'TypeScript',
+        'React',
+        'Tailwind CSS',
+        'Express',
+        'Prisma',
+        'PostgreSQL',
+        'ESP32',
+        'Socket.io',
+      ],
+      features: [
+        "Students sign up on the web app, register for events, and link their NFC card on the reader box or with their phone's NFC.",
+        'The box reads the card with a PN532 reader and sends its ID to the Express API over HTTPS.',
+        'A known card is marked present and logged. An unknown card makes the box show a QR code that opens registration. A second tap at the same event is not counted twice.',
+        'The firmware is a 5-state state machine with a touch screen and 4 buzzer tones, so students know the result without looking.',
+      ],
       decisions: [
         {
-          title: 'HTTPS polling from the ESP32',
+          title: 'The box talks HTTPS to the API',
           reason:
-            'Each scan goes to the backend over HTTPS, and the device polls for the card status.',
+            'Each scan is one request to the backend, so the box needs no database and the web app stays the single source of truth.',
         },
         {
-          title: 'Socket.io for the dashboard',
+          title: 'Socket.io for card linking',
           reason:
-            'The backend pushes live updates to the web app, so the attendance list updates without a refresh.',
+            'The backend tells the web app the moment a card is linked, so the registration page confirms it without a refresh.',
         },
       ],
-      changes: ['The professor liked removing the QR step.'],
-      numbers: ['2nd place, KMUTT SIT IoT Hackathon, January 2026.'],
-      tags: ['#ESP32', '#EXPRESS', '#POSTGRES', '#SOCKETIO'],
       color: '#fe9d00',
       links: [
         {
@@ -390,6 +539,7 @@ export const portfolioData = {
           href: 'https://github.com/kmutt-iot-hackathon-group-8/frontend',
         },
       ],
+      liveUrl: 'https://frontend-six-chi-19.vercel.app',
       image: {
         src: '/projects/nfc-attendance/team-presenting.webp',
         alt: 'Oakar and two teammates presenting the NFC attendance box on stage at the SIT IoT Hackathon 2026.',
@@ -432,26 +582,43 @@ export const portfolioData = {
       language: 'JavaScript',
       langColor: '#f7df1e',
       summary:
-        'An npm CLI that scaffolds an Express + TypeScript + Prisma + SQLite backend in one command.',
+        'An npm CLI that creates an Express + TypeScript + Prisma + SQLite backend with one command: npm create adorex.',
       problem:
-        'Setting up the same stack for every class project was repeated work, and students lost time before they reached the database part.',
-      role: 'Built and published the CLI.',
+        'Setting up the same stack for every class project was repeated work, and students lost time on setup before they reached the database part of the course.',
+      role: 'Solo. I built, tested, and published the CLI and its template.',
+      result:
+        'It became the Web Dev class template, and about 30 to 40 students started their projects with it. Setup went from about 2 hours to about 20 minutes.',
+      stack: [
+        'TypeScript',
+        'JavaScript',
+        'Node.js',
+        'Express',
+        'Prisma',
+        'SQLite',
+        'Zod',
+        'GitHub Actions',
+      ],
+      features: [
+        'Asks for a project name (or takes one as an argument), and can create the project in the current folder.',
+        'The new project has a running Express server with a health route, a Prisma schema on SQLite, environment settings, and scripts to run, typecheck, build, and start.',
+        'Works with npm, pnpm, yarn, and bun, and starts a git repository for you.',
+      ],
       decisions: [
         {
           title: 'Defaults match the class stack',
           reason:
             'Students start with Express, TypeScript, Prisma, and SQLite, a stack they already know from class.',
         },
-      ],
-      changes: [
-        'It became the Web Dev class template.',
-        'I still use it to start my own projects.',
+        {
+          title: 'Test the generated app, not just the CLI',
+          reason:
+            'CI creates a real project on Ubuntu, macOS, and Windows with Node 22 and 24, then typechecks, builds, and starts it.',
+        },
       ],
       numbers: [
-        'Cut new-project setup from about 2 hours to about 20 minutes.',
-        '30 to 40 students used it as the class template.',
+        '2,649 downloads on npm in the last year.',
+        '19 published versions since April 2026.',
       ],
-      tags: ['#NPM', '#CLI', '#EXPRESS', '#PRISMA'],
       color: '#00ffc2',
       npm: 'npmjs.com/package/create-adorex',
       image: {
@@ -461,64 +628,53 @@ export const portfolioData = {
       repoUrl: 'github.com/Mykal-Steele/adorex-cli',
     },
     {
-      id: 'social',
-      name: 'Social Feed',
-      status: 'STABLE',
-      language: 'TypeScript',
-      langColor: '#3178c6',
-      summary:
-        'Where Adorio started: posts, likes, threaded comments, image uploads, and JWT auth.',
-      problem:
-        'I wanted a place for me and my classmates to post updates and images without another platform.',
-      role: 'Built the feed, auth, uploads, comments, and the streaming first page.',
-      decisions: [
-        {
-          title: 'Stream the first page',
-          reason: 'PostsLoader fetches page one on the server, then infinite scroll takes over.',
-        },
-        {
-          title: 'Debounce likes',
-          reason: 'Rapid clicks wait 100 ms and only the final state is sent.',
-        },
-      ],
-      tags: ['#NEXTJS', '#SUSPENSE', '#MONGODB'],
-      color: '#00ffc2',
-      liveUrl: '/social',
-      image: {
-        src: '/projects/social/cover.webp',
-        alt: 'The /social feed with the post composer and recent posts pinned to the wall.',
-      },
-      requiresAccount: true,
-    },
-    {
       id: 'cognimax',
       name: 'CogniMax',
       status: 'BETA',
       language: 'Python',
       langColor: '#3572A5',
       summary:
-        'A chess engine that models how a player at a given skill level plays, not just the strongest move.',
+        'A chess engine that plays to beat a specific opponent quickly. It predicts how a player at a given rating is likely to reply and picks the move with the best expected result, instead of assuming the opponent plays perfectly.',
       problem:
-        'A normal chess engine assumes perfect play. I wanted one that models how a player at a target Elo actually plays.',
-      role: 'Research intern at IC2, KMUTT. Built the engine and ran the experiments.',
+        "Engines like Stockfish assume the opponent always finds the best reply. Against a real 1200-rated player that wastes chances, so games drag on. Training bots and game AI that play at a person's level need an engine that takes the opponent's likely mistakes into account.",
+      role: 'Research intern at the IC2 Lab, KMUTT, June to July 2026. I built the engine, designed and ran the experiments, and wrote the statistics and the scripts that recompute every number in the report from the raw games.',
+      result:
+        'Across 4,120 games against a human-like opponent at 11 ratings from 600 to 2600, CogniMax won in a median of 22 moves, versus 27 for Stockfish searching to the same depth. It won faster at every rating (up to 31% fewer moves at 2400) and lost no games.',
+      stack: [
+        'Python',
+        'PyTorch',
+        'python-chess',
+        'Stockfish',
+        'maia3',
+        'pandas',
+        'SciPy',
+        'statsmodels',
+      ],
+      features: [
+        "Stockfish at depth 8 proposes CogniMax's candidate moves and scores the positions.",
+        'maia3, a neural network trained on human games, predicts how likely the opponent is to play each reply at the target rating.',
+        'A 3-move-deep expectimax search combines the two and picks the move with the best expected result. A setting controls how much risk it takes.',
+        'In every game the opponent is maia3 at the target rating, picking moves the way a person at that level would.',
+      ],
       decisions: [
         {
-          title: 'Weight replies by maia3',
+          title: 'Win speed as the main measure',
           reason:
-            'The search takes Stockfish top replies and weights them by maia3 predicted human-reply probabilities, with a risk-sensitivity parameter.',
+            'Both engines won nearly every game, so the useful question was how fast each one wins.',
         },
         {
-          title: 'Tests on the numbers',
+          title: 'Statistics that hold up',
           reason:
-            'Bootstrap A/B tests, Holm-corrected paired tests, power analysis, and scripts that recompute every number from the raw data.',
+            'Bootstrap A/B tests, Holm-corrected paired tests, power analysis, and survival models, plus scripts that check every claim in the report against the raw data.',
         },
       ],
       numbers: [
-        '4,120 games at 11 skill levels (Elo 600 to 2600).',
-        'Games about 20% shorter on average, up to 31%.',
-        'Won faster than a same-depth Stockfish baseline at every level.',
+        'CogniMax: 2,056 wins, 4 draws, 0 losses. Stockfish: 2,030 wins, 30 draws, 0 losses.',
+        "Its chance of winning by any given move was 1.5 times Stockfish's at rating 600 and 2.9 times at 2400.",
+        'About 30,500 lines of Python for the engine, experiments, analysis, and report.',
       ],
-      tags: ['#PYTHON', '#CHESS', '#PYTORCH', '#RESEARCH'],
+      limits:
+        "The gain is for engines limited to a shallow search. CogniMax thinks about 4.4 seconds a move against Stockfish's 30 ms, and a Stockfish given the same time wins at least as fast. A reply predictor built from Stockfish alone also did as well as maia3, which the report treats as its main finding.",
       color: '#fe9d00',
       repoUrl: 'github.com/Mykal-Steele/CogniMax',
       image: {
@@ -556,24 +712,19 @@ export const portfolioData = {
       problem:
         'A coding agent writes code fast, but people still have to decide what gets built and when it counts as done. Uniloom keeps the plan, the checklists, and the approvals in one place, and agents connect to it over MCP.',
       role: 'One of three main contributors at UniCorp. I built project invite links with optional approval (the API, the join page, join requests, and cleanup of revoked links) and the one-command local setup that works on Windows, macOS, and Linux.',
-      decisions: [
-        {
-          title: 'Sign in through uniAuth',
-          reason:
-            "uniAuth is UniCorp's shared sign-on: one account for Unishare, Unigym, and Uniloom. Uniloom is an OpenID Connect client of it through Better Auth, and agents sign in through it too.",
-        },
-        {
-          title: 'Checklists gate the board',
-          reason:
-            "A slice can't move until its 3 to 6 done-when items allow it, so done means the same thing for people and agents.",
-        },
-        {
-          title: 'One command to start',
-          reason:
-            'bun run setup writes the env files, starts both databases, and migrates. bun run dev:local starts uniAuth, the API, the web app, and the worker together.',
-        },
+      result:
+        'People join projects through the invite links I built, and a new contributor gets the whole app running locally with two commands on any of the three operating systems.',
+      stack: [
+        'TypeScript',
+        'Next.js',
+        'Hono',
+        'Bun',
+        'Prisma',
+        'PostgreSQL',
+        'Better Auth',
+        'OpenID Connect',
+        'MCP',
       ],
-      tags: ['#NEXTJS', '#HONO', '#BUN', '#PRISMA', '#POSTGRESQL', '#OIDC'],
       color: '#8b5cf6',
       repoUrl: 'github.com/unishare-oss/uniloom',
       liveUrl: 'https://loom.psstee.me/',
@@ -585,13 +736,12 @@ export const portfolioData = {
   ] as Project[],
 
   otherProjects: [
-    { name: 'Adorio', href: 'https://github.com/Mykal-Steele/Adorio' },
     { name: 'CozyTalk', href: 'https://github.com/CozyTalk/CozyTalk' },
     { name: 'Vexta', href: 'https://github.com/Mykal-Steele/Vexta' },
     { name: 'Mistbound', href: 'https://github.com/Mykal-Steele/MistboundMain' },
-    { name: 'Rhythm Dots', href: '/rygame', requiresAccount: true },
+    { name: 'Rhythm Dots', href: '/rygame' },
     { name: 'ArchMaster', href: '/cao/' },
-    { name: 'Runway', href: '/finance', requiresAccount: true },
+    { name: 'Runway', href: '/finance' },
     { name: 'SCB API guides', href: '/smartcity' },
   ] as OtherProject[],
 
@@ -599,23 +749,29 @@ export const portfolioData = {
     { id: 'typescript', name: 'TypeScript', group: 'Languages', story: '' },
     { id: 'javascript', name: 'JavaScript', group: 'Languages', story: '' },
     { id: 'java', name: 'Java', group: 'Languages', story: '' },
-    { id: 'sql', name: 'SQL', group: 'Languages', story: '' },
     { id: 'python', name: 'Python', group: 'Languages', story: '' },
-    { id: 'react', name: 'React', group: 'Web', story: '' },
-    { id: 'nextjs', name: 'Next.js', group: 'Web', story: '' },
-    { id: 'tailwindcss', name: 'Tailwind CSS', group: 'Web', story: '' },
-    { id: 'nodejs', name: 'Node.js', group: 'Backend', story: '' },
-    { id: 'bun', name: 'Bun', group: 'Backend', story: '' },
-    { id: 'express', name: 'Express', group: 'Backend', story: '' },
-    { id: 'hono', name: 'Hono', group: 'Backend', story: '' },
-    { id: 'postgresql', name: 'PostgreSQL', group: 'Data', story: '' },
-    { id: 'sqlite', name: 'SQLite', group: 'Data', story: '' },
-    { id: 'mongodb', name: 'MongoDB', group: 'Data', story: '' },
-    { id: 'prisma', name: 'Prisma', group: 'Data', story: '' },
-    { id: 'git', name: 'Git', group: 'Tools', story: '' },
-    { id: 'linux', name: 'Linux', group: 'Tools', story: '' },
-    { id: 'docker', name: 'Docker', group: 'Tools', story: '' },
-    { id: 'azure', name: 'Azure', group: 'Tools', story: '' },
+    { id: 'sql', name: 'SQL', group: 'Languages', story: '' },
+    { id: 'react', name: 'React', group: 'Web & Backend', story: '' },
+    { id: 'nextjs', name: 'Next.js', group: 'Web & Backend', story: '' },
+    { id: 'tailwindcss', name: 'Tailwind CSS', group: 'Web & Backend', story: '' },
+    { id: 'nodejs', name: 'Node.js', group: 'Web & Backend', story: '' },
+    { id: 'bun', name: 'Bun', group: 'Web & Backend', story: '' },
+    { id: 'express', name: 'Express', group: 'Web & Backend', story: '' },
+    { id: 'nestjs', name: 'NestJS', group: 'Web & Backend', story: '' },
+    { id: 'hono', name: 'Hono', group: 'Web & Backend', story: '' },
+    { id: 'prisma', name: 'Prisma', group: 'Web & Backend', story: '' },
+    { id: 'postgresql', name: 'PostgreSQL', group: 'Databases', story: '' },
+    { id: 'sqlite', name: 'SQLite', group: 'Databases', story: '' },
+    { id: 'mongodb', name: 'MongoDB', group: 'Databases', story: '' },
+    { id: 'docker', name: 'Docker', group: 'Tools & Infra', story: '' },
+    { id: 'nginx', name: 'Nginx', group: 'Tools & Infra', story: '' },
+    { id: 'githubactions', name: 'GitHub Actions', group: 'Tools & Infra', story: '' },
+    { id: 'azure', name: 'Azure', group: 'Tools & Infra', story: '' },
+    { id: 'cloudflare', name: 'Cloudflare', group: 'Tools & Infra', story: '' },
+    { id: 'git', name: 'Git', group: 'Tools & Infra', story: '' },
+    { id: 'linux', name: 'Linux', group: 'Tools & Infra', story: '' },
+    { id: 'swagger', name: 'Swagger / OpenAPI', group: 'Tools & Infra', story: '' },
+    { id: 'figma', name: 'Figma', group: 'Tools & Infra', story: '' },
   ] as Skill[],
 
   setup: [

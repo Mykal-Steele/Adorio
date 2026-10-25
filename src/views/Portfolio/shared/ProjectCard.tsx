@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Lock } from 'lucide-react';
 import type { Project } from '../data/portfolio';
 import { sans, serif } from '../constants/fonts';
 import { eyebrow, preview } from '../constants/type';
 import { Tape } from './IDECard';
+import { LiveTag } from './LiveTag';
 import { ProjectImage } from './ProjectImage';
 import { StatusLabel } from './StatusLabel';
 
@@ -34,14 +34,9 @@ export function ProjectCard({ project }: { project: Project }) {
 
       <div className="flex flex-1 flex-col" style={{ padding: '20px 12px 12px' }}>
         <div className="flex flex-wrap items-center" style={{ gap: 12 }}>
+          {project.liveUrl && <LiveTag />}
           {project.language && <span style={eyebrow}>{project.language}</span>}
           <StatusLabel status={project.status} />
-          {project.requiresAccount && (
-            <span className="inline-flex items-center" style={{ ...eyebrow, gap: 4 }}>
-              <Lock size={12} />
-              Account
-            </span>
-          )}
         </div>
 
         <h3
@@ -75,7 +70,7 @@ export function ProjectCard({ project }: { project: Project }) {
           className="mt-auto"
           style={{ fontFamily: sans, fontSize: 14, color: 'var(--ide-text-5)', paddingTop: 16 }}
         >
-          {project.tags.slice(0, 3).join('  ')}
+          {project.stack.slice(0, 4).join(', ')}
         </p>
       </div>
     </Link>

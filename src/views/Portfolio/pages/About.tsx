@@ -10,10 +10,10 @@ import { useResponsive } from '../hooks/useResponsive';
 import { useContentWidth } from '../hooks/useContentWidth';
 import { sans, serif } from '../constants/fonts';
 import { body, eyebrow, preview } from '../constants/type';
-import { LogoTile, ProjectImage, SectionLabel, StatusLabel, Tape } from '../shared';
+import { LiveTag, LogoTile, ProjectImage, SectionLabel, StatusLabel, Tape } from '../shared';
 
 const FEATURED_IDS = ['chronochunk', 'coding-challenges', 'create-adorex'];
-const SKILL_GROUPS: SkillGroup[] = ['Languages', 'Web', 'Backend', 'Data', 'Tools'];
+const SKILL_GROUPS: SkillGroup[] = ['Languages', 'Web & Backend', 'Databases', 'Tools & Infra'];
 
 const links = [
   { label: 'GitHub', href: `https://${portfolioData.github}`, icon: Github, external: true },
@@ -30,6 +30,10 @@ const facts = [
 
 // What a recruiter should take away in one pass; each line links to the full write-up
 const proof = [
+  {
+    id: 'adorio',
+    text: ', the site you are on. I run it on Azure with automatic deploys and a backup copy that takes over if Azure goes down.',
+  },
   {
     id: 'smartcity-financial',
     text: ', the payment backend for a class-wide project, which I led.',
@@ -222,6 +226,7 @@ function FeaturedProject({
 
       <div>
         <div className="flex flex-wrap items-center" style={{ gap: 12 }}>
+          {project.liveUrl && <LiveTag />}
           {project.language && <span style={eyebrow}>{project.language}</span>}
           <StatusLabel status={project.status} />
         </div>
@@ -423,7 +428,7 @@ function TechSheet({ isMobile }: { isMobile: boolean }) {
           <div
             key={label}
             className="grid items-center"
-            style={{ gridTemplateColumns: isMobile ? '1fr' : '112px 1fr', gap: isMobile ? 8 : 16 }}
+            style={{ gridTemplateColumns: isMobile ? '1fr' : '132px 1fr', gap: isMobile ? 8 : 16 }}
           >
             <dt
               style={{
@@ -637,6 +642,11 @@ export function About() {
         <div style={{ maxWidth: 720 }}>
           <SectionLabel>About me</SectionLabel>
           <div className="flex flex-col" style={{ gap: 16 }}>
+            <p style={body}>
+              Most of my work is on the server side. I mainly use TypeScript with Express or Hono,
+              Prisma with PostgreSQL or SQLite, and Docker on Azure behind Nginx and Cloudflare,
+              with React and Next.js when a project needs a frontend.
+            </p>
             <p style={body}>
               I got into programming at 15 through online HTML classes and Scratch, then spent a few
               years on games and small Python bots. At KMUTT I moved to backend work, and most of
