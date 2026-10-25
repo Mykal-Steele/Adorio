@@ -219,7 +219,7 @@ function FeaturedProject({
         <h3
           style={{
             fontFamily: serif,
-            fontSize: 32,
+            fontSize: isMobile ? 24 : 30,
             fontWeight: 700,
             lineHeight: 1.1,
             color: 'var(--ide-text-1)',

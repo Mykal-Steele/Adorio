@@ -6,9 +6,9 @@ export function SectionLabel({ children }: { children: ReactNode }) {
     <h2
       style={{
         fontFamily: serif,
-        fontSize: 28,
+        fontSize: 'clamp(30px, 4vw, 40px)',
         fontWeight: 700,
-        lineHeight: 1.2,
+        lineHeight: 1.15,
         letterSpacing: '-0.01em',
         color: 'var(--ide-text-1)',
         margin: '0 0 32px',
