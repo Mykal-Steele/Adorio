@@ -105,7 +105,10 @@ export function Contact() {
       className={isMobile ? 'px-4 pt-8 pb-16' : 'px-8 pt-16 pb-24'}
       style={{ maxWidth: 776, margin: '0 auto' }}
     >
-      <PageHeader title="Contact" subtitle="Use the channels below or send a message directly." />
+      <PageHeader
+        title="Contact"
+        subtitle="You can use the channels below, or just send me a message directly if you want to collab or ask me anything!"
+      />
 
       <IDECard style={{ marginTop: 48 }}>
         <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>

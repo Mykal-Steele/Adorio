@@ -92,6 +92,18 @@ function BuiltWith({ stack }: { stack: string[] }) {
   );
 }
 
+function Paragraphs({ text }: { text: string }) {
+  return (
+    <div className="flex flex-col" style={{ gap: 12 }}>
+      {text.split(/\n\s*\n/).map((paragraph) => (
+        <p key={paragraph} style={body}>
+          {paragraph}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 // Wide screenshots take the full width. Tall ones sit three to a row, two when there
 // are only two, and a single one is centered.
 function shotColumn(shot: ProjectShot, tallCount: number) {
@@ -314,6 +326,18 @@ export function ProjectDetail({ id }: { id: string }) {
         {project.numbers && project.numbers.length > 0 && (
           <Section title="By the numbers">
             <BulletList items={project.numbers} />
+          </Section>
+        )}
+
+        {project.hardPart && (
+          <Section title="The hard part">
+            <Paragraphs text={project.hardPart} />
+          </Section>
+        )}
+
+        {project.learned && (
+          <Section title="What I learned">
+            <Paragraphs text={project.learned} />
           </Section>
         )}
 

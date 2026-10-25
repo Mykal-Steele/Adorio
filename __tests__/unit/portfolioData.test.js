@@ -80,6 +80,25 @@ describe('portfolio projects', () => {
   });
 });
 
+describe('portfolio writing', () => {
+  test('should give every skill a story', () => {
+    const empty = portfolioData.skills.filter((s) => !s.story.trim()).map((s) => s.name);
+    expect(empty).toEqual([]);
+  });
+
+  test('should describe every other project in a line', () => {
+    const empty = portfolioData.otherProjects.filter((p) => !p.detail?.trim()).map((p) => p.name);
+    expect(empty).toEqual([]);
+  });
+
+  test('should give every role at least one highlight', () => {
+    const empty = portfolioData.experience
+      .filter((e) => e.highlights.length === 0)
+      .map((e) => e.role);
+    expect(empty).toEqual([]);
+  });
+});
+
 describe('portfolio experience', () => {
   const MONTHS = [
     'Jan',

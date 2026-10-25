@@ -45,6 +45,9 @@ export interface Project {
   features?: string[];
   decisions?: ProjectDecision[];
   numbers?: string[];
+  // In my own words, for the questions recruiters ask in interviews
+  hardPart?: string;
+  learned?: string;
   limits?: string;
   note?: string;
   color: string;
@@ -59,6 +62,7 @@ export interface Project {
 export interface OtherProject {
   name: string;
   href: string;
+  detail: string;
 }
 
 export interface TimelineItem {
@@ -121,14 +125,14 @@ export const portfolioData = {
       color: '#00a4ef',
       since: 'Apr 2026',
       detail:
-        'I share Microsoft learning resources and events, and help build the student tech community.',
+        'I share Microsoft Learn resources and events on social media and go to community events. The Azure credit is also what hosts most of my projects.',
     },
     {
       name: 'Google Developer Group (GDG)',
       short: 'GDG',
       color: '#4285f4',
       since: 'Oct 2025',
-      detail: 'Member of GDG on Campus KMUTT and GDG Cloud Bangkok.',
+      detail: 'Member of GDG on Campus KMUTT and GDG Cloud Bangkok. I go to their events.',
     },
   ],
 
@@ -158,6 +162,8 @@ export const portfolioData = {
       highlights: [
         'Mentor 18 first-year CS students with weekly sessions on programming logic, syntax, and OOP',
         'Run code review, debugging help, and exam prep as a hybrid class, with code and notes shared in Microsoft Teams',
+        'Built Coding Challenges so they can practice problems that match what they learn in class and on their quizzes and exams',
+        'Students who were stuck at the start are now writing OOP code on their own',
       ],
       projectId: 'coding-challenges',
     },
@@ -165,7 +171,11 @@ export const portfolioData = {
       role: 'Research Intern',
       org: 'IC2 (Innovative Cognitive Computing) Lab, KMUTT · CogniMax Chess Research',
       period: 'Jun 2026 to Jul 2026',
-      highlights: [],
+      highlights: [
+        'Applied for the summer internship and worked under Dr. Jonathan Hoyin Chan, Director of the IC2 Research Center',
+        'Ran my own research project, CogniMax, mostly on my own with weekly progress meetings',
+        'Planned every run: how to test it, what it measures, and what comes next, and documented all of it so the results can be reproduced',
+      ],
       projectId: 'cognimax',
     },
     {
@@ -183,14 +193,21 @@ export const portfolioData = {
       role: 'Hardware and Backend Engineer',
       org: 'KMUTT IoT Hackathon (2nd Place)',
       period: 'Jan 2026',
-      highlights: [],
+      highlights: [
+        'One-week hackathon (11 to 18 Jan 2026) with a 2,000 baht budget for the hardware',
+        'Spent most of the week getting the touch screen, the NFC reader, and the connection between the box and the website to work together',
+      ],
       projectId: 'nfc-attendance',
     },
     {
       role: 'Financial Team Lead',
       org: 'KMUTT Integrated Project (Smart City)',
       period: 'Aug to Dec 2025',
-      highlights: [],
+      highlights: [
+        'Split the work in my 3-person team and ran the meetings where we decided the design, like how to integrate with SCB and how transfers work',
+        'Worked with the traffic department so metro cards can be topped up from the wallet',
+        'Worked with the apartment department so people can pay rent through the app',
+      ],
       projectId: 'smartcity-financial',
     },
   ] as ExperienceItem[],
@@ -251,9 +268,13 @@ export const portfolioData = {
         },
       ],
       numbers: [
+        'About 5 people use /social and /coding regularly, and about 20 when my class was on it.',
         'Over 1,200 commits since January 2025, all mine.',
         '195 unit tests and 76 integration tests.',
       ],
+      hardPart:
+        "The code runner. I had to design it so running it 24/7 doesn't make me go bankrupt lol, and find a way to make it work cheap.\n\nOn the social page, infinite scroll was a pain. Posts showed up twice, and every new page shuffled the images into different columns. The duplicates came from the server-rendered first page not matching what the browser fetched next, and I stopped the jumping by giving each post a fixed column. Getting the lines on the left of a reply thread to connect smoothly took a while too.",
+      note: "Why the name? I wanted something unique so it's easy to find on search. It's inspired by Arduino, and it sounds round. I like it.",
       color: '#00ffc2',
       repoUrl: 'github.com/Mykal-Steele/Adorio',
       liveUrl: 'https://adorio.space',
@@ -274,7 +295,7 @@ export const portfolioData = {
         'Finding the answer to one course question meant scrolling through hours of lecture recordings and slide decks spread across Teams and SharePoint. A general chatbot answers from memory and can make things up. I wanted one place to ask that answers from our own material and cites it, so anyone can check the answer.',
       role: 'Solo project. I built the sync that pulls class material into a searchable database, the search itself, the step that decides when a question needs course material, study mode, and the deployment on Azure.',
       result:
-        'Classmates use it to study for 9 courses. Its answers come from about 183 hours of lecture transcripts plus the slides and assignments, and each one cites the textbook page, slide, or lecture timestamp it used.',
+        'People use it a lot, mostly to TL;DR a Discord channel in UniCorp (it reads the messages and images too), and also for advice and study guides. Course answers come from about 183 hours of lecture transcripts plus slides and assignments across 9 courses, and each one cites the page, slide, or lecture timestamp it used.',
       stack: [
         'Python',
         'SQLite',
@@ -315,6 +336,10 @@ export const portfolioData = {
         'Search takes about 51 ms over 50,000 chunks.',
         '995 tests, run with ruff and pyright on every push.',
       ],
+      hardPart:
+        'Handling massive context. A busy channel, hours of lectures, and a pile of slides are way more than the model can take in at once. At first I kept patching problems, like old topics coming back and the bot repeating itself.',
+      learned:
+        'I should have designed the data handling first, and how the AI would use it. What actually fixed things: everything goes into SQLite, each slide gets described once and saved, and the bot only reads as much of a channel as the question needs.',
       color: '#fe9d00',
       repoUrl: 'github.com/Mykal-Steele/ChronoChunk',
       image: {
@@ -415,6 +440,8 @@ export const portfolioData = {
         'About 2,700 lines added to the backend module and about 3,000 to the frontend.',
       ],
       note: 'My commits are under OakarOo / Mykal-Steele. The class site is offline now, so there is no live demo.',
+      hardPart:
+        'The SCB API, especially the debit card integration and PromptPay. I had to read through their developer docs, learn the whole API, and write a lot of tests just to understand the flow from 0 to 100. Getting proper credentials set up was tricky too, since their API needs the data properly encrypted and decrypted.',
       color: '#00ffc2',
       repoUrl: 'github.com/CSC290-2025/backend',
       image: {
@@ -444,7 +471,7 @@ export const portfolioData = {
         'Students in the Java class I mentor needed practice that matches the course, with instant feedback instead of waiting for me to check their code. Paid code-runner APIs charge per run, which does not work for a whole class running code.',
       role: 'Solo. I wrote the problems and their tests, built the editor page and test runner, and set up the sandbox on Azure that runs Java and Python.',
       result:
-        'The Java class I mentor practices on it during class. The sandbox costs about $6 a month because it only runs while someone is coding.',
+        "The Java class I mentor practices on it during class. They like that the problems target what they learn in class and what's on their quizzes and exams, instead of broad LeetCode questions. The sandbox costs about $6 a month because it only runs while someone is coding.",
       stack: [
         'TypeScript',
         'Java',
@@ -519,6 +546,8 @@ export const portfolioData = {
             'A card the system has never seen is not rejected. The box shows a QR code that opens registration, so a new student is set up on their first tap.',
         },
       ],
+      hardPart:
+        'Managing all the wires for the TFT touch screen. And the box XD Gluing it all together took the whole night.',
       color: '#fe9d00',
       links: [
         {
@@ -578,7 +607,7 @@ export const portfolioData = {
         'Setting up the same stack for every class project was repeated work, and students lost time on setup before they reached the database part of the course.',
       role: 'Solo. I built, tested, and published the CLI and its template.',
       result:
-        'It became the Web Dev class template, and about 30 to 40 students started their projects with it. Setup went from about 2 hours to about 20 minutes.',
+        "It became the 2026 Web Dev class template, and about 30 to 40 students started their projects with it. Setting up the stack by hand takes 10 to 20 minutes at least (more if you're new). With adorex it's one command, plus the install and the Prisma migrate.",
       stack: [
         'TypeScript',
         'JavaScript',
@@ -596,9 +625,14 @@ export const portfolioData = {
       ],
       decisions: [
         {
+          title: 'A CLI, not a template repo',
+          reason:
+            'Students already knew npm create vite, so npm create adorex feels easy for them, and kind of premium. You could ask Vite the same thing: why not just a template repo?',
+        },
+        {
           title: 'Defaults match the class stack',
           reason:
-            'Students start with Express, TypeScript, Prisma, and SQLite, a stack they already know from class.',
+            'Students start with Express, TypeScript, Prisma, and SQLite, a stack they already know from class. Everyone gets the same versions and folder setup, so their results match.',
         },
         {
           title: 'Test the generated app, not just the CLI',
@@ -627,7 +661,7 @@ export const portfolioData = {
       summary:
         'A chess engine that plays to beat a specific opponent quickly. It predicts how a player at a given rating is likely to reply and picks the move with the best expected result, instead of assuming the opponent plays perfectly.',
       problem:
-        "Engines like Stockfish assume the opponent always finds the best reply. Against a real 1200-rated player that wastes chances, so games drag on. Training bots and game AI that play at a person's level need an engine that takes the opponent's likely mistakes into account.",
+        "Engines like Stockfish assume the opponent always finds the best reply. Against a real 1200-rated player that wastes chances, so games drag on. Training bots and game AI that play at a person's level need an engine that takes the opponent's likely mistakes into account. Put simply, the best move in general is not always the most effective one. When your opponent has a weak spot, going after it usually works better (like punching someone where they're already hurt, or a better example lol).",
       role: 'Research intern at the IC2 Lab, KMUTT, June to July 2026. I built the engine, designed and ran the experiments, and wrote the statistics and the scripts that recompute every number in the report from the raw games.',
       result:
         'Across 4,120 games against a human-like opponent at 11 ratings from 600 to 2600, CogniMax won in a median of 22 moves, versus 27 for Stockfish searching to the same depth. It won faster at every rating (up to 31% fewer moves at 2400) and lost no games.',
@@ -666,6 +700,8 @@ export const portfolioData = {
       ],
       limits:
         "The gain is for engines limited to a shallow search. CogniMax thinks about 4.4 seconds a move against Stockfish's 30 ms, and a Stockfish given the same time wins at least as fast. A reply predictor built from Stockfish alone also did as well as maia3, which the report treats as its main finding.",
+      learned:
+        'How important it is to document everything and make sure everything can be reproduced. And to write a clear hypothesis and main goal before running anything.',
       color: '#fe9d00',
       repoUrl: 'github.com/Mykal-Steele/CogniMax',
       image: {
@@ -716,6 +752,9 @@ export const portfolioData = {
         'OpenID Connect',
         'MCP',
       ],
+      hardPart:
+        "We focus on agentic development, and it moves fast. Managing it is really hard, and new developers suffer the most, trying to get all the latest info. That's a big part of why I built the one-command setup.",
+      note: 'UniCorp is a group my friends made to simulate working at a company. We built our own central sign-in and a bunch of sites under the name, with a proper PM and ticket system. We hope more devs and friends join.',
       color: '#8b5cf6',
       repoUrl: 'github.com/unishare-oss/uniloom',
       liveUrl: 'https://loom.psstee.me/',
@@ -727,42 +766,228 @@ export const portfolioData = {
   ] as Project[],
 
   otherProjects: [
-    { name: 'CozyTalk', href: 'https://github.com/CozyTalk/CozyTalk' },
-    { name: 'Vexta', href: 'https://github.com/Mykal-Steele/Vexta' },
-    { name: 'Mistbound', href: 'https://github.com/Mykal-Steele/MistboundMain' },
-    { name: 'Rhythm Dots', href: '/rygame' },
-    { name: 'ArchMaster', href: '/cao/' },
-    { name: 'Runway', href: '/finance' },
-    { name: 'SCB API guides', href: '/smartcity' },
+    {
+      name: 'CozyTalk',
+      href: 'https://github.com/CozyTalk/CozyTalk',
+      detail:
+        'Our first mobile app, built with Flutter and Firebase for the agile dev and mobile dev classes combined, so we had to follow agile.',
+    },
+    {
+      name: 'Vexta',
+      href: 'https://github.com/Mykal-Steele/Vexta',
+      detail: 'Lets you use your phone as a camera for your computer.',
+    },
+    {
+      name: 'Mistbound',
+      href: 'https://github.com/Mykal-Steele/MistboundMain',
+      detail: "A 2D Unity game. Not complete, it's just movement and stuff.",
+    },
+    {
+      name: 'Rhythm Dots',
+      href: '/rygame',
+      detail: 'A rhythm game in the browser. Hit the dots in time with the music.',
+    },
+    {
+      name: 'ArchMaster',
+      href: '/cao/',
+      detail: 'Exam prep for my computer architecture class.',
+    },
+    {
+      name: 'Runway',
+      href: '/finance',
+      detail:
+        'My finance tracker. It gives me a daily budget and carries over what I save or overspend.',
+    },
+    {
+      name: 'SCB API guides',
+      href: '/smartcity',
+      detail: 'Guides to the SCB APIs (DeepLink and Direct Debit) for the Smart City class.',
+    },
   ] as OtherProject[],
 
   skills: [
-    { id: 'typescript', name: 'TypeScript', group: 'Languages', story: '' },
-    { id: 'javascript', name: 'JavaScript', group: 'Languages', story: '' },
-    { id: 'java', name: 'Java', group: 'Languages', story: '' },
-    { id: 'python', name: 'Python', group: 'Languages', story: '' },
-    { id: 'sql', name: 'SQL', group: 'Languages', story: '' },
-    { id: 'react', name: 'React', group: 'Web & Backend', story: '' },
-    { id: 'nextjs', name: 'Next.js', group: 'Web & Backend', story: '' },
-    { id: 'tailwindcss', name: 'Tailwind CSS', group: 'Web & Backend', story: '' },
-    { id: 'nodejs', name: 'Node.js', group: 'Web & Backend', story: '' },
-    { id: 'bun', name: 'Bun', group: 'Web & Backend', story: '' },
-    { id: 'express', name: 'Express', group: 'Web & Backend', story: '' },
-    { id: 'nestjs', name: 'NestJS', group: 'Web & Backend', story: '' },
-    { id: 'hono', name: 'Hono', group: 'Web & Backend', story: '' },
-    { id: 'prisma', name: 'Prisma', group: 'Web & Backend', story: '' },
-    { id: 'postgresql', name: 'PostgreSQL', group: 'Databases', story: '' },
-    { id: 'sqlite', name: 'SQLite', group: 'Databases', story: '' },
-    { id: 'mongodb', name: 'MongoDB', group: 'Databases', story: '' },
-    { id: 'docker', name: 'Docker', group: 'Tools & Infra', story: '' },
-    { id: 'nginx', name: 'Nginx', group: 'Tools & Infra', story: '' },
-    { id: 'githubactions', name: 'GitHub Actions', group: 'Tools & Infra', story: '' },
-    { id: 'azure', name: 'Azure', group: 'Tools & Infra', story: '' },
-    { id: 'cloudflare', name: 'Cloudflare', group: 'Tools & Infra', story: '' },
-    { id: 'git', name: 'Git', group: 'Tools & Infra', story: '' },
-    { id: 'linux', name: 'Linux', group: 'Tools & Infra', story: '' },
-    { id: 'swagger', name: 'Swagger / OpenAPI', group: 'Tools & Infra', story: '' },
-    { id: 'figma', name: 'Figma', group: 'Tools & Infra', story: '' },
+    {
+      id: 'typescript',
+      name: 'TypeScript',
+      group: 'Languages',
+      story:
+        "I started using it when KMUTT started teaching it, and we had to build a lot of projects with it. The year after mine, as a mentor for the web dev course, we voted to make TypeScript the default from day one, instead of starting with JavaScript and switching later like my year did.\n\nI use it for my uni projects and basically everything I've built since, and I refactored Adorio to TypeScript too! At first we had a lot of issues in group projects because no one really knew what we were doing. Learning stuff like optional ? made it a lot easier, and slowly every mistake turned into experience and things started to flow better.\n\nToday I use it for basically every project. I still have issues with some types, usually generics and callbacks, but for daily projects I'm pretty comfortable.",
+    },
+    {
+      id: 'javascript',
+      name: 'JavaScript',
+      group: 'Languages',
+      story:
+        "I started learning JavaScript really early, along with HTML, but didn't go too deep. In my year at KMUTT it was taught before TypeScript, and I had a lot of fun with it. After that it basically replaced Java as the main language at my uni, and even algorithms and data structures were taught in JavaScript!\n\nBefore TypeScript I used it with Express. When I moved on to Hono, which defaults to TypeScript, I got nudged into learning TypeScript.\n\nIt clicked when I got async and await: calling a function with await and without it, and realizing it's not really running in parallel. Now I mostly use it for quick scripts and LeetCode-type problems, and I'm pretty comfortable with it.",
+    },
+    {
+      id: 'java',
+      name: 'Java',
+      group: 'Languages',
+      story:
+        "Uni started us with Java, and I learned all my programming fundamentals with it. Now I'm the one teaching it back!\n\nWe built mostly OOP stuff and basic CLI programs, like a slot machine and a text RPG. Once I started looking around the docs, I realized how much is already built in. After discovering Java Streams I thought I had the power to do anything haha. ArrayList was pretty cool too. I realized I don't have to start from scratch to do something.\n\nToday I mostly use it for LeetCode-type problems, since Java is actually pretty fun to use, and I like making classes with it.",
+    },
+    {
+      id: 'python',
+      name: 'Python',
+      group: 'Languages',
+      story:
+        "I started with Python before uni, on one of those learn-Python websites, doing the basic stuff like conditionals and loops. Then I started asking my friend who started uni before me (he's also doing comp sci) for his homework so I could practice, and ended up doing it myself lol. Mostly LeetCode-type problems, but more interesting.\n\nSame as Java, it started with small CLI programs to test out the language. Lately I use it for my ChronoChunk bot with discord.py, and for the CogniMax research to write the runs.\n\nA mistake I made was not commenting while writing. Python is so compact you can do a lot with very little code, and if you aren't documenting, you get lost in a short while. Nowadays I use it for anything that needs a quick and easy language, for scripts, and for the AI stuff I like trying on Kaggle. I used some for my data science class too, but that class focused more on manual calculation and Orange Data Mining.",
+    },
+    {
+      id: 'sql',
+      name: 'SQL',
+      group: 'Languages',
+      story:
+        "I started SQL in my database class. Before that I just used Prisma and never had to touch it, but when I had to learn it, I realized it's pretty awesome. It's always satisfying when you see the result after you press run, like opening a tap and the water just flows out. I know this is a weird comparison, but it's real haha.\n\nGROUP BY was the hard one. I knew it was simple, but the results still seemed surprising for some reason. It started making sense when I took the name literally and thought about grouping the rows, instead of reading it like a sentence.\n\nNow I mostly use it when I have to go deep into a server to check something, like cooking up a quick query to see if an operation worked.",
+    },
+    {
+      id: 'react',
+      name: 'React',
+      group: 'Web & Backend',
+      story:
+        "I started it during my web dev class at uni. After the class I watched a lot of videos online, since there are so many of them. I feel like there's always more to learn, but also not. The concepts are really simple, yet you can use them to make complicated structures. I'd say it's just like Langton's Ant.\n\nI build websites haha. Basically all my uni projects are built with it. For my personal projects I moved to Next.js, because plain React has no structure, and it's really frustrating having a completely different setup every time.\n\nIt clicked when I started seeing things as components instead of just code. I see each piece as its own thing, or a group of things, which helps me split the job across components and makes managing it a lot easier. I'm somewhat comfortable with it, but not so much with layouts.",
+    },
+    {
+      id: 'nextjs',
+      name: 'Next.js',
+      group: 'Web & Backend',
+      story:
+        'I started using it mainly because I wanted structure and better SEO. I noticed that with React, search engines can\'t really read what\'s on the site because it ships JavaScript, while Next.js renders on the server, which is better for SEO.\n\nI build Adorio and the rest of my projects with it. The big lesson was server side rendering: figuring out what runs on the server and what needs "use client", and that "use client" components still render on the server first. On Adorio, the feed streams its first page from the server, then infinite scroll takes over.\n\nI\'m somewhat comfortable with it.',
+    },
+    {
+      id: 'tailwindcss',
+      name: 'Tailwind CSS',
+      group: 'Web & Backend',
+      story:
+        "I started using it in a group project to make writing CSS better, and I was surprised by how good it is. It makes styling so much easier, so I built all my sites with it.\n\nThere was a huge migration from Tailwind 3 to 4, and I had to change a lot of stuff to make it work, especially with the config file being removed. If I had just read the docs properly, I would have had a better time.\n\nI'm pretty comfortable with it, but I might need a refresher on layouts.",
+    },
+    {
+      id: 'nodejs',
+      name: 'Node.js',
+      group: 'Web & Backend',
+      story:
+        'Node is what runs my Express backends, ever since the uni projects. create-adorex needs Node 22 too, and publishing it taught me how npm packages, bin scripts, and versions work.\n\nMoving to ES modules tripped me up, like imports needing the .js extension even in TypeScript. These days I reach for Bun first, but Node is still what most things run on.',
+    },
+    {
+      id: 'bun',
+      name: 'Bun',
+      group: 'Web & Backend',
+      story:
+        "I started using it when I was looking for something more efficient. I tried it and instantly fell in love, because of how fast it is and how little effort it takes to use.\n\nUniloom's one-command setup and dev scripts all run on Bun, and Adorio's unit tests run with bun test because it's so fast. It's what I reach for first now.",
+    },
+    {
+      id: 'express',
+      name: 'Express',
+      group: 'Web & Backend',
+      story:
+        "It was my default after Hono. I started using it in one of the uni group projects, and the year after mine, we voted to make it the default for the web dev class because it has a wider community. I taught it to students as a mentor too.\n\nAdorio's backend, the NFC attendance API, and the create-adorex template all run on Express. The lesson was middleware order. Middleware runs from top to bottom, and putting something like CORS or auth in the wrong spot broke stuff.",
+    },
+    {
+      id: 'nestjs',
+      name: 'NestJS',
+      group: 'Web & Backend',
+      story:
+        "I'm still learning this one. My friend recommended it and said it's like Java, and I quite enjoy using it. Right now I'm building a small practice API to learn how modules, controllers, and dependency injection fit together.",
+    },
+    {
+      id: 'hono',
+      name: 'Hono',
+      group: 'Web & Backend',
+      story:
+        "It was part of the stack in a group project, and actually the default for the web dev class in my year. The year after, we voted to make Express the default instead, because it has a wider community.\n\nI built some of my early uni sites with it, and the Smart City financial module and Uniloom's API run on it. It's like the modern version of Express, and it works really well with OpenAPI and orval. The frontend gets typed API calls generated from the backend, so nothing drifts. I enjoyed it a lot and want to use it again for my next project.",
+    },
+    {
+      id: 'prisma',
+      name: 'Prisma',
+      group: 'Web & Backend',
+      story:
+        "I started using it as part of the web dev course, and it basically became the default for all my projects after that. Teaching it to students as a mentor made me understand it way better than just using it.\n\nIn Smart City, reading a balance and then writing it back could lose money when two transfers hit at the same time, so I switched to Prisma's increment and decrement. Migrations taught me a lesson too. I messed up migrate more than once and had to reset my dev database.",
+    },
+    {
+      id: 'postgresql',
+      name: 'PostgreSQL',
+      group: 'Databases',
+      story:
+        'I used it in my database class to learn more about structured databases. Smart City, NFC Attendance, and Uniloom all run on it.\n\nThe thing I keep coming back to is transactions. Wrapping related writes together is how Smart City makes sure a user is never created without a wallet.',
+    },
+    {
+      id: 'sqlite',
+      name: 'SQLite',
+      group: 'Databases',
+      story:
+        "It became the new default for freshmen because it's lightweight and relatively easy. There's no server to install, so they can focus on SQL and schema design. I started using it in my database classes too, when I wanted to explore.\n\nWhat surprised me is how far it goes. ChronoChunk does vector search and full-text search all inside SQLite, and create-adorex sets up new projects on it.",
+    },
+    {
+      id: 'mongodb',
+      name: 'MongoDB',
+      group: 'Databases',
+      story:
+        'This is the database I use for Adorio. The main reason was flexibility, since Adorio is so broad and I was spamming all kinds of random projects under it.\n\nNo schema was great at the start, but the data got messy, so I added Mongoose schemas and Zod validation to keep it in check.',
+    },
+    {
+      id: 'docker',
+      name: 'Docker',
+      group: 'Tools & Infra',
+      story:
+        "I started using it when I wanted to use something without setting it up, like Postgres. Then I used it for all my project deployments because it made it so easy. Northflank lets me give it a Dockerfile and it deploys the whole site, which made it even easier.\n\nAdorio ships Nginx, Express, and Next.js together in one image, and Docker Compose runs ChronoChunk on its VM. I had to learn a lot about Compose, and I still need to learn a lot even though I use it all the time. I've played a little with Nginx sidecars and stuff too.",
+    },
+    {
+      id: 'nginx',
+      name: 'Nginx',
+      group: 'Tools & Infra',
+      story:
+        'Nginx is the front door for Adorio. Inside one container, it sends /api to Express and the pages to Next.js, and serves /cao on its own. On my old DigitalOcean server it handled the HTTPS certificates too, before Azure did that for me.\n\nI know enough to route and proxy things, but I still look stuff up a lot.',
+    },
+    {
+      id: 'githubactions',
+      name: 'GitHub Actions',
+      group: 'Tools & Infra',
+      story:
+        "It's basically been there since the start, for CI/CD.\n\nOn Adorio, format, lint, build, and the tests all have to pass before anything deploys, which has saved me from shipping broken stuff.",
+    },
+    {
+      id: 'azure',
+      name: 'Azure',
+      group: 'Tools & Infra',
+      story:
+        "I started using it once I became a Microsoft Student Ambassador and got $150 of free Azure credit every month. Adorio, ChronoChunk, and the code runner for Coding Challenges all run on it.\n\nThe big lesson was idle costs. The code runner's scale set was costing about $60 a month just sitting there, so I switched to one VM that turns itself off when nobody is coding. I also set budget alerts so I find out before the credit runs out, not after. And GitHub deploys to it with OIDC, so there's no Azure password stored anywhere.",
+    },
+    {
+      id: 'cloudflare',
+      name: 'Cloudflare',
+      group: 'Tools & Infra',
+      story:
+        "I found out about it by accident while looking through some blog, and realized how much free stuff they give away, like caching and DNS. After a while I moved my whole domain's DNS from Namecheap to Cloudflare. It's awesome and I don't know why people don't mention it more. It's like an instant glow up for your site, for free.\n\nAdorio runs through it. A Cloudflare Worker switches the site to my free backup on Northflank if Azure goes down, and my resume lives in R2, so updating it is one upload.\n\nIt has bitten me too. After a deploy, Cloudflare kept serving old cached pages that pointed to JavaScript files that didn't exist anymore, so the site went white. Now every deploy clears the cache. And Cloudflare Fonts once rewrote my font tags and broke React on every page.",
+    },
+    {
+      id: 'git',
+      name: 'Git',
+      group: 'Tools & Infra',
+      story:
+        "I've used Git for every project. One of the lessons was ending up on a detached HEAD with commits that weren't on any branch. I used rebase to get them back where they belonged.\n\nAnother time, git add just wouldn't pick up a change, and git commit -am was what finally got it committed.",
+    },
+    {
+      id: 'linux',
+      name: 'Linux',
+      group: 'Tools & Infra',
+      story:
+        "I started tweaking with Linux a few years ago. At the start I was mainly looking for a way to make my old laptop run faster, so I distro hopped for a while, starting with Peppermint, then stuff like Linux Mint and Puppy Linux. Another distro I like is Fedora.\n\nToday I use Omarchy (Arch with Hyprland) daily for everything, including building this site, and it works really well. Of course I've had a lot of problems with booting and setup. Dual booting with Windows broke my boot a few times, and fixing it taught me a lot about how the system starts. But I never gave up on Linux, just like it never gave up on me (unless you count it randomly not booting, but that's usually because of the Windows I'm dual booting holding or locking something. Of course it is lmao).",
+    },
+    {
+      id: 'swagger',
+      name: 'Swagger / OpenAPI',
+      group: 'Tools & Infra',
+      story:
+        "I started using it in the integrated project at uni, the one where the whole class (50+ devs) works on one project. Not the whole project used it, but our financial department used it heavily.\n\nOur Swagger docs let the other departments see and try our endpoints without asking us, and the frontend's API calls were generated from the spec with orval, so there was no hand-written fetch code.",
+    },
+    {
+      id: 'figma',
+      name: 'Figma',
+      group: 'Tools & Infra',
+      story:
+        'I started using it in my first group project. I use it to make low-fi and high-fi designs of my websites before I start working on them.',
+    },
   ] as Skill[],
 
   setup: [
@@ -778,8 +1003,9 @@ export const portfolioData = {
     {
       year: '2026',
       events: [
-        'Published create-adorex on npm and became a Microsoft Student Ambassador.',
-        'Built CozyTalk with a team.',
+        'Published create-adorex on npm (Apr).',
+        'Became a Microsoft Student Ambassador (Apr).',
+        'Built CozyTalk, our first mobile app, with my team.',
         'Started a business administration degree at University of the People.',
       ],
     },

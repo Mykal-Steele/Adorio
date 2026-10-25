@@ -50,7 +50,7 @@ const proof = [
   },
   {
     id: 'create-adorex',
-    text: ', an npm starter that cut new-project setup from about 2 hours to 20 minutes and became a class template.',
+    text: ', an npm starter that turns 10 to 20 minutes of setup into one command. It became the class template.',
   },
   {
     id: 'chronochunk',
@@ -127,8 +127,8 @@ function Hero({ isMobile }: { isMobile: boolean }) {
           Backend developer
         </p>
         <p style={{ ...body, fontSize: 19, marginTop: 20, maxWidth: '40ch' }}>
-          I build backends and the setup that keeps them running: APIs, databases, deployment, and
-          developer experience.
+          I focus on backends and the setup that keeps them running. I mainly like working with
+          APIs, databases, deployment, and developer experience.
         </p>
 
         <div className="flex flex-wrap items-center" style={{ gap: 12, marginTop: 32 }}>
@@ -638,14 +638,19 @@ export function About() {
           <SectionLabel>About me</SectionLabel>
           <div className="flex flex-col" style={{ gap: 16 }}>
             <p style={body}>
-              Most of my work is on the server side. I mainly use TypeScript with Express or Hono,
-              Prisma with PostgreSQL or SQLite, and Docker on Azure behind Nginx and Cloudflare,
-              with React and Next.js when a project needs a frontend.
+              Most of my work is on the server side. I&apos;m familiar with stuff like TypeScript
+              with Express or Hono, Prisma, Docker, Azure, and React and Next.js when a project
+              needs a frontend (the full list is in the tech stack below). I like learning new stuff
+              too! Right now I&apos;m learning Go by building a smart project manager. Why? Because
+              Go is cool :)
             </p>
             <p style={body}>
               I got into programming at 15 through online HTML classes and Scratch, then spent a few
-              years on games and small Python bots. At KMUTT I moved to backend work, and most of
-              what I know now comes from building things other people use:
+              years on games and small Python bots. At KMUTT, uni projects kept putting me on the
+              backend, and deploying my own stuff got me hooked on how it all runs. I love working
+              on things people actually use. If someone asks for a feature, I&apos;m happy to build
+              it, because it feels like I&apos;m making an impact. Most of what I know comes from
+              building things like:
             </p>
             <ul
               className="flex flex-col marker:text-[var(--ide-text-5)]"
@@ -660,7 +665,22 @@ export function About() {
                 </li>
               ))}
             </ul>
-            <p style={body}>Outside of code: learning Korean and working out.</p>
+            <p style={body}>
+              I picked KMUTT because I heard it has a great Computer Science program, and
+              that&apos;s all I was looking for. I&apos;m also doing a business degree online at
+              University of the People, on a scholarship, so I know the business side too, not just
+              the technical side.
+            </p>
+            <p style={body}>
+              After my internship, I want to work on backend, infra, or DevOps. A startup where I
+              can learn a lot sounds great, and I don&apos;t mind any country if I can work remote.
+            </p>
+            <p style={body}>
+              Outside of code, I&apos;m learning Korean (it started as an elective, since most of
+              the others weren&apos;t open to international students), working out, and playing
+              chess at around 1100 Elo. Can I count working on projects as a hobby too? Haha,
+              that&apos;s what I do when I&apos;m free.
+            </p>
           </div>
         </div>
       </Band>

@@ -5,6 +5,7 @@ import { ArrowRight, ExternalLink } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
 import { useContentWidth } from '../hooks/useContentWidth';
+import { body } from '../constants/type';
 import { PageHeader, ProjectCard, SectionLabel } from '../shared';
 
 export function Projects() {
@@ -38,11 +39,17 @@ export function Projects() {
       <section style={{ marginTop: isMobile ? 48 : 64 }}>
         <SectionLabel>Other projects</SectionLabel>
         <ul
-          className="flex flex-wrap"
-          style={{ gap: '12px 32px', margin: 0, padding: 0, listStyle: 'none' }}
+          className="grid"
+          style={{
+            gap: '28px 40px',
+            margin: 0,
+            padding: 0,
+            listStyle: 'none',
+            gridTemplateColumns: oneColumn ? '1fr' : 'repeat(2, 1fr)',
+          }}
         >
           {portfolioData.otherProjects.map((project) => (
-            <li key={project.name}>
+            <li key={project.name} className="flex flex-col items-start" style={{ gap: 10 }}>
               {project.href.startsWith('http') ? (
                 <a href={project.href} target="_blank" rel="noopener noreferrer" className="pf-btn">
                   {project.name}
@@ -54,6 +61,7 @@ export function Projects() {
                   <ArrowRight size={14} />
                 </Link>
               )}
+              <p style={{ ...body, fontSize: 16 }}>{project.detail}</p>
             </li>
           ))}
         </ul>
