@@ -100,12 +100,27 @@ describe('portfolio writing', () => {
 });
 
 describe('linux setup', () => {
-  test('should show the full machine, system, and tools setup on the Linux page', () => {
+  test('should show the machine, system, and tools setup on the Linux page', () => {
     const setup = skill('linux').setup ?? [];
     expect(setup.map((g) => g.group)).toEqual(['Machine', 'System', 'Tools']);
-    const values = setup.flatMap((g) => g.items.map((i) => i.value)).join(' ');
-    expect(values).toContain('UX5401ZAS');
-    expect(values).toContain('foot');
+    expect(setup.flatMap((g) => g.items.map((i) => i.value)).join(' ')).toContain('foot');
+  });
+
+  // Exact models, boot setup, browser, and failover or spending thresholds help someone target me
+  test('should not publish details that help an attacker', () => {
+    const text = JSON.stringify(portfolioData);
+    for (const detail of [
+      'UX5401ZAS',
+      'Tiny11',
+      'Limine',
+      'Brave',
+      'Two failed requests',
+      'every 5 minutes',
+      '$2.50 a day',
+      'failover does not mistake',
+    ]) {
+      expect({ detail, found: text.includes(detail) }).toEqual({ detail, found: false });
+    }
   });
 });
 

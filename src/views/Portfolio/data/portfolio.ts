@@ -254,7 +254,7 @@ export const portfolioData = {
         'The backend is split into controllers, services, models, and schemas. Zod checks every request, and login, posting, likes, and code runs each have a rate limit.',
         'One container runs Nginx, the Express API, and the Next.js server on Azure Container Apps, with health checks and scaling from 1 to 3 copies.',
         'GitHub Actions checks format and lint, builds, runs integration tests against production containers, deploys to Azure without a stored password (OIDC), waits for the health check, and clears the Cloudflare cache.',
-        'A Cloudflare Worker sends traffic to Azure. Two failed requests in a row switch it to the Northflank copy, and a check every 5 minutes switches it back once Azure is healthy.',
+        'If Azure goes down, a Cloudflare Worker switches traffic to a backup copy on Northflank, and switches it back once Azure is healthy.',
         'The Azure setup is written in Bicep, with a $150 monthly budget and spending alerts.',
       ],
       decisions: [
@@ -329,7 +329,7 @@ export const portfolioData = {
         {
           title: 'Spending caps',
           reason:
-            'AI calls stop at $2.50 a day, $20 a month, and a limit per user, so one heavy user cannot run up the bill.',
+            'AI calls have daily, monthly, and per-user limits, so one heavy user cannot run up the bill.',
         },
         {
           title: 'Docker Compose on one small Azure VM',
@@ -495,7 +495,7 @@ export const portfolioData = {
         '16 problems: 11 algorithm problems that each come in JavaScript and Python, plus 5 Java problems that follow the course.',
         'JavaScript tests run in the browser. Java and Python code goes to the backend, which runs it on Piston and checks the output of each test.',
         'Opening a Java or Python problem starts the sandbox VM. It turns off after 30 minutes without a run, and a daily limit plus a timer on the VM itself stop it from running all night.',
-        'While the sandbox is starting, the API answers "not ready" instead of a server error, so the site\'s failover does not mistake it for an outage.',
+        'While the sandbox is starting, the API answers "not ready" instead of an error, so the page can tell students to wait a moment.',
         'Progress is saved per problem and language in the browser.',
       ],
       decisions: [
@@ -984,7 +984,7 @@ export const portfolioData = {
         {
           group: 'Machine',
           items: [
-            { label: 'Laptop', value: 'ASUS Zenbook 14X OLED (UX5401ZAS)' },
+            { label: 'Laptop', value: 'ASUS Zenbook 14X OLED' },
             { label: 'CPU', value: 'Intel Core i7-12700H, 14 cores and 20 threads, up to 4.7 GHz' },
             { label: 'Graphics', value: 'Intel Iris Xe (integrated)' },
             { label: 'Memory', value: '16 GB' },
@@ -998,8 +998,6 @@ export const portfolioData = {
           items: [
             { label: 'OS', value: 'Omarchy 4 (Arch Linux)' },
             { label: 'Desktop', value: 'Hyprland on Wayland' },
-            { label: 'Kernel', value: 'linux-omarchy, with the stock Arch kernel as a fallback' },
-            { label: 'Boot', value: 'Limine, dual booting with Windows 11 (Tiny11)' },
             {
               label: 'Filesystem',
               value: 'btrfs, with a Snapper snapshot before every package update',
@@ -1013,7 +1011,6 @@ export const portfolioData = {
             { label: 'Terminal', value: 'foot' },
             { label: 'Shell', value: 'Bash with Starship' },
             { label: 'Editor', value: 'VS Code, and Neovim in the terminal' },
-            { label: 'Browser', value: 'Brave' },
             { label: 'Versions', value: 'mise, with Bun and pnpm' },
             { label: 'Containers', value: 'Docker, with lazydocker' },
             { label: 'Git', value: 'lazygit' },
