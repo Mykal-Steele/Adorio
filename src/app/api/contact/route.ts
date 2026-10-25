@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('[contact] Resend error:', err);
     return NextResponse.json(
-      { error: 'Failed to send message. Please try email directly.' },
+      { error: 'Failed to send. Please email me directly.' },
       { status: 500 },
     );
   }

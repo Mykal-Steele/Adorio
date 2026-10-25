@@ -8,7 +8,7 @@
 const FLAKY_PATTERNS = [/terminated by signal/i, /sigkill/i];
 
 const FRIENDLY_NOTE =
-  "It does that sometimes, I'll fix it later. Try running again or refreshing the page.";
+  'Something went wrong while running your code. Try again, or refresh the page.';
 
 export const withFriendlyRetryNote = (message: string | undefined | null): string | undefined => {
   if (!message) return message ?? undefined;

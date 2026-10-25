@@ -5,7 +5,7 @@ import PostsLoader from './PostsLoader';
 
 export const metadata: Metadata = {
   title: 'Social',
-  description: 'Recent posts from the Adorio community. Share thoughts, projects, and ideas.',
+  description: 'What people on Adorio are posting.',
 };
 
 export default function SocialPage() {

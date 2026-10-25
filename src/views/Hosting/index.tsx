@@ -98,7 +98,7 @@ export default function HostingView() {
             File Hosting
           </h1>
           <p className="mt-3.5 max-w-[56ch] text-[17px] leading-[1.62] text-[var(--paper-muted)]">
-            Drop in an HTML file and get a shareable link instantly at{' '}
+            Upload an HTML file and get a link to it at{' '}
             <span className="font-paper-mono text-[15px] text-[var(--paper-accent)]">
               adorio.space/h/your-file
             </span>

@@ -123,7 +123,7 @@ export default function TempBeforeReal() {
       <footer className="bg-white border-t border-gray-100 py-12 mt-12">
         <div className="px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <span className="font-bold text-2xl text-gray-900">Adorio</span>
-          <p className="text-gray-500 text-base">© 2026 Adorio Design. All rights reserved.</p>
+          <p className="text-gray-500 text-base">Made by Oakar Oo</p>
         </div>
       </footer>
     </div>
