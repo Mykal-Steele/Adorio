@@ -105,7 +105,9 @@ const getWebGLFingerprint = () => {
         result.unmaskedVendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
         result.unmaskedRenderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
       }
-    } catch (debugError) {}
+    } catch {
+      // This signal isn't available in every browser; the fingerprint just skips it
+    }
 
     result.extensions = gl.getSupportedExtensions() || [];
 
@@ -190,12 +192,16 @@ const getAvailableFonts = () => {
               if (width !== baselines[baseFont] && baselines[baseFont] > 0) {
                 detected = true;
               }
-            } catch (measureError) {}
+            } catch {
+              // This signal isn't available in every browser; the fingerprint just skips it
+            }
           });
           if (detected) {
             availableFonts.push(font);
           }
-        } catch (fontTestError) {}
+        } catch {
+          // This signal isn't available in every browser; the fingerprint just skips it
+        }
       });
 
       return availableFonts;
@@ -433,7 +439,9 @@ const getPersistentId = async () => {
       const id = localStorage.getItem(key);
       if (id) return id;
     }
-  } catch (e) {}
+  } catch {
+    // This signal isn't available in every browser; the fingerprint just skips it
+  }
 
   try {
     for (const key of storageKeys) {
@@ -441,21 +449,29 @@ const getPersistentId = async () => {
       if (id) {
         try {
           localStorage.setItem('adorio_persistent_id', id);
-        } catch (e) {}
+        } catch {
+          // This signal isn't available in every browser; the fingerprint just skips it
+        }
         return id;
       }
     }
-  } catch (e) {}
+  } catch {
+    // This signal isn't available in every browser; the fingerprint just skips it
+  }
 
   try {
     const id = await getFromIndexedDB('adorio_visitor_store', 'persistent_id');
     if (id) {
       try {
         localStorage.setItem('adorio_persistent_id', id);
-      } catch (e) {}
+      } catch {
+        // This signal isn't available in every browser; the fingerprint just skips it
+      }
       return id;
     }
-  } catch (e) {}
+  } catch {
+    // This signal isn't available in every browser; the fingerprint just skips it
+  }
 
   return null;
 };
@@ -465,15 +481,21 @@ const createPersistentId = async () => {
 
   try {
     localStorage.setItem('adorio_persistent_id', id);
-  } catch (e) {}
+  } catch {
+    // This signal isn't available in every browser; the fingerprint just skips it
+  }
 
   try {
     sessionStorage.setItem('adorio_persistent_id', id);
-  } catch (e) {}
+  } catch {
+    // This signal isn't available in every browser; the fingerprint just skips it
+  }
 
   try {
     await storeInIndexedDB('adorio_visitor_store', 'persistent_id', id);
-  } catch (e) {}
+  } catch {
+    // This signal isn't available in every browser; the fingerprint just skips it
+  }
 
   return id;
 };
