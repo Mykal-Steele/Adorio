@@ -1,20 +1,25 @@
 /* Google Fonts are loaded via <link> tags in app/layout.tsx (not @import) so the
    browser can discover and fetch them in parallel instead of after this file loads. */
 
-@font-face {
-  font-family: 'Funny Hello';
-  src: url('/FunnyHello.otf') format('opentype');
-  font-weight: 400;
-  font-display: swap;
-}
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Portfolio IDE theme tokens — one-dark defaults match the site default theme.
+/* Portfolio IDE theme tokens — the root block is the pre-hydration fallback.
    next-themes overwrites these at runtime via [data-theme]. Tailwind can't drive runtime themes. */
 :root {
+  --ide-on-yellow: #1d1b17;
+  --ide-ink: rgba(0, 0, 0, 0.85);
+  --ide-card-shadow: 0 14px 26px -14px rgba(0, 0, 0, 0.6), 0 2px 0 rgba(0, 0, 0, 0.25);
+  --ide-card-shadow-hover: 0 20px 32px -14px rgba(0, 0, 0, 0.7), 0 2px 0 rgba(0, 0, 0, 0.25);
+  /* Yellow mixed into a dark surface turns brown, so the soft tints use each theme's accent */
+  --ide-tape: color-mix(in srgb, var(--ide-accent) 45%, transparent);
+  --ide-tape-edge: color-mix(in srgb, var(--ide-accent) 70%, white);
+  --ide-note: color-mix(in srgb, var(--ide-accent) 12%, var(--ide-bg-3));
+  --ide-ink-shadow: color-mix(in srgb, var(--ide-yellow) 45%, black);
+  --ide-highlight: color-mix(in srgb, var(--ide-accent) 26%, transparent);
+  --ide-margin-line: color-mix(in srgb, var(--ide-red) 45%, transparent);
+
   --ide-bg-0: #1b1e24;
   --ide-bg-1: #1e2127;
   --ide-bg-2: #21252b;
@@ -83,7 +88,6 @@
   --ide-syntax-string2: #56b6c2;
   --ide-line-number: rgba(92, 99, 112, 0.5);
   --ide-scrollbar: #353b45;
-  --ide-editor-font-size: 13px;
 }
 
 /* IDE themes — every theme has its own explicit block so :root is only a
@@ -355,6 +359,88 @@
   --ide-scrollbar: #353b45;
 }
 
+[data-theme='paper'] {
+  --ide-on-yellow: #2b2723;
+  --ide-ink: #2b2723;
+  --ide-card-shadow: 0 14px 26px -14px rgba(60, 44, 24, 0.3), 0 2px 0 rgba(60, 44, 24, 0.1);
+  --ide-card-shadow-hover: 0 20px 32px -14px rgba(60, 44, 24, 0.38), 0 2px 0 rgba(60, 44, 24, 0.1);
+  --ide-tape: rgba(242, 199, 68, 0.7);
+  --ide-tape-edge: rgba(60, 44, 24, 0.3);
+  --ide-ink-shadow: #2b2723;
+  --ide-note: #faeec4;
+  --ide-highlight: rgba(242, 199, 68, 0.45);
+  --ide-margin-line: rgba(196, 72, 60, 0.4);
+
+  --ide-bg-0: #f3ecdd;
+  --ide-bg-1: #fbf7ee;
+  --ide-bg-2: #f7f1e4;
+  --ide-bg-3: #fdfaf3;
+  --ide-bg-4: #ebe2d0;
+  --ide-bg-5: #ddd0b8;
+  --ide-border-subtle: rgba(60, 44, 24, 0.08);
+  --ide-border: rgba(60, 44, 24, 0.13);
+  --ide-border-medium: rgba(60, 44, 24, 0.18);
+  --ide-border-strong: rgba(60, 44, 24, 0.24);
+  --ide-border-stronger: rgba(60, 44, 24, 0.32);
+  --ide-text-1: #2b2723;
+  --ide-text-2: #3a342d;
+  --ide-text-3: #4a443c;
+  --ide-text-4: #5c544a;
+  --ide-text-5: #6b6154;
+  --ide-text-6: #6f6457;
+  --ide-text-7: #6f6457;
+  --ide-text-8: #6f6457;
+  --ide-text-9: #6f6457;
+  --ide-accent: #7a4f10;
+  --ide-accent-dark: #5a3908;
+  --ide-accent-light: #a8801a;
+  --ide-accent-bright: #c99a1f;
+  --ide-accent-a5: rgba(122, 79, 16, 0.05);
+  --ide-accent-a6: rgba(122, 79, 16, 0.06);
+  --ide-accent-a8: rgba(122, 79, 16, 0.08);
+  --ide-accent-a10: rgba(122, 79, 16, 0.1);
+  --ide-accent-a12: rgba(122, 79, 16, 0.12);
+  --ide-accent-a15: rgba(122, 79, 16, 0.15);
+  --ide-accent-a20: rgba(122, 79, 16, 0.2);
+  --ide-accent-a25: rgba(122, 79, 16, 0.25);
+  --ide-accent-a30: rgba(122, 79, 16, 0.3);
+  --ide-accent-light-a15: rgba(168, 128, 26, 0.15);
+  --ide-accent-light-a40: rgba(168, 128, 26, 0.4);
+  --ide-accent-light-a60: rgba(168, 128, 26, 0.6);
+  --ide-accent-light-a70: rgba(168, 128, 26, 0.7);
+  --ide-orange: #8a5a12;
+  --ide-orange-light: #a8801a;
+  --ide-orange-a12: rgba(168, 128, 26, 0.12);
+  --ide-orange-a18: rgba(168, 128, 26, 0.18);
+  --ide-orange-a30: rgba(168, 128, 26, 0.3);
+  --ide-orange-a45: rgba(168, 128, 26, 0.45);
+  --ide-purple: #6d3f7c;
+  --ide-purple-a10: rgba(109, 63, 124, 0.1);
+  --ide-purple-a12: rgba(109, 63, 124, 0.12);
+  --ide-purple-a15: rgba(109, 63, 124, 0.15);
+  --ide-purple-a25: rgba(109, 63, 124, 0.25);
+  --ide-blue: #2f5f8a;
+  --ide-blue-light: #4a7da8;
+  --ide-blue-a18: rgba(47, 95, 138, 0.18);
+  --ide-blue-a45: rgba(47, 95, 138, 0.45);
+  --ide-green: #4f6b32;
+  --ide-red: #a1493f;
+  --ide-red-dark: #84362e;
+  --ide-red-a12: rgba(161, 73, 63, 0.12);
+  --ide-pink: #9d3c56;
+  --ide-pink-a12: rgba(157, 60, 86, 0.12);
+  --ide-cyan: #2f6f6a;
+  --ide-ts-blue: #2f5f8a;
+  --ide-ts-blue-a8: rgba(47, 95, 138, 0.08);
+  --ide-ts-blue-a10: rgba(47, 95, 138, 0.1);
+  --ide-ts-blue-a20: rgba(47, 95, 138, 0.2);
+  --ide-yellow: #f2c744;
+  --ide-syntax-string: #4f6b32;
+  --ide-syntax-string2: #2f6f6a;
+  --ide-line-number: rgba(92, 80, 64, 0.5);
+  --ide-scrollbar: #ddd0b8;
+}
+
 [data-theme='catppuccin'] {
   --ide-bg-0: #11111b;
   --ide-bg-1: #131320;
@@ -431,42 +517,249 @@ body {
 .ide-layout,
 .ide-layout body {
   overflow: hidden;
+  background: var(--ide-bg-1);
+}
+
+/* Scrollbar that only shows while the pointer is over the area */
+.pf-scroll-hover {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.pf-scroll-hover:hover {
+  scrollbar-color: var(--ide-scrollbar) transparent;
+}
+
+/* Keyboard focus must stay visible through the IDE's inline styles */
+.ide-layout :focus-visible {
+  outline: 2px solid var(--ide-accent);
+  outline-offset: 2px;
+}
+/* Tabs sit in a scrolling row that clips anything outside it, so their ring goes inside */
+.ide-layout .pf-tab:focus-visible {
+  outline-offset: -2px;
+}
+.pf-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+.pf-btn:disabled:hover,
+.pf-btn:disabled:active {
+  background: var(--ide-bg-3);
+  border-color: var(--ide-text-3);
+  transform: none;
+  box-shadow: none;
 }
 
 /* Theme-aware hover backgrounds — values use CSS vars, !important overrides base resets */
 .ide-hover:hover {
-  background: rgba(255, 255, 255, 0.04) !important;
+  background: color-mix(in srgb, var(--ide-text-1) 8%, transparent) !important;
 }
 .ide-hover-icon:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: var(--ide-border) !important;
 }
 
-/* Custom animations — Tailwind only ships spin/ping/pulse/bounce */
-@keyframes rainbow {
-  0% {
-    color: var(--ide-accent);
-  }
-  25% {
-    color: var(--ide-orange);
-  }
-  50% {
-    color: var(--ide-purple);
-  }
-  75% {
-    color: var(--ide-blue);
-  }
-  100% {
-    color: var(--ide-accent);
-  }
+/* Portfolio interaction states. Hover and press live here because the portfolio's
+   inline styles would override any :hover written as a Tailwind class. */
+.pf-btn,
+.pf-btn-primary {
+  /* Anchors absolutely positioned children (like sr-only labels) so they can't stretch the page */
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 140ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 140ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 140ms ease,
+    border-color 140ms ease;
 }
-.rainbow-icon {
-  animation: rainbow 4s linear infinite;
+.pf-btn-primary {
+  padding: 10px 20px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ide-on-yellow);
+  background: var(--ide-yellow);
+  border: 1.5px solid var(--ide-ink);
+  box-shadow: 3px 4px 0 var(--ide-ink-shadow);
 }
-.rainbow-btn:hover .rainbow-icon {
-  animation: none;
+.pf-btn-primary:hover {
+  transform: translate(-1px, -2px);
+  box-shadow: 5px 6px 0 var(--ide-ink-shadow);
+}
+.pf-btn {
+  padding: 10px 18px;
+  font-family: 'Karla', Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--ide-text-1);
+  background: var(--ide-bg-3);
+  border: 1.5px solid var(--ide-text-3);
+  box-shadow: 0 0 0 var(--ide-text-1);
+}
+.pf-btn:hover {
+  background: var(--ide-note);
+  border-color: var(--ide-text-1);
+  transform: translate(-1px, -2px);
+  box-shadow: 3px 4px 0 var(--ide-text-1);
+}
+.pf-live {
+  transition:
+    transform 140ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 140ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.pf-live:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 var(--ide-ink);
+}
+.pf-live:active {
+  transform: none;
+  box-shadow: none;
+}
+.pf-btn-primary:active,
+.pf-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 0 0 0 var(--ide-ink);
+  transition-duration: 60ms;
+}
+.pf-btn svg,
+.pf-btn-primary svg {
+  transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.pf-btn:hover svg,
+.pf-btn-primary:hover svg {
+  transform: scale(1.15);
 }
 
+/* Highlighter: a yellow underline that fills behind the text on hover */
+.pf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  /* Bottom padding keeps the underline below descenders instead of through them */
+  padding: 0 1px 4px;
+  font-family: 'Karla', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ide-text-1);
+  text-decoration: none;
+  background-image:
+    linear-gradient(var(--ide-yellow), var(--ide-yellow)),
+    linear-gradient(var(--ide-highlight), var(--ide-highlight));
+  background-repeat: no-repeat;
+  background-position:
+    0 100%,
+    0 100%;
+  background-size:
+    100% 3px,
+    100% 0;
+  transition: background-size 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.pf-link:hover {
+  background-size:
+    100% 3px,
+    100% 100%;
+}
+
+.pf-card {
+  box-shadow: var(--ide-card-shadow);
+  transition:
+    transform 220ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.pf-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--ide-card-shadow-hover);
+}
+.pf-card:active {
+  transform: translateY(-1px);
+}
+.pf-card img {
+  transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.pf-card:hover img {
+  transform: scale(1.03);
+}
+
+/* Taped photo prints sit tilted and straighten up when you point at them */
+.pf-print {
+  transform: rotate(var(--tilt, 0deg));
+  box-shadow: var(--ide-card-shadow);
+  transition:
+    transform 300ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 300ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.pf-print:hover {
+  transform: rotate(0deg) scale(1.015);
+  box-shadow: var(--ide-card-shadow-hover);
+}
+
+.pf-tile {
+  transition:
+    transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.pf-tile:hover {
+  transform: translateY(-3px);
+  border-color: var(--ide-text-3);
+  box-shadow: 0 8px 14px -8px rgba(0, 0, 0, 0.35);
+}
+.pf-tile:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* The one entrance on the page: the sticky note lands on the desk */
+.pf-note {
+  transform: rotate(var(--tilt, 0deg));
+  animation: noteDrop 700ms cubic-bezier(0.23, 1, 0.32, 1) 150ms both;
+}
+@keyframes noteDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-28px) rotate(calc(var(--tilt, 0deg) + 7deg)) scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--tilt, 0deg));
+  }
+}
+
+@keyframes lightboxIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-btn,
+  .pf-btn-primary,
+  .pf-link,
+  .pf-card,
+  .pf-card img,
+  .pf-print,
+  .pf-tile,
+  .pf-live,
+  .pf-note {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Custom animations, Tailwind only ships spin/ping/pulse/bounce */
 @keyframes pulse {
   0%,
   100% {
@@ -474,19 +767,6 @@ body {
   }
   50% {
     opacity: 0.4;
-  }
-}
-
-@keyframes typingDot {
-  0%,
-  80%,
-  100% {
-    opacity: 0.3;
-    transform: scale(0.8);
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 
@@ -602,9 +882,6 @@ body {
 }
 .font-paper-serif {
   font-family: 'Playfair Display', Georgia, serif;
-}
-.font-paper-hand {
-  font-family: 'Caveat', cursive;
 }
 .font-paper-mono {
   font-family: 'Courier Prime', monospace;

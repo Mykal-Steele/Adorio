@@ -8,3 +8,5 @@ ai-slop/
 public/
 *.min.js
 package-lock.json
+
+next-env.d.ts

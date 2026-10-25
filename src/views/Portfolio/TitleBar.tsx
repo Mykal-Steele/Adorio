@@ -1,102 +1,61 @@
 'use client';
 
-import { Search, GitBranch, Zap } from 'lucide-react';
-import { portfolioData } from './data/portfolio';
-import { useResponsive } from './hooks/useResponsive';
-import { sans } from './constants/fonts';
+import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { useIDE } from './context/IDEContext';
+import { useContentWidth } from './hooks/useContentWidth';
+import { serif } from './constants/fonts';
+import { ThemeHint } from './shared/ThemeHint';
 import { ThemeSwitcher } from './shared';
 
 export function TitleBar() {
-  const { isTablet } = useResponsive();
+  const { themeHintEnabled, setThemeHintEnabled } = useIDE();
+  // Only the home page keeps the top-right corner clear for it
+  const contentWidth = useContentWidth();
+  const pathname = usePathname();
+  const roomy = contentWidth >= 880 && pathname === '/';
+  // Opening the theme menu hides the hint until the next load
+  const [closed, setClosed] = useState(false);
+
+  useEffect(() => {
+    if (themeHintEnabled) setClosed(false);
+  }, [themeHintEnabled]);
+
+  // The tip is pinned to the top bar, so it steps aside once the page scrolls under it
+  const [atTop, setAtTop] = useState(true);
+  useEffect(() => {
+    const main = document.querySelector('main');
+    if (!main) return;
+    const onScroll = () => setAtTop(main.scrollTop < 40);
+    main.addEventListener('scroll', onScroll, { passive: true });
+    return () => main.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
     <div
-      className="shrink-0 flex items-center justify-between px-4 border-b"
+      className="relative shrink-0 flex items-center justify-between px-4"
       style={{
-        height: 44,
-        background: 'var(--ide-bg-0)',
-        borderColor: 'var(--ide-border)',
-        fontFamily: sans,
+        height: 52,
+        borderBottom: '1px solid var(--ide-border)',
+        background: 'var(--ide-bg-1)',
       }}
     >
-      {/* Brand */}
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2 mr-2">
-          <div
-            className="flex items-center justify-center"
-            style={{ width: 28, height: 28, background: 'var(--ide-accent)' }}
-            aria-hidden="true"
-          >
-            <Zap size={14} color="var(--ide-accent-dark)" strokeWidth={2.5} />
-          </div>
-          <span
-            style={{
-              color: 'var(--ide-text-1)',
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: '0.05em',
-            }}
-          >
-            {portfolioData.handle}
-          </span>
-          <span
-            style={{
-              background: 'var(--ide-accent-a12)',
-              color: 'var(--ide-accent)',
-              fontSize: 10,
-              padding: '1px 6px',
-              letterSpacing: '0.05em',
-            }}
-            aria-label={`Version ${portfolioData.version}`}
-          >
-            {portfolioData.version}
-          </span>
-        </div>
-      </div>
+      <span
+        style={{
+          fontFamily: serif,
+          fontStyle: 'italic',
+          fontSize: 22,
+          fontWeight: 700,
+          color: 'var(--ide-text-1)',
+        }}
+      >
+        Portfolio
+      </span>
 
-      {/* Right: Search + Actions */}
-      <div className="flex items-center gap-3">
-        {!isTablet && (
-          <div
-            className="flex items-center gap-2 px-3"
-            style={{
-              height: 28,
-              background: 'var(--ide-bg-3)',
-              border: '1px solid var(--ide-border-medium)',
-              minWidth: 200,
-            }}
-            role="search"
-            aria-label="Portfolio search (decorative)"
-          >
-            <Search size={12} color="var(--ide-text-6)" aria-hidden="true" />
-            <span style={{ fontSize: 11, color: 'var(--ide-text-6)' }}>Go to file...</span>
-            <span
-              style={{ fontSize: 10, color: 'var(--ide-text-9)', marginLeft: 'auto' }}
-              aria-hidden="true"
-            >
-              ⌘P
-            </span>
-          </div>
-        )}
-        <div className="flex items-center gap-3">
-          <ThemeSwitcher showLabel />
-          <div
-            className="flex items-center gap-1 px-2"
-            style={{
-              height: 24,
-              background: 'var(--ide-accent)',
-              fontSize: 10,
-              fontWeight: 700,
-              color: 'var(--ide-accent-dark)',
-              letterSpacing: '0.05em',
-            }}
-            aria-label={`Current branch: ${portfolioData.branch}`}
-          >
-            <GitBranch size={10} aria-hidden="true" />
-            main
-          </div>
-        </div>
-      </div>
+      <ThemeSwitcher showLabel onOpen={() => setClosed(true)} />
+      {themeHintEnabled && !closed && roomy && (
+        <ThemeHint visible={atTop} onDismissForever={() => setThemeHintEnabled(false)} />
+      )}
     </div>
   );
 }

@@ -1,56 +1,66 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
-
-export type SidePanelType = 'explorer' | 'profile' | 'git' | 'skills';
-export type RightPanelTab = 'system' | 'askme';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 
 const IDEContext = createContext<{
-  activeSidePanel: SidePanelType;
-  setActiveSidePanel: (panel: SidePanelType) => void;
-  rightPanelTab: RightPanelTab;
-  setRightPanelTab: (tab: RightPanelTab) => void;
+  sidePanelOpen: boolean;
+  toggleSidePanel: () => void;
   terminalOpen: boolean;
   toggleTerminal: () => void;
-  openProjectTabs: string[];
-  addProjectTab: (id: string) => void;
-  closeProjectTab: (id: string) => void;
-  isSettingsOpen: boolean;
-  toggleSettings: () => void;
+  openTabs: string[];
+  closeTab: (path: string) => void;
+  closeOtherTabs: () => void;
+  themeHintEnabled: boolean;
+  setThemeHintEnabled: (enabled: boolean) => void;
 } | null>(null);
 
+const HINT_KEY = 'theme-hint-dismissed';
+
 export function IDEProvider({ children }: { children: ReactNode }) {
-  const [activeSidePanel, setActiveSidePanel] = useState<SidePanelType>('explorer');
-  const [rightPanelTab, setRightPanelTab] = useState<RightPanelTab>('system');
-  const [terminalOpen, setTerminalOpen] = useState(true);
-  const [openProjectTabs, setOpenProjectTabs] = useState<string[]>([]);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const pathname = usePathname();
+  const [sidePanelOpen, setSidePanelOpen] = useState(true);
+  const [terminalOpen, setTerminalOpen] = useState(false);
+  const [openTabs, setOpenTabs] = useState<string[]>([]);
+  // Off until localStorage is read, so a dismissed hint never flashes on load
+  const [themeHintEnabled, setHintState] = useState(false);
 
-  const toggleTerminal = () => setTerminalOpen((v) => !v);
-  const toggleSettings = () => setIsSettingsOpen((v) => !v);
+  useEffect(() => {
+    try {
+      setHintState(localStorage.getItem(HINT_KEY) !== '1');
+    } catch {
+      setHintState(true);
+    }
+  }, []);
 
-  const addProjectTab = (id: string) => {
-    setOpenProjectTabs((prev) => (prev.includes(id) ? prev : [...prev, id]));
+  const setThemeHintEnabled = (enabled: boolean) => {
+    setHintState(enabled);
+    try {
+      if (enabled) localStorage.removeItem(HINT_KEY);
+      else localStorage.setItem(HINT_KEY, '1');
+    } catch {
+      // Storage blocked: the choice lasts until the next visit
+    }
   };
 
-  const closeProjectTab = (id: string) => {
-    setOpenProjectTabs((prev) => prev.filter((t) => t !== id));
-  };
+  // Like an editor, whatever page is showing has a tab
+  useEffect(() => {
+    setOpenTabs((prev) => (prev.includes(pathname) ? prev : [...prev, pathname]));
+  }, [pathname]);
 
   return (
     <IDEContext.Provider
       value={{
-        activeSidePanel,
-        setActiveSidePanel,
-        rightPanelTab,
-        setRightPanelTab,
+        sidePanelOpen,
+        toggleSidePanel: () => setSidePanelOpen((v) => !v),
         terminalOpen,
-        toggleTerminal,
-        openProjectTabs,
-        addProjectTab,
-        closeProjectTab,
-        isSettingsOpen,
-        toggleSettings,
+        toggleTerminal: () => setTerminalOpen((v) => !v),
+        openTabs,
+        closeTab: (path) => setOpenTabs((prev) => prev.filter((t) => t !== path)),
+        // The page on screen always keeps its tab
+        closeOtherTabs: () => setOpenTabs([pathname]),
+        themeHintEnabled,
+        setThemeHintEnabled,
       }}
     >
       {children}
