@@ -18,9 +18,9 @@ export function Projects() {
       style={{ maxWidth: 1040, margin: '0 auto' }}
     >
       <PageHeader
-        eyebrow={`${portfolioData.projects.length} projects · open a card for the full case study`}
+        eyebrow={`${portfolioData.projects.length} projects`}
         title="Projects"
-        subtitle="Backend services, tools, and the systems that keep them running."
+        subtitle="Things I've built, mostly backends and the setup around them."
       />
 
       <div

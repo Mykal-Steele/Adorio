@@ -4,7 +4,7 @@ import { Projects } from '@/views/Portfolio/pages/Projects';
 export const metadata: Metadata = {
   title: 'Projects | Oakar Oo',
   description:
-    'Backend services, tools, and the systems behind them. ChronoChunk, Smart City, Coding Challenges, NFC Attendance, create-adorex, and more.',
+    'Projects by Oakar Oo, including Adorio, ChronoChunk, the Smart City financial module, Coding Challenges, NFC Attendance, create-adorex, CogniMax, and Uniloom.',
   keywords: [
     'Oakar Oo',
     'projects',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Projects | Oakar Oo',
-    description: 'Backend services, tools, and the systems behind them.',
+    description: 'Things Oakar Oo has built, mostly backends and the setup around them.',
     url: 'https://adorio.space/projects',
     siteName: 'Oakar Oo',
     type: 'website',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary',
     title: 'Projects | Oakar Oo',
-    description: 'Backend services, tools, and the systems behind them.',
+    description: 'Things Oakar Oo has built, mostly backends and the setup around them.',
   },
 };
 

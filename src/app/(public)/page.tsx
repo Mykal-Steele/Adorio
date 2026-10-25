@@ -4,7 +4,7 @@ import { About } from '@/views/Portfolio/pages/About';
 export const metadata: Metadata = {
   title: 'Oakar Oo | Backend Developer',
   description:
-    'Backend developer based in Bangkok. I build APIs, databases, deployment, and developer tools with TypeScript, Express, Hono, Prisma, and PostgreSQL.',
+    'Backend developer in Bangkok. I focus on backends and the setup that keeps them running, mostly with TypeScript, Express, Hono, Prisma, and Docker on Azure.',
   keywords: [
     'Oakar Oo',
     'backend developer',
@@ -18,7 +18,8 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Oakar Oo | Backend Developer',
-    description: 'Backend developer in Bangkok. Projects, stack, and open to opportunities.',
+    description:
+      'Backend developer in Bangkok, studying CS at KMUTT and looking for a software engineering internship.',
     url: 'https://adorio.space',
     siteName: 'Oakar Oo',
     images: [
@@ -34,7 +35,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Oakar Oo | Backend Developer',
-    description: 'Backend developer in Bangkok. Projects, stack, and open to opportunities.',
+    description:
+      'Backend developer in Bangkok, studying CS at KMUTT and looking for a software engineering internship.',
     images: ['https://i.ibb.co/KxH3wXDS/download-3.png'],
   },
 };

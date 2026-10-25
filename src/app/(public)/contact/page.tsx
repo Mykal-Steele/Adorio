@@ -3,11 +3,11 @@ import { Contact } from '@/views/Portfolio/pages/Contact';
 
 export const metadata: Metadata = {
   title: 'Contact | Oakar Oo',
-  description: 'Get in touch. Open to internships, part-time roles, and collaboration.',
+  description: 'Send Oakar Oo a message about an internship, a collab, or anything else.',
   keywords: ['Oakar Oo', 'contact', 'hire', 'internship', 'collaboration', 'Bangkok developer'],
   openGraph: {
     title: 'Contact | Oakar Oo',
-    description: 'Open to internships, part-time roles, and collaboration.',
+    description: 'Send Oakar Oo a message about an internship, a collab, or anything else.',
     url: 'https://adorio.space/contact',
     siteName: 'Oakar Oo',
     type: 'website',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary',
     title: 'Contact | Oakar Oo',
-    description: 'Open to internships, part-time roles, and collaboration.',
+    description: 'Send Oakar Oo a message about an internship, a collab, or anything else.',
   },
 };
 

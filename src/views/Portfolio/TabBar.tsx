@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { X } from 'lucide-react';
+import { CopyX, X } from 'lucide-react';
 import { useIDE } from './context/IDEContext';
 import { fileNameForPath } from './data/files';
 import { sans } from './constants/fonts';
@@ -39,21 +39,24 @@ export function TabBar() {
         borderBottom: '1px solid var(--ide-border)',
       }}
     >
-      <div
-        className="flex shrink-0 items-center"
-        style={{ padding: '0 8px', borderRight: '1px solid var(--ide-border)' }}
+      <button
+        onClick={closeOtherTabs}
+        disabled={openTabs.length < 2}
+        aria-label="Close other tabs"
+        title="Close other tabs"
+        className={`pf-tab flex shrink-0 items-center justify-center ${openTabs.length < 2 ? '' : 'ide-hover'}`}
+        style={{
+          width: 44,
+          border: 'none',
+          borderRight: '1px solid var(--ide-border)',
+          background: 'transparent',
+          color: 'var(--ide-text-4)',
+          opacity: openTabs.length < 2 ? 0.4 : 1,
+          cursor: openTabs.length < 2 ? 'default' : 'pointer',
+        }}
       >
-        <button
-          onClick={closeOtherTabs}
-          disabled={openTabs.length < 2}
-          title="Close every tab except this page"
-          className="pf-btn"
-          style={{ padding: '4px 10px', fontSize: 13, gap: 6 }}
-        >
-          <X size={13} />
-          Clear all
-        </button>
-      </div>
+        <CopyX size={16} />
+      </button>
       <div
         className="flex min-w-0 flex-1 items-stretch overflow-x-auto"
         style={{ scrollbarWidth: 'none' }}

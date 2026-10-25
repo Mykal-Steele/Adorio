@@ -16,7 +16,7 @@ const channels = [
     label: 'GitHub',
     value: portfolioData.github,
     href: `https://${portfolioData.github}`,
-    description: 'Where the actual work lives.',
+    description: 'My code and projects.',
     color: 'var(--ide-text-1)',
   },
   {
@@ -25,7 +25,7 @@ const channels = [
     label: 'LinkedIn',
     value: portfolioData.linkedin,
     href: `https://${portfolioData.linkedin}`,
-    description: 'Professional background and roles.',
+    description: 'My experience and roles.',
     color: '#0077b5',
   },
   {

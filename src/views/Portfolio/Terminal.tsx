@@ -33,13 +33,13 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
   return {
     help: () => {
       const cmds: [string, string][] = [
-        ['whoami', 'identity'],
+        ['whoami', 'who I am'],
         ['ls', 'list portfolio pages'],
         ['open <page>', 'navigate to a page'],
         ['stack', 'tech stack overview'],
         ['projects', 'list all projects'],
         ['skills', 'list skills'],
-        ['contact', 'reach out'],
+        ['contact', 'how to reach me'],
         ['date', 'current date & time'],
         ['clear', 'clear terminal'],
       ];

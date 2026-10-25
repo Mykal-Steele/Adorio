@@ -232,7 +232,7 @@ export const portfolioData = {
         'I wanted a place for me and my classmates to post updates and photos without using another platform. As I added more apps, I needed them under one domain, deployed automatically, and still up when the main server has a problem.',
       role: 'Solo project. I built the social feed (posts, likes, threaded comments with @mentions, image uploads, and login with refresh tokens), the Express backend, the Next.js frontend, and all of the infrastructure.',
       result:
-        'Running since February 2025. Every push to main is tested against production containers and deployed with no manual steps, and if Azure goes down, Cloudflare switches traffic to a backup copy on Northflank on its own.',
+        'Running since February 2025. Every push to main is tested against production containers and deployed with no manual steps.',
       stack: [
         'TypeScript',
         'Next.js',
@@ -254,7 +254,6 @@ export const portfolioData = {
         'The backend is split into controllers, services, models, and schemas. Zod checks every request, and login, posting, likes, and code runs each have a rate limit.',
         'One container runs Nginx, the Express API, and the Next.js server on Azure Container Apps, with health checks and scaling from 1 to 3 copies.',
         'GitHub Actions checks format and lint, builds, runs integration tests against production containers, deploys to Azure without a stored password (OIDC), waits for the health check, and clears the Cloudflare cache.',
-        'If Azure goes down, a Cloudflare Worker switches traffic to a backup copy on Northflank, and switches it back once Azure is healthy.',
         'The Azure setup is written in Bicep, with a $150 monthly budget and spending alerts.',
       ],
       decisions: [
@@ -346,7 +345,7 @@ export const portfolioData = {
       hardPart:
         'Handling massive context. A busy channel, hours of lectures, and a pile of slides are way more than the model can take in at once. At first I kept patching problems, like old topics coming back and the bot repeating itself.',
       learned:
-        'I should have designed the data handling first, and how the AI would use it. What actually fixed things: everything goes into SQLite, each slide gets described once and saved, and the bot only reads as much of a channel as the question needs.',
+        'I should have designed the data handling first, and how the AI would use it. What actually fixed it was putting everything in SQLite, describing each slide once and saving it, and having the bot read only as much of a channel as the question needs.',
       color: '#fe9d00',
       repoUrl: 'github.com/Mykal-Steele/ChronoChunk',
       image: {
@@ -545,7 +544,7 @@ export const portfolioData = {
         {
           title: 'The box talks HTTPS to the API',
           reason:
-            'Each scan is one request to the backend, so the box needs no database and the web app stays the single source of truth.',
+            "Each scan is one request to the backend, so the box doesn't need a database of its own.",
         },
         {
           title: 'Register at the door',
@@ -742,7 +741,7 @@ export const portfolioData = {
       language: 'TypeScript',
       langColor: '#3178c6',
       summary:
-        'A self-hosted work tracker for building software with a coding agent: plan small slices with done-when checklists, let the agent do the work, and keep the approvals with people.',
+        'A self-hosted work tracker for building software with coding agents. People plan small pieces of work and sign off on them, and the agents do the coding.',
       problem:
         'A coding agent writes code fast, but people still have to decide what gets built and when it counts as done. Uniloom keeps the plan, the checklists, and the approvals in one place, and agents connect to it over MCP.',
       role: 'One of three main contributors at UniCorp. I built project invite links with optional approval (the API, the join page, join requests, and cleanup of revoked links) and the one-command local setup that works on Windows, macOS, and Linux.',
