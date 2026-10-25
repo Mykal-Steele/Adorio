@@ -628,9 +628,9 @@ function AboutMe() {
       <p style={body}>
         Most of my work is on the server side. I&apos;m familiar with stuff like TypeScript with
         Express or Hono, Prisma, Docker, Azure, and React and Next.js when a project needs a
-        frontend (the full list is in the tech stack below). After my internship, I want to work on
-        backend, infra, or DevOps. A startup where I can learn a lot sounds great, and I don&apos;t
-        mind any country if I can work remote.
+        frontend (the full list is in the tech stack below). I want to work on backend, infra, or
+        DevOps. A startup where I can learn a lot sounds great, and I don&apos;t mind any country if
+        I can work remote.
       </p>
       <p style={body}>
         I love working on things people actually use. Most of what I know comes from building things
