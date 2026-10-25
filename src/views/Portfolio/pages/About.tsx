@@ -27,7 +27,7 @@ const facts = [
     label: 'Studying',
     value: [
       'Computer Science, year 3, KMUTT',
-      'Business Administration, University of the People, California',
+      'Business Administration, University of the People (California)',
     ],
   },
   { label: 'Graduating', value: ['2028, both degrees'] },
@@ -99,7 +99,7 @@ function Hero({ isMobile }: { isMobile: boolean }) {
   return (
     <header
       className="grid items-start"
-      style={{ gap: isMobile ? 40 : 56, gridTemplateColumns: isMobile ? '1fr' : '1fr 280px' }}
+      style={{ gap: isMobile ? 40 : 56, gridTemplateColumns: isMobile ? '1fr' : '1fr 320px' }}
     >
       <div>
         <h1
@@ -160,24 +160,24 @@ function Hero({ isMobile }: { isMobile: boolean }) {
           {
             '--tilt': isMobile ? '-1deg' : '2deg',
             position: 'relative',
-            padding: '28px 24px 24px',
+            padding: '24px 24px 20px',
             background: 'var(--ide-note)',
             boxShadow: 'var(--ide-card-shadow)',
-            marginTop: isMobile ? 0 : 96,
+            marginTop: isMobile ? 0 : 56,
             maxWidth: isMobile ? 360 : undefined,
           } as CSSProperties
         }
       >
         <Tape />
-        <dl className="flex flex-col" style={{ gap: 14, margin: 0 }}>
+        <dl className="flex flex-col" style={{ gap: 12, margin: 0 }}>
           {facts.map(({ label, value }) => (
             <div key={label}>
               <dt style={{ ...eyebrow, fontSize: 13 }}>{label}</dt>
-              {value.map((line) => (
+              {value.map((line, i) => (
                 <dd
                   key={line}
                   style={{
-                    margin: '2px 0 0',
+                    margin: `${i === 0 ? 2 : 6}px 0 0`,
                     fontFamily: sans,
                     fontSize: 16,
                     fontWeight: 500,
