@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         project?.image
           ? { url: `https://adorio.space${project.image.src}`, alt: project.image.alt }
           : {
-              url: 'https://i.ibb.co/KxH3wXDS/download-3.png',
+              url: 'https://adorio.space/og.png',
               width: 1200,
               height: 630,
               alt: `${project?.name ?? 'Project'} by Oakar Oo`,
