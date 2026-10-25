@@ -36,12 +36,12 @@ export function LogoTile({ id, name, href }: { id: string; name: string; href?: 
 
   return href ? (
     <Link href={href} aria-label={name} className="pf-tile group relative" style={tileStyle}>
-      <TechLogo id={id} />
+      <TechLogo id={id} size={30} />
       {tooltip}
     </Link>
   ) : (
     <span tabIndex={0} aria-label={name} className="pf-tile group relative" style={tileStyle}>
-      <TechLogo id={id} />
+      <TechLogo id={id} size={30} />
       {tooltip}
     </span>
   );

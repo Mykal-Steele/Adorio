@@ -2,8 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import type { CSSProperties, ReactNode } from 'react';
-import { Download, Github, Linkedin, Mail, MessageSquare } from 'lucide-react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
+import { ChevronDown, Download, Github, Linkedin, Mail, MessageSquare } from 'lucide-react';
 import { portfolioData, type Project, type SkillGroup } from '../data/portfolio';
 import { skillsForProject } from '../data/skills';
 import { useResponsive } from '../hooks/useResponsive';
@@ -620,6 +620,84 @@ function Community({ isMobile }: { isMobile: boolean }) {
   );
 }
 
+// What a recruiter needs is always visible; the personal side opens on request
+function AboutMe() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="flex flex-col" style={{ gap: 16 }}>
+      <p style={body}>
+        Most of my work is on the server side. I&apos;m familiar with stuff like TypeScript with
+        Express or Hono, Prisma, Docker, Azure, and React and Next.js when a project needs a
+        frontend (the full list is in the tech stack below). After my internship, I want to work on
+        backend, infra, or DevOps. A startup where I can learn a lot sounds great, and I don&apos;t
+        mind any country if I can work remote.
+      </p>
+      <p style={body}>
+        I love working on things people actually use. Most of what I know comes from building things
+        like:
+      </p>
+      <ul
+        className="flex flex-col marker:text-[var(--ide-text-5)]"
+        style={{ gap: 10, margin: 0, paddingLeft: 20, listStyle: 'disc' }}
+      >
+        {proof.map(({ id, text }) => (
+          <li key={id} style={body}>
+            <Link href={`/projects/${id}`} className="pf-link" style={{ fontSize: 17 }}>
+              {portfolioData.projects.find((p) => p.id === id)?.name}
+            </Link>
+            {text}
+          </li>
+        ))}
+      </ul>
+
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls="about-more"
+        className="pf-btn self-start"
+        style={{ marginTop: 8 }}
+      >
+        {open ? 'Show less' : 'More about me'}
+        <ChevronDown
+          size={16}
+          aria-hidden="true"
+          style={{ transform: open ? 'rotate(180deg)' : 'none' }}
+        />
+      </button>
+
+      <div
+        id="about-more"
+        hidden={!open}
+        // The flex class would otherwise override the hidden attribute
+        style={{ display: open ? 'flex' : 'none', flexDirection: 'column', gap: 16 }}
+      >
+        <p style={body}>
+          I got into programming at 15 through online HTML classes and Scratch, then spent a few
+          years on games and small Python bots. At KMUTT, uni projects kept putting me on the
+          backend, and deploying my own stuff got me hooked on how it all runs. If someone asks for
+          a feature, I&apos;m happy to build it, because it feels like I&apos;m making an impact.
+        </p>
+        <p style={body}>
+          I picked KMUTT because I heard it has a great Computer Science program, and that&apos;s
+          all I was looking for. I&apos;m also doing a business degree online at University of the
+          People, on a scholarship, so I know the business side too, not just the technical side.
+        </p>
+        <p style={body}>
+          I like learning new stuff too! Right now I&apos;m learning Go by building a smart project
+          manager. Why? Because Go is cool :)
+        </p>
+        <p style={body}>
+          Outside of code, I&apos;m learning Korean (it started as an elective, since most of the
+          others weren&apos;t open to international students), working out, and playing chess at
+          around 1100 Elo. Can I count working on projects as a hobby too? Haha, that&apos;s what I
+          do when I&apos;m free.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function About() {
   const { isMobile } = useResponsive();
   const stacked = useContentWidth() < 880;
@@ -636,52 +714,7 @@ export function About() {
       <Band isMobile={isMobile}>
         <div style={{ maxWidth: 720 }}>
           <SectionLabel>About me</SectionLabel>
-          <div className="flex flex-col" style={{ gap: 16 }}>
-            <p style={body}>
-              Most of my work is on the server side. I&apos;m familiar with stuff like TypeScript
-              with Express or Hono, Prisma, Docker, Azure, and React and Next.js when a project
-              needs a frontend (the full list is in the tech stack below). I like learning new stuff
-              too! Right now I&apos;m learning Go by building a smart project manager. Why? Because
-              Go is cool :)
-            </p>
-            <p style={body}>
-              I got into programming at 15 through online HTML classes and Scratch, then spent a few
-              years on games and small Python bots. At KMUTT, uni projects kept putting me on the
-              backend, and deploying my own stuff got me hooked on how it all runs. I love working
-              on things people actually use. If someone asks for a feature, I&apos;m happy to build
-              it, because it feels like I&apos;m making an impact. Most of what I know comes from
-              building things like:
-            </p>
-            <ul
-              className="flex flex-col marker:text-[var(--ide-text-5)]"
-              style={{ gap: 10, margin: 0, paddingLeft: 20, listStyle: 'disc' }}
-            >
-              {proof.map(({ id, text }) => (
-                <li key={id} style={body}>
-                  <Link href={`/projects/${id}`} className="pf-link" style={{ fontSize: 17 }}>
-                    {portfolioData.projects.find((p) => p.id === id)?.name}
-                  </Link>
-                  {text}
-                </li>
-              ))}
-            </ul>
-            <p style={body}>
-              I picked KMUTT because I heard it has a great Computer Science program, and
-              that&apos;s all I was looking for. I&apos;m also doing a business degree online at
-              University of the People, on a scholarship, so I know the business side too, not just
-              the technical side.
-            </p>
-            <p style={body}>
-              After my internship, I want to work on backend, infra, or DevOps. A startup where I
-              can learn a lot sounds great, and I don&apos;t mind any country if I can work remote.
-            </p>
-            <p style={body}>
-              Outside of code, I&apos;m learning Korean (it started as an elective, since most of
-              the others weren&apos;t open to international students), working out, and playing
-              chess at around 1100 Elo. Can I count working on projects as a hobby too? Haha,
-              that&apos;s what I do when I&apos;m free.
-            </p>
-          </div>
+          <AboutMe />
         </div>
       </Band>
 

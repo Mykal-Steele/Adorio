@@ -520,6 +520,15 @@ body {
   background: var(--ide-bg-1);
 }
 
+/* Scrollbar that only shows while the pointer is over the area */
+.pf-scroll-hover {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.pf-scroll-hover:hover {
+  scrollbar-color: var(--ide-scrollbar) transparent;
+}
+
 /* Keyboard focus must stay visible through the IDE's inline styles */
 .ide-layout :focus-visible {
   outline: 2px solid var(--ide-accent);

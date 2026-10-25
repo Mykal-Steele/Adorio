@@ -139,7 +139,7 @@ export function SidePanel() {
           Explorer
         </div>
       )}
-      <div className="flex-1 overflow-y-auto py-2" style={{ scrollbarWidth: 'thin' }}>
+      <div className="pf-scroll-hover flex-1 overflow-y-auto py-2">
         {ROOT_FILES.slice(0, 2).map((f) => (
           <FileRow key={f.path} path={f.path} name={f.name} depth={0} />
         ))}

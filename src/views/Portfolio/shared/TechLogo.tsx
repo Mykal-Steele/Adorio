@@ -29,7 +29,9 @@ import {
   siTypescript,
   type SimpleIcon,
 } from 'simple-icons';
+import { Database } from 'lucide-react';
 import { serif } from '../constants/fonts';
+import { EXTRA_LOGOS } from './extraLogos';
 
 const ICONS: Record<string, SimpleIcon> = {
   typescript: siTypescript,
@@ -62,9 +64,6 @@ const ICONS: Record<string, SimpleIcon> = {
   pnpm: siPnpm,
 };
 
-// simple-icons has no mark for these, so they get a lettered tile
-const LETTERS: Record<string, string> = { java: 'Java', sql: 'SQL', azure: 'Az', mise: 'mi' };
-
 // Brand colors too pale to see on paper
 const COLOR_OVERRIDES: Record<string, string> = {
   linux: 'var(--ide-text-1)',
@@ -80,19 +79,39 @@ function brandColor(hex: string) {
 
 export function TechLogo({ id, size = 22 }: { id: string; size?: number }) {
   const icon = ICONS[id];
+  const extra = EXTRA_LOGOS[id];
+  if (extra) {
+    return (
+      <svg
+        role="img"
+        aria-hidden="true"
+        viewBox={extra.viewBox}
+        width={size}
+        height={size}
+        style={{ color: 'var(--ide-text-1)' }}
+      >
+        {extra.body}
+      </svg>
+    );
+  }
+  // SQL is a language, not a brand, so it gets a database symbol
+  if (id === 'sql') {
+    return <Database aria-hidden="true" size={size} color="#3f7fc4" strokeWidth={1.8} />;
+  }
+  // Anything else without a logo gets its first two letters
   if (!icon) {
     return (
       <span
         aria-hidden="true"
         style={{
           fontFamily: serif,
-          fontSize: (LETTERS[id] ?? '').length > 3 ? size * 0.5 : size * 0.62,
+          fontSize: size * 0.62,
           fontWeight: 700,
           lineHeight: `${size}px`,
           color: 'var(--ide-text-2)',
         }}
       >
-        {LETTERS[id] ?? id.slice(0, 2)}
+        {id.slice(0, 2)}
       </span>
     );
   }
