@@ -25,6 +25,9 @@ describe('getRedirectPaths', () => {
       '/\n/evil.example',
       '/\t/evil.example',
       '/\r\n/evil.example',
+      // The same characters, still percent-encoded after the query string is decoded
+      '/%0A/evil.example',
+      '/%09/evil.example',
     ]) {
       expect(getRedirectPaths(params(target)).from).toBe('/social');
     }

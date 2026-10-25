@@ -20,7 +20,20 @@ const isUser = (value: unknown): value is User => {
 // Browsers also drop tabs and newlines, so "/\n/host" would become "//host".
 const hasControlChar = (text: string) =>
   [...text].some((ch) => ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127);
-const isSafeRedirect = (path: string) => /^\/(?![/\\])/.test(path) && !hasControlChar(path);
+// Encoded ones (like %0A) are refused too, along with anything that doesn't decode
+const decoded = (text: string) => {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return null;
+  }
+};
+const isSafeRedirect = (path: string) => {
+  const plain = decoded(path);
+  return (
+    plain !== null && /^\/(?![/\\])/.test(path) && !hasControlChar(path) && !hasControlChar(plain)
+  );
+};
 
 export const getRedirectPaths = (searchParams: SearchParamsLike) => {
   const redirect = searchParams.get('redirect');
