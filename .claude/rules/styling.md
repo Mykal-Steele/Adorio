@@ -49,13 +49,12 @@ Follow the Tailwind recommended order (enforced by Prettier plugin if configured
 
 ## Custom Fonts
 
-Four fonts are loaded — use the constants from `src/views/Portfolio/constants/fonts.ts` in portfolio components:
-- Space Grotesk — sans-serif headings
-- Be Vietnam Pro — body text
-- JetBrains Mono — code/mono
-- Funny Hello — title display (served from `public/FunnyHello.otf`)
+Three fonts are used. Portfolio components take them from `src/views/Portfolio/constants/fonts.ts`:
+- Playfair Display: headings (`serif`)
+- Karla: body and UI text (`sans`)
+- Courier Prime: small labels and the terminal (`mono`)
 
-Don't load additional Google Fonts without updating the `@import` in `globals.css`.
+Load any new Google Font with the `<link>` tags in `src/app/layout.tsx`.
 
 ## Component Class Extraction
 

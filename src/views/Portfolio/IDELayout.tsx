@@ -18,7 +18,8 @@ import { MobileDrawer } from './mobile/MobileDrawer';
 import { ThemeProvider } from './context/ThemeContext';
 import { IDEProvider } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
-import { sans, mono } from './constants/fonts';
+import { sans } from './constants/fonts';
+import { eyebrow } from './constants/type';
 import { NavigationProgressBar } from './shared/NavigationProgressBar';
 
 function DesktopShell({ children }: { children: ReactNode }) {
@@ -26,7 +27,7 @@ function DesktopShell({ children }: { children: ReactNode }) {
   return (
     <div
       className="flex flex-col"
-      style={{ height: '100vh', overflow: 'hidden', background: 'var(--ide-bg-2)' }}
+      style={{ height: '100vh', overflow: 'hidden', background: 'var(--ide-bg-1)' }}
     >
       <TitleBar />
       <div className="flex flex-1 overflow-hidden">
@@ -37,7 +38,7 @@ function DesktopShell({ children }: { children: ReactNode }) {
           <main
             className="flex-1 overflow-y-auto"
             style={{
-              background: 'var(--ide-bg-4)',
+              background: 'var(--ide-bg-0)',
               scrollbarWidth: 'thin',
               scrollbarColor: 'var(--ide-bg-5) transparent',
             }}
@@ -59,7 +60,7 @@ function TabletShell({ children }: { children: ReactNode }) {
   return (
     <div
       className="flex flex-col"
-      style={{ height: '100vh', overflow: 'hidden', background: 'var(--ide-bg-2)' }}
+      style={{ height: '100vh', overflow: 'hidden', background: 'var(--ide-bg-1)' }}
     >
       <TitleBar />
       <div className="flex flex-1 overflow-hidden">
@@ -67,7 +68,7 @@ function TabletShell({ children }: { children: ReactNode }) {
           className="shrink-0 flex flex-col items-center justify-between py-2"
           style={{
             width: 48,
-            background: 'var(--ide-bg-0)',
+            background: 'var(--ide-bg-1)',
             borderRight: '1px solid var(--ide-border)',
           }}
         >
@@ -79,10 +80,10 @@ function TabletShell({ children }: { children: ReactNode }) {
               style={{
                 width: 40,
                 height: 40,
-                background: explorerOpen ? 'var(--ide-border)' : 'transparent',
+                background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
-                borderLeft: explorerOpen ? '2px solid var(--ide-orange)' : '2px solid transparent',
+                borderLeft: explorerOpen ? '2px solid var(--ide-yellow)' : '2px solid transparent',
               }}
             >
               <Folder size={18} color={explorerOpen ? 'var(--ide-text-1)' : 'var(--ide-text-5)'} />
@@ -94,7 +95,7 @@ function TabletShell({ children }: { children: ReactNode }) {
           <main
             className="flex-1 overflow-y-auto"
             style={{
-              background: 'var(--ide-bg-4)',
+              background: 'var(--ide-bg-0)',
               scrollbarWidth: 'thin',
               scrollbarColor: 'var(--ide-bg-5) transparent',
             }}
@@ -131,13 +132,13 @@ function MobileMoreMenu({
 }) {
   const menuItems = [
     {
-      icon: <TerminalIcon size={16} color="var(--ide-accent)" />,
+      icon: <TerminalIcon size={16} color="var(--ide-text-3)" />,
       label: 'Terminal',
       sub: 'Interactive command line',
       action: onOpenTerminal,
     },
     {
-      icon: <Folder size={16} color="var(--ide-orange)" />,
+      icon: <Folder size={16} color="var(--ide-text-3)" />,
       label: 'File Explorer',
       sub: 'Browse portfolio files',
       action: onOpenExplorer,
@@ -164,10 +165,10 @@ function MobileMoreMenu({
           <div>
             <div
               style={{
-                fontSize: 12,
+                fontSize: 15,
                 fontFamily: sans,
                 color: 'var(--ide-text-1)',
-                fontWeight: 600,
+                fontWeight: 700,
               }}
             >
               {item.label}
@@ -179,17 +180,7 @@ function MobileMoreMenu({
         </button>
       ))}
       <div className="px-4 pt-4 pb-2" style={{ borderTop: '1px solid var(--ide-border)' }}>
-        <div
-          style={{
-            fontSize: 11,
-            fontFamily: sans,
-            color: 'var(--ide-text-5)',
-            letterSpacing: '0.1em',
-            marginBottom: 8,
-          }}
-        >
-          LINKS
-        </div>
+        <div style={{ ...eyebrow, fontSize: 11, marginBottom: 8 }}>Links</div>
         <div className="flex flex-col gap-2">
           <a
             href={`https://${portfolioData.github}`}
@@ -197,8 +188,8 @@ function MobileMoreMenu({
             rel="noreferrer"
             className="flex items-center gap-2"
             style={{
-              fontSize: 13,
-              fontFamily: mono,
+              fontSize: 15,
+              fontFamily: sans,
               color: 'var(--ide-text-3)',
               textDecoration: 'none',
             }}
@@ -212,13 +203,13 @@ function MobileMoreMenu({
             rel="noreferrer"
             className="flex items-center gap-2"
             style={{
-              fontSize: 13,
-              fontFamily: mono,
+              fontSize: 15,
+              fontFamily: sans,
               color: 'var(--ide-text-3)',
               textDecoration: 'none',
             }}
           >
-            <LinkedinIcon size={14} color="#0077b5" />
+            <LinkedinIcon size={14} color="var(--ide-text-5)" />
             LinkedIn
           </a>
         </div>
@@ -235,13 +226,13 @@ function MobileShell({ children }: { children: ReactNode }) {
   return (
     <div
       className="flex flex-col"
-      style={{ height: '100dvh', overflow: 'hidden', background: 'var(--ide-bg-2)' }}
+      style={{ height: '100dvh', overflow: 'hidden', background: 'var(--ide-bg-1)' }}
     >
       <MobileHeader onMenuOpen={() => open('explorer')} />
       <main
         className="flex-1 overflow-y-auto"
         style={{
-          background: 'var(--ide-bg-4)',
+          background: 'var(--ide-bg-0)',
           scrollbarWidth: 'thin',
           scrollbarColor: 'var(--ide-bg-5) transparent',
         }}
@@ -284,7 +275,7 @@ function IDELayoutInner({ children }: { children: ReactNode }) {
   // Don't render any shell until we know the real breakpoint. This prevents
   // DesktopShell flashing on mobile before useResponsive reads window.innerWidth.
   if (!mounted) {
-    return <div style={{ height: '100dvh', background: 'var(--ide-bg-2)' }} />;
+    return <div style={{ height: '100dvh', background: 'var(--ide-bg-1)' }} />;
   }
 
   const Shell = isMobile ? MobileShell : isTablet ? TabletShell : DesktopShell;

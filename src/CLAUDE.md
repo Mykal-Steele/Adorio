@@ -161,7 +161,6 @@ src/
         ├── SettingsPanel.tsx    — Settings sub-panel
         ├── TabBar.tsx           — Tab row with main + dynamic project tabs
         ├── TitleBar.tsx         — 48px top bar with Portfolio label + ThemeSwitcher
-        ├── RightPanel.tsx       — 280px right panel (metrics + Ask Oo chat)
         ├── StatusBar.tsx        — 24px bottom status bar
         ├── Terminal.tsx         — Boot terminal with interactive commands
         ├── context/
@@ -170,19 +169,18 @@ src/
         ├── data/portfolio.ts    — All portfolio content (projects, commits, PRs, skills, AI responses)
         ├── constants/
         │   ├── fonts.ts         — Font family strings
-        │   └── status.ts        — statusConfig + codeColors for syntax highlighting
+        │   ├── status.ts        — statusConfig (label + dot color per project status)
+        │   └── type.ts          — shared text and button styles
         ├── hooks/
         │   ├── useProjectNavigation.ts — navigate between project tabs
         │   └── useResponsive.ts — SSR-safe breakpoint (initializes 'desktop', reads window in useEffect)
         ├── shared/              — IDE-specific shared primitives
         │   ├── index.ts         — Barrel export
-        │   ├── Badge.tsx        — Tag/label badge
-        │   ├── Breadcrumb.tsx   — File path breadcrumb
-        │   ├── IDECard.tsx      — Card component with IDE styling
-        │   ├── LineNumbers.tsx  — Gutter line number display
+        │   ├── IDECard.tsx      — Paper card with optional tape strip
         │   ├── PageHeader.tsx   — Section header
-        │   ├── ProjectCard.tsx  — Project cover, metadata, and tags card
-        │   ├── SectionLabel.tsx — Sub-section label
+        │   ├── ProjectCard.tsx  — Project card: status, title, summary, tags
+        │   ├── SectionLabel.tsx — Section heading
+        │   ├── StatusLabel.tsx  — Status dot + label
         │   └── ThemeSwitcher.tsx — Theme selector dropdown
         ├── mobile/
         │   ├── MobileDrawer.tsx — Slide-in drawer for mobile nav

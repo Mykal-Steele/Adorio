@@ -32,7 +32,7 @@ export function SettingsPanel() {
       <div
         ref={overlayRef}
         className="absolute inset-0"
-        style={{ background: 'rgba(0,0,0,0.65)' }}
+        style={{ background: 'rgba(0,0,0,0.45)' }}
         onClick={toggleSettings}
       />
 
@@ -43,9 +43,11 @@ export function SettingsPanel() {
           width: 540,
           maxWidth: '92vw',
           maxHeight: '80vh',
-          background: 'var(--ide-bg-2)',
-          border: '2px solid var(--nb-border)',
-          boxShadow: '8px 8px 0 var(--nb-shadow)',
+          background: 'var(--ide-bg-3)',
+          border: '1px solid var(--ide-border)',
+          borderRadius: 6,
+          boxShadow: 'var(--ide-card-shadow)',
+          overflow: 'hidden',
           animation: 'settingsFadeIn 0.15s ease-out',
         }}
       >
@@ -53,16 +55,16 @@ export function SettingsPanel() {
         <div
           className="shrink-0 flex items-center justify-between px-5"
           style={{
-            height: 40,
-            background: 'var(--ide-bg-0)',
-            borderBottom: '2px solid var(--nb-border)',
+            height: 44,
+            background: 'var(--ide-bg-1)',
+            borderBottom: '1px solid var(--ide-border)',
           }}
         >
           <div className="flex items-center gap-2">
             <Monitor size={13} color="var(--ide-text-5)" />
             <span
               style={{
-                fontSize: 11,
+                fontSize: 13,
                 fontFamily: sans,
                 color: 'var(--ide-text-2)',
                 fontWeight: 600,
@@ -75,7 +77,7 @@ export function SettingsPanel() {
           <div className="flex items-center gap-3">
             <span
               style={{
-                fontSize: 9,
+                fontSize: 11,
                 fontFamily: mono,
                 color: 'var(--ide-text-7)',
                 letterSpacing: '0.05em',
@@ -138,7 +140,7 @@ export function SettingsPanel() {
                 </label>
                 <span
                   style={{
-                    fontSize: 9,
+                    fontSize: 11,
                     fontFamily: mono,
                     color: 'var(--ide-accent)',
                     background: 'var(--ide-accent-a10)',
@@ -179,7 +181,7 @@ export function SettingsPanel() {
                     />
                     <span
                       style={{
-                        fontSize: 9,
+                        fontSize: 11,
                         fontFamily: sans,
                         color: theme === t ? 'var(--ide-text-1)' : 'var(--ide-text-5)',
                         letterSpacing: '0.04em',
@@ -231,7 +233,7 @@ export function SettingsPanel() {
                       background: fontSize === size ? 'var(--ide-accent-a12)' : 'var(--ide-bg-3)',
                       border: `1px solid ${fontSize === size ? 'var(--ide-accent-a30)' : 'var(--ide-border)'}`,
                       color: fontSize === size ? 'var(--ide-accent)' : 'var(--ide-text-5)',
-                      fontSize: 10,
+                      fontSize: 12,
                       fontFamily: mono,
                       padding: '4px 10px',
                       cursor: 'pointer',
@@ -258,10 +260,10 @@ export function SettingsPanel() {
                 style={{ width: '100%', accentColor: 'var(--ide-accent)', cursor: 'pointer' }}
               />
               <div className="flex justify-between mt-1">
-                <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-text-7)' }}>
+                <span style={{ fontSize: 11, fontFamily: mono, color: 'var(--ide-text-7)' }}>
                   10px
                 </span>
-                <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-text-7)' }}>
+                <span style={{ fontSize: 11, fontFamily: mono, color: 'var(--ide-text-7)' }}>
                   16px
                 </span>
               </div>

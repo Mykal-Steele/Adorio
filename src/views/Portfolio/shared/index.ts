@@ -1,10 +1,8 @@
-export { Breadcrumb } from './Breadcrumb';
 export { PageHeader } from './PageHeader';
 export { SectionLabel } from './SectionLabel';
-export { Badge } from './Badge';
+export { StatusLabel } from './StatusLabel';
 export { IconButton } from './IconButton';
-export { LineNumbers } from './LineNumbers';
-export { IDECard } from './IDECard';
+export { IDECard, Tape } from './IDECard';
 export { ThemeSwitcher } from './ThemeSwitcher';
 export { RouteLoadingSkeleton } from './RouteLoadingSkeleton';
 export { NavigationProgressBar } from './NavigationProgressBar';

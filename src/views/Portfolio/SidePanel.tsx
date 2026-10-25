@@ -6,6 +6,7 @@ import { useIDE } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
 import { useResponsive } from './hooks/useResponsive';
 import { mono, sans } from './constants/fonts';
+import { eyebrow } from './constants/type';
 
 function ExplorerPanel() {
   const pathname = usePathname();
@@ -31,9 +32,8 @@ function ExplorerPanel() {
         className="flex items-center gap-2 px-3 py-2"
         style={{
           color: 'var(--ide-text-4)',
-          fontSize: 12,
+          fontSize: 13,
           fontFamily: sans,
-          letterSpacing: '0.06em',
         }}
       >
         <ChevronDown size={12} />
@@ -43,9 +43,8 @@ function ExplorerPanel() {
         className="flex items-center gap-1 px-3 py-1"
         style={{
           color: 'var(--ide-text-4)',
-          fontSize: 12,
+          fontSize: 13,
           fontFamily: sans,
-          letterSpacing: '0.06em',
         }}
       >
         <Folder size={14} color="var(--ide-orange)" />
@@ -59,13 +58,13 @@ function ExplorerPanel() {
             onClick={() => router.push(f.path)}
             className="w-full flex items-center gap-2 py-2 text-left transition-colors"
             style={{
-              background: isActive ? 'var(--nb-accent)' : 'transparent',
+              background: isActive ? 'var(--ide-border-subtle)' : 'transparent',
               borderTop: 'none',
               borderRight: 'none',
               borderBottom: 'none',
-              borderLeft: isActive ? '4px solid var(--nb-border)' : '4px solid transparent',
+              borderLeft: isActive ? '2px solid var(--ide-yellow)' : '2px solid transparent',
               cursor: 'pointer',
-              paddingLeft: isActive ? 22 : 24,
+              paddingLeft: 24,
               paddingRight: 12,
             }}
             onMouseEnter={(e) => {
@@ -80,9 +79,9 @@ function ExplorerPanel() {
             {f.icon}
             <span
               style={{
-                fontSize: 15,
+                fontSize: 14,
                 fontFamily: sans,
-                color: isActive ? 'var(--nb-on-accent)' : 'var(--ide-text-3)',
+                color: isActive ? 'var(--ide-text-1)' : 'var(--ide-text-3)',
                 fontWeight: isActive ? 700 : 400,
               }}
             >
@@ -103,15 +102,15 @@ function ProfilePanel() {
           style={{
             width: 40,
             height: 40,
-            background: 'linear-gradient(135deg, var(--ide-accent), var(--ide-orange))',
-            borderRadius: 6,
+            background: 'var(--ide-bg-4)',
+            borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
           }}
         >
-          <User size={20} color="var(--ide-bg-1)" />
+          <User size={20} color="var(--ide-text-3)" />
         </div>
         <div>
           <div
@@ -125,14 +124,7 @@ function ProfilePanel() {
         </div>
       </div>
 
-      <div
-        className="mb-5 p-3"
-        style={{
-          background: 'var(--ide-accent-a5)',
-          border: '1px solid var(--ide-accent-a15)',
-          borderRadius: 4,
-        }}
-      >
+      <div className="mb-5 pb-4" style={{ borderBottom: '1px solid var(--ide-border)' }}>
         <div
           style={{
             fontSize: 15,
@@ -146,9 +138,9 @@ function ProfilePanel() {
         </div>
         <div className="flex items-center gap-1.5" style={{ marginBottom: 6 }}>
           <div
-            style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--ide-accent)' }}
+            style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--ide-green)' }}
           />
-          <span style={{ fontSize: 13, fontFamily: sans, color: 'var(--ide-accent)' }}>
+          <span style={{ fontSize: 13, fontFamily: sans, color: 'var(--ide-text-3)' }}>
             Open to Opportunities
           </span>
         </div>
@@ -172,28 +164,9 @@ function ProfilePanel() {
         </div>
       </div>
 
-      <div
-        style={{
-          fontSize: 11,
-          fontFamily: sans,
-          color: 'var(--ide-text-5)',
-          letterSpacing: '0.1em',
-          marginBottom: 8,
-        }}
-      >
-        COMMUNITY
-      </div>
+      <div style={{ ...eyebrow, fontSize: 11, marginBottom: 8 }}>Community</div>
       {portfolioData.community.map((c) => (
-        <div
-          key={c.short}
-          className="flex items-center gap-2 mb-2 px-2 py-2"
-          style={{
-            background: `${c.color}08`,
-            border: `1px solid ${c.color}25`,
-            borderRadius: 3,
-            boxShadow: `inset 3px 0 0 ${c.color}`,
-          }}
-        >
+        <div key={c.short} className="flex items-center gap-2 mb-2 py-1">
           <Circle size={6} fill={c.color} color={c.color} />
           <span style={{ fontSize: 14, fontFamily: sans, color: 'var(--ide-text-3)' }}>
             {c.name}
@@ -213,27 +186,11 @@ function SkillsPanel() {
         if (!skills.length) return null;
         return (
           <div key={cat} className="mb-5">
-            <div
-              style={{
-                fontSize: 11,
-                fontFamily: sans,
-                color: 'var(--ide-text-5)',
-                letterSpacing: '0.1em',
-                marginBottom: 6,
-              }}
-            >
-              {cat.toUpperCase()}
-            </div>
+            <div style={{ ...eyebrow, fontSize: 11, marginBottom: 6 }}>{cat}</div>
             {skills.map((s) => (
               <div key={s.name} className="flex items-center gap-2 mb-1 px-2 py-1">
-                <Circle size={5} fill="var(--ide-accent)" color="var(--ide-accent)" />
-                <span
-                  style={{
-                    fontSize: 15,
-                    fontFamily: mono,
-                    color: 'var(--ide-text-2)',
-                  }}
-                >
+                <Circle size={5} fill="var(--ide-text-5)" color="var(--ide-text-5)" />
+                <span style={{ fontSize: 14, fontFamily: sans, color: 'var(--ide-text-2)' }}>
                   {s.name}
                 </span>
               </div>
@@ -270,18 +227,17 @@ export function SidePanel() {
       data-guide="side-panel"
       style={{
         width: isInDrawer ? '100%' : 220,
-        background: 'var(--ide-bg-2)',
-        borderRight: isInDrawer ? 'none' : '2px solid var(--nb-border)',
+        background: 'var(--ide-bg-1)',
+        borderRight: isInDrawer ? 'none' : '1px solid var(--ide-border)',
       }}
     >
       <div
         className="shrink-0 px-3 py-2"
         style={{
-          borderBottom: '2px solid var(--nb-border)',
-          fontSize: 11,
+          borderBottom: '1px solid var(--ide-border)',
+          fontSize: 13,
           fontFamily: sans,
-          color: 'var(--ide-text-3)',
-          letterSpacing: '0.1em',
+          color: 'var(--ide-text-4)',
           fontWeight: 700,
         }}
       >

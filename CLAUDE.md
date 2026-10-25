@@ -120,7 +120,7 @@ Secrets stored in GitHub: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPT
 
 ### Portfolio IDE (`src/views/Portfolio/`)
 
-The public-facing portfolio lives at `/`, `/projects`, `/projects/[id]`, and `/contact`. It is a VSCode-style IDE layout with a neo-brutalist paper theme (plus five dark themes).
+The public-facing portfolio lives at `/`, `/projects`, `/projects/[id]`, and `/contact`. It is a VSCode-style IDE layout in the same paper style as `/social` and `/coding` (plus five dark themes).
 
 **Entry point**: `src/app/(public)/layout.tsx` wraps all portfolio routes with `PortfolioShell` (from `IDELayout.tsx`), which composes `ThemeProvider → IDEProvider → IDELayout`. The shell stays mounted across page navigations — only `children` swaps, preventing flicker. Login/register are in `(with-navbar)` so they are unaffected.
 
@@ -134,7 +134,6 @@ src/views/Portfolio/
 ├── SidePanel.tsx           — 220px left panel with 4 sub-panels
 ├── SettingsPanel.tsx       — Settings sub-panel rendered inside SidePanel
 ├── TabBar.tsx              — 40px tab row with main + dynamic project tabs
-├── RightPanel.tsx          — 280px right panel (System metrics + Ask Oo chat)
 ├── StatusBar.tsx           — 24px bottom status bar
 ├── Terminal.tsx            — Animated boot terminal with interactive commands
 ├── context/
@@ -143,8 +142,9 @@ src/views/Portfolio/
 ├── hooks/useResponsive.ts  — SSR-safe breakpoint (initializes to 'desktop', reads window in useEffect)
 ├── data/portfolio.ts       — All portfolio content (projects, commits, PRs, skills, aiResponses)
 ├── constants/fonts.ts      — Font family strings
-├── constants/status.ts     — statusConfig + codeColors for syntax highlighting
-├── shared/                 — Badge, IDECard, Breadcrumb, LineNumbers, PageHeader, ProjectCard, SectionLabel, ThemeSwitcher
+├── constants/status.ts     — statusConfig (label + dot color per project status)
+├── constants/type.ts       — shared text and button styles (eyebrow, body, primaryButton, textLink)
+├── shared/                 — IDECard (with Tape), PageHeader, ProjectCard, SectionLabel, StatusLabel, ThemeSwitcher
 ├── mobile/                 — MobileHeader, MobileNav, MobileDrawer
 └── pages/
     ├── About.tsx           — / (bio, social links, featured projects, stack, timeline, community)
@@ -153,11 +153,11 @@ src/views/Portfolio/
     └── Contact.tsx         — /contact (channels + message form)
 ```
 
-**Theme system**: CSS variables are set on `document.documentElement` at runtime by `ThemeProvider`. `globals.css` has the one-dark fallback plus a `paper` neo-brutalist theme (the default). The user's choice is persisted by next-themes in `localStorage` under `theme`.
+**Theme system**: CSS variables are set on `document.documentElement` at runtime by `ThemeProvider`. `globals.css` has the one-dark fallback plus a `paper` theme (the default) that matches the `/social` and `/coding` colors. The user's choice is persisted by next-themes in `localStorage` under `theme`.
 
 **Navigation**: All Vike `navigate()` calls replaced with `useRouter().push()` from `next/navigation`. Route params passed as props (not from routeContext).
 
-**Fonts**: Space Grotesk (sans), Be Vietnam Pro (body), JetBrains Mono (mono), Funny Hello (title). Google Fonts loaded via CSS `@import` in `globals.css`. Funny Hello served from `public/FunnyHello.otf`.
+**Fonts**: the same set as the paper pages. Playfair Display for headings, Karla for body and UI text, Courier Prime for small labels and the terminal. Loaded with `<link>` tags in `src/app/layout.tsx`.
 
 ### Backend Architecture (`backend/`)
 

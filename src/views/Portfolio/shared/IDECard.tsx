@@ -4,23 +4,43 @@ interface IDECardProps {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
-  bg?: 'bg-2' | 'bg-3';
-  onClick?: () => void;
+  tape?: boolean;
 }
 
-export function IDECard({ children, className = '', style, bg = 'bg-2', onClick }: IDECardProps) {
+export function IDECard({ children, className = '', style, tape = false }: IDECardProps) {
   return (
     <div
       className={className}
-      onClick={onClick}
       style={{
-        background: `var(--ide-${bg})`,
-        border: '2px solid var(--nb-border)',
-        boxShadow: '4px 4px 0 var(--nb-shadow)',
+        position: 'relative',
+        background: 'var(--ide-bg-3)',
+        borderRadius: 3,
+        boxShadow: 'var(--ide-card-shadow)',
         ...style,
       }}
     >
+      {tape && <Tape />}
       {children}
     </div>
+  );
+}
+
+export function Tape() {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        top: -10,
+        left: 28,
+        width: 80,
+        height: 20,
+        transform: 'rotate(-3deg)',
+        background: 'var(--ide-tape)',
+        borderLeft: '1px dashed var(--ide-tape-edge)',
+        borderRight: '1px dashed var(--ide-tape-edge)',
+        pointerEvents: 'none',
+      }}
+    />
   );
 }

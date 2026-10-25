@@ -1,61 +1,76 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, Github, Package, PlayCircle } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { ArrowLeft, ExternalLink, Github, Package, PlayCircle } from 'lucide-react';
 import { portfolioData, type ProjectShot } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
-import { mono, sans, vietnam, title as titleFont } from '../constants/fonts';
-import { statusConfig } from '../constants/status';
-import { Breadcrumb, Badge, IDECard, SectionLabel } from '../shared';
+import { mono, sans, serif } from '../constants/fonts';
+import { body, eyebrow, primaryButton, textLink } from '../constants/type';
+import { IDECard, PageHeader, StatusLabel } from '../shared';
 
-const EXT_BY_LANGUAGE: Record<string, string> = {
-  JavaScript: '.js',
-  TypeScript: '.ts',
-  Python: '.py',
-  Java: '.java',
-};
-
-const bodyStyle = {
-  fontFamily: vietnam,
-  fontSize: 16,
-  lineHeight: 1.6,
-  color: 'var(--ide-text-3)',
-  margin: 0,
-  maxWidth: '70ch',
+const sectionHeading = {
+  fontFamily: serif,
+  fontSize: 24,
+  fontWeight: 700,
+  lineHeight: 1.25,
+  color: 'var(--ide-text-1)',
+  margin: '0 0 12px',
 } as const;
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section style={{ marginTop: 48 }}>
+      <h2 style={sectionHeading}>{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function BulletList({ items }: { items: string[] }) {
+  return (
+    <ul className="flex flex-col" style={{ gap: 8, margin: 0, paddingLeft: 20, listStyle: 'disc' }}>
+      {items.map((item) => (
+        <li key={item} style={body}>
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 function Screenshot({ shot }: { shot: ProjectShot }) {
   return (
-    <figure
-      style={{
-        margin: 0,
-        background: 'var(--ide-bg-2)',
-        border: '2px solid var(--nb-border)',
-        boxShadow: '4px 4px 0 var(--nb-shadow)',
-      }}
-    >
-      <Image
-        src={shot.src}
-        alt={shot.alt}
-        width={shot.width}
-        height={shot.height}
-        sizes="(max-width: 900px) 100vw, 760px"
-        style={{ display: 'block', width: '100%', height: 'auto' }}
-      />
-      <figcaption
-        style={{
-          padding: '12px 16px',
-          borderTop: '2px solid var(--nb-border)',
-          fontFamily: vietnam,
-          fontSize: 14,
-          lineHeight: 1.6,
-          color: 'var(--ide-text-4)',
-        }}
-      >
-        {shot.caption}
-      </figcaption>
-    </figure>
+    <IDECard style={{ margin: 0, padding: 8 }}>
+      <figure style={{ margin: 0 }}>
+        <Image
+          src={shot.src}
+          alt={shot.alt}
+          width={shot.width}
+          height={shot.height}
+          sizes="(max-width: 900px) 100vw, 720px"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: 'auto',
+            border: '1px solid var(--ide-border)',
+          }}
+        />
+        <figcaption
+          style={{
+            padding: '12px 8px 4px',
+            fontFamily: sans,
+            fontSize: 15,
+            lineHeight: 1.55,
+            color: 'var(--ide-text-4)',
+          }}
+        >
+          {shot.caption}
+        </figcaption>
+      </figure>
+    </IDECard>
   );
 }
 
@@ -67,415 +82,251 @@ export function ProjectDetail({ id }: { id: string }) {
 
   if (!project) {
     return (
-      <div
-        className="flex flex-col items-center justify-center h-full"
-        style={{ color: 'var(--ide-text-5)', fontFamily: sans }}
-      >
-        <div style={{ fontSize: 18, marginBottom: 12 }}>Project not found</div>
-        <button
-          onClick={() => router.push('/projects')}
-          style={{
-            color: 'var(--ide-accent)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontFamily: mono,
-            fontSize: 15,
-          }}
-        >
-          ← Back to projects
-        </button>
+      <div className="flex h-full flex-col items-center justify-center" style={{ gap: 12 }}>
+        <div style={{ ...sectionHeading, margin: 0 }}>Project not found</div>
+        <Link href="/projects" className="hover:underline underline-offset-4" style={textLink}>
+          <ArrowLeft size={16} />
+          Back to projects
+        </Link>
       </div>
     );
   }
 
-  const sc = statusConfig[project.status] || statusConfig.STABLE;
-  const ext = project.language ? (EXT_BY_LANGUAGE[project.language] ?? '.md') : '.md';
+  const { liveUrl } = project;
   const screenshots = project.screenshots ?? [];
   const mainShots = screenshots.slice(0, 3);
   const moreShots = screenshots.slice(3);
   const hasLinks = Boolean(project.repoUrl || project.npm || project.links?.length);
+  const secondaryLinks = [
+    ...(project.repoUrl
+      ? [{ href: `https://${project.repoUrl}`, label: 'Source', icon: Github }]
+      : []),
+    ...(project.npm
+      ? [{ href: `https://${project.npm}`, label: 'npm package', icon: Package }]
+      : []),
+    ...(project.links ?? []).map((link) => ({ ...link, icon: ExternalLink })),
+  ];
 
   return (
-    <div className="flex flex-col" style={{ minHeight: '100%' }}>
-      <Breadcrumb
-        segments={['src', 'projects', `${project.id}${ext}`]}
-        language={project.language ?? 'Markdown'}
-      />
+    <div
+      className={`flex ${isMobile ? 'flex-col px-4 pt-8 pb-16' : 'items-start px-8 pt-16 pb-24'}`}
+      style={{ gap: 48, maxWidth: 1096, margin: '0 auto' }}
+    >
+      <article className="min-w-0 flex-1" style={{ maxWidth: 720 }}>
+        <PageHeader
+          eyebrow={
+            <span className="inline-flex flex-wrap items-center" style={{ gap: 16 }}>
+              {project.language && <span>{project.language}</span>}
+              <StatusLabel status={project.status} />
+            </span>
+          }
+          title={project.name}
+          subtitle={project.summary}
+        />
 
-      <div className={`flex ${isMobile ? 'flex-col' : ''} flex-1`}>
-        <div className={`flex-1 ${isMobile ? 'p-5' : 'p-8'}`}>
-          <h1
-            style={{
-              fontSize: 36,
-              fontFamily: titleFont,
-              fontWeight: 700,
-              color: 'var(--ide-text-1)',
-              letterSpacing: '-1px',
-              margin: '0 0 8px',
-            }}
-          >
-            {project.name}
-          </h1>
-          <div
-            style={{ width: 48, height: 3, background: 'var(--ide-orange)', marginBottom: 24 }}
-          />
-
-          <div className="flex items-center gap-3 mb-6 flex-wrap">
-            <Badge color={sc.color} bg={sc.bg} style={{ padding: '3px 10px' }}>
-              {sc.label}
-            </Badge>
-            {project.language && project.langColor && (
-              <span
-                style={{
-                  fontSize: 13,
-                  fontFamily: mono,
-                  color: project.langColor,
-                  background: `${project.langColor}18`,
-                  padding: '2px 8px',
-                }}
-              >
-                {project.language}
-              </span>
-            )}
-          </div>
-
+        {project.requiresAccount && (
           <p
             style={{
-              fontSize: 18,
-              fontFamily: vietnam,
-              color: 'var(--ide-text-2)',
-              lineHeight: 1.6,
-              margin: '0 0 16px',
-              maxWidth: '65ch',
+              ...body,
+              fontSize: 15,
+              color: 'var(--ide-text-4)',
+              marginTop: 16,
+              paddingLeft: 12,
+              borderLeft: '2px solid var(--ide-yellow)',
             }}
           >
-            {project.summary}
+            This project needs an account to open. Ask me for a demo account if you want to try it.
           </p>
+        )}
 
-          {project.requiresAccount && (
-            <p
-              style={{
-                ...bodyStyle,
-                fontSize: 15,
-                color: 'var(--ide-text-4)',
-                marginBottom: 28,
-              }}
+        {project.problem && (
+          <Section title="The problem">
+            <p style={body}>{project.problem}</p>
+          </Section>
+        )}
+
+        {project.role && (
+          <Section title="My role">
+            <p style={body}>{project.role}</p>
+          </Section>
+        )}
+
+        {project.decisions && project.decisions.length > 0 && (
+          <Section title="Decisions">
+            <ol
+              className="flex flex-col"
+              style={{ gap: 24, margin: 0, padding: 0, listStyle: 'none' }}
             >
-              This project needs an account to open. Ask me for a demo account if you want to try
-              it.
-            </p>
-          )}
-
-          {project.problem && (
-            <div style={{ marginTop: 32 }}>
-              <SectionLabel>The problem</SectionLabel>
-              <p style={bodyStyle}>{project.problem}</p>
-            </div>
-          )}
-
-          {project.role && (
-            <div style={{ marginTop: 32 }}>
-              <SectionLabel>My role</SectionLabel>
-              <p style={bodyStyle}>{project.role}</p>
-            </div>
-          )}
-
-          {project.decisions && project.decisions.length > 0 && (
-            <div style={{ marginTop: 32 }}>
-              <SectionLabel>Decisions</SectionLabel>
               {project.decisions.map((decision, i) => (
-                <div key={decision.title} className="flex items-start" style={{ gap: 16 }}>
+                <li key={decision.title} className="flex items-baseline" style={{ gap: 16 }}>
                   <span
                     style={{
                       fontFamily: mono,
-                      fontSize: 13,
-                      color: 'var(--ide-text-6)',
-                      paddingTop: 2,
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: 'var(--ide-text-5)',
                       flexShrink: 0,
                     }}
                   >
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <div style={{ marginBottom: 20 }}>
-                    <div
+                  <div>
+                    <h3
                       style={{
                         fontFamily: sans,
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: 700,
-                        color: 'var(--ide-text-2)',
-                        marginBottom: 4,
+                        color: 'var(--ide-text-1)',
+                        margin: '0 0 4px',
                       }}
                     >
                       {decision.title}
-                    </div>
-                    <p style={bodyStyle}>{decision.reason}</p>
+                    </h3>
+                    <p style={body}>{decision.reason}</p>
                   </div>
-                </div>
+                </li>
+              ))}
+            </ol>
+          </Section>
+        )}
+
+        {project.changes && project.changes.length > 0 && (
+          <Section title="What changed">
+            <BulletList items={project.changes} />
+          </Section>
+        )}
+
+        {project.numbers && project.numbers.length > 0 && (
+          <Section title="Numbers">
+            <BulletList items={project.numbers} />
+          </Section>
+        )}
+
+        {mainShots.length > 0 && (
+          <Section title="Screenshots">
+            <div className="flex flex-col" style={{ gap: 32, marginTop: 8 }}>
+              {mainShots.map((shot) => (
+                <Screenshot key={shot.src} shot={shot} />
               ))}
             </div>
-          )}
-
-          {project.changes && project.changes.length > 0 && (
-            <div style={{ marginTop: 12 }}>
-              <SectionLabel>What changed</SectionLabel>
-              <ul
-                className="flex flex-col gap-2"
-                style={{ margin: 0, padding: 0, listStyle: 'none' }}
+            {moreShots.length > 0 && (
+              <div
+                className="grid"
+                style={{
+                  gap: 24,
+                  marginTop: 32,
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+                }}
               >
-                {project.changes.map((change) => (
-                  <li key={change} className="flex items-start" style={{ gap: 10 }}>
-                    <span
-                      style={{
-                        color: 'var(--ide-accent)',
-                        fontSize: 10,
-                        flexShrink: 0,
-                        marginTop: 4,
-                      }}
-                    >
-                      ▸
-                    </span>
-                    <span style={bodyStyle}>{change}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {project.numbers && project.numbers.length > 0 && (
-            <div style={{ marginTop: 32 }}>
-              <SectionLabel>Numbers</SectionLabel>
-              <ul
-                className="flex flex-col gap-2"
-                style={{ margin: 0, padding: 0, listStyle: 'none' }}
-              >
-                {project.numbers.map((number) => (
-                  <li key={number} className="flex items-start" style={{ gap: 10 }}>
-                    <span
-                      style={{
-                        color: 'var(--ide-orange)',
-                        fontSize: 10,
-                        flexShrink: 0,
-                        marginTop: 4,
-                      }}
-                    >
-                      ▸
-                    </span>
-                    <span style={bodyStyle}>{number}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {mainShots.length > 0 && (
-            <div style={{ marginTop: 36 }}>
-              <SectionLabel>Screenshots</SectionLabel>
-              <div className="flex flex-col gap-5">
-                {mainShots.map((shot) => (
+                {moreShots.map((shot) => (
                   <Screenshot key={shot.src} shot={shot} />
                 ))}
               </div>
-              {moreShots.length > 0 && (
-                <div
-                  className="grid gap-4"
+            )}
+          </Section>
+        )}
+
+        {project.tags.length > 0 && (
+          <p style={{ ...body, fontSize: 15, color: 'var(--ide-text-5)', marginTop: 48 }}>
+            {project.tags.join(' / ')}
+          </p>
+        )}
+      </article>
+
+      <aside
+        className="shrink-0"
+        style={{
+          width: isMobile ? '100%' : 280,
+          position: isMobile ? 'static' : 'sticky',
+          top: 32,
+        }}
+      >
+        <IDECard tape style={{ padding: 24 }}>
+          <p style={{ ...eyebrow, marginBottom: 16 }}>At a glance</p>
+
+          <dl className="flex flex-col" style={{ gap: 12, margin: 0 }}>
+            <div className="flex items-center justify-between" style={{ gap: 12 }}>
+              <dt style={{ fontFamily: sans, fontSize: 15, color: 'var(--ide-text-4)' }}>Status</dt>
+              <dd style={{ margin: 0 }}>
+                <StatusLabel status={project.status} />
+              </dd>
+            </div>
+            {project.stats.map((s) => (
+              <div key={s.label} className="flex items-center justify-between" style={{ gap: 12 }}>
+                <dt style={{ fontFamily: sans, fontSize: 15, color: 'var(--ide-text-4)' }}>
+                  {s.label}
+                </dt>
+                <dd
                   style={{
-                    marginTop: 16,
-                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+                    margin: 0,
+                    fontFamily: sans,
+                    fontSize: 15,
+                    fontWeight: 700,
+                    color: 'var(--ide-text-2)',
+                    textAlign: 'right',
                   }}
                 >
-                  {moreShots.map((shot) => (
-                    <Screenshot key={shot.src} shot={shot} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                  {s.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
 
-          {project.tags.length > 0 && (
-            <div
-              className="flex flex-wrap gap-2"
-              style={{ marginTop: 40, paddingTop: 20, borderTop: '1px solid var(--ide-border)' }}
+          {liveUrl && (
+            <button
+              onClick={() => router.push(liveUrl)}
+              className="w-full transition-transform hover:-translate-y-px"
+              style={{ ...primaryButton, marginTop: 24 }}
             >
-              {project.tags.map((tag) => (
-                <span
-                  key={tag}
-                  style={{
-                    fontSize: 12,
-                    fontFamily: mono,
-                    color: 'var(--ide-text-4)',
-                    background: 'var(--ide-bg-0)',
-                    border: '1.5px solid var(--nb-border)',
-                    padding: '3px 10px',
-                  }}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+              <PlayCircle size={15} />
+              Open live
+            </button>
           )}
-        </div>
 
-        <aside
-          className="shrink-0"
-          style={{
-            width: isMobile ? '100%' : 260,
-            borderLeft: isMobile ? 'none' : '2px solid var(--nb-border)',
-            borderTop: isMobile ? '2px solid var(--nb-border)' : 'none',
-            background: 'var(--ide-bg-3)',
-          }}
-        >
-          <div className="p-4">
-            <div
+          {hasLinks && (
+            <ul
+              className="flex flex-col"
               style={{
-                fontSize: 12,
-                fontFamily: sans,
-                fontWeight: 700,
-                color: 'var(--ide-text-2)',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                marginBottom: 16,
+                gap: 12,
+                margin: 0,
+                marginTop: 24,
+                paddingTop: 20,
+                listStyle: 'none',
+                borderTop: '1px solid var(--ide-border)',
               }}
             >
-              At a glance
-            </div>
-
-            <div className="flex items-center justify-between mb-4">
-              <span style={{ fontSize: 13, fontFamily: sans, color: 'var(--ide-text-4)' }}>
-                Status
-              </span>
-              <span
-                style={{
-                  fontSize: 12,
-                  background: sc.bg,
-                  color: sc.color,
-                  padding: '3px 8px',
-                  border: '1.5px solid var(--nb-border)',
-                  fontWeight: 700,
-                }}
-              >
-                {project.status === 'IN_PROGRESS' ? 'In progress' : project.status}
-              </span>
-            </div>
-
-            {project.stats.length > 0 && (
-              <IDECard className="mb-4 p-3">
-                {project.stats.map((s) => (
-                  <div key={s.label} className="flex items-center justify-between mb-2 last:mb-0">
-                    <span style={{ fontSize: 13, fontFamily: sans, color: 'var(--ide-text-4)' }}>
-                      {s.label}
-                    </span>
-                    <span style={{ fontSize: 14, fontFamily: mono, color: 'var(--ide-text-2)' }}>
-                      {s.value}
-                    </span>
-                  </div>
-                ))}
-              </IDECard>
-            )}
-
-            {project.liveUrl && (
-              <button
-                onClick={() => router.push(project.liveUrl!)}
-                className="w-full flex items-center justify-center gap-2 py-3 transition-opacity hover:opacity-90"
-                style={{
-                  background: 'var(--nb-accent)',
-                  border: '2px solid var(--nb-border)',
-                  boxShadow: '3px 3px 0 var(--nb-shadow)',
-                  cursor: 'pointer',
-                  fontSize: 14,
-                  fontFamily: sans,
-                  fontWeight: 700,
-                  color: 'var(--nb-on-accent)',
-                  marginBottom: 8,
-                }}
-              >
-                <PlayCircle size={12} />
-                Open live
-              </button>
-            )}
-
-            {hasLinks && (
-              <div className="flex flex-col gap-2">
-                {project.repoUrl && (
+              {secondaryLinks.map(({ href, label, icon: Icon }) => (
+                <li key={href}>
                   <a
-                    href={`https://${project.repoUrl}`}
+                    href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 py-2.5 transition-opacity hover:opacity-90"
-                    style={{
-                      border: '2px solid var(--nb-border)',
-                      background: 'var(--ide-bg-0)',
-                      fontSize: 13,
-                      fontFamily: sans,
-                      fontWeight: 600,
-                      color: 'var(--ide-text-3)',
-                      textDecoration: 'none',
-                    }}
+                    className="hover:underline underline-offset-4"
+                    style={{ ...textLink, fontSize: 15 }}
                   >
-                    <Github size={12} />
-                    Source
+                    <Icon size={15} />
+                    {label}
                   </a>
-                )}
-                {project.npm && (
-                  <a
-                    href={`https://${project.npm}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 py-2.5 transition-opacity hover:opacity-90"
-                    style={{
-                      border: '2px solid var(--nb-border)',
-                      background: 'var(--ide-bg-0)',
-                      fontSize: 13,
-                      fontFamily: sans,
-                      fontWeight: 600,
-                      color: 'var(--ide-text-3)',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    <Package size={12} />
-                    npm package
-                  </a>
-                )}
-                {project.links?.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 py-2.5 transition-opacity hover:opacity-90"
-                    style={{
-                      border: '2px solid var(--nb-border)',
-                      background: 'var(--ide-bg-0)',
-                      fontSize: 13,
-                      fontFamily: sans,
-                      fontWeight: 600,
-                      color: 'var(--ide-text-3)',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    <ExternalLink size={12} />
-                    {link.label}
-                  </a>
-                ))}
-              </div>
-            )}
+                </li>
+              ))}
+            </ul>
+          )}
 
-            {project.note && (
-              <p
-                style={{
-                  fontFamily: vietnam,
-                  fontSize: 13,
-                  lineHeight: 1.6,
-                  color: 'var(--ide-text-5)',
-                  margin: '12px 0 0',
-                }}
-              >
-                {project.note}
-              </p>
-            )}
-          </div>
-        </aside>
-      </div>
+          {project.note && (
+            <p
+              style={{
+                fontFamily: sans,
+                fontSize: 14,
+                lineHeight: 1.6,
+                color: 'var(--ide-text-5)',
+                margin: '16px 0 0',
+              }}
+            >
+              {project.note}
+            </p>
+          )}
+        </IDECard>
+      </aside>
     </div>
   );
 }

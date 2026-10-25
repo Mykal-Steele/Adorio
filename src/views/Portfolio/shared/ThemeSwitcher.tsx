@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Palette, Check } from 'lucide-react';
 import { useTheme, themeLabels, type ThemeName } from '../context/ThemeContext';
 import { sans } from '../constants/fonts';
+import { eyebrow } from '../constants/type';
 
 interface ThemeSwitcherProps {
   showLabel?: boolean;
@@ -28,53 +29,37 @@ export function ThemeSwitcher({ showLabel = false }: ThemeSwitcherProps) {
         onClick={() => setOpen((v) => !v)}
         title="Switch Theme"
         aria-label="Switch Theme"
-        className="rainbow-btn flex items-center justify-center gap-1.5"
+        className="ide-hover flex items-center justify-center gap-1.5"
         style={{
-          background: open ? 'var(--nb-accent)' : 'var(--ide-bg-0)',
-          border: '2px solid var(--nb-border)',
-          boxShadow: '2px 2px 0 var(--nb-shadow)',
+          background: open ? 'var(--ide-border-subtle)' : 'transparent',
+          border: '1px solid var(--ide-border)',
           cursor: 'pointer',
-          padding: showLabel ? '4px 9px' : 16,
-          borderRadius: 0,
-          fontSize: 10,
+          padding: showLabel ? '5px 10px' : 8,
+          borderRadius: 4,
+          fontSize: 14,
           fontFamily: sans,
-          letterSpacing: '0.04em',
-          color: open ? 'var(--nb-on-accent)' : 'var(--ide-text-5)',
+          color: 'var(--ide-text-3)',
         }}
       >
-        <Palette
-          size={showLabel ? 12 : 14}
-          className={open ? '' : 'rainbow-icon'}
-          style={open ? { color: 'var(--nb-on-accent)' } : undefined}
-        />
-        {showLabel && <span className={open ? '' : 'rainbow-icon'}>THEME</span>}
+        <Palette size={showLabel ? 14 : 16} />
+        {showLabel && <span>Theme</span>}
       </button>
       {open && (
         <div
           className="absolute right-0 z-50"
           style={{
             top: 'calc(100% + 6px)',
-            background: 'var(--ide-bg-0)',
-            border: '2px solid var(--nb-border)',
-            borderRadius: 0,
-            minWidth: 180,
-            padding: '4px 0',
-            boxShadow: '5px 5px 0 var(--nb-shadow)',
+            background: 'var(--ide-bg-3)',
+            border: '1px solid var(--ide-border)',
+            borderRadius: 6,
+            minWidth: 190,
+            padding: '6px 0',
+            boxShadow: 'var(--ide-card-shadow)',
             animation: 'dropdownOpen 0.14s ease-out',
             transformOrigin: 'top right',
           }}
         >
-          <div
-            style={{
-              padding: '4px 10px 6px',
-              fontSize: 9,
-              color: 'var(--ide-text-5)',
-              letterSpacing: '0.1em',
-              fontFamily: sans,
-            }}
-          >
-            COLOR THEME
-          </div>
+          <div style={{ ...eyebrow, fontSize: 11, padding: '4px 12px 6px' }}>Color theme</div>
           {(Object.keys(themeLabels) as ThemeName[]).map((t) => (
             <button
               key={t}
@@ -82,23 +67,16 @@ export function ThemeSwitcher({ showLabel = false }: ThemeSwitcherProps) {
                 setTheme(t);
                 setOpen(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-1.5"
+              className="ide-hover w-full flex items-center gap-2 px-3 py-1.5"
               style={{
-                background: theme === t ? 'var(--nb-accent)' : 'transparent',
+                background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
-                fontSize: 11,
+                fontSize: 14,
                 fontFamily: sans,
-                color: theme === t ? 'var(--nb-on-accent)' : 'var(--ide-text-2)',
+                color: theme === t ? 'var(--ide-text-1)' : 'var(--ide-text-3)',
                 fontWeight: theme === t ? 700 : 400,
                 textAlign: 'left',
-              }}
-              onMouseEnter={(e) => {
-                if (theme !== t)
-                  (e.currentTarget as HTMLElement).style.background = 'var(--ide-border-subtle)';
-              }}
-              onMouseLeave={(e) => {
-                if (theme !== t) (e.currentTarget as HTMLElement).style.background = 'transparent';
               }}
             >
               <span style={{ width: 14, display: 'inline-flex', justifyContent: 'center' }}>

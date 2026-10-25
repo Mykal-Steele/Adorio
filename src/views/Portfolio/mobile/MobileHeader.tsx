@@ -1,7 +1,7 @@
 'use client';
 
 import { Menu } from 'lucide-react';
-import { sans } from '../constants/fonts';
+import { serif } from '../constants/fonts';
 import { ThemeSwitcher, IconButton } from '../shared';
 
 interface MobileHeaderProps {
@@ -14,18 +14,18 @@ export function MobileHeader({ onMenuOpen }: MobileHeaderProps) {
       className="shrink-0 flex items-center justify-between px-4"
       style={{
         height: 48,
-        background: 'var(--ide-bg-0)',
-        borderBottom: '2px solid var(--nb-border)',
-        fontFamily: sans,
+        background: 'var(--ide-bg-1)',
+        borderBottom: '1px solid var(--ide-border)',
       }}
     >
       <div className="flex items-center gap-2">
         <span
           style={{
-            color: 'var(--ide-text-1)',
-            fontSize: 15,
+            fontFamily: serif,
+            fontStyle: 'italic',
+            fontSize: 20,
             fontWeight: 700,
-            letterSpacing: '0.02em',
+            color: 'var(--ide-text-1)',
           }}
         >
           Portfolio

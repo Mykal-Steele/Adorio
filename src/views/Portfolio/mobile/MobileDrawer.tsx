@@ -68,22 +68,22 @@ export function MobileDrawer({
             ? { bottom: 0, left: 0, right: 0, maxHeight: '85vh' }
             : { top: 0, right: 0, bottom: 0, width: '80vw', maxWidth: 320 }),
           animation: closing ? closeAnim : openAnim,
-          background: 'var(--ide-bg-2)',
-          borderTop: isBottom ? '2px solid var(--nb-border)' : 'none',
-          borderLeft: !isBottom ? '2px solid var(--nb-border)' : 'none',
+          background: 'var(--ide-bg-1)',
+          borderTop: isBottom ? '1px solid var(--ide-border)' : 'none',
+          borderLeft: !isBottom ? '1px solid var(--ide-border)' : 'none',
+          borderRadius: isBottom ? '12px 12px 0 0' : 0,
         }}
       >
         <div
           className="flex items-center justify-between px-4 shrink-0"
-          style={{ height: 48, borderBottom: '2px solid var(--nb-border)' }}
+          style={{ height: 48, borderBottom: '1px solid var(--ide-border)' }}
         >
           <span
             style={{
-              fontSize: 10,
+              fontSize: 15,
               fontFamily: sans,
-              color: 'var(--ide-text-3)',
-              letterSpacing: '0.08em',
-              fontWeight: 600,
+              color: 'var(--ide-text-1)',
+              fontWeight: 700,
             }}
           >
             {title}

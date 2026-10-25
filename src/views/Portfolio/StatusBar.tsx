@@ -13,11 +13,10 @@ export function StatusBar() {
       className="shrink-0 flex items-center justify-between px-3 gap-4 overflow-hidden"
       style={{
         height: 28,
-        background: 'var(--ide-bg-0)',
-        borderTop: '2px solid var(--nb-border)',
+        background: 'var(--ide-bg-1)',
+        borderTop: '1px solid var(--ide-border)',
         fontFamily: sans,
-        fontSize: 11,
-        letterSpacing: '0.04em',
+        fontSize: 13,
         flexShrink: 0,
       }}
     >
@@ -31,7 +30,7 @@ export function StatusBar() {
           target="_blank"
           rel="noreferrer"
           className="hover:underline"
-          style={{ color: 'var(--ide-text-3)', textDecoration: 'none', fontSize: 12 }}
+          style={{ color: 'var(--ide-text-4)', textDecoration: 'none' }}
         >
           GitHub
         </a>
@@ -40,14 +39,14 @@ export function StatusBar() {
           target="_blank"
           rel="noreferrer"
           className="hover:underline"
-          style={{ color: 'var(--ide-text-3)', textDecoration: 'none', fontSize: 12 }}
+          style={{ color: 'var(--ide-text-4)', textDecoration: 'none' }}
         >
           LinkedIn
         </a>
         <a
           href={`mailto:${portfolioData.email}`}
           className="hover:underline"
-          style={{ color: 'var(--ide-text-3)', textDecoration: 'none', fontSize: 12 }}
+          style={{ color: 'var(--ide-text-4)', textDecoration: 'none' }}
         >
           Email
         </a>
@@ -58,8 +57,8 @@ export function StatusBar() {
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            color: 'var(--ide-text-3)',
-            fontSize: 12,
+            color: 'var(--ide-text-4)',
+            fontSize: 13,
             fontFamily: sans,
             padding: 0,
           }}

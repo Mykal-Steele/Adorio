@@ -228,13 +228,13 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
       style={{
         height: embedded ? '100%' : 200,
         background: 'var(--ide-bg-1)',
-        borderTop: embedded ? 'none' : '2px solid var(--nb-border)',
+        borderTop: embedded ? 'none' : '1px solid var(--ide-border)',
       }}
     >
       {!embedded && (
         <div
           className="flex items-center gap-4 px-3"
-          style={{ height: 32, borderBottom: '2px solid var(--nb-border)', flexShrink: 0 }}
+          style={{ height: 32, borderBottom: '1px solid var(--ide-border)', flexShrink: 0 }}
         >
           <span
             style={{
@@ -298,7 +298,7 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
       </div>
       <div
         className="flex items-center gap-2 px-4 py-1.5 shrink-0"
-        style={{ borderTop: '2px solid var(--nb-border)' }}
+        style={{ borderTop: '1px solid var(--ide-border)' }}
       >
         <span
           style={{

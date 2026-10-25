@@ -36,7 +36,7 @@ export function MobileNav({ onMoreOpen }: MobileNavProps) {
       className="shrink-0 flex items-center justify-around"
       style={{
         height: 56,
-        background: 'var(--ide-bg-0)',
+        background: 'var(--ide-bg-1)',
         borderTop: '1px solid var(--ide-border)',
         fontFamily: sans,
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
@@ -55,19 +55,19 @@ export function MobileNav({ onMoreOpen }: MobileNavProps) {
               cursor: 'pointer',
               padding: '4px 0',
               minWidth: 56,
+              borderTop: active ? '2px solid var(--ide-yellow)' : '2px solid transparent',
             }}
           >
             <Icon
               size={20}
-              color={active ? 'var(--ide-accent)' : 'var(--ide-text-6)'}
+              color={active ? 'var(--ide-text-1)' : 'var(--ide-text-6)'}
               strokeWidth={active ? 2 : 1.5}
             />
             <span
               style={{
-                fontSize: 11,
-                color: active ? 'var(--ide-accent)' : 'var(--ide-text-6)',
-                fontWeight: active ? 600 : 400,
-                letterSpacing: '0.04em',
+                fontSize: 12,
+                color: active ? 'var(--ide-text-1)' : 'var(--ide-text-6)',
+                fontWeight: active ? 700 : 400,
               }}
             >
               {label}
@@ -84,12 +84,11 @@ export function MobileNav({ onMoreOpen }: MobileNavProps) {
           cursor: 'pointer',
           padding: '4px 0',
           minWidth: 56,
+          borderTop: '2px solid transparent',
         }}
       >
         <MoreHorizontal size={20} color="var(--ide-text-6)" strokeWidth={1.5} />
-        <span style={{ fontSize: 11, color: 'var(--ide-text-6)', letterSpacing: '0.04em' }}>
-          More
-        </span>
+        <span style={{ fontSize: 12, color: 'var(--ide-text-6)' }}>More</span>
       </button>
     </div>
   );

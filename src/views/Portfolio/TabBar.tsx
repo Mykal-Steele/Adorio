@@ -10,20 +10,10 @@ import { usePendingNavPath } from './hooks/usePendingNavPath';
 import { IconButton } from './shared';
 
 const mainTabs = [
-  { name: 'about_me.md', path: '/', color: 'var(--ide-text-4)' },
-  { name: 'projects.json', path: '/projects', color: 'var(--ide-accent-light)' },
-  { name: 'contact.sh', path: '/contact', color: 'var(--ide-purple)' },
+  { name: 'about_me.md', path: '/' },
+  { name: 'projects.json', path: '/projects' },
+  { name: 'contact.sh', path: '/contact' },
 ];
-
-function dotColor(name: string): string {
-  if (name.endsWith('.tsx') || name.endsWith('.ts')) return 'var(--ide-orange)';
-  if (name.endsWith('.json')) return 'var(--ide-accent-light)';
-  if (name.endsWith('.md')) return 'var(--ide-text-4)';
-  if (name.endsWith('.sh')) return 'var(--ide-purple)';
-  if (name.endsWith('.rs')) return 'var(--ide-red-dark)';
-  if (name.endsWith('.go')) return 'var(--ide-cyan)';
-  return 'var(--ide-text-4)';
-}
 
 export function TabBar() {
   const pathname = usePathname();
@@ -65,8 +55,8 @@ export function TabBar() {
     <div
       className="shrink-0 flex items-end overflow-x-auto"
       style={{
-        background: 'var(--ide-bg-3)',
-        borderBottom: '2px solid var(--nb-border)',
+        background: 'var(--ide-bg-1)',
+        borderBottom: '1px solid var(--ide-border)',
         scrollbarWidth: 'none',
         height: 40,
       }}
@@ -80,19 +70,18 @@ export function TabBar() {
               onClick={() => router.push(tab.path)}
               className="flex items-center gap-2 px-4 h-full shrink-0 transition-colors"
               style={{
-                background: active ? 'var(--nb-accent)' : 'transparent',
-                borderTop: active ? '3px solid var(--nb-border)' : '3px solid transparent',
+                background: active ? 'var(--ide-bg-0)' : 'transparent',
+                borderTop: 'none',
                 borderRight: '1px solid var(--ide-border)',
                 borderLeft: 'none',
-                borderBottom: 'none',
+                borderBottom: active ? '2px solid var(--ide-yellow)' : '2px solid transparent',
                 cursor: 'pointer',
-                color: active ? 'var(--nb-on-accent)' : 'var(--ide-text-4)',
-                fontSize: 13,
-                fontWeight: active ? 700 : 500,
+                color: active ? 'var(--ide-text-1)' : 'var(--ide-text-4)',
+                fontSize: 14,
+                fontWeight: active ? 700 : 400,
                 fontFamily: sans,
               }}
             >
-              <span style={{ color: dotColor(tab.name), fontSize: 8 }}>●</span>
               {tab.name}
             </button>
           );
@@ -104,9 +93,9 @@ export function TabBar() {
               key={tab.id}
               className="flex items-center h-full shrink-0"
               style={{
-                background: active ? 'var(--nb-accent)' : 'transparent',
-                borderTop: active ? '3px solid var(--nb-border)' : '3px solid transparent',
+                background: active ? 'var(--ide-bg-0)' : 'transparent',
                 borderRight: '1px solid var(--ide-border)',
+                borderBottom: active ? '2px solid var(--ide-yellow)' : '2px solid transparent',
               }}
             >
               <button
@@ -116,13 +105,12 @@ export function TabBar() {
                   background: 'transparent',
                   border: 'none',
                   cursor: 'pointer',
-                  color: active ? 'var(--nb-on-accent)' : 'var(--ide-text-4)',
-                  fontSize: 13,
-                  fontWeight: active ? 700 : 500,
+                  color: active ? 'var(--ide-text-1)' : 'var(--ide-text-4)',
+                  fontSize: 14,
+                  fontWeight: active ? 700 : 400,
                   fontFamily: sans,
                 }}
               >
-                <span style={{ color: dotColor(tab.name), fontSize: 8 }}>●</span>
                 {tab.name}
               </button>
               <IconButton
@@ -133,7 +121,7 @@ export function TabBar() {
                 }}
                 aria-label={`Close ${tab.name} tab`}
                 size={32}
-                color={active ? 'var(--nb-on-accent)' : 'var(--ide-text-6)'}
+                color={active ? 'var(--ide-text-3)' : 'var(--ide-text-6)'}
                 className="mr-2"
                 style={{ height: '100%' }}
               >
