@@ -500,20 +500,11 @@ export const portfolioData = {
       role: 'Team of three. I wrote all of the ESP32 firmware for the reader box, and most of the backend and frontend: about 70% and 60% of the commits, including the check-in logic, card registration, and the register-card page.',
       result:
         '2nd place (1st runner-up) at the KMUTT SIT IoT Hackathon 2026. A check-in takes under a second from tap to confirmation on the box.',
-      stack: [
-        'TypeScript',
-        'React',
-        'Tailwind CSS',
-        'Express',
-        'Prisma',
-        'PostgreSQL',
-        'ESP32',
-        'Socket.io',
-      ],
+      stack: ['TypeScript', 'React', 'Tailwind CSS', 'Express', 'Prisma', 'PostgreSQL', 'ESP32'],
       features: [
         "Students sign up on the web app, register for events, and link their NFC card on the reader box or with their phone's NFC.",
         'The box reads the card with a PN532 reader and sends its ID to the Express API over HTTPS.',
-        'A known card is marked present and logged. An unknown card makes the box show a QR code that opens registration. A second tap at the same event is not counted twice.',
+        'A known card is marked present and logged. A second tap at the same event is not counted twice.',
         'The firmware is a 5-state state machine with a touch screen and 4 buzzer tones, so students know the result without looking.',
       ],
       decisions: [
@@ -523,9 +514,9 @@ export const portfolioData = {
             'Each scan is one request to the backend, so the box needs no database and the web app stays the single source of truth.',
         },
         {
-          title: 'Socket.io for card linking',
+          title: 'Register at the door',
           reason:
-            'The backend tells the web app the moment a card is linked, so the registration page confirms it without a refresh.',
+            'A card the system has never seen is not rejected. The box shows a QR code that opens registration, so a new student is set up on their first tap.',
         },
       ],
       color: '#fe9d00',
