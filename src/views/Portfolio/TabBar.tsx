@@ -55,7 +55,7 @@ export function TabBar() {
             <button
               aria-current={active ? 'page' : undefined}
               onClick={() => router.push(path)}
-              className="flex h-full items-center gap-2 pl-4 pr-1"
+              className="pf-tab flex h-full items-center gap-2 pl-4 pr-1"
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -74,7 +74,7 @@ export function TabBar() {
               aria-label={`Close ${name}`}
               size={28}
               color="var(--ide-text-5)"
-              className={`ide-hover-icon mr-1.5 rounded ${active ? '' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'}`}
+              className={`pf-tab ide-hover-icon mr-1.5 rounded ${active ? '' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'}`}
             >
               <X size={13} />
             </IconButton>

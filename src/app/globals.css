@@ -517,12 +517,17 @@ body {
 .ide-layout,
 .ide-layout body {
   overflow: hidden;
+  background: var(--ide-bg-1);
 }
 
 /* Keyboard focus must stay visible through the IDE's inline styles */
 .ide-layout :focus-visible {
   outline: 2px solid var(--ide-accent);
   outline-offset: 2px;
+}
+/* Tabs sit in a scrolling row that clips anything outside it, so their ring goes inside */
+.ide-layout .pf-tab:focus-visible {
+  outline-offset: -2px;
 }
 
 /* Theme-aware hover backgrounds — values use CSS vars, !important overrides base resets */
@@ -537,6 +542,8 @@ body {
    inline styles would override any :hover written as a Tailwind class. */
 .pf-btn,
 .pf-btn-primary {
+  /* Anchors absolutely positioned children (like sr-only labels) so they can't stretch the page */
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
