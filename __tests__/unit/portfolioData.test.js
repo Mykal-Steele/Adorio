@@ -99,6 +99,16 @@ describe('portfolio writing', () => {
   });
 });
 
+describe('linux setup', () => {
+  test('should show the full machine, system, and tools setup on the Linux page', () => {
+    const setup = skill('linux').setup ?? [];
+    expect(setup.map((g) => g.group)).toEqual(['Machine', 'System', 'Tools']);
+    const values = setup.flatMap((g) => g.items.map((i) => i.value)).join(' ');
+    expect(values).toContain('UX5401ZAS');
+    expect(values).toContain('foot');
+  });
+});
+
 describe('portfolio experience', () => {
   const MONTHS = [
     'Jan',

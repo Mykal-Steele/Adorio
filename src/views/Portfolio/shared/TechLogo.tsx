@@ -15,6 +15,7 @@ import {
   siMongodb,
   siNestjs,
   siNextdotjs,
+  siNeovim,
   siNginx,
   siNodedotjs,
   siPnpm,
@@ -26,7 +27,6 @@ import {
   siSwagger,
   siTailwindcss,
   siTypescript,
-  siVim,
   type SimpleIcon,
 } from 'simple-icons';
 import { serif } from '../constants/fonts';
@@ -57,7 +57,7 @@ const ICONS: Record<string, SimpleIcon> = {
   figma: siFigma,
   archlinux: siArchlinux,
   hyprland: siHyprland,
-  vim: siVim,
+  neovim: siNeovim,
   bash: siGnubash,
   pnpm: siPnpm,
 };

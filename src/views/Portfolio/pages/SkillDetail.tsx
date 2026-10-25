@@ -77,6 +77,53 @@ export function SkillDetail({ id }: { id: string }) {
         </section>
       )}
 
+      {skill.setup && (
+        <section style={{ marginTop: 64 }}>
+          <SectionLabel>My setup</SectionLabel>
+          <div
+            className="flex flex-col"
+            style={{
+              gap: 32,
+              padding: isMobile ? 20 : 28,
+              background: 'var(--ide-bg-3)',
+              borderRadius: 3,
+              boxShadow: 'var(--ide-card-shadow)',
+            }}
+          >
+            {skill.setup.map(({ group, items }) => (
+              <div key={group}>
+                <h3
+                  style={{
+                    fontFamily: serif,
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: 'var(--ide-text-1)',
+                    margin: '0 0 12px',
+                  }}
+                >
+                  {group}
+                </h3>
+                <dl className="flex flex-col" style={{ gap: 10, margin: 0 }}>
+                  {items.map(({ label, value }) => (
+                    <div
+                      key={label}
+                      className="grid items-baseline"
+                      style={{
+                        gridTemplateColumns: oneColumn ? '1fr' : '140px 1fr',
+                        gap: oneColumn ? 2 : 16,
+                      }}
+                    >
+                      <dt style={{ ...eyebrow, fontSize: 15 }}>{label}</dt>
+                      <dd style={{ ...body, margin: 0 }}>{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {projects.length > 0 && (
         <section style={{ marginTop: 64 }}>
           <SectionLabel>Projects</SectionLabel>

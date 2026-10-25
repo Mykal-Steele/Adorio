@@ -93,7 +93,14 @@ export interface Skill {
   group: SkillGroup;
   // Your own words on how you learned it and what you built with it. Shown on /skills/<id>.
   story: string;
+  // Specs shown on the skill page, like the laptop on the Linux page
+  setup?: SetupGroup[];
 }
+
+export type SetupGroup = {
+  group: string;
+  items: { label: string; value: string }[];
+};
 
 export type SetupItem = {
   id: string;
@@ -973,6 +980,47 @@ export const portfolioData = {
       group: 'Tools & Infra',
       story:
         "I started tweaking with Linux a few years ago. At the start I was mainly looking for a way to make my old laptop run faster, so I distro hopped for a while, starting with Peppermint, then stuff like Linux Mint and Puppy Linux. Another distro I like is Fedora.\n\nToday I use Omarchy (Arch with Hyprland) daily for everything, including building this site, and it works really well. Of course I've had a lot of problems with booting and setup. Dual booting with Windows broke my boot a few times, and fixing it taught me a lot about how the system starts. But I never gave up on Linux, just like it never gave up on me (unless you count it randomly not booting, but that's usually because of the Windows I'm dual booting holding or locking something. Of course it is lmao).",
+      setup: [
+        {
+          group: 'Machine',
+          items: [
+            { label: 'Laptop', value: 'ASUS Zenbook 14X OLED (UX5401ZAS)' },
+            { label: 'CPU', value: 'Intel Core i7-12700H, 14 cores and 20 threads, up to 4.7 GHz' },
+            { label: 'Graphics', value: 'Intel Iris Xe (integrated)' },
+            { label: 'Memory', value: '16 GB' },
+            { label: 'Storage', value: 'Samsung 1 TB NVMe SSD' },
+            { label: 'Display', value: '14" OLED, 3840x2400 at 60 Hz, 2x scaling' },
+            { label: 'Mic', value: 'HyperX SoloCast (USB)' },
+          ],
+        },
+        {
+          group: 'System',
+          items: [
+            { label: 'OS', value: 'Omarchy 4 (Arch Linux)' },
+            { label: 'Desktop', value: 'Hyprland on Wayland' },
+            { label: 'Kernel', value: 'linux-omarchy, with the stock Arch kernel as a fallback' },
+            { label: 'Boot', value: 'Limine, dual booting with Windows 11 (Tiny11)' },
+            {
+              label: 'Filesystem',
+              value: 'btrfs, with a Snapper snapshot before every package update',
+            },
+            { label: 'Theme', value: 'Coppernight' },
+          ],
+        },
+        {
+          group: 'Tools',
+          items: [
+            { label: 'Terminal', value: 'foot' },
+            { label: 'Shell', value: 'Bash with Starship' },
+            { label: 'Editor', value: 'VS Code, and Neovim in the terminal' },
+            { label: 'Browser', value: 'Brave' },
+            { label: 'Versions', value: 'mise, with Bun and pnpm' },
+            { label: 'Containers', value: 'Docker, with lazydocker' },
+            { label: 'Git', value: 'lazygit' },
+            { label: 'Terminal tools', value: 'tmux, btop, fzf, zoxide, eza' },
+          ],
+        },
+      ],
     },
     {
       id: 'swagger',
@@ -993,7 +1041,7 @@ export const portfolioData = {
   setup: [
     { id: 'archlinux', name: 'Arch Linux' },
     { id: 'hyprland', name: 'Omarchy / Hyprland' },
-    { id: 'vim', name: 'Vim' },
+    { id: 'neovim', name: 'Neovim' },
     { id: 'bash', name: 'Bash' },
     { id: 'pnpm', name: 'pnpm' },
     { id: 'mise', name: 'mise' },
