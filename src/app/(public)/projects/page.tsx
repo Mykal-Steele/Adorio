@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://i.ibb.co/KxH3wXDS/download-3.png',
+        url: 'https://adorio.space/og.png',
         width: 1200,
         height: 630,
         alt: 'Projects by Oakar Oo',
