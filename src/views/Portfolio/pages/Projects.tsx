@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
-import { textLink } from '../constants/type';
+import { buttonHover, secondaryButton } from '../constants/type';
 import { PageHeader, ProjectCard, SectionLabel } from '../shared';
 
 export function Projects() {
@@ -47,18 +47,14 @@ export function Projects() {
                   href={project.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline underline-offset-4"
-                  style={textLink}
+                  className={buttonHover}
+                  style={secondaryButton}
                 >
                   {project.name}
                   <ExternalLink size={14} />
                 </a>
               ) : (
-                <Link
-                  href={project.href}
-                  className="hover:underline underline-offset-4"
-                  style={textLink}
-                >
+                <Link href={project.href} className={buttonHover} style={secondaryButton}>
                   {project.name}
                   <ArrowRight size={14} />
                 </Link>

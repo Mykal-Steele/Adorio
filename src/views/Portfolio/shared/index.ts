@@ -7,3 +7,7 @@ export { ThemeSwitcher } from './ThemeSwitcher';
 export { RouteLoadingSkeleton } from './RouteLoadingSkeleton';
 export { NavigationProgressBar } from './NavigationProgressBar';
 export { ProjectCard } from './ProjectCard';
+export { ProjectImage } from './ProjectImage';
+export { FileIcon } from './FileIcon';
+export { LogoTile } from './LogoTile';
+export { TechLogo, skillIdForLanguage } from './TechLogo';

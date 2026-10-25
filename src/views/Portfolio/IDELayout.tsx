@@ -9,13 +9,11 @@ import { SidePanel } from './SidePanel';
 import { TabBar } from './TabBar';
 import { StatusBar } from './StatusBar';
 import { Terminal } from './Terminal';
-import { SettingsPanel } from './SettingsPanel';
 import { useIDE } from './context/IDEContext';
 import { useResponsive } from './hooks/useResponsive';
 import { MobileHeader } from './mobile/MobileHeader';
 import { MobileNav } from './mobile/MobileNav';
 import { MobileDrawer } from './mobile/MobileDrawer';
-import { ThemeProvider } from './context/ThemeContext';
 import { IDEProvider } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
 import { sans } from './constants/fonts';
@@ -23,7 +21,7 @@ import { eyebrow } from './constants/type';
 import { NavigationProgressBar } from './shared/NavigationProgressBar';
 
 function DesktopShell({ children }: { children: ReactNode }) {
-  const { terminalOpen, isSettingsOpen } = useIDE();
+  const { terminalOpen, sidePanelOpen } = useIDE();
   return (
     <div
       className="flex flex-col"
@@ -32,7 +30,7 @@ function DesktopShell({ children }: { children: ReactNode }) {
       <TitleBar />
       <div className="flex flex-1 overflow-hidden">
         <ActivityBar />
-        <SidePanel />
+        {sidePanelOpen && <SidePanel />}
         <div className="flex flex-col flex-1 overflow-hidden">
           <TabBar />
           <main
@@ -49,13 +47,12 @@ function DesktopShell({ children }: { children: ReactNode }) {
         </div>
       </div>
       <StatusBar />
-      {isSettingsOpen && <SettingsPanel />}
     </div>
   );
 }
 
 function TabletShell({ children }: { children: ReactNode }) {
-  const { terminalOpen, isSettingsOpen } = useIDE();
+  const { terminalOpen } = useIDE();
   const [explorerOpen, setExplorerOpen] = useState(false);
   return (
     <div
@@ -114,7 +111,6 @@ function TabletShell({ children }: { children: ReactNode }) {
       >
         <SidePanel />
       </MobileDrawer>
-      {isSettingsOpen && <SettingsPanel />}
     </div>
   );
 }
@@ -219,7 +215,6 @@ function MobileMoreMenu({
 }
 
 function MobileShell({ children }: { children: ReactNode }) {
-  const { isSettingsOpen } = useIDE();
   const [drawer, setDrawer] = useState<MobileDrawerType>(null);
   const open = (type: MobileDrawerType) => setDrawer(type);
   const close = () => setDrawer(null);
@@ -255,7 +250,6 @@ function MobileShell({ children }: { children: ReactNode }) {
           <Terminal embedded />
         </div>
       </MobileDrawer>
-      {isSettingsOpen && <SettingsPanel />}
     </div>
   );
 }
@@ -294,10 +288,8 @@ export function IDELayout({ children }: { children: ReactNode }) {
 
 export function PortfolioShell({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider>
-      <IDEProvider>
-        <IDELayout>{children}</IDELayout>
-      </IDEProvider>
-    </ThemeProvider>
+    <IDEProvider>
+      <IDELayout>{children}</IDELayout>
+    </IDEProvider>
   );
 }

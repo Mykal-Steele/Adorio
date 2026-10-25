@@ -120,7 +120,7 @@ Secrets stored in GitHub: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPT
 
 ### Portfolio IDE (`src/views/Portfolio/`)
 
-The public-facing portfolio lives at `/`, `/projects`, `/projects/[id]`, and `/contact`. It is a VSCode-style IDE layout in the same paper style as `/social` and `/coding` (plus five dark themes).
+The public-facing portfolio lives at `/`, `/projects`, `/projects/[id]`, `/skills/[id]`, and `/contact`. It is a VSCode-style IDE layout in the same paper style as `/social` and `/coding` (plus five dark themes).
 
 **Entry point**: `src/app/(public)/layout.tsx` wraps all portfolio routes with `PortfolioShell` (from `IDELayout.tsx`), which composes `ThemeProvider → IDEProvider → IDELayout`. The shell stays mounted across page navigations — only `children` swaps, preventing flicker. Login/register are in `(with-navbar)` so they are unaffected.
 
@@ -130,26 +130,28 @@ The public-facing portfolio lives at `/`, `/projects`, `/projects/[id]`, and `/c
 src/views/Portfolio/
 ├── IDELayout.tsx          — PortfolioShell, IDELayout, DesktopShell, TabletShell, MobileShell
 ├── TitleBar.tsx            — 48px top bar with Portfolio label + ThemeSwitcher
-├── ActivityBar.tsx         — 48px left icon column (Explorer/Profile/Git/Skills/Settings)
-├── SidePanel.tsx           — 220px left panel with 4 sub-panels
-├── SettingsPanel.tsx       — Settings sub-panel rendered inside SidePanel
-├── TabBar.tsx              — 40px tab row with main + dynamic project tabs
+├── ActivityBar.tsx         — 48px left column, one button that shows or hides the explorer
+├── SidePanel.tsx           — 240px explorer: root files plus projects/ and skills/ folders
+├── TabBar.tsx              — 40px tab row of open files, closable like an editor
 ├── StatusBar.tsx           — 24px bottom status bar
 ├── Terminal.tsx            — Animated boot terminal with interactive commands
 ├── context/
-│   ├── IDEContext.tsx      — activeSidePanel, terminalOpen, openProjectTabs
-│   └── ThemeContext.tsx    — 6 themes (paper/midnight/nord/dracula/one-dark/catppuccin), CSS vars injected via document.documentElement
+│   ├── IDEContext.tsx      — sidePanelOpen, terminalOpen, openTabs (every visited page gets a tab)
+│   └── ThemeContext.tsx    — theme names and labels, plus useTheme over next-themes
 ├── hooks/useResponsive.ts  — SSR-safe breakpoint (initializes to 'desktop', reads window in useEffect)
-├── data/portfolio.ts       — All portfolio content (projects, commits, PRs, skills, aiResponses)
+├── data/portfolio.ts       — All portfolio content (projects, experience, skills with a `story` field, setup, timeline)
+├── data/files.ts           — file names for tabs and the explorer
+├── data/skills.ts          — which projects and roles mention each skill
 ├── constants/fonts.ts      — Font family strings
-├── constants/status.ts     — statusConfig (label + dot color per project status)
+├── constants/status.ts     — statusConfig (display label per project status)
 ├── constants/type.ts       — shared text and button styles (eyebrow, body, primaryButton, textLink)
-├── shared/                 — IDECard (with Tape), PageHeader, ProjectCard, SectionLabel, StatusLabel, ThemeSwitcher
+├── shared/                 — IDECard (with Tape), FileIcon, LogoTile, PageHeader, ProjectCard, ProjectImage, SectionLabel, StatusLabel, TechLogo, ThemeSwitcher
 ├── mobile/                 — MobileHeader, MobileNav, MobileDrawer
 └── pages/
     ├── About.tsx           — / (bio, social links, featured projects, stack, timeline, community)
     ├── Projects.tsx        — /projects (visual project card grid)
     ├── ProjectDetail.tsx   — /projects/[id] (accepts id prop)
+    ├── SkillDetail.tsx     — /skills/[id]: logo, your story, and the projects and roles that use it
     └── Contact.tsx         — /contact (channels + message form)
 ```
 

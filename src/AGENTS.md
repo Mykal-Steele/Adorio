@@ -40,9 +40,10 @@ src/
 │   │   ├── layout.tsx           — Wraps children in PortfolioShell from views/Portfolio/IDELayout
 │   │   ├── page.tsx             — / → mounts views/Portfolio/pages/About
 │   │   ├── contact/page.tsx     — /contact → mounts views/Portfolio/pages/Contact
-│   │   └── projects/
-│   │       ├── page.tsx         — /projects → mounts views/Portfolio/pages/Projects
-│   │       └── [id]/page.tsx    — /projects/[id] → mounts views/Portfolio/pages/ProjectDetail
+│   │   ├── projects/
+│   │   │   ├── page.tsx         — /projects → mounts views/Portfolio/pages/Projects
+│   │   │   └── [id]/page.tsx    — /projects/[id] → mounts views/Portfolio/pages/ProjectDetail
+│   │   └── skills/[id]/page.tsx — /skills/[id] → mounts views/Portfolio/pages/SkillDetail
 │   └── (with-navbar)/           — Route group: app pages (Navbar rendered in group layout)
 │       ├── layout.tsx           — Renders <Navbar /> above {children}
 │       ├── login/page.tsx       — /login → mounts views/Login
@@ -156,23 +157,23 @@ src/
     │       └── problemStorage.ts   — localStorage persistence for user code per problem
     └── Portfolio/               — VSCode-style IDE portfolio (public-facing, no auth)
         ├── IDELayout.tsx        — PortfolioShell, IDELayout, Desktop/Tablet/MobileShell
-        ├── ActivityBar.tsx      — 48px left icon column (Explorer/Profile/Git/Skills/Settings)
-        ├── SidePanel.tsx        — 220px left panel with 4 sub-panels
-        ├── SettingsPanel.tsx    — Settings sub-panel
-        ├── TabBar.tsx           — Tab row with main + dynamic project tabs
+        ├── ActivityBar.tsx      — 48px left column, toggles the explorer
+        ├── SidePanel.tsx        — Explorer tree: root files, projects/, skills/
+        ├── TabBar.tsx           — Open files as closable tabs
         ├── TitleBar.tsx         — 48px top bar with Portfolio label + ThemeSwitcher
         ├── StatusBar.tsx        — 24px bottom status bar
         ├── Terminal.tsx         — Boot terminal with interactive commands
         ├── context/
-        │   ├── IDEContext.tsx   — activeSidePanel, terminalOpen, openProjectTabs
-        │   └── ThemeContext.tsx — 6 themes (paper/midnight/nord/dracula/one-dark/catppuccin), CSS vars on documentElement
-        ├── data/portfolio.ts    — All portfolio content (projects, commits, PRs, skills, AI responses)
+        │   ├── IDEContext.tsx   — sidePanelOpen, terminalOpen, openTabs
+        │   └── ThemeContext.tsx — theme names and labels, useTheme over next-themes
+        ├── data/portfolio.ts    — All portfolio content (projects, experience, skills, setup, timeline)
+        ├── data/files.ts        — File names for tabs and the explorer
+        ├── data/skills.ts       — Projects and roles that mention each skill
         ├── constants/
         │   ├── fonts.ts         — Font family strings
-        │   ├── status.ts        — statusConfig (label + dot color per project status)
+        │   ├── status.ts        — statusConfig (display label per project status)
         │   └── type.ts          — shared text and button styles
         ├── hooks/
-        │   ├── useProjectNavigation.ts — navigate between project tabs
         │   └── useResponsive.ts — SSR-safe breakpoint (initializes 'desktop', reads window in useEffect)
         ├── shared/              — IDE-specific shared primitives
         │   ├── index.ts         — Barrel export
@@ -180,7 +181,11 @@ src/
         │   ├── PageHeader.tsx   — Section header
         │   ├── ProjectCard.tsx  — Project card: status, title, summary, tags
         │   ├── SectionLabel.tsx — Section heading
-        │   ├── StatusLabel.tsx  — Status dot + label
+        │   ├── StatusLabel.tsx  — Project status as text
+        │   ├── TechLogo.tsx     — simple-icons logo (or lettered tile) for a skill id
+        │   ├── LogoTile.tsx     — Logo tile with a name tooltip
+        │   ├── ProjectImage.tsx — Project screenshot, or a logo cover when there is none
+        │   ├── FileIcon.tsx     — Icon for a file in tabs and the explorer
         │   └── ThemeSwitcher.tsx — Theme selector dropdown
         ├── mobile/
         │   ├── MobileDrawer.tsx — Slide-in drawer for mobile nav
@@ -190,6 +195,7 @@ src/
             ├── About.tsx        — /: bio, social links, featured projects, stack, timeline, community
             ├── Projects.tsx     — /projects: visual project card grid
             ├── ProjectDetail.tsx — /projects/[id]: detailed project view
+            ├── SkillDetail.tsx  — /skills/[id]: skill story and where it was used
             └── Contact.tsx      — /contact: channels + message form (uses contactSchema)
 ```
 

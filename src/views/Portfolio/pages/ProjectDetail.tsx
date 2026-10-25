@@ -2,14 +2,22 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { ArrowLeft, ExternalLink, Github, Package, PlayCircle } from 'lucide-react';
 import { portfolioData, type ProjectShot } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
 import { mono, sans, serif } from '../constants/fonts';
-import { body, eyebrow, primaryButton, textLink } from '../constants/type';
-import { IDECard, PageHeader, StatusLabel } from '../shared';
+import {
+  body,
+  buttonHover,
+  eyebrow,
+  linkHover,
+  primaryButton,
+  secondaryButton,
+  textLink,
+} from '../constants/type';
+import { skillsForProject } from '../data/skills';
+import { IDECard, LogoTile, PageHeader, ProjectImage, StatusLabel } from '../shared';
 
 const sectionHeading = {
   fontFamily: serif,
@@ -75,7 +83,6 @@ function Screenshot({ shot }: { shot: ProjectShot }) {
 }
 
 export function ProjectDetail({ id }: { id: string }) {
-  const router = useRouter();
   const { isMobile } = useResponsive();
 
   const project = portfolioData.projects.find((p) => p.id === id);
@@ -84,7 +91,7 @@ export function ProjectDetail({ id }: { id: string }) {
     return (
       <div className="flex h-full flex-col items-center justify-center" style={{ gap: 12 }}>
         <div style={{ ...sectionHeading, margin: 0 }}>Project not found</div>
-        <Link href="/projects" className="hover:underline underline-offset-4" style={textLink}>
+        <Link href="/projects" className={linkHover} style={textLink}>
           <ArrowLeft size={16} />
           Back to projects
         </Link>
@@ -94,6 +101,9 @@ export function ProjectDetail({ id }: { id: string }) {
 
   const { liveUrl } = project;
   const screenshots = project.screenshots ?? [];
+  const cover =
+    project.image && !screenshots.some((shot) => shot.src === project.image?.src) ? project : null;
+  const builtWith = skillsForProject(project);
   const mainShots = screenshots.slice(0, 3);
   const moreShots = screenshots.slice(3);
   const hasLinks = Boolean(project.repoUrl || project.npm || project.links?.length);
@@ -123,6 +133,33 @@ export function ProjectDetail({ id }: { id: string }) {
           title={project.name}
           subtitle={project.summary}
         />
+
+        {builtWith.length > 0 && (
+          <div className="flex flex-wrap" style={{ gap: 10, marginTop: 24 }}>
+            {builtWith.map((skill) => (
+              <LogoTile
+                key={skill.id}
+                id={skill.id}
+                name={skill.name}
+                href={`/skills/${skill.id}`}
+              />
+            ))}
+          </div>
+        )}
+
+        {cover && (
+          <div
+            style={{
+              position: 'relative',
+              marginTop: 40,
+              padding: 10,
+              background: 'var(--ide-bg-3)',
+              boxShadow: 'var(--ide-card-shadow)',
+            }}
+          >
+            <ProjectImage project={cover} sizes="(max-width: 900px) 100vw, 720px" />
+          </div>
+        )}
 
         {project.requiresAccount && (
           <p
@@ -228,7 +265,7 @@ export function ProjectDetail({ id }: { id: string }) {
 
         {project.tags.length > 0 && (
           <p style={{ ...body, fontSize: 15, color: 'var(--ide-text-5)', marginTop: 48 }}>
-            {project.tags.join(' / ')}
+            {project.tags.join('  ')}
           </p>
         )}
       </article>
@@ -273,14 +310,17 @@ export function ProjectDetail({ id }: { id: string }) {
           </dl>
 
           {liveUrl && (
-            <button
-              onClick={() => router.push(liveUrl)}
-              className="w-full transition-transform hover:-translate-y-px"
+            <Link
+              href={liveUrl}
+              {...(liveUrl.startsWith('http')
+                ? { target: '_blank', rel: 'noopener noreferrer' }
+                : {})}
+              className="w-full transition-transform duration-150 hover:-translate-y-px active:scale-[0.97]"
               style={{ ...primaryButton, marginTop: 24 }}
             >
               <PlayCircle size={15} />
               Open live
-            </button>
+            </Link>
           )}
 
           {hasLinks && (
@@ -301,8 +341,8 @@ export function ProjectDetail({ id }: { id: string }) {
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:underline underline-offset-4"
-                    style={{ ...textLink, fontSize: 15 }}
+                    className={`w-full ${buttonHover}`}
+                    style={secondaryButton}
                   >
                     <Icon size={15} />
                     {label}

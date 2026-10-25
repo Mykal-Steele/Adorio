@@ -1,50 +1,37 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
-
-export type SidePanelType = 'explorer' | 'profile' | 'skills';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 
 const IDEContext = createContext<{
-  activeSidePanel: SidePanelType;
-  setActiveSidePanel: (panel: SidePanelType) => void;
+  sidePanelOpen: boolean;
+  toggleSidePanel: () => void;
   terminalOpen: boolean;
   toggleTerminal: () => void;
-  openProjectTabs: string[];
-  addProjectTab: (id: string) => void;
-  closeProjectTab: (id: string) => void;
-  isSettingsOpen: boolean;
-  toggleSettings: () => void;
+  openTabs: string[];
+  closeTab: (path: string) => void;
 } | null>(null);
 
 export function IDEProvider({ children }: { children: ReactNode }) {
-  const [activeSidePanel, setActiveSidePanel] = useState<SidePanelType>('explorer');
+  const pathname = usePathname();
+  const [sidePanelOpen, setSidePanelOpen] = useState(true);
   const [terminalOpen, setTerminalOpen] = useState(false);
-  const [openProjectTabs, setOpenProjectTabs] = useState<string[]>([]);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [openTabs, setOpenTabs] = useState<string[]>([]);
 
-  const toggleTerminal = () => setTerminalOpen((v) => !v);
-  const toggleSettings = () => setIsSettingsOpen((v) => !v);
-
-  const addProjectTab = (id: string) => {
-    setOpenProjectTabs((prev) => (prev.includes(id) ? prev : [...prev, id]));
-  };
-
-  const closeProjectTab = (id: string) => {
-    setOpenProjectTabs((prev) => prev.filter((t) => t !== id));
-  };
+  // Like an editor, whatever page is showing has a tab
+  useEffect(() => {
+    setOpenTabs((prev) => (prev.includes(pathname) ? prev : [...prev, pathname]));
+  }, [pathname]);
 
   return (
     <IDEContext.Provider
       value={{
-        activeSidePanel,
-        setActiveSidePanel,
+        sidePanelOpen,
+        toggleSidePanel: () => setSidePanelOpen((v) => !v),
         terminalOpen,
-        toggleTerminal,
-        openProjectTabs,
-        addProjectTab,
-        closeProjectTab,
-        isSettingsOpen,
-        toggleSettings,
+        toggleTerminal: () => setTerminalOpen((v) => !v),
+        openTabs,
+        closeTab: (path) => setOpenTabs((prev) => prev.filter((t) => t !== path)),
       }}
     >
       {children}

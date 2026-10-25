@@ -129,7 +129,7 @@ function makeCommands(navigate: (path: string) => void): Record<string, CommandF
     skills: () =>
       portfolioData.skills.map((s) => ({
         prefix: '  · ',
-        text: `${s.name.padEnd(20)} [${s.category}]`,
+        text: `${s.name.padEnd(20)} [${s.group}]`,
         color: 'var(--ide-text-3)',
       })),
 
@@ -220,7 +220,7 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
     }
   };
 
-  const fontSize = 'var(--ide-editor-font-size, 13px)';
+  const fontSize = 14;
 
   return (
     <div

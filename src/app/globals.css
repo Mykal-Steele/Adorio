@@ -14,6 +14,8 @@
   --ide-card-shadow-hover: 0 20px 32px -14px rgba(0, 0, 0, 0.7), 0 2px 0 rgba(0, 0, 0, 0.25);
   --ide-tape: color-mix(in srgb, var(--ide-yellow) 35%, transparent);
   --ide-tape-edge: rgba(255, 255, 255, 0.18);
+  --ide-note: color-mix(in srgb, var(--ide-yellow) 16%, var(--ide-bg-3));
+  --ide-margin-line: color-mix(in srgb, var(--ide-red) 45%, transparent);
 
   --ide-bg-0: #1b1e24;
   --ide-bg-1: #1e2127;
@@ -83,7 +85,6 @@
   --ide-syntax-string2: #56b6c2;
   --ide-line-number: rgba(92, 99, 112, 0.5);
   --ide-scrollbar: #353b45;
-  --ide-editor-font-size: 13px;
 }
 
 /* IDE themes — every theme has its own explicit block so :root is only a
@@ -362,6 +363,8 @@
   --ide-card-shadow-hover: 0 20px 32px -14px rgba(60, 44, 24, 0.38), 0 2px 0 rgba(60, 44, 24, 0.1);
   --ide-tape: rgba(242, 199, 68, 0.7);
   --ide-tape-edge: rgba(60, 44, 24, 0.3);
+  --ide-note: #faeec4;
+  --ide-margin-line: rgba(196, 72, 60, 0.4);
 
   --ide-bg-0: #f3ecdd;
   --ide-bg-1: #fbf7ee;

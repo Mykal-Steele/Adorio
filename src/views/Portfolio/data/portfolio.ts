@@ -25,6 +25,11 @@ export interface ProjectLink {
 
 export type ProjectStatus = 'STABLE' | 'BETA' | 'IN_PROGRESS' | 'DEPRECATED';
 
+export interface ProjectImage {
+  src: string;
+  alt: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -46,6 +51,7 @@ export interface Project {
   liveUrl?: string;
   links?: ProjectLink[];
   requiresAccount?: boolean;
+  image?: ProjectImage;
   screenshots?: ProjectShot[];
 }
 
@@ -56,7 +62,7 @@ export interface OtherProject {
 
 export interface TimelineItem {
   year: string;
-  event: string;
+  events: string[];
 }
 
 export interface ExperienceItem {
@@ -66,20 +72,24 @@ export interface ExperienceItem {
   highlights: string[];
 }
 
-export interface StackGroup {
-  category: string;
-  items: string[];
-  color: string;
-}
-
 export interface NowItem {
   label: string;
   detail: string;
 }
 
+export type SkillGroup = 'Languages' | 'Web' | 'Backend' | 'Data' | 'Tools';
+
 export interface Skill {
+  id: string;
   name: string;
-  category: 'Language' | 'Framework' | 'Runtime' | 'Tool';
+  group: SkillGroup;
+  // Your own words on how you learned it and what you built with it. Shown on /skills/<id>.
+  story: string;
+}
+
+export interface SetupItem {
+  id: string;
+  name: string;
 }
 
 export const portfolioData = {
@@ -100,7 +110,6 @@ export const portfolioData = {
   location: 'Bangkok, Thailand',
   timezone: 'UTC+7',
   university: 'KMUTT · CS Year 3 · GPA 3.28',
-  tools: 'Arch Linux with Omarchy/Hyprland, Vim, Bash, pnpm, mise, Docker.',
 
   community: [
     {
@@ -216,6 +225,10 @@ export const portfolioData = {
       ],
       color: '#fe9d00',
       repoUrl: 'github.com/Mykal-Steele/ChronoChunk',
+      image: {
+        src: '/projects/chronochunk/study-guide.webp',
+        alt: 'Discord conversation asking for an HDFS study guide and system diagram, with the generated PDF attached.',
+      },
       screenshots: [
         {
           src: '/projects/chronochunk/study-guide.webp',
@@ -327,6 +340,10 @@ export const portfolioData = {
       stats: [{ label: 'Served at', value: '/coding' }],
       color: '#00ffc2',
       liveUrl: '/coding',
+      image: {
+        src: '/projects/coding-challenges/cover.webp',
+        alt: 'The Algorithms class on /coding with the problem list and the Generate Odd Numbers problem open.',
+      },
     },
     {
       id: 'nfc-attendance',
@@ -404,6 +421,10 @@ export const portfolioData = {
       ],
       color: '#00ffc2',
       npm: 'npmjs.com/package/create-adorex',
+      image: {
+        src: '/projects/create-adorex/cover.webp',
+        alt: 'The create-adorex page on npm with the install command and usage for npm, pnpm, yarn, and bun.',
+      },
       repoUrl: 'github.com/Mykal-Steele/adorex-cli',
     },
     {
@@ -431,6 +452,10 @@ export const portfolioData = {
       stats: [{ label: 'Served at', value: '/social' }],
       color: '#00ffc2',
       liveUrl: '/social',
+      image: {
+        src: '/projects/social/cover.webp',
+        alt: 'The /social feed with the post composer and recent posts pinned to the wall.',
+      },
       requiresAccount: true,
     },
     {
@@ -478,6 +503,11 @@ export const portfolioData = {
       tags: [],
       stats: [{ label: 'Team', value: 'UniCorp' }],
       color: '#8b5cf6',
+      liveUrl: 'https://loom.psstee.me/',
+      image: {
+        src: '/projects/uniloom/cover.webp',
+        alt: 'The Uniloom landing page with a board showing slices in aligning, in progress, and in review.',
+      },
     },
   ] as Project[],
 
@@ -493,71 +523,62 @@ export const portfolioData = {
   ] as OtherProject[],
 
   skills: [
-    { name: 'typescript', category: 'Language' },
-    { name: 'javascript', category: 'Language' },
-    { name: 'java', category: 'Language' },
-    { name: 'sql', category: 'Language' },
-    { name: 'python', category: 'Language' },
-    { name: 'react', category: 'Framework' },
-    { name: 'next.js', category: 'Framework' },
-    { name: 'tailwind css', category: 'Framework' },
-    { name: 'express', category: 'Framework' },
-    { name: 'hono', category: 'Framework' },
-    { name: 'node.js', category: 'Runtime' },
-    { name: 'bun', category: 'Runtime' },
-    { name: 'prisma', category: 'Tool' },
-    { name: 'postgresql', category: 'Tool' },
-    { name: 'sqlite', category: 'Tool' },
-    { name: 'mongodb', category: 'Tool' },
-    { name: 'git', category: 'Tool' },
-    { name: 'linux', category: 'Tool' },
-    { name: 'docker', category: 'Tool' },
-    { name: 'azure', category: 'Tool' },
+    { id: 'typescript', name: 'TypeScript', group: 'Languages', story: '' },
+    { id: 'javascript', name: 'JavaScript', group: 'Languages', story: '' },
+    { id: 'java', name: 'Java', group: 'Languages', story: '' },
+    { id: 'sql', name: 'SQL', group: 'Languages', story: '' },
+    { id: 'python', name: 'Python', group: 'Languages', story: '' },
+    { id: 'react', name: 'React', group: 'Web', story: '' },
+    { id: 'nextjs', name: 'Next.js', group: 'Web', story: '' },
+    { id: 'tailwindcss', name: 'Tailwind CSS', group: 'Web', story: '' },
+    { id: 'nodejs', name: 'Node.js', group: 'Backend', story: '' },
+    { id: 'bun', name: 'Bun', group: 'Backend', story: '' },
+    { id: 'express', name: 'Express', group: 'Backend', story: '' },
+    { id: 'hono', name: 'Hono', group: 'Backend', story: '' },
+    { id: 'postgresql', name: 'PostgreSQL', group: 'Data', story: '' },
+    { id: 'sqlite', name: 'SQLite', group: 'Data', story: '' },
+    { id: 'mongodb', name: 'MongoDB', group: 'Data', story: '' },
+    { id: 'prisma', name: 'Prisma', group: 'Data', story: '' },
+    { id: 'git', name: 'Git', group: 'Tools', story: '' },
+    { id: 'linux', name: 'Linux', group: 'Tools', story: '' },
+    { id: 'docker', name: 'Docker', group: 'Tools', story: '' },
+    { id: 'azure', name: 'Azure', group: 'Tools', story: '' },
   ] as Skill[],
 
-  stack: [
-    {
-      category: 'Languages',
-      items: ['TypeScript', 'JavaScript', 'Java', 'SQL', 'Python'],
-      color: 'var(--ide-accent)',
-    },
-    {
-      category: 'Web',
-      items: ['React', 'Next.js', 'Tailwind CSS'],
-      color: 'var(--ide-orange)',
-    },
-    {
-      category: 'Backend',
-      items: ['Node.js', 'Bun', 'Express', 'Hono'],
-      color: 'var(--ide-purple)',
-    },
-    {
-      category: 'Data',
-      items: ['PostgreSQL', 'SQLite', 'MongoDB', 'Prisma'],
-      color: 'var(--ide-blue)',
-    },
-    {
-      category: 'Tools',
-      items: ['Git', 'Linux', 'Docker', 'Azure'],
-      color: 'var(--ide-green)',
-    },
-  ] as StackGroup[],
+  setup: [
+    { id: 'archlinux', name: 'Arch Linux' },
+    { id: 'hyprland', name: 'Omarchy / Hyprland' },
+    { id: 'vim', name: 'Vim' },
+    { id: 'bash', name: 'Bash' },
+    { id: 'pnpm', name: 'pnpm' },
+    { id: 'mise', name: 'mise' },
+  ] as SetupItem[],
 
   timeline: [
     {
       year: '2026',
-      event:
-        'Placed 2nd at the KMUTT IoT Hackathon and mentored first-year students in web development. Published create-adorex on npm and became a Microsoft Student Ambassador. Built CozyTalk with a team, then did an IC2 research internship and built CogniMax. Started a business administration degree at University of the People, and now mentor in Java and build Uniloom with UniCorp.',
+      events: [
+        'Placed 2nd at the KMUTT IoT Hackathon and mentored first-year students in web development.',
+        'Published create-adorex on npm and became a Microsoft Student Ambassador.',
+        'Built CozyTalk with a team, then did an IC2 research internship and built CogniMax.',
+        'Started a business administration degree at University of the People, and now mentor in Java and build Uniloom with UniCorp.',
+      ],
     },
     {
       year: '2025',
-      event:
-        'Learned TypeScript, React, Express, Hono, and Bun at KMUTT, then Next.js. Created Adorio and started ChronoChunk. Led the financial team on a 50+ student smart city class project.',
+      events: [
+        'Learned TypeScript, React, Express, Hono, and Bun at KMUTT, then Next.js.',
+        'Created Adorio and started ChronoChunk.',
+        'Led the financial team on a 50+ student smart city class project.',
+      ],
     },
     {
       year: '2024',
-      event:
-        'Started Mistbound in Unity (Mar). First Discord bot, in Python (Apr). Started BSc Computer Science at KMUTT (Aug).',
+      events: [
+        'Started Mistbound in Unity (Mar).',
+        'First Discord bot, in Python (Apr).',
+        'Started BSc Computer Science at KMUTT (Aug).',
+      ],
     },
   ] as TimelineItem[],
 };

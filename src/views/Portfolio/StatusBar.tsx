@@ -1,6 +1,6 @@
 'use client';
 
-import { Terminal as TerminalIcon } from 'lucide-react';
+import { GitBranch, Terminal as TerminalIcon } from 'lucide-react';
 import { useIDE } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
 import { sans } from './constants/fonts';
@@ -20,8 +20,9 @@ export function StatusBar() {
         flexShrink: 0,
       }}
     >
-      <span style={{ color: 'var(--ide-text-4)' }}>
-        {portfolioData.location} · {portfolioData.timezone}
+      <span className="flex items-center gap-1.5" style={{ color: 'var(--ide-text-4)' }}>
+        <GitBranch size={13} />
+        {portfolioData.branch}
       </span>
 
       <div className="flex items-center gap-4 shrink-0">
