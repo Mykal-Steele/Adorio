@@ -10,6 +10,7 @@ const IDEContext = createContext<{
   toggleTerminal: () => void;
   openTabs: string[];
   closeTab: (path: string) => void;
+  closeOtherTabs: () => void;
   themeHintEnabled: boolean;
   setThemeHintEnabled: (enabled: boolean) => void;
 } | null>(null);
@@ -56,6 +57,8 @@ export function IDEProvider({ children }: { children: ReactNode }) {
         toggleTerminal: () => setTerminalOpen((v) => !v),
         openTabs,
         closeTab: (path) => setOpenTabs((prev) => prev.filter((t) => t !== path)),
+        // The page on screen always keeps its tab
+        closeOtherTabs: () => setOpenTabs([pathname]),
         themeHintEnabled,
         setThemeHintEnabled,
       }}

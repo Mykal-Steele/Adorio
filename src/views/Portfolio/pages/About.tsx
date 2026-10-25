@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
-import { Download, Github, Linkedin, Mail } from 'lucide-react';
+import { Download, Github, Linkedin, Mail, MessageSquare } from 'lucide-react';
 import { portfolioData, type Project, type SkillGroup } from '../data/portfolio';
 import { skillsForProject } from '../data/skills';
 import { useResponsive } from '../hooks/useResponsive';
@@ -22,17 +22,23 @@ const links = [
 ];
 
 const facts = [
-  { label: 'Looking for', value: 'A software engineering internship' },
-  { label: 'Studying', value: 'Computer Science, year 3, KMUTT' },
-  { label: 'Graduating', value: '2028' },
-  { label: 'Based in', value: `${portfolioData.location} (${portfolioData.timezone})` },
+  { label: 'Looking for', value: ['A software engineering internship'] },
+  {
+    label: 'Studying',
+    value: [
+      'Computer Science, year 3, KMUTT',
+      'Business Administration, University of the People, California',
+    ],
+  },
+  { label: 'Graduating', value: ['2028, both degrees'] },
+  { label: 'Based in', value: [`${portfolioData.location} (${portfolioData.timezone})`] },
 ];
 
 // What a recruiter should take away in one pass; each line links to the full write-up
 const proof = [
   {
     id: 'adorio',
-    text: ', the site you are on. I run it on Azure with automatic deploys and a backup copy that takes over if Azure goes down.',
+    text: ', the site you are on. I run it on Azure with automatic deploys, and a Cloudflare Worker moves traffic to a free backup server on Northflank if Azure goes down.',
   },
   {
     id: 'smartcity-financial',
@@ -130,6 +136,10 @@ function Hero({ isMobile }: { isMobile: boolean }) {
             <Download size={15} />
             Resume
           </a>
+          <Link href="/contact" className="pf-btn">
+            <MessageSquare size={16} />
+            Contact me
+          </Link>
           {links.map(({ label, href, icon: Icon, external }) => (
             <a
               key={label}
@@ -163,17 +173,20 @@ function Hero({ isMobile }: { isMobile: boolean }) {
           {facts.map(({ label, value }) => (
             <div key={label}>
               <dt style={{ ...eyebrow, fontSize: 13 }}>{label}</dt>
-              <dd
-                style={{
-                  margin: '2px 0 0',
-                  fontFamily: sans,
-                  fontSize: 16,
-                  fontWeight: 500,
-                  color: 'var(--ide-text-1)',
-                }}
-              >
-                {value}
-              </dd>
+              {value.map((line) => (
+                <dd
+                  key={line}
+                  style={{
+                    margin: '2px 0 0',
+                    fontFamily: sans,
+                    fontSize: 16,
+                    fontWeight: 500,
+                    color: 'var(--ide-text-1)',
+                  }}
+                >
+                  {line}
+                </dd>
+              ))}
             </div>
           ))}
         </dl>
@@ -621,24 +634,6 @@ export function About() {
       </Band>
 
       <Band isMobile={isMobile}>
-        <SectionLabel>Featured projects</SectionLabel>
-        <div className="flex flex-col" style={{ gap: isMobile ? 56 : 80, marginTop: 40 }}>
-          {featured.map((project, i) => (
-            <FeaturedProject
-              key={project.id}
-              project={project}
-              flip={i % 2 === 1}
-              priority={i === 0}
-              isMobile={stacked}
-            />
-          ))}
-        </div>
-        <Link href="/projects" className="pf-btn" style={{ marginTop: 56 }}>
-          See all {portfolioData.projects.length} projects
-        </Link>
-      </Band>
-
-      <Band isMobile={isMobile}>
         <div style={{ maxWidth: 720 }}>
           <SectionLabel>About me</SectionLabel>
           <div className="flex flex-col" style={{ gap: 16 }}>
@@ -673,6 +668,23 @@ export function About() {
       <Band isMobile={isMobile}>
         <SectionLabel>Experience</SectionLabel>
         <Experience isMobile={stacked} />
+      </Band>
+
+      <Band isMobile={isMobile}>
+        <SectionLabel>Featured projects</SectionLabel>
+        <div className="flex flex-col" style={{ gap: isMobile ? 56 : 80, marginTop: 40 }}>
+          {featured.map((project, i) => (
+            <FeaturedProject
+              key={project.id}
+              project={project}
+              flip={i % 2 === 1}
+              isMobile={stacked}
+            />
+          ))}
+        </div>
+        <Link href="/projects" className="pf-btn" style={{ marginTop: 56 }}>
+          See all {portfolioData.projects.length} projects
+        </Link>
       </Band>
 
       <Band isMobile={isMobile}>

@@ -12,7 +12,7 @@ import { FileIcon, IconButton } from './shared';
 export function TabBar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { openTabs, closeTab } = useIDE();
+  const { openTabs, closeTab, closeOtherTabs } = useIDE();
   const pendingPath = usePendingNavPath();
   const activePath = pendingPath ?? pathname;
 
@@ -31,56 +31,76 @@ export function TabBar() {
   return (
     <nav
       aria-label="Open files"
-      className="shrink-0 flex items-stretch overflow-x-auto"
+      className="flex shrink-0 items-stretch"
       style={{
         height: 44,
         background: 'var(--ide-bg-1)',
         borderBottom: '1px solid var(--ide-border)',
-        scrollbarWidth: 'none',
       }}
     >
-      {openTabs.map((path) => {
-        const active = path === activePath;
-        const name = fileNameForPath(path);
-        return (
-          <div
-            key={path}
-            className={`group flex shrink-0 items-center ${active ? '' : 'ide-hover'}`}
-            style={{
-              background: active ? 'var(--ide-bg-0)' : 'transparent',
-              borderRight: '1px solid var(--ide-border)',
-              boxShadow: active ? 'inset 0 -2px 0 var(--ide-yellow)' : 'none',
-            }}
-          >
-            <button
-              aria-current={active ? 'page' : undefined}
-              onClick={() => router.push(path)}
-              className="pf-tab flex h-full items-center gap-2 pl-4 pr-1"
+      <div
+        className="flex shrink-0 items-center"
+        style={{ padding: '0 8px', borderRight: '1px solid var(--ide-border)' }}
+      >
+        <button
+          onClick={closeOtherTabs}
+          disabled={openTabs.length < 2}
+          title="Close every tab except this page"
+          className="pf-btn"
+          style={{ padding: '4px 10px', fontSize: 13, gap: 6 }}
+        >
+          <X size={13} />
+          Clear all
+        </button>
+      </div>
+      <div
+        className="flex min-w-0 flex-1 items-stretch overflow-x-auto"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {openTabs.map((path) => {
+          const active = path === activePath;
+          const name = fileNameForPath(path);
+          return (
+            <div
+              key={path}
+              className={`group relative flex shrink-0 items-center ${active ? '' : 'ide-hover'}`}
               style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: active ? 'var(--ide-text-1)' : 'var(--ide-text-4)',
-                fontSize: 15,
-                fontWeight: active ? 700 : 400,
-                fontFamily: sans,
+                background: active ? 'var(--ide-bg-0)' : 'transparent',
+                borderRight: '1px solid var(--ide-border)',
+                boxShadow: active ? 'inset 0 -2px 0 var(--ide-yellow)' : 'none',
               }}
             >
-              <FileIcon path={path} />
-              {name}
-            </button>
-            <IconButton
-              onClick={() => close(path)}
-              aria-label={`Close ${name}`}
-              size={28}
-              color="var(--ide-text-5)"
-              className={`pf-tab ide-hover-icon mr-1.5 rounded ${active ? '' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'}`}
-            >
-              <X size={13} />
-            </IconButton>
-          </div>
-        );
-      })}
+              {/* Spans the whole tab so its focus ring circles the close button too */}
+              <button
+                aria-current={active ? 'page' : undefined}
+                onClick={() => router.push(path)}
+                className="pf-tab pf-tab-open flex h-full items-center gap-2 pr-10 pl-4"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: active ? 'var(--ide-text-1)' : 'var(--ide-text-4)',
+                  fontSize: 15,
+                  fontWeight: active ? 700 : 400,
+                  fontFamily: sans,
+                }}
+              >
+                <FileIcon path={path} />
+                {name}
+              </button>
+              <IconButton
+                onClick={() => close(path)}
+                aria-label={`Close ${name}`}
+                size={28}
+                color="var(--ide-text-5)"
+                className={`pf-tab ide-hover-icon absolute top-1/2 right-1.5 -translate-y-1/2 rounded ${active ? '' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'}`}
+              >
+                <X size={13} />
+              </IconButton>
+            </div>
+          );
+        })}
+      </div>
     </nav>
   );
 }

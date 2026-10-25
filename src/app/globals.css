@@ -529,6 +529,19 @@ body {
 .ide-layout .pf-tab:focus-visible {
   outline-offset: -2px;
 }
+.pf-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+.pf-btn:disabled:hover,
+.pf-btn:disabled:active {
+  background: var(--ide-bg-3);
+  border-color: var(--ide-text-3);
+  transform: none;
+  box-shadow: none;
+}
 
 /* Theme-aware hover backgrounds — values use CSS vars, !important overrides base resets */
 .ide-hover:hover {
