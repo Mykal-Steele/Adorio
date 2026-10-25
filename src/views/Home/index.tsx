@@ -60,14 +60,9 @@ const ComposeCard = ({
       aria-hidden="true"
       className="absolute -top-3 left-7 h-[26px] w-24 rotate-[-3.5deg] border-x border-dashed border-[rgba(60,44,24,.3)] bg-[rgba(242,199,68,.7)] shadow-[0_1px_3px_rgba(60,44,24,.2)]"
     />
-    <div className="flex flex-wrap items-baseline gap-3">
-      <h2 id="compose-h" className="font-paper-serif text-[27px] font-bold">
-        Create a post
-      </h2>
-      <span className="font-paper-hand text-xl text-[var(--paper-accent)]">
-        &larr; ship it, then write it up
-      </span>
-    </div>
+    <h2 id="compose-h" className="font-paper-serif text-[27px] font-bold">
+      Create a post
+    </h2>
 
     <form onSubmit={onSubmit}>
       <label className="mt-[22px] block">
@@ -513,7 +508,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
               </p>
             </div>
             {mounted && newTodayCount > 0 && (
-              <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-[18px] py-3 font-paper-hand text-2xl leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
+              <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-[18px] py-3 font-paper-sans font-bold text-lg leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
                 {newTodayCount} new today
               </p>
             )}
@@ -632,16 +627,14 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
           )}
 
           {!loading && !hasMore && posts.length > 0 && (
-            <p className="mx-auto mt-[clamp(40px,5vw,64px)] text-center font-paper-hand text-2xl text-[var(--paper-muted)]">
-              that&apos;s everything for now, check back later
+            <p className="mx-auto mt-[clamp(40px,5vw,64px)] text-center font-paper-sans text-lg text-[var(--paper-muted)]">
+              You&apos;ve reached the end.
             </p>
           )}
 
           {!loading && posts.length === 0 && !error && (
             <div className="py-16 text-center">
-              <p className="font-paper-hand text-2xl text-[var(--paper-muted)]">
-                No posts yet. Be the first to pin one up!
-              </p>
+              <p className="font-paper-sans text-lg text-[var(--paper-muted)]">No posts yet.</p>
             </div>
           )}
         </div>

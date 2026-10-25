@@ -70,10 +70,10 @@ export default function HostingAdminView() {
           )}
 
           {loading ? (
-            <p className="font-paper-hand text-2xl text-[var(--paper-muted)]">loading…</p>
+            <p className="font-paper-sans text-lg text-[var(--paper-muted)]">Loading…</p>
           ) : files.length === 0 ? (
-            <p className="font-paper-hand text-2xl text-[var(--paper-muted)]">
-              no files hosted yet
+            <p className="font-paper-sans text-lg text-[var(--paper-muted)]">
+              No files hosted yet.
             </p>
           ) : (
             <div className="space-y-8">

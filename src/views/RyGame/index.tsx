@@ -1247,9 +1247,7 @@ const RyGame = () => {
     if (!Array.isArray(leaderboard) || leaderboard.length === 0) {
       return (
         <div className="py-8 text-center">
-          <p className="font-paper-hand text-xl text-[var(--paper-muted)]">
-            No scores yet. Be the first!
-          </p>
+          <p className="font-paper-sans text-base text-[var(--paper-muted)]">No scores yet.</p>
         </div>
       );
     }
@@ -1412,7 +1410,7 @@ const RyGame = () => {
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[rgba(43,39,35,.62)]">
                   <div className="max-w-sm rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-6 text-left shadow-[4px_5px_0_var(--paper-ink)]">
                     <h3 className="mb-3 font-paper-serif text-xl font-bold">Game Over</h3>
-                    <p className="mb-2 font-paper-hand text-xl text-[var(--paper-muted)]">
+                    <p className="mb-2 font-paper-sans text-base text-[var(--paper-muted)]">
                       {gameOverMessage}
                     </p>
                     {pLevel > 0 && (
@@ -1481,14 +1479,14 @@ const RyGame = () => {
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-[rgba(43,39,35,.55)]">
                   <div className="flex flex-col items-center">
                     {audioLoadError ? (
-                      <p className="max-w-xs text-center font-paper-hand text-xl text-[var(--paper-cream)]">
-                        audio couldn&apos;t load — refresh to try again
+                      <p className="max-w-xs text-center font-paper-sans text-base text-[var(--paper-cream)]">
+                        The audio didn&apos;t load. Refresh the page to try again.
                       </p>
                     ) : (
                       <>
                         <div className="mb-4 h-10 w-10 animate-spin rounded-full border-[3px] border-[var(--paper-yellow)] border-t-transparent"></div>
-                        <p className="font-paper-hand text-xl text-[var(--paper-cream)]">
-                          loading audio…
+                        <p className="font-paper-sans text-base text-[var(--paper-cream)]">
+                          Loading audio…
                         </p>
                       </>
                     )}
