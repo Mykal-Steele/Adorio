@@ -16,12 +16,16 @@ const isUser = (value: unknown): value is User => {
   return typeof value === 'object' && value !== null && '_id' in value && 'username' in value;
 };
 
+// Only same-site paths: "//host" and "/\host" are read by browsers as another site
+const isSafeRedirect = (path: string) => /^\/(?![/\\])/.test(path);
+
 export const getRedirectPaths = (searchParams: SearchParamsLike) => {
   const redirect = searchParams.get('redirect');
+  const safe = redirect && isSafeRedirect(redirect) ? redirect : null;
 
   return {
-    from: redirect || '/social',
-    redirect,
+    from: safe || '/social',
+    redirect: safe,
   };
 };
 

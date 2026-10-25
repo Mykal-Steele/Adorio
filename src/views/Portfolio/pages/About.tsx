@@ -22,10 +22,10 @@ const links = [
 ];
 
 const facts = [
+  { label: 'Looking for', value: 'A software engineering internship' },
   { label: 'Studying', value: 'Computer Science, year 3, KMUTT' },
-  { label: 'GPA', value: '3.28' },
+  { label: 'Graduating', value: '2028' },
   { label: 'Based in', value: `${portfolioData.location} (${portfolioData.timezone})` },
-  { label: 'Status', value: 'Open to opportunities' },
 ];
 
 // What a recruiter should take away in one pass; each line links to the full write-up
@@ -38,7 +38,10 @@ const proof = [
     id: 'nfc-attendance',
     text: ', a tap-to-check-in system that took 2nd place at the KMUTT IoT Hackathon.',
   },
-  { id: 'create-adorex', text: ', an npm starter that a whole class adopted for its projects.' },
+  {
+    id: 'create-adorex',
+    text: ', an npm starter that cut new-project setup from about 2 hours to 20 minutes and became a class template.',
+  },
   {
     id: 'chronochunk',
     text: ', a Discord bot classmates use to ask questions about course material.',
@@ -560,11 +563,20 @@ function Community({ isMobile }: { isMobile: boolean }) {
               >
                 {community.name}
               </span>
-              {badge?.href && (
-                <span style={{ ...eyebrow, display: 'block', marginTop: 4 }}>
-                  {badge.href.replace('https://', '')}
-                </span>
-              )}
+              <span style={{ ...eyebrow, display: 'block', marginTop: 4 }}>
+                Since {community.since}
+              </span>
+              <span
+                style={{
+                  ...body,
+                  display: 'block',
+                  fontSize: 15,
+                  lineHeight: 1.55,
+                  marginTop: 6,
+                }}
+              >
+                {community.detail}
+              </span>
             </span>
           </>
         );
@@ -666,6 +678,43 @@ export function About() {
       <Band isMobile={isMobile}>
         <SectionLabel>Community</SectionLabel>
         <Community isMobile={stacked} />
+      </Band>
+
+      <Band isMobile={isMobile}>
+        <SectionLabel>Certificates</SectionLabel>
+        <ul className="flex flex-col" style={{ gap: 12, margin: 0, padding: 0, listStyle: 'none' }}>
+          {portfolioData.certificates.map((cert) => (
+            <li key={cert.name}>
+              <a
+                href={`https://${portfolioData.linkedin}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pf-card block"
+                style={{
+                  padding: 20,
+                  background: 'var(--ide-bg-3)',
+                  borderRadius: 3,
+                  textDecoration: 'none',
+                }}
+              >
+                <span
+                  style={{
+                    display: 'block',
+                    fontFamily: serif,
+                    fontSize: 20,
+                    fontWeight: 700,
+                    color: 'var(--ide-text-1)',
+                  }}
+                >
+                  {cert.name}
+                </span>
+                <span style={{ ...body, display: 'block', fontSize: 15, marginTop: 4 }}>
+                  {cert.detail}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </Band>
     </div>
   );

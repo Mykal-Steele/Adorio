@@ -16,9 +16,9 @@ function usesSkill(project: Project, skill: Skill) {
     return t === skill.id || (t.length >= 6 && skill.id.startsWith(t));
   });
   if (tagMatch) return true;
+  // "My role" mentions platforms the work ran on, not what it was built with, so it's left out
   const writeUp = [
     project.summary,
-    project.role,
     ...(project.decisions ?? []).flatMap((d) => [d.title, d.reason]),
   ].join(' ');
   return mentions(writeUp, skill);

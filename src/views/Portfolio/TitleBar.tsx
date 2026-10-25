@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useIDE } from './context/IDEContext';
 import { useContentWidth } from './hooks/useContentWidth';
 import { serif } from './constants/fonts';
@@ -9,7 +10,10 @@ import { ThemeSwitcher } from './shared';
 
 export function TitleBar() {
   const { themeHintEnabled, setThemeHintEnabled } = useIDE();
-  const roomy = useContentWidth() >= 880;
+  // Only the home page keeps the top-right corner clear for it
+  const contentWidth = useContentWidth();
+  const pathname = usePathname();
+  const roomy = contentWidth >= 880 && pathname === '/';
   // Opening the theme menu hides the hint until the next load
   const [closed, setClosed] = useState(false);
 

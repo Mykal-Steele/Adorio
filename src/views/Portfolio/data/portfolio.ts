@@ -23,6 +23,8 @@ export type ProjectStatus = 'STABLE' | 'BETA' | 'IN_PROGRESS' | 'DEPRECATED';
 export type ProjectImage = {
   src: string;
   alt: string;
+  // Charts are shown whole instead of cropped like screenshots
+  fit?: 'contain';
 };
 
 export interface Project {
@@ -105,18 +107,30 @@ export const portfolioData = {
   buymeacoffee: 'buymeacoffee.com/mykalstele4',
   location: 'Bangkok, Thailand',
   timezone: 'UTC+7',
-  university: 'KMUTT · CS Year 3 · GPA 3.28',
+  university: 'KMUTT · CS Year 3 · Graduating 2028',
 
   community: [
     {
       name: 'Microsoft Student Ambassadors',
       short: 'MSA',
       color: '#00a4ef',
+      since: 'Apr 2026',
+      detail:
+        'I share Microsoft learning resources and events, and help build the student tech community.',
     },
     {
       name: 'Google Developer Group (GDG)',
       short: 'GDG',
       color: '#4285f4',
+      since: 'Oct 2025',
+      detail: 'Member of GDG on Campus KMUTT and GDG Cloud Bangkok.',
+    },
+  ],
+
+  certificates: [
+    {
+      name: 'Google IT Support Professional Certificate',
+      detail: 'Plus other Coursera and Microsoft Learn certificates, all listed on LinkedIn.',
     },
   ],
 
@@ -133,7 +147,7 @@ export const portfolioData = {
 
   experience: [
     {
-      role: 'Java Programming Mentor',
+      role: 'Computer Science Programming Mentor in Java',
       org: 'SIT-KMUTT · Programming in Java',
       period: 'Aug 2026 to Present',
       highlights: [
@@ -267,7 +281,7 @@ export const portfolioData = {
         'Wallets, top-ups, transfers, and SCB payments for a 50+ student class building one smart city platform.',
       problem:
         'The class platform needed one financial module for wallets, top-ups, user-to-user transfers, and SCB payments. Two transfers at the same time must not corrupt a balance, and a user must never exist without a wallet.',
-      role: 'Led the 3-person financial team. My work is in src/modules/Financial of the CSC290 backend.',
+      role: 'Led the 3-person financial team and built the whole financial flow: top-ups, the SCB bank integration, the React transaction screens, and live status updates over WebSockets, later moved to Pusher Channels. My work is in src/modules/Financial of the CSC290 backend.',
       decisions: [
         {
           title: 'Atomic balance changes',
@@ -291,7 +305,7 @@ export const portfolioData = {
         'Moved live updates to Pusher Channels.',
       ],
       note: 'My commits are under OakarOo / Mykal-Steele.',
-      tags: ['#HONO', '#PRISMA', '#ZOD', '#TYPESCRIPT'],
+      tags: ['#HONO', '#PRISMA', '#ZOD', '#TYPESCRIPT', '#REACT'],
       color: '#00ffc2',
       repoUrl: 'github.com/CSC290-2025/backend',
       image: {
@@ -433,7 +447,10 @@ export const portfolioData = {
         'It became the Web Dev class template.',
         'I still use it to start my own projects.',
       ],
-      numbers: ['30 to 40 students used it as the class template.'],
+      numbers: [
+        'Cut new-project setup from about 2 hours to about 20 minutes.',
+        '30 to 40 students used it as the class template.',
+      ],
       tags: ['#NPM', '#CLI', '#EXPRESS', '#PRISMA'],
       color: '#00ffc2',
       npm: 'npmjs.com/package/create-adorex',
@@ -504,15 +521,61 @@ export const portfolioData = {
       tags: ['#PYTHON', '#CHESS', '#PYTORCH', '#RESEARCH'],
       color: '#fe9d00',
       repoUrl: 'github.com/Mykal-Steele/CogniMax',
+      image: {
+        src: '/projects/cognimax/moves-to-win.webp',
+        alt: 'Bar chart of median moves to win in Run 4: CogniMax wins in fewer moves than the Stockfish control at every Elo band from 600 to 2000.',
+        fit: 'contain',
+      },
+      screenshots: [
+        {
+          src: '/projects/cognimax/all-11-bands.webp',
+          alt: "Bar chart of effect size (Cliff's delta) at all 11 tested Elo bands from 600 to 2600.",
+          caption:
+            'Effect size at all 11 tested Elo bands, 600 to 2600, pooled across every run. The advantage holds at every band and is largest from 2200 to 2600.',
+          width: 1600,
+          height: 875,
+        },
+        {
+          src: '/projects/cognimax/win-rate.webp',
+          alt: 'Bar chart of win rate by Elo band in Run 4, with both engines near 100 percent.',
+          caption:
+            'Win rate by Elo band, Run 4. Both engines win nearly every game, which is why moves to win is the main measure.',
+          width: 1600,
+          height: 876,
+        },
+      ],
     },
     {
       id: 'uniloom',
       name: 'Uniloom',
       status: 'IN_PROGRESS',
-      summary: 'A project with UniCorp, a student developer group.',
-      role: 'Building it with UniCorp.',
-      tags: [],
+      language: 'TypeScript',
+      langColor: '#3178c6',
+      summary:
+        'A self-hosted work tracker for building software with a coding agent: plan small slices with done-when checklists, let the agent do the work, and keep the approvals with people.',
+      problem:
+        'A coding agent writes code fast, but people still have to decide what gets built and when it counts as done. Uniloom keeps the plan, the checklists, and the approvals in one place, and agents connect to it over MCP.',
+      role: 'One of three main contributors at UniCorp. I built project invite links with optional approval (the API, the join page, join requests, and cleanup of revoked links) and the one-command local setup that works on Windows, macOS, and Linux.',
+      decisions: [
+        {
+          title: 'Sign in through uniAuth',
+          reason:
+            "uniAuth is UniCorp's shared sign-on: one account for Unishare, Unigym, and Uniloom. Uniloom is an OpenID Connect client of it through Better Auth, and agents sign in through it too.",
+        },
+        {
+          title: 'Checklists gate the board',
+          reason:
+            "A slice can't move until its 3 to 6 done-when items allow it, so done means the same thing for people and agents.",
+        },
+        {
+          title: 'One command to start',
+          reason:
+            'bun run setup writes the env files, starts both databases, and migrates. bun run dev:local starts uniAuth, the API, the web app, and the worker together.',
+        },
+      ],
+      tags: ['#NEXTJS', '#HONO', '#BUN', '#PRISMA', '#POSTGRESQL', '#OIDC'],
       color: '#8b5cf6',
+      repoUrl: 'github.com/unishare-oss/uniloom',
       liveUrl: 'https://loom.psstee.me/',
       image: {
         src: '/projects/uniloom/cover.webp',

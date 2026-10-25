@@ -19,7 +19,10 @@ export function ProjectImage({
         position: 'relative',
         aspectRatio: '16 / 10',
         overflow: 'hidden',
-        background: `color-mix(in srgb, ${project.color} 12%, var(--ide-bg-4))`,
+        background:
+          project.image?.fit === 'contain'
+            ? '#ffffff'
+            : `color-mix(in srgb, ${project.color} 12%, var(--ide-bg-4))`,
         border: '1px solid var(--ide-border)',
       }}
     >
@@ -30,7 +33,11 @@ export function ProjectImage({
           fill
           priority={priority}
           sizes={sizes}
-          style={{ objectFit: 'cover', objectPosition: 'top left' }}
+          style={
+            project.image.fit === 'contain'
+              ? { objectFit: 'contain', padding: 6 }
+              : { objectFit: 'cover', objectPosition: 'top left' }
+          }
         />
       ) : (
         <div className="flex h-full flex-col items-center justify-center" style={{ gap: 12 }}>
