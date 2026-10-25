@@ -21,7 +21,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: `https://adorio.space/skills/${id}`,
       siteName: 'Oakar Oo',
+      images: [
+        {
+          url: 'https://adorio.space/og.png',
+          width: 1200,
+          height: 630,
+          alt: 'Oakar Oo, backend developer',
+        },
+      ],
     },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 

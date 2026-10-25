@@ -14,7 +14,10 @@ export const metadata: Metadata = {
     siteName: 'Adorio',
     images: [
       {
-        url: 'https://res.cloudinary.com/dboeqtx65/image/upload/c_limit,h_1200,w_1200/f_auto/q_auto:good/v1777471457/feelio/posts/file_kmm4d4',
+        url: 'https://adorio.space/og.png',
+        width: 1200,
+        height: 630,
+        alt: 'Oakar Oo, backend developer',
       },
     ],
   },

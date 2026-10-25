@@ -24,10 +24,10 @@ export const metadata: Metadata = {
     siteName: 'Oakar Oo',
     images: [
       {
-        url: 'https://i.ibb.co/KxH3wXDS/download-3.png',
+        url: 'https://adorio.space/og.png',
         width: 1200,
         height: 630,
-        alt: 'Oakar Oo portfolio',
+        alt: 'Oakar Oo, backend developer',
       },
     ],
     type: 'website',
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     title: 'Oakar Oo | Backend Developer',
     description:
       'Backend developer in Bangkok, studying CS at KMUTT and looking for a software engineering internship.',
-    images: ['https://i.ibb.co/KxH3wXDS/download-3.png'],
+    images: ['https://adorio.space/og.png'],
   },
 };
 
