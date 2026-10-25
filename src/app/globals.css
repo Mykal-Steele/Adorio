@@ -602,7 +602,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 0 3px;
+  /* Bottom padding keeps the underline below descenders instead of through them */
+  padding: 0 1px 4px;
   font-family: 'Karla', Helvetica, Arial, sans-serif;
   font-size: 16px;
   font-weight: 700;

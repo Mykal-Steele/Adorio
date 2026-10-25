@@ -14,11 +14,13 @@ export function SectionLabel({ children }: { children: ReactNode }) {
         margin: '0 0 32px',
       }}
     >
+      {/* The stroke sits below the descenders so it never crosses letters like g, j, p */}
       <span
         style={{
-          padding: '0 4px',
+          display: 'inline-block',
+          paddingBottom: 10,
           background:
-            'linear-gradient(transparent 80%, var(--ide-yellow) 80%, var(--ide-yellow) 92%, transparent 92%)',
+            'linear-gradient(var(--ide-yellow), var(--ide-yellow)) left bottom / 100% 4px no-repeat',
         }}
       >
         {children}

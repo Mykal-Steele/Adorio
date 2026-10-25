@@ -45,7 +45,7 @@ export function ProjectCard({ project }: { project: Project }) {
         </div>
 
         <h3
-          className="decoration-[var(--ide-yellow)] decoration-[3px] underline-offset-4 group-hover:underline"
+          className="decoration-[var(--ide-yellow)] decoration-[3px] underline-offset-[8px] group-hover:underline"
           style={{
             fontFamily: serif,
             fontSize: 24,

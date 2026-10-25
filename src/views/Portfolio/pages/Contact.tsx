@@ -128,7 +128,7 @@ export function Contact() {
                     style={{ gap: '4px 16px' }}
                   >
                     <span
-                      className="group-hover:underline underline-offset-4"
+                      className="group-hover:underline underline-offset-[6px]"
                       style={{
                         fontFamily: sans,
                         fontSize: 17,
@@ -266,7 +266,7 @@ export function Contact() {
                   setForm({ name: '', email: '', subject: '', message: '', website: '' });
                   setError(null);
                 }}
-                className="hover:underline underline-offset-4"
+                className="hover:underline underline-offset-[6px]"
                 style={{
                   marginTop: 16,
                   padding: 0,
