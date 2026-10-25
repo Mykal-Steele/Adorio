@@ -390,6 +390,40 @@ export const portfolioData = {
           href: 'https://github.com/kmutt-iot-hackathon-group-8/frontend',
         },
       ],
+      image: {
+        src: '/projects/nfc-attendance/team-presenting.webp',
+        alt: 'Oakar and two teammates presenting the NFC attendance box on stage at the SIT IoT Hackathon 2026.',
+      },
+      screenshots: [
+        {
+          src: '/projects/nfc-attendance/finished-box.webp',
+          alt: 'The finished attendance box with a touch screen and a buzzer set into its slanted lid.',
+          caption: 'The finished box. The touch screen and buzzer sit in the slanted lid.',
+          width: 800,
+          height: 1067,
+        },
+        {
+          src: '/projects/nfc-attendance/inside-case.webp',
+          alt: 'Inside the box: an ESP32 on a breadboard with jumper wires running up to the lid.',
+          caption: 'Inside the case, the ESP32 on a breadboard wired up to the lid.',
+          width: 800,
+          height: 1062,
+        },
+        {
+          src: '/projects/nfc-attendance/breadboard-build.webp',
+          alt: 'Wiring the screen and reader to the ESP32 on a breadboard, powered from a power bank.',
+          caption: 'The first build on a breadboard, running off a power bank.',
+          width: 800,
+          height: 1062,
+        },
+        {
+          src: '/projects/nfc-attendance/runner-up.webp',
+          alt: 'The team receiving the 1st runner-up prize at the SIT IoT Hackathon 2026.',
+          caption: 'Taking 1st runner-up (2nd place) at the SIT IoT Hackathon 2026.',
+          width: 1080,
+          height: 720,
+        },
+      ],
     },
     {
       id: 'create-adorex',

@@ -49,9 +49,14 @@ function BulletList({ items }: { items: string[] }) {
   );
 }
 
+// Tall photos sit three to a row, wide screenshots take the full width
+function shotSpan(shot: ProjectShot) {
+  return shot.height > shot.width ? 2 : 6;
+}
+
 function Screenshot({ shot }: { shot: ProjectShot }) {
   return (
-    <IDECard style={{ margin: 0, padding: 8 }}>
+    <IDECard tape style={{ margin: 0, padding: 8, height: '100%' }}>
       <figure style={{ margin: 0 }}>
         <Image
           src={shot.src}
@@ -104,8 +109,6 @@ export function ProjectDetail({ id }: { id: string }) {
   const cover =
     project.image && !screenshots.some((shot) => shot.src === project.image?.src) ? project : null;
   const builtWith = skillsForProject(project);
-  const mainShots = screenshots.slice(0, 3);
-  const moreShots = screenshots.slice(3);
   const hasLinks = Boolean(project.repoUrl || project.npm || project.links?.length);
   const secondaryLinks = [
     ...(project.repoUrl
@@ -239,27 +242,18 @@ export function ProjectDetail({ id }: { id: string }) {
           </Section>
         )}
 
-        {mainShots.length > 0 && (
-          <Section title="Screenshots">
-            <div className="flex flex-col" style={{ gap: 32, marginTop: 8 }}>
-              {mainShots.map((shot) => (
-                <Screenshot key={shot.src} shot={shot} />
+        {screenshots.length > 0 && (
+          <Section title="Gallery">
+            <div
+              className="grid"
+              style={{ gap: 24, marginTop: 8, gridTemplateColumns: 'repeat(6, minmax(0, 1fr))' }}
+            >
+              {screenshots.map((shot) => (
+                <div key={shot.src} style={{ gridColumn: `span ${isMobile ? 6 : shotSpan(shot)}` }}>
+                  <Screenshot shot={shot} />
+                </div>
               ))}
             </div>
-            {moreShots.length > 0 && (
-              <div
-                className="grid"
-                style={{
-                  gap: 24,
-                  marginTop: 32,
-                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-                }}
-              >
-                {moreShots.map((shot) => (
-                  <Screenshot key={shot.src} shot={shot} />
-                ))}
-              </div>
-            )}
           </Section>
         )}
 
