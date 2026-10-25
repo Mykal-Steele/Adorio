@@ -1,7 +1,7 @@
 // In-memory sliding-window rate limiter for Next.js Route Handlers.
 // Mirrors backend/utils/monitoring.js's RateLimiter class — same approach,
 // separate implementation since the Next.js server and Express backend are
-// different processes that share no code (see backend/CLAUDE.md).
+// different processes that share no code (see backend/AGENTS.md).
 class RateLimiter {
   private requests = new Map<string, number[]>();
 
