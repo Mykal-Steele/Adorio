@@ -170,7 +170,7 @@ export default function HostingView() {
               {uploading ? (
                 <>
                   <div className="h-9 w-9 animate-spin rounded-full border-[3px] border-[var(--paper-accent)] border-t-transparent" />
-                  <p className="font-paper-hand text-xl text-[var(--paper-muted)]">uploading…</p>
+                  <p className="font-paper-sans text-base text-[var(--paper-muted)]">Uploading…</p>
                 </>
               ) : (
                 <>
@@ -219,7 +219,7 @@ export default function HostingView() {
               Your files
             </h2>
             {!loading && files.length > 0 && (
-              <span className="font-paper-hand text-xl text-[var(--paper-accent)]">
+              <span className="font-paper-sans text-base text-[var(--paper-accent)]">
                 {files.length} page{files.length !== 1 ? 's' : ''} live
               </span>
             )}
@@ -238,9 +238,7 @@ export default function HostingView() {
           ) : files.length === 0 ? (
             <div className="flex flex-col items-center gap-2 rounded-[3px] border-[1.5px] border-dashed border-[rgba(60,44,24,.35)] py-16">
               <DocumentIcon className="h-8 w-8 text-[var(--paper-muted-2)]" />
-              <p className="font-paper-hand text-xl text-[var(--paper-muted)]">
-                no files yet — upload one above
-              </p>
+              <p className="font-paper-sans text-base text-[var(--paper-muted)]">No files yet.</p>
             </div>
           ) : (
             <div className="space-y-3">
