@@ -4,7 +4,15 @@ import { serif } from '../constants/fonts';
 import { TechLogo, skillIdForLanguage } from './TechLogo';
 
 // The project's screenshot, or its language logo and name when there is no screenshot yet
-export function ProjectImage({ project, sizes }: { project: Project; sizes: string }) {
+export function ProjectImage({
+  project,
+  sizes,
+  priority = false,
+}: {
+  project: Project;
+  sizes: string;
+  priority?: boolean;
+}) {
   return (
     <div
       style={{
@@ -20,6 +28,7 @@ export function ProjectImage({ project, sizes }: { project: Project; sizes: stri
           src={project.image.src}
           alt={project.image.alt}
           fill
+          priority={priority}
           sizes={sizes}
           style={{ objectFit: 'cover', objectPosition: 'top left' }}
         />

@@ -188,7 +188,7 @@ export function ProjectDetail({ id }: { id: string }) {
               boxShadow: 'var(--ide-card-shadow)',
             }}
           >
-            <ProjectImage project={cover} sizes="(max-width: 900px) 100vw, 720px" />
+            <ProjectImage project={cover} sizes="(max-width: 900px) 100vw, 720px" priority />
           </div>
         )}
 

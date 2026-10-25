@@ -20,10 +20,10 @@ export interface ProjectLink {
 
 export type ProjectStatus = 'STABLE' | 'BETA' | 'IN_PROGRESS' | 'DEPRECATED';
 
-export interface ProjectImage {
+export type ProjectImage = {
   src: string;
   alt: string;
-}
+};
 
 export interface Project {
   id: string;
@@ -52,6 +52,7 @@ export interface Project {
 export interface OtherProject {
   name: string;
   href: string;
+  requiresAccount?: boolean;
 }
 
 export interface TimelineItem {
@@ -83,10 +84,10 @@ export interface Skill {
   story: string;
 }
 
-export interface SetupItem {
+export type SetupItem = {
   id: string;
   name: string;
-}
+};
 
 export const portfolioData = {
   name: 'Oakar Oo',
@@ -525,9 +526,9 @@ export const portfolioData = {
     { name: 'CozyTalk', href: 'https://github.com/CozyTalk/CozyTalk' },
     { name: 'Vexta', href: 'https://github.com/Mykal-Steele/Vexta' },
     { name: 'Mistbound', href: 'https://github.com/Mykal-Steele/MistboundMain' },
-    { name: 'Rhythm Dots', href: '/rygame' },
+    { name: 'Rhythm Dots', href: '/rygame', requiresAccount: true },
     { name: 'ArchMaster', href: '/cao/' },
-    { name: 'Runway', href: '/finance' },
+    { name: 'Runway', href: '/finance', requiresAccount: true },
     { name: 'SCB API guides', href: '/smartcity' },
   ] as OtherProject[],
 

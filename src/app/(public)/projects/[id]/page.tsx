@@ -29,16 +29,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: 'Oakar Oo',
       type: 'article',
       images: [
-        {
-          url: 'https://i.ibb.co/KxH3wXDS/download-3.png',
-          width: 1200,
-          height: 630,
-          alt: `${project?.name ?? 'Project'} by Oakar Oo`,
-        },
+        project?.image
+          ? { url: `https://adorio.space${project.image.src}`, alt: project.image.alt }
+          : {
+              url: 'https://i.ibb.co/KxH3wXDS/download-3.png',
+              width: 1200,
+              height: 630,
+              alt: `${project?.name ?? 'Project'} by Oakar Oo`,
+            },
       ],
     },
     twitter: {
-      card: 'summary',
+      card: project?.image ? 'summary_large_image' : 'summary',
       title,
       description,
     },

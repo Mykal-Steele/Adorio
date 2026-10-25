@@ -29,8 +29,7 @@ export function TabBar() {
   };
 
   return (
-    <div
-      role="tablist"
+    <nav
       aria-label="Open files"
       className="shrink-0 flex items-stretch overflow-x-auto"
       style={{
@@ -54,8 +53,7 @@ export function TabBar() {
             }}
           >
             <button
-              role="tab"
-              aria-selected={active}
+              aria-current={active ? 'page' : undefined}
               onClick={() => router.push(path)}
               className="flex h-full items-center gap-2 pl-4 pr-1"
               style={{
@@ -83,6 +81,6 @@ export function TabBar() {
           </div>
         );
       })}
-    </div>
+    </nav>
   );
 }

@@ -1,9 +1,9 @@
 import { hand } from '../constants/fonts';
 
-interface ThemeHintProps {
+type ThemeHintProps = {
   visible: boolean;
   onDismissForever: () => void;
-}
+};
 
 // A note scribbled under the title bar, with a curly arrow up to the Theme button
 export function ThemeHint({ visible, onDismissForever }: ThemeHintProps) {

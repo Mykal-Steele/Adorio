@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, ExternalLink } from 'lucide-react';
+import { ArrowRight, ExternalLink, Lock } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { useResponsive } from '../hooks/useResponsive';
 import { useContentWidth } from '../hooks/useContentWidth';
@@ -49,9 +49,20 @@ export function Projects() {
                   <ExternalLink size={14} />
                 </a>
               ) : (
-                <Link href={project.href} className="pf-btn">
+                <Link
+                  href={project.href}
+                  className="pf-btn"
+                  title={project.requiresAccount ? 'Needs an account' : undefined}
+                >
                   {project.name}
-                  <ArrowRight size={14} />
+                  {project.requiresAccount ? (
+                    <>
+                      <Lock size={14} />
+                      <span className="sr-only">(needs an account)</span>
+                    </>
+                  ) : (
+                    <ArrowRight size={14} />
+                  )}
                 </Link>
               )}
             </li>

@@ -179,10 +179,12 @@ function FeaturedProject({
   project,
   flip,
   isMobile,
+  priority = false,
 }: {
   project: Project;
   flip: boolean;
   isMobile: boolean;
+  priority?: boolean;
 }) {
   const href = `/projects/${project.id}`;
   const builtWith = skillsForProject(project);
@@ -208,7 +210,11 @@ function FeaturedProject({
         }
       >
         <Tape />
-        <ProjectImage project={project} sizes="(max-width: 900px) 100vw, 520px" />
+        <ProjectImage
+          project={project}
+          sizes="(max-width: 900px) 100vw, 520px"
+          priority={priority}
+        />
       </Link>
 
       <div>
@@ -605,6 +611,7 @@ export function About() {
               key={project.id}
               project={project}
               flip={i % 2 === 1}
+              priority={i === 0}
               isMobile={stacked}
             />
           ))}
