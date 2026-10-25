@@ -359,6 +359,8 @@
   --ide-scrollbar: #353b45;
 }
 
+/* Paper is also the fallback before next-themes sets data-theme (no JS, crawlers, link previews) */
+:root:not([data-theme]),
 [data-theme='paper'] {
   --ide-on-yellow: #2b2723;
   --ide-ink: #2b2723;
