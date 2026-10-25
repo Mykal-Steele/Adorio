@@ -113,8 +113,8 @@ const TestTicket = ({ test }: { test: TestRunResult }) => {
 const TestResults = ({ results, isRunning }: TestResultsProps) => {
   if (isRunning) {
     return (
-      <p className="py-6 text-center font-paper-hand text-xl text-[var(--paper-muted)]">
-        running your solution&hellip;
+      <p className="py-6 text-center font-paper-sans text-base text-[var(--paper-muted)]">
+        Running your code&hellip;
       </p>
     );
   }

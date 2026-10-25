@@ -113,9 +113,9 @@ const Profile = () => {
               </p>
             </div>
             {posts.length > 0 && (
-              <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-[18px] py-3 font-paper-hand text-2xl leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
+              <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-[18px] py-3 font-paper-sans font-bold text-lg leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
                 {posts.length}
-                {hasMore ? '+' : ''} pinned up
+                {hasMore ? '+' : ''} posts
               </p>
             )}
           </div>
@@ -147,18 +147,16 @@ const Profile = () => {
 
           {!loading && posts.length === 0 && (
             <div className="mx-auto mt-[clamp(40px,5vw,64px)] max-w-md text-center">
-              <p className="font-paper-hand text-2xl text-[var(--paper-muted)]">
-                nothing pinned up yet
-              </p>
+              <p className="font-paper-sans text-lg text-[var(--paper-muted)]">No posts yet.</p>
               <p className="mt-2 text-[15px] text-[var(--paper-muted)]">
-                Head to the social feed and post your first update.
+                Posts you make on the social feed show up here.
               </p>
             </div>
           )}
 
           {!loading && !hasMore && posts.length > 0 && (
-            <p className="mx-auto mt-[clamp(40px,5vw,64px)] text-center font-paper-hand text-2xl text-[var(--paper-muted)]">
-              that&apos;s everything for now, check back later
+            <p className="mx-auto mt-[clamp(40px,5vw,64px)] text-center font-paper-sans text-lg text-[var(--paper-muted)]">
+              You&apos;ve reached the end.
             </p>
           )}
         </div>

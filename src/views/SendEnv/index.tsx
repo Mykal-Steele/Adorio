@@ -124,8 +124,8 @@ const SendEnv = () => {
                 </div>
 
                 {copied && (
-                  <p className="mt-2 font-paper-hand text-xl text-[var(--paper-accent)]">
-                    copied to clipboard
+                  <p className="mt-2 font-paper-sans text-base text-[var(--paper-accent)]">
+                    Copied.
                   </p>
                 )}
 
@@ -162,8 +162,8 @@ const SendEnv = () => {
                     spellCheck={false}
                     required
                   />
-                  <span className="mt-1.5 block font-paper-hand text-[19px] leading-tight text-[var(--paper-accent)]">
-                    lowercase letters, digits, dashes &middot; 3–40 characters
+                  <span className="mt-1.5 block font-paper-sans text-sm leading-tight text-[var(--paper-accent)]">
+                    3 to 40 characters. Use lowercase letters, numbers, and dashes.
                   </span>
                 </label>
 
@@ -194,9 +194,9 @@ const SendEnv = () => {
                     autoComplete="new-password"
                     required
                   />
-                  <span className="mt-1.5 block font-paper-hand text-[19px] leading-tight text-[var(--paper-accent)]">
-                    at least 8 printable ASCII characters, no trailing spaces &middot; nothing is
-                    stored that can reset it
+                  <span className="mt-1.5 block font-paper-sans text-sm leading-tight text-[var(--paper-accent)]">
+                    At least 8 characters, with no space at the end. It can&apos;t be reset, so keep
+                    it somewhere safe.
                   </span>
                 </label>
 
@@ -217,8 +217,8 @@ const SendEnv = () => {
             )}
           </div>
 
-          <p className="mt-6 text-center font-paper-hand text-xl text-[var(--paper-muted)]">
-            account required to store &middot; no email reminders
+          <p className="mt-6 text-center font-paper-sans text-base text-[var(--paper-muted)]">
+            You need to be logged in to save. A lost passphrase can&apos;t be recovered.
           </p>
         </div>
       </main>

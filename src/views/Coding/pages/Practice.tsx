@@ -344,7 +344,7 @@ const Practice = ({ classId }: PracticeProps) => {
               {activeClass?.name ?? 'Unknown class'}
             </h1>
             {classProblems.length > 0 && (
-              <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-4 py-2 font-paper-hand text-xl leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
+              <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-4 py-2 font-paper-sans font-bold text-base leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
                 {classSolvedCount}/{classProblems.length} solved
               </p>
             )}
@@ -355,15 +355,15 @@ const Practice = ({ classId }: PracticeProps) => {
       <main className="px-4 pb-20 pt-9 sm:px-8 sm:pb-24 sm:pt-12">
         <div className="mx-auto max-w-6xl">
           {!activeClass ? (
-            <p className="mx-auto mt-12 max-w-md text-center font-paper-hand text-2xl text-[var(--paper-muted)]">
+            <p className="mx-auto mt-12 max-w-md text-center font-paper-sans text-lg text-[var(--paper-muted)]">
               That class doesn&apos;t exist.{' '}
               <Link href="/coding" className="underline underline-offset-2">
                 Back to practice problems
               </Link>
             </p>
           ) : !activeProblem || !activeVariant ? (
-            <p className="mx-auto mt-12 max-w-md text-center font-paper-hand text-2xl text-[var(--paper-muted)]">
-              No problems in {activeClass.name} yet — check back soon.
+            <p className="mx-auto mt-12 max-w-md text-center font-paper-sans text-lg text-[var(--paper-muted)]">
+              No problems in {activeClass.name} yet.
             </p>
           ) : (
             <div className="grid gap-6 lg:grid-cols-[280px_1fr]">

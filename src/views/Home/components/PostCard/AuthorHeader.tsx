@@ -28,7 +28,7 @@ const AuthorHeader = ({ user, createdAt, isAdmin }) => {
             </span>
           )}
         </div>
-        <span className="font-paper-hand text-[19px] leading-none text-[var(--paper-muted-2)]">
+        <span className="font-paper-sans text-sm leading-none text-[var(--paper-muted-2)]">
           {moment.utc(createdAt).local().fromNow()}
         </span>
       </div>

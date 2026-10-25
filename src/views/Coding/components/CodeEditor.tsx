@@ -41,8 +41,8 @@ const CodeEditor = ({
         className="absolute -top-3 right-9 h-[24px] w-20 rotate-[3deg] border-x border-dashed border-[rgba(60,44,24,.3)] bg-[rgba(242,199,68,.7)] shadow-[0_1px_3px_rgba(60,44,24,.2)]"
       />
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="editor-h" className="font-paper-hand text-2xl text-[var(--paper-accent)]">
-          your solution
+        <h2 id="editor-h" className="font-paper-serif text-xl font-bold">
+          Your solution
         </h2>
         {/* Only two things live here: the language you're solving in (grows
             over time, so it's a dropdown — see LanguagePicker), and actions

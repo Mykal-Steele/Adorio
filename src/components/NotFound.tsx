@@ -67,7 +67,7 @@ const NotFound = () => {
         </motion.div>
 
         <p className="font-paper-mono mb-2 text-xs font-bold uppercase tracking-[.2em] text-[var(--paper-accent-strong)]">
-          404 — page not found
+          404, page not found
         </p>
 
         <h1 className="font-paper-serif mb-4 text-4xl font-bold text-[var(--paper-ink)]">
