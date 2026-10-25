@@ -21,11 +21,12 @@ export function TabBar() {
   }, [router, openTabs]);
 
   const close = (path: string) => {
-    closeTab(path);
-    if (path !== activePath) return;
     const index = openTabs.indexOf(path);
     const next = openTabs[index + 1] ?? openTabs[index - 1] ?? '/';
-    router.push(next === path ? '/' : next);
+    // The page on screen always keeps a tab, so its last tab can't close onto itself
+    if (path === activePath && next === path) return;
+    closeTab(path);
+    if (path === activePath) router.push(next);
   };
 
   return (

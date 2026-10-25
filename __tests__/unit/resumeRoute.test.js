@@ -66,6 +66,20 @@ describe('/resume', () => {
     expect(res.status).toBe(200);
   });
 
+  test('should keep serving the last copy when the R2 download breaks halfway', async () => {
+    r2Serves(200, { etag: '"abc"' });
+    const { GET } = await loadRoute();
+    await GET(visit());
+    globalThis.fetch = async () => {
+      const res = new Response(pdf, { status: 200, headers: { etag: '"new"' } });
+      res.arrayBuffer = () => Promise.reject(new Error('connection reset'));
+      return res;
+    };
+    const res = await GET(visit());
+    expect(res.status).toBe(200);
+    expect(res.headers.get('etag')).toBe('"abc"');
+  });
+
   test('should redirect instead of a 5xx when R2 is down and nothing is cached', async () => {
     r2Serves(503);
     const { GET } = await loadRoute();

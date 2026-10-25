@@ -53,11 +53,15 @@ async function refreshResume(): Promise<CachedResume | null> {
   }).catch(() => null);
 
   if (upstream?.status === 200) {
-    cache = {
-      body: await upstream.arrayBuffer(),
-      etag: upstream.headers.get('etag'),
-      lastModified: upstream.headers.get('last-modified'),
-    };
+    // The headers can arrive before the body fails, so a broken download keeps the old copy
+    const body = await upstream.arrayBuffer().catch(() => null);
+    if (body) {
+      cache = {
+        body,
+        etag: upstream.headers.get('etag'),
+        lastModified: upstream.headers.get('last-modified'),
+      };
+    }
   }
   // 304 means our copy is current; anything else keeps the last good copy
   return cache;

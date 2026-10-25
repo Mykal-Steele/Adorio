@@ -9,15 +9,27 @@ import { sans } from '../constants/fonts';
 // Full-size view of a gallery image. Esc, the close button, or a click outside closes it.
 export function Lightbox({ shot, onClose }: { shot: ProjectShot; onClose: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  // The parent passes a new onClose on every render, so the effect reads it from a ref
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') onCloseRef.current();
+      // The close button is the only control, so Tab stays on it while the dialog is open
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        closeRef.current?.focus();
+      }
     };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      opener?.focus();
+    };
+  }, []);
 
   return (
     <div

@@ -21,6 +21,10 @@ describe('getRedirectPaths', () => {
       '/\\evil.example',
       'javascript:alert(1)',
       'evil.example/path',
+      // Browsers strip tabs and newlines from URLs, which turns these into //evil.example
+      '/\n/evil.example',
+      '/\t/evil.example',
+      '/\r\n/evil.example',
     ]) {
       expect(getRedirectPaths(params(target)).from).toBe('/social');
     }

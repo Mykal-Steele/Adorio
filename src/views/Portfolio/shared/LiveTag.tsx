@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Radio } from 'lucide-react';
 import { sans } from '../constants/fonts';
 
@@ -24,7 +25,7 @@ export function LiveTag({ href }: { href?: string }) {
   );
   if (href) {
     return (
-      <a
+      <Link
         href={href}
         {...(href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         aria-label="Live: open the live site"
@@ -32,7 +33,7 @@ export function LiveTag({ href }: { href?: string }) {
         style={tagStyle}
       >
         {content}
-      </a>
+      </Link>
     );
   }
   return (

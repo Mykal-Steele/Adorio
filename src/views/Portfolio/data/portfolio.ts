@@ -180,18 +180,18 @@ export const portfolioData = {
       projectId: 'create-adorex',
     },
     {
-      role: 'Financial Team Lead',
-      org: 'KMUTT Integrated Project (Smart City)',
-      period: 'Aug to Dec 2025',
-      highlights: [],
-      projectId: 'smartcity-financial',
-    },
-    {
       role: 'Hardware and Backend Engineer',
       org: 'KMUTT IoT Hackathon (2nd Place)',
       period: 'Jan 2026',
       highlights: [],
       projectId: 'nfc-attendance',
+    },
+    {
+      role: 'Financial Team Lead',
+      org: 'KMUTT Integrated Project (Smart City)',
+      period: 'Aug to Dec 2025',
+      highlights: [],
+      projectId: 'smartcity-financial',
     },
   ] as ExperienceItem[],
 

@@ -80,6 +80,34 @@ describe('portfolio projects', () => {
   });
 });
 
+describe('portfolio experience', () => {
+  const MONTHS = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  // "Aug to Dec 2025" starts in Aug 2025, "Jun 2026 to Jul 2026" in Jun 2026
+  const start = (period) => {
+    const month = MONTHS.indexOf(period.slice(0, 3));
+    const year = Number(period.match(/\d{4}/)[0]);
+    return year * 12 + month;
+  };
+
+  test('should list roles newest first, since the timeline marks the first one as current', () => {
+    const starts = portfolioData.experience.map((exp) => start(exp.period));
+    expect(starts).toEqual([...starts].sort((a, b) => b - a));
+  });
+});
+
 describe('liveLabel', () => {
   test('should show where a live project runs, without the protocol', () => {
     expect(liveLabel('/coding')).toBe('adorio.space/coding');

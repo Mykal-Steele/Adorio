@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { X, Minus, Send } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useIDE } from './context/IDEContext';
@@ -167,6 +167,13 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
   const [history, setHistory] = useState<string[]>([]);
   const [histIdx, setHistIdx] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
+  const outputRef = useRef<HTMLDivElement>(null);
+
+  // Sets the pane's own scroll position; scrollIntoView would also scroll the page around it
+  useEffect(() => {
+    const pane = outputRef.current;
+    if (pane) pane.scrollTop = pane.scrollHeight;
+  }, [lines]);
 
   const commands = useCallback(() => makeCommands((path) => router.push(path)), [router]);
 
@@ -267,6 +274,7 @@ export function Terminal({ embedded }: { embedded?: boolean }) {
         </div>
       )}
       <div
+        ref={outputRef}
         className="flex-1 overflow-y-auto px-4 py-2"
         style={{ scrollbarWidth: 'none' }}
         onClick={() => inputRef.current?.focus()}

@@ -40,6 +40,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+// Every id is known at build time, so anything else is a real 404
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   return portfolioData.projects.map((p) => ({ id: p.id }));
 }
