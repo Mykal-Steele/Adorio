@@ -1,12 +1,11 @@
-import { readFile } from 'fs/promises';
-import path from 'path';
+import { createR2Proxy } from '@/lib/r2Proxy';
 
-export async function GET() {
-  const html = await readFile(path.join(process.cwd(), 'public', 'learn-korean.html'), 'utf-8');
-  return new Response(html, {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600',
-    },
-  });
-}
+// The page lives in the adorio-hosted R2 bucket, served at files.adorio.space.
+// To update it: npx wrangler r2 object put adorio-hosted/learn-korean.html --remote \
+//   --file <html> --content-type "text/html; charset=utf-8" --cache-control no-cache
+const PAGE_URL = 'https://files.adorio.space/learn-korean.html';
+
+// Run on every visit so a new upload shows up right away
+export const dynamic = 'force-dynamic';
+
+export const GET = createR2Proxy(PAGE_URL, { 'Content-Type': 'text/html; charset=utf-8' });
