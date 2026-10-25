@@ -9,16 +9,16 @@ My personal site and a social app, plus a handful of side projects, all living i
 
 ## What's actually on this site
 
-- **Portfolio** (`/`, `/about`, `/projects`, `/contact`) — my personal site, styled like a code editor
-- **Social feed** (`/social`) — posts, likes, threaded comments, the usual, with real auth
-- **Coding practice** (`/coding`) — Java and algorithms problems. JS runs in-browser; Java and Python compile and run server-side against a self-hosted [Piston](https://github.com/engineer-man/piston) sandbox
-- **Runway** (`/finance`, login required) — personal budget/runway tracker
-- **File Hosting** (`/hosting`, login required) — drop an HTML file, get it hosted
-- **Rhythm Dots** (`/rygame`, login required) — canvas rhythm game
-- **Send Env** (`/sendenv`, login required) — encrypted note-to-self vault, pulled with `curl`
-- **Data Lookup** (`/data-lookup`, login required) — visitor analytics dashboard
-- **Smart City APIs** (`/smartcity`) — docs/demo page for some bank API work
-- **AI exam-prep sidecar** (`/cao/`) — separate Vite app, built and served independently
+- **Portfolio** (`/`, `/projects`, `/skills`, `/contact`): my personal site, styled like a code editor
+- **Social feed** (`/social`): posts, likes, threaded comments, the usual, with real auth
+- **Coding practice** (`/coding`): Java and algorithms problems. JS runs in-browser; Java and Python compile and run server-side against a self-hosted [Piston](https://github.com/engineer-man/piston) sandbox
+- **Runway** (`/finance`, login required): personal budget/runway tracker
+- **File Hosting** (`/hosting`, login required): drop an HTML file, get it hosted
+- **Rhythm Dots** (`/rygame`, login required): canvas rhythm game
+- **Send Env** (`/sendenv`, login required): encrypted note-to-self vault, pulled with `curl`
+- **Data Lookup** (`/data-lookup`, login required): visitor analytics dashboard
+- **Smart City APIs** (`/smartcity`): guides for the SCB bank APIs from the Smart City class
+- **AI exam-prep sidecar** (`/cao/`): separate Vite app, built and served independently
 
 ## Quick start
 

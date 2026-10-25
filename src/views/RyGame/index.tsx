@@ -723,7 +723,7 @@ const RyGame = () => {
 
       setShowAchievement({
         name: 'First Play',
-        description: 'Started your rhythm journey',
+        description: 'Played your first game',
         icon: <SparklesIcon className="h-6 w-6 text-[var(--paper-accent)]" />,
       });
 
