@@ -1,4 +1,4 @@
-import { mock, beforeEach } from 'bun:test';
+import { describe, test, it, expect, mock, beforeEach } from 'bun:test';
 
 // ── module mocks (must be set up before any dynamic imports) ───────────────────
 
@@ -31,6 +31,8 @@ mock.module('../../backend/models/index.js', () => ({
   findUserByEmail: mockFindUserByEmail,
   findUserById: mockFindUserByIdModel,
   deleteUserById: mockDeleteUserById,
+  deleteStaleTestUsers: mock(() => Promise.resolve({ deletedCount: 0 })),
+  searchUsersByUsernamePrefix: mock(() => Promise.resolve(null)),
 }));
 
 mock.module('../../backend/config/environment.js', () => ({

@@ -120,7 +120,7 @@ export default function Dashboard({
           {hasBudget && overview.isPartialMonth && (
             <div className="mt-2.5 border-t border-dashed border-[var(--paper-line)] pt-2.5 text-xs leading-relaxed text-[var(--paper-muted-2)]">
               Started tracking on the {overview.trackingStartDay}
-              {ordinalSuffix(overview.trackingStartDay)} — your budget is scaled to the days since
+              {ordinalSuffix(overview.trackingStartDay)}, your budget is scaled to the days since
               then, not the whole month.
             </div>
           )}
@@ -196,7 +196,7 @@ export default function Dashboard({
           </div>
           {recent.length === 0 ? (
             <p className="text-sm text-[var(--paper-muted-2)]">
-              No transactions yet — press <Kbd>N</Kbd> for an expense or <Kbd>I</Kbd> for income.
+              No transactions yet. Press <Kbd>N</Kbd> for an expense or <Kbd>I</Kbd> for income.
             </p>
           ) : (
             <div className="flex flex-col">

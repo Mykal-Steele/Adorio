@@ -1,10 +1,10 @@
 import type { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
 
 // The Java mode (@codemirror/legacy-modes) only tokenizes for syntax
-// highlighting — it has no notion of the standard library, so without this
+// highlighting, it has no notion of the standard library, so without this
 // nothing after `autocompletion()` ever suggests System, Scanner, etc. This
 // is a curated static list (what a beginner actually needs for stdin/stdout
-// practice problems), not a real language server — it won't know local
+// practice problems), not a real language server, it won't know local
 // variable types or give signature help. A real Java IntelliSense would mean
 // running an actual language server (e.g. Eclipse JDT LS) and wiring it in
 // over LSP, which is a much larger project than an editor tweak.
@@ -96,7 +96,7 @@ export const JAVA_TYPE_LABELS = [
 const TYPES = JAVA_TYPE_LABELS.map((label): Completion => ({ label, type: 'class' }));
 
 // Dot-completion for the handful of classes practice problems actually reach
-// for — matched by the literal receiver text, not real type tracking.
+// for, matched by the literal receiver text, not real type tracking.
 // detail/info give the VSCode-style signature + doc panel.
 export interface MemberDoc {
   label: string;
@@ -115,7 +115,7 @@ export const JAVA_MEMBER_DOCS: Record<string, MemberDoc[]> = {
     {
       label: 'out',
       detail: 'PrintStream',
-      info: 'Standard output — out.println(...) prints a line.',
+      info: 'Standard output. out.println(...) prints a line.',
     },
     { label: 'err', detail: 'PrintStream', info: 'Standard error stream.' },
     { label: 'in', detail: 'InputStream', info: 'Standard input stream.' },
@@ -270,7 +270,7 @@ export const JAVA_MEMBER_DOCS: Record<string, MemberDoc[]> = {
   ],
 };
 
-// CodeMirror-shaped completions layered from the raw docs above — 'out'
+// CodeMirror-shaped completions layered from the raw docs above, 'out'
 // (instance method calls) ranks above the class-level statics.
 const MEMBER_KIND: Record<string, { type: string; boost: number }> = {
   out: { type: 'method', boost: 2 },
@@ -283,12 +283,11 @@ const MEMBERS: Record<string, Completion[]> = Object.fromEntries(
 );
 
 // There's no type checker here, so `foo.` can't know whether `foo` is a
-// Scanner, a String, a StringBuilder, or a List — so this is the instance-
+// Scanner, a String, a StringBuilder, or a List, so this is the instance-
 // method surface people actually type on local variables, offered for any
 // receiver that isn't a known class name above (matching real Java would
 // need a language server, not a static list). This is also why Scanner's
-// methods live here rather than under a "Scanner" key in JAVA_MEMBER_DOCS —
-// nobody ever types `Scanner.nextInt()` on the class itself, only on a
+// methods live here rather than under a "Scanner" key in JAVA_MEMBER_DOCS, // nobody ever types `Scanner.nextInt()` on the class itself, only on a
 // variable like `sc.nextInt()`.
 export const JAVA_INSTANCE_FALLBACK_DOCS: MemberDoc[] = [
   // Scanner

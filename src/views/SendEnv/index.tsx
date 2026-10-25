@@ -80,7 +80,7 @@ const SendEnv = () => {
           </h1>
           <p className="mt-3.5 max-w-[56ch] text-[17px] leading-[1.62] text-[var(--paper-muted)]">
             Write something down, lock it with a passphrase, and pull it back later with a single
-            command. Sign in to store it — only the passphrase can decrypt it.
+            command. Sign in to store it. Only the passphrase can decrypt it.
           </p>
         </div>
       </section>
@@ -107,7 +107,7 @@ const SendEnv = () => {
                     <code className="font-paper-mono font-bold">{storedName}</code> and the
                     passphrase you just set.
                   </p>
-                  <p className="mt-1.5">Keep the passphrase safe — there is no reset.</p>
+                  <p className="mt-1.5">Keep the passphrase safe. There is no reset.</p>
                 </div>
 
                 <div className="relative mt-4">

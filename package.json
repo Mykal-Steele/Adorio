@@ -25,7 +25,7 @@
     "check-nginx-routes": "node scripts/check-nginx-routes.cjs",
     "secrets": "node scripts/rotate-secrets.mjs",
     "test": "npm run test:dev",
-    "test:unit": "bun test __tests__/unit/",
+    "test:unit": "for f in __tests__/unit/*.test.js; do bun test \"$f\" || exit 1; done",
     "test:integration": "npx jest --testPathPattern __tests__/integration/ --runInBand --forceExit",
     "test:dev": "sh -c 'set -e; npm run docker:preflight; cleanup() { docker compose -f docker-compose.yml down --remove-orphans || true; }; trap cleanup EXIT; docker compose -f docker-compose.yml down --remove-orphans || true; docker compose -f docker-compose.yml up -d --build --remove-orphans; node scripts/wait-for-url.cjs http://localhost:8080/api/health 180000 1000; TEST_TARGET_URL=http://localhost:8080 npm run test:integration'",
     "test:prod": "sh -c 'set -e; npm run docker:preflight; cleanup() { docker compose -f docker-compose.prod.yml down --remove-orphans || true; }; trap cleanup EXIT; docker compose -f docker-compose.prod.yml down --remove-orphans || true; docker compose -f docker-compose.prod.yml up -d --build --remove-orphans; node scripts/wait-for-url.cjs http://localhost:80/api/health 240000 1000; npm run test:integration'",

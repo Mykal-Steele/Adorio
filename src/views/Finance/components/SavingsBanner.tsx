@@ -23,13 +23,13 @@ export default function SavingsBanner({
   let message: string;
   if (completedDays.length === 0) {
     message = isPartialMonth
-      ? 'Tracking starts today — your saved balance builds up one finished day at a time.'
-      : 'First day of the month — check back tomorrow to see this move.';
+      ? 'Tracking starts today. Your saved balance builds up one finished day at a time.'
+      : 'First day of the month. Check back tomorrow to see this move.';
   } else if (inDebt) {
     message = `You've spent ${fmtMoneyPlain(Math.abs(saved))} more than planned. Trim spending over the next few days to get back on track.`;
   } else if (saved === 0) {
     message =
-      "Right on pace with your daily budget — spend less than today's share to build a cushion.";
+      "Right on pace with your daily budget. Spend less than today's share to build a cushion.";
   } else {
     message = `You're ${fmtMoneyPlain(saved)} ahead of your daily budget. That's real breathing room for later in the month.`;
   }
@@ -63,7 +63,7 @@ export default function SavingsBanner({
           return (
             <span
               key={day.date}
-              title={`Day ${day.day} — ${fmtMoneyPlain(day.spent)} of ${fmtMoneyPlain(day.budget)}`}
+              title={`Day ${day.day}: ${fmtMoneyPlain(day.spent)} of ${fmtMoneyPlain(day.budget)}`}
               className={`h-2.5 w-2.5 flex-shrink-0 rounded-[2px] ${tone}`}
               style={{ opacity: day.isToday ? 1 : over ? 0.55 : 0.85 }}
             />
@@ -74,7 +74,7 @@ export default function SavingsBanner({
           .map((day) => (
             <span
               key={day.date}
-              title={`Day ${day.day} — upcoming`}
+              title={`Day ${day.day}, upcoming`}
               className="h-2.5 w-2.5 flex-shrink-0 rounded-[2px] bg-[rgba(43,39,35,0.08)]"
             />
           ))}

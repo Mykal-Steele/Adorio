@@ -1,7 +1,7 @@
 // Java's convention (and every starter template in problems.ts) is 4 spaces
 // per level; this app's JS templates are 2. Both editor engines' live
 // indentation already keys off this per language (see CodeMirrorEditor's
-// indentUnit and MonacoEditor's TAB_SIZE) — formatCode has to match, or
+// indentUnit and MonacoEditor's TAB_SIZE), formatCode has to match, or
 // pressing Format would immediately re-indent Java back down to 2 spaces
 // and undo that consistency.
 export const INDENT_WIDTH_BY_LANGUAGE: Record<string, number> = { java: 4 };
@@ -28,7 +28,7 @@ export const formatCode = (code: string, language?: string): string => {
     if (line.trim() === '') return '';
 
     // A line in the middle of a multi-line template literal is string
-    // content — re-indenting it would change the program's value.
+    // content, re-indenting it would change the program's value.
     const verbatim = inTemplate;
 
     let opens = 0;
@@ -97,9 +97,9 @@ export const formatCode = (code: string, language?: string): string => {
 };
 
 // Maps a cursor offset in `oldText` to the equivalent offset in `newText`
-// after `formatCode` ran. formatCode never adds/removes lines — it only
+// after `formatCode` ran. formatCode never adds/removes lines, it only
 // rewrites leading indentation (tabs -> spaces, brace-depth indent) and
-// trims trailing whitespace — so the cursor's line number is stable and
+// trims trailing whitespace, so the cursor's line number is stable and
 // only its column needs adjusting by the indent delta. A cursor sitting in
 // (or at the end of) the old indent lands at the corresponding spot in the
 // new indent; a cursor in the code keeps its offset within the code. This

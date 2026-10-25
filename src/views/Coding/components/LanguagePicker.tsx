@@ -16,7 +16,7 @@ interface LanguagePickerProps {
 
 // A dropdown, not a row of pill buttons: a language list only grows over
 // time (JS → +Java → +Python → ...), and a segmented control that adds a
-// button per option doesn't scale — it just crowds the header more with
+// button per option doesn't scale, it just crowds the header more with
 // every addition, and reads ambiguously next to the engine toggle. A single
 // button showing the current choice, opening a short list on click, is the
 // pattern every real coding-practice site (LeetCode, HackerRank, CodeSignal)

@@ -61,7 +61,7 @@ export const applyAuthSession = (
 
 // The api/index.ts response interceptor already runs handleApiError once,
 // so by the time an error reaches a view's catch block it's already an
-// Error/ApiClientError with the real backend message on .message — not a raw
+// Error/ApiClientError with the real backend message on .message, not a raw
 // axios error with .response. Re-running handleApiError here would always
 // hit its "no response" branch, since a plain Error has no .response.
 export const getAuthErrorMessage = (error: unknown, fallback: string) =>

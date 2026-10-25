@@ -34,7 +34,7 @@ export function useKeyboardShortcuts(handlers: Handlers) {
       }
       if (isTyping) return;
       // A modal (calculator, transaction form, ...) owns the keyboard while
-      // it's open — its own listener handles typing. Without this, "1"-"4"
+      // it's open, its own listener handles typing. Without this, "1"-"4"
       // would still flip dashboard tabs underneath an open dialog.
       if (h.isModalOpen) return;
 

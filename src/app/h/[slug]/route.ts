@@ -18,7 +18,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
 
   if (res.status === 404) {
     return new NextResponse(
-      '<!doctype html><html><body style="font-family:sans-serif;padding:2rem"><h1>404 — File not found</h1></body></html>',
+      '<!doctype html><html><body style="font-family:sans-serif;padding:2rem"><h1>404: File not found</h1></body></html>',
       { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
     );
   }

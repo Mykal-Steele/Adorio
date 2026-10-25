@@ -10,7 +10,7 @@
 //
 // Two things keep the shape legible against an unpredictable backdrop
 // (a same-colored card, a busy photo):
-// 1. Each spike fills from a gradient — solid cream for a short buffer at
+// 1. Each spike fills from a gradient, solid cream for a short buffer at
 //    the top (so it still reads as one seamless color with the Navbar),
 //    fading to a darker tan for most of the spike's height, darkest at the tip.
 // 2. A second, unfilled path retraces just the jagged edge (not the flat top,
@@ -18,7 +18,7 @@
 //    dark stroke, so there's a hard edge that doesn't depend on color
 //    contrast with whatever happens to be behind it.
 //
-// Mobile renders a sparser zigzag than desktop — the strip is shorter there,
+// Mobile renders a sparser zigzag than desktop, the strip is shorter there,
 // and the dense desktop pattern reads as noise at that height.
 const PaperTornEdge = () => (
   <div className="sticky top-14 z-40 h-4 w-full bg-transparent sm:top-16 sm:h-6">

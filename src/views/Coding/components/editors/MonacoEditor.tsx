@@ -17,7 +17,7 @@ import type { EditorEngineProps, EditorHandle } from './types';
 type IStandaloneCodeEditor = Monaco.editor.IStandaloneCodeEditor;
 
 // registerCompletionItemProvider/registerDocumentFormattingEditProvider are
-// global to the monaco module, not per-editor-instance — Practice.tsx
+// global to the monaco module, not per-editor-instance, Practice.tsx
 // remounts this component on every problem/language switch (see `editorKey`
 // in Practice.tsx), so registering again on every mount would stack up
 // duplicate suggestions. Monaco itself (the loaded module) is a singleton
@@ -33,7 +33,7 @@ const registerProvidersOnce = (monaco: typeof Monaco) => {
   registerSnippets(monaco, 'javascript');
 
   // Manual format only (Shift+Alt+F / Format button, Monaco's own default
-  // binding for "Format Document") — same formatCode used by the CodeMirror
+  // binding for "Format Document"), same formatCode used by the CodeMirror
   // engine, so both produce identical output. Emits one edit per changed
   // line rather than a single whole-document replace so Monaco's own
   // edit-tracking keeps the cursor in place, matching the CodeMirror path's
@@ -121,7 +121,7 @@ const MonacoEditor = forwardRef<EditorHandle, EditorEngineProps>(
       applySettings(editor);
 
       // Courier Prime/JetBrains Mono are Google Fonts loaded via <link> tags
-      // (async, font-display: swap) — Monaco measures character width for
+      // (async, font-display: swap), Monaco measures character width for
       // its own layout (indent guides, cursor position) as soon as it
       // mounts, using whatever font is actually active in the DOM at that
       // instant. If the custom font hasn't finished downloading yet, that's
@@ -140,12 +140,12 @@ const MonacoEditor = forwardRef<EditorHandle, EditorEngineProps>(
 
       editor.updateOptions({
         // Alt+Click multi-cursor and Ctrl+Space suggest are Monaco defaults
-        // already — nothing to configure for those.
+        // already, nothing to configure for those.
         tabSize: TAB_SIZE[language] ?? 2,
         insertSpaces: true,
         // Practice.tsx remounts this component fresh on every language
         // switch (see editorKey), so tabSize above is already correct for
-        // the language being mounted — detectIndentation sniffing the
+        // the language being mounted, detectIndentation sniffing the
         // starter code's actual whitespace would just silently override it.
         detectIndentation: false,
         autoClosingBrackets: 'always',

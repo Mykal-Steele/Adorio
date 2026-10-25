@@ -113,7 +113,7 @@ export default function History({
         <p className="py-1.5 text-sm text-[var(--paper-muted-2)]">
           {hasAnyTransactions
             ? 'No transactions match your filters.'
-            : 'No transactions yet — press N for an expense or I for income.'}
+            : 'No transactions yet. Press N for an expense or I for income.'}
         </p>
       ) : (
         dates.map((date) => {

@@ -16,11 +16,11 @@ import { Language } from '../../types';
 import type { EditorEngineProps, EditorHandle } from './types';
 
 const javaLanguage = StreamLanguage.define(java);
-// .data.of(...) only builds the extension — it still has to be in the
+// .data.of(...) only builds the extension, it still has to be in the
 // editor's `extensions` array below to actually take effect.
 const javaCompletions = javaLanguage.data.of({ autocomplete: javaCompletionSource });
 const javaSnippets = javaLanguage.data.of({ autocomplete: javaSnippetSource });
-// toggleComment (Ctrl+/) reads comment syntax from language data — the
+// toggleComment (Ctrl+/) reads comment syntax from language data, the
 // legacy Java mode doesn't provide any, so declare it explicitly.
 const javaComments = javaLanguage.data.of({
   commentTokens: { line: '//', block: { open: '/*', close: '*/' } },
@@ -34,7 +34,7 @@ const javaComments = javaLanguage.data.of({
 // that line leaves a bracket unclosed, and drop one level if the line being
 // indented opens with a closer. Brackets inside string/char literals and
 // comments are skipped when counting, so a brace in e.g. "{" or // }
-// never shifts indentation. This is the whole Enter story — same as VSCode:
+// never shifts indentation. This is the whole Enter story, same as VSCode:
 // indent the new line, nothing more.
 const countNetOpens = (line: string): number => {
   let depth = 0;
@@ -95,7 +95,7 @@ const javaIndent = indentService.of((context, pos) => {
 
 // globalThis introspection gets JS completions for every real built-in
 // (Array, Object, Math, console, JSON, ...) and their members, not a
-// hand-maintained list — this is what "knows the standard library" actually
+// hand-maintained list, this is what "knows the standard library" actually
 // looks like when the runtime can be introspected directly, unlike Java.
 const jsGlobalCompletions = javascriptLanguage.data.of({
   autocomplete: scopeCompletionSource(globalThis),
@@ -106,18 +106,18 @@ const jsSnippets = javascriptLanguage.data.of({ autocomplete: jsSnippetSource })
 // negative text-indent via line decorations) once shifted the selection
 // layer's highlight rectangles off the text, producing blocky misaligned
 // selections. Wrapped continuation lines starting at column 0 is the lesser
-// evil — CodeMirror has no built-in hanging indent.
+// evil, CodeMirror has no built-in hanging indent.
 
 // Manual format only (Shift+Alt+F / Format button): a cursor-preserving
 // whole-doc replace, left in the undo history as one step. There is
-// deliberately no auto-format on Enter or paste — VSCode ships with both
+// deliberately no auto-format on Enter or paste, VSCode ships with both
 // off by default, and reformatting the whole document behind the user's
 // back is what made Enter feel broken.
 //
 // formatCode is brace-depth-based (Java/JS); Python's blocks are indentation,
 // not braces, so running it on Python would recompute indentation from `(`/
 // `[` call/list nesting and corrupt the program. No formatter for Python
-// until there's a real indentation-aware one — silently no-op is safer than
+// until there's a real indentation-aware one, silently no-op is safer than
 // silently breaking the user's code.
 const dispatchPreservingFormat = (view: EditorView, language: string) => {
   if (language === Language.PYTHON) return;
@@ -157,8 +157,7 @@ const CodeMirrorEditor = forwardRef<EditorHandle, EditorEngineProps>(
       [code, onChange, language],
     );
 
-    // Re-applies the shared wrap/font-size settings whenever they change —
-    // including once on mount, in case the store already holds a non-default
+    // Re-applies the shared wrap/font-size settings whenever they change,     // including once on mount, in case the store already holds a non-default
     // value from before this instance existed (e.g. right after switching
     // engines, or on a fresh CodeMirror instance from the problem-switch
     // `key` reset in Practice.tsx).
@@ -169,14 +168,14 @@ const CodeMirrorEditor = forwardRef<EditorHandle, EditorEngineProps>(
 
     const extensions = useMemo(() => {
       // Python's own lang package ships proper indentation-sensitive indent
-      // logic already — unlike the legacy Java clike mode, it doesn't need
+      // logic already, unlike the legacy Java clike mode, it doesn't need
       // (or want) the brace-counting javaIndent override.
       // Java's convention (and every starter template in problems.ts) is 4
       // spaces per level, matching VSCode's own per-language default; this
       // app's JS templates are 2. CodeMirror's indentUnit facet defaults to
       // 2 for everything, so without this, javaIndent's `context.unit`
       // inserted 2-space levels into new lines a student typed while the
-      // pre-written starter code around it stayed at 4 — real, visible
+      // pre-written starter code around it stayed at 4, real, visible
       // indentation drift within the same file.
       let languageExtension;
       let languageFeatures: unknown[];

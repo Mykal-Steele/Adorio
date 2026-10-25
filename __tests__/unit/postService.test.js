@@ -1,4 +1,4 @@
-import { mock, beforeEach } from 'bun:test';
+import { describe, test, it, expect, mock, beforeEach } from 'bun:test';
 
 // ── module mocks ───────────────────────────────────────────────────────────────
 

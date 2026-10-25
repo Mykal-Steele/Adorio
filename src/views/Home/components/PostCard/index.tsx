@@ -110,7 +110,7 @@ const PostCard = ({
             (like) => (like?._id?.toString() || like?.toString()) === currentUserId?.toString(),
           );
 
-          // Server is authoritative — apply it even if it matches the pre-click
+          // Server is authoritative, apply it even if it matches the pre-click
           // state (this closure's optimisticUserLiked is the value from before
           // the optimistic update, not the willBeLiked value just applied).
           setOptimisticUserLiked(serverHasUserLike);
