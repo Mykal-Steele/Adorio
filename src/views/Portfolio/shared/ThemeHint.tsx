@@ -1,15 +1,23 @@
 import { hand } from '../constants/fonts';
 
 interface ThemeHintProps {
+  visible: boolean;
   onDismissForever: () => void;
 }
 
 // A note scribbled under the title bar, with a curly arrow up to the Theme button
-export function ThemeHint({ onDismissForever }: ThemeHintProps) {
+export function ThemeHint({ visible, onDismissForever }: ThemeHintProps) {
   return (
     <div
       className="pointer-events-none absolute z-30 flex items-start"
-      style={{ top: 'calc(100% + 6px)', right: 56, gap: 2 }}
+      style={{
+        top: 'calc(100% + 6px)',
+        right: 56,
+        gap: 2,
+        opacity: visible ? 1 : 0,
+        visibility: visible ? 'visible' : 'hidden',
+        transition: 'opacity 200ms ease, visibility 200ms',
+      }}
     >
       <div
         className="flex flex-col items-end"

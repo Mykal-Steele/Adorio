@@ -17,6 +17,16 @@ export function TitleBar() {
     if (themeHintEnabled) setClosed(false);
   }, [themeHintEnabled]);
 
+  // The tip is pinned to the top bar, so it steps aside once the page scrolls under it
+  const [atTop, setAtTop] = useState(true);
+  useEffect(() => {
+    const main = document.querySelector('main');
+    if (!main) return;
+    const onScroll = () => setAtTop(main.scrollTop < 40);
+    main.addEventListener('scroll', onScroll, { passive: true });
+    return () => main.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
     <div
       className="relative shrink-0 flex items-center justify-between px-4"
@@ -40,7 +50,7 @@ export function TitleBar() {
 
       <ThemeSwitcher showLabel onOpen={() => setClosed(true)} />
       {themeHintEnabled && !closed && roomy && (
-        <ThemeHint onDismissForever={() => setThemeHintEnabled(false)} />
+        <ThemeHint visible={atTop} onDismissForever={() => setThemeHintEnabled(false)} />
       )}
     </div>
   );
