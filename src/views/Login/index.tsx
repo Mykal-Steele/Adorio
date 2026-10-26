@@ -3,8 +3,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAppDispatch } from '../../store/hooks';
 import { login } from '../../api';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { applyAuthSession, getAuthErrorMessage, getRedirectPaths } from '../../utils/authFlow';
+import { useRouter } from 'next/navigation';
+import { applyAuthSession, getAuthErrorMessage } from '../../utils/authFlow';
+import { useAuthRedirect } from '../../hooks/useAuthRedirect';
 import AuthCard from '../../components/AuthCard';
 import EmailField from '../../components/AuthCard/EmailField';
 import PasswordField from '../../components/AuthCard/PasswordField';
@@ -12,7 +13,6 @@ import PasswordField from '../../components/AuthCard/PasswordField';
 const Login = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
@@ -20,8 +20,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const errorRef = useRef<HTMLParagraphElement>(null);
 
-  const { from, redirect } = getRedirectPaths(searchParams);
-  const redirectQuery = redirect ? `?redirect=${encodeURIComponent(redirect)}` : '';
+  const { from, redirectQuery } = useAuthRedirect();
 
   // Move focus to the error on submit failure so keyboard/screen-reader users
   // aren't left stranded on the submit button with no indication of what happened.
@@ -50,7 +49,8 @@ const Login = () => {
 
   return (
     <AuthCard mode="signin" redirectQuery={redirectQuery} formTitle="Sign in">
-      <form onSubmit={handleLogin}>
+      {/* post: if it is ever submitted before JS loads, the fields can't end up in the URL */}
+      <form method="post" onSubmit={handleLogin}>
         <EmailField value={email} onChange={setEmail} disabled={loading} />
         <PasswordField
           value={password}
