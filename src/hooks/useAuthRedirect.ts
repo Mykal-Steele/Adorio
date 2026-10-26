@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getRedirectPaths } from '../utils/authFlow';
+import { getRedirectPaths } from '@/utils/authFlow';
 
 // Where to go after signing in, from ?redirect=. Read after mount instead of with
 // useSearchParams, which would make Next skip server rendering for the whole form and
