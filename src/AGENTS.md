@@ -163,6 +163,7 @@ src/
         ├── TitleBar.tsx         — 48px top bar with Portfolio label + ThemeSwitcher
         ├── StatusBar.tsx        — 24px bottom status bar
         ├── Terminal.tsx         — Boot terminal with interactive commands
+        ├── motion.ts            — prefersReducedMotion() for motion started from JS
         ├── context/
         │   ├── IDEContext.tsx   — sidePanelOpen, terminalOpen, openTabs
         │   └── ThemeContext.tsx — theme names and labels, useTheme over next-themes

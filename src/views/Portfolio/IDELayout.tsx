@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import { Folder, Terminal as TerminalIcon, GithubIcon, LinkedinIcon } from 'lucide-react';
 
 import { TitleBar } from './TitleBar';
@@ -19,17 +20,16 @@ import { sans } from './constants/fonts';
 import { eyebrow } from './constants/type';
 import { NavigationProgressBar } from './shared/NavigationProgressBar';
 import { SettingsButton } from './shared';
+import { prefersReducedMotion } from './motion';
 
 type MobileDrawerType = 'explorer' | 'terminal' | 'more' | null;
 
 function MobileMoreMenu({
   onOpenTerminal,
   onOpenExplorer,
-  onClose,
 }: {
   onOpenTerminal: () => void;
   onOpenExplorer: () => void;
-  onClose: () => void;
 }) {
   const menuItems = [
     {
@@ -50,10 +50,7 @@ function MobileMoreMenu({
       {menuItems.map((item) => (
         <button
           key={item.label}
-          onClick={() => {
-            onClose();
-            setTimeout(item.action, 100);
-          }}
+          onClick={item.action}
           className="w-full flex items-center gap-3 px-4 py-3 text-left ide-hover"
           style={{
             background: 'transparent',
@@ -123,11 +120,48 @@ function MobileMoreMenu({
 // right layout and nothing swaps in after JavaScript loads. Below md (768px): mobile header
 // and bottom nav. md to lg: title bar, a rail with an explorer drawer, tabs, status bar.
 // lg and up: the full editor with the activity bar and explorer.
+// Eases the new page in when you move between pages. Not on the first load, so the first
+// paint is never held back. A layout effect runs before the browser paints the new page,
+// so it never shows at full opacity for a frame and then jumps to the start of the fade.
+function usePageEnter() {
+  const pathname = usePathname();
+  const pageRef = useRef<HTMLDivElement>(null);
+  const shownPath = useRef(pathname);
+
+  useLayoutEffect(() => {
+    if (shownPath.current === pathname) return;
+    shownPath.current = pathname;
+    if (prefersReducedMotion()) return;
+    pageRef.current?.animate(
+      [
+        { opacity: 0, transform: 'translateY(6px)' },
+        { opacity: 1, transform: 'none' },
+      ],
+      { duration: 240, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
+    );
+  }, [pathname]);
+
+  return pageRef;
+}
+
 function Shell({ children }: { children: ReactNode }) {
   const { terminalOpen, sidePanelOpen } = useIDE();
+  const pageRef = usePageEnter();
   const [drawer, setDrawer] = useState<MobileDrawerType>(null);
   const open = (type: MobileDrawerType) => setDrawer(type);
   const close = () => setDrawer(null);
+  // Going from one drawer to another waits for the first to finish closing, so two sheets
+  // and two backdrops never stack.
+  const nextDrawer = useRef<MobileDrawerType>(null);
+  const switchTo = (type: MobileDrawerType) => {
+    nextDrawer.current = type;
+    close();
+  };
+  const openNext = useCallback(() => {
+    if (!nextDrawer.current) return;
+    setDrawer(nextDrawer.current);
+    nextDrawer.current = null;
+  }, []);
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden" style={{ background: 'var(--ide-bg-1)' }}>
@@ -185,7 +219,9 @@ function Shell({ children }: { children: ReactNode }) {
               scrollbarColor: 'var(--ide-bg-5) transparent',
             }}
           >
-            {children}
+            <div ref={pageRef} className="h-full">
+              {children}
+            </div>
           </main>
           {terminalOpen && (
             <div className="hidden md:block">
@@ -205,11 +241,10 @@ function Shell({ children }: { children: ReactNode }) {
       <MobileDrawer open={drawer === 'explorer'} onClose={close} title="Explorer" position="right">
         <SidePanel inDrawer />
       </MobileDrawer>
-      <MobileDrawer open={drawer === 'more'} onClose={close} title="Menu">
+      <MobileDrawer open={drawer === 'more'} onClose={close} onExited={openNext} title="Menu">
         <MobileMoreMenu
-          onOpenTerminal={() => open('terminal')}
-          onOpenExplorer={() => open('explorer')}
-          onClose={close}
+          onOpenTerminal={() => switchTo('terminal')}
+          onOpenExplorer={() => switchTo('explorer')}
         />
       </MobileDrawer>
       <MobileDrawer open={drawer === 'terminal'} onClose={close} title="Terminal">

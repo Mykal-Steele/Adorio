@@ -759,6 +759,13 @@ body {
     transition: none;
     animation: none;
   }
+  /* Drawers fade instead of sliding. The slide is inline, so these need !important. */
+  .pf-drawer[data-state='open'] {
+    animation: fadeIn 160ms ease-out !important;
+  }
+  .pf-drawer[data-state='closed'] {
+    animation: fadeOut 160ms ease-in forwards !important;
+  }
 }
 
 /* Custom animations, Tailwind only ships spin/ping/pulse/bounce */
@@ -816,6 +823,25 @@ body {
   }
   to {
     transform: translateY(100%);
+  }
+}
+
+/* Theme changes crossfade (ThemeContext starts the view transition) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 280ms;
+  animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
   }
 }
 
