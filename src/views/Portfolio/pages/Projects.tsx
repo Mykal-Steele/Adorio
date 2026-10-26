@@ -22,8 +22,8 @@ export function Projects() {
         className="grid grid-cols-1 gap-8 md:gap-10 @[640px]:grid-cols-2"
         style={{ marginTop: 48 }}
       >
-        {portfolioData.projects.map((project) => (
-          <ProjectCard key={project.id} project={project} />
+        {portfolioData.projects.map((project, index) => (
+          <ProjectCard key={project.id} project={project} priority={index === 0} />
         ))}
       </div>
 

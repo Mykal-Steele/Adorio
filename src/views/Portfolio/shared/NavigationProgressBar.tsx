@@ -6,17 +6,22 @@ import { usePathname } from 'next/navigation';
 const NAV_START_EVENT = 'adorio:nav-start';
 const STUCK_TIMEOUT_MS = 6000;
 const DONE_FADE_MS = 260;
+// Most page changes are prefetched and land faster than this. Showing the bar for those
+// reads as a flicker, so it only appears once a navigation is actually taking a while.
+const SHOW_DELAY_MS = 150;
 
 export function NavigationProgressBar() {
   const pathname = usePathname();
   const [phase, setPhase] = useState<'idle' | 'loading' | 'done'>('idle');
   const stuckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevPathname = useRef(pathname);
 
   useEffect(() => {
     function handleStart() {
-      setPhase('loading');
+      if (showTimer.current) clearTimeout(showTimer.current);
       if (stuckTimer.current) clearTimeout(stuckTimer.current);
+      showTimer.current = setTimeout(() => setPhase('loading'), SHOW_DELAY_MS);
       stuckTimer.current = setTimeout(() => setPhase('idle'), STUCK_TIMEOUT_MS);
     }
     window.addEventListener(NAV_START_EVENT, handleStart);
@@ -27,7 +32,9 @@ export function NavigationProgressBar() {
     if (prevPathname.current === pathname) return;
     prevPathname.current = pathname;
     if (stuckTimer.current) clearTimeout(stuckTimer.current);
-    setPhase('done');
+    if (showTimer.current) clearTimeout(showTimer.current);
+    // Only finish the bar if it was showing. An instant navigation never shows it at all.
+    setPhase((p) => (p === 'loading' ? 'done' : 'idle'));
     const t = setTimeout(() => setPhase('idle'), DONE_FADE_MS);
     return () => clearTimeout(t);
   }, [pathname]);
