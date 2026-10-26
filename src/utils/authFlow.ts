@@ -16,12 +16,32 @@ const isUser = (value: unknown): value is User => {
   return typeof value === 'object' && value !== null && '_id' in value && 'username' in value;
 };
 
+// Only same-site paths: "//host" and "/\host" are read by browsers as another site.
+// Browsers also drop tabs and newlines, so "/\n/host" would become "//host".
+const hasControlChar = (text: string) =>
+  [...text].some((ch) => ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127);
+// Encoded ones (like %0A) are refused too, along with anything that doesn't decode
+const decoded = (text: string) => {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return null;
+  }
+};
+const isSafeRedirect = (path: string) => {
+  const plain = decoded(path);
+  return (
+    plain !== null && /^\/(?![/\\])/.test(path) && !hasControlChar(path) && !hasControlChar(plain)
+  );
+};
+
 export const getRedirectPaths = (searchParams: SearchParamsLike) => {
   const redirect = searchParams.get('redirect');
+  const safe = redirect && isSafeRedirect(redirect) ? redirect : null;
 
   return {
-    from: redirect || '/social',
-    redirect,
+    from: safe || '/social',
+    redirect: safe,
   };
 };
 
@@ -41,7 +61,7 @@ export const applyAuthSession = (
 
 // The api/index.ts response interceptor already runs handleApiError once,
 // so by the time an error reaches a view's catch block it's already an
-// Error/ApiClientError with the real backend message on .message — not a raw
+// Error/ApiClientError with the real backend message on .message, not a raw
 // axios error with .response. Re-running handleApiError here would always
 // hit its "no response" branch, since a plain Error has no .response.
 export const getAuthErrorMessage = (error: unknown, fallback: string) =>

@@ -1,785 +1,171 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import {
-  Folder,
-  FileText,
-  Terminal,
-  ChevronDown,
-  GitCommit,
-  GitPullRequest,
-  Circle,
-  Search,
-  User,
-  MapPin,
-  Clock,
-} from 'lucide-react';
-import { useIDE } from './context/IDEContext';
+import { useState, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { IntentLink } from '@/components/IntentLink';
+import { ChevronRight, Folder as FolderClosed, FolderOpen } from 'lucide-react';
 import { portfolioData } from './data/portfolio';
-import { useResponsive } from './hooks/useResponsive';
-import { mono, sans } from './constants/fonts';
-import { IconButton } from './shared';
+import { ROOT_FILES, projectFileName } from './data/files';
+import { usePendingNavPath } from './hooks/usePendingNavPath';
+import { sans } from './constants/fonts';
+import { FileIcon } from './shared';
 
-function ExplorerPanel() {
+const rowStyle = {
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  height: 36,
+  paddingRight: 12,
+  border: 'none',
+  cursor: 'pointer',
+  fontFamily: sans,
+  fontSize: 15.5,
+  textAlign: 'left',
+} as const;
+
+// A real link, so it opens in a new tab like any other. The explorer lists 30 odd pages, so
+// each one is fetched when pointed at, focused or touched, not all of them on load.
+function FileRow({ path, name, depth }: { path: string; name: string; depth: number }) {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const files = [
-    { name: 'dashboard.tsx', path: '/', icon: <FileText size={12} color="var(--ide-orange)" /> },
-    { name: 'about_me.md', path: '/about', icon: <FileText size={12} color="var(--ide-text-4)" /> },
-    {
-      name: 'projects.json',
-      path: '/projects',
-      icon: <FileText size={12} color="var(--ide-accent-light)" />,
-    },
-    {
-      name: 'contact.sh',
-      path: '/contact',
-      icon: <Terminal size={12} color="var(--ide-purple)" />,
-    },
-  ];
+  const active = (usePendingNavPath() ?? pathname) === path;
 
   return (
-    <div>
-      <div
-        className="flex items-center gap-2 px-3 py-2"
-        style={{
-          color: 'var(--ide-text-5)',
-          fontSize: 10,
-          fontFamily: sans,
-          letterSpacing: '0.1em',
-        }}
-      >
-        <ChevronDown size={10} />
-        <span>~/src/portfolio</span>
-      </div>
-      <div
-        className="flex items-center gap-1 px-3 py-1"
-        style={{
-          color: 'var(--ide-text-5)',
-          fontSize: 10,
-          fontFamily: sans,
-          letterSpacing: '0.08em',
-        }}
-      >
-        <Folder size={11} color="var(--ide-orange)" />
-        <span>src/</span>
-      </div>
-      {files.map((f) => {
-        const isActive = pathname === f.path || (f.path === '/' && pathname === '/');
-        return (
-          <button
-            key={f.name}
-            onClick={() => router.push(f.path)}
-            className="w-full flex items-center gap-2 py-1 text-left transition-colors"
-            style={{
-              background: isActive ? 'var(--ide-border)' : 'transparent',
-              borderTop: 'none',
-              borderRight: 'none',
-              borderBottom: 'none',
-              borderLeft: isActive ? '2px solid var(--ide-accent)' : '2px solid transparent',
-              cursor: 'pointer',
-              paddingLeft: isActive ? 22 : 24,
-              paddingRight: 12,
-            }}
-            onMouseEnter={(e) => {
-              router.prefetch(f.path);
-              if (!isActive)
-                (e.currentTarget as HTMLElement).style.background = 'var(--ide-border-subtle)';
-            }}
-            onMouseLeave={(e) => {
-              if (!isActive) (e.currentTarget as HTMLElement).style.background = 'transparent';
-            }}
-          >
-            {f.icon}
-            <span
-              style={{
-                fontSize: 12,
-                fontFamily: sans,
-                color: isActive ? 'var(--ide-accent)' : 'var(--ide-text-3)',
-                fontWeight: isActive ? 500 : 400,
-              }}
-            >
-              {f.name}
-            </span>
-          </button>
-        );
-      })}
-      <div className="mt-4 px-3 pt-3" style={{ borderTop: '1px solid var(--ide-border-subtle)' }}>
-        <div
-          style={{
-            fontSize: 9,
-            fontFamily: sans,
-            color: 'var(--ide-text-7)',
-            letterSpacing: '0.1em',
-            marginBottom: 8,
-          }}
-        >
-          Dependencies
-        </div>
-        {portfolioData.portfolioDeps.map((dep) => (
-          <div
-            key={dep}
-            style={{
-              fontSize: 10,
-              fontFamily: mono,
-              color: 'var(--ide-text-7)',
-              paddingLeft: 4,
-              lineHeight: 1.8,
-            }}
-          >
-            # {dep}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ProfilePanel() {
-  return (
-    <div className="px-3">
-      <div className="flex items-center gap-3 mb-4">
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            background: 'linear-gradient(135deg, var(--ide-accent), var(--ide-orange))',
-            borderRadius: 6,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <User size={20} color="var(--ide-accent-dark)" />
-        </div>
-        <div>
-          <div
-            style={{ fontSize: 13, fontFamily: sans, color: 'var(--ide-text-1)', fontWeight: 700 }}
-          >
-            oakar oo
-          </div>
-          <div style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-accent)' }}>
-            {portfolioData.handle}
-          </div>
-        </div>
-      </div>
-      <div
-        className="mb-4 p-3"
-        style={{
-          background: 'var(--ide-accent-a5)',
-          border: '1px solid var(--ide-accent-a15)',
-          borderRadius: 4,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 11,
-            fontFamily: sans,
-            color: 'var(--ide-text-1)',
-            fontWeight: 600,
-            marginBottom: 4,
-          }}
-        >
-          {portfolioData.role}
-        </div>
-        <div className="flex items-center gap-1.5" style={{ marginBottom: 4 }}>
-          <div
-            style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--ide-accent)' }}
-          />
-          <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-accent)' }}>
-            Open to Opportunities
-          </span>
-        </div>
-        <div style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-5)' }}>
-          {portfolioData.university}
-        </div>
-      </div>
-      <div className="flex flex-col gap-2 mb-4">
-        <div className="flex items-center gap-2">
-          <MapPin size={10} color="var(--ide-text-6)" />
-          <span style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-4)' }}>
-            {portfolioData.location}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock size={10} color="var(--ide-text-6)" />
-          <span style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-4)' }}>
-            UTC+7 · Bangkok
-          </span>
-        </div>
-      </div>
-      <div
-        style={{
-          fontSize: 9,
-          fontFamily: sans,
-          color: 'var(--ide-text-7)',
-          letterSpacing: '0.1em',
-          marginBottom: 8,
-        }}
-      >
-        Community
-      </div>
-      {portfolioData.community.map((c) => (
-        <div
-          key={c.short}
-          className="flex items-center gap-2 mb-2 px-2 py-1.5"
-          style={{
-            background: `${c.color}08`,
-            border: `1px solid ${c.color}25`,
-            borderRadius: 3,
-            boxShadow: `inset 3px 0 0 ${c.color}`,
-          }}
-        >
-          <Circle size={5} fill={c.color} color={c.color} />
-          <span style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-3)' }}>
-            {c.name}
-          </span>
-        </div>
-      ))}
-      <div
-        style={{
-          fontSize: 9,
-          fontFamily: sans,
-          color: 'var(--ide-text-7)',
-          letterSpacing: '0.1em',
-          marginTop: 12,
-          marginBottom: 8,
-        }}
-      >
-        Metrics
-      </div>
-      <div className="grid gap-1" style={{ gridTemplateColumns: '1fr 1fr' }}>
-        {[
-          { label: 'Years', value: String(new Date().getFullYear() - 2021) },
-          {
-            label: 'Repos',
-            value: String(portfolioData.projects.filter((p) => p.repoUrl).length),
-          },
-          { label: 'NPM Pkg', value: '1' },
-          { label: 'Community', value: String(portfolioData.community.length) },
-        ].map((s) => (
-          <div
-            key={s.label}
-            className="p-2"
-            style={{
-              background: 'var(--ide-bg-2)',
-              border: '1px solid var(--ide-border-subtle)',
-              borderRadius: 3,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 8,
-                fontFamily: sans,
-                color: 'var(--ide-text-7)',
-                letterSpacing: '0.08em',
-                marginBottom: 2,
-              }}
-            >
-              {s.label}
-            </div>
-            <div
-              style={{
-                fontSize: 16,
-                fontFamily: sans,
-                fontWeight: 700,
-                color: 'var(--ide-accent-light)',
-              }}
-            >
-              {s.value}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SearchPanel() {
-  const router = useRouter();
-  const [query, setQuery] = useState('');
-  const allResults = portfolioData.searchResults;
-  const results = query.trim()
-    ? allResults.filter(
-        (r) =>
-          r.file.toLowerCase().includes(query.toLowerCase()) ||
-          r.content.toLowerCase().includes(query.toLowerCase()),
-      )
-    : allResults.slice(0, 5);
-
-  return (
-    <div className="px-3">
-      <div
-        className="flex items-center gap-2 px-2 mb-3"
-        style={{
-          height: 28,
-          background: 'var(--ide-bg-2)',
-          border: '1px solid var(--ide-border-strong)',
-        }}
-      >
-        <Search size={10} color="var(--ide-accent)" />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search portfolio..."
-          autoFocus
-          style={{
-            flex: 1,
-            background: 'transparent',
-            border: 'none',
-            outline: 'none',
-            fontSize: 11,
-            fontFamily: mono,
-            color: 'var(--ide-text-2)',
-          }}
-        />
-        {query && (
-          <IconButton
-            onClick={() => setQuery('')}
-            aria-label="Clear search"
-            size={24}
-            color="var(--ide-text-6)"
-            style={{ fontSize: 10 }}
-          >
-            ✕
-          </IconButton>
-        )}
-      </div>
-      <div
-        style={{
-          fontSize: 9,
-          fontFamily: sans,
-          color: 'var(--ide-text-5)',
-          letterSpacing: '0.1em',
-          marginBottom: 8,
-        }}
-      >
-        {results.length} RESULTS {query ? `— "${query}"` : ''}
-      </div>
-      {results.map((r, i) => (
-        <button
-          key={i}
-          onClick={() => router.push(r.path)}
-          onMouseEnter={() => router.prefetch(r.path)}
-          className="w-full text-left mb-3"
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-        >
-          <div
-            style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-3)', marginBottom: 3 }}
-          >
-            {r.file}
-          </div>
-          <div
-            className="px-2 py-1"
-            style={{ background: 'var(--ide-bg-2)', borderLeft: '2px solid var(--ide-bg-5)' }}
-          >
-            <span style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-5)' }}>
-              {r.line}{' '}
-            </span>
-            <span style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-4)' }}>
-              {r.content}
-            </span>
-          </div>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-interface GithubCommit {
-  sha: string;
-  message: string;
-  repo: string;
-  branch: string;
-  url: string;
-  timestamp: string;
-}
-
-interface GithubPullRequest {
-  id: number;
-  repo: string;
-  title: string;
-  status: 'open' | 'merged' | 'closed';
-  action: string;
-  url: string;
-  timestamp: string;
-}
-
-const GIT_PANEL_LS_COMMITS = 'gh_activity_commits';
-const GIT_PANEL_LS_PRS = 'gh_activity_prs';
-
-function readGitPanelCache<T>(key: string): T | null {
-  try {
-    return JSON.parse(localStorage.getItem(key) ?? 'null');
-  } catch {
-    return null;
-  }
-}
-function writeGitPanelCache(key: string, value: unknown) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    /* quota */
-  }
-}
-
-function formatGitPanelRelativeTime(iso: string): string {
-  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months}mo ago`;
-  return `${Math.floor(months / 12)}y ago`;
-}
-
-function useGitPanelActivity() {
-  const [commits, setCommits] = useState<GithubCommit[] | null>(null);
-  const [pullRequests, setPullRequests] = useState<GithubPullRequest[] | null>(null);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    const cachedCommits = readGitPanelCache<GithubCommit[]>(GIT_PANEL_LS_COMMITS);
-    if (cachedCommits) setCommits(cachedCommits);
-    const cachedPrs = readGitPanelCache<GithubPullRequest[]>(GIT_PANEL_LS_PRS);
-    if (cachedPrs) setPullRequests(cachedPrs);
-  }, []);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch('/api/github-activity');
-        const json = await res.json();
-        if (!res.ok || json.error) {
-          setError(true);
-          return;
-        }
-        setCommits(json.commits ?? []);
-        setPullRequests(json.pullRequests ?? []);
-        setError(false);
-        writeGitPanelCache(GIT_PANEL_LS_COMMITS, json.commits ?? []);
-        writeGitPanelCache(GIT_PANEL_LS_PRS, json.pullRequests ?? []);
-      } catch {
-        setError(true);
-      }
-    };
-    const t1 = setTimeout(load, 1500);
-    const t2 = setInterval(load, 60_000);
-    return () => {
-      clearTimeout(t1);
-      clearInterval(t2);
-    };
-  }, []);
-
-  return { commits, pullRequests, error };
-}
-
-function GitPanel() {
-  const { commits, pullRequests, error } = useGitPanelActivity();
-  const openPrs = pullRequests?.filter((p) => p.status === 'open') ?? [];
-
-  return (
-    <div>
-      <div className="px-3 mb-3">
-        <div className="flex items-center gap-2 mb-2">
-          <Circle size={7} fill="var(--ide-accent)" color="var(--ide-accent)" />
-          <span
-            style={{ fontSize: 12, fontFamily: sans, color: 'var(--ide-accent)', fontWeight: 600 }}
-          >
-            main/production
-          </span>
-          <span
-            style={{
-              fontSize: 9,
-              background: 'var(--ide-accent-a12)',
-              color: 'var(--ide-accent)',
-              padding: '1px 5px',
-            }}
-          >
-            STABLE
-          </span>
-        </div>
-        <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-6)' }}>
-          {commits === null
-            ? error
-              ? "couldn't load activity"
-              : 'loading recent activity...'
-            : `${commits.length} recent commit${commits.length === 1 ? '' : 's'}`}
-        </div>
-      </div>
-      <div className="px-3 mb-3">
-        <div
-          style={{
-            fontSize: 9,
-            fontFamily: sans,
-            color: 'var(--ide-text-7)',
-            letterSpacing: '0.1em',
-            marginBottom: 6,
-          }}
-        >
-          OPEN PRS
-        </div>
-        {pullRequests !== null && openPrs.length === 0 && (
-          <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-7)' }}>
-            No open pull requests.
-          </div>
-        )}
-        {openPrs.map((pr) => (
-          <a
-            key={`${pr.repo}-${pr.id}`}
-            href={pr.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-2 mb-2"
-            style={{ textDecoration: 'none' }}
-          >
-            <GitPullRequest
-              size={10}
-              color="var(--ide-blue)"
-              style={{ marginTop: 2, flexShrink: 0 }}
-            />
-            <div>
-              <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-3)' }}>
-                #{pr.id} {pr.title.slice(0, 32)}
-                {pr.title.length > 32 ? '...' : ''}
-              </div>
-              <div style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-text-6)' }}>
-                {formatGitPanelRelativeTime(pr.timestamp)}
-              </div>
-            </div>
-          </a>
-        ))}
-      </div>
-      <div className="px-3">
-        <div
-          style={{
-            fontSize: 9,
-            fontFamily: sans,
-            color: 'var(--ide-text-7)',
-            letterSpacing: '0.1em',
-            marginBottom: 6,
-          }}
-        >
-          RECENT COMMITS
-        </div>
-        {commits === null && !error && (
-          <div className="flex flex-col gap-3">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="animate-pulse"
-                style={{ height: 10, width: '70%', background: 'var(--ide-border)' }}
-              />
-            ))}
-          </div>
-        )}
-        {commits === null && error && (
-          <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-7)' }}>
-            Couldn&apos;t reach GitHub right now.
-          </div>
-        )}
-        {commits !== null && commits.length === 0 && (
-          <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-7)' }}>
-            No recent public commits.
-          </div>
-        )}
-        {commits !== null &&
-          commits.slice(0, 5).map((c) => {
-            const branchColor =
-              c.branch === 'main'
-                ? 'var(--ide-accent)'
-                : c.branch.startsWith('fix')
-                  ? 'var(--ide-orange)'
-                  : 'var(--ide-purple)';
-            return (
-              <a
-                key={`${c.repo}-${c.sha}`}
-                href={c.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-start gap-2 mb-3"
-                style={{ textDecoration: 'none' }}
-              >
-                <GitCommit
-                  size={10}
-                  color="var(--ide-text-6)"
-                  style={{ marginTop: 2, flexShrink: 0 }}
-                />
-                <div className="min-w-0">
-                  <div
-                    style={{
-                      fontSize: 10,
-                      fontFamily: sans,
-                      color: 'var(--ide-text-4)',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {c.message}
-                  </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span
-                      style={{
-                        fontSize: 9,
-                        fontFamily: mono,
-                        color: branchColor,
-                      }}
-                    >
-                      #{c.sha}
-                    </span>
-                    <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-7)' }}>
-                      {formatGitPanelRelativeTime(c.timestamp)}
-                    </span>
-                  </div>
-                </div>
-              </a>
-            );
-          })}
-      </div>
-    </div>
-  );
-}
-
-function SkillsPanel() {
-  const categories = ['Language', 'Framework', 'Runtime', 'Tool'];
-  return (
-    <div className="px-3">
-      <div
-        style={{
-          fontSize: 9,
-          fontFamily: sans,
-          color: 'var(--ide-text-7)',
-          letterSpacing: '0.1em',
-          marginBottom: 8,
-        }}
-      >
-        Installed — {portfolioData.skills.length} Packages
-      </div>
-      {categories.map((cat) => {
-        const skills = portfolioData.skills.filter((s) => s.category === cat);
-        if (!skills.length) return null;
-        return (
-          <div key={cat} className="mb-4">
-            <div
-              style={{
-                fontSize: 9,
-                fontFamily: sans,
-                color: 'var(--ide-text-6)',
-                letterSpacing: '0.08em',
-                marginBottom: 4,
-              }}
-            >
-              {cat.toUpperCase()}
-            </div>
-            {skills.map((s) => (
-              <div
-                key={s.name}
-                className="flex items-center justify-between mb-1 px-2 py-1"
-                style={{ background: s.active ? 'var(--ide-border-subtle)' : 'transparent' }}
-              >
-                <div className="flex items-center gap-2">
-                  <Circle
-                    size={5}
-                    fill={s.active ? 'var(--ide-accent)' : 'var(--ide-text-7)'}
-                    color={s.active ? 'var(--ide-accent)' : 'var(--ide-text-7)'}
-                  />
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontFamily: mono,
-                      color: s.active ? 'var(--ide-text-2)' : 'var(--ide-text-6)',
-                    }}
-                  >
-                    {s.name}
-                  </span>
-                </div>
-                <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-text-7)' }}>
-                  {s.version}
-                </span>
-              </div>
-            ))}
-          </div>
-        );
-      })}
-      <div className="mt-2 pt-3" style={{ borderTop: '1px solid var(--ide-border-subtle)' }}>
-        <div
-          style={{
-            fontSize: 9,
-            fontFamily: sans,
-            color: 'var(--ide-text-7)',
-            letterSpacing: '0.1em',
-            marginBottom: 8,
-          }}
-        >
-          COMMUNITY_ROLES
-        </div>
-        {portfolioData.community.map((c) => (
-          <div key={c.short} className="flex items-center gap-2 mb-2">
-            <Circle size={5} fill={c.color} color={c.color} />
-            <span style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-5)' }}>
-              {c.name}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function SidePanel() {
-  const { activeSidePanel } = useIDE();
-  const { isMobile, isTablet } = useResponsive();
-  const labels: Record<string, string> = {
-    explorer: 'Explorer: Portfolio',
-    profile: 'Profile',
-    git: 'Source Control',
-    skills: 'Extensions',
-  };
-  const renderPanel = () => {
-    switch (activeSidePanel) {
-      case 'explorer':
-        return <ExplorerPanel />;
-      case 'profile':
-        return <ProfilePanel />;
-      case 'git':
-        return <GitPanel />;
-      case 'skills':
-        return <SkillsPanel />;
-    }
-  };
-  const isInDrawer = isMobile || isTablet;
-  return (
-    <div
-      className="shrink-0 flex flex-col overflow-hidden"
-      data-guide="side-panel"
+    <IntentLink
+      href={path}
+      onlyOnIntent
+      aria-current={active ? 'page' : undefined}
+      className={active ? '' : 'ide-hover'}
       style={{
-        width: isInDrawer ? '100%' : 220,
-        background: 'var(--ide-bg-2)',
-        borderRight: isInDrawer ? 'none' : '1px solid var(--ide-border)',
+        ...rowStyle,
+        textDecoration: 'none',
+        paddingLeft: 14 + depth * 22,
+        background: active ? 'var(--ide-border-subtle)' : 'transparent',
+        boxShadow: active ? 'inset 2px 0 0 var(--ide-yellow)' : 'none',
+        color: active ? 'var(--ide-text-1)' : 'var(--ide-text-3)',
+        fontWeight: active ? 700 : 400,
       }}
     >
-      <div
-        className="shrink-0 px-3 py-2"
+      <FileIcon path={path} />
+      <span className="truncate">{name}</span>
+    </IntentLink>
+  );
+}
+
+function Folder({
+  name,
+  color,
+  open,
+  onToggle,
+  children,
+}: {
+  name: string;
+  color: string;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  const Icon = open ? FolderOpen : FolderClosed;
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        aria-expanded={open}
+        className="ide-hover"
         style={{
-          borderBottom: '1px solid var(--ide-border)',
-          fontSize: 9,
-          fontFamily: sans,
-          color: 'var(--ide-text-5)',
-          letterSpacing: '0.12em',
+          ...rowStyle,
+          paddingLeft: 8,
+          gap: 6,
+          background: 'transparent',
+          color: 'var(--ide-text-1)',
+          fontWeight: 600,
         }}
       >
-        {labels[activeSidePanel]}
-      </div>
-      <div className="flex-1 overflow-y-auto py-2" style={{ scrollbarWidth: 'none' }}>
-        {renderPanel()}
-      </div>
+        <ChevronRight
+          size={16}
+          color="var(--ide-text-5)"
+          style={{ transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 150ms ease' }}
+        />
+        <Icon size={17} color={color} fill={color} fillOpacity={0.25} strokeWidth={1.75} />
+        {name}
+      </button>
+      {open && (
+        <div style={{ position: 'relative' }}>
+          {/* Indent guide, like an editor's tree */}
+          <span
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              left: 15,
+              top: 0,
+              bottom: 0,
+              width: 1,
+              background: 'var(--ide-border-strong)',
+            }}
+          />
+          {children}
+        </div>
+      )}
     </div>
+  );
+}
+
+// The shell renders it inline on wide screens and inside a drawer below lg
+export function SidePanel({ inDrawer = false }: { inDrawer?: boolean }) {
+  const pathname = usePathname();
+  const [projectsOpen, setProjectsOpen] = useState(pathname.startsWith('/projects/'));
+  const [skillsOpen, setSkillsOpen] = useState(true);
+
+  return (
+    <nav
+      aria-label="Explorer"
+      className="shrink-0 flex flex-col overflow-hidden"
+      style={{
+        width: inDrawer ? '100%' : 268,
+        background: 'var(--ide-bg-1)',
+        borderRight: inDrawer ? 'none' : '1px solid var(--ide-border)',
+      }}
+    >
+      {!inDrawer && (
+        <div
+          className="shrink-0 px-3 py-2"
+          style={{
+            borderBottom: '1px solid var(--ide-border)',
+            fontSize: 14,
+            fontFamily: sans,
+            fontWeight: 700,
+            color: 'var(--ide-text-4)',
+          }}
+        >
+          Explorer
+        </div>
+      )}
+      <div className="pf-scroll-hover flex-1 overflow-y-auto py-2">
+        {ROOT_FILES.slice(0, 2).map((f) => (
+          <FileRow key={f.path} path={f.path} name={f.name} depth={0} />
+        ))}
+        <Folder
+          name="projects"
+          color="var(--ide-blue)"
+          open={projectsOpen}
+          onToggle={() => setProjectsOpen((v) => !v)}
+        >
+          {portfolioData.projects.map((p) => (
+            <FileRow key={p.id} path={`/projects/${p.id}`} name={projectFileName(p.id)} depth={1} />
+          ))}
+        </Folder>
+        <Folder
+          name="skills"
+          color="var(--ide-orange)"
+          open={skillsOpen}
+          onToggle={() => setSkillsOpen((v) => !v)}
+        >
+          {portfolioData.skills.map((s) => (
+            <FileRow key={s.id} path={`/skills/${s.id}`} name={`${s.id}.md`} depth={1} />
+          ))}
+        </Folder>
+        <FileRow path={ROOT_FILES[2].path} name={ROOT_FILES[2].name} depth={0} />
+      </div>
+    </nav>
   );
 }

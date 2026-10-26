@@ -4,25 +4,23 @@ import PaperTornEdge from '../PaperTornEdge';
 
 type AuthMode = 'signup' | 'signin';
 
-const COPY: Record<AuthMode, { eyebrow: string; heading: string; blurb: string; note: string }> = {
+const COPY: Record<AuthMode, { eyebrow: string; heading: string; blurb: string }> = {
   signup: {
     eyebrow: 'New account',
-    heading: 'Make yourself an account',
-    blurb: 'Some things here need to know who you are. Sign up once and they all will.',
-    note: 'takes about a minute',
+    heading: 'Create an account',
+    blurb: 'Some pages need an account. One sign-up works for all of them.',
   },
   signin: {
     eyebrow: 'Welcome back',
-    heading: 'Pick up where you left off',
-    blurb: 'Everything you left open is still open.',
-    note: 'good to see you',
+    heading: 'Log in',
+    blurb: 'Log in with your email and password.',
   },
 };
 
 const CHECKLIST = [
-  'One email and password, nothing else needed',
-  'Your posts, likes, and progress are saved for you',
-  'Delete your account any time — just ask',
+  'All you need is an email and a password',
+  'Your posts, likes, and coding progress are saved',
+  'Ask me any time to delete your account',
 ];
 
 const ROTATIONS = ['rotate-[-3deg]', 'rotate-[2deg]', 'rotate-[-2deg]'];
@@ -43,7 +41,7 @@ const AuthCard = ({ mode, redirectQuery, formTitle, children }: AuthCardProps) =
       <PaperTornEdge />
 
       <main className="flex flex-1 items-center px-4 py-8 sm:px-8 sm:py-12">
-        <div className="mx-auto grid max-w-[1080px] grid-cols-1 items-center gap-[clamp(32px,5vw,64px)] lg:grid-cols-2">
+        <div className="mx-auto grid w-full max-w-[1080px] grid-cols-1 items-center gap-[clamp(32px,5vw,64px)] lg:grid-cols-2">
           <div>
             <p className="mb-3.5 inline-flex items-center gap-[10px] font-paper-mono text-xs uppercase tracking-[.2em] text-[#3d382f]">
               <span aria-hidden="true" className="h-0.5 w-[22px] bg-[var(--paper-accent)]" />
@@ -67,10 +65,6 @@ const AuthCard = ({ mode, redirectQuery, formTitle, children }: AuthCardProps) =
                 </li>
               ))}
             </ul>
-
-            <p className="mt-[clamp(26px,3.5vw,34px)] rotate-[-1deg] font-paper-hand text-2xl font-bold leading-[1.25]">
-              {copy.note}
-            </p>
           </div>
 
           <section

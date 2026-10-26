@@ -21,9 +21,10 @@ const ENGINE_LABELS: Record<EditorEngine, string> = {
 };
 
 const ENGINE_DESCRIPTIONS: Record<EditorEngine, string> = {
-  monaco: "Monaco, VS Code's real editor — authentic IntelliSense, bracket matching, shortcuts.",
+  monaco:
+    'Monaco, the editor inside VS Code, with real IntelliSense, bracket matching, and shortcuts.',
   codemirror:
-    "This site's original lighter editor — an approximation of VS Code, not the real thing.",
+    "This site's original, lighter editor. It looks like VS Code but isn't the real thing.",
 };
 
 const SHORTCUTS: Array<[string, string]> = [

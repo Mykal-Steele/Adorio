@@ -3,7 +3,7 @@ import { PAPER_EDITOR_PALETTE } from './editorTheme';
 
 // Same palette as the CodeMirror theme (editorTheme.ts), translated to
 // Monaco's IStandaloneThemeData shape (token names are Monaco/TextMate scope
-// names, not Lezer tags — the categories don't map one-to-one, but the goal
+// names, not Lezer tags, the categories don't map one-to-one, but the goal
 // is the same page identity across engines, not pixel-perfect parity).
 export const PAPER_MONACO_THEME_NAME = 'paper-dark';
 

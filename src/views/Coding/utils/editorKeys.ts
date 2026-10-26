@@ -28,7 +28,7 @@ import {
 } from './editorSettingsStore';
 
 // Tab with no selection inserts spaces at the cursor up to the next tab
-// stop — just like Space but tab-sized, and just like VSCode's default Tab.
+// stop, just like Space but tab-sized, and just like VSCode's default Tab.
 // It never re-indents the whole line: only a real selection indents (via
 // indentMore), so Tab in the middle of a line only affects text to the
 // right of the cursor. Shift-Tab still outdents the line.
@@ -69,8 +69,7 @@ export const settingsCompartments = [
   fontSizeCompartment.of(fontSizeTheme(DEFAULT_EDITOR_SETTINGS.fontSize)),
 ];
 
-// Re-applies the (engine-agnostic) settings store to a live CodeMirror view —
-// called by the settings panel after it changes the store, and by the
+// Re-applies the (engine-agnostic) settings store to a live CodeMirror view, // called by the settings panel after it changes the store, and by the
 // editor itself on mount in case the store already held a non-default value
 // (e.g. after switching engines mid-session).
 export const syncEditorSettings = (view: EditorView | null) => {
@@ -78,7 +77,7 @@ export const syncEditorSettings = (view: EditorView | null) => {
 };
 
 // While a snippet is active, Tab/Shift-Tab jump between its placeholders
-// and Escape cancels it — returning false falls through to the bindings
+// and Escape cancels it, returning false falls through to the bindings
 // below when no snippet is active.
 const snippetNavigation: KeyBinding[] = [
   { key: 'Tab', run: (target) => hasNextSnippetField(target.state) && nextSnippetField(target) },
@@ -96,7 +95,7 @@ const snippetNavigation: KeyBinding[] = [
 
 // storeToggleWrap/storeChangeFontSize notify the settings-store subscriber
 // synchronously, which already dispatches via syncEditorSettings (see
-// CodeMirrorEditor.tsx) — dispatching again here would use this command's
+// CodeMirrorEditor.tsx), dispatching again here would use this command's
 // now-stale captured `state` and CodeMirror rejects it. Let the subscriber be
 // the only one that ever dispatches.
 const toggleWrap: StateCommand = () => {

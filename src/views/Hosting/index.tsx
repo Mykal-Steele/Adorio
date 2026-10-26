@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   presignHostedUpload,
   confirmHostedUpload,
-  getMyHostedFiles,
   getHostedUsage,
+  getMyHostedFiles,
   deleteHostedFile,
   MAX_HOSTED_FILE_BYTES,
   type HostedFile,
@@ -17,6 +17,12 @@ import PaperTornEdge from '@/components/PaperTornEdge';
 import { formatBytes } from './formatBytes';
 import TurnstileWidget from './TurnstileWidget';
 
+const STAT_ROTATIONS = ['rotate-[-0.8deg]', 'rotate-[0.6deg]', 'rotate-[-0.4deg]'];
+const FILE_ROTATIONS = ['rotate-[0.3deg]', 'rotate-[-0.35deg]', 'rotate-[0.2deg]'];
+
+// The file goes straight to R2 with the presigned URL, not through our servers, which is
+// how uploads get past Cloudflare's 100 MB request limit. XHR because fetch can't report
+// upload progress.
 const putFile = (
   url: string,
   file: File,
@@ -34,46 +40,9 @@ const putFile = (
       if (xhr.status >= 200 && xhr.status < 300) resolve();
       else reject(new Error(`Upload failed (${xhr.status})`));
     };
-    xhr.onerror = () => reject(new Error('Upload failed — check your connection'));
+    xhr.onerror = () => reject(new Error('Upload failed. Check your connection and try again.'));
     xhr.send(file);
   });
-
-const ROTATIONS = ['rotate-[-0.5deg]', 'rotate-[0.4deg]', 'rotate-[-0.3deg]', 'rotate-[0.6deg]'];
-
-const IconButton = ({
-  label,
-  onClick,
-  href,
-  danger,
-  disabled,
-  children,
-}: {
-  label: string;
-  onClick?: () => void;
-  href?: string;
-  danger?: boolean;
-  disabled?: boolean;
-  children: React.ReactNode;
-}) => {
-  const className = `grid h-9 w-9 place-items-center rounded-[4px] border-[1.5px] border-[var(--paper-ink)] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px disabled:opacity-50 ${
-    danger ? 'bg-[#f4e0dc] text-[#8d3a33]' : 'bg-[var(--paper-cream)] text-[var(--paper-ink)]'
-  }`;
-  return href ? (
-    <a href={href} target="_blank" rel="noreferrer" aria-label={label} className={className}>
-      {children}
-    </a>
-  ) : (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
-      className={className}
-    >
-      {children}
-    </button>
-  );
-};
 
 export default function HostingView() {
   const [files, setFiles] = useState<HostedFile[]>([]);
@@ -85,35 +54,47 @@ export default function HostingView() {
   const [dragging, setDragging] = useState(false);
   const [deletingSlugs, setDeletingSlugs] = useState<Set<string>>(new Set());
   const [usage, setUsage] = useState<HostedUsage | null>(null);
+  const [usageFailed, setUsageFailed] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
+  // A new key remounts the widget for a fresh token, since each one works only once
   const [turnstileKey, setTurnstileKey] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleToken = useCallback((token: string) => setTurnstileToken(token), []);
+
+  // The meter, whether uploads are on, and the bot check key all come from here, so a
+  // failure is shown with a retry instead of quietly leaving the form half set up
+  const loadUsage = useCallback(() => {
+    setUsageFailed(false);
+    getHostedUsage()
+      .then(setUsage)
+      .catch(() => setUsageFailed(true));
+  }, []);
 
   useEffect(() => {
     getMyHostedFiles()
       .then(setFiles)
       .catch(() => setError('Failed to load files'))
       .finally(() => setLoading(false));
-    getHostedUsage()
-      .then(setUsage)
-      .catch(() => {});
-  }, []);
+    loadUsage();
+  }, [loadUsage]);
 
+  const uploadsEnabled = usage?.uploadsEnabled === true;
   const storageFull = usage ? usage.remainingBytes <= 0 : false;
+  const canUpload = uploadsEnabled && !storageFull && !uploading;
 
   const handleFile = async (file: File) => {
+    if (!canUpload) return;
     if (file.size > MAX_HOSTED_FILE_BYTES) {
       setError('File must be under 100 MB');
       return;
     }
-    if (storageFull) {
-      setError('Storage is full — delete a file to free space.');
+    if (usage && file.size > usage.remainingBytes) {
+      setError(`Not enough space left. ${formatBytes(usage.remainingBytes)} is free.`);
       return;
     }
     if (usage?.turnstileSiteKey && !turnstileToken) {
-      setError('Please complete the captcha first.');
+      setError('Finish the bot check above first.');
       return;
     }
     setError('');
@@ -130,19 +111,10 @@ export default function HostingView() {
       await putFile(uploadUrl, file, contentType, setProgress);
       const uploaded = await confirmHostedUpload(slug);
       setFiles((prev) => [uploaded, ...prev]);
-      setUsage((prev) =>
-        prev
-          ? {
-              ...prev,
-              usedBytes: prev.usedBytes + uploaded.size,
-              remainingBytes: Math.max(0, prev.remainingBytes - uploaded.size),
-            }
-          : prev,
-      );
+      loadUsage();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Upload failed');
     } finally {
-      // A Turnstile token is single-use, so solve again for the next attempt.
       setTurnstileToken('');
       setTurnstileKey((key) => key + 1);
       setUploading(false);
@@ -154,7 +126,7 @@ export default function HostingView() {
     e.preventDefault();
     setDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file && !uploading && !storageFull) handleFile(file);
+    if (file) handleFile(file);
   };
 
   const handleDelete = async (slug: string) => {
@@ -162,8 +134,10 @@ export default function HostingView() {
     try {
       await deleteHostedFile(slug);
       setFiles((prev) => prev.filter((f) => f.slug !== slug));
-    } catch {
-      setError('Failed to delete file');
+      // The space is free again, so the meter and the full-storage lock should say so
+      loadUsage();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to delete file');
     } finally {
       setDeletingSlugs((prev) => {
         const next = new Set(prev);
@@ -182,46 +156,53 @@ export default function HostingView() {
   const totalViews = files.reduce((sum, f) => sum + f.views, 0);
   const totalSize = files.reduce((sum, f) => sum + f.size, 0);
 
+  const dropHint = !usage
+    ? usageFailed
+      ? 'Could not check storage'
+      : 'Checking storage…'
+    : !uploadsEnabled
+      ? 'Uploads are off right now'
+      : storageFull
+        ? 'Storage is full'
+        : 'any file · max 100 MB';
+
   return (
     <div className="paper-theme min-h-screen">
       <PaperTornEdge />
 
-      <section className="relative -mt-4 bg-[var(--paper-hero)] px-4 pb-12 pt-12 sm:-mt-6 sm:px-8 sm:pb-16 sm:pt-16">
-        <div className="mx-auto max-w-3xl">
+      <section className="relative -mt-4 bg-[var(--paper-hero)] px-4 pb-12 pt-12 sm:-mt-6 sm:px-8 sm:pb-14 sm:pt-16">
+        <div className="mx-auto max-w-5xl">
           <p className="mb-3 font-paper-mono text-xs uppercase tracking-[.2em] text-[var(--paper-muted-2)]">
-            adorio community &middot; file hosting
+            share a file
           </p>
           <h1 className="font-paper-serif text-[clamp(38px,6vw,58px)] font-bold leading-[1.02] tracking-[-.02em]">
-            File hosting
+            File Hosting
           </h1>
           <p className="mt-3.5 max-w-[56ch] text-[17px] leading-[1.62] text-[var(--paper-muted)]">
-            Drop in any file and get a shareable link at{' '}
+            Upload a file and get a link to it at{' '}
             <span className="font-paper-mono text-[15px] text-[var(--paper-accent)]">
               adorio.space/h/your-file
             </span>
-            . HTML, PDF, images, archives — up to 100&nbsp;MB.
+            . HTML, PDFs, images, zips, anything up to 100&nbsp;MB.
           </p>
         </div>
       </section>
 
       <main className="px-4 pb-20 pt-9 sm:px-8 sm:pb-24 sm:pt-12">
         <div className="mx-auto max-w-3xl">
-          {/* Stats */}
           {!loading && files.length > 0 && (
-            <div className="mb-8 grid grid-cols-3 gap-[clamp(12px,2vw,20px)]">
+            <div className="mb-7 grid grid-cols-3 gap-3">
               {[
                 { label: 'Files', value: files.length },
                 { label: 'Total views', value: totalViews.toLocaleString() },
-                { label: 'Storage used', value: formatBytes(totalSize) },
+                { label: 'Your storage', value: formatBytes(totalSize) },
               ].map((s, i) => (
                 <div
                   key={s.label}
-                  className={`rounded-[3px] bg-[var(--paper-cream)] p-[clamp(14px,2vw,22px)] shadow-[0_14px_26px_-14px_rgba(60,44,24,.3),0_2px_0_rgba(60,44,24,.1)] ${ROTATIONS[i % ROTATIONS.length]}`}
+                  className={`rounded-[3px] bg-[var(--paper-cream)] px-4 py-3 shadow-[0_10px_20px_-14px_rgba(60,44,24,.35),0_2px_0_rgba(60,44,24,.1)] ${STAT_ROTATIONS[i % STAT_ROTATIONS.length]}`}
                 >
-                  <p className="font-paper-serif text-[clamp(22px,3vw,30px)] font-bold leading-none">
-                    {s.value}
-                  </p>
-                  <p className="mt-1.5 font-paper-mono text-[10px] uppercase tracking-[.14em] text-[var(--paper-muted-2)]">
+                  <p className="font-paper-serif text-2xl font-bold">{s.value}</p>
+                  <p className="mt-0.5 font-paper-mono text-[10px] uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
                     {s.label}
                   </p>
                 </div>
@@ -229,25 +210,77 @@ export default function HostingView() {
             </div>
           )}
 
-          {/* Upload zone */}
+          {usage && uploadsEnabled && (
+            <div className="mb-5">
+              <div className="mb-1.5 flex items-baseline justify-between gap-3 font-paper-mono text-[10px] uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
+                <span>Shared storage</span>
+                <span className="tabular-nums">
+                  {formatBytes(usage.usedBytes)} of {formatBytes(usage.limitBytes)} used
+                </span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-[rgba(60,44,24,.12)]">
+                <div
+                  className={`h-full rounded-full ${storageFull ? 'bg-[#8d3a33]' : 'bg-[var(--paper-accent)]'}`}
+                  style={{ width: `${Math.min(100, (usage.usedBytes / usage.limitBytes) * 100)}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {usageFailed && (
+            <p className="mb-5 rounded-[3px] border border-[#8d3a33] bg-[#f3ded9] px-4 py-3 text-sm text-[#7a2f29]">
+              Couldn&apos;t check the storage, so uploads are paused.{' '}
+              <button
+                type="button"
+                onClick={loadUsage}
+                className="font-bold underline underline-offset-[3px]"
+              >
+                Try again
+              </button>
+            </p>
+          )}
+
+          {usage && !uploadsEnabled && (
+            <p className="mb-5 rounded-[3px] border border-dashed border-[rgba(60,44,24,.45)] bg-[var(--paper-cream)] px-4 py-3 text-sm text-[var(--paper-muted)]">
+              Uploads are off on the site right now. Your files below still work.
+            </p>
+          )}
+
+          {usage?.turnstileSiteKey && canUpload && (
+            <div className="mb-5">
+              <TurnstileWidget
+                key={turnstileKey}
+                siteKey={usage.turnstileSiteKey}
+                onToken={handleToken}
+              />
+            </div>
+          )}
+
           <div
-            className={`relative mb-8 rounded-[3px] p-[clamp(20px,3vw,30px)] shadow-[0_14px_26px_-14px_rgba(60,44,24,.3),0_2px_0_rgba(60,44,24,.1)] transition-transform ${
-              dragging
-                ? 'rotate-[-0.4deg] scale-[1.01] bg-[var(--paper-yellow-soft)]'
-                : 'bg-[var(--paper-cream)]'
-            } ${!uploading && !storageFull ? 'cursor-pointer' : ''}`}
-            onClick={() => !uploading && !storageFull && fileInputRef.current?.click()}
+            role="button"
+            tabIndex={canUpload ? 0 : -1}
+            aria-disabled={!canUpload}
+            onClick={() => canUpload && fileInputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (canUpload && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
             onDragOver={(e) => {
               e.preventDefault();
-              if (!storageFull) setDragging(true);
+              if (canUpload) setDragging(true);
             }}
             onDragLeave={() => setDragging(false)}
             onDrop={handleDrop}
+            className={`relative mb-7 rounded-[3px] border-[1.5px] border-dashed transition-colors ${
+              !canUpload && !uploading
+                ? 'cursor-not-allowed border-[rgba(60,44,24,.3)] bg-[var(--paper-cream)] opacity-70'
+                : dragging
+                  ? 'cursor-pointer border-[var(--paper-accent-strong)] bg-[var(--paper-yellow-soft)]'
+                  : 'cursor-pointer border-[rgba(60,44,24,.45)] bg-[var(--paper-cream)] hover:border-[var(--paper-accent-strong)] hover:bg-[var(--paper-yellow-soft)]'
+            }`}
           >
-            <span
-              aria-hidden="true"
-              className="absolute -top-3 left-7 h-[24px] w-24 rotate-[-3deg] border-x border-dashed border-[rgba(60,44,24,.3)] bg-[rgba(242,199,68,.7)] shadow-[0_1px_3px_rgba(60,44,24,.2)]"
-            />
             <input
               ref={fileInputRef}
               type="file"
@@ -258,46 +291,35 @@ export default function HostingView() {
                 e.target.value = '';
               }}
             />
-            <div className="flex flex-col items-center gap-3 rounded-[2px] border-2 border-dashed border-[rgba(60,44,24,.35)] py-12">
+            <div className="flex flex-col items-center gap-3 px-4 py-12">
               {uploading ? (
-                <>
-                  <div className="h-9 w-9 animate-spin rounded-full border-2 border-[var(--paper-accent)] border-t-transparent" />
-                  <p className="font-paper-serif text-lg font-bold">
-                    Uploading… {Math.round(progress * 100)}%
+                <div className="w-full max-w-xs text-center">
+                  <p className="font-paper-sans text-base text-[var(--paper-muted)]">
+                    Uploading… <span className="tabular-nums">{Math.round(progress * 100)}%</span>
                   </p>
-                  <div className="h-2 w-52 overflow-hidden rounded-[2px] border border-[rgba(60,44,24,.3)] bg-[var(--paper-yellow-soft)]">
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[rgba(60,44,24,.12)]">
                     <div
-                      className="h-full bg-[var(--paper-yellow)] transition-all"
+                      className="h-full rounded-full bg-[var(--paper-accent)] transition-[width] duration-150"
                       style={{ width: `${Math.round(progress * 100)}%` }}
                     />
                   </div>
-                </>
-              ) : storageFull ? (
-                <>
-                  <DocumentIcon className="h-10 w-10 text-[#8d3a33]" />
-                  <div className="text-center">
-                    <p className="font-paper-serif text-lg font-bold text-[#8d3a33]">
-                      Storage is full
-                    </p>
-                    <p className="mt-1 font-paper-mono text-[11px] uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
-                      Delete a file below to free space
-                    </p>
-                  </div>
-                </>
+                </div>
               ) : (
                 <>
                   <CloudArrowUpIcon
-                    className={`h-10 w-10 transition-colors ${dragging ? 'text-[var(--paper-accent)]' : 'text-[var(--paper-muted-2)]'}`}
+                    className={`h-10 w-10 ${
+                      dragging ? 'text-[var(--paper-accent)]' : 'text-[var(--paper-muted-2)]'
+                    }`}
                   />
                   <div className="text-center">
-                    <p className="font-paper-serif text-lg font-bold">
+                    <p className="text-[15px] font-medium">
                       Drop a file or{' '}
-                      <span className="text-[var(--paper-accent)] underline underline-offset-2">
+                      <span className="font-bold text-[var(--paper-accent)] underline underline-offset-[3px]">
                         browse
                       </span>
                     </p>
-                    <p className="mt-1 font-paper-mono text-[11px] uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
-                      HTML · PDF · images · archives — up to 100 MB
+                    <p className="mt-1 font-paper-mono text-[10px] uppercase tracking-[.14em] text-[var(--paper-muted-2)]">
+                      {dropHint}
                     </p>
                   </div>
                 </>
@@ -305,50 +327,18 @@ export default function HostingView() {
             </div>
           </div>
 
-          {/* Host-wide storage meter */}
-          {usage && usage.limitBytes > 0 && (
-            <div className="mb-8 rounded-[3px] border border-[rgba(60,44,24,.25)] bg-[var(--paper-cream)]/70 px-4 py-3">
-              <div className="flex items-center justify-between gap-3 font-paper-mono text-[11px] uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
-                <span>Host storage</span>
-                <span>
-                  {formatBytes(usage.usedBytes)} / {formatBytes(usage.limitBytes)}
-                </span>
-              </div>
-              <div className="mt-2 h-2 overflow-hidden rounded-[2px] border border-[rgba(60,44,24,.3)] bg-[var(--paper-yellow-soft)]">
-                <div
-                  className={`h-full transition-all ${storageFull ? 'bg-[#c0655a]' : 'bg-[var(--paper-yellow)]'}`}
-                  style={{
-                    width: `${Math.min(100, Math.round((usage.usedBytes / usage.limitBytes) * 100))}%`,
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Bot check — only when the backend has Turnstile keys configured */}
-          {usage?.turnstileSiteKey && (
-            <div className="mb-8">
-              <TurnstileWidget
-                key={turnstileKey}
-                siteKey={usage.turnstileSiteKey}
-                onToken={handleToken}
-              />
-            </div>
-          )}
-
           <AnimatePresence>
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="mb-8 flex items-start justify-between gap-3 rounded-[3px] border border-[var(--paper-ink)] bg-[var(--paper-cream)] p-4 shadow-[3px_4px_0_var(--paper-ink)]"
+                className="mb-5 flex items-center justify-between gap-3 rounded-[3px] border border-[#8d3a33] bg-[#f3ded9] px-4 py-3"
               >
-                <p className="text-sm text-[#8d3a33]">{error}</p>
+                <p className="text-sm text-[#7a2f29]">{error}</p>
                 <button
-                  type="button"
                   onClick={() => setError('')}
-                  className="shrink-0 text-sm font-medium text-[var(--paper-accent)] hover:text-[var(--paper-ink)]"
+                  className="shrink-0 font-paper-mono text-[10px] uppercase tracking-[.12em] text-[#8d3a33] hover:text-[#7a2f29]"
                 >
                   Dismiss
                 </button>
@@ -356,37 +346,34 @@ export default function HostingView() {
             )}
           </AnimatePresence>
 
-          {/* File list */}
-          <div className="flex items-end justify-between gap-4">
-            <h2 className="font-paper-mono text-xs uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
+          <div className="mb-3 flex items-end justify-between">
+            <h2 className="font-paper-mono text-[11px] uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
               Your files
             </h2>
             {!loading && files.length > 0 && (
-              <p className="font-paper-mono text-xs uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
-                {files.length} {files.length === 1 ? 'file' : 'files'}
-              </p>
+              <span className="font-paper-sans text-base text-[var(--paper-accent)]">
+                {files.length} file{files.length !== 1 ? 's' : ''} live
+              </span>
             )}
           </div>
-          <div aria-hidden="true" className="paper-dashed-rule mt-2 h-0.5" />
+          <div aria-hidden="true" className="paper-dashed-rule mb-6 h-0.5" />
 
           {loading ? (
-            <div className="mt-8 space-y-4">
+            <div className="space-y-3">
               {[1, 2].map((i) => (
                 <div
                   key={i}
-                  className="h-24 animate-pulse rounded-[3px] bg-[var(--paper-cream)]/70"
+                  className="h-[86px] animate-pulse rounded-[3px] bg-[var(--paper-cream)] shadow-[0_10px_20px_-16px_rgba(60,44,24,.3)]"
                 />
               ))}
             </div>
           ) : files.length === 0 ? (
-            <div className="mt-8 rounded-[3px] border-2 border-dashed border-[rgba(60,44,24,.3)] py-16 text-center">
-              <DocumentIcon className="mx-auto h-8 w-8 text-[var(--paper-muted-2)]" />
-              <p className="mt-2 font-paper-hand text-2xl text-[var(--paper-muted)]">
-                No files yet — pin one up above
-              </p>
+            <div className="flex flex-col items-center gap-2 rounded-[3px] border-[1.5px] border-dashed border-[rgba(60,44,24,.35)] py-16">
+              <DocumentIcon className="h-8 w-8 text-[var(--paper-muted-2)]" />
+              <p className="font-paper-sans text-base text-[var(--paper-muted)]">No files yet.</p>
             </div>
           ) : (
-            <div className="mt-8 space-y-5">
+            <div className="space-y-3">
               <AnimatePresence>
                 {files.map((f, i) => (
                   <motion.div
@@ -394,45 +381,44 @@ export default function HostingView() {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className={`relative flex items-center gap-4 rounded-[3px] bg-[var(--paper-cream)] p-[clamp(16px,2.4vw,24px)] shadow-[0_14px_26px_-14px_rgba(60,44,24,.3),0_2px_0_rgba(60,44,24,.1)] transition-transform hover:-translate-y-1 ${ROTATIONS[i % ROTATIONS.length]}`}
+                    className={`flex items-center gap-4 rounded-[3px] bg-[var(--paper-cream)] px-5 py-4 shadow-[0_10px_20px_-16px_rgba(60,44,24,.35),0_2px_0_rgba(60,44,24,.08)] ${FILE_ROTATIONS[i % FILE_ROTATIONS.length]}`}
                   >
-                    <span
-                      aria-hidden="true"
-                      className="absolute -top-3 left-6 h-[20px] w-16 rotate-[-4deg] border-x border-dashed border-[rgba(60,44,24,.3)] bg-[rgba(242,199,68,.6)] shadow-[0_1px_3px_rgba(60,44,24,.2)]"
-                    />
                     <DocumentIcon className="h-5 w-5 shrink-0 text-[var(--paper-muted-2)]" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-paper-serif text-lg font-bold">
-                        {f.originalFilename}
-                      </p>
-                      <p className="mt-0.5 font-paper-mono text-xs text-[var(--paper-accent)]">
+                      <p className="truncate text-sm font-bold">{f.originalFilename}</p>
+                      <p className="mt-0.5 truncate font-paper-mono text-[11px] text-[var(--paper-accent)]">
                         /h/{f.slug}
                       </p>
-                      <p className="mt-1 font-paper-mono text-[11px] uppercase tracking-[.08em] text-[var(--paper-muted-2)]">
+                      <p className="mt-0.5 font-paper-mono text-[10px] uppercase tracking-[.08em] text-[var(--paper-muted-2)]">
                         {formatBytes(f.size)} &middot;{' '}
                         {f.views === 1 ? '1 view' : `${f.views} views`} &middot;{' '}
                         {new Date(f.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="flex shrink-0 items-center gap-2.5">
+                    <div className="flex shrink-0 items-center gap-2">
                       <button
-                        type="button"
                         onClick={() => copyUrl(f.slug)}
-                        className="min-w-[76px] rounded-[4px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] px-3 py-1.5 font-paper-mono text-[11px] font-bold uppercase tracking-[.1em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px"
+                        className="min-w-[76px] rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-3 py-1.5 font-paper-mono text-[10px] font-bold uppercase tracking-[.08em] text-center shadow-[2px_2px_0_var(--paper-ink)] transition-transform hover:-translate-y-px"
                       >
-                        {copied === f.slug ? '✓ Copied' : 'Copy'}
+                        {copied === f.slug ? 'Copied' : 'Copy URL'}
                       </button>
-                      <IconButton label={`View ${f.originalFilename}`} href={`/h/${f.slug}`}>
+                      <a
+                        href={`/h/${f.slug}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-[3px] border-[1.5px] border-dashed border-[rgba(60,44,24,.5)] p-1.5 text-[var(--paper-muted)] transition-colors hover:border-[var(--paper-accent-strong)] hover:bg-[var(--paper-yellow-soft)]"
+                        aria-label={`View ${f.originalFilename}`}
+                      >
                         <EyeIcon className="h-4 w-4" />
-                      </IconButton>
-                      <IconButton
-                        label={`Delete ${f.originalFilename}`}
+                      </a>
+                      <button
                         onClick={() => handleDelete(f.slug)}
-                        danger
                         disabled={deletingSlugs.has(f.slug)}
+                        className="rounded-[3px] border border-[#8d3a33] bg-[#f3ded9] p-1.5 text-[#8d3a33] transition-colors hover:bg-[#ecd0c9] disabled:opacity-50"
+                        aria-label={`Delete ${f.originalFilename}`}
                       >
                         <TrashIcon className="h-4 w-4" />
-                      </IconButton>
+                      </button>
                     </div>
                   </motion.div>
                 ))}

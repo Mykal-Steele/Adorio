@@ -78,7 +78,7 @@ export default function Calendar({ overview }: CalendarProps) {
       <div className="mb-6">
         <h2 className="font-paper-serif text-2xl font-bold md:text-[1.7rem]">Calendar</h2>
         <div className="mt-1 text-sm text-[var(--paper-muted)]">
-          {monthLabel} — a green day spent less than its share of the budget, a red day spent more.
+          {monthLabel}: a green day spent less than its share of the budget, a red day spent more.
         </div>
       </div>
 

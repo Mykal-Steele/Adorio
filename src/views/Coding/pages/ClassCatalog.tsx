@@ -15,7 +15,7 @@ const ROTATIONS = ['rotate-[-0.6deg]', 'rotate-[0.5deg]', 'rotate-[-0.4deg]', 'r
 
 const ClassCatalog = () => {
   const classes = getClasses();
-  // Solved counts read localStorage — computed after mount so the server-rendered
+  // Solved counts read localStorage, computed after mount so the server-rendered
   // HTML (no access to localStorage) matches the client's first paint.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);

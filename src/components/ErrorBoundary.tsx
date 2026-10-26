@@ -38,7 +38,7 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren, ErrorBounda
               Something went wrong
             </h2>
             <p className="mb-6 text-[var(--paper-muted)]">
-              An unexpected error occurred. Please refresh the page.
+              Something broke on this page. Reloading usually fixes it.
             </p>
             <button
               onClick={() => window.location.reload()}

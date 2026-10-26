@@ -13,14 +13,28 @@ export const findHostedFilesByUserId = (userId) =>
     .sort({ createdAt: -1 })
     .lean();
 
+// Both deletes return the removed document, or null when another request removed it
+// first. The service only gives storage back when it gets a document, so two requests
+// racing to delete the same file can't release its bytes twice.
 export const deleteHostedFileBySlug = (slug) =>
   HostedFile.findOneAndDelete({ slug: { $eq: slug } });
+
+// Only removes the record while it is still pending, so the stale sweep can't remove an
+// upload that was confirmed after the sweep looked it up.
+export const deletePendingHostedFile = (slug) =>
+  HostedFile.findOneAndDelete({ slug: { $eq: slug }, pending: true });
 
 export const incrementFileViews = (slug) =>
   HostedFile.updateOne({ slug: { $eq: slug } }, { $inc: { views: 1 } });
 
+// The pending → confirmed step happens once. Returns the confirmed document, or null when
+// another confirm (or a delete) got there first, so only one request settles the storage.
 export const markHostedFileConfirmed = (slug, size) =>
-  HostedFile.updateOne({ slug: { $eq: slug } }, { $set: { pending: false, size } });
+  HostedFile.findOneAndUpdate(
+    { slug: { $eq: slug }, pending: true },
+    { $set: { pending: false, size } },
+    { new: true },
+  ).lean();
 
 export const findAllHostedFiles = () =>
   HostedFile.find({ pending: { $ne: true } })

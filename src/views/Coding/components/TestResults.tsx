@@ -18,7 +18,7 @@ const formatDuration = (duration: number) => {
 const TestTicket = ({ test }: { test: TestRunResult }) => {
   const isSuccess = test.passed && !test.error;
   // A passing test's detail (input/expected/actual) is only useful for
-  // double-checking, not for debugging — collapsed by default so a run with
+  // double-checking, not for debugging, collapsed by default so a run with
   // a dozen passes isn't a dozen full cards to scroll through. A failure is
   // exactly what someone opened this panel to read, so it starts open.
   const [open, setOpen] = useState(!isSuccess);
@@ -40,7 +40,7 @@ const TestTicket = ({ test }: { test: TestRunResult }) => {
             className={`h-3.5 w-3.5 shrink-0 transition-transform ${isSuccess ? 'text-[#5c7a3a]' : 'text-[#a1493f]'} ${open ? 'rotate-180' : ''}`}
           />
           <span className={`text-sm font-bold ${isSuccess ? 'text-[#3c5220]' : 'text-[#7a2f29]'}`}>
-            {isSuccess ? '✓ Passed' : '✗ Failed'} — {test.name}
+            {isSuccess ? '✓ Passed' : '✗ Failed'}: {test.name}
           </span>
         </span>
         <span className="font-paper-mono text-xs text-[var(--paper-muted-2)]">
@@ -113,8 +113,8 @@ const TestTicket = ({ test }: { test: TestRunResult }) => {
 const TestResults = ({ results, isRunning }: TestResultsProps) => {
   if (isRunning) {
     return (
-      <p className="py-6 text-center font-paper-hand text-xl text-[var(--paper-muted)]">
-        running your solution&hellip;
+      <p className="py-6 text-center font-paper-sans text-base text-[var(--paper-muted)]">
+        Running your code&hellip;
       </p>
     );
   }

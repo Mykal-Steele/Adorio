@@ -1,5 +1,10 @@
 import asyncHandler from '../utils/asyncHandler.js';
-import { getLeaderboard, updateUserScore, getUserStats } from '../services/gameService.js';
+import {
+  getLeaderboard,
+  updateUserScore,
+  updateUserAchievements,
+  getUserStats,
+} from '../services/gameService.js';
 
 const getLeaderboardHandler = asyncHandler(async (req, res) => {
   const leaderboard = await getLeaderboard();
@@ -18,9 +23,19 @@ const updateScoreHandler = asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'Score updated successfully', ...result });
 });
 
+const updateAchievementsHandler = asyncHandler(async (req, res) => {
+  const result = await updateUserAchievements({ userId: req.user?.id, rawBody: req.body });
+  res.status(200).json(result);
+});
+
 const getUserStatsHandler = asyncHandler(async (req, res) => {
   const stats = await getUserStats(req.user?.id);
   res.status(200).json(stats);
 });
 
-export { getLeaderboardHandler, updateScoreHandler, getUserStatsHandler };
+export {
+  getLeaderboardHandler,
+  updateScoreHandler,
+  updateAchievementsHandler,
+  getUserStatsHandler,
+};

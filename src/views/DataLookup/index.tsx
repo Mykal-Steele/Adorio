@@ -322,7 +322,7 @@ const VisitorStatsChart = ({ data }) => {
             <div className="text-sm font-medium">Visitor statistics unavailable</div>
             <div className="text-xs mt-1">
               {data === null
-                ? 'This feature requires backend deployment'
+                ? "Visitor stats aren't available right now."
                 : 'No visitor data available'}
             </div>
           </div>
@@ -783,11 +783,10 @@ const DataLookup = () => {
         <header className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-              Analytics data lookup
+              Visitor analytics
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-400">
-              View real-time page analytics, unique visitor counts, and the latest recorded visits
-              across the site.
+              Page views, unique visitors, and the latest visits.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -825,7 +824,7 @@ const DataLookup = () => {
               id="totals-heading"
               className="text-lg font-semibold text-gray-900 dark:text-gray-100"
             >
-              Totals at a glance
+              Totals
             </h2>
             {loading ? (
               <span className="text-xs text-gray-400 dark:text-gray-500">Updating…</span>
@@ -859,7 +858,7 @@ const DataLookup = () => {
               Visual Analytics
             </h2>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Interactive charts showing page popularity and visitor activity patterns.
+              Views per page and visits over time.
             </p>
           </div>
           <div className="grid gap-6 lg:grid-cols-2">
@@ -875,10 +874,10 @@ const DataLookup = () => {
                 id="paths-heading"
                 className="text-lg font-semibold text-gray-900 dark:text-gray-100"
               >
-                Performance by path
+                Visits by page
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Sorted by total visits so you can spot your busiest routes instantly.
+                Pages sorted by total visits.
               </p>
             </div>
           </div>
@@ -898,7 +897,7 @@ const DataLookup = () => {
                 Detailed breakdown of individual visitor activity with friendly nicknames.
                 {visitorStats.length === 0 && (
                   <span className="block mt-1 text-amber-600 dark:text-amber-400">
-                    ⚠️ Requires latest backend deployment
+                    Not available right now
                   </span>
                 )}
               </p>
@@ -914,10 +913,10 @@ const DataLookup = () => {
                 id="recent-heading"
                 className="text-lg font-semibold text-gray-900 dark:text-gray-100"
               >
-                Recent visit stream
+                Recent visits
               </h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Latest tracked visits with metadata. Older entries roll off as you load more.
+                The newest visits first. Load more to see older ones.
               </p>
             </div>
             <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">

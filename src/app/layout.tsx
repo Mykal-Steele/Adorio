@@ -3,46 +3,55 @@ import { Suspense } from 'react';
 import './globals.css';
 import Providers from './Providers';
 import AuthBootstrapper from './AuthBootstrapper';
+import Script from 'next/script';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { NavigationProgressBar } from '@/components/NavigationProgressBar';
+import { fontVariables } from './fonts';
 
 export const metadata: Metadata = {
   title: { default: 'Adorio', template: '%s | Adorio' },
   description:
-    'Backend & full-stack developer portfolio: TypeScript, Java, Bun. CLI tools, web apps, and backend services.',
+    'Oakar Oo, a backend developer in Bangkok. My portfolio, projects, and apps all live on adorio.space.',
   metadataBase: new URL('https://adorio.space'),
   openGraph: {
     siteName: 'Adorio',
     images: [
       {
-        url: 'https://res.cloudinary.com/dboeqtx65/image/upload/c_limit,h_1200,w_1200/f_auto/q_auto:good/v1777471457/feelio/posts/file_kmm4d4',
+        url: 'https://adorio.space/og.png',
+        width: 1200,
+        height: 630,
+        alt: 'Oakar Oo, backend developer',
       },
     ],
   },
 };
 
+// /learn-korean is a standalone HTML page, so following its link is a full page load. Chrome
+// prerenders it after a 200ms hover ("moderate"), which makes the load instant when the
+// click comes. Other browsers ignore this.
+const SPECULATION_RULES = JSON.stringify({
+  prerender: [{ where: { href_matches: '/learn-korean' }, eagerness: 'moderate' }],
+});
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={fontVariables} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap"
-        />
-        {/* Social feed paper-craft theme fonts */}
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,700&family=Karla:ital,wght@0,400;0,500;0,700&family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&display=swap"
-        />
+        {/* Marks the page as signed in before first paint, so AuthSwitch shows the right
+            Navbar and composer straight away instead of flashing the logged-out version */}
+        <Script id="auth-hint" strategy="beforeInteractive">
+          {`try{if(localStorage.getItem('token')||sessionStorage.getItem('token'))document.documentElement.dataset.auth='in'}catch(e){}`}
+        </Script>
         <link rel="preconnect" href="https://res.cloudinary.com" />
+        {/* A fixed string from this file, nothing user supplied goes in it */}
+        <script type="speculationrules" dangerouslySetInnerHTML={{ __html: SPECULATION_RULES }} />
       </head>
       {/* suppressHydrationWarning: browser extensions (Grammarly, password managers, etc.)
           inject attributes like data-gr-ext-installed onto <body> before React hydrates.
-          That's a real DOM difference React can't help mismatching, but it's harmless —
-          this only silences the warning for body's own attributes, not its children. */}
-      <body className="bg-gray-950" suppressHydrationWarning>
+          That's a real DOM difference React can't help mismatching, but it's harmless. This only silences the warning for body's own attributes, not its children. */}
+      <body className="bg-[var(--paper-hero)]" suppressHydrationWarning>
         <Providers>
+          <NavigationProgressBar />
           <ErrorBoundary>
             <Suspense fallback={null}>
               <AuthBootstrapper />

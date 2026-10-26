@@ -49,7 +49,7 @@ function branchFromRef(ref: unknown): string {
 }
 
 // GitHub's merge commits put the actual change summary on the first
-// non-empty line after "Merge pull request #N from ..." — surface that
+// non-empty line after "Merge pull request #N from ...", surface that
 // instead of the generic merge line.
 function commitTitle(message: string): string {
   const lines = message.split('\n');

@@ -6,9 +6,14 @@ import { sans } from '../constants/fonts';
 import { IconButton } from '../shared';
 import type { ReactNode } from 'react';
 
+// Leaving is quicker than arriving, so closing feels like it answers the tap.
+export const DRAWER_EXIT_MS = 200;
+
 interface MobileDrawerProps {
   open: boolean;
   onClose: () => void;
+  // Called once the close animation has finished and the drawer is gone
+  onExited?: () => void;
   title: string;
   children: ReactNode;
   position?: 'bottom' | 'right';
@@ -17,6 +22,7 @@ interface MobileDrawerProps {
 export function MobileDrawer({
   open,
   onClose,
+  onExited,
   title,
   children,
   position = 'bottom',
@@ -32,10 +38,13 @@ export function MobileDrawer({
     } else if (mounted) {
       // Trigger the slide-out, then unmount after the animation duration.
       setClosing(true);
-      const t = setTimeout(() => setMounted(false), 240);
+      const t = setTimeout(() => {
+        setMounted(false);
+        onExited?.();
+      }, DRAWER_EXIT_MS);
       return () => clearTimeout(t);
     }
-  }, [open, mounted]);
+  }, [open, mounted, onExited]);
 
   useEffect(() => {
     document.body.style.overflow = mounted && !closing ? 'hidden' : '';
@@ -47,30 +56,35 @@ export function MobileDrawer({
   if (!mounted) return null;
 
   const isBottom = position === 'bottom';
-  const openAnim = isBottom ? 'slideInBottom 0.22s ease-out' : 'slideInRight 0.22s ease-out';
-  const closeAnim = isBottom ? 'slideOutBottom 0.22s ease-in' : 'slideOutRight 0.22s ease-in';
+  const side = isBottom ? 'Bottom' : 'Right';
+  const openAnim = `slideIn${side} 320ms cubic-bezier(0.23, 1, 0.32, 1)`;
+  const closeAnim = `slideOut${side} ${DRAWER_EXIT_MS}ms cubic-bezier(0.4, 0, 1, 1) forwards`;
 
   return (
     <div className="fixed inset-0 z-50">
       <div
-        className="absolute inset-0"
+        className="pf-drawer absolute inset-0"
+        data-state={closing ? 'closed' : 'open'}
         style={{
           background: 'rgba(0,0,0,0.5)',
-          opacity: closing ? 0 : 1,
-          transition: 'opacity 0.22s ease',
+          animation: closing
+            ? `fadeOut ${DRAWER_EXIT_MS}ms ease-in forwards`
+            : 'fadeIn 320ms cubic-bezier(0.23, 1, 0.32, 1)',
         }}
         onClick={onClose}
       />
       <div
-        className="absolute flex flex-col"
+        className="pf-drawer absolute flex flex-col"
+        data-state={closing ? 'closed' : 'open'}
         style={{
           ...(isBottom
             ? { bottom: 0, left: 0, right: 0, maxHeight: '85vh' }
             : { top: 0, right: 0, bottom: 0, width: '80vw', maxWidth: 320 }),
           animation: closing ? closeAnim : openAnim,
-          background: 'var(--ide-bg-2)',
+          background: 'var(--ide-bg-1)',
           borderTop: isBottom ? '1px solid var(--ide-border)' : 'none',
           borderLeft: !isBottom ? '1px solid var(--ide-border)' : 'none',
+          borderRadius: isBottom ? '12px 12px 0 0' : 0,
         }}
       >
         <div
@@ -79,11 +93,10 @@ export function MobileDrawer({
         >
           <span
             style={{
-              fontSize: 10,
+              fontSize: 15,
               fontFamily: sans,
-              color: 'var(--ide-text-3)',
-              letterSpacing: '0.08em',
-              fontWeight: 600,
+              color: 'var(--ide-text-1)',
+              fontWeight: 700,
             }}
           >
             {title}

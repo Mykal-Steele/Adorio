@@ -20,6 +20,7 @@ export type HostedUsage = {
   usedBytes: number;
   limitBytes: number;
   remainingBytes: number;
+  uploadsEnabled: boolean;
   turnstileSiteKey: string | null;
 };
 

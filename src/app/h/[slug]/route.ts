@@ -20,12 +20,19 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
   // the browser fetches the object directly (no large payload through here).
   if (res.status >= 300 && res.status < 400) {
     const location = res.headers.get('location');
-    if (location) return NextResponse.redirect(location, 302);
+    if (location) {
+      // Not cached: Cloudflare caches everything outside /api, and a cached redirect would
+      // keep pointing at a file after it's deleted
+      return NextResponse.redirect(location, {
+        status: 302,
+        headers: { 'Cache-Control': 'no-store' },
+      });
+    }
   }
 
   if (res.status === 404) {
     return new NextResponse(
-      '<!doctype html><html><body style="font-family:sans-serif;padding:2rem"><h1>404 — File not found</h1></body></html>',
+      '<!doctype html><html><body style="font-family:sans-serif;padding:2rem"><h1>404: File not found</h1></body></html>',
       { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
     );
   }
@@ -37,12 +44,16 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
     );
   }
 
-  // Legacy: files uploaded before R2 stored their HTML in Mongo directly.
+  // Legacy: files uploaded before R2 stored their HTML in Mongo directly. It's someone's
+  // HTML served on adorio.space itself, so it runs sandboxed: without allow-same-origin it
+  // gets an opaque origin and its scripts can't read this site's storage (where the login
+  // token lives) or call the API as the visitor. Scripts, forms and popups still work.
   const html = await res.text();
   return new NextResponse(html, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'no-store',
+      'Content-Security-Policy': 'sandbox allow-scripts allow-forms allow-popups allow-modals',
     },
   });
 }

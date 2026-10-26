@@ -1,5 +1,6 @@
 import {
   S3Client,
+  CopyObjectCommand,
   PutObjectCommand,
   DeleteObjectCommand,
   HeadObjectCommand,
@@ -10,7 +11,10 @@ import ApiError from './ApiError.js';
 
 const { accountId, accessKeyId, secretAccessKey, bucket, publicUrl } = environment.r2;
 
-export const r2Configured = Boolean(accountId && accessKeyId && secretAccessKey && bucket);
+// The public URL counts too: without it a served file would redirect to "undefined/key"
+export const r2Configured = Boolean(
+  accountId && accessKeyId && secretAccessKey && bucket && publicUrl,
+);
 
 // R2's S3 API is region-agnostic ("auto"). The explicit checksum settings stop
 // @aws-sdk v3 from scripting x-amz-checksum-* into a presigned PUT — a browser
@@ -26,8 +30,14 @@ const client = r2Configured
     })
   : null;
 
+// 409, not 500: the Cloudflare failover worker reads two 5xx in a row as the backend
+// being down, and a host without R2 keys (like the Northflank copy) answers this every time.
 const requireClient = () => {
-  if (!client) throw ApiError.internalServerError('File hosting is not configured');
+  if (!client) {
+    throw ApiError.conflict('File hosting is not set up on this server.', {
+      code: 'HOSTING_NOT_CONFIGURED',
+    });
+  }
   return client;
 };
 
@@ -41,5 +51,23 @@ export const headObject = (key) =>
 
 export const deleteObject = (key) =>
   requireClient().send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
+
+// Cloudflare caches files.adorio.space, and an object without Cache-Control is kept at the
+// edge for two hours, so a deleted file would stay downloadable that long. Copying the
+// object onto itself is how S3 (and R2) change an object's headers after upload. Keys are
+// h/<slug>.<ext> with a [a-z0-9-] slug, so they need no escaping in CopySource.
+export const OBJECT_CACHE_CONTROL = 'public, max-age=60';
+
+export const setObjectCacheControl = (key, contentType) =>
+  requireClient().send(
+    new CopyObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      CopySource: `${bucket}/${key}`,
+      MetadataDirective: 'REPLACE',
+      ContentType: contentType,
+      CacheControl: OBJECT_CACHE_CONTROL,
+    }),
+  );
 
 export const publicUrlFor = (key) => `${publicUrl}/${key}`;

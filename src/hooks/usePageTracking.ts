@@ -118,10 +118,13 @@ const usePageTracking = () => {
       userId,
     };
 
-    // Use setTimeout to batch analytics calls and prevent blocking
-    setTimeout(() => {
-      trackPageView(payload);
-    }, 0);
+    // Wait until the browser is idle. On a fresh load this keeps the fingerprint work
+    // out of the way of hydration and the first paint. Safari has no requestIdleCallback.
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => trackPageView(payload), { timeout: 3000 });
+    } else {
+      setTimeout(() => trackPageView(payload), 1000);
+    }
 
     navigationRef.current = {
       path: fullPath,

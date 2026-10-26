@@ -1,8 +1,17 @@
 import API, { request } from './index';
 
-export const getPosts = (page = 1, limit = 5, signal?: AbortSignal, hasImage?: boolean) =>
+type GetPostsOptions = {
+  limit?: number;
+  signal?: AbortSignal;
+  hasImage?: boolean;
+  // Only this user's posts
+  user?: string;
+};
+
+export const getPosts = (page = 1, { limit = 5, signal, hasImage, user }: GetPostsOptions = {}) =>
   request(
-    API.get(`/posts?page=${page}&limit=${limit}${hasImage ? '&hasImage=true' : ''}`, {
+    API.get('/posts', {
+      params: { page, limit, ...(hasImage ? { hasImage: true } : {}), ...(user ? { user } : {}) },
       signal,
       timeout: 10000,
     }),
@@ -34,14 +43,6 @@ export const likePost = async (postId, shouldBeLiked) => {
 
       if (!finalIntent) {
         return null;
-      }
-
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(
-          `Sending FINAL like state for post ${postId}: ${
-            finalIntent.shouldBeLiked ? 'LIKED' : 'UNLIKED'
-          }`,
-        );
       }
 
       const response = await API.put(`/posts/${postId}/like`, {

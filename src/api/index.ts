@@ -77,8 +77,12 @@ export const refreshAccessToken = (refreshToken: string): Promise<{ token: strin
 
 export const fetchUserData = () => request(API.get('/users/me'));
 
-export const storeSecret = (message, password) =>
-  request(API.post('/secretenv', { message, password }));
+export const storeSecret = (
+  name: string,
+  message: string,
+  password: string,
+): Promise<{ name?: string; retrievalCommand: string }> =>
+  request(API.post('/secretenv', { name, message, password }));
 
 export { sendContactMessage } from './contact';
 export { runCodingSubmission, requestCodeRunnerSession, holdCodeRunner } from './coding';

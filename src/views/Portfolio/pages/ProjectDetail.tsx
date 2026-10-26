@@ -1,509 +1,440 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { ExternalLink, Package, PlayCircle } from 'lucide-react';
-import { portfolioData } from '../data/portfolio';
-import { useResponsive } from '../hooks/useResponsive';
-import { mono, sans, vietnam, title as titleFont } from '../constants/fonts';
-import { statusConfig, codeColors } from '../constants/status';
-import { Breadcrumb, Badge, IDECard } from '../shared';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useState, type ReactNode } from 'react';
+import { ArrowLeft, ExternalLink, Github, Package, PlayCircle } from 'lucide-react';
+import { liveLabel } from '../data/links';
+import { portfolioData, type ProjectShot } from '../data/portfolio';
+import { mono, sans, serif } from '../constants/fonts';
+import { body, eyebrow } from '../constants/type';
+import {
+  IDECard,
+  Lightbox,
+  LiveTag,
+  Tape,
+  PageHeader,
+  ProjectImage,
+  StatusLabel,
+  TechLogo,
+} from '../shared';
 
-const EXT_BY_LANGUAGE: Record<string, string> = {
-  Rust: '.rs',
-  Go: '.go',
-  JavaScript: '.js',
-  TypeScript: '.ts',
-  Python: '.py',
-  Dart: '.dart',
-  'C#': '.cs',
-  HTML: '.html',
-  Orange: '.ows',
-};
+const sectionHeading = {
+  fontFamily: serif,
+  fontSize: 24,
+  fontWeight: 700,
+  lineHeight: 1.25,
+  color: 'var(--ide-text-1)',
+  margin: '0 0 12px',
+} as const;
 
-function getCodeSnippet(id: string) {
-  switch (id) {
-    case 'create-adorex':
-      return [
-        { n: '01', code: `#!/usr/bin/env node`, type: 'comment' },
-        { n: '02', code: `import { scaffold } from './scaffold.js';`, type: 'keyword' },
-        { n: '03', code: `import { parseArgs } from './cli.js';`, type: 'keyword' },
-        { n: '04', code: ``, type: 'empty' },
-        { n: '05', code: `const { name, template } = parseArgs();`, type: 'normal' },
-        { n: '06', code: ``, type: 'empty' },
-        { n: '07', code: `// One template today: express-sqlite`, type: 'comment' },
-        { n: '08', code: `await scaffold({ name, template });`, type: 'normal' },
-        { n: '09', code: ``, type: 'empty' },
-        { n: '10', code: `console.log('project ready');`, type: 'normal' },
-      ];
-    case 'vexta':
-      return [
-        { n: '01', code: `Socket socket = await Socket.connect(host, 4444);`, type: 'normal' },
-        { n: '02', code: ``, type: 'empty' },
-        { n: '03', code: `final jpeg = await compressFrame(cameraImage);`, type: 'normal' },
-        { n: '04', code: `final header = ByteData(4)..setUint32(0, jpeg.length);`, type: 'field' },
-        { n: '05', code: `socket.add(header.buffer.asUint8List());`, type: 'field' },
-        { n: '06', code: `socket.add(jpeg);`, type: 'field' },
-        { n: '07', code: ``, type: 'empty' },
-        { n: '08', code: `// receiver decodes with the image pub package,`, type: 'comment' },
-        { n: '09', code: `// then hands raw bytes to the driver via FFI.`, type: 'comment' },
-      ];
-    case 'cognimax':
-      return [
-        { n: '01', code: `def _chance_node(board, depth, lam):`, type: 'keyword' },
-        { n: '02', code: `    replies = maia3.predict(board)`, type: 'normal' },
-        { n: '03', code: `    scores = [`, type: 'normal' },
-        { n: '04', code: `        _max_node(board.push(m), depth - 1)`, type: 'field' },
-        { n: '05', code: `        for m, p in replies`, type: 'field' },
-        { n: '06', code: `    ]`, type: 'normal' },
-        {
-          n: '07',
-          code: `    # risk-sensitive weighted average, not a plain mean`,
-          type: 'comment',
-        },
-        { n: '08', code: `    return risk_weighted(scores, replies, lam)`, type: 'normal' },
-      ];
-    case 'cozytalk':
-      return [
-        { n: '01', code: `final room = ref.watch(matchmakingProvider);`, type: 'normal' },
-        { n: '02', code: `if (room.theme != null) applyTheme(room.theme);`, type: 'field' },
-        { n: '03', code: ``, type: 'empty' },
-        { n: '04', code: `// jukebox: shared music moved to YouTube`, type: 'comment' },
-        { n: '05', code: `await jukebox.play(room.track.youtubeId);`, type: 'field' },
-      ];
-    case 'titanic':
-      return [
-        { n: '01', code: `# explored in Orange, not code:`, type: 'comment' },
-        { n: '02', code: `# transport groups, cabin decks, spend features`, type: 'comment' },
-        { n: '03', code: `# presented with scatter plots`, type: 'comment' },
-      ];
-    case 'archmaster':
-      return [
-        { n: '01', code: `const chunks = rankChunks(question, notes);`, type: 'normal' },
-        { n: '02', code: `const context = chunks.slice(0, k).join('\\n');`, type: 'normal' },
-        { n: '03', code: ``, type: 'empty' },
-        { n: '04', code: `const stream = await chat.sendMessageStream({`, type: 'normal' },
-        { n: '05', code: `  message: \`\${context}\\n\\n\${question}\`,`, type: 'field' },
-        { n: '06', code: `});`, type: 'normal' },
-        { n: '07', code: `for await (const chunk of stream) render(chunk.text);`, type: 'normal' },
-      ];
-    case 'rhythm-dots':
-      return [
-        { n: '01', code: `function tick(now: number) {`, type: 'normal' },
-        { n: '02', code: `  const t = audio.currentTime;`, type: 'field' },
-        { n: '03', code: `  dots.forEach((d) => d.updatePosition(t));`, type: 'field' },
-        { n: '04', code: `  drawFrame(ctx, dots, hitEffects);`, type: 'field' },
-        { n: '05', code: `  requestAnimationFrame(tick);`, type: 'field' },
-        { n: '06', code: `}`, type: 'normal' },
-      ];
-    case 'mistbound':
-      return [
-        { n: '01', code: `void Update() {`, type: 'normal' },
-        { n: '02', code: `    if (Input.GetMouseButtonDown(0) && !isFrozen)`, type: 'field' },
-        { n: '03', code: `        CheckQteHit(clockHandAngle);`, type: 'field' },
-        { n: '04', code: `}`, type: 'normal' },
-        { n: '05', code: ``, type: 'empty' },
-        { n: '06', code: `// death/respawn flow: not implemented yet`, type: 'comment' },
-      ];
-    case 'chronochunk':
-      return [
-        { n: '01', code: `@bot.command()`, type: 'attr' },
-        { n: '02', code: `async def guess(ctx, number: int):`, type: 'keyword' },
-        { n: '03', code: `    game = games.get(ctx.author.id)`, type: 'normal' },
-        { n: '04', code: `    if not game:`, type: 'normal' },
-        { n: '05', code: `        return await ctx.send("start with /game first")`, type: 'field' },
-        { n: '06', code: `    game.check(number)`, type: 'field' },
-      ];
-    case 'coding-challenges':
-      return [
-        { n: '01', code: `const fn = new Function(\`return \${userCode}\`)();`, type: 'normal' },
-        { n: '02', code: `for (const t of testCases) {`, type: 'normal' },
-        { n: '03', code: `  const result = fn(...t.input);`, type: 'field' },
-        { n: '04', code: `  t.passed = deepEqual(result, t.expected);`, type: 'field' },
-        { n: '05', code: `}`, type: 'normal' },
-        { n: '06', code: `// runs on the main thread, not a Worker`, type: 'comment' },
-      ];
-    case 'data-lookup':
-      return [
-        { n: '01', code: `const [summary, visits, stats, details] =`, type: 'normal' },
-        { n: '02', code: `  await Promise.allSettled([`, type: 'normal' },
-        { n: '03', code: `    fetchPageViewSummary(),`, type: 'field' },
-        { n: '04', code: `    fetchRecentVisits(),`, type: 'field' },
-        { n: '05', code: `    fetchVisitorStats(),`, type: 'field' },
-        { n: '06', code: `    fetchVisitorDetails(),`, type: 'field' },
-        { n: '07', code: `  ]);`, type: 'normal' },
-      ];
-    case 'smartcity':
-      return [
-        { n: '01', code: `const guides = [`, type: 'normal' },
-        {
-          n: '02',
-          code: `  { title: 'SCB DeepLink Mobile', href: '/smartcity/deeplink.html' },`,
-          type: 'field',
-        },
-        {
-          n: '03',
-          code: `  { title: 'SCB Direct Debit', href: '/smartcity/direct-debit.html' },`,
-          type: 'field',
-        },
-        { n: '04', code: `];`, type: 'normal' },
-      ];
-    default:
-      return [
-        { n: '01', code: `export default async function App() {`, type: 'normal' },
-        { n: '02', code: `  return <Layout>{children}</Layout>;`, type: 'field' },
-        { n: '03', code: `}`, type: 'normal' },
-      ];
-  }
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section style={{ marginTop: 48 }}>
+      <h2 style={sectionHeading}>{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function BulletList({ items }: { items: string[] }) {
+  return (
+    <ul className="flex flex-col" style={{ gap: 8, margin: 0, paddingLeft: 20, listStyle: 'disc' }}>
+      {items.map((item) => (
+        <li key={item} style={body}>
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const chipStyle = {
+  gap: 8,
+  padding: '6px 12px',
+  fontSize: 15,
+} as const;
+
+// Skills on this site link to their page; anything else is plain text
+function BuiltWith({ stack }: { stack: string[] }) {
+  return (
+    <ul className="flex flex-wrap" style={{ gap: 10, margin: 0, padding: 0, listStyle: 'none' }}>
+      {stack.map((name) => {
+        const skill = portfolioData.skills.find((s) => s.name === name);
+        return (
+          <li key={name}>
+            {skill ? (
+              <Link href={`/skills/${skill.id}`} className="pf-btn" style={chipStyle}>
+                <TechLogo id={skill.id} size={16} />
+                {name}
+              </Link>
+            ) : (
+              <span
+                className="inline-flex items-center"
+                style={{
+                  ...chipStyle,
+                  fontFamily: sans,
+                  fontWeight: 700,
+                  color: 'var(--ide-text-2)',
+                  border: '1.5px dashed var(--ide-border-strong)',
+                  borderRadius: 4,
+                }}
+              >
+                {name}
+              </span>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function Paragraphs({ text }: { text: string }) {
+  return (
+    <div className="flex flex-col" style={{ gap: 12 }}>
+      {text.split(/\n\s*\n/).map((paragraph) => (
+        <p key={paragraph} style={body}>
+          {paragraph}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+// Wide screenshots take the full width. Tall ones sit three to a row, two when there
+// are only two, and a single one is centered.
+// On phones every shot takes the full width. Class names are written out in full so
+// Tailwind can find them.
+function shotColumn(shot: ProjectShot, tallCount: number) {
+  if (shot.height <= shot.width) return 'col-span-6';
+  if (tallCount === 1) return 'col-span-6 md:col-span-4 md:col-start-2';
+  return tallCount >= 3 ? 'col-span-6 md:col-span-2' : 'col-span-6 md:col-span-3';
+}
+
+function Screenshot({ shot, onOpen }: { shot: ProjectShot; onOpen: () => void }) {
+  return (
+    <figure
+      className="pf-card relative"
+      style={{
+        margin: 0,
+        padding: 8,
+        height: '100%',
+        background: 'var(--ide-bg-3)',
+        borderRadius: 3,
+      }}
+    >
+      <Tape />
+      <button
+        onClick={onOpen}
+        aria-label={`View full size: ${shot.alt}`}
+        className="block w-full"
+        style={{
+          padding: 0,
+          border: 'none',
+          background: 'none',
+          cursor: 'zoom-in',
+          overflow: 'hidden',
+        }}
+      >
+        <Image
+          src={shot.src}
+          alt={shot.alt}
+          width={shot.width}
+          height={shot.height}
+          sizes="(max-width: 900px) 100vw, 720px"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: 'auto',
+            border: '1px solid var(--ide-border)',
+          }}
+        />
+      </button>
+      <figcaption
+        style={{
+          padding: '12px 8px 4px',
+          fontFamily: sans,
+          fontSize: 15,
+          lineHeight: 1.55,
+          color: 'var(--ide-text-4)',
+        }}
+      >
+        {shot.caption}
+      </figcaption>
+    </figure>
+  );
 }
 
 export function ProjectDetail({ id }: { id: string }) {
-  const router = useRouter();
-  const { isMobile } = useResponsive();
+  const [openShot, setOpenShot] = useState<ProjectShot | null>(null);
 
   const project = portfolioData.projects.find((p) => p.id === id);
 
   if (!project) {
     return (
-      <div
-        className="flex flex-col items-center justify-center h-full"
-        style={{ color: 'var(--ide-text-5)', fontFamily: sans }}
-      >
-        <div style={{ fontSize: 14, marginBottom: 12 }}>// Project not found</div>
-        <button
-          onClick={() => router.push('/projects')}
-          style={{
-            color: 'var(--ide-accent)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontFamily: mono,
-            fontSize: 12,
-          }}
-        >
-          ← cd ../projects
-        </button>
+      <div className="flex h-full flex-col items-center justify-center" style={{ gap: 12 }}>
+        <div style={{ ...sectionHeading, margin: 0 }}>Project not found</div>
+        <Link href="/projects" className="pf-link">
+          <ArrowLeft size={16} />
+          Back to projects
+        </Link>
       </div>
     );
   }
 
-  const sc = statusConfig[project.status] || statusConfig.STABLE;
-  const snippet = getCodeSnippet(project.id);
-  const ext = EXT_BY_LANGUAGE[project.language] ?? '.ts';
+  const { liveUrl } = project;
+  const screenshots = project.screenshots ?? [];
+  const cover =
+    project.image && !screenshots.some((shot) => shot.src === project.image?.src) ? project : null;
+  const tallCount = screenshots.filter((shot) => shot.height > shot.width).length;
+  const hasLinks = Boolean(project.repoUrl || project.npm || project.links?.length);
+  const secondaryLinks = [
+    ...(project.repoUrl
+      ? [{ href: `https://${project.repoUrl}`, label: 'Source', icon: Github }]
+      : []),
+    ...(project.npm
+      ? [{ href: `https://${project.npm}`, label: 'npm package', icon: Package }]
+      : []),
+    ...(project.links ?? []).map((link) => ({ ...link, icon: ExternalLink })),
+  ];
 
   return (
-    <div className="flex flex-col" style={{ minHeight: '100%' }}>
-      <Breadcrumb
-        segments={['src', 'projects', `${project.id}${ext}`]}
-        language={project.language}
-      />
+    <div
+      className="flex flex-col px-4 pt-8 pb-16 md:px-8 md:pt-16 md:pb-24 @[880px]:flex-row @[880px]:items-start"
+      style={{ gap: 48, maxWidth: 1096, margin: '0 auto' }}
+    >
+      <article className="min-w-0 flex-1" style={{ maxWidth: 720 }}>
+        <Link href="/projects" className="pf-btn" style={{ marginBottom: 32 }}>
+          <ArrowLeft size={15} />
+          All projects
+        </Link>
 
-      <div className={`flex ${isMobile ? 'flex-col' : ''} flex-1`}>
-        {/* Main content */}
-        <div className={`flex-1 ${isMobile ? 'p-4' : 'p-8'}`}>
-          <h1
-            style={{
-              fontSize: 36,
-              fontFamily: titleFont,
-              fontWeight: 700,
-              color: 'var(--ide-text-1)',
-              letterSpacing: '-1px',
-              marginBottom: 8,
-              margin: '0 0 8px',
-            }}
-          >
-            {project.name.replace(/-/g, '_')}
-          </h1>
-          <div
-            style={{ width: 48, height: 3, background: 'var(--ide-orange)', marginBottom: 24 }}
-          />
-
-          <div className="flex items-center gap-3 mb-6 flex-wrap">
-            <Badge
-              color={sc.color}
-              bg={sc.bg}
-              style={{ padding: '3px 10px', letterSpacing: '0.08em' }}
-            >
-              ■ {project.status}
-            </Badge>
-            {project.aiAssisted && (
-              <Badge color="var(--ide-purple)" bg="var(--ide-purple-a15)">
-                AI-ASSISTED
-              </Badge>
-            )}
-            <span
-              style={{
-                fontSize: 10,
-                fontFamily: mono,
-                color: project.langColor,
-                background: `${project.langColor}18`,
-                padding: '2px 8px',
-              }}
-            >
-              _{project.language}
+        <PageHeader
+          eyebrow={
+            <span className="inline-flex flex-wrap items-center" style={{ gap: 16 }}>
+              {liveUrl && <LiveTag href={liveUrl} />}
+              {project.language && <span>{project.language}</span>}
+              <StatusLabel status={project.status} />
             </span>
-            <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-text-7)' }}>
-              ⎇ {project.branch}
-            </span>
-            {project.npm && (
-              <a
-                href={`https://${project.npm}`}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  fontSize: 9,
-                  fontFamily: sans,
-                  color: '#cb3837',
-                  background: 'rgba(203,56,55,0.1)',
-                  border: '1px solid rgba(203,56,55,0.3)',
-                  padding: '2px 8px',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 4,
-                  letterSpacing: '0.06em',
-                }}
-              >
-                <Package size={9} />
-                NPM
-              </a>
-            )}
-          </div>
+          }
+          title={project.name}
+          subtitle={project.summary}
+        />
 
-          <div
-            style={{
-              fontSize: 15,
-              fontFamily: vietnam,
-              color: 'var(--ide-text-2)',
-              lineHeight: 1.8,
-              marginBottom: 32,
-              maxWidth: 520,
-            }}
-          >
-            {project.description}
-          </div>
-
-          <div
-            className="mb-8 px-5 py-5"
-            style={{ background: 'var(--ide-bg-2)', borderLeft: '2px solid var(--ide-text-5)' }}
-          >
-            <div
-              style={{
-                fontSize: 9,
-                fontFamily: sans,
-                color: 'var(--ide-text-5)',
-                letterSpacing: '0.12em',
-                marginBottom: 8,
-              }}
-            >
-              // Architecture Notes
-            </div>
-            <div
-              style={{
-                fontSize: 13,
-                fontFamily: vietnam,
-                fontStyle: 'italic',
-                color: 'var(--ide-text-4)',
-                lineHeight: 1.7,
-              }}
-            >
-              "{project.archNote}"
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2 mb-8">
-            {project.tags.map((tag) => (
-              <span
-                key={tag}
-                style={{
-                  fontSize: 10,
-                  fontFamily: mono,
-                  color: 'var(--ide-text-5)',
-                  background: 'var(--ide-bg-3)',
-                  border: '1px solid var(--ide-border-medium)',
-                  padding: '3px 10px',
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          <div
-            style={{
-              background: 'var(--ide-bg-1)',
-              border: '1px solid var(--ide-border)',
-              marginBottom: 8,
-            }}
-          >
-            <div
-              className="flex items-center gap-2 px-4 py-2"
-              style={{ borderBottom: '1px solid var(--ide-border)' }}
-            >
-              <span
-                style={{
-                  fontSize: 9,
-                  fontFamily: mono,
-                  color: 'var(--ide-text-6)',
-                  marginLeft: 12,
-                }}
-              >
-                {project.id}
-                {ext}
-              </span>
-              <span
-                style={{
-                  marginLeft: 'auto',
-                  fontSize: 9,
-                  fontFamily: sans,
-                  color: 'var(--ide-text-7)',
-                }}
-              >
-                Illustrative, not the literal file
-              </span>
-            </div>
-            <div className="px-4 py-4">
-              {snippet.map((line) => (
-                <div key={line.n} className="flex items-start" style={{ lineHeight: '22px' }}>
-                  <span
-                    style={{
-                      fontSize: 'var(--ide-editor-font-size, 12px)',
-                      fontFamily: mono,
-                      color: 'var(--ide-line-number)',
-                      width: 32,
-                      flexShrink: 0,
-                      textAlign: 'right',
-                      paddingRight: 16,
-                    }}
-                  >
-                    {line.n}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 'var(--ide-editor-font-size, 12px)',
-                      fontFamily: mono,
-                      color: codeColors[line.type] || 'var(--ide-text-1)',
-                    }}
-                  >
-                    {line.code}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {project.repoUrl && (
-            <a
-              href={`https://${project.repoUrl}`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 mt-4"
-              style={{
-                fontSize: 10,
-                fontFamily: mono,
-                color: 'var(--ide-text-6)',
-                textDecoration: 'none',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = 'var(--ide-accent)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = 'var(--ide-text-6)';
-              }}
-            >
-              <ExternalLink size={10} />
-              {project.repoUrl}
-            </a>
-          )}
-        </div>
-
-        {/* Right facts panel */}
-        <div
-          className="shrink-0"
+        <section
+          aria-labelledby="result"
           style={{
-            width: isMobile ? '100%' : 240,
-            borderLeft: isMobile ? 'none' : '1px solid var(--ide-border)',
-            borderTop: isMobile ? '1px solid var(--ide-border)' : 'none',
-            background: 'var(--ide-bg-3)',
+            position: 'relative',
+            marginTop: 32,
+            padding: '24px 24px 20px',
+            background: 'var(--ide-note)',
+            boxShadow: 'var(--ide-card-shadow)',
           }}
         >
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <span
-                style={{
-                  fontSize: 9,
-                  fontFamily: sans,
-                  color: 'var(--ide-text-5)',
-                  letterSpacing: '0.12em',
-                }}
-              >
-                Facts
-              </span>
-              <span style={{ fontSize: 8, background: sc.bg, color: sc.color, padding: '1px 6px' }}>
-                {project.status}
-              </span>
-            </div>
+          <Tape />
+          <h2 id="result" style={{ ...eyebrow, fontSize: 13 }}>
+            Result
+          </h2>
+          <p
+            style={{
+              fontFamily: sans,
+              fontSize: 18,
+              fontWeight: 500,
+              lineHeight: 1.6,
+              color: 'var(--ide-text-1)',
+              margin: '6px 0 0',
+            }}
+          >
+            {project.result}
+          </p>
+        </section>
 
-            <IDECard className="mb-4 p-3">
-              {project.stats.map((s) => (
-                <div key={s.label} className="flex items-center justify-between mb-2 last:mb-0">
-                  <span style={{ fontSize: 9, fontFamily: sans, color: 'var(--ide-text-6)' }}>
-                    {s.label}
+        {cover && (
+          <div
+            style={{
+              position: 'relative',
+              marginTop: 40,
+              padding: 10,
+              background: 'var(--ide-bg-3)',
+              boxShadow: 'var(--ide-card-shadow)',
+            }}
+          >
+            <ProjectImage project={cover} sizes="(max-width: 900px) 100vw, 720px" priority />
+          </div>
+        )}
+
+        <Section title="Built with">
+          <BuiltWith stack={project.stack} />
+        </Section>
+
+        <Section title="The problem">
+          <p style={body}>{project.problem}</p>
+        </Section>
+
+        <Section title="What I built">
+          <p style={body}>{project.role}</p>
+        </Section>
+
+        {project.features && project.features.length > 0 && (
+          <Section title="How it works">
+            <BulletList items={project.features} />
+          </Section>
+        )}
+
+        {project.decisions && project.decisions.length > 0 && (
+          <Section title="Key decisions">
+            <ol
+              className="flex flex-col"
+              style={{ gap: 24, margin: 0, padding: 0, listStyle: 'none' }}
+            >
+              {project.decisions.map((decision, i) => (
+                <li key={decision.title} className="flex items-baseline" style={{ gap: 16 }}>
+                  <span
+                    style={{
+                      fontFamily: mono,
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: 'var(--ide-text-5)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {String(i + 1).padStart(2, '0')}
                   </span>
-                  <span style={{ fontSize: 10, fontFamily: mono, color: 'var(--ide-text-1)' }}>
-                    {s.value}
-                  </span>
+                  <div>
+                    <h3
+                      style={{
+                        fontFamily: sans,
+                        fontSize: 18,
+                        fontWeight: 700,
+                        color: 'var(--ide-text-1)',
+                        margin: '0 0 4px',
+                      }}
+                    >
+                      {decision.title}
+                    </h3>
+                    <p style={body}>{decision.reason}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </Section>
+        )}
+
+        {project.numbers && project.numbers.length > 0 && (
+          <Section title="By the numbers">
+            <BulletList items={project.numbers} />
+          </Section>
+        )}
+
+        {project.hardPart && (
+          <Section title="The hard part">
+            <Paragraphs text={project.hardPart} />
+          </Section>
+        )}
+
+        {project.learned && (
+          <Section title="What I learned">
+            <Paragraphs text={project.learned} />
+          </Section>
+        )}
+
+        {project.limits && (
+          <Section title="Limits">
+            <p style={body}>{project.limits}</p>
+          </Section>
+        )}
+
+        {screenshots.length > 0 && (
+          <Section title="Gallery">
+            <div
+              className="grid"
+              style={{ gap: 24, marginTop: 8, gridTemplateColumns: 'repeat(6, minmax(0, 1fr))' }}
+            >
+              {screenshots.map((shot) => (
+                <div key={shot.src} className={shotColumn(shot, tallCount)}>
+                  <Screenshot shot={shot} onOpen={() => setOpenShot(shot)} />
                 </div>
               ))}
-            </IDECard>
+            </div>
+          </Section>
+        )}
+      </article>
 
-            {project.liveUrl && (
-              <button
-                onClick={() => router.push(project.liveUrl!)}
-                className="w-full flex items-center justify-center gap-2 py-3 transition-opacity hover:opacity-90"
+      {(liveUrl || hasLinks || project.note) && (
+        <aside className="w-full shrink-0 @[880px]:sticky @[880px]:w-[280px]" style={{ top: 32 }}>
+          <IDECard tape style={{ padding: 24 }}>
+            {liveUrl && (
+              <Link
+                href={liveUrl}
+                {...(liveUrl.startsWith('http')
+                  ? { target: '_blank', rel: 'noopener noreferrer' }
+                  : {})}
+                className="pf-btn-primary w-full"
+              >
+                <PlayCircle size={15} />
+                Open live site
+              </Link>
+            )}
+            {liveUrl && (
+              <p
                 style={{
-                  background: 'var(--ide-accent)',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: 11,
                   fontFamily: sans,
-                  fontWeight: 700,
-                  color: 'var(--ide-bg-2)',
-                  letterSpacing: '0.08em',
-                  marginBottom: 8,
+                  fontSize: 14,
+                  color: 'var(--ide-text-4)',
+                  textAlign: 'center',
+                  margin: '8px 0 0',
+                  overflowWrap: 'anywhere',
                 }}
               >
-                <PlayCircle size={12} />
-                Open Live
-              </button>
+                {liveLabel(liveUrl)}
+              </p>
             )}
 
-            {project.repoUrl && (
-              <a
-                href={`https://${project.repoUrl}`}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full flex items-center justify-center gap-2 py-3 transition-opacity hover:opacity-90"
+            {hasLinks && (
+              <ul
+                className="flex flex-col"
                 style={{
-                  background: project.liveUrl ? 'transparent' : 'var(--ide-orange)',
-                  border: project.liveUrl ? '1px solid var(--ide-border-medium)' : 'none',
-                  cursor: 'pointer',
-                  fontSize: 11,
-                  fontFamily: sans,
-                  fontWeight: 700,
-                  color: project.liveUrl ? 'var(--ide-text-4)' : 'var(--ide-bg-2)',
-                  letterSpacing: '0.08em',
-                  marginBottom: 8,
-                  textDecoration: 'none',
-                  display: 'flex',
+                  gap: 12,
+                  margin: 0,
+                  marginTop: liveUrl ? 16 : 0,
+                  padding: 0,
+                  listStyle: 'none',
                 }}
               >
-                <ExternalLink size={12} />
-                View Source
-              </a>
+                {secondaryLinks.map(({ href, label, icon: Icon }) => (
+                  <li key={href}>
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pf-btn w-full"
+                    >
+                      <Icon size={15} />
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             )}
-          </div>
-        </div>
-      </div>
+
+            {project.note && (
+              <p
+                style={{
+                  fontFamily: sans,
+                  fontSize: 14,
+                  lineHeight: 1.6,
+                  color: 'var(--ide-text-5)',
+                  margin: '16px 0 0',
+                }}
+              >
+                {project.note}
+              </p>
+            )}
+          </IDECard>
+        </aside>
+      )}
+      {openShot && <Lightbox shot={openShot} onClose={() => setOpenShot(null)} />}
     </div>
   );
 }

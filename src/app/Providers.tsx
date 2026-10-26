@@ -4,13 +4,13 @@ import { Provider } from 'react-redux';
 import store from '@/store/store';
 
 // next-themes ThemeProvider lives here (root level) so its SSR blocking script
-// can inject [data-theme] on <html> before React hydrates — zero flash.
+// can inject [data-theme] on <html> before React hydrates, zero flash.
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider
       attribute="data-theme"
-      defaultTheme="one-dark"
-      themes={['midnight', 'nord', 'dracula', 'one-dark', 'catppuccin']}
+      defaultTheme="paper"
+      themes={['paper', 'midnight', 'nord', 'dracula', 'one-dark', 'catppuccin']}
       disableTransitionOnChange
       enableSystem={false}
     >

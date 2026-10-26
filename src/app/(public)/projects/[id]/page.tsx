@@ -9,14 +9,12 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const project = portfolioData.projects.find((p) => p.id === id);
-  const title = project ? `${project.name} — Oakar Oo` : 'Project — Oakar Oo';
-  const description = project?.description ?? 'Project details.';
+  const title = project ? `${project.name} | Oakar Oo` : 'Project | Oakar Oo';
+  const description = project?.summary ?? 'Project details.';
   return {
     title,
     description,
-    keywords: project
-      ? [project.name, 'Oakar Oo', project.language, ...project.tags.map((t) => t.replace('#', ''))]
-      : ['Oakar Oo', 'project'],
+    keywords: project ? [project.name, 'Oakar Oo', ...project.stack] : ['Oakar Oo', 'project'],
     openGraph: {
       title,
       description,
@@ -24,21 +22,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: 'Oakar Oo',
       type: 'article',
       images: [
-        {
-          url: 'https://i.ibb.co/KxH3wXDS/download-3.png',
-          width: 1200,
-          height: 630,
-          alt: `${project?.name ?? 'Project'} by Oakar Oo`,
-        },
+        project?.image
+          ? { url: `https://adorio.space${project.image.src}`, alt: project.image.alt }
+          : {
+              url: 'https://adorio.space/og.png',
+              width: 1200,
+              height: 630,
+              alt: `${project?.name ?? 'Project'} by Oakar Oo`,
+            },
       ],
     },
     twitter: {
-      card: 'summary',
+      card: project?.image ? 'summary_large_image' : 'summary',
       title,
       description,
     },
   };
 }
+
+// Every id is known at build time, so anything else is a real 404
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   return portfolioData.projects.map((p) => ({ id: p.id }));

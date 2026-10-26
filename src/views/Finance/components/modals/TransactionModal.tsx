@@ -71,7 +71,7 @@ export default function TransactionModal({
         await onSaved('Transaction updated.');
       } else {
         await createFinanceTransaction(payload);
-        await onSaved(`${type === 'income' ? 'Income' : 'Expense'} added — balance updated.`);
+        await onSaved(`${type === 'income' ? 'Income' : 'Expense'} added. Balance updated.`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save transaction');

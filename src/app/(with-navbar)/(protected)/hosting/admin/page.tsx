@@ -1,7 +1,7 @@
 import HostingAdminView from '@/views/Hosting/Admin';
 
 export const metadata = {
-  title: 'Admin — Hosted Files',
+  title: 'Hosted Files Admin',
 };
 
 export default function HostingAdminPage() {

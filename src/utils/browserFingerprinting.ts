@@ -18,6 +18,15 @@ interface NavigatorExtended extends Navigator {
 let fingerprintCache = null;
 let fingerprintPromise = null;
 
+// Canvas, WebGL and font checks only change when the device or browser does, and they are
+// the slow part (WebGL alone can take 100ms on a phone). Keep them for a week instead of
+// redoing them on every page load.
+const DEVICE_STORAGE_KEY = 'adorio:deviceFingerprint';
+const DEVICE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Give the main thread back between the slow checks so none of them adds to one long task
+const yieldToMain = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 const secureRandomString = () => {
   if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
     const bytes = crypto.getRandomValues(new Uint8Array(9));
@@ -105,7 +114,9 @@ const getWebGLFingerprint = () => {
         result.unmaskedVendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
         result.unmaskedRenderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
       }
-    } catch (debugError) {}
+    } catch {
+      // This signal isn't available in every browser; the fingerprint just skips it
+    }
 
     result.extensions = gl.getSupportedExtensions() || [];
 
@@ -159,51 +170,42 @@ const getAvailableFonts = () => {
     const testString = 'mmmmmmmmmmlli';
     const testSize = '72px';
 
-    canvas.width = 400;
-    canvas.height = 60;
-    canvas.style.position = 'absolute';
-    canvas.style.left = '-9999px';
-    canvas.style.top = '-9999px';
-
-    document.body.appendChild(canvas);
-
-    try {
-      const baselines = {};
-      baseFonts.forEach((font) => {
-        try {
-          ctx.font = `${testSize} ${font}`;
-          baselines[font] = ctx.measureText(testString).width;
-        } catch (fontError) {
-          baselines[font] = 0;
-        }
-      });
-
-      const availableFonts = [];
-
-      testFonts.forEach((font) => {
-        try {
-          let detected = false;
-          baseFonts.forEach((baseFont) => {
-            try {
-              ctx.font = `${testSize} ${font}, ${baseFont}`;
-              const width = ctx.measureText(testString).width;
-              if (width !== baselines[baseFont] && baselines[baseFont] > 0) {
-                detected = true;
-              }
-            } catch (measureError) {}
-          });
-          if (detected) {
-            availableFonts.push(font);
-          }
-        } catch (fontTestError) {}
-      });
-
-      return availableFonts;
-    } finally {
-      if (canvas.parentNode) {
-        document.body.removeChild(canvas);
+    // measureText works on a canvas that isn't in the page, and adding it would force a layout
+    const baselines = {};
+    baseFonts.forEach((font) => {
+      try {
+        ctx.font = `${testSize} ${font}`;
+        baselines[font] = ctx.measureText(testString).width;
+      } catch (fontError) {
+        baselines[font] = 0;
       }
-    }
+    });
+
+    const availableFonts = [];
+
+    testFonts.forEach((font) => {
+      try {
+        let detected = false;
+        baseFonts.forEach((baseFont) => {
+          try {
+            ctx.font = `${testSize} ${font}, ${baseFont}`;
+            const width = ctx.measureText(testString).width;
+            if (width !== baselines[baseFont] && baselines[baseFont] > 0) {
+              detected = true;
+            }
+          } catch {
+            // This signal isn't available in every browser; the fingerprint just skips it
+          }
+        });
+        if (detected) {
+          availableFonts.push(font);
+        }
+      } catch {
+        // This signal isn't available in every browser; the fingerprint just skips it
+      }
+    });
+
+    return availableFonts;
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.warn('Font detection failed:', error);
@@ -236,13 +238,43 @@ const getTimezoneFingerprint = () => {
   };
 };
 
+const readStoredDevice = () => {
+  try {
+    const stored = JSON.parse(localStorage.getItem(DEVICE_STORAGE_KEY) || 'null');
+    if (stored && Date.now() - stored.savedAt < DEVICE_MAX_AGE_MS) return stored;
+  } catch {
+    // Blocked or corrupted storage, the checks just run again
+  }
+  return null;
+};
+
+const getDeviceFingerprint = async () => {
+  const stored = readStoredDevice();
+  if (stored) return stored;
+
+  const canvas = getCanvasFingerprint();
+  await yieldToMain();
+  const webgl = getWebGLFingerprint();
+  await yieldToMain();
+  const fonts = getAvailableFonts();
+
+  const device = {
+    canvas: canvas ? canvas.substring(0, 100) : null,
+    webgl,
+    fonts,
+    savedAt: Date.now(),
+  };
+  try {
+    localStorage.setItem(DEVICE_STORAGE_KEY, JSON.stringify(device));
+  } catch {
+    // Storage full or blocked, it gets recomputed next time
+  }
+  return device;
+};
+
 const getBrowserFingerprint = async () => {
   try {
-    const [canvas, webgl, fonts] = await Promise.all([
-      Promise.resolve(getCanvasFingerprint()),
-      Promise.resolve(getWebGLFingerprint()),
-      Promise.resolve(getAvailableFonts()),
-    ]);
+    const { canvas, webgl, fonts } = await getDeviceFingerprint();
 
     const fingerprint: Record<string, unknown> = {
       userAgent: navigator.userAgent || '',
@@ -261,7 +293,7 @@ const getBrowserFingerprint = async () => {
       appName: navigator.appName || '',
       appVersion: navigator.appVersion || '',
       product: navigator.product || '',
-      canvas: canvas ? canvas.substring(0, 100) : null,
+      canvas,
       fonts: fonts || [],
     };
 
@@ -433,7 +465,9 @@ const getPersistentId = async () => {
       const id = localStorage.getItem(key);
       if (id) return id;
     }
-  } catch (e) {}
+  } catch {
+    // This signal isn't available in every browser; the fingerprint just skips it
+  }
 
   try {
     for (const key of storageKeys) {
@@ -441,21 +475,29 @@ const getPersistentId = async () => {
       if (id) {
         try {
           localStorage.setItem('adorio_persistent_id', id);
-        } catch (e) {}
+        } catch {
+          // This signal isn't available in every browser; the fingerprint just skips it
+        }
         return id;
       }
     }
-  } catch (e) {}
+  } catch {
+    // This signal isn't available in every browser; the fingerprint just skips it
+  }
 
   try {
     const id = await getFromIndexedDB('adorio_visitor_store', 'persistent_id');
     if (id) {
       try {
         localStorage.setItem('adorio_persistent_id', id);
-      } catch (e) {}
+      } catch {
+        // This signal isn't available in every browser; the fingerprint just skips it
+      }
       return id;
     }
-  } catch (e) {}
+  } catch {
+    // This signal isn't available in every browser; the fingerprint just skips it
+  }
 
   return null;
 };
@@ -465,15 +507,21 @@ const createPersistentId = async () => {
 
   try {
     localStorage.setItem('adorio_persistent_id', id);
-  } catch (e) {}
+  } catch {
+    // This signal isn't available in every browser; the fingerprint just skips it
+  }
 
   try {
     sessionStorage.setItem('adorio_persistent_id', id);
-  } catch (e) {}
+  } catch {
+    // This signal isn't available in every browser; the fingerprint just skips it
+  }
 
   try {
     await storeInIndexedDB('adorio_visitor_store', 'persistent_id', id);
-  } catch (e) {}
+  } catch {
+    // This signal isn't available in every browser; the fingerprint just skips it
+  }
 
   return id;
 };

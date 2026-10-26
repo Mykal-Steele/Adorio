@@ -89,7 +89,7 @@ const Practice = ({ classId }: PracticeProps) => {
   const runBlockedLabel = getRunBlockedLabel();
 
   // Any in-flight run is only allowed to write its results if nothing has
-  // superseded it since — a code edit, a reset, or switching problem/language.
+  // superseded it since, a code edit, a reset, or switching problem/language.
   // Bumping the id (and dropping isRunning) makes a stale run's eventual
   // resolution a no-op instead of a race that can clobber newer state.
   const executionIdRef = useRef(0);
@@ -102,7 +102,7 @@ const Practice = ({ classId }: PracticeProps) => {
     setSolvedIds(new Set(classProblems.filter(isProblemSolved).map((p) => p.id)));
   }, [classProblems]);
 
-  // Restore the last-visited problem for this class after hydration — reading
+  // Restore the last-visited problem for this class after hydration, reading
   // localStorage during the initial render would make the server-rendered HTML
   // mismatch the client's.
   useEffect(() => {
@@ -183,16 +183,14 @@ const Practice = ({ classId }: PracticeProps) => {
     (nextCode: string) => {
       invalidateActiveExecution();
       setCode(nextCode);
-      // Results intentionally stay on screen until the next Run press —
-      // clearing them on every keystroke made the test output unusable.
+      // Results intentionally stay on screen until the next Run press,       // clearing them on every keystroke made the test output unusable.
       // The draft is still persisted on every edit (keeping the last run's
       // results alongside it) via saveCode below, so a reload restores the
       // latest code together with its last results.
       if (activeProblem && activeVariant && nextCode !== activeVariant.starterCode) {
         saveCodeDebounced(activeProblem.id, language, nextCode);
       } else {
-        // Typed back to exactly the starter code before the debounce fired —
-        // otherwise the stale queued save would still land and persist code
+        // Typed back to exactly the starter code before the debounce fired,         // otherwise the stale queued save would still land and persist code
         // that's no longer on screen.
         saveCodeDebounced.cancel();
       }
@@ -232,7 +230,7 @@ const Practice = ({ classId }: PracticeProps) => {
       }
     } catch (err) {
       // verifyToken answers 403 for a bad/expired token (not 401), so both
-      // mean "not logged in" here — anything else is a genuine run failure.
+      // mean "not logged in" here, anything else is a genuine run failure.
       const statusCode =
         err instanceof Error && 'statusCode' in err
           ? (err as { statusCode?: number }).statusCode
@@ -253,7 +251,7 @@ const Practice = ({ classId }: PracticeProps) => {
     }
 
     // Superseded by an edit, reset, or navigation while the run was in
-    // flight — invalidateActiveExecution already reset isRunning, and this
+    // flight, invalidateActiveExecution already reset isRunning, and this
     // result no longer describes the code currently on screen.
     if (executionIdRef.current !== executionId) return;
 
@@ -304,7 +302,7 @@ const Practice = ({ classId }: PracticeProps) => {
     }
   }, [runQueued, runnerReady, runnerStarting]);
 
-  // Ctrl/Cmd+Enter runs the tests from anywhere on the page — the standard
+  // Ctrl/Cmd+Enter runs the tests from anywhere on the page, the standard
   // shortcut on LeetCode/HackerRank, so there's no mouse round-trip to Run.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -344,7 +342,7 @@ const Practice = ({ classId }: PracticeProps) => {
               {activeClass?.name ?? 'Unknown class'}
             </h1>
             {classProblems.length > 0 && (
-              <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-4 py-2 font-paper-hand text-xl leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
+              <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-4 py-2 font-paper-sans font-bold text-base leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
                 {classSolvedCount}/{classProblems.length} solved
               </p>
             )}
@@ -355,15 +353,15 @@ const Practice = ({ classId }: PracticeProps) => {
       <main className="px-4 pb-20 pt-9 sm:px-8 sm:pb-24 sm:pt-12">
         <div className="mx-auto max-w-6xl">
           {!activeClass ? (
-            <p className="mx-auto mt-12 max-w-md text-center font-paper-hand text-2xl text-[var(--paper-muted)]">
+            <p className="mx-auto mt-12 max-w-md text-center font-paper-sans text-lg text-[var(--paper-muted)]">
               That class doesn&apos;t exist.{' '}
               <Link href="/coding" className="underline underline-offset-2">
                 Back to practice problems
               </Link>
             </p>
           ) : !activeProblem || !activeVariant ? (
-            <p className="mx-auto mt-12 max-w-md text-center font-paper-hand text-2xl text-[var(--paper-muted)]">
-              No problems in {activeClass.name} yet — check back soon.
+            <p className="mx-auto mt-12 max-w-md text-center font-paper-sans text-lg text-[var(--paper-muted)]">
+              No problems in {activeClass.name} yet.
             </p>
           ) : (
             <div className="grid gap-6 lg:grid-cols-[280px_1fr]">

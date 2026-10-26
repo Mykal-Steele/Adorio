@@ -1,193 +1,44 @@
 'use client';
 
-import { useState, useEffect, ReactNode } from 'react';
-import {
-  Folder,
-  Bot,
-  Terminal as TerminalIcon,
-  GithubIcon,
-  LinkedinIcon,
-  GitBranch,
-} from 'lucide-react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { Folder, Terminal as TerminalIcon, GithubIcon, LinkedinIcon } from 'lucide-react';
 
 import { TitleBar } from './TitleBar';
 import { ActivityBar } from './ActivityBar';
 import { SidePanel } from './SidePanel';
 import { TabBar } from './TabBar';
-import { RightPanel, AskMePanel } from './RightPanel';
 import { StatusBar } from './StatusBar';
 import { Terminal } from './Terminal';
-import { SettingsPanel } from './SettingsPanel';
 import { useIDE } from './context/IDEContext';
-import { useResponsive } from './hooks/useResponsive';
 import { MobileHeader } from './mobile/MobileHeader';
 import { MobileNav } from './mobile/MobileNav';
 import { MobileDrawer } from './mobile/MobileDrawer';
-import { ThemeProvider } from './context/ThemeContext';
 import { IDEProvider } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
-import { sans, mono } from './constants/fonts';
-import { NavigationProgressBar } from './shared/NavigationProgressBar';
+import { sans } from './constants/fonts';
+import { eyebrow } from './constants/type';
+import { SettingsButton } from './shared';
+import { prefersReducedMotion } from './motion';
 
-function DesktopShell({ children }: { children: ReactNode }) {
-  const { terminalOpen, isSettingsOpen } = useIDE();
-  return (
-    <div
-      className="flex flex-col"
-      style={{ height: '100vh', overflow: 'hidden', background: 'var(--ide-bg-2)' }}
-    >
-      <TitleBar />
-      <div className="flex flex-1 overflow-hidden">
-        <ActivityBar />
-        <SidePanel />
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <TabBar />
-          <main
-            className="flex-1 overflow-y-auto"
-            style={{
-              background: 'var(--ide-bg-4)',
-              scrollbarWidth: 'thin',
-              scrollbarColor: 'var(--ide-bg-5) transparent',
-            }}
-          >
-            {children}
-          </main>
-          {terminalOpen && <Terminal />}
-        </div>
-        <RightPanel />
-      </div>
-      <StatusBar />
-      {isSettingsOpen && <SettingsPanel />}
-    </div>
-  );
-}
-
-function TabletShell({ children }: { children: ReactNode }) {
-  const { terminalOpen, isSettingsOpen } = useIDE();
-  const [tabletDrawer, setTabletDrawer] = useState<'side' | 'right' | null>(null);
-  return (
-    <div
-      className="flex flex-col"
-      style={{ height: '100vh', overflow: 'hidden', background: 'var(--ide-bg-2)' }}
-    >
-      <TitleBar />
-      <div className="flex flex-1 overflow-hidden">
-        <div
-          className="shrink-0 flex flex-col items-center justify-between py-2"
-          style={{
-            width: 48,
-            background: 'var(--ide-bg-0)',
-            borderRight: '1px solid var(--ide-border)',
-          }}
-        >
-          <div className="flex flex-col items-center gap-1">
-            <button
-              aria-label="Toggle explorer panel"
-              onClick={() => setTabletDrawer((d) => (d === 'side' ? null : 'side'))}
-              className="flex items-center justify-center"
-              style={{
-                width: 40,
-                height: 40,
-                background: tabletDrawer === 'side' ? 'var(--ide-border)' : 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                borderLeft:
-                  tabletDrawer === 'side' ? '2px solid var(--ide-orange)' : '2px solid transparent',
-              }}
-            >
-              <Folder
-                size={18}
-                color={tabletDrawer === 'side' ? 'var(--ide-text-1)' : 'var(--ide-text-6)'}
-              />
-            </button>
-            <button
-              aria-label="Toggle system panel"
-              onClick={() => setTabletDrawer((d) => (d === 'right' ? null : 'right'))}
-              className="flex items-center justify-center"
-              style={{
-                width: 40,
-                height: 40,
-                background: tabletDrawer === 'right' ? 'var(--ide-border)' : 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                borderLeft:
-                  tabletDrawer === 'right'
-                    ? '2px solid var(--ide-orange)'
-                    : '2px solid transparent',
-              }}
-            >
-              <Bot
-                size={18}
-                color={tabletDrawer === 'right' ? 'var(--ide-text-1)' : 'var(--ide-text-6)'}
-              />
-            </button>
-          </div>
-        </div>
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <TabBar />
-          <main
-            className="flex-1 overflow-y-auto"
-            style={{
-              background: 'var(--ide-bg-4)',
-              scrollbarWidth: 'thin',
-              scrollbarColor: 'var(--ide-bg-5) transparent',
-            }}
-          >
-            {children}
-          </main>
-          {terminalOpen && <Terminal />}
-        </div>
-      </div>
-      <StatusBar />
-      <MobileDrawer
-        open={tabletDrawer === 'side'}
-        onClose={() => setTabletDrawer(null)}
-        title="Explorer"
-        position="right"
-      >
-        <SidePanel />
-      </MobileDrawer>
-      <MobileDrawer
-        open={tabletDrawer === 'right'}
-        onClose={() => setTabletDrawer(null)}
-        title="System & Ask Oo"
-        position="right"
-      >
-        <RightPanel />
-      </MobileDrawer>
-      {isSettingsOpen && <SettingsPanel />}
-    </div>
-  );
-}
-
-type MobileDrawerType = 'explorer' | 'askme' | 'terminal' | 'more' | null;
+type MobileDrawerType = 'explorer' | 'terminal' | 'more' | null;
 
 function MobileMoreMenu({
   onOpenTerminal,
-  onOpenAskOo,
   onOpenExplorer,
-  onClose,
 }: {
   onOpenTerminal: () => void;
-  onOpenAskOo: () => void;
   onOpenExplorer: () => void;
-  onClose: () => void;
 }) {
   const menuItems = [
     {
-      icon: <TerminalIcon size={16} color="var(--ide-accent)" />,
+      icon: <TerminalIcon size={16} color="var(--ide-text-3)" />,
       label: 'Terminal',
       sub: 'Interactive command line',
       action: onOpenTerminal,
     },
     {
-      icon: <Bot size={16} color="var(--ide-purple)" />,
-      label: 'Ask Oo',
-      sub: "Chat with Oakar's knowledge base",
-      action: onOpenAskOo,
-    },
-    {
-      icon: <Folder size={16} color="var(--ide-orange)" />,
+      icon: <Folder size={16} color="var(--ide-text-3)" />,
       label: 'File Explorer',
       sub: 'Browse portfolio files',
       action: onOpenExplorer,
@@ -198,10 +49,7 @@ function MobileMoreMenu({
       {menuItems.map((item) => (
         <button
           key={item.label}
-          onClick={() => {
-            onClose();
-            setTimeout(item.action, 100);
-          }}
+          onClick={item.action}
           className="w-full flex items-center gap-3 px-4 py-3 text-left ide-hover"
           style={{
             background: 'transparent',
@@ -214,32 +62,22 @@ function MobileMoreMenu({
           <div>
             <div
               style={{
-                fontSize: 12,
+                fontSize: 15,
                 fontFamily: sans,
                 color: 'var(--ide-text-1)',
-                fontWeight: 600,
+                fontWeight: 700,
               }}
             >
               {item.label}
             </div>
-            <div style={{ fontSize: 10, fontFamily: sans, color: 'var(--ide-text-6)' }}>
+            <div style={{ fontSize: 13, fontFamily: sans, color: 'var(--ide-text-4)' }}>
               {item.sub}
             </div>
           </div>
         </button>
       ))}
       <div className="px-4 pt-4 pb-2" style={{ borderTop: '1px solid var(--ide-border)' }}>
-        <div
-          style={{
-            fontSize: 9,
-            fontFamily: sans,
-            color: 'var(--ide-text-7)',
-            letterSpacing: '0.1em',
-            marginBottom: 8,
-          }}
-        >
-          LINKS
-        </div>
+        <div style={{ ...eyebrow, fontSize: 11, marginBottom: 8 }}>Links</div>
         <div className="flex flex-col gap-2">
           <a
             href={`https://${portfolioData.github}`}
@@ -247,9 +85,9 @@ function MobileMoreMenu({
             rel="noreferrer"
             className="flex items-center gap-2"
             style={{
-              fontSize: 11,
-              fontFamily: mono,
-              color: 'var(--ide-text-4)',
+              fontSize: 15,
+              fontFamily: sans,
+              color: 'var(--ide-text-3)',
               textDecoration: 'none',
             }}
           >
@@ -262,63 +100,161 @@ function MobileMoreMenu({
             rel="noreferrer"
             className="flex items-center gap-2"
             style={{
-              fontSize: 11,
-              fontFamily: mono,
-              color: 'var(--ide-text-4)',
+              fontSize: 15,
+              fontFamily: sans,
+              color: 'var(--ide-text-3)',
               textDecoration: 'none',
             }}
           >
-            <LinkedinIcon size={14} color="#0077b5" />
+            <LinkedinIcon size={14} color="var(--ide-text-5)" />
             LinkedIn
           </a>
-        </div>
-      </div>
-      <div
-        className="mx-4 mt-4 px-3 py-2"
-        style={{ background: 'var(--ide-accent-dark)', borderRadius: 4 }}
-      >
-        <div className="flex items-center gap-2">
-          <GitBranch size={10} color="var(--ide-accent-light)" />
-          <span style={{ fontSize: 9, fontFamily: mono, color: 'var(--ide-accent-light)' }}>
-            ROOT@{portfolioData.handle}:~$
-          </span>
         </div>
       </div>
     </div>
   );
 }
 
-function MobileShell({ children }: { children: ReactNode }) {
-  const { isSettingsOpen } = useIDE();
+// One shell for every screen size. CSS picks which bars show, so the server renders the
+// right layout and nothing swaps in after JavaScript loads. Below md (768px): mobile header
+// and bottom nav. md to lg: title bar, a rail with an explorer drawer, tabs, status bar.
+// lg and up: the full editor with the activity bar and explorer.
+// Eases the new page in when you move between pages. Not on the first load, so the first
+// paint is never held back. A layout effect runs before the browser paints the new page,
+// so it never shows at full opacity for a frame and then jumps to the start of the fade.
+function usePageEnter() {
+  const pathname = usePathname();
+  const pageRef = useRef<HTMLDivElement>(null);
+  const shownPath = useRef(pathname);
+
+  useLayoutEffect(() => {
+    if (shownPath.current === pathname) return;
+    shownPath.current = pathname;
+    if (prefersReducedMotion()) return;
+    pageRef.current?.animate(
+      [
+        { opacity: 0, transform: 'translateY(6px)' },
+        { opacity: 1, transform: 'none' },
+      ],
+      { duration: 240, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
+    );
+  }, [pathname]);
+
+  return pageRef;
+}
+
+function Shell({ children }: { children: ReactNode }) {
+  const { terminalOpen, sidePanelOpen } = useIDE();
+  const pageRef = usePageEnter();
   const [drawer, setDrawer] = useState<MobileDrawerType>(null);
   const open = (type: MobileDrawerType) => setDrawer(type);
   const close = () => setDrawer(null);
+  // Going from one drawer to another waits for the first to finish closing, so two sheets
+  // and two backdrops never stack.
+  const nextDrawer = useRef<MobileDrawerType>(null);
+  const switchTo = (type: MobileDrawerType) => {
+    nextDrawer.current = type;
+    close();
+  };
+  const openNext = useCallback(() => {
+    if (!nextDrawer.current) return;
+    setDrawer(nextDrawer.current);
+    nextDrawer.current = null;
+  }, []);
+
+  // Picking a page in a drawer closes it as soon as the click lands, so it slides away
+  // while the next page comes in instead of covering it
+  useEffect(() => {
+    const closeOnNavigate = () => setDrawer(null);
+    window.addEventListener('adorio:nav-start', closeOnNavigate);
+    return () => window.removeEventListener('adorio:nav-start', closeOnNavigate);
+  }, []);
+
   return (
     <div
-      className="flex flex-col"
-      style={{ height: '100dvh', overflow: 'hidden', background: 'var(--ide-bg-2)' }}
+      className="ide-root flex h-dvh flex-col overflow-hidden"
+      style={{ background: 'var(--ide-bg-1)' }}
     >
-      <MobileHeader onMenuOpen={() => open('explorer')} />
-      <main
-        className="flex-1 overflow-y-auto"
-        style={{
-          background: 'var(--ide-bg-4)',
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'var(--ide-bg-5) transparent',
-        }}
-      >
-        {children}
-      </main>
-      <MobileNav onMoreOpen={() => open('more')} />
+      <div className="shrink-0 md:hidden">
+        <MobileHeader onMenuOpen={() => open('explorer')} />
+      </div>
+      <div className="hidden shrink-0 md:block">
+        <TitleBar />
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        <div className="hidden lg:flex">
+          <ActivityBar />
+        </div>
+        <div
+          className="hidden shrink-0 flex-col items-center justify-between py-2 md:flex lg:hidden"
+          style={{ width: 52, borderRight: '1px solid var(--ide-border)' }}
+        >
+          <button
+            aria-label="Toggle explorer panel"
+            onClick={() => setDrawer((d) => (d === 'explorer' ? null : 'explorer'))}
+            className="flex items-center justify-center"
+            style={{
+              width: 40,
+              height: 40,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              borderLeft:
+                drawer === 'explorer' ? '2px solid var(--ide-yellow)' : '2px solid transparent',
+            }}
+          >
+            <Folder
+              size={18}
+              color={drawer === 'explorer' ? 'var(--ide-text-1)' : 'var(--ide-text-5)'}
+            />
+          </button>
+          <SettingsButton />
+        </div>
+        {sidePanelOpen && (
+          <div className="hidden lg:flex">
+            <SidePanel />
+          </div>
+        )}
+
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="hidden shrink-0 md:block">
+            <TabBar />
+          </div>
+          <main
+            className="@container flex-1 overflow-y-auto"
+            style={{
+              background: 'var(--ide-bg-0)',
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'var(--ide-bg-5) transparent',
+            }}
+          >
+            <div ref={pageRef} className="h-full">
+              {children}
+            </div>
+          </main>
+          {terminalOpen && (
+            <div className="hidden md:block">
+              <Terminal />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="hidden shrink-0 md:block">
+        <StatusBar />
+      </div>
+      <div className="shrink-0 md:hidden">
+        <MobileNav onMoreOpen={() => open('more')} />
+      </div>
+
       <MobileDrawer open={drawer === 'explorer'} onClose={close} title="Explorer" position="right">
-        <SidePanel />
+        <SidePanel inDrawer />
       </MobileDrawer>
-      <MobileDrawer open={drawer === 'more'} onClose={close} title="Menu">
+      <MobileDrawer open={drawer === 'more'} onClose={close} onExited={openNext} title="Menu">
         <MobileMoreMenu
-          onOpenTerminal={() => open('terminal')}
-          onOpenAskOo={() => open('askme')}
-          onOpenExplorer={() => open('explorer')}
-          onClose={close}
+          onOpenTerminal={() => switchTo('terminal')}
+          onOpenExplorer={() => switchTo('explorer')}
         />
       </MobileDrawer>
       <MobileDrawer open={drawer === 'terminal'} onClose={close} title="Terminal">
@@ -326,54 +262,18 @@ function MobileShell({ children }: { children: ReactNode }) {
           <Terminal embedded />
         </div>
       </MobileDrawer>
-      <MobileDrawer open={drawer === 'askme'} onClose={close} title="Ask Oo">
-        <div style={{ height: '70vh' }}>
-          <AskMePanel />
-        </div>
-      </MobileDrawer>
-      {isSettingsOpen && <SettingsPanel />}
     </div>
   );
 }
 
-function IDELayoutInner({ children }: { children: ReactNode }) {
-  const { isMobile, isTablet } = useResponsive();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    document.documentElement.classList.add('ide-layout');
-    setMounted(true);
-    return () => {
-      document.documentElement.classList.remove('ide-layout');
-    };
-  }, []);
-
-  // Don't render any shell until we know the real breakpoint — prevents
-  // DesktopShell flashing on mobile before useResponsive reads window.innerWidth.
-  if (!mounted) {
-    return <div style={{ height: '100dvh', background: 'var(--ide-bg-2)' }} />;
-  }
-
-  const Shell = isMobile ? MobileShell : isTablet ? TabletShell : DesktopShell;
-
-  return (
-    <>
-      <NavigationProgressBar />
-      <Shell>{children}</Shell>
-    </>
-  );
-}
-
 export function IDELayout({ children }: { children: ReactNode }) {
-  return <IDELayoutInner>{children}</IDELayoutInner>;
+  return <Shell>{children}</Shell>;
 }
 
 export function PortfolioShell({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider>
-      <IDEProvider>
-        <IDELayout>{children}</IDELayout>
-      </IDEProvider>
-    </ThemeProvider>
+    <IDEProvider>
+      <IDELayout>{children}</IDELayout>
+    </IDEProvider>
   );
 }

@@ -7,8 +7,7 @@ import {
   type MemberDoc,
 } from './javaCompletions';
 
-// Monaco's own equivalent of the CodeMirror provider in javaCompletions.ts —
-// same curated data (imported, not re-typed), adapted to Monaco's
+// Monaco's own equivalent of the CodeMirror provider in javaCompletions.ts, // same curated data (imported, not re-typed), adapted to Monaco's
 // CompletionItemProvider shape. See javaCompletions.ts for why this is a
 // static list rather than a real language server.
 export function registerJavaCompletions(monaco: typeof Monaco) {

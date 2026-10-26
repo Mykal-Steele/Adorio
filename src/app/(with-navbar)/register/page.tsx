@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Register from '@/views/Register';
 
@@ -8,9 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
-  return (
-    <Suspense fallback={null}>
-      <Register />
-    </Suspense>
-  );
+  return <Register />;
 }

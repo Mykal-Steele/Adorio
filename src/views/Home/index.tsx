@@ -5,11 +5,14 @@ import { getPosts, createPost, likePost } from '../../api';
 import PostCard from './components/PostCard';
 import PostSkeleton from './components/PostSkeleton';
 import { useAppSelector } from '../../store/hooks';
+import { useHydrated } from '../../hooks/useHydrated';
+import { AuthSwitch } from '@/components/AuthSwitch';
 import { ExclamationTriangleIcon, CameraIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import { debounce } from 'lodash';
 import { isAbortError } from '../../utils/errorHandling';
+import PostColumns from './components/PostColumns';
 import { TITLE_CHARACTER_LIMIT } from './constants/title';
 import { POSTS_PAGE_SIZE } from './constants/feed';
 import PaperTornEdge from '../../components/PaperTornEdge';
@@ -60,14 +63,9 @@ const ComposeCard = ({
       aria-hidden="true"
       className="absolute -top-3 left-7 h-[26px] w-24 rotate-[-3.5deg] border-x border-dashed border-[rgba(60,44,24,.3)] bg-[rgba(242,199,68,.7)] shadow-[0_1px_3px_rgba(60,44,24,.2)]"
     />
-    <div className="flex flex-wrap items-baseline gap-3">
-      <h2 id="compose-h" className="font-paper-serif text-[27px] font-bold">
-        Create a post
-      </h2>
-      <span className="font-paper-hand text-xl text-[var(--paper-accent)]">
-        &larr; ship it, then write it up
-      </span>
-    </div>
+    <h2 id="compose-h" className="font-paper-serif text-[27px] font-bold">
+      Create a post
+    </h2>
 
     <form onSubmit={onSubmit}>
       <label className="mt-[22px] block">
@@ -129,7 +127,7 @@ const ComposeCard = ({
       {imagePreview && (
         <div className="relative mt-4 inline-block rotate-[-0.7deg] bg-[#f1e7d3] p-[10px] shadow-[0_2px_0_rgba(60,44,24,.12)]">
           {/* imagePreview is always either '' or a same-origin blob: URL from
-              URL.createObjectURL() in handleImageChange below — never user-supplied text */}
+              URL.createObjectURL() in handleImageChange below, never user-supplied text */}
           <img
             src={imagePreview} // lgtm[js/xss-through-dom] -- browser-generated blob: URL, not DOM text
             alt="Selected upload preview"
@@ -179,6 +177,10 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
   const [content, setContent] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const { user } = useAppSelector((state) => state.user);
+  // The server renders the feed for nobody. Use the signed-in user only once the feed has
+  // hydrated, or likes and owner buttons won't match the server HTML.
+  const hydrated = useHydrated();
+  const viewer = hydrated ? user : null;
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -220,12 +222,11 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getPosts(
-        page,
-        POSTS_PAGE_SIZE,
-        abortControllerRef.current.signal,
-        filter === 'photos',
-      );
+      const response = await getPosts(page, {
+        limit: POSTS_PAGE_SIZE,
+        signal: abortControllerRef.current.signal,
+        hasImage: filter === 'photos',
+      });
       const newPosts = response.posts || [];
       setPosts((prev) => (page === 1 ? newPosts : [...prev, ...newPosts]));
       setHasMore(response.hasMore);
@@ -243,7 +244,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     }
   }, [page, filter]);
 
-  // SSR already rendered page 1 — don't refetch it on mount or posts 4..N
+  // SSR already rendered page 1, don't refetch it on mount or posts 4..N
   // get skipped/overwritten by a mismatched page/limit. The next fetch is
   // page 2 via infinite scroll. If SSR failed (no initial posts), fetch page 1.
   const hasHydratedInitialPage = useRef(initialPosts.length > 0);
@@ -257,7 +258,7 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
 
   // Switching filters queries a different set on the backend now (see fetchPosts),
   // so the existing page needs to be thrown away and pagination restarted from
-  // page 1 for it — otherwise switching to Photos would either show a stale mix
+  // page 1 for it, otherwise switching to Photos would either show a stale mix
   // of results or try to append page 2 of the new filter onto page 1 of the old one.
   const isFirstFilterRender = useRef(true);
   useEffect(() => {
@@ -463,20 +464,6 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     }
   };
 
-  // Two fixed columns instead of a CSS multi-column layout: a native `column-width`
-  // rebalances its entire contents from scratch whenever the total content changes,
-  // which visibly moves already-rendered posts into a different column every time
-  // a new page loads. Assigning each post to a column by its own stable index means
-  // a newly loaded post only ever appends to the end of a column — it never moves
-  // one that's already on screen.
-  const postColumns = useMemo(() => {
-    const columns: { post: (typeof posts)[number]; index: number }[][] = [[], []];
-    posts.forEach((post, index) => {
-      columns[index % 2].push({ post, index });
-    });
-    return columns;
-  }, [posts]);
-
   const countLabel =
     filter === 'photos' ? `${posts.length} with photos` : `${posts.length} posts on the wall`;
 
@@ -512,15 +499,18 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
                 drop a screenshot, or just say hi.
               </p>
             </div>
+            {/* Shows after mount because "today" is the visitor's own timezone. Below lg it would
+                wrap onto its own line and push the whole feed down when it appears, so there it
+                sits on the corner of the hero like a sticker and takes no space. */}
             {mounted && newTodayCount > 0 && (
-              <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-[18px] py-3 font-paper-hand text-2xl leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
+              <p className="absolute right-4 top-0 whitespace-nowrap rounded-[2px] sm:right-8 sm:top-2 lg:relative lg:right-auto lg:top-auto bg-[var(--paper-yellow)] px-[18px] py-3 font-paper-sans font-bold text-lg leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
                 {newTodayCount} new today
               </p>
             )}
           </div>
 
-          {mounted &&
-            (user ? (
+          <AuthSwitch
+            signedIn={
               <ComposeCard
                 title={title}
                 content={content}
@@ -533,9 +523,9 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
                 onRemoveImage={handleRemoveImage}
                 onSubmit={handleSubmit}
               />
-            ) : (
-              <GuestPrompt />
-            ))}
+            }
+            signedOut={<GuestPrompt />}
+          />
         </div>
 
         <svg
@@ -600,26 +590,24 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
               <PostSkeleton count={3} />
             </div>
           ) : (
-            <div className="mt-[clamp(34px,4vw,50px)] grid grid-cols-1 gap-x-[clamp(24px,3vw,38px)] sm:grid-cols-2">
-              {postColumns.map((column, columnIndex) => (
-                <div key={columnIndex}>
-                  {column.map(({ post, index }) => (
-                    <PostCard
-                      key={post._id}
-                      {...post}
-                      index={index}
-                      currentUserId={user?._id}
-                      currentUsername={user?.username}
-                      onLike={handleLike}
-                      onCommentAdded={(updatedPost) => {
-                        setPosts((prevPosts) =>
-                          prevPosts.map((p) => (p._id === updatedPost._id ? updatedPost : p)),
-                        );
-                      }}
-                    />
-                  ))}
-                </div>
-              ))}
+            <div className="mt-[clamp(34px,4vw,50px)]">
+              <PostColumns
+                posts={posts}
+                renderPost={(post, index) => (
+                  <PostCard
+                    {...post}
+                    index={index}
+                    currentUserId={viewer?._id}
+                    currentUsername={viewer?.username}
+                    onLike={handleLike}
+                    onCommentAdded={(updatedPost) => {
+                      setPosts((prevPosts) =>
+                        prevPosts.map((p) => (p._id === updatedPost._id ? updatedPost : p)),
+                      );
+                    }}
+                  />
+                )}
+              />
             </div>
           )}
 
@@ -632,16 +620,14 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
           )}
 
           {!loading && !hasMore && posts.length > 0 && (
-            <p className="mx-auto mt-[clamp(40px,5vw,64px)] text-center font-paper-hand text-2xl text-[var(--paper-muted)]">
-              that&apos;s everything for now, check back later
+            <p className="mx-auto mt-[clamp(40px,5vw,64px)] text-center font-paper-sans text-lg text-[var(--paper-muted)]">
+              You&apos;ve reached the end.
             </p>
           )}
 
           {!loading && posts.length === 0 && !error && (
             <div className="py-16 text-center">
-              <p className="font-paper-hand text-2xl text-[var(--paper-muted)]">
-                No posts yet. Be the first to pin one up!
-              </p>
+              <p className="font-paper-sans text-lg text-[var(--paper-muted)]">No posts yet.</p>
             </div>
           )}
         </div>

@@ -36,7 +36,12 @@ export const usage = asyncHandler(async (req, res) => {
 export const serveFile = asyncHandler(async (req, res) => {
   const target = await getFileTarget(req.params.slug);
   if (target.redirectUrl) return res.redirect(302, target.redirectUrl);
-  res.set('Content-Type', target.contentType).send(target.body);
+  // Old uploads are someone's HTML served from adorio.space. The sandbox gives it an
+  // opaque origin, so its scripts can't read the site's storage or call the API as the visitor.
+  res
+    .set('Content-Type', target.contentType)
+    .set('Content-Security-Policy', 'sandbox allow-scripts allow-forms allow-popups allow-modals')
+    .send(target.body);
 });
 
 export const deleteFile = asyncHandler(async (req, res) => {

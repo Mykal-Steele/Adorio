@@ -36,7 +36,7 @@ export function formatDayLabel(iso: string): string {
 }
 
 // Paper theme has no built-in positive/negative/warning palette (those are
-// Runway's own dark-theme tokens) — these earthy equivalents keep the same
+// Runway's own dark-theme tokens), these earthy equivalents keep the same
 // good/warning/over-budget semantics on cream.
 export const STATUS_COLORS = {
   positive: '#3f7d52',
