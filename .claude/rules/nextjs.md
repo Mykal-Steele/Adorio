@@ -45,7 +45,10 @@ export function InteractiveButton() { ... }
 ## Navigation
 
 - Use `useRouter().push()` from `next/navigation` for programmatic navigation — never `window.location`
-- Use `<Link>` for anchor navigation — automatic prefetching, no full reload
+- Use `<Link>` for anchor navigation — automatic prefetching, no full reload. Never a `<button>` with `router.push` for going to a page: it can't open in a new tab and isn't prefetched
+- Use `IntentLink` (`src/components/IntentLink.tsx`) where a link should fetch the whole page on hover, focus or touch: dynamic pages like `/social`, and long lists (`onlyOnIntent` skips the on-screen prefetch)
+- Use a plain `<a>` for anything that isn't a Next page: route handlers like `/learn-korean` and `/resume`, files in `public/`. A `<Link>` to one makes an extra request before the full page load
+- The page change progress bar is `src/components/NavigationProgressBar.tsx`, mounted once in the root layout
 - Pass route params as props to components; don't access `routeContext` directly
 
 ## API Calls from Client

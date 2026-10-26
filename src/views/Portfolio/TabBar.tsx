@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { CopyX, X } from 'lucide-react';
 import { useIDE } from './context/IDEContext';
@@ -15,10 +15,6 @@ export function TabBar() {
   const { openTabs, closeTab, closeOtherTabs } = useIDE();
   const pendingPath = usePendingNavPath();
   const activePath = pendingPath ?? pathname;
-
-  useEffect(() => {
-    openTabs.forEach((path) => router.prefetch(path));
-  }, [router, openTabs]);
 
   const close = (path: string) => {
     const index = openTabs.indexOf(path);
@@ -75,14 +71,12 @@ export function TabBar() {
               }}
             >
               {/* Spans the whole tab so its focus ring circles the close button too */}
-              <button
+              <Link
+                href={path}
                 aria-current={active ? 'page' : undefined}
-                onClick={() => router.push(path)}
                 className="pf-tab pf-tab-open flex h-full items-center gap-2 pr-10 pl-4"
                 style={{
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
+                  textDecoration: 'none',
                   color: active ? 'var(--ide-text-1)' : 'var(--ide-text-4)',
                   fontSize: 15,
                   fontWeight: active ? 700 : 400,
@@ -91,7 +85,7 @@ export function TabBar() {
               >
                 <FileIcon path={path} />
                 {name}
-              </button>
+              </Link>
               <IconButton
                 onClick={() => close(path)}
                 aria-label={`Close ${name}`}

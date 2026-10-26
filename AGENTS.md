@@ -163,7 +163,7 @@ src/views/Portfolio/
 
 **Interaction states**: buttons, links, cards, logo tiles, and photo prints use the `.pf-btn-primary`, `.pf-btn`, `.pf-link`, `.pf-card`, `.pf-tile`, and `.pf-print` classes in `globals.css`. Inline styles would override any `:hover`, so keep transforms and shadows for these elements in the classes, not in `style={{}}`.
 
-**Motion**: a new page eases in on client navigation (`usePageEnter` in `IDELayout.tsx`, never on the first load), theme changes crossfade with a view transition (`ThemeContext.tsx`), and going from one mobile drawer to another waits for the first to close (`onExited`). The navigation bar only shows when a page takes longer than 150ms. Everything checks `prefersReducedMotion()` from `motion.ts` or has a `prefers-reduced-motion` rule in `globals.css`. Keep new motion to things the user did, and use the same `cubic-bezier(0.23, 1, 0.32, 1)` curve.
+**Motion**: a new page eases in on client navigation (`usePageEnter` in `IDELayout.tsx`, never on the first load), theme changes crossfade with a view transition (`ThemeContext.tsx`), and going from one mobile drawer to another waits for the first to close (`onExited`). The page change progress bar (`src/components/NavigationProgressBar.tsx`, on every page) only shows when a page takes longer than 150ms, and creeps on instead of stopping partway. Everything checks `prefersReducedMotion()` from `motion.ts` or has a `prefers-reduced-motion` rule in `globals.css`. Keep new motion to things the user did, and use the same `cubic-bezier(0.23, 1, 0.32, 1)` curve.
 
 ### Backend Architecture (`backend/`)
 

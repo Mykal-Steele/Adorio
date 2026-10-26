@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useLayoutEffect, useRef, useCallback, ReactNode } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { Folder, Terminal as TerminalIcon, GithubIcon, LinkedinIcon } from 'lucide-react';
 
@@ -18,7 +18,6 @@ import { IDEProvider } from './context/IDEContext';
 import { portfolioData } from './data/portfolio';
 import { sans } from './constants/fonts';
 import { eyebrow } from './constants/type';
-import { NavigationProgressBar } from './shared/NavigationProgressBar';
 import { SettingsButton } from './shared';
 import { prefersReducedMotion } from './motion';
 
@@ -163,6 +162,14 @@ function Shell({ children }: { children: ReactNode }) {
     nextDrawer.current = null;
   }, []);
 
+  // Picking a page in a drawer closes it as soon as the click lands, so it slides away
+  // while the next page comes in instead of covering it
+  useEffect(() => {
+    const closeOnNavigate = () => setDrawer(null);
+    window.addEventListener('adorio:nav-start', closeOnNavigate);
+    return () => window.removeEventListener('adorio:nav-start', closeOnNavigate);
+  }, []);
+
   return (
     <div
       className="ide-root flex h-dvh flex-col overflow-hidden"
@@ -259,17 +266,8 @@ function Shell({ children }: { children: ReactNode }) {
   );
 }
 
-function IDELayoutInner({ children }: { children: ReactNode }) {
-  return (
-    <>
-      <NavigationProgressBar />
-      <Shell>{children}</Shell>
-    </>
-  );
-}
-
 export function IDELayout({ children }: { children: ReactNode }) {
-  return <IDELayoutInner>{children}</IDELayoutInner>;
+  return <Shell>{children}</Shell>;
 }
 
 export function PortfolioShell({ children }: { children: ReactNode }) {
