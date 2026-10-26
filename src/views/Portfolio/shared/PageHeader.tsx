@@ -34,7 +34,7 @@ export function PageHeader({ title, eyebrow, subtitle, style }: PageHeaderProps)
             lineHeight: 1.55,
             color: 'var(--ide-text-3)',
             margin: '12px 0 0',
-            maxWidth: '56ch',
+            maxWidth: '33.25em', // 56ch of Karla, in em so it holds while fonts load
           }}
         >
           {subtitle}

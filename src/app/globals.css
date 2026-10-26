@@ -583,7 +583,7 @@ body {
 }
 .pf-btn-primary {
   padding: 10px 20px;
-  font-family: 'Courier Prime', monospace;
+  font-family: var(--font-courier), monospace;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -599,7 +599,7 @@ body {
 }
 .pf-btn {
   padding: 10px 18px;
-  font-family: 'Karla', Helvetica, Arial, sans-serif;
+  font-family: var(--font-karla), Helvetica, Arial, sans-serif;
   font-size: 15px;
   font-weight: 700;
   color: var(--ide-text-1);
@@ -648,7 +648,7 @@ body {
   gap: 6px;
   /* Bottom padding keeps the underline below descenders instead of through them */
   padding: 0 1px 4px;
-  font-family: 'Karla', Helvetica, Arial, sans-serif;
+  font-family: var(--font-karla), Helvetica, Arial, sans-serif;
   font-size: 16px;
   font-weight: 700;
   color: var(--ide-text-1);
@@ -852,7 +852,7 @@ body {
    /social) so the noise texture and Karla body font don't leak into the rest of the
    still-dark site. */
 .paper-theme {
-  font-family: 'Karla', Helvetica, Arial, sans-serif;
+  font-family: var(--font-karla), Helvetica, Arial, sans-serif;
   background-color: var(--paper-bg);
   /* Fractal-noise paper grain — no Tailwind equivalent for an inline SVG filter background */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.2'/%3E%3C/svg%3E");
@@ -883,13 +883,13 @@ body {
   outline-offset: 3px;
 }
 .font-paper-serif {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--font-playfair), Georgia, serif;
 }
 .font-paper-mono {
-  font-family: 'Courier Prime', monospace;
+  font-family: var(--font-courier), monospace;
 }
 .font-paper-sans {
-  font-family: 'Karla', Helvetica, Arial, sans-serif;
+  font-family: var(--font-karla), Helvetica, Arial, sans-serif;
 }
 /* Ruled notebook lines behind the compose textarea — repeating-linear-gradient has no Tailwind utility.
    background-color must be set explicitly: browsers give <textarea> an opaque

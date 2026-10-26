@@ -126,7 +126,7 @@ function Hero({ isMobile }: { isMobile: boolean }) {
         >
           Backend developer
         </p>
-        <p style={{ ...body, fontSize: 19, marginTop: 20, maxWidth: '40ch' }}>
+        <p style={{ ...body, fontSize: 19, marginTop: 20, maxWidth: '23.75em' }}>
           I focus on backends and the setup that keeps them running. I mainly like working with
           APIs, databases, deployment, and developer experience.
         </p>
