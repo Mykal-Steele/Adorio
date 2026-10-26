@@ -4,24 +4,37 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 const NAV_START_EVENT = 'adorio:nav-start';
-const STUCK_TIMEOUT_MS = 6000;
-const DONE_FADE_MS = 260;
 // Most page changes are prefetched and land faster than this. Showing the bar for those
 // reads as a flicker, so it only appears once a navigation is actually taking a while.
 const SHOW_DELAY_MS = 150;
+const STUCK_TIMEOUT_MS = 10000;
+const FINISH_MS = 350;
 
+// Thin bar at the top of every page while a page change is slow. How it moves is in
+// globals.css (.nav-progress): it keeps creeping instead of stopping partway, then finishes
+// fast, because a bar that stalls makes the same wait feel longer.
 export function NavigationProgressBar() {
   const pathname = usePathname();
   const [phase, setPhase] = useState<'idle' | 'loading' | 'done'>('idle');
-  const stuckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // A new key restarts the creep when another navigation starts during the finish
+  const [run, setRun] = useState(0);
   const showTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const prevPathname = useRef(pathname);
+  const stuckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shownPath = useRef(pathname);
 
   useEffect(() => {
-    function handleStart() {
+    function handleStart(e: Event) {
+      const url = (e as CustomEvent<{ url?: string }>).detail?.url;
+      // Search-only changes stay on the same page, so there's nothing to wait for
+      if (url && new URL(url, window.location.origin).pathname === window.location.pathname) {
+        return;
+      }
       if (showTimer.current) clearTimeout(showTimer.current);
       if (stuckTimer.current) clearTimeout(stuckTimer.current);
-      showTimer.current = setTimeout(() => setPhase('loading'), SHOW_DELAY_MS);
+      showTimer.current = setTimeout(() => {
+        setRun((n) => n + 1);
+        setPhase('loading');
+      }, SHOW_DELAY_MS);
       stuckTimer.current = setTimeout(() => setPhase('idle'), STUCK_TIMEOUT_MS);
     }
     window.addEventListener(NAV_START_EVENT, handleStart);
@@ -29,44 +42,21 @@ export function NavigationProgressBar() {
   }, []);
 
   useEffect(() => {
-    if (prevPathname.current === pathname) return;
-    prevPathname.current = pathname;
-    if (stuckTimer.current) clearTimeout(stuckTimer.current);
+    if (shownPath.current === pathname) return;
+    shownPath.current = pathname;
     if (showTimer.current) clearTimeout(showTimer.current);
+    if (stuckTimer.current) clearTimeout(stuckTimer.current);
     // Only finish the bar if it was showing. An instant navigation never shows it at all.
     setPhase((p) => (p === 'loading' ? 'done' : 'idle'));
-    const t = setTimeout(() => setPhase('idle'), DONE_FADE_MS);
+    const t = setTimeout(() => setPhase('idle'), FINISH_MS);
     return () => clearTimeout(t);
   }, [pathname]);
 
   if (phase === 'idle') return null;
 
   return (
-    <div
-      aria-hidden
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 2,
-        zIndex: 300,
-        pointerEvents: 'none',
-      }}
-    >
-      <div
-        style={{
-          height: '100%',
-          width: phase === 'done' ? '100%' : '78%',
-          background: 'var(--ide-accent)',
-          boxShadow: '0 0 8px var(--ide-accent-light-a60), 0 0 2px var(--ide-accent)',
-          opacity: phase === 'done' ? 0 : 1,
-          transition:
-            phase === 'done'
-              ? `width 200ms ease-out, opacity ${DONE_FADE_MS}ms ease-out 100ms`
-              : 'width 900ms cubic-bezier(0.2, 0.65, 0.3, 1)',
-        }}
-      />
+    <div key={run} aria-hidden className="nav-progress" data-nav-progress data-state={phase}>
+      <div className="nav-progress-fill" />
     </div>
   );
 }

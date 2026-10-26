@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { IntentLink } from '@/components/IntentLink';
 import { ChevronRight, Folder as FolderClosed, FolderOpen } from 'lucide-react';
 import { portfolioData } from './data/portfolio';
 import { ROOT_FILES, projectFileName } from './data/files';
@@ -23,19 +24,21 @@ const rowStyle = {
   textAlign: 'left',
 } as const;
 
+// A real link, so it opens in a new tab like any other. The explorer lists 30 odd pages, so
+// each one is fetched when pointed at, focused or touched, not all of them on load.
 function FileRow({ path, name, depth }: { path: string; name: string; depth: number }) {
-  const router = useRouter();
   const pathname = usePathname();
   const active = (usePendingNavPath() ?? pathname) === path;
 
   return (
-    <button
-      onClick={() => router.push(path)}
-      onMouseEnter={() => router.prefetch(path)}
+    <IntentLink
+      href={path}
+      onlyOnIntent
       aria-current={active ? 'page' : undefined}
       className={active ? '' : 'ide-hover'}
       style={{
         ...rowStyle,
+        textDecoration: 'none',
         paddingLeft: 14 + depth * 22,
         background: active ? 'var(--ide-border-subtle)' : 'transparent',
         boxShadow: active ? 'inset 2px 0 0 var(--ide-yellow)' : 'none',
@@ -45,7 +48,7 @@ function FileRow({ path, name, depth }: { path: string; name: string; depth: num
     >
       <FileIcon path={path} />
       <span className="truncate">{name}</span>
-    </button>
+    </IntentLink>
   );
 }
 

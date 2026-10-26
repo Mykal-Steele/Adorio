@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { User, FolderGit2, Mail, MoreHorizontal } from 'lucide-react';
 import { sans } from '../constants/fonts';
@@ -22,6 +23,9 @@ export function MobileNav({ onMoreOpen }: MobileNavProps) {
   const pendingPath = usePendingNavPath();
   const effectivePath = pendingPath ?? pathname;
 
+  // The three main pages are small and static, so get them up front. Links only prefetch
+  // once they're on screen, and on desktop this bar is hidden and contact.sh is below the
+  // fold in the explorer.
   useEffect(() => {
     navItems.forEach((item) => router.prefetch(item.path));
   }, [router]);
@@ -45,14 +49,13 @@ export function MobileNav({ onMoreOpen }: MobileNavProps) {
       {navItems.map(({ path, icon: Icon, label }) => {
         const active = isActive(path);
         return (
-          <button
+          <Link
             key={path}
-            onClick={() => router.push(path)}
+            href={path}
+            aria-current={active ? 'page' : undefined}
             className="flex flex-col items-center gap-1"
             style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
+              textDecoration: 'none',
               padding: '4px 0',
               minWidth: 56,
               borderTop: active ? '2px solid var(--ide-yellow)' : '2px solid transparent',
@@ -72,7 +75,7 @@ export function MobileNav({ onMoreOpen }: MobileNavProps) {
             >
               {label}
             </span>
-          </button>
+          </Link>
         );
       })}
       <button

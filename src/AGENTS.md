@@ -76,6 +76,8 @@ src/
 │   ├── AdSenseScript.tsx        — Google AdSense script injection
 │   ├── ErrorBoundary.tsx        — React error boundary wrapper
 │   ├── Navbar.tsx               — Top navigation bar (reads auth state from Redux, dispatches logout)
+│   ├── IntentLink.tsx           — Link that fetches the whole page on hover, focus or touch; LinkPending for instant feedback
+│   ├── NavigationProgressBar.tsx — Top progress bar for slow page changes, mounted in the root layout
 │   ├── NotFound.tsx             — 404 message component
 │   ├── ui/                      — Generic UI primitives (shadcn-compatible structure)
 │   │   ├── index.ts             — Barrel: exports Button, Spinner, SkeletonLoader

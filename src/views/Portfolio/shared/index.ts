@@ -4,7 +4,6 @@ export { StatusLabel } from './StatusLabel';
 export { IconButton } from './IconButton';
 export { IDECard, Tape } from './IDECard';
 export { ThemeSwitcher } from './ThemeSwitcher';
-export { NavigationProgressBar } from './NavigationProgressBar';
 export { ProjectCard } from './ProjectCard';
 export { ProjectImage } from './ProjectImage';
 export { FileIcon } from './FileIcon';

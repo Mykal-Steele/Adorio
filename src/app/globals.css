@@ -859,6 +859,58 @@ body {
   }
 }
 
+/* Page change progress (NavigationProgressBar). It shows only when a page takes over 150ms,
+   creeps on without ever stopping, then fills fast at the end. A bar that stalls partway
+   makes the same wait feel longer, and one that keeps moving or speeds up feels shorter. */
+.nav-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 300;
+  height: 2px;
+  pointer-events: none;
+}
+.nav-progress-fill {
+  height: 100%;
+  transform-origin: left;
+  background: var(--nav-progress, var(--paper-ink));
+  animation: navCreep 12s linear forwards;
+}
+.nav-progress[data-state='done'] {
+  opacity: 0;
+  transition: opacity 200ms ease 150ms;
+}
+.nav-progress[data-state='done'] .nav-progress-fill {
+  animation: none;
+  transform: scaleX(1);
+  transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@keyframes navCreep {
+  0% {
+    transform: scaleX(0.1);
+  }
+  4% {
+    transform: scaleX(0.4);
+  }
+  12% {
+    transform: scaleX(0.6);
+  }
+  40% {
+    transform: scaleX(0.8);
+  }
+  100% {
+    transform: scaleX(0.94);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress-fill {
+    animation: none;
+    transform: scaleX(0.6);
+  }
+}
+:root:has(.ide-root) {
+  --nav-progress: var(--ide-accent);
+}
+
 /* AuthSwitch renders both versions until the session check finishes. The data-auth flag is
    set in <head> before first paint (layout.tsx), so the right one shows from the start. */
 html:not([data-auth='in']) .auth-in,

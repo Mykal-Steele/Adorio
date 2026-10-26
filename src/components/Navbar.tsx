@@ -5,10 +5,13 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Bars3Icon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { AuthSwitch } from '@/components/AuthSwitch';
+import { IntentLink, LinkPending } from '@/components/IntentLink';
 import { logout } from '@/store/userSlice';
 import { AnimatePresence, motion } from 'framer-motion';
 
-type NavItem = { href: string; text: string; external?: boolean };
+// page: a full page load (a route handler or a file in public/), not a Next page. A <Link> to
+// one asks for app router data first, gets HTML back, and only then loads the page.
+type NavItem = { href: string; text: string; external?: boolean; page?: boolean };
 type NavSection = { label: string; items: NavItem[] };
 
 const Navbar = () => {
@@ -61,11 +64,11 @@ const Navbar = () => {
     { href: '/rygame', text: 'RyGame' },
     { href: '/sendenv', text: 'SendEnv' },
     { href: '/finance', text: 'Financial Tracker' },
-    { href: '/learn-korean', text: 'Learn Korean' },
+    { href: '/learn-korean', text: 'Learn Korean', page: true },
   ];
   const signedOutLinks: NavItem[] = [
     { href: '/coding', text: 'Coding' },
-    { href: '/learn-korean', text: 'Learn Korean' },
+    { href: '/learn-korean', text: 'Learn Korean', page: true },
   ];
   // The mobile menu opens after the session check, so it can read the token directly
   const links = token ? signedInLinks : signedOutLinks;
@@ -95,18 +98,18 @@ const Navbar = () => {
       label: 'Study Pages',
       items: [
         { href: '/algo', text: 'Algo Cheat Sheet' },
-        { href: '/sadnote.html', text: 'SAD Textbook' },
-        { href: '/statsNotes.html', text: 'Stats Study Guide' },
-        { href: '/statsQuiz.html', text: 'Stats Quiz' },
-        { href: '/cogni-report.html', text: 'CogniMax Report' },
+        { href: '/sadnote.html', text: 'SAD Textbook', page: true },
+        { href: '/statsNotes.html', text: 'Stats Study Guide', page: true },
+        { href: '/statsQuiz.html', text: 'Stats Quiz', page: true },
+        { href: '/cogni-report.html', text: 'CogniMax Report', page: true },
       ],
     },
     {
       label: 'Files',
       items: [
-        { href: '/resume', text: 'Resume' },
-        { href: '/performance', text: 'Performance Report' },
-        { href: '/AI_Exam2_Cheat_Sheets.pdf', text: 'AI Exam Cheat Sheets' },
+        { href: '/resume', text: 'Resume', page: true },
+        { href: '/performance', text: 'Performance Report', page: true },
+        { href: '/AI_Exam2_Cheat_Sheets.pdf', text: 'AI Exam Cheat Sheets', page: true },
       ],
     },
   );
@@ -122,6 +125,7 @@ const Navbar = () => {
     <span className="relative inline-block px-[7px] py-[2px]">
       {active && (
         <span
+          data-active
           aria-hidden="true"
           className="absolute inset-x-[-1px] bottom-0 h-[8px] -rotate-[0.7deg] rounded-[2px_7px_3px_8px] bg-[var(--paper-yellow)]"
         />
@@ -132,21 +136,22 @@ const Navbar = () => {
 
   const renderDesktopLinks = (list: NavItem[]) => (
     <>
-      {list.map(({ href, text, external }) => {
+      {list.map(({ href, text, external, page }) => {
         const isActive = pathname === href;
-        return external ? (
+        return external || page ? (
           <a key={href} href={href} className={linkClassName}>
             {renderLabel(text, isActive)}
           </a>
         ) : (
-          <Link
+          <IntentLink
             key={href}
             href={href}
             aria-current={isActive ? 'page' : undefined}
             className={linkClassName}
           >
-            {renderLabel(text, isActive)}
-          </Link>
+            {/* Lights up as soon as it's clicked, before the page arrives */}
+            <LinkPending>{(pending) => renderLabel(text, isActive || pending)}</LinkPending>
+          </IntentLink>
         );
       })}
     </>
@@ -232,25 +237,27 @@ const Navbar = () => {
                             }`;
                             return (
                               <li key={item.href}>
-                                {item.external ? (
+                                {item.external || item.page ? (
                                   <a
                                     href={item.href}
                                     onClick={() => setMoreOpen(false)}
                                     className={className}
                                   >
                                     {item.text}
-                                    <span aria-hidden="true" className="ml-1 text-[10px]">
-                                      ↗
-                                    </span>
+                                    {item.external && (
+                                      <span aria-hidden="true" className="ml-1 text-[10px]">
+                                        ↗
+                                      </span>
+                                    )}
                                   </a>
                                 ) : (
-                                  <Link
+                                  <IntentLink
                                     href={item.href}
                                     onClick={() => setMoreOpen(false)}
                                     className={className}
                                   >
                                     {item.text}
-                                  </Link>
+                                  </IntentLink>
                                 )}
                               </li>
                             );
@@ -304,8 +311,8 @@ const Navbar = () => {
             className="overflow-hidden border-t border-[rgba(60,44,24,.15)] bg-[var(--paper-cream)] xl:hidden"
           >
             <div className="mx-auto flex max-h-[calc(100vh-4rem)] max-w-6xl flex-col overflow-y-auto px-4 py-2">
-              {links.map(({ href, text, external }) =>
-                external ? (
+              {links.map(({ href, text, external, page }) =>
+                external || page ? (
                   <a
                     key={href}
                     href={href}
@@ -315,14 +322,14 @@ const Navbar = () => {
                     {text}
                   </a>
                 ) : (
-                  <Link
+                  <IntentLink
                     key={href}
                     href={href}
                     onClick={close}
                     className="rounded-lg px-3 py-3 text-sm transition-colors hover:bg-[var(--paper-yellow-soft)]"
                   >
                     {text}
-                  </Link>
+                  </IntentLink>
                 ),
               )}
 
@@ -335,7 +342,7 @@ const Navbar = () => {
                     {section.label}
                   </p>
                   {section.items.map((item) =>
-                    item.external ? (
+                    item.external || item.page ? (
                       <a
                         key={item.href}
                         href={item.href}
@@ -343,19 +350,21 @@ const Navbar = () => {
                         className="block rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-[var(--paper-yellow-soft)]"
                       >
                         {item.text}
-                        <span aria-hidden="true" className="ml-1 text-[10px]">
-                          ↗
-                        </span>
+                        {item.external && (
+                          <span aria-hidden="true" className="ml-1 text-[10px]">
+                            ↗
+                          </span>
+                        )}
                       </a>
                     ) : (
-                      <Link
+                      <IntentLink
                         key={item.href}
                         href={item.href}
                         onClick={close}
                         className="block rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-[var(--paper-yellow-soft)]"
                       >
                         {item.text}
-                      </Link>
+                      </IntentLink>
                     ),
                   )}
                 </div>
