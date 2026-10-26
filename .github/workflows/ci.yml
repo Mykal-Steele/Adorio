@@ -104,6 +104,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: integration
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # One deploy at a time. Container Apps rejects an update while another is still
+    # provisioning, so merges that landed close together failed each other, and the one that
+    # finished last went live even when it was an older commit. A newer push waiting here
+    # replaces an older one that hasn't started yet, so the latest commit is what deploys.
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
     permissions:
       id-token: write
       contents: read
