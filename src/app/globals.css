@@ -830,6 +830,13 @@ body {
   }
 }
 
+/* AuthSwitch renders both versions until the session check finishes. The data-auth flag is
+   set in <head> before first paint (layout.tsx), so the right one shows from the start. */
+html:not([data-auth='in']) .auth-in,
+html[data-auth='in'] .auth-out {
+  display: none !important;
+}
+
 /* Paper-craft theme tokens — the color/font vocabulary for the social feed (/social)
    and the site-wide Navbar. Custom properties are inert until referenced, so declaring
    them on :root is safe even on pages that don't use any of them. */
