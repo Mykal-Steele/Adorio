@@ -10,7 +10,6 @@ import { TabBar } from './TabBar';
 import { StatusBar } from './StatusBar';
 import { Terminal } from './Terminal';
 import { useIDE } from './context/IDEContext';
-import { useResponsive } from './hooks/useResponsive';
 import { MobileHeader } from './mobile/MobileHeader';
 import { MobileNav } from './mobile/MobileNav';
 import { MobileDrawer } from './mobile/MobileDrawer';
@@ -20,102 +19,6 @@ import { sans } from './constants/fonts';
 import { eyebrow } from './constants/type';
 import { NavigationProgressBar } from './shared/NavigationProgressBar';
 import { SettingsButton } from './shared';
-
-function DesktopShell({ children }: { children: ReactNode }) {
-  const { terminalOpen, sidePanelOpen } = useIDE();
-  return (
-    <div
-      className="flex flex-col"
-      style={{ height: '100vh', overflow: 'hidden', background: 'var(--ide-bg-1)' }}
-    >
-      <TitleBar />
-      <div className="flex flex-1 overflow-hidden">
-        <ActivityBar />
-        {sidePanelOpen && <SidePanel />}
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <TabBar />
-          <main
-            className="flex-1 overflow-y-auto"
-            style={{
-              background: 'var(--ide-bg-0)',
-              scrollbarWidth: 'thin',
-              scrollbarColor: 'var(--ide-bg-5) transparent',
-            }}
-          >
-            {children}
-          </main>
-          {terminalOpen && <Terminal />}
-        </div>
-      </div>
-      <StatusBar />
-    </div>
-  );
-}
-
-function TabletShell({ children }: { children: ReactNode }) {
-  const { terminalOpen } = useIDE();
-  const [explorerOpen, setExplorerOpen] = useState(false);
-  return (
-    <div
-      className="flex flex-col"
-      style={{ height: '100vh', overflow: 'hidden', background: 'var(--ide-bg-1)' }}
-    >
-      <TitleBar />
-      <div className="flex flex-1 overflow-hidden">
-        <div
-          className="shrink-0 flex flex-col items-center justify-between py-2"
-          style={{
-            width: 52,
-            background: 'var(--ide-bg-1)',
-            borderRight: '1px solid var(--ide-border)',
-          }}
-        >
-          <div className="flex flex-col items-center gap-1">
-            <button
-              aria-label="Toggle explorer panel"
-              onClick={() => setExplorerOpen((v) => !v)}
-              className="flex items-center justify-center"
-              style={{
-                width: 40,
-                height: 40,
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                borderLeft: explorerOpen ? '2px solid var(--ide-yellow)' : '2px solid transparent',
-              }}
-            >
-              <Folder size={18} color={explorerOpen ? 'var(--ide-text-1)' : 'var(--ide-text-5)'} />
-            </button>
-          </div>
-          <SettingsButton />
-        </div>
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <TabBar />
-          <main
-            className="flex-1 overflow-y-auto"
-            style={{
-              background: 'var(--ide-bg-0)',
-              scrollbarWidth: 'thin',
-              scrollbarColor: 'var(--ide-bg-5) transparent',
-            }}
-          >
-            {children}
-          </main>
-          {terminalOpen && <Terminal />}
-        </div>
-      </div>
-      <StatusBar />
-      <MobileDrawer
-        open={explorerOpen}
-        onClose={() => setExplorerOpen(false)}
-        title="Explorer"
-        position="right"
-      >
-        <SidePanel />
-      </MobileDrawer>
-    </div>
-  );
-}
 
 type MobileDrawerType = 'explorer' | 'terminal' | 'more' | null;
 
@@ -216,29 +119,91 @@ function MobileMoreMenu({
   );
 }
 
-function MobileShell({ children }: { children: ReactNode }) {
+// One shell for every screen size. CSS picks which bars show, so the server renders the
+// right layout and nothing swaps in after JavaScript loads. Below md (768px): mobile header
+// and bottom nav. md to lg: title bar, a rail with an explorer drawer, tabs, status bar.
+// lg and up: the full editor with the activity bar and explorer.
+function Shell({ children }: { children: ReactNode }) {
+  const { terminalOpen, sidePanelOpen } = useIDE();
   const [drawer, setDrawer] = useState<MobileDrawerType>(null);
   const open = (type: MobileDrawerType) => setDrawer(type);
   const close = () => setDrawer(null);
+
   return (
-    <div
-      className="flex flex-col"
-      style={{ height: '100dvh', overflow: 'hidden', background: 'var(--ide-bg-1)' }}
-    >
-      <MobileHeader onMenuOpen={() => open('explorer')} />
-      <main
-        className="flex-1 overflow-y-auto"
-        style={{
-          background: 'var(--ide-bg-0)',
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'var(--ide-bg-5) transparent',
-        }}
-      >
-        {children}
-      </main>
-      <MobileNav onMoreOpen={() => open('more')} />
+    <div className="flex h-dvh flex-col overflow-hidden" style={{ background: 'var(--ide-bg-1)' }}>
+      <div className="shrink-0 md:hidden">
+        <MobileHeader onMenuOpen={() => open('explorer')} />
+      </div>
+      <div className="hidden shrink-0 md:block">
+        <TitleBar />
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        <div className="hidden lg:flex">
+          <ActivityBar />
+        </div>
+        <div
+          className="hidden shrink-0 flex-col items-center justify-between py-2 md:flex lg:hidden"
+          style={{ width: 52, borderRight: '1px solid var(--ide-border)' }}
+        >
+          <button
+            aria-label="Toggle explorer panel"
+            onClick={() => setDrawer((d) => (d === 'explorer' ? null : 'explorer'))}
+            className="flex items-center justify-center"
+            style={{
+              width: 40,
+              height: 40,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              borderLeft:
+                drawer === 'explorer' ? '2px solid var(--ide-yellow)' : '2px solid transparent',
+            }}
+          >
+            <Folder
+              size={18}
+              color={drawer === 'explorer' ? 'var(--ide-text-1)' : 'var(--ide-text-5)'}
+            />
+          </button>
+          <SettingsButton />
+        </div>
+        {sidePanelOpen && (
+          <div className="hidden lg:flex">
+            <SidePanel />
+          </div>
+        )}
+
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="hidden shrink-0 md:block">
+            <TabBar />
+          </div>
+          <main
+            className="@container flex-1 overflow-y-auto"
+            style={{
+              background: 'var(--ide-bg-0)',
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'var(--ide-bg-5) transparent',
+            }}
+          >
+            {children}
+          </main>
+          {terminalOpen && (
+            <div className="hidden md:block">
+              <Terminal />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="hidden shrink-0 md:block">
+        <StatusBar />
+      </div>
+      <div className="shrink-0 md:hidden">
+        <MobileNav onMoreOpen={() => open('more')} />
+      </div>
+
       <MobileDrawer open={drawer === 'explorer'} onClose={close} title="Explorer" position="right">
-        <SidePanel />
+        <SidePanel inDrawer />
       </MobileDrawer>
       <MobileDrawer open={drawer === 'more'} onClose={close} title="Menu">
         <MobileMoreMenu
@@ -257,24 +222,12 @@ function MobileShell({ children }: { children: ReactNode }) {
 }
 
 function IDELayoutInner({ children }: { children: ReactNode }) {
-  const { isMobile, isTablet } = useResponsive();
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     document.documentElement.classList.add('ide-layout');
-    setMounted(true);
     return () => {
       document.documentElement.classList.remove('ide-layout');
     };
   }, []);
-
-  // Don't render any shell until we know the real breakpoint. This prevents
-  // DesktopShell flashing on mobile before useResponsive reads window.innerWidth.
-  if (!mounted) {
-    return <div style={{ height: '100dvh', background: 'var(--ide-bg-1)' }} />;
-  }
-
-  const Shell = isMobile ? MobileShell : isTablet ? TabletShell : DesktopShell;
 
   return (
     <>

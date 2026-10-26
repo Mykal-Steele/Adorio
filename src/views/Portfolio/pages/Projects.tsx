@@ -3,18 +3,13 @@
 import Link from 'next/link';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
-import { useResponsive } from '../hooks/useResponsive';
-import { useContentWidth } from '../hooks/useContentWidth';
 import { body } from '../constants/type';
 import { PageHeader, ProjectCard, SectionLabel } from '../shared';
 
 export function Projects() {
-  const { isMobile } = useResponsive();
-  const oneColumn = useContentWidth() < 640;
-
   return (
     <div
-      className={isMobile ? 'px-4 pt-8 pb-16' : 'px-8 pt-16 pb-24'}
+      className="px-4 pt-8 pb-16 md:px-8 md:pt-16 md:pb-24"
       style={{ maxWidth: 1040, margin: '0 auto' }}
     >
       <PageHeader
@@ -24,29 +19,19 @@ export function Projects() {
       />
 
       <div
-        className="grid"
-        style={{
-          gap: isMobile ? 32 : 40,
-          marginTop: 48,
-          gridTemplateColumns: oneColumn ? '1fr' : 'repeat(2, 1fr)',
-        }}
+        className="grid grid-cols-1 gap-8 md:gap-10 @[640px]:grid-cols-2"
+        style={{ marginTop: 48 }}
       >
         {portfolioData.projects.map((project) => (
           <ProjectCard key={project.id} project={project} />
         ))}
       </div>
 
-      <section style={{ marginTop: isMobile ? 48 : 64 }}>
+      <section className="mt-12 md:mt-16">
         <SectionLabel>Other projects</SectionLabel>
         <ul
-          className="grid"
-          style={{
-            gap: '28px 40px',
-            margin: 0,
-            padding: 0,
-            listStyle: 'none',
-            gridTemplateColumns: oneColumn ? '1fr' : 'repeat(2, 1fr)',
-          }}
+          className="grid grid-cols-1 @[640px]:grid-cols-2"
+          style={{ gap: '28px 40px', margin: 0, padding: 0, listStyle: 'none' }}
         >
           {portfolioData.otherProjects.map((project) => (
             <li key={project.name} className="flex flex-col items-start" style={{ gap: 10 }}>

@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { ChevronRight, Folder as FolderClosed, FolderOpen } from 'lucide-react';
 import { portfolioData } from './data/portfolio';
 import { ROOT_FILES, projectFileName } from './data/files';
-import { useResponsive } from './hooks/useResponsive';
 import { usePendingNavPath } from './hooks/usePendingNavPath';
 import { sans } from './constants/fonts';
 import { FileIcon } from './shared';
@@ -108,24 +107,23 @@ function Folder({
   );
 }
 
-export function SidePanel() {
+// The shell renders it inline on wide screens and inside a drawer below lg
+export function SidePanel({ inDrawer = false }: { inDrawer?: boolean }) {
   const pathname = usePathname();
-  const { isMobile, isTablet } = useResponsive();
   const [projectsOpen, setProjectsOpen] = useState(pathname.startsWith('/projects/'));
   const [skillsOpen, setSkillsOpen] = useState(true);
-  const isInDrawer = isMobile || isTablet;
 
   return (
     <nav
       aria-label="Explorer"
       className="shrink-0 flex flex-col overflow-hidden"
       style={{
-        width: isInDrawer ? '100%' : 268,
+        width: inDrawer ? '100%' : 268,
         background: 'var(--ide-bg-1)',
-        borderRight: isInDrawer ? 'none' : '1px solid var(--ide-border)',
+        borderRight: inDrawer ? 'none' : '1px solid var(--ide-border)',
       }}
     >
-      {!isInDrawer && (
+      {!inDrawer && (
         <div
           className="shrink-0 px-3 py-2"
           style={{

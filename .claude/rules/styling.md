@@ -34,7 +34,7 @@ Follow the Tailwind recommended order (enforced by Prettier plugin if configured
 ## Responsive Design
 
 - Mobile-first: base classes are mobile, add `sm:`, `md:`, `lg:`, `xl:` for larger screens
-- The Portfolio IDE has its own responsive shell (`DesktopShell`, `TabletShell`, `MobileShell`) — use the `useResponsive` hook from `hooks/useResponsive.ts`, not raw CSS media queries, for JS-driven layout switches
+- The Portfolio IDE lays out with CSS only, so the server renders the right layout on every screen. Use `md:`/`lg:` classes for screen size and container queries (`@[880px]:`, `@[640px]:`) for the width of the editor area (`<main>` has `@container`). Don't pick layouts in JavaScript (no `isMobile ? ... : ...` styles): they render the desktop layout first and jump after hydration
 
 ## Dark Mode
 

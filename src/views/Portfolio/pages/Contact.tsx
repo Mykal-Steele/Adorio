@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Send, GithubIcon, LinkedinIcon, Mail, AlertCircle, Code } from 'lucide-react';
 import { sendContactMessage } from '../../../api';
 import { portfolioData } from '../data/portfolio';
-import { useResponsive } from '../hooks/useResponsive';
 import { mono, sans } from '../constants/fonts';
 import { body } from '../constants/type';
 import { IDECard, PageHeader, SectionLabel } from '../shared';
@@ -77,7 +76,6 @@ const inputStyle = {
 } as const;
 
 export function Contact() {
-  const { isMobile } = useResponsive();
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', website: '' });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -102,7 +100,7 @@ export function Contact() {
 
   return (
     <div
-      className={isMobile ? 'px-4 pt-8 pb-16' : 'px-8 pt-16 pb-24'}
+      className="px-4 pt-8 pb-16 md:px-8 md:pt-16 md:pb-24"
       style={{ maxWidth: 776, margin: '0 auto' }}
     >
       <PageHeader
@@ -162,10 +160,10 @@ export function Contact() {
         </ul>
       </IDECard>
 
-      <section style={{ marginTop: isMobile ? 48 : 64 }}>
+      <section className="mt-12 md:mt-16">
         <SectionLabel>Send a message</SectionLabel>
 
-        <IDECard tape style={{ padding: isMobile ? 20 : 32 }}>
+        <IDECard tape className="p-5 md:p-8">
           {!sent ? (
             <div className="flex flex-col" style={{ gap: 20 }}>
               {/* Honeypot: invisible to real visitors, only a bot filling every field would touch this */}

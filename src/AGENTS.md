@@ -156,7 +156,7 @@ src/
     │       ├── editorKeys.ts — VSCode editing shortcuts (tab-at-cursor, comment/line keys)
     │       └── problemStorage.ts   — localStorage persistence for user code per problem
     └── Portfolio/               — VSCode-style IDE portfolio (public-facing, no auth)
-        ├── IDELayout.tsx        — PortfolioShell, IDELayout, Desktop/Tablet/MobileShell
+        ├── IDELayout.tsx        — PortfolioShell and one Shell; CSS breakpoints pick which bars show
         ├── ActivityBar.tsx      — 48px left column, toggles the explorer
         ├── SidePanel.tsx        — Explorer tree: root files, projects/, skills/
         ├── TabBar.tsx           — Open files as closable tabs
@@ -174,7 +174,7 @@ src/
         │   ├── status.ts        — statusConfig (display label per project status)
         │   └── type.ts          — shared text and button styles
         ├── hooks/
-        │   └── useResponsive.ts — SSR-safe breakpoint (initializes 'desktop', reads window in useEffect)
+        │   └── useContentWidth.ts — editor-area width for behavior only; layout uses container queries
         ├── shared/              — IDE-specific shared primitives
         │   ├── index.ts         — Barrel export
         │   ├── IDECard.tsx      — Paper card with optional tape strip

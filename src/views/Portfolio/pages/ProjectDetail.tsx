@@ -6,8 +6,6 @@ import { useState, type ReactNode } from 'react';
 import { ArrowLeft, ExternalLink, Github, Package, PlayCircle } from 'lucide-react';
 import { liveLabel } from '../data/links';
 import { portfolioData, type ProjectShot } from '../data/portfolio';
-import { useResponsive } from '../hooks/useResponsive';
-import { useContentWidth } from '../hooks/useContentWidth';
 import { mono, sans, serif } from '../constants/fonts';
 import { body, eyebrow } from '../constants/type';
 import {
@@ -106,10 +104,12 @@ function Paragraphs({ text }: { text: string }) {
 
 // Wide screenshots take the full width. Tall ones sit three to a row, two when there
 // are only two, and a single one is centered.
+// On phones every shot takes the full width. Class names are written out in full so
+// Tailwind can find them.
 function shotColumn(shot: ProjectShot, tallCount: number) {
-  if (shot.height <= shot.width) return 'span 6';
-  if (tallCount === 1) return '2 / span 4';
-  return tallCount >= 3 ? 'span 2' : 'span 3';
+  if (shot.height <= shot.width) return 'col-span-6';
+  if (tallCount === 1) return 'col-span-6 md:col-span-4 md:col-start-2';
+  return tallCount >= 3 ? 'col-span-6 md:col-span-2' : 'col-span-6 md:col-span-3';
 }
 
 function Screenshot({ shot, onOpen }: { shot: ProjectShot; onOpen: () => void }) {
@@ -167,8 +167,6 @@ function Screenshot({ shot, onOpen }: { shot: ProjectShot; onOpen: () => void })
 }
 
 export function ProjectDetail({ id }: { id: string }) {
-  const { isMobile } = useResponsive();
-  const stacked = useContentWidth() < 880;
   const [openShot, setOpenShot] = useState<ProjectShot | null>(null);
 
   const project = portfolioData.projects.find((p) => p.id === id);
@@ -203,7 +201,7 @@ export function ProjectDetail({ id }: { id: string }) {
 
   return (
     <div
-      className={`flex ${stacked ? 'flex-col' : 'items-start'} ${isMobile ? 'px-4 pt-8 pb-16' : 'px-8 pt-16 pb-24'}`}
+      className="flex flex-col px-4 pt-8 pb-16 md:px-8 md:pt-16 md:pb-24 @[880px]:flex-row @[880px]:items-start"
       style={{ gap: 48, maxWidth: 1096, margin: '0 auto' }}
     >
       <article className="min-w-0 flex-1" style={{ maxWidth: 720 }}>
@@ -354,10 +352,7 @@ export function ProjectDetail({ id }: { id: string }) {
               style={{ gap: 24, marginTop: 8, gridTemplateColumns: 'repeat(6, minmax(0, 1fr))' }}
             >
               {screenshots.map((shot) => (
-                <div
-                  key={shot.src}
-                  style={{ gridColumn: isMobile ? 'span 6' : shotColumn(shot, tallCount) }}
-                >
+                <div key={shot.src} className={shotColumn(shot, tallCount)}>
                   <Screenshot shot={shot} onOpen={() => setOpenShot(shot)} />
                 </div>
               ))}
@@ -367,14 +362,7 @@ export function ProjectDetail({ id }: { id: string }) {
       </article>
 
       {(liveUrl || hasLinks || project.note) && (
-        <aside
-          className="shrink-0"
-          style={{
-            width: stacked ? '100%' : 280,
-            position: stacked ? 'static' : 'sticky',
-            top: 32,
-          }}
-        >
+        <aside className="w-full shrink-0 @[880px]:sticky @[880px]:w-[280px]" style={{ top: 32 }}>
           <IDECard tape style={{ padding: 24 }}>
             {liveUrl && (
               <Link
