@@ -12,17 +12,24 @@ const bangkokTime = new Intl.DateTimeFormat('en-US', {
   minute: '2-digit',
 });
 
-// Oakar's local time, so a visitor can tell whether now is a sensible time to reach out
+// Oakar's local time, so a visitor can tell whether now is a sensible time to reach out.
+// The pages are prerendered at build time, so the time is only known after mount. Until
+// then a fixed placeholder holds the space, hidden, so the server HTML and the first
+// render match. A real time in the server HTML made React throw the page away and render
+// it again, which replayed every entrance animation.
 function LocalTime() {
-  const [now, setNow] = useState(() => new Date());
+  const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
+    setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(id);
   }, []);
   return (
     <span className="flex items-center gap-1.5" style={{ color: 'var(--ide-text-4)' }}>
       <Clock size={14} />
-      {bangkokTime.format(now)} in Bangkok
+      <span style={{ visibility: now ? 'visible' : 'hidden' }}>
+        {bangkokTime.format(now ?? new Date(0))} in Bangkok
+      </span>
     </span>
   );
 }
