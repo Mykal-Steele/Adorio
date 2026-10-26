@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { Bars3Icon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
@@ -9,10 +9,38 @@ import { IntentLink, LinkPending } from '@/components/IntentLink';
 import { logout } from '@/store/userSlice';
 import { AnimatePresence, motion } from 'framer-motion';
 
+// The width a main link gets its own spot in the bar from. Narrower than that it's listed in
+// More instead, so the bar never wraps or runs past the page. 'never' always lives in More.
+type Breakpoint = 'md' | 'lg' | 'xl' | 'never';
+
 // page: a full page load (a route handler or a file in public/), not a Next page. A <Link> to
 // one asks for app router data first, gets HTML back, and only then loads the page.
-type NavItem = { href: string; text: string; external?: boolean; page?: boolean };
+type NavItem = {
+  href: string;
+  text: string;
+  external?: boolean;
+  page?: boolean;
+  from?: Breakpoint;
+};
 type NavSection = { label: string; items: NavItem[] };
+
+// Written out in full so Tailwind sees every class
+const SHOW_IN_BAR: Record<Breakpoint, string> = {
+  md: 'hidden md:block',
+  lg: 'hidden lg:block',
+  xl: 'hidden xl:block',
+  never: 'hidden',
+};
+const SHOW_IN_MORE: Record<Breakpoint, string> = {
+  md: 'md:hidden',
+  lg: 'lg:hidden',
+  xl: 'xl:hidden',
+  never: '',
+};
+const ORDER: Breakpoint[] = ['md', 'lg', 'xl', 'never'];
+
+const ctaClassName =
+  'shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)]';
 
 const Navbar = () => {
   const { token, user } = useAppSelector((state) => state.user);
@@ -41,6 +69,20 @@ const Navbar = () => {
     };
   }, [moreOpen]);
 
+  // The phone menu covers the page, so the page behind it shouldn't scroll
+  useEffect(() => {
+    if (!open) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [open]);
+
   useEffect(() => {
     setMoreOpen(false);
     setOpen(false);
@@ -57,20 +99,20 @@ const Navbar = () => {
   };
 
   const signedInLinks: NavItem[] = [
-    { href: '/social', text: 'Social' },
-    { href: '/profile', text: 'Profile' },
-    { href: '/hosting', text: 'Hosting' },
-    { href: '/coding', text: 'Coding' },
-    { href: '/rygame', text: 'RyGame' },
-    { href: '/sendenv', text: 'SendEnv' },
-    { href: '/finance', text: 'Financial Tracker' },
-    { href: '/learn-korean', text: 'Learn Korean', page: true },
+    { href: '/social', text: 'Social', from: 'md' },
+    { href: '/profile', text: 'Profile', from: 'md' },
+    { href: '/coding', text: 'Coding', from: 'md' },
+    { href: '/hosting', text: 'Hosting', from: 'lg' },
+    { href: '/learn-korean', text: 'Learn Korean', page: true, from: 'lg' },
+    { href: '/rygame', text: 'RyGame', from: 'lg' },
+    { href: '/finance', text: 'Financial Tracker', from: 'xl' },
+    { href: '/sendenv', text: 'SendEnv', from: 'never' },
   ];
   const signedOutLinks: NavItem[] = [
-    { href: '/coding', text: 'Coding' },
-    { href: '/learn-korean', text: 'Learn Korean', page: true },
+    { href: '/coding', text: 'Coding', from: 'md' },
+    { href: '/learn-korean', text: 'Learn Korean', page: true, from: 'md' },
   ];
-  // The mobile menu opens after the session check, so it can read the token directly
+  // The menus open after the session check, so they can read the token directly
   const links = token ? signedInLinks : signedOutLinks;
 
   const sections: NavSection[] = [];
@@ -114,12 +156,27 @@ const Navbar = () => {
     },
   );
 
-  const isMoreActive = sections.some((section) =>
-    section.items.some((item) => pathname === item.href),
+  // More lists the main links that don't fit in the bar at the current width. The heading
+  // hides at the width where the last of them gets its own spot.
+  const lastToFit = links.reduce<Breakpoint>(
+    (latest, item) =>
+      ORDER.indexOf(item.from ?? 'never') > ORDER.indexOf(latest) ? (item.from ?? 'never') : latest,
+    'md',
   );
 
+  // More is marked as the current page only where the page actually sits inside it. A main
+  // link is in More below its breakpoint, so the mark uses the same classes.
+  const currentMain = links.find((item) => pathname === item.href);
+  const moreActiveClass = sections.some((section) =>
+    section.items.some((item) => pathname === item.href),
+  )
+    ? ''
+    : currentMain
+      ? SHOW_IN_MORE[currentMain.from ?? 'never']
+      : null;
+
   const linkClassName =
-    'relative px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:text-[var(--paper-accent)]';
+    'relative px-2 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:text-[var(--paper-accent)]';
 
   const renderLabel = (text: string, active: boolean) => (
     <span className="relative inline-block px-[7px] py-[2px]">
@@ -134,28 +191,63 @@ const Navbar = () => {
     </span>
   );
 
-  const renderDesktopLinks = (list: NavItem[]) => (
+  // Next pages get an IntentLink (prefetch on hover, focus or touch). Everything else is a
+  // plain <a>, and links off the site get an arrow.
+  const renderItem = (
+    item: NavItem,
+    className: string,
+    onClick?: () => void,
+    children: ReactNode = item.text,
+  ) =>
+    item.external || item.page ? (
+      <a key={item.href} href={item.href} onClick={onClick} className={className}>
+        {children}
+        {item.external && (
+          <span aria-hidden="true" className="ml-1 text-[10px]">
+            ↗
+          </span>
+        )}
+      </a>
+    ) : (
+      <IntentLink
+        key={item.href}
+        href={item.href}
+        onClick={onClick}
+        aria-current={pathname === item.href ? 'page' : undefined}
+        className={className}
+      >
+        {children}
+      </IntentLink>
+    );
+
+  const renderBarLinks = (list: NavItem[]) => (
     <>
-      {list.map(({ href, text, external, page }) => {
-        const isActive = pathname === href;
-        return external || page ? (
-          <a key={href} href={href} className={linkClassName}>
-            {renderLabel(text, isActive)}
-          </a>
-        ) : (
-          <IntentLink
-            key={href}
-            href={href}
-            aria-current={isActive ? 'page' : undefined}
-            className={linkClassName}
-          >
-            {/* Lights up as soon as it's clicked, before the page arrives */}
-            <LinkPending>{(pending) => renderLabel(text, isActive || pending)}</LinkPending>
-          </IntentLink>
+      {list.map((item) => {
+        const isActive = pathname === item.href;
+        return renderItem(
+          item,
+          `${SHOW_IN_BAR[item.from ?? 'never']} ${linkClassName}`,
+          undefined,
+          item.external || item.page ? (
+            renderLabel(item.text, isActive)
+          ) : (
+            // Lights up as soon as it's clicked, before the page arrives
+            <LinkPending>{(pending) => renderLabel(item.text, isActive || pending)}</LinkPending>
+          ),
         );
       })}
     </>
   );
+
+  const moreItemClassName = (href: string) =>
+    `block rounded-[2px] px-2 py-1.5 text-sm transition-colors hover:bg-[var(--paper-yellow-soft)] ${
+      pathname === href
+        ? 'bg-[var(--paper-yellow-soft)] font-semibold text-[var(--paper-accent-deep)]'
+        : ''
+    }`;
+
+  const sectionLabelClassName =
+    'mb-1.5 border-b border-dashed border-[var(--paper-line)] pb-1 font-paper-mono text-[10px] uppercase tracking-[.18em] text-[var(--paper-muted-2)]';
 
   return (
     // Deliberately a plain <nav>, not a motion component: animating this in with
@@ -167,11 +259,11 @@ const Navbar = () => {
     // dark body; it's a visible dark flash on this cream one.
     <nav className="font-paper-sans sticky top-0 z-50 bg-[var(--paper-cream)] text-[var(--paper-ink)]">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="flex h-14 items-center sm:h-16">
+        <div className="relative flex h-14 items-center sm:h-16">
           <Link
             href="/social"
             aria-label="Adorio, home"
-            className="mr-6 flex shrink-0 items-baseline gap-[6px]"
+            className="mr-4 flex shrink-0 items-baseline gap-[6px] lg:mr-6"
           >
             <span className="font-paper-serif text-2xl font-bold italic tracking-[-.015em] sm:text-3xl">
               Adorio
@@ -185,13 +277,15 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <div className="hidden flex-1 items-center justify-center gap-0.5 xl:flex">
+          <div className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 md:flex">
             <AuthSwitch
-              signedIn={renderDesktopLinks(signedInLinks)}
-              signedOut={renderDesktopLinks(signedOutLinks)}
+              signedIn={renderBarLinks(signedInLinks)}
+              signedOut={renderBarLinks(signedOutLinks)}
             />
 
-            <div ref={moreRef} className="relative">
+            {/* Not relative: the panel lines up with the right edge of the bar, not the button, so it
+                stays on screen however few links are in front of it */}
+            <div ref={moreRef}>
               <button
                 type="button"
                 onClick={() => setMoreOpen((value) => !value)}
@@ -200,10 +294,10 @@ const Navbar = () => {
                 className={linkClassName}
               >
                 <span className="relative inline-flex items-center gap-0.5 px-[7px] py-[2px]">
-                  {isMoreActive && (
+                  {moreActiveClass !== null && (
                     <span
                       aria-hidden="true"
-                      className="absolute inset-x-[-1px] bottom-0 h-[8px] -rotate-[0.7deg] rounded-[2px_7px_3px_8px] bg-[var(--paper-yellow)]"
+                      className={`${moreActiveClass} absolute inset-x-[-1px] bottom-0 h-[8px] -rotate-[0.7deg] rounded-[2px_7px_3px_8px] bg-[var(--paper-yellow)]`}
                     />
                   )}
                   <span className="relative">More</span>
@@ -219,49 +313,33 @@ const Navbar = () => {
               {moreOpen && (
                 <div
                   id="navbar-more-panel"
-                  className="absolute right-0 top-full z-50 mt-1 w-[540px] origin-top-right rounded-[4px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-4 shadow-[3px_4px_0_var(--paper-ink)]"
+                  className="absolute right-0 top-full z-50 mt-1 max-h-[calc(100dvh-5rem)] w-[min(540px,calc(100vw-2rem))] origin-top-right overflow-y-auto overscroll-contain rounded-[4px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-4 shadow-[3px_4px_0_var(--paper-ink)] [scrollbar-width:thin]"
                 >
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  {/* Columns, not a grid, so a short section doesn't leave a gap next to a long one */}
+                  <div className="columns-2 gap-x-6">
+                    <div className={`mb-4 break-inside-avoid ${SHOW_IN_MORE[lastToFit]}`}>
+                      <p className={sectionLabelClassName}>Pages</p>
+                      <ul>
+                        {links.map((item) => (
+                          <li key={item.href} className={SHOW_IN_MORE[item.from ?? 'never']}>
+                            {renderItem(item, moreItemClassName(item.href), () =>
+                              setMoreOpen(false),
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                     {sections.map((section) => (
-                      <div key={section.label}>
-                        <p className="mb-1.5 border-b border-dashed border-[var(--paper-line)] pb-1 font-paper-mono text-[10px] uppercase tracking-[.18em] text-[var(--paper-muted-2)]">
-                          {section.label}
-                        </p>
+                      <div key={section.label} className="mb-4 break-inside-avoid">
+                        <p className={sectionLabelClassName}>{section.label}</p>
                         <ul>
-                          {section.items.map((item) => {
-                            const isActive = pathname === item.href;
-                            const className = `block rounded-[2px] px-2 py-1.5 text-sm transition-colors hover:bg-[var(--paper-yellow-soft)] ${
-                              isActive
-                                ? 'bg-[var(--paper-yellow-soft)] font-semibold text-[var(--paper-accent-deep)]'
-                                : ''
-                            }`;
-                            return (
-                              <li key={item.href}>
-                                {item.external || item.page ? (
-                                  <a
-                                    href={item.href}
-                                    onClick={() => setMoreOpen(false)}
-                                    className={className}
-                                  >
-                                    {item.text}
-                                    {item.external && (
-                                      <span aria-hidden="true" className="ml-1 text-[10px]">
-                                        ↗
-                                      </span>
-                                    )}
-                                  </a>
-                                ) : (
-                                  <IntentLink
-                                    href={item.href}
-                                    onClick={() => setMoreOpen(false)}
-                                    className={className}
-                                  >
-                                    {item.text}
-                                  </IntentLink>
-                                )}
-                              </li>
-                            );
-                          })}
+                          {section.items.map((item) => (
+                            <li key={item.href}>
+                              {renderItem(item, moreItemClassName(item.href), () =>
+                                setMoreOpen(false),
+                              )}
+                            </li>
+                          ))}
                         </ul>
                       </div>
                     ))}
@@ -275,16 +353,13 @@ const Navbar = () => {
             signedIn={
               <button
                 onClick={handleLogout}
-                className="hidden shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)] xl:ml-6 xl:block"
+                className={`hidden md:ml-3 md:block lg:ml-6 ${ctaClassName}`}
               >
                 Sign out
               </button>
             }
             signedOut={
-              <Link
-                href="/register"
-                className="hidden shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)] xl:ml-6 xl:block"
-              >
+              <Link href="/register" className={`hidden md:ml-3 md:block lg:ml-6 ${ctaClassName}`}>
                 Get Started
               </Link>
             }
@@ -292,8 +367,10 @@ const Navbar = () => {
 
           <button
             onClick={() => setOpen((value) => !value)}
-            className="ml-auto rounded-lg p-2 text-[var(--paper-ink)] transition-colors hover:bg-[var(--paper-yellow-soft)] xl:hidden"
-            aria-label="Toggle navigation menu"
+            className="ml-auto rounded-lg p-2.5 text-[var(--paper-ink)] transition-colors hover:bg-[var(--paper-yellow-soft)] md:hidden"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            aria-controls="navbar-menu"
           >
             {open ? <XMarkIcon className="h-5 w-5" /> : <Bars3Icon className="h-5 w-5" />}
           </button>
@@ -304,85 +381,63 @@ const Navbar = () => {
         {open && (
           <motion.div
             key="mobile-menu"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden border-t border-[rgba(60,44,24,.15)] bg-[var(--paper-cream)] xl:hidden"
+            id="navbar-menu"
+            role="dialog"
+            aria-label="Menu"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+            className="fixed inset-x-0 bottom-0 top-14 overflow-y-auto overscroll-contain border-t border-[rgba(60,44,24,.15)] bg-[var(--paper-cream)] [scrollbar-width:thin] sm:top-16 md:hidden"
           >
-            <div className="mx-auto flex max-h-[calc(100vh-4rem)] max-w-6xl flex-col overflow-y-auto px-4 py-2">
-              {links.map(({ href, text, external, page }) =>
-                external || page ? (
-                  <a
-                    key={href}
-                    href={href}
-                    onClick={close}
-                    className="rounded-lg px-3 py-3 text-sm transition-colors hover:bg-[var(--paper-yellow-soft)]"
-                  >
-                    {text}
-                  </a>
-                ) : (
-                  <IntentLink
-                    key={href}
-                    href={href}
-                    onClick={close}
-                    className="rounded-lg px-3 py-3 text-sm transition-colors hover:bg-[var(--paper-yellow-soft)]"
-                  >
-                    {text}
-                  </IntentLink>
-                ),
-              )}
+            <div className="mx-auto flex min-h-full max-w-2xl flex-col px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-3 sm:px-6">
+              <ul className="grid grid-cols-2 gap-1">
+                {links.map((item) => (
+                  <li key={item.href}>
+                    {renderItem(
+                      item,
+                      `flex min-h-11 items-center rounded-[3px] px-3 text-[15px] font-medium transition-colors hover:bg-[var(--paper-yellow-soft)] ${
+                        pathname === item.href ? 'bg-[var(--paper-yellow-soft)]' : ''
+                      }`,
+                      close,
+                    )}
+                  </li>
+                ))}
+              </ul>
 
-              {sections.map((section) => (
-                <div
-                  key={section.label}
-                  className="mt-2 border-t border-dashed border-[var(--paper-line)] pt-2"
-                >
-                  <p className="px-3 pb-1 font-paper-mono text-[10px] uppercase tracking-[.18em] text-[var(--paper-muted-2)]">
-                    {section.label}
-                  </p>
-                  {section.items.map((item) =>
-                    item.external || item.page ? (
-                      <a
-                        key={item.href}
-                        href={item.href}
-                        onClick={close}
-                        className="block rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-[var(--paper-yellow-soft)]"
-                      >
-                        {item.text}
-                        {item.external && (
-                          <span aria-hidden="true" className="ml-1 text-[10px]">
-                            ↗
-                          </span>
-                        )}
-                      </a>
-                    ) : (
-                      <IntentLink
-                        key={item.href}
-                        href={item.href}
-                        onClick={close}
-                        className="block rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-[var(--paper-yellow-soft)]"
-                      >
-                        {item.text}
-                      </IntentLink>
-                    ),
-                  )}
-                </div>
-              ))}
+              <div className="mt-4 columns-2 gap-x-4 border-t border-dashed border-[var(--paper-line)] pt-4">
+                {sections.map((section) => (
+                  <div key={section.label} className="mb-4 break-inside-avoid">
+                    <p className="px-3 pb-1 font-paper-mono text-[10px] uppercase tracking-[.18em] text-[var(--paper-muted-2)]">
+                      {section.label}
+                    </p>
+                    <ul>
+                      {section.items.map((item) => (
+                        <li key={item.href}>
+                          {renderItem(
+                            item,
+                            `flex min-h-10 items-center rounded-[3px] px-3 text-sm transition-colors hover:bg-[var(--paper-yellow-soft)] ${
+                              pathname === item.href ? 'bg-[var(--paper-yellow-soft)]' : ''
+                            }`,
+                            close,
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
 
-              <div className="mt-2 border-t border-dashed border-[var(--paper-line)] pt-2">
+              <div className="mt-auto pt-6">
                 {token ? (
-                  <button
-                    onClick={handleLogout}
-                    className="w-full rounded-lg px-3 py-3 text-left text-sm font-medium text-[#8d3a33] transition-colors hover:bg-[var(--paper-yellow-soft)]"
-                  >
-                    Logout
+                  <button onClick={handleLogout} className={`w-full py-3 ${ctaClassName}`}>
+                    Sign out
                   </button>
                 ) : (
                   <Link
                     href="/register"
                     onClick={close}
-                    className="block rounded-lg px-3 py-3 text-sm font-semibold text-[var(--paper-accent)] transition-colors hover:bg-[var(--paper-yellow-soft)]"
+                    className={`block w-full py-3 text-center ${ctaClassName}`}
                   >
                     Get Started
                   </Link>
