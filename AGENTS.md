@@ -254,6 +254,28 @@ The Dockerfile passes `--build-arg ENV=development|production` to copy either `n
 - Separate Axios instances per file (import from `src/api/index.ts`)
 - Verbose type definitions when TypeScript can infer
 
+## Pull Requests
+
+Write PR descriptions the way the owner would: short, plain, first person ("I moved the resume to R2 because..."). Casual is fine. Don't write it like a report or an AI summary ("The sweep came back clean: ..."), don't use em dashes, and don't add any AI attribution.
+
+Every PR uses this format:
+
+```markdown
+## Summary
+
+What changed and why, in a few sentences. Add a small diff, tree, or code sketch only if it makes the change clearer.
+
+## Evidence
+
+Real proof it works: the test that failed before and passes now, a before/after screenshot, or the command output.
+
+## Merge Danger
+
+**Door:** one-way or two-way (can it be rolled back?)
+
+**Blast Radius:** what could break if this is wrong
+```
+
 ## Environment Files
 
 One centralized set at the repo root — frontend, backend, and Docker dev all read the same files. There is no `backend/.env`; `backend/config/environment.js` resolves the repo root from its own file location and loads the root files directly, regardless of the working directory it's started from.
