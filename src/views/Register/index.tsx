@@ -49,7 +49,8 @@ const Register = () => {
 
   return (
     <AuthCard mode="signup" redirectQuery={redirectQuery} formTitle="Create your account">
-      <form onSubmit={handleRegister}>
+      {/* post: if it is ever submitted before JS loads, the fields can't end up in the URL */}
+      <form method="post" onSubmit={handleRegister}>
         <label className="mt-[18px] block">
           <span className="mb-1.5 block font-paper-mono text-[11px] uppercase tracking-[.16em] text-[var(--paper-muted-2)]">
             Username

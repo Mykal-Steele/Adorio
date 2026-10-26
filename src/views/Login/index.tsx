@@ -49,7 +49,8 @@ const Login = () => {
 
   return (
     <AuthCard mode="signin" redirectQuery={redirectQuery} formTitle="Sign in">
-      <form onSubmit={handleLogin}>
+      {/* post: if it is ever submitted before JS loads, the fields can't end up in the URL */}
+      <form method="post" onSubmit={handleLogin}>
         <EmailField value={email} onChange={setEmail} disabled={loading} />
         <PasswordField
           value={password}
