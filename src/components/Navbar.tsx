@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { Bars3Icon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { AuthSwitch } from '@/components/AuthSwitch';
 import { logout } from '@/store/userSlice';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -52,21 +53,22 @@ const Navbar = () => {
     close();
   };
 
-  const links: NavItem[] = token
-    ? [
-        { href: '/social', text: 'Social' },
-        { href: '/profile', text: 'Profile' },
-        { href: '/hosting', text: 'Hosting' },
-        { href: '/coding', text: 'Coding' },
-        { href: '/rygame', text: 'RyGame' },
-        { href: '/sendenv', text: 'SendEnv' },
-        { href: '/finance', text: 'Financial Tracker' },
-        { href: '/learn-korean', text: 'Learn Korean' },
-      ]
-    : [
-        { href: '/coding', text: 'Coding' },
-        { href: '/learn-korean', text: 'Learn Korean' },
-      ];
+  const signedInLinks: NavItem[] = [
+    { href: '/social', text: 'Social' },
+    { href: '/profile', text: 'Profile' },
+    { href: '/hosting', text: 'Hosting' },
+    { href: '/coding', text: 'Coding' },
+    { href: '/rygame', text: 'RyGame' },
+    { href: '/sendenv', text: 'SendEnv' },
+    { href: '/finance', text: 'Financial Tracker' },
+    { href: '/learn-korean', text: 'Learn Korean' },
+  ];
+  const signedOutLinks: NavItem[] = [
+    { href: '/coding', text: 'Coding' },
+    { href: '/learn-korean', text: 'Learn Korean' },
+  ];
+  // The mobile menu opens after the session check, so it can read the token directly
+  const links = token ? signedInLinks : signedOutLinks;
 
   const sections: NavSection[] = [];
 
@@ -128,6 +130,28 @@ const Navbar = () => {
     </span>
   );
 
+  const renderDesktopLinks = (list: NavItem[]) => (
+    <>
+      {list.map(({ href, text, external }) => {
+        const isActive = pathname === href;
+        return external ? (
+          <a key={href} href={href} className={linkClassName}>
+            {renderLabel(text, isActive)}
+          </a>
+        ) : (
+          <Link
+            key={href}
+            href={href}
+            aria-current={isActive ? 'page' : undefined}
+            className={linkClassName}
+          >
+            {renderLabel(text, isActive)}
+          </Link>
+        );
+      })}
+    </>
+  );
+
   return (
     // Deliberately a plain <nav>, not a motion component: animating this in with
     // a transform (e.g. initial={{ y: -64 }}) doesn't reserve layout space, so
@@ -157,23 +181,10 @@ const Navbar = () => {
           </Link>
 
           <div className="hidden flex-1 items-center justify-center gap-0.5 xl:flex">
-            {links.map(({ href, text, external }) => {
-              const isActive = pathname === href;
-              return external ? (
-                <a key={href} href={href} className={linkClassName}>
-                  {renderLabel(text, isActive)}
-                </a>
-              ) : (
-                <Link
-                  key={href}
-                  href={href}
-                  aria-current={isActive ? 'page' : undefined}
-                  className={linkClassName}
-                >
-                  {renderLabel(text, isActive)}
-                </Link>
-              );
-            })}
+            <AuthSwitch
+              signedIn={renderDesktopLinks(signedInLinks)}
+              signedOut={renderDesktopLinks(signedOutLinks)}
+            />
 
             <div ref={moreRef} className="relative">
               <button
@@ -253,21 +264,24 @@ const Navbar = () => {
             </div>
           </div>
 
-          {token ? (
-            <button
-              onClick={handleLogout}
-              className="hidden shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)] xl:ml-6 xl:block"
-            >
-              Sign out
-            </button>
-          ) : (
-            <Link
-              href="/register"
-              className="hidden shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)] xl:ml-6 xl:block"
-            >
-              Get Started
-            </Link>
-          )}
+          <AuthSwitch
+            signedIn={
+              <button
+                onClick={handleLogout}
+                className="hidden shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)] xl:ml-6 xl:block"
+              >
+                Sign out
+              </button>
+            }
+            signedOut={
+              <Link
+                href="/register"
+                className="hidden shrink-0 -rotate-1 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-5 py-2 font-paper-mono text-xs font-bold uppercase tracking-[.14em] shadow-[2px_3px_0_var(--paper-ink)] transition-transform hover:-translate-y-px hover:shadow-[2px_5px_0_var(--paper-ink)] active:translate-y-0.5 active:shadow-[1px_1px_0_var(--paper-ink)] xl:ml-6 xl:block"
+              >
+                Get Started
+              </Link>
+            }
+          />
 
           <button
             onClick={() => setOpen((value) => !value)}

@@ -27,6 +27,7 @@ export const setAuthTokens = (
   const store = remember ? localStorage : sessionStorage;
   store.setItem('token', token);
   if (refreshToken) store.setItem('refreshToken', refreshToken);
+  document.documentElement.dataset.auth = 'in';
 };
 
 // For refreshing just the access token in place (same storage as the original login).
@@ -40,4 +41,5 @@ export const clearAuthTokens = () => {
   localStorage.removeItem(REMEMBER_KEY);
   sessionStorage.removeItem('token');
   sessionStorage.removeItem('refreshToken');
+  delete document.documentElement.dataset.auth;
 };

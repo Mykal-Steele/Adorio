@@ -5,6 +5,7 @@ import { getPosts, createPost, likePost } from '../../api';
 import PostCard from './components/PostCard';
 import PostSkeleton from './components/PostSkeleton';
 import { useAppSelector } from '../../store/hooks';
+import { AuthSwitch } from '@/components/AuthSwitch';
 import { ExclamationTriangleIcon, CameraIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
@@ -514,8 +515,8 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
             )}
           </div>
 
-          {mounted &&
-            (user ? (
+          <AuthSwitch
+            signedIn={
               <ComposeCard
                 title={title}
                 content={content}
@@ -528,9 +529,9 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
                 onRemoveImage={handleRemoveImage}
                 onSubmit={handleSubmit}
               />
-            ) : (
-              <GuestPrompt />
-            ))}
+            }
+            signedOut={<GuestPrompt />}
+          />
         </div>
 
         <svg

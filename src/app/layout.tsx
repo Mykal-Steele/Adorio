@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import './globals.css';
 import Providers from './Providers';
 import AuthBootstrapper from './AuthBootstrapper';
+import Script from 'next/script';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { fontVariables } from './fonts';
 
@@ -28,12 +29,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={fontVariables} suppressHydrationWarning>
       <head>
+        {/* Marks the page as signed in before first paint, so AuthSwitch shows the right
+            Navbar and composer straight away instead of flashing the logged-out version */}
+        <Script id="auth-hint" strategy="beforeInteractive">
+          {`try{if(localStorage.getItem('token')||sessionStorage.getItem('token'))document.documentElement.dataset.auth='in'}catch(e){}`}
+        </Script>
         <link rel="preconnect" href="https://res.cloudinary.com" />
       </head>
       {/* suppressHydrationWarning: browser extensions (Grammarly, password managers, etc.)
           inject attributes like data-gr-ext-installed onto <body> before React hydrates.
           That's a real DOM difference React can't help mismatching, but it's harmless. This only silences the warning for body's own attributes, not its children. */}
-      <body className="bg-gray-950" suppressHydrationWarning>
+      <body className="bg-[var(--paper-hero)]" suppressHydrationWarning>
         <Providers>
           <ErrorBoundary>
             <Suspense fallback={null}>
