@@ -153,7 +153,7 @@ const MonacoEditor = forwardRef<EditorHandle, EditorEngineProps>(
         minimap: { enabled: false },
         renderLineHighlight: 'all',
         fontLigatures: false,
-        fontFamily: "'Courier Prime', 'JetBrains Mono', monospace",
+        fontFamily: 'var(--font-courier), monospace',
         scrollBeyondLastLine: false,
         automaticLayout: true,
       });

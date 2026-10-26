@@ -29,7 +29,7 @@ export const PAPER_EDITOR_PALETTE = {
   operator: '#b99a6b',
   comment: '#948a76',
   invalid: '#e07a68',
-  fontFamily: "'Courier Prime', 'JetBrains Mono', monospace",
+  fontFamily: 'var(--font-courier), monospace',
 } as const;
 
 export const paperEditorTheme = createTheme({

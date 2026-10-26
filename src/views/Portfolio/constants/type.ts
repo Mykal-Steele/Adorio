@@ -15,7 +15,8 @@ export const body = {
   lineHeight: 1.65,
   color: 'var(--ide-text-3)',
   margin: 0,
-  maxWidth: '68ch',
+  // em, not ch: ch is the width of the 0 glyph, which changes while fonts load (68ch of Karla)
+  maxWidth: '40.4em',
 } as const;
 
 // Buttons and links are styled by the .pf-btn-primary, .pf-btn, and .pf-link classes
