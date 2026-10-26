@@ -146,13 +146,14 @@ function Hero() {
         }}
       >
         <Tape />
-        {/* Two columns once the note is wide enough, which only happens on tablets */}
+        {/* Two columns once the note is wide enough, which only happens on tablets. CSS columns
+            stack each side on its own, so a two-line fact doesn't leave a gap beside it. */}
         <dl
-          className="grid grid-cols-1 gap-3 @[440px]:grid-cols-2 @[440px]:gap-x-8 @[440px]:gap-y-4"
+          className="flex flex-col gap-3 @[440px]:block @[440px]:columns-2 @[440px]:gap-8"
           style={{ margin: 0 }}
         >
           {facts.map(({ label, value }) => (
-            <div key={label}>
+            <div key={label} className="break-inside-avoid @[440px]:mb-4">
               <dt style={{ ...eyebrow, fontSize: 13 }}>{label}</dt>
               {value.map((line, i) => (
                 <dd
