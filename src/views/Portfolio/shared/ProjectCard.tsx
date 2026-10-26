@@ -10,7 +10,13 @@ import { LiveTag } from './LiveTag';
 import { ProjectImage } from './ProjectImage';
 import { StatusLabel } from './StatusLabel';
 
-export function ProjectCard({ project }: { project: Project }) {
+export function ProjectCard({
+  project,
+  priority = false,
+}: {
+  project: Project;
+  priority?: boolean;
+}) {
   const router = useRouter();
   const href = `/projects/${project.id}`;
 
@@ -29,7 +35,11 @@ export function ProjectCard({ project }: { project: Project }) {
     >
       <Tape />
       <div style={{ overflow: 'hidden' }}>
-        <ProjectImage project={project} sizes="(max-width: 900px) 100vw, 480px" />
+        <ProjectImage
+          project={project}
+          sizes="(max-width: 900px) 100vw, 480px"
+          priority={priority}
+        />
       </div>
 
       <div className="flex flex-1 flex-col" style={{ padding: '20px 12px 12px' }}>

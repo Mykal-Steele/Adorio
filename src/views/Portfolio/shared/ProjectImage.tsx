@@ -3,7 +3,9 @@ import type { Project } from '../data/portfolio';
 import { serif } from '../constants/fonts';
 import { TechLogo, skillIdForLanguage } from './TechLogo';
 
-// The project's screenshot, or its language logo and name when there is no screenshot yet
+// The project's screenshot, or its language logo and name when there is no screenshot yet.
+// priority is for the image that is the page's largest paint: it loads right away at high
+// priority instead of waiting to be scrolled near, which lazy loading would do.
 export function ProjectImage({
   project,
   sizes,
@@ -31,7 +33,8 @@ export function ProjectImage({
           src={project.image.src}
           alt={project.image.alt}
           fill
-          priority={priority}
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
           sizes={sizes}
           style={
             project.image.fit === 'contain'
