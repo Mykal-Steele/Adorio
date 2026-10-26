@@ -150,7 +150,6 @@ const Navbar = () => {
       label: 'Files',
       items: [
         { href: '/resume', text: 'Resume', page: true },
-        { href: '/performance', text: 'Performance Report', page: true },
         { href: '/AI_Exam2_Cheat_Sheets.pdf', text: 'AI Exam Cheat Sheets', page: true },
       ],
     },

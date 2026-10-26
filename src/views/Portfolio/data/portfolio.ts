@@ -227,10 +227,10 @@ export const portfolioData = {
       language: 'TypeScript',
       langColor: '#3178c6',
       summary:
-        'My own platform. It started as a social feed for me and my classmates and grew to run this portfolio, coding practice, and my other apps. I build, host, and deploy all of it.',
+        'My own platform at adorio.space. It runs this portfolio and my apps, like Social, Coding Challenges, and Hosting, under one domain. I build, host, and deploy all of it.',
       problem:
-        'I wanted a place for me and my classmates to post updates and photos without using another platform. As I added more apps, I needed them under one domain, deployed automatically, and still up when the main server has a problem.',
-      role: 'Solo project. I built the social feed (posts, likes, threaded comments with @mentions, image uploads, and login with refresh tokens), the Express backend, the Next.js frontend, and all of the infrastructure.',
+        'I kept building small apps and wanted them under one domain, deployed automatically, and still up when the main server has a problem.',
+      role: 'Solo project. I built the Express backend, the Next.js frontend, login with refresh tokens, and all of the infrastructure.',
       result:
         'Running since February 2025. Every push to main is tested against production containers and deployed with no manual steps.',
       stack: [
@@ -247,10 +247,8 @@ export const portfolioData = {
         'Cloudflare',
         'GitHub Actions',
         'Zod',
-        'Cloudinary',
       ],
       features: [
-        'The feed renders its first 12 posts on the server and streams them in, then infinite scroll takes over. Likes wait 100 ms, so fast clicks send one request.',
         'The backend is split into controllers, services, models, and schemas. Zod checks every request, and login, posting, likes, and code runs each have a rate limit.',
         'One container runs Nginx, the Express API, and the Next.js server on Azure Container Apps, with health checks and scaling from 1 to 3 copies.',
         'GitHub Actions checks format and lint, builds, runs integration tests against production containers, deploys to Azure without a stored password (OIDC), waits for the health check, and clears the Cloudflare cache.',
@@ -279,15 +277,75 @@ export const portfolioData = {
         '195 unit tests and 76 integration tests.',
       ],
       hardPart:
-        "The code runner. I had to design it so running it 24/7 doesn't make me go bankrupt lol, and find a way to make it work cheap.\n\nOn the social page, infinite scroll was a pain. Posts showed up twice, and every new page shuffled the images into different columns. The duplicates came from the server-rendered first page not matching what the browser fetched next, and I stopped the jumping by giving each post a fixed column. Getting the lines on the left of a reply thread to connect smoothly took a while too.",
+        "The code runner. I had to design it so running it 24/7 doesn't make me go bankrupt lol, and find a way to make it work cheap.",
       note: "Why the name? I wanted something unique so it's easy to find on search. It's inspired by Arduino, and it sounds round. I like it.",
       color: '#00ffc2',
       repoUrl: 'github.com/Mykal-Steele/Adorio',
       liveUrl: 'https://adorio.space',
       image: {
+        src: '/projects/adorio/cover.webp',
+        alt: 'The adorio.space home page, this portfolio, laid out like a code editor.',
+      },
+    },
+    {
+      id: 'social',
+      name: 'Social',
+      status: 'STABLE',
+      language: 'TypeScript',
+      langColor: '#3178c6',
+      summary:
+        'A social feed for me and my classmates. You post updates and photos, like posts, and reply in threads.',
+      problem:
+        'I wanted a place for me and my classmates to post updates and photos without using another platform.',
+      role: 'Solo project. I built posts, likes, threaded comments with @mentions, image uploads, and login with refresh tokens.',
+      result: 'Running since February 2025. It was the first app on Adorio.',
+      stack: [
+        'TypeScript',
+        'Next.js',
+        'React',
+        'Tailwind CSS',
+        'Node.js',
+        'Express',
+        'MongoDB',
+        'Zod',
+        'Cloudinary',
+      ],
+      features: [
+        'The feed renders its first 12 posts on the server and streams them in, then infinite scroll takes over. Likes wait 100 ms, so fast clicks send one request.',
+        'Photos upload to Cloudinary, and replies can @mention people.',
+      ],
+      hardPart:
+        'Infinite scroll was a pain. Posts showed up twice, and every new page shuffled the images into different columns. The duplicates came from the server-rendered first page not matching what the browser fetched next, and I stopped the jumping by giving each post a fixed column. Getting the lines on the left of a reply thread to connect smoothly took a while too.',
+      color: '#fe9d00',
+      liveUrl: '/social',
+      image: {
         src: '/projects/social/cover.webp',
         alt: 'The /social feed on adorio.space with the post composer and recent posts pinned to the wall.',
       },
+    },
+    {
+      id: 'hosting',
+      name: 'Hosting',
+      status: 'BETA',
+      language: 'TypeScript',
+      langColor: '#3178c6',
+      summary:
+        'Upload an HTML file and get a link to it at adorio.space/h/<name>. Each file counts its views.',
+      problem: 'Putting one page online usually means setting up a whole site for it.',
+      role: 'Solo project. I built the upload page, the file list with view counts, the /h/ links, and an admin page for every file.',
+      result: 'Live since June 2026 for anyone with an account.',
+      stack: [
+        'TypeScript',
+        'Next.js',
+        'React',
+        'Tailwind CSS',
+        'Node.js',
+        'Express',
+        'MongoDB',
+        'Zod',
+      ],
+      color: '#8b5cf6',
+      liveUrl: '/hosting',
     },
     {
       id: 'chronochunk',
