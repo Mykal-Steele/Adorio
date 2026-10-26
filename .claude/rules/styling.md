@@ -55,7 +55,7 @@ Four fonts are used. Portfolio components take them from `src/views/Portfolio/co
 - Courier Prime: the main button and the terminal (`mono`)
 - Patrick Hand: only the handwritten theme hint (`hand`)
 
-Load any new Google Font with the `<link>` tags in `src/app/layout.tsx`.
+Fonts are files in `src/app/fonts/` loaded with `next/font/local` in `src/app/fonts.ts`. Add a new one there (latin woff2, see `src/app/fonts/README.md`), not with `next/font/google` or a `<link>` tag: those download from Google at build time, and a failed download fails the build.
 
 ## Component Class Extraction
 

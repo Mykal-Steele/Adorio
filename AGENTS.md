@@ -159,7 +159,7 @@ src/views/Portfolio/
 
 **Navigation**: All Vike `navigate()` calls replaced with `useRouter().push()` from `next/navigation`. Route params passed as props (not from routeContext).
 
-**Fonts**: the same set as the paper pages. Playfair Display for headings, Karla for body and UI text, Courier Prime for the main button and the terminal, and Patrick Hand only for the handwritten theme hint. Loaded with `<link>` tags in `src/app/layout.tsx`.
+**Fonts**: the same set as the paper pages. Playfair Display for headings, Karla for body and UI text, Courier Prime for the main button and the terminal, and Patrick Hand only for the handwritten theme hint. The files are in `src/app/fonts/` and load through `next/font/local` in `src/app/fonts.ts`, so builds never download fonts.
 
 **Interaction states**: buttons, links, cards, logo tiles, and photo prints use the `.pf-btn-primary`, `.pf-btn`, `.pf-link`, `.pf-card`, `.pf-tile`, and `.pf-print` classes in `globals.css`. Inline styles would override any `:hover`, so keep transforms and shadows for these elements in the classes, not in `style={{}}`.
 
