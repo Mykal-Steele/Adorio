@@ -330,7 +330,7 @@ export const portfolioData = {
       language: 'TypeScript',
       langColor: '#3178c6',
       summary:
-        'Upload an HTML file and get a link to it at adorio.space/h/<name>. Each file counts its views.',
+        'Upload a file and get a link to it at adorio.space/h/<name>. Each file counts its views.',
       problem: 'Putting one page online usually means setting up a whole site for it.',
       role: 'Solo project. I built the upload page, the file list with view counts, the /h/ links, and an admin page for every file.',
       result: 'Live since June 2026 for anyone with an account.',
