@@ -216,12 +216,11 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getPosts(
-        page,
-        POSTS_PAGE_SIZE,
-        abortControllerRef.current.signal,
-        filter === 'photos',
-      );
+      const response = await getPosts(page, {
+        limit: POSTS_PAGE_SIZE,
+        signal: abortControllerRef.current.signal,
+        hasImage: filter === 'photos',
+      });
       const newPosts = response.posts || [];
       setPosts((prev) => (page === 1 ? newPosts : [...prev, ...newPosts]));
       setHasMore(response.hasMore);

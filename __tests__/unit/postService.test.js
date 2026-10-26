@@ -113,6 +113,33 @@ describe('getPaginatedPosts', () => {
     const result = await getPaginatedPosts({ page: '3', limit: '5' });
     expect(result.currentPage).toBe(3);
   });
+
+  // The profile page lists one person's posts. Filtering in the query keeps hasMore
+  // right, instead of the page walking the whole feed to find them.
+  test("should fetch and count only that user's posts when user is given", async () => {
+    mockCountPosts.mockImplementation(() => Promise.resolve(3));
+    const userId = '0123456789abcdef01234567';
+    const result = await getPaginatedPosts({ page: '1', limit: '5', user: userId });
+    expect(mockFindPostsPaginated.mock.calls.at(-1)[0].filter).toEqual({ user: userId });
+    expect(mockCountPosts.mock.calls.at(-1)[0]).toEqual({ user: userId });
+    expect(result.hasMore).toBe(false);
+  });
+
+  test('should combine the user filter with hasImage', async () => {
+    const userId = '0123456789abcdef01234567';
+    await getPaginatedPosts({ user: userId, hasImage: 'true' });
+    expect(mockCountPosts.mock.calls.at(-1)[0]).toEqual({ image: { $ne: null }, user: userId });
+  });
+
+  test('should reject a user id that is not an ObjectId', async () => {
+    let caught;
+    try {
+      await getPaginatedPosts({ user: '{"$ne":null}' });
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught?.statusCode).toBe(400);
+  });
 });
 
 // ── getPostById ────────────────────────────────────────────────────────────────

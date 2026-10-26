@@ -28,4 +28,9 @@ export const getPostsQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(50).optional().default(5),
   hasImage: z.coerce.boolean().optional(),
+  // Only this user's posts, for the profile page
+  user: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, 'Invalid user id')
+    .optional(),
 });

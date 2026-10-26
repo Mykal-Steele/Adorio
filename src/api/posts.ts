@@ -1,8 +1,17 @@
 import API, { request } from './index';
 
-export const getPosts = (page = 1, limit = 5, signal?: AbortSignal, hasImage?: boolean) =>
+type GetPostsOptions = {
+  limit?: number;
+  signal?: AbortSignal;
+  hasImage?: boolean;
+  // Only this user's posts
+  user?: string;
+};
+
+export const getPosts = (page = 1, { limit = 5, signal, hasImage, user }: GetPostsOptions = {}) =>
   request(
-    API.get(`/posts?page=${page}&limit=${limit}${hasImage ? '&hasImage=true' : ''}`, {
+    API.get('/posts', {
+      params: { page, limit, ...(hasImage ? { hasImage: true } : {}), ...(user ? { user } : {}) },
       signal,
       timeout: 10000,
     }),

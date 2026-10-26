@@ -40,14 +40,16 @@ const Profile = () => {
     );
   };
 
+  const userId = user?._id;
+
   const fetchUserPosts = useCallback(async () => {
+    if (!userId) return;
     setLoading(true);
     setError('');
     try {
-      const response = await getPosts(page);
-      const newPosts = response.posts || [];
-
-      const userPosts = newPosts.filter((post) => post.user?._id === user?._id);
+      // The API filters by user, so every page is yours and hasMore counts only your posts
+      const response = await getPosts(page, { user: userId });
+      const userPosts = response.posts || [];
 
       setPosts((prev) => (page === 1 ? userPosts : [...prev, ...userPosts]));
       setHasMore(response.hasMore);
@@ -58,7 +60,7 @@ const Profile = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, user]);
+  }, [page, userId]);
 
   useEffect(() => {
     fetchUserPosts();
