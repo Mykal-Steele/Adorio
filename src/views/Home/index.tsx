@@ -5,6 +5,7 @@ import { getPosts, createPost, likePost } from '../../api';
 import PostCard from './components/PostCard';
 import PostSkeleton from './components/PostSkeleton';
 import { useAppSelector } from '../../store/hooks';
+import { useHydrated } from '../../hooks/useHydrated';
 import { AuthSwitch } from '@/components/AuthSwitch';
 import { ExclamationTriangleIcon, CameraIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -176,6 +177,10 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
   const [content, setContent] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const { user } = useAppSelector((state) => state.user);
+  // The server renders the feed for nobody. Use the signed-in user only once the feed has
+  // hydrated, or likes and owner buttons won't match the server HTML.
+  const hydrated = useHydrated();
+  const viewer = hydrated ? user : null;
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -592,8 +597,8 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
                   <PostCard
                     {...post}
                     index={index}
-                    currentUserId={user?._id}
-                    currentUsername={user?.username}
+                    currentUserId={viewer?._id}
+                    currentUsername={viewer?.username}
                     onLike={handleLike}
                     onCommentAdded={(updatedPost) => {
                       setPosts((prevPosts) =>
