@@ -41,7 +41,7 @@ const AuthCard = ({ mode, redirectQuery, formTitle, children }: AuthCardProps) =
       <PaperTornEdge />
 
       <main className="flex flex-1 items-center px-4 py-8 sm:px-8 sm:py-12">
-        <div className="mx-auto grid max-w-[1080px] grid-cols-1 items-center gap-[clamp(32px,5vw,64px)] lg:grid-cols-2">
+        <div className="mx-auto grid w-full max-w-[1080px] grid-cols-1 items-center gap-[clamp(32px,5vw,64px)] lg:grid-cols-2">
           <div>
             <p className="mb-3.5 inline-flex items-center gap-[10px] font-paper-mono text-xs uppercase tracking-[.2em] text-[#3d382f]">
               <span aria-hidden="true" className="h-0.5 w-[22px] bg-[var(--paper-accent)]" />
