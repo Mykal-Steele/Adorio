@@ -128,7 +128,7 @@ The public-facing portfolio lives at `/`, `/projects`, `/projects/[id]`, `/skill
 
 ```
 src/views/Portfolio/
-├── IDELayout.tsx          — PortfolioShell, IDELayout, DesktopShell, TabletShell, MobileShell
+├── IDELayout.tsx          — PortfolioShell and one Shell; CSS breakpoints pick which bars show
 ├── TitleBar.tsx            — 48px top bar with Portfolio label + ThemeSwitcher
 ├── ActivityBar.tsx         — 48px left column, one button that shows or hides the explorer
 ├── SidePanel.tsx           — 240px explorer: root files plus projects/ and skills/ folders
@@ -138,7 +138,7 @@ src/views/Portfolio/
 ├── context/
 │   ├── IDEContext.tsx      — sidePanelOpen, terminalOpen, openTabs (every visited page gets a tab)
 │   └── ThemeContext.tsx    — theme names and labels, plus useTheme over next-themes
-├── hooks/useResponsive.ts  — SSR-safe breakpoint (initializes to 'desktop', reads window in useEffect)
+├── hooks/useContentWidth.ts — editor-area width, only for behavior (the theme tip); layout uses container queries
 ├── data/portfolio.ts       — All portfolio content (projects, experience, skills with a `story` field, setup, timeline)
 ├── data/files.ts           — file names for tabs and the explorer
 ├── data/skills.ts          — which projects and roles mention each skill

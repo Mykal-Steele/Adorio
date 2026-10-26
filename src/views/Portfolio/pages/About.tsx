@@ -6,8 +6,6 @@ import { useState, type CSSProperties, type ReactNode } from 'react';
 import { ChevronDown, Download, Github, Linkedin, Mail, MessageSquare } from 'lucide-react';
 import { portfolioData, type Project, type SkillGroup } from '../data/portfolio';
 import { skillsForProject } from '../data/skills';
-import { useResponsive } from '../hooks/useResponsive';
-import { useContentWidth } from '../hooks/useContentWidth';
 import { sans, serif } from '../constants/fonts';
 import { body, eyebrow, preview } from '../constants/type';
 import { LiveTag, LogoTile, ProjectImage, SectionLabel, StatusLabel, Tape } from '../shared';
@@ -64,28 +62,14 @@ const BADGES: Record<string, { src: string; href?: string }> = {
 };
 
 // Sections share one background; a ruled line marks where each new one starts
-function Band({
-  first = false,
-  isMobile,
-  children,
-}: {
-  first?: boolean;
-  isMobile: boolean;
-  children: ReactNode;
-}) {
+function Band({ first = false, children }: { first?: boolean; children: ReactNode }) {
   return (
-    <section style={{ padding: isMobile ? '0 16px' : '0 40px' }}>
+    <section className="px-4 md:px-10">
       <div
+        className={first ? 'pt-10 pb-14 md:pt-16 md:pb-20' : 'py-12 md:py-[72px]'}
         style={{
           maxWidth: 1000,
           margin: '0 auto',
-          padding: first
-            ? isMobile
-              ? '40px 0 56px'
-              : '64px 0 80px'
-            : isMobile
-              ? '48px 0'
-              : '72px 0',
           borderTop: first ? 'none' : '1.5px solid var(--ide-border-strong)',
         }}
       >
@@ -95,12 +79,11 @@ function Band({
   );
 }
 
-function Hero({ isMobile }: { isMobile: boolean }) {
+// Layout follows the editor area's width (container queries on <main>), so the server
+// renders it right on every screen and nothing jumps when JavaScript loads
+function Hero() {
   return (
-    <header
-      className="grid items-start"
-      style={{ gap: isMobile ? 40 : 56, gridTemplateColumns: isMobile ? '1fr' : '1fr 320px' }}
-    >
+    <header className="grid grid-cols-1 items-start gap-10 @[880px]:grid-cols-[1fr_320px] @[880px]:gap-14">
       <div>
         <h1
           style={{
@@ -155,18 +138,12 @@ function Hero({ isMobile }: { isMobile: boolean }) {
       </div>
 
       <aside
-        className="pf-note"
-        style={
-          {
-            '--tilt': isMobile ? '-1deg' : '2deg',
-            position: 'relative',
-            padding: '24px 24px 20px',
-            background: 'var(--ide-note)',
-            boxShadow: 'var(--ide-card-shadow)',
-            marginTop: isMobile ? 0 : 56,
-            maxWidth: isMobile ? 360 : undefined,
-          } as CSSProperties
-        }
+        className="pf-note relative max-w-[360px] [--tilt:-1deg] @[880px]:mt-14 @[880px]:max-w-none @[880px]:[--tilt:2deg]"
+        style={{
+          padding: '24px 24px 20px',
+          background: 'var(--ide-note)',
+          boxShadow: 'var(--ide-card-shadow)',
+        }}
       >
         <Tape />
         <dl className="flex flex-col" style={{ gap: 12, margin: 0 }}>
@@ -198,32 +175,25 @@ function Hero({ isMobile }: { isMobile: boolean }) {
 function FeaturedProject({
   project,
   flip,
-  isMobile,
   priority = false,
 }: {
   project: Project;
   flip: boolean;
-  isMobile: boolean;
   priority?: boolean;
 }) {
   const href = `/projects/${project.id}`;
   const builtWith = skillsForProject(project);
   return (
     <article
-      className="grid items-center"
-      style={{
-        gap: isMobile ? 24 : 48,
-        gridTemplateColumns: isMobile ? '1fr' : flip ? '5fr 6fr' : '6fr 5fr',
-      }}
+      className={`grid grid-cols-1 items-center gap-6 @[880px]:gap-12 ${flip ? '@[880px]:grid-cols-[5fr_6fr]' : '@[880px]:grid-cols-[6fr_5fr]'}`}
     >
       <Link
         href={href}
         aria-label={project.name}
-        className="pf-print relative block"
+        className={`pf-print relative block ${flip ? '@[880px]:order-2' : ''}`}
         style={
           {
             '--tilt': `${flip ? 1.2 : -1.2}deg`,
-            order: !isMobile && flip ? 2 : 0,
             padding: 10,
             background: 'var(--ide-bg-3)',
           } as CSSProperties
@@ -244,9 +214,9 @@ function FeaturedProject({
           <StatusLabel status={project.status} />
         </div>
         <h3
+          className="text-[24px] @[880px]:text-[30px]"
           style={{
             fontFamily: serif,
-            fontSize: isMobile ? 24 : 30,
             fontWeight: 700,
             lineHeight: 1.1,
             color: 'var(--ide-text-1)',
@@ -305,7 +275,7 @@ function ExperienceProject({ project }: { project: Project }) {
   );
 }
 
-function Experience({ isMobile }: { isMobile: boolean }) {
+function Experience() {
   const last = portfolioData.experience.length - 1;
   return (
     <ol style={{ margin: 0, padding: 0, listStyle: 'none' }}>
@@ -314,25 +284,20 @@ function Experience({ isMobile }: { isMobile: boolean }) {
         return (
           <li
             key={exp.org}
-            className="grid"
-            style={{
-              gridTemplateColumns: isMobile ? '20px 1fr' : '148px 20px 1fr',
-              columnGap: isMobile ? 12 : 16,
-              paddingBottom: i < last ? 32 : 0,
-            }}
+            className="grid grid-cols-[20px_1fr] gap-x-3 @[880px]:grid-cols-[148px_20px_1fr] @[880px]:gap-x-4"
+            style={{ paddingBottom: i < last ? 32 : 0 }}
           >
-            {!isMobile && (
-              <div
-                style={{
-                  ...eyebrow,
-                  paddingTop: 24,
-                  textAlign: 'right',
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {exp.period}
-              </div>
-            )}
+            <div
+              className="hidden @[880px]:block"
+              style={{
+                ...eyebrow,
+                paddingTop: 24,
+                textAlign: 'right',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {exp.period}
+            </div>
             <div className="relative flex justify-center">
               <span
                 aria-hidden="true"
@@ -359,18 +324,18 @@ function Experience({ isMobile }: { isMobile: boolean }) {
               />
             </div>
             <article
-              className="grid"
+              className={`grid grid-cols-1 p-5 @[880px]:p-6 ${project ? '@[880px]:grid-cols-[1fr_200px]' : ''}`}
               style={{
                 gap: 20,
-                gridTemplateColumns: project && !isMobile ? '1fr 200px' : '1fr',
-                padding: isMobile ? 20 : 24,
                 background: 'var(--ide-bg-3)',
                 borderRadius: 3,
                 boxShadow: 'var(--ide-card-shadow)',
               }}
             >
               <div>
-                {isMobile && <div style={{ ...eyebrow, marginBottom: 6 }}>{exp.period}</div>}
+                <div className="@[880px]:hidden" style={{ ...eyebrow, marginBottom: 6 }}>
+                  {exp.period}
+                </div>
                 <h3
                   style={{
                     fontFamily: serif,
@@ -416,7 +381,7 @@ function Experience({ isMobile }: { isMobile: boolean }) {
   );
 }
 
-function TechSheet({ isMobile }: { isMobile: boolean }) {
+function TechSheet() {
   const rows = [
     ...SKILL_GROUPS.map((group) => ({
       label: group,
@@ -429,8 +394,8 @@ function TechSheet({ isMobile }: { isMobile: boolean }) {
 
   return (
     <div
+      className="p-5 @[880px]:p-7"
       style={{
-        padding: isMobile ? 20 : 28,
         background: 'var(--ide-bg-3)',
         borderRadius: 3,
         boxShadow: 'var(--ide-card-shadow)',
@@ -440,8 +405,7 @@ function TechSheet({ isMobile }: { isMobile: boolean }) {
         {rows.map(({ label, items }) => (
           <div
             key={label}
-            className="grid items-center"
-            style={{ gridTemplateColumns: isMobile ? '1fr' : '132px 1fr', gap: isMobile ? 8 : 16 }}
+            className="grid grid-cols-1 items-center gap-2 @[880px]:grid-cols-[132px_1fr] @[880px]:gap-4"
           >
             <dt
               style={{
@@ -471,42 +435,44 @@ function TechSheet({ isMobile }: { isMobile: boolean }) {
           borderTop: '1px solid var(--ide-border)',
         }}
       >
-        {isMobile
-          ? 'Tap a logo to see where I used it.'
-          : 'Hover a logo for its name. Click one to see where I used it.'}
+        {/* Touch screens can't hover, so they get the tap hint */}
+        <span className="[@media(hover:hover)]:hidden">Tap a logo to see where I used it.</span>
+        <span className="hidden [@media(hover:hover)]:inline">
+          Hover a logo for its name. Click one to see where I used it.
+        </span>
       </p>
     </div>
   );
 }
 
-function CareerLog({ isMobile }: { isMobile: boolean }) {
-  const margin = isMobile ? 64 : 112;
+// --margin is the notebook's red margin line, wider when there's room
+function CareerLog() {
   return (
     <div
+      className="[--margin:64px] @[880px]:[--margin:112px]"
       style={{
         padding: '32px 24px 0 0',
         background: 'var(--ide-bg-3)',
         borderRadius: 3,
         boxShadow: 'var(--ide-card-shadow)',
-        backgroundImage: `linear-gradient(to right, transparent ${margin - 2}px, var(--ide-margin-line) ${margin - 2}px, var(--ide-margin-line) ${margin}px, transparent ${margin}px), repeating-linear-gradient(to bottom, transparent 0 31px, var(--ide-border) 31px 32px)`,
+        backgroundImage:
+          'linear-gradient(to right, transparent calc(var(--margin) - 2px), var(--ide-margin-line) calc(var(--margin) - 2px), var(--ide-margin-line) var(--margin), transparent var(--margin)), repeating-linear-gradient(to bottom, transparent 0 31px, var(--ide-border) 31px 32px)',
         backgroundPosition: '0 0, 0 32px',
       }}
     >
       {portfolioData.timeline.map((item) => (
         <section
           key={item.year}
-          className="grid"
-          style={{ gridTemplateColumns: `${margin}px 1fr`, columnGap: isMobile ? 12 : 24 }}
+          className="grid grid-cols-[var(--margin)_1fr] gap-x-3 @[880px]:gap-x-6"
         >
           <h3
+            className="pr-[10px] text-[20px] @[880px]:pr-[18px] @[880px]:text-[26px]"
             style={{
               fontFamily: serif,
-              fontSize: isMobile ? 20 : 26,
               fontWeight: 700,
               lineHeight: '32px',
               color: 'var(--ide-text-1)',
               margin: 0,
-              paddingRight: isMobile ? 10 : 18,
               textAlign: 'right',
               fontVariantNumeric: 'tabular-nums',
             }}
@@ -534,7 +500,7 @@ function CareerLog({ isMobile }: { isMobile: boolean }) {
   );
 }
 
-function Community({ isMobile }: { isMobile: boolean }) {
+function Community() {
   const cardStyle = {
     display: 'flex',
     alignItems: 'center',
@@ -547,14 +513,8 @@ function Community({ isMobile }: { isMobile: boolean }) {
 
   return (
     <ul
-      className="grid"
-      style={{
-        gap: 24,
-        margin: 0,
-        padding: 0,
-        listStyle: 'none',
-        gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-      }}
+      className="grid grid-cols-1 @[880px]:grid-cols-2"
+      style={{ gap: 24, margin: 0, padding: 0, listStyle: 'none' }}
     >
       {portfolioData.community.map((community) => {
         const badge = BADGES[community.short];
@@ -699,40 +659,33 @@ function AboutMe() {
 }
 
 export function About() {
-  const { isMobile } = useResponsive();
-  const stacked = useContentWidth() < 880;
   const featured = FEATURED_IDS.map((id) =>
     portfolioData.projects.find((project) => project.id === id),
   ).filter((project): project is Project => Boolean(project));
 
   return (
     <div>
-      <Band first isMobile={isMobile}>
-        <Hero isMobile={stacked} />
+      <Band first>
+        <Hero />
       </Band>
 
-      <Band isMobile={isMobile}>
+      <Band>
         <div style={{ maxWidth: 720 }}>
           <SectionLabel>About me</SectionLabel>
           <AboutMe />
         </div>
       </Band>
 
-      <Band isMobile={isMobile}>
+      <Band>
         <SectionLabel>Experience</SectionLabel>
-        <Experience isMobile={stacked} />
+        <Experience />
       </Band>
 
-      <Band isMobile={isMobile}>
+      <Band>
         <SectionLabel>Featured projects</SectionLabel>
-        <div className="flex flex-col" style={{ gap: isMobile ? 56 : 80, marginTop: 40 }}>
+        <div className="flex flex-col gap-14 md:gap-20" style={{ marginTop: 40 }}>
           {featured.map((project, i) => (
-            <FeaturedProject
-              key={project.id}
-              project={project}
-              flip={i % 2 === 1}
-              isMobile={stacked}
-            />
+            <FeaturedProject key={project.id} project={project} flip={i % 2 === 1} />
           ))}
         </div>
         <Link href="/projects" className="pf-btn" style={{ marginTop: 56 }}>
@@ -740,22 +693,22 @@ export function About() {
         </Link>
       </Band>
 
-      <Band isMobile={isMobile}>
+      <Band>
         <SectionLabel>Tech stack</SectionLabel>
-        <TechSheet isMobile={stacked} />
+        <TechSheet />
       </Band>
 
-      <Band isMobile={isMobile}>
+      <Band>
         <SectionLabel>Career log</SectionLabel>
-        <CareerLog isMobile={stacked} />
+        <CareerLog />
       </Band>
 
-      <Band isMobile={isMobile}>
+      <Band>
         <SectionLabel>Community</SectionLabel>
-        <Community isMobile={stacked} />
+        <Community />
       </Band>
 
-      <Band isMobile={isMobile}>
+      <Band>
         <SectionLabel>Certificates</SectionLabel>
         <ul className="flex flex-col" style={{ gap: 12, margin: 0, padding: 0, listStyle: 'none' }}>
           {portfolioData.certificates.map((cert) => (

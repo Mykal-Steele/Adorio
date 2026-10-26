@@ -4,15 +4,11 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { experienceForSkill, projectsForSkill } from '../data/skills';
-import { useResponsive } from '../hooks/useResponsive';
-import { useContentWidth } from '../hooks/useContentWidth';
 import { sans, serif } from '../constants/fonts';
 import { body, eyebrow } from '../constants/type';
 import { ProjectImage, SectionLabel, TechLogo } from '../shared';
 
 export function SkillDetail({ id }: { id: string }) {
-  const { isMobile } = useResponsive();
-  const oneColumn = useContentWidth() < 640;
   const skill = portfolioData.skills.find((s) => s.id === id);
 
   if (!skill) {
@@ -33,7 +29,7 @@ export function SkillDetail({ id }: { id: string }) {
 
   return (
     <div
-      className={isMobile ? 'px-4 pt-10 pb-20' : 'px-10 pt-16 pb-28'}
+      className="px-4 pt-10 pb-20 md:px-10 md:pt-16 md:pb-28"
       style={{ maxWidth: 760, margin: '0 auto' }}
     >
       <header className="flex items-center" style={{ gap: 20 }}>
@@ -81,10 +77,9 @@ export function SkillDetail({ id }: { id: string }) {
         <section style={{ marginTop: 64 }}>
           <SectionLabel>My setup</SectionLabel>
           <div
-            className="flex flex-col"
+            className="flex flex-col p-5 md:p-7"
             style={{
               gap: 32,
-              padding: isMobile ? 20 : 28,
               background: 'var(--ide-bg-3)',
               borderRadius: 3,
               boxShadow: 'var(--ide-card-shadow)',
@@ -107,11 +102,7 @@ export function SkillDetail({ id }: { id: string }) {
                   {items.map(({ label, value }) => (
                     <div
                       key={label}
-                      className="grid items-baseline"
-                      style={{
-                        gridTemplateColumns: oneColumn ? '1fr' : '140px 1fr',
-                        gap: oneColumn ? 2 : 16,
-                      }}
+                      className="grid grid-cols-1 items-baseline gap-0.5 @[640px]:grid-cols-[140px_1fr] @[640px]:gap-4"
                     >
                       <dt style={{ ...eyebrow, fontSize: 15 }}>{label}</dt>
                       <dd style={{ ...body, margin: 0 }}>{value}</dd>
@@ -128,14 +119,8 @@ export function SkillDetail({ id }: { id: string }) {
         <section style={{ marginTop: 64 }}>
           <SectionLabel>Projects</SectionLabel>
           <ul
-            className="grid"
-            style={{
-              gap: 24,
-              margin: 0,
-              padding: 0,
-              listStyle: 'none',
-              gridTemplateColumns: oneColumn ? '1fr' : 'repeat(2, minmax(0, 1fr))',
-            }}
+            className="grid grid-cols-1 @[640px]:grid-cols-2"
+            style={{ gap: 24, margin: 0, padding: 0, listStyle: 'none' }}
           >
             {projects.map((project) => (
               <li key={project.id}>
