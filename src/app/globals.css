@@ -516,8 +516,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.ide-layout,
-.ide-layout body {
+/* The page-level styles for the portfolio key off the shell being in the page, so they apply
+   from the first paint. A class added from JS only landed after hydration, so the page first
+   drew with a scrollbar and then restyled everything to drop it. */
+:root:has(.ide-root),
+:root:has(.ide-root) body {
   overflow: hidden;
   background: var(--ide-bg-1);
 }
@@ -532,12 +535,12 @@ body {
 }
 
 /* Keyboard focus must stay visible through the IDE's inline styles */
-.ide-layout :focus-visible {
+:root:has(.ide-root) :focus-visible {
   outline: 2px solid var(--ide-accent);
   outline-offset: 2px;
 }
 /* Tabs sit in a scrolling row that clips anything outside it, so their ring goes inside */
-.ide-layout .pf-tab:focus-visible {
+:root:has(.ide-root) .pf-tab:focus-visible {
   outline-offset: -2px;
 }
 .pf-btn:disabled {

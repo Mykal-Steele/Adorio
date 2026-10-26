@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useLayoutEffect, useRef, useCallback, ReactNode } from 'react';
+import { useState, useLayoutEffect, useRef, useCallback, ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { Folder, Terminal as TerminalIcon, GithubIcon, LinkedinIcon } from 'lucide-react';
 
@@ -164,7 +164,10 @@ function Shell({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden" style={{ background: 'var(--ide-bg-1)' }}>
+    <div
+      className="ide-root flex h-dvh flex-col overflow-hidden"
+      style={{ background: 'var(--ide-bg-1)' }}
+    >
       <div className="shrink-0 md:hidden">
         <MobileHeader onMenuOpen={() => open('explorer')} />
       </div>
@@ -257,13 +260,6 @@ function Shell({ children }: { children: ReactNode }) {
 }
 
 function IDELayoutInner({ children }: { children: ReactNode }) {
-  useEffect(() => {
-    document.documentElement.classList.add('ide-layout');
-    return () => {
-      document.documentElement.classList.remove('ide-layout');
-    };
-  }, []);
-
   return (
     <>
       <NavigationProgressBar />
