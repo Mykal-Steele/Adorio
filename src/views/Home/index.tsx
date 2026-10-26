@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import { debounce } from 'lodash';
 import { isAbortError } from '../../utils/errorHandling';
+import PostColumns from './components/PostColumns';
 import { TITLE_CHARACTER_LIMIT } from './constants/title';
 import { POSTS_PAGE_SIZE } from './constants/feed';
 import PaperTornEdge from '../../components/PaperTornEdge';
@@ -458,20 +459,6 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     }
   };
 
-  // Two fixed columns instead of a CSS multi-column layout: a native `column-width`
-  // rebalances its entire contents from scratch whenever the total content changes,
-  // which visibly moves already-rendered posts into a different column every time
-  // a new page loads. Assigning each post to a column by its own stable index means
-  // a newly loaded post only ever appends to the end of a column, it never moves
-  // one that's already on screen.
-  const postColumns = useMemo(() => {
-    const columns: { post: (typeof posts)[number]; index: number }[][] = [[], []];
-    posts.forEach((post, index) => {
-      columns[index % 2].push({ post, index });
-    });
-    return columns;
-  }, [posts]);
-
   const countLabel =
     filter === 'photos' ? `${posts.length} with photos` : `${posts.length} posts on the wall`;
 
@@ -507,8 +494,11 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
                 drop a screenshot, or just say hi.
               </p>
             </div>
+            {/* Shows after mount because "today" is the visitor's own timezone. Below lg it would
+                wrap onto its own line and push the whole feed down when it appears, so there it
+                sits on the corner of the hero like a sticker and takes no space. */}
             {mounted && newTodayCount > 0 && (
-              <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-[18px] py-3 font-paper-sans font-bold text-lg leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
+              <p className="absolute right-4 top-0 whitespace-nowrap rounded-[2px] sm:right-8 sm:top-2 lg:relative lg:right-auto lg:top-auto bg-[var(--paper-yellow)] px-[18px] py-3 font-paper-sans font-bold text-lg leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
                 {newTodayCount} new today
               </p>
             )}
@@ -595,26 +585,24 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
               <PostSkeleton count={3} />
             </div>
           ) : (
-            <div className="mt-[clamp(34px,4vw,50px)] grid grid-cols-1 gap-x-[clamp(24px,3vw,38px)] sm:grid-cols-2">
-              {postColumns.map((column, columnIndex) => (
-                <div key={columnIndex}>
-                  {column.map(({ post, index }) => (
-                    <PostCard
-                      key={post._id}
-                      {...post}
-                      index={index}
-                      currentUserId={user?._id}
-                      currentUsername={user?.username}
-                      onLike={handleLike}
-                      onCommentAdded={(updatedPost) => {
-                        setPosts((prevPosts) =>
-                          prevPosts.map((p) => (p._id === updatedPost._id ? updatedPost : p)),
-                        );
-                      }}
-                    />
-                  ))}
-                </div>
-              ))}
+            <div className="mt-[clamp(34px,4vw,50px)]">
+              <PostColumns
+                posts={posts}
+                renderPost={(post, index) => (
+                  <PostCard
+                    {...post}
+                    index={index}
+                    currentUserId={user?._id}
+                    currentUsername={user?.username}
+                    onLike={handleLike}
+                    onCommentAdded={(updatedPost) => {
+                      setPosts((prevPosts) =>
+                        prevPosts.map((p) => (p._id === updatedPost._id ? updatedPost : p)),
+                      );
+                    }}
+                  />
+                )}
+              />
             </div>
           )}
 

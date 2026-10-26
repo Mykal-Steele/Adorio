@@ -4,6 +4,7 @@ import { useAppSelector } from '../../store/hooks';
 import { getPosts, likePost } from '../../api';
 import PostCard from '../Home/components/PostCard';
 import PostSkeleton from '../Home/components/PostSkeleton';
+import PostColumns from '../Home/components/PostColumns';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import { isAbortError } from '../../utils/errorHandling';
 import PaperTornEdge from '../../components/PaperTornEdge';
@@ -69,16 +70,7 @@ const Profile = () => {
     onLoadMore: () => setPage((prev) => prev + 1),
   });
 
-  if (loading && page === 1) {
-    return (
-      <div className="paper-theme min-h-screen">
-        <PaperTornEdge />
-        <div className="mx-auto max-w-5xl px-4 py-12 sm:px-8">
-          <PostSkeleton count={3} />
-        </div>
-      </div>
-    );
-  }
+  const firstLoad = loading && page === 1;
 
   if (error) {
     return (
@@ -112,21 +104,28 @@ const Profile = () => {
                 social feed and it lands here.
               </p>
             </div>
-            {posts.length > 0 && (
-              <p className="relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-[18px] py-3 font-paper-sans font-bold text-lg leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)]">
-                {posts.length}
-                {hasMore ? '+' : ''} posts
-              </p>
-            )}
+            {/* Always in the layout so it can't push the page down when the count arrives.
+                On phones it wraps onto its own line, so popping in would move everything. */}
+            <p
+              className={`relative whitespace-nowrap rounded-[2px] bg-[var(--paper-yellow)] px-[18px] py-3 font-paper-sans font-bold text-lg leading-none rotate-[2deg] shadow-[1px_3px_9px_rgba(60,44,24,.22)] ${firstLoad ? 'invisible' : ''}`}
+            >
+              {posts.length}
+              {hasMore ? '+' : ''} posts
+            </p>
           </div>
         </div>
       </section>
 
       <main className="px-4 pb-20 pt-9 sm:px-8 sm:pb-24 sm:pt-12">
         <div className="mx-auto max-w-5xl">
-          <div className="[column-gap:clamp(24px,3vw,38px)] [column-width:22rem]">
-            {posts.map((post, index) => (
-              <div key={post._id} ref={index === posts.length - 1 ? lastPostRef : null}>
+          {firstLoad ? (
+            <PostSkeleton count={3} />
+          ) : (
+            // Same fixed columns as the social feed, so the next page only adds to the
+            // bottom and nothing already on screen moves
+            <PostColumns
+              posts={posts}
+              renderPost={(post, index) => (
                 <PostCard
                   {...post}
                   index={index}
@@ -135,9 +134,13 @@ const Profile = () => {
                   onLike={handleLike}
                   onCommentAdded={handleCommentAdded}
                 />
-              </div>
-            ))}
-          </div>
+              )}
+            />
+          )}
+
+          {/* Below the grid, not on the last post, so it keeps loading even when a page of
+              the feed has none of your posts */}
+          <div ref={lastPostRef} aria-hidden="true" />
 
           {loading && page > 1 && (
             <div className="mt-8">
@@ -145,7 +148,7 @@ const Profile = () => {
             </div>
           )}
 
-          {!loading && posts.length === 0 && (
+          {!loading && !hasMore && posts.length === 0 && (
             <div className="mx-auto mt-[clamp(40px,5vw,64px)] max-w-md text-center">
               <p className="font-paper-sans text-lg text-[var(--paper-muted)]">No posts yet.</p>
               <p className="mt-2 text-[15px] text-[var(--paper-muted)]">
