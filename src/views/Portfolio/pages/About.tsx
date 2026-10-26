@@ -138,7 +138,7 @@ function Hero() {
       </div>
 
       <aside
-        className="pf-note relative max-w-[360px] [--tilt:-1deg] @[880px]:mt-14 @[880px]:max-w-none @[880px]:[--tilt:2deg]"
+        className="pf-note @container relative max-w-[360px] [--tilt:-1deg] @[560px]:max-w-[620px] @[880px]:mt-14 @[880px]:max-w-none @[880px]:[--tilt:2deg]"
         style={{
           padding: '24px 24px 20px',
           background: 'var(--ide-note)',
@@ -146,7 +146,11 @@ function Hero() {
         }}
       >
         <Tape />
-        <dl className="flex flex-col" style={{ gap: 12, margin: 0 }}>
+        {/* Two columns once the note is wide enough, which only happens on tablets */}
+        <dl
+          className="grid grid-cols-1 gap-3 @[440px]:grid-cols-2 @[440px]:gap-x-8 @[440px]:gap-y-4"
+          style={{ margin: 0 }}
+        >
           {facts.map(({ label, value }) => (
             <div key={label}>
               <dt style={{ ...eyebrow, fontSize: 13 }}>{label}</dt>
