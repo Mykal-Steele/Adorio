@@ -252,6 +252,9 @@ Three components work together:
 | `stopped`             | `reason`, `onSeconds`, `usageDay`, `usageMinutes`   | How long each session ran, and the day's total on-time |
 | `daily_limit_blocked` | `trigger`, `userId`, `usageMinutes`                 | The daily cap is being hit, raise it or look for abuse |
 | `start_failed`, `power_state_failed`, `stop_check_failed` | `message` | Azure calls failing                                   |
+| `auth_failed`         | `status` (401 or 403)                               | `PISTON_TOKEN` doesn't match the VM's token. Logged once until Piston accepts it again |
+
+Two log alerts in `infra/main.bicep` email the owner: `code-runner-token-rejected` on any `auth_failed`, and `code-runner-stuck-starting` when a `start_requested` has no `ready` after it for 10 minutes. The stop check probes Piston every minute while the VM runs, so `ready` gets logged even when nobody has the page open.
 
 In Log Analytics (`adorio-prod-env-logs`):
 

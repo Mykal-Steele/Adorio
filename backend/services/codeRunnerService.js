@@ -66,6 +66,19 @@ const minutesFrom = (date, minutes) => new Date(date.getTime() + minutes * 60000
 const isDailyLimitReached = (doc, now) =>
   doc?.usageDay === utcDay(now) && doc.usageMinutes >= environment.piston.dailyLimitMinutes;
 
+// A 401 or 403 means PISTON_TOKEN does not match the token on the VM, which
+// no amount of waiting fixes. The page still shows "starting", so this log
+// line (and the alert on it in infra/main.bicep) is how anyone finds out. It
+// is written once, and again only after Piston has accepted the token since.
+let authFailureLogged = false;
+const noteAuthFailure = (status) => {
+  if (authFailureLogged) return;
+  authFailureLogged = true;
+  console.error(
+    JSON.stringify({ scope: 'code-runner', event: 'auth_failed', level: 'error', status }),
+  );
+};
+
 // A running VM is not a ready runner: after a start, Docker and Piston need a
 // while longer before both runtimes answer. Any failure here just means "not
 // yet", so it is reported as false rather than thrown.
@@ -76,7 +89,9 @@ const pistonHasRuntimes = async () => {
       headers: { 'X-Auth-Token': environment.piston.token },
       signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
     });
+    if (res.status === 401 || res.status === 403) noteAuthFailure(res.status);
     if (!res.ok) return false;
+    authFailureLogged = false;
     const runtimes = await res.json();
     return REQUIRED_RUNTIMES.every((language) => runtimes.some((r) => r.language === language));
   } catch {
@@ -239,6 +254,12 @@ export const runRunnerStopCheck = async (now = new Date()) => {
   // Read again right before acting, so a run that arrived while Azure was
   // answering above is not cut off.
   const latest = await findRunnerState(RUNNER_KEY);
+  // The page only notices "ready" while someone has it open. Checking here too
+  // means every start that works logs "ready" within a minute, so the alert
+  // for a start that never gets there does not fire because someone left.
+  if (power === 'running' && (await pistonHasRuntimes())) {
+    await noteIfJustReady('ready', latest, now);
+  }
   if (latest.keepUntil > new Date()) return;
 
   await deallocateVm();
