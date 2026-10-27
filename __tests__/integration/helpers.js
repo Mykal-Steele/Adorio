@@ -18,9 +18,8 @@ const waitForBackend = async (retries = 30, interval = 2000) => {
   );
 };
 
-// Creates a unique user credential set. A monotonic counter is appended so
-// two calls within the same millisecond (e.g. a test file registering two
-// users back to back) never collide on username/email.
+// the counter keeps two users made in the same millisecond from colliding on
+// username/email
 let credentialCounter = 0;
 
 const makeCredentials = () => {

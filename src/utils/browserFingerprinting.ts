@@ -297,7 +297,6 @@ const getBrowserFingerprint = async () => {
       fonts: fonts || [],
     };
 
-    // Add WebGL info in a structured way
     if (webgl) {
       fingerprint.webgl = {
         vendor: webgl.vendor || webgl.unmaskedVendor || '',

@@ -16,9 +16,9 @@ export const r2Configured = Boolean(
   accountId && accessKeyId && secretAccessKey && bucket && publicUrl,
 );
 
-// R2's S3 API is region-agnostic ("auto"). The explicit checksum settings stop
-// @aws-sdk v3 from scripting x-amz-checksum-* into a presigned PUT — a browser
-// PUT can't compute those headers, so the signature would never match.
+// R2 has no regions ("auto"). The checksum settings stop @aws-sdk v3 from adding
+// x-amz-checksum-* to a presigned PUT. A browser PUT can't compute those, so
+// the signature would never match.
 const client = r2Configured
   ? new S3Client({
       region: 'auto',

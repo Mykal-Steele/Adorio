@@ -1,25 +1,18 @@
-// Torn-paper strip below the sticky Navbar. Stays sticky at the same offset as
-// the Navbar's own height so it scrolls as one unit with it instead of sliding
-// away underneath.
+// Torn-paper strip under the sticky Navbar. It sticks at the Navbar's height so the two
+// scroll as one instead of the strip sliding away underneath.
 //
-// The background is intentionally transparent, not a flat fill: the jagged
-// valleys cut into the bottom edge are meant to reveal whatever real content
-// (a feed card, an image) is actually sitting behind them. A solid backdrop
-// color there makes the tear look like it's painted on top of a rectangle
-// instead of genuinely overlapping the page underneath it.
+// The background is transparent on purpose: the valleys in the bottom edge should show
+// whatever is behind them (a feed card, a photo). A solid fill makes the tear look
+// painted on a rectangle.
 //
-// Two things keep the shape legible against an unpredictable backdrop
-// (a same-colored card, a busy photo):
-// 1. Each spike fills from a gradient, solid cream for a short buffer at
-//    the top (so it still reads as one seamless color with the Navbar),
-//    fading to a darker tan for most of the spike's height, darkest at the tip.
-// 2. A second, unfilled path retraces just the jagged edge (not the flat top,
-//    or the stroke would draw a seam line against the Navbar) with a thin
-//    dark stroke, so there's a hard edge that doesn't depend on color
-//    contrast with whatever happens to be behind it.
+// To keep the shape readable over any backdrop (a same-colored card, a busy photo):
+// 1. Each spike fills with a gradient: solid cream at the top so it blends with the
+//    Navbar, then a darker tan, darkest at the tip.
+// 2. A second unfilled path traces only the jagged edge with a thin dark stroke, so the
+//    edge doesn't depend on contrast. Tracing the flat top too would draw a seam against
+//    the Navbar.
 //
-// Mobile renders a sparser zigzag than desktop, the strip is shorter there,
-// and the dense desktop pattern reads as noise at that height.
+// Mobile gets a sparser zigzag. The strip is shorter there and the dense one reads as noise.
 const PaperTornEdge = () => (
   <div className="sticky top-14 z-40 h-4 w-full bg-transparent sm:top-16 sm:h-6">
     <svg

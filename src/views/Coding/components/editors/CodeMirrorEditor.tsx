@@ -16,26 +16,18 @@ import { Language } from '../../types';
 import type { EditorEngineProps, EditorHandle } from './types';
 
 const javaLanguage = StreamLanguage.define(java);
-// .data.of(...) only builds the extension, it still has to be in the
-// editor's `extensions` array below to actually take effect.
+// .data.of() only builds the extension, it still has to go in `extensions` below
 const javaCompletions = javaLanguage.data.of({ autocomplete: javaCompletionSource });
 const javaSnippets = javaLanguage.data.of({ autocomplete: javaSnippetSource });
-// toggleComment (Ctrl+/) reads comment syntax from language data, the
-// legacy Java mode doesn't provide any, so declare it explicitly.
+// Ctrl+/ reads comment tokens from language data and the legacy Java mode has none
 const javaComments = javaLanguage.data.of({
   commentTokens: { line: '//', block: { open: '/*', close: '*/' } },
 });
 
-// The legacy CM5-style clike mode's own indent() is a rough brace-tracking
-// heuristic that regularly gets Enter-on-a-plain-statement wrong (dedents to
-// the enclosing block instead of matching the line above, like every real
-// editor does). Overriding with an explicit indentService replaces it
-// outright: match the previous non-blank line's indent, add one level if
-// that line leaves a bracket unclosed, and drop one level if the line being
-// indented opens with a closer. Brackets inside string/char literals and
-// comments are skipped when counting, so a brace in e.g. "{" or // }
-// never shifts indentation. This is the whole Enter story, same as VSCode:
-// indent the new line, nothing more.
+// The legacy clike mode's indent() often dedents Enter after a plain statement.
+// This replaces it: copy the previous non-blank line's indent, +1 level if that
+// line leaves a bracket open, -1 if the new line starts with a closer. Brackets
+// in strings and comments don't count.
 const countNetOpens = (line: string): number => {
   let depth = 0;
   let inSingle = false;
@@ -93,32 +85,20 @@ const javaIndent = indentService.of((context, pos) => {
   return indent;
 });
 
-// globalThis introspection gets JS completions for every real built-in
-// (Array, Object, Math, console, JSON, ...) and their members, not a
-// hand-maintained list, this is what "knows the standard library" actually
-// looks like when the runtime can be introspected directly, unlike Java.
+// introspecting globalThis gives every real JS built-in and its members for free
 const jsGlobalCompletions = javascriptLanguage.data.of({
   autocomplete: scopeCompletionSource(globalThis),
 });
 const jsSnippets = javascriptLanguage.data.of({ autocomplete: jsSnippetSource });
 
-// Plain EditorView.lineWrapping only: a hanging-wrap attempt (padding-left +
-// negative text-indent via line decorations) once shifted the selection
-// layer's highlight rectangles off the text, producing blocky misaligned
-// selections. Wrapped continuation lines starting at column 0 is the lesser
-// evil, CodeMirror has no built-in hanging indent.
+// Wrapping is plain EditorView.lineWrapping on purpose. A hanging indent via
+// padding + negative text-indent decorations threw the selection highlight off
+// the text, so wrapped lines start at column 0.
 
-// Manual format only (Shift+Alt+F / Format button): a cursor-preserving
-// whole-doc replace, left in the undo history as one step. There is
-// deliberately no auto-format on Enter or paste, VSCode ships with both
-// off by default, and reformatting the whole document behind the user's
-// back is what made Enter feel broken.
-//
-// formatCode is brace-depth-based (Java/JS); Python's blocks are indentation,
-// not braces, so running it on Python would recompute indentation from `(`/
-// `[` call/list nesting and corrupt the program. No formatter for Python
-// until there's a real indentation-aware one, silently no-op is safer than
-// silently breaking the user's code.
+// Manual format only (Shift+Alt+F or the button), one undo step. No format on
+// Enter or paste: reformatting behind the user's back made Enter feel broken.
+// formatCode counts braces, so on Python it would wreck the indentation. No-op
+// there until there's an indentation-aware formatter.
 const dispatchPreservingFormat = (view: EditorView, language: string) => {
   if (language === Language.PYTHON) return;
   const current = view.state.doc.toString();
@@ -157,26 +137,17 @@ const CodeMirrorEditor = forwardRef<EditorHandle, EditorEngineProps>(
       [code, onChange, language],
     );
 
-    // Re-applies the shared wrap/font-size settings whenever they change,     // including once on mount, in case the store already holds a non-default
-    // value from before this instance existed (e.g. right after switching
-    // engines, or on a fresh CodeMirror instance from the problem-switch
-    // `key` reset in Practice.tsx).
+    // also runs on mount, the store may already hold non-default settings
+    // (after switching engines, or the remount on problem switch)
     useEffect(() => {
       syncEditorSettings(viewRef.current);
       return subscribeEditorSettings(() => syncEditorSettings(viewRef.current));
     }, []);
 
     const extensions = useMemo(() => {
-      // Python's own lang package ships proper indentation-sensitive indent
-      // logic already, unlike the legacy Java clike mode, it doesn't need
-      // (or want) the brace-counting javaIndent override.
-      // Java's convention (and every starter template in problems.ts) is 4
-      // spaces per level, matching VSCode's own per-language default; this
-      // app's JS templates are 2. CodeMirror's indentUnit facet defaults to
-      // 2 for everything, so without this, javaIndent's `context.unit`
-      // inserted 2-space levels into new lines a student typed while the
-      // pre-written starter code around it stayed at 4, real, visible
-      // indentation drift within the same file.
+      // Python's lang package already indents properly, so no javaIndent there.
+      // Java starters use 4 spaces and indentUnit defaults to 2, so without
+      // the override new lines came out 2 deep next to 4-space starter code.
       let languageExtension;
       let languageFeatures: unknown[];
       if (language === Language.JAVA) {
@@ -202,8 +173,7 @@ const CodeMirrorEditor = forwardRef<EditorHandle, EditorEngineProps>(
         autocompletion({ activateOnTyping: true }),
         closeBrackets(),
         disableGrammarly,
-        // VSCode-style Alt+Click multi-cursor (CodeMirror's default is
-        // Ctrl/Cmd+Click, which collides with browser shortcuts).
+        // Alt+Click multi-cursor like VSCode, Ctrl+Click clashes with the browser
         EditorView.clickAddsSelectionRange.of((event) => event.altKey),
         ...settingsCompartments,
         keymap.of([
@@ -225,18 +195,14 @@ const CodeMirrorEditor = forwardRef<EditorHandle, EditorEngineProps>(
         height="380px"
         theme={paperEditorTheme}
         extensions={extensions}
-        // @uiw registers CodeMirror's stock indentWithTab ahead of user
-        // extensions, which would shadow our Tab handler below (whole-line
-        // indent everywhere). Disabled so vscodeTab owns Tab/Shift-Tab.
+        // @uiw adds indentWithTab ahead of our extensions, which would shadow vscodeTab
         indentWithTab={false}
         basicSetup={{
           highlightActiveLine: true,
           highlightActiveLineGutter: true,
           foldGutter: true,
           lineNumbers: true,
-          // highlightSelectionMatches paints every occurrence of the selected
-          // text in a near-identical mustard wash, so unselected lines look
-          // selected. Off so only the real selection highlights.
+          // its highlight looks almost the same as a real selection
           highlightSelectionMatches: false,
         }}
         onChange={onChange}

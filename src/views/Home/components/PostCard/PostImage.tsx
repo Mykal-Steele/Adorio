@@ -1,6 +1,5 @@
 import React from 'react';
 
-// image component that handles all the loading states
 const PostImage = ({ imageState, onImageClick, title, postId, rotationClass }) => {
   if (!imageState) return null;
 

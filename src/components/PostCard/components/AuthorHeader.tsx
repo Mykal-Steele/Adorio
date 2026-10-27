@@ -19,7 +19,6 @@ const AuthorHeader = ({ user, createdAt, isAdmin }) => {
                 className="w-full h-full object-cover rounded-full"
               />
             ) : (
-              // Use first letter when a profile image is not available.
               <span className="text-xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
                 {user?.username?.charAt(0).toUpperCase() || 'U'}
               </span>

@@ -23,8 +23,6 @@ describe('Posts API', () => {
     }
   });
 
-  // ── Unauthenticated guards ────────────────────────────────────────────────
-
   describe('Unauthenticated guards', () => {
     test('POST /api/posts without token returns 401', async () => {
       const res = await axios.post(
@@ -53,8 +51,6 @@ describe('Posts API', () => {
       expect(res.status).toBe(401);
     });
   });
-
-  // ── Public read ───────────────────────────────────────────────────────────
 
   describe('Public read', () => {
     test('GET /api/posts returns posts array with pagination meta', async () => {
@@ -94,8 +90,6 @@ describe('Posts API', () => {
     });
   });
 
-  // ── Sad paths with auth ───────────────────────────────────────────────────
-
   describe('Sad paths with auth', () => {
     test('PUT /api/posts/:id/like on non-existent post returns 404', async () => {
       const res = await axios.put(
@@ -121,8 +115,6 @@ describe('Posts API', () => {
       expect(res.status).toBe(404);
     });
   });
-
-  // ── Full flow ─────────────────────────────────────────────────────────────
 
   describe('Full flow: create → read → like → comment', () => {
     test('POST /api/posts creates a post and returns it', async () => {
@@ -177,8 +169,6 @@ describe('Posts API', () => {
       expect(found).toBe(true);
     });
   });
-
-  // ── Input validation ──────────────────────────────────────────────────────
 
   describe('Input validation', () => {
     test('POST /api/posts with missing content returns 400', async () => {

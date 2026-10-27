@@ -3,17 +3,11 @@ const BACKUP_ORIGIN = 'https://p01--adorio--y9gwmvv64g9t.code.run';
 const HEALTH_PATH = '/api/health';
 const KV_KEY = 'primary-health';
 const PRIMARY_TIMEOUT_MS = 5000;
-// /api/coding/run compiles and runs real code through Piston — legitimate
-// successful responses have been observed taking 5.6-5.9s, right at (and
-// over) the generic 5s budget above. Without this, a request that's simply
-// slow (not actually broken) gets treated as a primary failure: it's routed
-// to the Northflank backup for that one request, AND counted toward the
-// shared FAIL_THRESHOLD below, which can mark the *entire* domain unhealthy
-// off nothing but a couple of ordinary Java submissions. 20s covers the
-// backend's own worst-case budget (backend/services/codingService.js's
-// COMPILE_TIMEOUT_MS + RUN_TIMEOUT_MS per test, batched across
-// TEST_CASE_CONCURRENCY) with headroom, while still failing over well
-// before a real Piston/Azure outage would leave a user waiting.
+// /api/coding/run runs real code through Piston and normal runs have taken 5.6-5.9s,
+// over the 5s budget above. With 5s, a slow run went to the backup and counted toward
+// FAIL_THRESHOLD, so a couple of Java submissions could fail over the whole domain.
+// 20s covers codingService.js's worst case (COMPILE_TIMEOUT_MS + RUN_TIMEOUT_MS per
+// test, batched by TEST_CASE_CONCURRENCY) with headroom, and still fails over on a real outage.
 const SLOW_PATH_TIMEOUT_MS = 20000;
 const SLOW_PATHS = ['/api/coding/run'];
 const PROBE_TIMEOUT_MS = 5000;
@@ -35,7 +29,7 @@ async function putState(env, state) {
   try {
     await env.FAILOVER_STATE.put(KV_KEY, JSON.stringify(state));
   } catch (err) {
-    // KV write failures must never crash the request path
+    // a failed KV write shouldn't break the request
   }
 }
 
@@ -90,8 +84,7 @@ export default {
     const state = await getState(env);
 
     if (state.healthy) {
-      // Exact match or a path-boundary prefix only — startsWith alone would
-      // also give something like /api/coding/runaway the slow budget.
+      // plain startsWith would also give /api/coding/runaway the slow budget
       const timeoutMs = SLOW_PATHS.some(
         (path) => url.pathname === path || url.pathname.startsWith(path + '/'),
       )
@@ -111,14 +104,11 @@ export default {
       }
     }
 
-    // Recovery detection runs only from the Cron Trigger below, never on the
-    // request path. Cron Triggers fire exactly once per schedule across the
-    // whole network. An earlier version probed from here on every request
-    // while unhealthy instead — since each Cloudflare edge location caches
-    // its own copy of FAILOVER_STATE (cacheTtl above), every colo serving
-    // traffic ran its own independent probe-and-write cycle, multiplying KV
-    // writes by however many colos were active and blowing past the free
-    // tier's 1,000 writes/day cap well before a full outage day was over.
+    // recovery is only checked by the cron below, which fires once per schedule
+    // network wide. It used to probe here on every request while unhealthy, so
+    // every colo (each caches its own FAILOVER_STATE) probed and wrote KV on its
+    // own, and that blew through the free tier's 1,000 writes/day before an
+    // outage day was over.
     return serveBackup(request, url);
   },
 

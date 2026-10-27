@@ -16,12 +16,9 @@ import type { EditorEngineProps, EditorHandle } from './types';
 
 type IStandaloneCodeEditor = Monaco.editor.IStandaloneCodeEditor;
 
-// registerCompletionItemProvider/registerDocumentFormattingEditProvider are
-// global to the monaco module, not per-editor-instance, Practice.tsx
-// remounts this component on every problem/language switch (see `editorKey`
-// in Practice.tsx), so registering again on every mount would stack up
-// duplicate suggestions. Monaco itself (the loaded module) is a singleton
-// across the page, so a module-level guard is the right scope here.
+// Providers are global to the monaco module, not per editor. Practice.tsx
+// remounts this on every problem/language switch (`editorKey`), so without
+// this guard the suggestions pile up as duplicates.
 let providersRegistered = false;
 
 const registerProvidersOnce = (monaco: typeof Monaco) => {
@@ -32,17 +29,12 @@ const registerProvidersOnce = (monaco: typeof Monaco) => {
   registerSnippets(monaco, 'java');
   registerSnippets(monaco, 'javascript');
 
-  // Manual format only (Shift+Alt+F / Format button, Monaco's own default
-  // binding for "Format Document"), same formatCode used by the CodeMirror
-  // engine, so both produce identical output. Emits one edit per changed
-  // line rather than a single whole-document replace so Monaco's own
-  // edit-tracking keeps the cursor in place, matching the CodeMirror path's
-  // cursor-preserving format.
+  // Same formatCode as CodeMirror so both engines format the same. One edit
+  // per changed line, not a whole-doc replace, so Monaco keeps the cursor put.
   const formattingProvider: Monaco.languages.DocumentFormattingEditProvider = {
     provideDocumentFormattingEdits(model) {
       const current = model.getValue();
-      // Registered once for both 'java' and 'javascript' (see below), so
-      // this reads the model's actual language rather than assuming one.
+      // registered for both java and javascript, so read the model's language
       const formatted = formatCode(current, model.getLanguageId());
       if (formatted === current) return [];
       const oldLines = current.split('\n');
@@ -82,13 +74,8 @@ const applySettings = (editor: IStandaloneCodeEditor) => {
   });
 };
 
-// Java's actual convention (and every starter template in problems.ts) is
-// 4 spaces per level; JS in this app's own starter templates is 2. Indent
-// guides and auto-indent both key off tabSize, so a fixed 2 for every
-// language meant new Java blocks a student typed drifted out of alignment
-// with the pre-written 4-space starter code, and the indent-guide lines
-// visibly desynced. VSCode does the same per-language sizing (its own
-// defaults ship 4 for Java, 2 for JS/TS).
+// Java/Python starters use 4 spaces, JS uses 2. A fixed 2 made new Java
+// blocks drift out of line with the 4-space starter code.
 const TAB_SIZE: Record<string, number> = {
   [Language.JAVA]: 4,
   [Language.PYTHON]: 4,
@@ -120,33 +107,21 @@ const MonacoEditor = forwardRef<EditorHandle, EditorEngineProps>(
       registerProvidersOnce(monaco);
       applySettings(editor);
 
-      // Courier Prime/JetBrains Mono are Google Fonts loaded via <link> tags
-      // (async, font-display: swap), Monaco measures character width for
-      // its own layout (indent guides, cursor position) as soon as it
-      // mounts, using whatever font is actually active in the DOM at that
-      // instant. If the custom font hasn't finished downloading yet, that's
-      // a fallback font's metrics; once the real font swaps in moments
-      // later, the rendered glyphs shift by a fraction of a pixel but
-      // Monaco's cached measurements don't, so indent guides drift out of
-      // alignment with the text. remeasureFonts() re-runs that measurement
-      // once every pending font load actually settles.
+      // Monaco measures char width on mount. If the web font hasn't swapped in
+      // yet it caches the fallback font's metrics and the indent guides drift
+      // off the text, so measure again once fonts are loaded.
       document.fonts.ready.then(() => monaco.editor.remeasureFonts());
 
-      // VSCode's own default: Alt+Z toggles word wrap, Ctrl+=/- zoom the
-      // editor font. Monaco doesn't bind either out of the box.
+      // VSCode binds these (Alt+Z wrap, Ctrl+=/- zoom), Monaco doesn't
       editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.KeyZ, () => toggleWrap());
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Equal, () => changeFontSize(1));
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Minus, () => changeFontSize(-1));
 
       editor.updateOptions({
-        // Alt+Click multi-cursor and Ctrl+Space suggest are Monaco defaults
-        // already, nothing to configure for those.
         tabSize: TAB_SIZE[language] ?? 2,
         insertSpaces: true,
-        // Practice.tsx remounts this component fresh on every language
-        // switch (see editorKey), so tabSize above is already correct for
-        // the language being mounted, detectIndentation sniffing the
-        // starter code's actual whitespace would just silently override it.
+        // tabSize is already right for this language (remounted per switch),
+        // detection would override it from the starter code's whitespace
         detectIndentation: false,
         autoClosingBrackets: 'always',
         bracketPairColorization: { enabled: true },

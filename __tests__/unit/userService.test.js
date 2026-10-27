@@ -1,6 +1,6 @@
 import { describe, test, it, expect, mock, beforeEach } from 'bun:test';
 
-// ── module mocks (must be set up before any dynamic imports) ───────────────────
+// mock.module has to run before the dynamic imports below
 
 const mockHash = mock(() => Promise.resolve('$2b$10$hashed_password'));
 const mockCompare = mock(() => Promise.resolve(false));
@@ -46,8 +46,6 @@ mock.module('../../backend/config/environment.js', () => ({
 
 const { sanitizeUser, createUserAccount, authenticateUser } =
   await import('../../backend/services/userService.js');
-
-// ── sanitizeUser ───────────────────────────────────────────────────────────────
 
 describe('sanitizeUser', () => {
   test('returns only the safe fields', () => {
@@ -105,8 +103,6 @@ describe('sanitizeUser', () => {
     expect(result).not.toHaveProperty('createdAt');
   });
 });
-
-// ── createUserAccount ──────────────────────────────────────────────────────────
 
 describe('createUserAccount', () => {
   beforeEach(() => {
@@ -172,8 +168,6 @@ describe('createUserAccount', () => {
     expect(result).toHaveProperty('email', 'alice@b.com');
   });
 });
-
-// ── authenticateUser ───────────────────────────────────────────────────────────
 
 describe('authenticateUser', () => {
   const fakeUser = {

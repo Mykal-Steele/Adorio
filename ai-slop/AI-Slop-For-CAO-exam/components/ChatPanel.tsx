@@ -39,7 +39,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [useThinking, setUseThinking] = useState(false);
   const [largeInfo, setLargeInfo] = useState("");
-  const [panelWidth, setPanelWidth] = useState(320); // Default width in px
+  const [panelWidth, setPanelWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +47,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     const handleMouseMove = (e: MouseEvent) => {
       if (isResizing) {
         const newWidth = window.innerWidth - e.clientX;
-        setPanelWidth(Math.max(200, Math.min(800, newWidth))); // Min 200px, max 800px
+        setPanelWidth(Math.max(200, Math.min(800, newWidth)));
       }
     };
 
@@ -68,7 +68,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
 
   useEffect(() => {
     const text = mdContent;
-    // Parse the MD file into chunks
+    // sections are split by ---, each with a ## title and a **Keywords:** line
     const rawChunks = text.split("---").filter((ch) => ch.trim());
     const parsedChunks = rawChunks.map((raw) => {
       const lines = raw.trim().split("\n");
@@ -87,7 +87,6 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       const content = lines.slice(contentStart).join("\n").trim();
       return { title, keywords, content };
     });
-    // Use the content as chunks for search, including titles and keywords
     setLargeInfo(
       parsedChunks
         .map(
@@ -123,86 +122,69 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     scrollToBottom();
   }, [messages]);
 
-  // Function to split text into chunks (by --- separator for MD format)
   const chunkText = (text: string): string[] => {
     return text.split("\n\n---\n\n").filter((chunk) => chunk.trim().length > 0);
   };
 
-  // Function to chunk problem into smaller pieces (sentences or small paragraphs)
   const chunkProblem = (problem: Problem): string[] => {
     const allText = `${problem.content}\n${problem.definitions
       .map((d) => `${d.term}: ${d.definition}`)
       .join("\n")}\n${problem.solution}`;
-    // Split by sentences or newlines
     return allText
       .split(/[.!?]\s+|\n+/)
       .filter((chunk) => chunk.trim().length > 10);
   };
 
-  // Function to retrieve relevant chunks (intelligent based on query)
   const retrieveRelevantContext = (
     query: string,
     chunks: string[],
     problem: Problem | null
   ): { context: string; indices: number[] } => {
-    // Always use general chunks, since problem content is already in primary context
+    // the problem itself is already in the main context, so only the notes get searched
     const searchChunks = chunks;
 
     if (searchChunks.length === 0) {
       return { context: "", indices: [] };
     }
 
-    // Perform two scoring methods
-
-    // A. Fuzzy Search (Good for finding similar strings, even with typos/variations)
+    // fuzzy match catches typos and near misses
     const fuse = new Fuse(searchChunks, {
       includeScore: true,
-      threshold: 0.6, // Looser threshold for general search
+      threshold: 0.6,
       keys: [],
-      ignoreLocation: true, // Focus on content, not where in the chunk the match is
+      ignoreLocation: true,
     });
     const fuseResults = fuse.search(query);
 
-    // B. Keyword Overlap Score (Good for finding high-density term matches)
+    // keyword overlap favors chunks dense with the query terms
     const keywordScores = calculateKeywordOverlapScore(query, searchChunks);
 
-    // Combine and Finalize Scoring
-
-    // Create a final score map for each unique chunk
     const finalScores = new Map<string, number>();
 
-    // Incorporate Keyword Scores
     for (const [chunk, score] of keywordScores.entries()) {
       if (score > 0) {
-        // Apply a high base weight to keyword overlap
         finalScores.set(chunk, score * 5);
       }
     }
 
-    // Incorporate Fuse Scores
     for (const result of fuseResults) {
       const chunk = result.item;
-      // Fuse score is 0 (perfect match) to 1 (no match). We invert it to (1 - score)
-      // so that a better match yields a higher score.
+      // Fuse gives 0 for a perfect match and 1 for none, so flip it
       const fuseQuality = 1 - result.score;
 
-      // Apply a high weight to the fuzzy match quality
       const fuseWeight = fuseQuality * 10;
 
       const currentScore = finalScores.get(chunk) || 0;
       finalScores.set(chunk, currentScore + fuseWeight);
     }
 
-    // Rank and Select the Top N chunks
     const rankedChunks = Array.from(finalScores.entries())
-      .filter(([, score]) => score > 5.0) // Filter out very low-scoring results
-      .sort((a, b) => b[1] - a[1]) // Sort descending by score
+      .filter(([, score]) => score > 5.0)
+      .sort((a, b) => b[1] - a[1])
       .map(([chunk]) => chunk);
 
-    // Select the top 5 chunks for richer context
     const selectedChunks = rankedChunks.slice(0, 5);
 
-    // Finalize output
     const indices = selectedChunks.map((chunk) => searchChunks.indexOf(chunk));
 
     console.log("--- Final Selection Stats ---");
@@ -223,7 +205,6 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     return { context: selectedChunks.join("\n\n"), indices };
   };
 
-  // Utility function for keyword overlap scoring
   const calculateKeywordOverlapScore = (
     query: string,
     chunks: string[]
@@ -234,7 +215,6 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       .filter((term) => term.length > 2);
     const scoreMap = new Map<string, number>();
 
-    // Function to escape regex special characters
     const escapeRegExp = (string: string) => {
       return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     };
@@ -243,21 +223,18 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       let score = 0;
       const lowerChunk = chunk.toLowerCase();
 
-      // Simple Term Frequency (TF) approach: count how many query terms appear in the chunk
       for (const term of queryTerms) {
         const escapedTerm = escapeRegExp(term);
-        const regex = new RegExp(`\\b${escapedTerm}\\b`, "g"); // Whole word match
+        const regex = new RegExp(`\\b${escapedTerm}\\b`, "g");
         const matches = lowerChunk.match(regex);
 
         if (matches) {
-          // Weight the score by the number of times the term appears (TF)
           score += matches.length;
         }
       }
 
-      // Normalize score by chunk length (to penalize very long chunks that only match a little)
+      // divide by log(length) so long chunks don't win just by being long
       if (score > 0 && lowerChunk.length > 50) {
-        // 1 / log(length) provides a decaying penalty for longer text
         score *= 1 / Math.log(lowerChunk.length);
       }
 
@@ -279,11 +256,9 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     setInput("");
     setIsLoading(true);
 
-    // Chunk the large info
     const chunks = chunkText(largeInfo);
     console.log("Large info length:", largeInfo.length);
     console.log("Chunks length:", chunks.length);
-    // Retrieve relevant context
     const { context: retrievedContext, indices } = retrieveRelevantContext(
       input,
       chunks,
@@ -304,7 +279,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
 
     await streamGeminiResponse(
       [...messages, userMsg],
-      fullContext, // Use augmented context
+      fullContext,
       (chunk) => {
         accumulatedText += chunk;
         setMessages((prev) =>

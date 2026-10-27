@@ -1,6 +1,6 @@
-// Small recursive-descent evaluator for the calculator modal's expression
-// strings (e.g. "12+(3×4)%"). Deliberately not `eval`/`Function`, this
-// parses a fixed, known grammar instead of running arbitrary JS.
+// Small recursive-descent evaluator for the calculator's expressions
+// (e.g. "12+(3×4)%"). Not `eval`/`Function` on purpose, it only parses a fixed
+// grammar instead of running arbitrary JS.
 type Token =
   | { type: 'num'; value: number }
   | { type: 'op'; value: '+' | '−' | '×' | '÷' }
@@ -60,12 +60,9 @@ export function evaluateExpression(rawExpression: string): number {
     return token?.type === 'op' ? token.value : null;
   };
 
-  // A "bare" percent term, a single factor like "15%" with nothing else
-  // multiplied into it, means something different depending on where it
-  // sits. Next to +/- it reads the financial way ("500 − 15%" is 500 minus
-  // 15% *of 500*, i.e. a discount), so that case is resolved against the
-  // running total instead of taken literally. Everywhere else (multiplied,
-  // parenthesized, or standalone) it's just the literal fraction.
+  // A bare percent ("15%" with nothing multiplied into it) next to +/- reads the
+  // financial way: "500 − 15%" is 500 minus 15% of 500, so it's taken against the
+  // running total. Anywhere else (multiplied, in parens, alone) it's just the fraction.
   interface Term {
     value: number;
     isBarePercent: boolean;

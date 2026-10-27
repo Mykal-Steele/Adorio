@@ -1,7 +1,6 @@
 import AdSenseScript from '../../components/AdSenseScript';
 import RetroTV from './RetroTV';
 
-// Static wooden sign, server rendered
 function WoodenSign({ text }: { text: string }) {
   return (
     <div className="relative">
@@ -34,7 +33,6 @@ function WoodenSign({ text }: { text: string }) {
   );
 }
 
-// Static wooden shelf, server rendered
 function WoodenShelf() {
   return (
     <div className="w-full">
@@ -70,7 +68,6 @@ export default function TempBeforeReal() {
     >
       <AdSenseScript />
 
-      {/* Navigation, server rendered static HTML */}
       <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="px-6 sm:px-8 lg:px-12">
           <div className="flex justify-between items-center h-24">
@@ -95,7 +92,6 @@ export default function TempBeforeReal() {
         </div>
       </nav>
 
-      {/* Main Content, static scaffold; RetroTV is a client island */}
       <main className="pt-32 pb-16">
         <div className="max-w-5xl mx-auto px-6">
           <div className="flex flex-col items-center">
@@ -103,7 +99,6 @@ export default function TempBeforeReal() {
               <div key={tv.style} className="w-full mb-2">
                 <div className="flex items-center justify-center gap-8">
                   <div className="flex-shrink-0 w-full max-w-2xl">
-                    {/* Client island: interactive carousel TV */}
                     <RetroTV style={tv.style} />
                     <div className="relative -mt-1">
                       <WoodenShelf />
@@ -119,7 +114,6 @@ export default function TempBeforeReal() {
         </div>
       </main>
 
-      {/* Footer, server rendered static HTML */}
       <footer className="bg-white border-t border-gray-100 py-12 mt-12">
         <div className="px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <span className="font-bold text-2xl text-gray-900">Adorio</span>

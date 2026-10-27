@@ -48,7 +48,6 @@ export default function Dashboard({
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
-        {/* Balance hero */}
         <Card className="flex flex-col justify-between md:col-span-2">
           <CardLabel>Balance</CardLabel>
           <div>
@@ -66,7 +65,6 @@ export default function Dashboard({
           </div>
         </Card>
 
-        {/* Daily gauge */}
         <Card className="flex flex-col items-center md:col-span-2">
           <CardLabel>Today&apos;s budget</CardLabel>
           <Gauge
@@ -82,7 +80,6 @@ export default function Dashboard({
           )}
         </Card>
 
-        {/* Monthly progress */}
         <Card className="md:col-span-2">
           <CardLabel>This month</CardLabel>
           <div className="my-1.5 h-3 overflow-hidden rounded-full border border-[var(--paper-line)] bg-[rgba(43,39,35,0.06)]">
@@ -139,7 +136,6 @@ export default function Dashboard({
           dailyLedger={overview.dailyLedger}
         />
 
-        {/* Category breakdown */}
         <Card className="md:col-span-3">
           <CardLabel>Spending by category</CardLabel>
           {overview.categoryBreakdown.length === 0 ? (
@@ -182,7 +178,6 @@ export default function Dashboard({
           )}
         </Card>
 
-        {/* Recent activity */}
         <Card className="md:col-span-3">
           <div className="mb-4 flex items-center justify-between gap-3">
             <CardLabel className="mb-0">Recent activity</CardLabel>

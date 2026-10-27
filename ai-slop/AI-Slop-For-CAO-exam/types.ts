@@ -15,7 +15,7 @@ export interface Problem {
   title: string;
   type: 'problem' | 'note';
   content: string;
-  definitions: Definition[]; // New field for pre-problem explanations
+  definitions: Definition[]; // shown before the problem
   solution: string;
   cheatSheet: CheatSheetStep[];
 }

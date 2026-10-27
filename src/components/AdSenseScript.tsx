@@ -1,10 +1,8 @@
 'use client';
 import { useEffect } from 'react';
 
-// Explicitly loads AdSense script for React pages
 const AdSenseScript = () => {
   useEffect(() => {
-    // Check if script already exists to avoid duplicates
     if (document.querySelector('script[src*="adsbygoogle"]')) return;
 
     const script = document.createElement('script');

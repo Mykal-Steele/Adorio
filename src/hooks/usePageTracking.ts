@@ -78,7 +78,6 @@ const usePageTracking = () => {
     const nowPerformance = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const previous = navigationRef.current;
 
-    // Skip if this is the same path to avoid duplicate tracking
     if (previous?.path === fullPath) {
       return;
     }

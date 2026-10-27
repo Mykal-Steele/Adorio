@@ -1,10 +1,8 @@
 #!/usr/bin/env node
 
-// Every Next.js Route Handler under src/app/api/ needs an exact-match
-// `location = /api/...` block in both nginx configs, or it silently falls
-// through to the Express catch-all and 404s in production (this happened
-// for real with /api/github-activity before nginx.production.conf and
-// nginx.development.conf were fixed to exempt it).
+// Every route handler under src/app/api/ needs a `location = /api/...` block in
+// both nginx configs, or it falls through to Express and 404s in prod. That
+// happened with /api/github-activity.
 
 const fs = require('fs');
 const path = require('path');
@@ -14,15 +12,10 @@ const NGINX_CONFIGS = ['nginx.production.conf', 'nginx.development.conf'].map((f
   path.join(__dirname, '..', f),
 );
 
-// Dynamic-segment routes (e.g. /api/foo/[id]) can't get an exact nginx
-// `location =` match — a real request carries an actual value, not the
-// literal `[id]`. Each one needs a human to add a `location <prefix>` block
-// proxying that subtree to Next.js, then register it here. An unregistered
-// dynamic route fails this check instead of being silently skipped, so a new
-// route can't reach production unrouted.
-const VERIFIED_DYNAMIC_ROUTES = {
-  // '/api/foo/[id]': '/api/foo/',
-};
+// a dynamic route like /api/foo/[id] can't use `location =` since requests have a real
+// value there. Add a `location /api/foo/` block for it by hand, then list it here as
+// '/api/foo/[id]': '/api/foo/'. Unlisted dynamic routes fail the check on purpose.
+const VERIFIED_DYNAMIC_ROUTES = {};
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

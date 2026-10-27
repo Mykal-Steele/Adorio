@@ -65,10 +65,9 @@ describe('authService', () => {
     });
 
     test('throws ApiError.unauthorized for an access token used as refresh token', () => {
-      // Access token is signed with jwtSecret; refresh token verifier uses refreshTokenSecret.
-      // Both happen to be the same value in this project, so we verify the tamper case instead.
+      // Access and refresh tokens use the same secret here, so a tampered payload
+      // is the closest thing to test.
       const { token } = createAuthTokens(fakeUserId, false);
-      // Tamper the payload so signature is invalid
       const [header, , sig] = token.split('.');
       const tamperedPayload = Buffer.from(JSON.stringify({ userId: 'hacker' })).toString(
         'base64url',

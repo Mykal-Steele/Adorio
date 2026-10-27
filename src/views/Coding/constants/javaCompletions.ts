@@ -1,13 +1,9 @@
 import type { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
 
-// The Java mode (@codemirror/legacy-modes) only tokenizes for syntax
-// highlighting, it has no notion of the standard library, so without this
-// nothing after `autocompletion()` ever suggests System, Scanner, etc. This
-// is a curated static list (what a beginner actually needs for stdin/stdout
-// practice problems), not a real language server, it won't know local
-// variable types or give signature help. A real Java IntelliSense would mean
-// running an actual language server (e.g. Eclipse JDT LS) and wiring it in
-// over LSP, which is a much larger project than an editor tweak.
+// The legacy Java mode only does highlighting, it knows nothing about the
+// standard library. This is a hand-picked list of what beginners need for
+// stdin/stdout problems. No local variable types or signature help: that would
+// take a real language server (e.g. Eclipse JDT LS over LSP).
 export const JAVA_KEYWORD_LABELS = [
   'abstract',
   'boolean',
@@ -95,9 +91,7 @@ export const JAVA_TYPE_LABELS = [
 ];
 const TYPES = JAVA_TYPE_LABELS.map((label): Completion => ({ label, type: 'class' }));
 
-// Dot-completion for the handful of classes practice problems actually reach
-// for, matched by the literal receiver text, not real type tracking.
-// detail/info give the VSCode-style signature + doc panel.
+// dot-completion matched on the literal receiver text, no type tracking
 export interface MemberDoc {
   label: string;
   detail?: string;
@@ -107,9 +101,8 @@ export interface MemberDoc {
 const membersOf = (type: string, boost: number, docs: MemberDoc[]): Completion[] =>
   docs.map(({ label, detail, info }) => ({ label, type, detail, info, boost }));
 
-// Raw docs, shared with the Monaco completion provider (constants/javaCompletionsMonaco.ts)
-// so the two engines suggest the same members instead of drifting apart. The
-// CodeMirror-specific `type`/`boost` metadata is layered on below, per key.
+// shared with javaCompletionsMonaco.ts so both engines suggest the same members.
+// CodeMirror's type/boost gets added below.
 export const JAVA_MEMBER_DOCS: Record<string, MemberDoc[]> = {
   System: [
     {
@@ -270,8 +263,7 @@ export const JAVA_MEMBER_DOCS: Record<string, MemberDoc[]> = {
   ],
 };
 
-// CodeMirror-shaped completions layered from the raw docs above, 'out'
-// (instance method calls) ranks above the class-level statics.
+// 'out' (instance calls) ranks above the class statics
 const MEMBER_KIND: Record<string, { type: string; boost: number }> = {
   out: { type: 'method', boost: 2 },
 };
@@ -282,13 +274,10 @@ const MEMBERS: Record<string, Completion[]> = Object.fromEntries(
   }),
 );
 
-// There's no type checker here, so `foo.` can't know whether `foo` is a
-// Scanner, a String, a StringBuilder, or a List, so this is the instance-
-// method surface people actually type on local variables, offered for any
-// receiver that isn't a known class name above (matching real Java would
-// need a language server, not a static list). This is also why Scanner's
-// methods live here rather than under a "Scanner" key in JAVA_MEMBER_DOCS, // nobody ever types `Scanner.nextInt()` on the class itself, only on a
-// variable like `sc.nextInt()`.
+// No type checker, so `foo.` can't tell a Scanner from a String or a List.
+// Any receiver that isn't a known class above gets all of these. Scanner's
+// methods are here and not under a "Scanner" key because nobody calls them
+// on the class, only on a variable like `sc.nextInt()`.
 export const JAVA_INSTANCE_FALLBACK_DOCS: MemberDoc[] = [
   // Scanner
   { label: 'nextInt', detail: 'nextInt() : int', info: 'Reads the next token as an int.' },

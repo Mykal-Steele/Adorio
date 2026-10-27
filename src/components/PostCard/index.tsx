@@ -9,7 +9,6 @@ import PostContent from './components/PostContent';
 import InteractionButtons from './components/InteractionButtons';
 import CommentSection from './components/CommentSection';
 
-// Import hooks
 import { useImageLoader } from './hooks/useImageLoader';
 import type { ApiClientError } from '@/utils/errorHandling';
 
@@ -36,10 +35,8 @@ const PostCard = ({
     [_id],
   );
 
-  // Derived states with safety checks
   const isAdmin = user?.isAdmin === true;
 
-  // Component state
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,7 +49,7 @@ const PostCard = ({
   const [showImageModal, setShowImageModal] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [optimisticLikesCount, setOptimisticLikesCount] = useState(
-    Array.isArray(likes) ? likes.length : 0, // Add safety
+    Array.isArray(likes) ? likes.length : 0,
   );
   // Always start as false (matches SSR), synced after auth loads via useEffect
   const [optimisticUserLiked, setOptimisticUserLiked] = useState(false);
@@ -78,21 +75,18 @@ const PostCard = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserId]);
 
-  // Load image
   const { imageState } = useImageLoader({
     postImage,
     postId: _id,
     instanceId,
   });
 
-  // Handle image click
   const handleImageClick = useCallback(() => {
     if (imageState.isLoaded && !imageState.hasError && imageState.url) {
       setShowImageModal(true);
     }
   }, [imageState]);
 
-  // Handle content toggle
   const handleToggleContent = useCallback(() => {
     setIsContentExpanded((prev) => !prev);
     if (!isContentExpanded) {
@@ -102,29 +96,22 @@ const PostCard = ({
     }
   }, [isContentExpanded]);
 
-  // Handle comment toggle
   const handleToggleComment = useCallback((commentId) => {
     setExpandedComments((prev) => ({ ...prev, [commentId]: !prev[commentId] }));
   }, []);
 
-  // Replace the current handleLike function
-
   const handleLike = useCallback(async () => {
-    // Get the target state (opposite of current state)
     const willBeLiked = !optimisticUserLiked;
 
-    // Prevent multiple clicks if a like is already in progress
     if (likeInProgressRef.current) return;
     likeInProgressRef.current = true;
     hasInteractedRef.current = true;
 
-    // Add the processing class to show animation - KEEP ONLY THIS INSTANCE
     const buttonElement = document.querySelector(`[data-post-id="${_id}"] .like-button`);
     if (buttonElement) {
       buttonElement.classList.add('processing-like');
     }
 
-    // Update UI optimistically right away
     setOptimisticUserLiked(willBeLiked);
     setOptimisticLikesCount((prev) => (willBeLiked ? prev + 1 : prev - 1));
 
@@ -133,24 +120,21 @@ const PostCard = ({
     // to implement an achievement system. maybe in v2? (who am i kidding there won't be a v2)
 
     try {
-      // Pass the intended state to the API function
       if (typeof onLike === 'function') {
         const response = await onLike(_id, willBeLiked);
 
-        // Ensure our UI reflects the server state (reconciliation)
+        // the server has the final say
         if (response && Array.isArray(response.likes)) {
           const serverHasUserLike = response.likes.some(
             (like) => (like?._id?.toString() || like?.toString()) === currentUserId?.toString(),
           );
 
-          // Only update UI if it differs from server state
           if (serverHasUserLike !== optimisticUserLiked) {
             setOptimisticUserLiked(serverHasUserLike);
             setOptimisticLikesCount(response.likes.length);
           }
         }
 
-        // Add conditional logging
         if (process.env.NODE_ENV !== 'production') {
           console.log(
             `Like operation completed - Server state: ${willBeLiked ? 'liked' : 'unliked'}`,
@@ -168,28 +152,23 @@ const PostCard = ({
         setAuthError('Failed to like. Please try again.');
       }
       setTimeout(() => setAuthError(null), 3000);
-      // Revert optimistic update on error
       setOptimisticUserLiked(!willBeLiked);
       setOptimisticLikesCount((prev) => (willBeLiked ? prev - 1 : prev + 1));
     } finally {
-      // Remove processing indicator
       if (buttonElement) {
         buttonElement.classList.remove('processing-like');
       }
-      // Reset the in-progress flag with a small delay
       setTimeout(() => {
         likeInProgressRef.current = false;
       }, 300);
     }
   }, [optimisticUserLiked, _id, onLike, currentUserId]);
 
-  // Handle emoji select
   const handleEmojiSelect = useCallback((emoji) => {
     setNewComment((prev) => prev + emoji.native);
     setShowEmojiPicker(false);
   }, []);
 
-  // Handle comment submit
   const handleCommentSubmit = useCallback(
     async (e) => {
       e.preventDefault();
@@ -221,7 +200,6 @@ const PostCard = ({
 
         // make sure we're actually getting populated comments with user data
         if (updatedPost?.comments) {
-          // replace all comments with the properly populated ones
           setComments(updatedPost.comments);
           if (typeof onCommentAdded === 'function') {
             onCommentAdded(updatedPost);
@@ -259,7 +237,6 @@ const PostCard = ({
   // make sure comments.length doesn't explode if comments is null
   const commentsCount = Array.isArray(comments) ? comments.length : 0;
 
-  // If no valid post ID, don't render
   if (!_id) return null;
 
   return (
@@ -321,7 +298,7 @@ const PostCard = ({
       <InteractionButtons
         userLiked={optimisticUserLiked}
         likesCount={optimisticLikesCount}
-        commentsCount={commentsCount} // Use the safe count
+        commentsCount={commentsCount}
         onLike={handleLike}
         onToggleComments={() => setShowComments(!showComments)}
       />
@@ -330,7 +307,7 @@ const PostCard = ({
 
       <CommentSection
         visible={showComments}
-        comments={comments || []} // Ensure array
+        comments={comments || []}
         newComment={newComment}
         isSubmitting={isSubmitting}
         showEmojiPicker={showEmojiPicker}
@@ -350,7 +327,6 @@ const PostCard = ({
 
 // this stops cards from re-rendering every time anything changes
 const areEqual = (prevProps, nextProps) => {
-  // compare primitive props
   if (
     prevProps._id !== nextProps._id ||
     prevProps.title !== nextProps.title ||
@@ -361,7 +337,6 @@ const areEqual = (prevProps, nextProps) => {
     return false;
   }
 
-  // Compare image props
   if (
     prevProps.image?.url !== nextProps.image?.url ||
     prevProps.image?.public_id !== nextProps.image?.public_id
@@ -369,12 +344,10 @@ const areEqual = (prevProps, nextProps) => {
     return false;
   }
 
-  // Compare likes length
   if ((prevProps.likes?.length || 0) !== (nextProps.likes?.length || 0)) {
     return false;
   }
 
-  // Compare comments length
   if ((prevProps.comments?.length || 0) !== (nextProps.comments?.length || 0)) {
     return false;
   }

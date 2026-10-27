@@ -36,10 +36,9 @@ export const updateUserRhythm = (userId, rhythmData) => {
 
 export const deleteUserById = (id) => User.findByIdAndDelete(id);
 
-// Integration-test and QA accounts only: timestamp-suffixed usernames or
-// @integration.test emails. Admins are never matched. Used by the janitor to
-// expire test data — scores are embedded in User docs so a Mongo TTL index
-// would delete the user itself; this targeted delete is the safe equivalent.
+// Test and QA accounts only: timestamp-suffixed usernames or @integration.test
+// emails, never admins. The janitor uses this to clear test data. Scores live
+// inside User docs, so a TTL index would delete the user itself.
 const TEST_USERNAME_PATTERN = /^(qatest_|testuser_|other_|user_)\d+$/;
 
 export const deleteStaleTestUsers = ({ createdBefore }) =>
@@ -54,8 +53,7 @@ export const findUsersByIds = (ids) =>
 
 export const searchUsersByUsernamePrefix = (query, limit = 8) => {
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  // Anchored (^) prefix scan over the unique username index: bounded work,
-  // stops after `limit` matches. Projection + lean keep the payload minimal.
+  // anchored prefix scan on the username index, stops after `limit` matches
   return User.find({ username: { $regex: `^${escaped}`, $options: 'i' } }, 'username')
     .sort({ username: 1 })
     .limit(limit)

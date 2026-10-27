@@ -40,7 +40,6 @@ console.log('🌐 Allowed CORS Origins:');
 allowedOrigins.forEach((origin) => console.log('-', origin));
 console.log('');
 
-// Check if all required environment variables are present
 const required = ['mongoUri', 'jwtSecret', 'clientUrl'];
 const missing = required.filter((key) => !environment[key]);
 

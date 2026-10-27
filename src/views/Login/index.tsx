@@ -22,8 +22,8 @@ const Login = () => {
 
   const { from, redirectQuery } = useAuthRedirect();
 
-  // Move focus to the error on submit failure so keyboard/screen-reader users
-  // aren't left stranded on the submit button with no indication of what happened.
+  // Focus the error on a failed submit, or keyboard and screen reader users are left
+  // on the button with no idea what went wrong
   useEffect(() => {
     if (error) errorRef.current?.focus();
   }, [error]);

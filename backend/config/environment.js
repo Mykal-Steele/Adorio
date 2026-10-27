@@ -4,29 +4,26 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ApiError from '../utils/ApiError.js';
 
-// Cloud platforms (Azure Container Apps, Northflank) inject env vars directly —
-// no .env file involved there. Locally, both native `cd backend && npm run dev`
-// and the Docker image start from different working directories, so this
-// resolves the repo root from this file's own location instead of relying on
-// CWD. The root .env.development / .env.production are the single source of
-// truth for local dev — shared with the frontend and with docker-compose's
-// env_file, instead of a separate backend-only copy that drifts out of sync.
+// Azure and Northflank inject env vars directly, no .env file there. Locally,
+// `cd backend && npm run dev` and the Docker image start in different working
+// directories, so the repo root comes from this file's location, not CWD. The
+// root .env.development / .env.production are shared with the frontend and
+// docker-compose's env_file, so there's no backend-only copy to drift.
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 if (process.env.NODE_ENV === 'development') {
   dotenv.config({ path: path.join(repoRoot, '.env.development') });
 } else if (!process.env.MONGO_URI) {
-  // Only load a file if environment variables aren't already set (local
-  // production testing via `npm run start` / docker-compose.prod.yml)
+  // only when vars aren't already set (local prod testing with `npm run start`
+  // or docker-compose.prod.yml)
   dotenv.config({ path: path.join(repoRoot, '.env.production') });
 }
 
 const normalize = (value) => (typeof value === 'string' ? value.trim() : value);
 
-// `Number('-5') || fallback` still returns -5 (it's truthy), so a bad value
-// silently produces a future cutoff instead of falling back — a negative
-// leaderboard age hides every score, and a negative test-user TTL deletes
-// every matching account on the next cleanup run.
+// `Number('-5') || fallback` is still -5 (truthy), so a bad value quietly gives
+// a future cutoff. A negative leaderboard age hides every score, and a negative
+// test-user TTL deletes every matching account on the next cleanup.
 const readPositiveInteger = (name, fallback) => {
   const raw = normalize(process.env[name]);
   if (!raw) return fallback;
@@ -38,9 +35,8 @@ const readPositiveInteger = (name, fallback) => {
 };
 
 const pistonUrl = normalize(process.env.PISTON_URL);
-// Only enforced in production — the deployed Piston instance is TLS-only, but
-// a local dev Piston (or none at all) shouldn't crash the whole backend over
-// a scheme check that has nothing to do with the rest of the app.
+// prod Piston is TLS only. Local dev Piston (or none) is plain http and
+// shouldn't crash the backend over it.
 if (
   normalize(process.env.NODE_ENV) === 'production' &&
   pistonUrl &&
@@ -51,29 +47,23 @@ if (
   );
 }
 
-// Piston's cert is self-signed and pinned here rather than issued by a public
-// CA (no per-instance renewal, works cleanly behind an autoscaled LB — see
-// infra/piston.bicep). tls.setDefaultCACertificates (not NODE_EXTRA_CA_CERTS,
-// which Node only reads once at process launch — setting it from process.env
-// here has no effect) extends the trust store at runtime. Appending to the
-// existing default list, rather than replacing it, means this only adds a
-// trust anchor; it can't weaken certificate verification for any other host.
-// Some hosts (Northflank's bulk .env import, notably) reject a secret value
-// that spans multiple physical lines, even quoted — the only way to store a
-// PEM cert there is as one line with literal \n sequences. Azure Container
-// App secrets store real newlines fine. Un-escaping \n here (a no-op if the
-// value already has real newlines) makes both work without caring which host
-// this runs on.
+// Piston's cert is self-signed and pinned here instead of coming from a public
+// CA (no per-instance renewal, see infra/piston.bicep). This uses
+// tls.setDefaultCACertificates because Node only reads NODE_EXTRA_CA_CERTS at
+// launch, so setting it here would do nothing. It appends to the default list,
+// so it only adds a trust anchor and can't weaken checks for other hosts.
+// Northflank's bulk .env import rejects multi-line secrets even when quoted, so
+// there the PEM is one line with literal \n. Azure keeps real newlines. Turning
+// \n back into newlines works for both (no-op on real newlines).
 const pistonCaCert = normalize(process.env.PISTON_CA_CERT)?.replace(/\\n/g, '\n');
 if (pistonCaCert) {
   tls.setDefaultCACertificates([...tls.getCACertificates('default'), pistonCaCert]);
 }
 
-// Set only where the backend is allowed to start and stop the Piston VM (the
-// Azure Container App, through its managed identity). Left unset everywhere
-// else (local dev, CI, the Northflank failover copy), where the backend just
-// reports whether Piston answers. The id is spliced into an Azure Resource
-// Manager URL, so anything that is not a plain VM resource id is rejected.
+// Only set on the Azure Container App, which can start and stop the Piston VM
+// through its managed identity. Unset in local dev, CI and the Northflank
+// failover, where the backend just reports whether Piston answers. The id goes
+// into an ARM URL, so anything that isn't a plain VM resource id is rejected.
 const VM_RESOURCE_ID_PATTERN =
   /^\/subscriptions\/[0-9a-f-]{36}\/resourceGroups\/[\w.()-]+\/providers\/Microsoft\.Compute\/virtualMachines\/[\w-]+$/i;
 const pistonVmResourceId = normalize(process.env.PISTON_VM_RESOURCE_ID);
@@ -114,9 +104,8 @@ const environment = {
     siteKey: normalize(process.env.TURNSTILE_SITE_KEY),
     secretKey: normalize(process.env.TURNSTILE_SECRET_KEY),
   },
-  // Hard ceiling on total hosted-file storage. Defaults to 9 GiB, a gigabyte
-  // under R2's 10 GB free-storage allowance, so uploads stop well before the
-  // account can be billed for going over.
+  // hard cap on hosted-file storage. 9 GiB default keeps us a gigabyte under
+  // R2's 10 GB free tier so we never get billed for going over
   hostedStorageLimitBytes: readPositiveInteger(
     'HOSTED_STORAGE_LIMIT_BYTES',
     9 * 1024 * 1024 * 1024,
@@ -133,7 +122,7 @@ const defaultOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:5173',
-  'http://localhost:5174', // In case vite uses alternate port
+  'http://localhost:5174', // vite's fallback port
   'https://adorio.space',
   'http://adorio.space',
   'https://www.adorio.space',

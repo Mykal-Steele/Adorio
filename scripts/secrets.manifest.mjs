@@ -1,12 +1,11 @@
-// Where every managed secret lives. This is the map the rotator reads — it is
-// not something you edit for a normal rotation (edit the ROTATIONS block in
-// scripts/rotate-secrets.mjs instead). Only touch this when a secret starts or
-// stops living somewhere new.
+// Where every managed secret lives, read by the rotator. For a normal rotation edit
+// ROTATIONS in scripts/rotate-secrets.mjs instead. Only change this when a secret
+// moves somewhere new.
 //
 // Per secret:
 //   generate  'hex32' to auto-make a random value, or null to paste one by hand
-//   files     local env files that contain the key (only existing lines are
-//             rewritten — a key that isn't already in a file is never added)
+//   files     local env files that contain the key (only existing lines get
+//             rewritten, a missing key is never added)
 //   github    whether to push it as a GitHub Actions repo secret
 //   azure     { secret: '<name>' } for a Container App secret, or
 //             { env: '<NAME>' } for a plain Container App env var, or null
@@ -167,9 +166,8 @@ export const SECRETS = {
   },
 };
 
-// Secrets that exist only in GitHub (deploy credentials) or only in the
-// Northflank failover dashboard. Nothing local to read them from, so the
-// rotator deliberately refuses to touch them — set these by hand.
+// only in GitHub (deploy credentials) or the Northflank dashboard. There's nothing
+// local to read them from, so the rotator won't touch them. Set these by hand.
 export const NOT_MANAGED = {
   'AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID':
     'deploy identity — from `az identity show`, not a rotatable secret',

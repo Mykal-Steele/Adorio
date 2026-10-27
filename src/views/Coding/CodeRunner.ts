@@ -19,11 +19,8 @@ export interface ExecuteResult {
   error?: string;
 }
 
-/**
- * Code execution service - handles running user code safely
- */
 export class CodeRunner {
-  // Compare two values for equality (with string trimming and deep object/array comparison)
+  // deep compare for arrays/objects, strings compare trimmed
   static isEqual(a, b) {
     if (Object.is(a, b)) return true;
 
@@ -44,7 +41,6 @@ export class CodeRunner {
     return false;
   }
 
-  // Format values for display in output
   static formatValue(value) {
     if (typeof value === 'undefined') return 'undefined';
     if (typeof value === 'string') return value;
@@ -55,31 +51,26 @@ export class CodeRunner {
     }
   }
 
-  // Extract line number from error, mapped back onto the user's own code.
-  // User code runs inside a `new Function` body with wrapper lines above it
-  // ("use strict" plus the console-proxy prelude), so a stack-trace line
-  // number points into the wrapper. The offset is derived from the actual
-  // wrapper text instead of hardcoded, so wrapper edits can't silently shift
-  // every reported line number.
+  // User code runs inside a `new Function` body under "use strict" and the
+  // console proxy prelude, so stack line numbers point into the wrapper.
+  // The offset comes from the real wrapper text, not a hardcoded number, so
+  // editing the wrapper doesn't shift every reported line.
   static extractErrorInfo(error, code, wrappedCode = null) {
     let message = error.message || String(error);
     let lineInfo = '';
 
-    // Try to extract line number from error stack or message
     if (error.stack) {
-      // Look for line number in stack trace patterns
       const stackPatterns = [
         /<anonymous>:(\d+):\d+/, // Chrome/V8
         /eval.*:(\d+):\d+/, // Firefox eval
-        /Function.*:(\d+):\d+/, // General function pattern
+        /Function.*:(\d+):\d+/,
       ];
 
       for (const pattern of stackPatterns) {
         const match = error.stack.match(pattern);
         if (match) {
           const reportedLine = parseInt(match[1]);
-          // The user's first line sits one past "use strict" plus every line
-          // of the wrapper that precedes their code.
+          // first user line is one past "use strict" plus the wrapper lines above it
           const userFirstLine = wrappedCode ? wrappedCode.split(code)[0].split('\n').length + 1 : 5;
           const lineNum = reportedLine - userFirstLine + 1;
 
@@ -95,7 +86,6 @@ export class CodeRunner {
     return message + lineInfo;
   }
 
-  // Create console proxy to capture all console output
   static createConsoleProxy() {
     const logs = [];
 
@@ -131,7 +121,6 @@ export class CodeRunner {
     return { proxy, logs };
   }
 
-  // Execute user code and run tests - now captures output for each test case
   static async execute(
     code: string,
     functionName: string,
@@ -142,12 +131,11 @@ export class CodeRunner {
       setTimeout(() => {
         try {
           const testResults = tests.map((test, index) => {
-            // Create a fresh console proxy for each test case
+            // fresh console per test so logs don't bleed between cases
             const { proxy: consoleProxy, logs } = this.createConsoleProxy();
             let wrappedCode: string | null = null;
 
             try {
-              // Inject console proxy into the code execution for each test
               wrappedCode = `
                 const console = arguments[0];
                 ${code}
@@ -160,7 +148,6 @@ export class CodeRunner {
                 }
               `;
 
-              // Get a fresh instance of the function/class for each test
               const userCallable = new Function(`"use strict";\n${wrappedCode}`)(consoleProxy);
 
               if (typeof userCallable !== 'function') {
@@ -228,7 +215,6 @@ export class CodeRunner {
     });
   }
 
-  // Run a single test for a function with output capture
   static runFunctionTestWithOutput(fn, test, consoleProxy, logs, index, code, wrappedCode) {
     const start = performance.now();
 
@@ -242,7 +228,7 @@ export class CodeRunner {
         passed: this.isEqual(output, test.expected),
         duration: performance.now() - start,
         error: null,
-        logs: [...logs], // Capture console output for this test case
+        logs: [...logs],
       };
     } catch (error) {
       return {
@@ -258,7 +244,6 @@ export class CodeRunner {
     }
   }
 
-  // Run a single test for a class method with output capture
   static runClassTestWithOutput(
     ClassConstructor,
     test,
@@ -272,7 +257,6 @@ export class CodeRunner {
     const start = performance.now();
 
     try {
-      // Create a fresh instance for each test case
       const instance = new ClassConstructor(...test.args);
 
       if (typeof instance[methodName] !== 'function') {
@@ -288,7 +272,6 @@ export class CodeRunner {
         };
       }
 
-      // Execute the method and capture its return value
       const output = instance[methodName]();
 
       return {
@@ -299,7 +282,7 @@ export class CodeRunner {
         passed: this.isEqual(output, test.expected),
         duration: performance.now() - start,
         error: null,
-        logs: [...logs], // Capture console output for this test case
+        logs: [...logs],
       };
     } catch (error) {
       return {

@@ -15,10 +15,7 @@ declare global {
   }
 }
 
-/**
- * Renders a Cloudflare Turnstile widget and hands the token up on solve. The
- * script is injected once and shared; each mount renders its own widget.
- */
+// The Turnstile script is injected once and shared; each mount renders its own widget
 export default function TurnstileWidget({
   siteKey,
   onToken,

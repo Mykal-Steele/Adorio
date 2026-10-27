@@ -1,7 +1,5 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test';
 
-// ── module mocks ───────────────────────────────────────────────────────────────
-
 const mockFindUsersWithScore = mock(() => Promise.resolve([]));
 const mockFindUserById = mock(() => Promise.resolve(null));
 const mockUpdateUserRhythm = mock(() => Promise.resolve());
@@ -14,8 +12,6 @@ mock.module('../../backend/models/index.js', () => ({
 
 const { getLeaderboard, updateUserScore, updateUserAchievements, getUserStats } =
   await import('../../backend/services/gameService.js');
-
-// ── getLeaderboard ─────────────────────────────────────────────────────────────
 
 describe('getLeaderboard', () => {
   test('sorts users by peakPLevel descending', async () => {
@@ -79,8 +75,6 @@ describe('getLeaderboard', () => {
     expect(result[0]).not.toHaveProperty('email');
   });
 });
-
-// ── updateUserScore ────────────────────────────────────────────────────────────
 
 describe('updateUserScore', () => {
   beforeEach(() => {
@@ -178,8 +172,6 @@ describe('updateUserScore', () => {
   });
 });
 
-// ── getUserStats ───────────────────────────────────────────────────────────────
-
 describe('getUserStats', () => {
   test('returns anonymous stats when userId is null', async () => {
     const result = await getUserStats(null);
@@ -228,8 +220,6 @@ describe('getUserStats', () => {
     });
   });
 });
-
-// ── updateUserAchievements ─────────────────────────────────────────────────────
 
 describe('updateUserAchievements', () => {
   beforeEach(() => {

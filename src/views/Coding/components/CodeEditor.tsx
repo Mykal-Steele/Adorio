@@ -26,9 +26,7 @@ const CodeEditor = ({
   onLanguageChange,
 }: CodeEditorProps) => {
   const engine = useSyncExternalStore(subscribeEditorEngine, getEditorEngine, () => 'monaco');
-  // Both engine implementations expose the same { format() } handle (see
-  // editors/types.ts), the Format button below calls whichever is
-  // currently mounted without needing to know which one that is.
+  // both engines expose the same { format() } handle (editors/types.ts)
   const editorRef = useRef<EditorHandle | null>(null);
 
   return (
@@ -44,12 +42,7 @@ const CodeEditor = ({
         <h2 id="editor-h" className="font-paper-serif text-xl font-bold">
           Your solution
         </h2>
-        {/* Only two things live here: the language you're solving in (grows
-            over time, so it's a dropdown, see LanguagePicker), and actions
-            on the current buffer (Format, settings). The editor engine
-            (VS Code vs Classic) is a standing preference, not a per-problem
-            choice, so it lives in the settings panel instead of competing
-            for space here. */}
+        {/* engine choice is a standing preference, so it lives in settings, not here */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => {
@@ -75,18 +68,10 @@ const CodeEditor = ({
           />
         </div>
       </div>
-      {/* Counter-rotates the outer section's rotate-[0.3deg] paper-tilt back
-          to upright for just the editor surface. Monaco (and CodeMirror)
-          render each line as its own absolutely-positioned row; rotating
-          that whole stack shifts every row's horizontal position by
-          row-offset × sin(0.3°), a few tenths of a pixel per line, small
-          per-row but compounding down the file, which shows up as the
-          indent guides visibly drifting off-vertical. Real VS Code never
-          has to deal with this because it's never rotated. Canceling the
-          rotation here keeps the tilted "pinned note" look on the card's
-          border/header/tape while the actual text and guides render dead
-          straight, which is what a code editor has to do regardless of the
-          chrome around it. */}
+      {/* undoes the section's 0.3deg tilt for the editor itself. Monaco and
+          CodeMirror position every line absolutely, so a rotated editor shifts
+          each row a bit more down the file and the indent guides drift off
+          vertical. The card chrome keeps the tilt. */}
       <div className="-rotate-[0.3deg] overflow-hidden rounded-[2px] border-[1.5px] border-[var(--paper-ink)]">
         {engine === 'monaco' ? (
           <MonacoEditor

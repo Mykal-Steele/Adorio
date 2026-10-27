@@ -69,8 +69,7 @@ function upsertEnvValue(content, key, value) {
     'm',
   );
   const rendered = renderValue(value);
-  // Replacer function, not a replacement string — otherwise `$&`, `$$`, etc.
-  // in a pasted value are interpreted by String.replace instead of written.
+  // a replacer function so `$&`, `$$` etc. in a pasted value get written as is
   if (!pattern.test(content)) return { content, missing: true };
   return { content: content.replace(pattern, () => `${key}=${rendered}`) };
 }
@@ -149,7 +148,7 @@ function writeFiles(plan) {
 function pushGithub(plan) {
   const keys = plan.filter((p) => p.spec.github);
   for (const { key, value } of keys) {
-    // Value on stdin, not argv — argv is visible to any local user via `ps`.
+    // stdin, not argv, since any local user can see argv in `ps`
     execFileSync('gh', ['secret', 'set', key], {
       input: value,
       stdio: ['pipe', 'inherit', 'inherit'],

@@ -1,14 +1,11 @@
 #!/bin/bash
-# Regression test for the jq logic embedded in infra/piston.bicep's cloud-init
-# script. This exists because a bug in exactly this logic (picking the wrong
-# Python package version, then matching the wrong runtime language name) took
-# production Piston down for hours with no visible error until someone
-# manually checked.
+# Regression test for the jq in piston.bicep's cloud-init. A bug there (wrong Python
+# package version, then the wrong runtime language name) took prod Piston down for
+# hours with no visible error until someone checked by hand.
 #
-# It never calls Azure or Piston. It pulls the live jq filters straight out of
-# piston.bicep (so this can't silently drift from what's actually deployed)
-# and runs them against fixture JSON shaped like the real API responses seen
-# in that incident.
+# No Azure or Piston calls. It pulls the jq filters straight out of piston.bicep so it
+# can't drift from what's deployed, and runs them on JSON shaped like the real API
+# responses from that incident.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -29,9 +26,8 @@ assert_eq() {
   fi
 }
 
-# --- fixture: /api/v2/packages, exactly as observed on the prod incident ---
-# (java has one version; python has several, including the ancient 2.7.18
-# which happens to sort first in Piston's own catalog order)
+# /api/v2/packages as seen during the incident. Python's old 2.7.18 comes first
+# in Piston's catalog order.
 PACKAGES_FIXTURE='[
   {"language":"java","language_version":"15.0.2","installed":true},
   {"language":"python","language_version":"2.7.18","installed":true},
@@ -53,24 +49,20 @@ JAVA_VERSION=$(echo "$PACKAGES_FIXTURE" | jq -r "$JAVA_VERSION_FILTER")
 PYTHON_VERSION=$(echo "$PACKAGES_FIXTURE" | jq -r "$PYTHON_VERSION_FILTER")
 
 assert_eq "Java version resolves to the catalog's only entry" "15.0.2" "$JAVA_VERSION"
-# This is the exact assertion that would have caught the incident: picking
-# [0] off an unsorted array landed on 2.7.18. It must always resolve to the
-# newest 3.x release, no matter what order Piston's catalog lists them in.
+# the one that would have caught it: [0] off the unsorted list was 2.7.18.
+# Has to be the newest 3.x whatever order the catalog is in.
 assert_eq "Python version resolves to the newest release, not the catalog's first entry" "3.12.0" "$PYTHON_VERSION"
 
-# --- fixture: /api/v2/runtimes, post-fix state as observed live ---
-# Piston reports an installed old-2.x Python build under language "python2",
-# not "python" — a second, independent way the original healthcheck.sh could
-# (and did) silently never see Python as ready.
+# /api/v2/runtimes after the fix, as seen live. Piston lists a 2.x build as
+# "python2", not "python", which is the other reason the old healthcheck.sh
+# never saw Python as ready.
 RUNTIMES_FIXTURE_FIXED='[
   {"language":"java","version":"15.0.2","aliases":[]},
   {"language":"python2","version":"2.7.18","aliases":["py2","python2"]},
   {"language":"python","version":"3.12.0","aliases":["py","py3","python3","python3.12"]}
 ]'
 
-# The broken state from the actual incident: no "python" entry exists at all,
-# because the install picked 2.7.18 and Piston only ever exposes that under
-# "python2".
+# the incident state: the install picked 2.7.18, so there's only "python2"
 RUNTIMES_FIXTURE_BROKEN='[
   {"language":"java","version":"15.0.2","aliases":[]},
   {"language":"python2","version":"2.7.18","aliases":["py2","python2"]}
@@ -90,7 +82,6 @@ assert_eq "Java runtime count is 1 once installed" "1" "$JAVA_COUNT_FIXED"
 assert_eq "Python runtime count is 1 once a real python3.x build is installed" "1" "$PYTHON_COUNT_FIXED"
 assert_eq "Python runtime count is 0 when only the python2-aliased build is present (the incident state)" "0" "$PYTHON_COUNT_BROKEN"
 
-# --- the whole template must still compile ---
 if command -v az >/dev/null 2>&1; then
   if az bicep build --file "$BICEP_FILE" --stdout >/dev/null 2>/tmp/piston-bicep-build-err.log; then
     echo "ok - piston.bicep compiles"

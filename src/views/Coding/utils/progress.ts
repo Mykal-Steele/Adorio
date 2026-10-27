@@ -13,8 +13,7 @@ const keyFor = (problemId: string, language: string) =>
   `${STORAGE_KEY_PREFIX}${problemId}:${language}`;
 const activeProblemKeyFor = (classId: string) => `${ACTIVE_PROBLEM_KEY_PREFIX}${classId}`;
 
-// localStorage can throw in private browsing / when a quota is hit, these are
-// environment limits, not bugs, so a write just silently doesn't persist.
+// localStorage throws in private browsing or when full, just skip the save
 const write = (problemId: string, language: string, data: SavedProgress) => {
   try {
     localStorage.setItem(keyFor(problemId, language), JSON.stringify(data));
@@ -33,9 +32,7 @@ export const loadProgress = (problemId: string, language: string): SavedProgress
   }
 };
 
-// Called on every keystroke (debounced), keeps the draft without touching
-// whatever the last real test run recorded, so a problem marked solved stays
-// solved while you keep tinkering with already-passing code.
+// keeps the last run's results, so a solved problem stays solved while you tinker
 export const saveCode = (problemId: string, language: string, code: string) => {
   if (!problemId) return;
   const existing = loadProgress(problemId, language);
@@ -48,8 +45,6 @@ export const saveCode = (problemId: string, language: string, code: string) => {
 
 export const saveCodeDebounced = debounce(saveCode, 800);
 
-// Called once a run finishes, code and results are saved together since they
-// describe the same snapshot of the solution.
 export const saveRunResult = (
   problemId: string,
   language: string,

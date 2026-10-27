@@ -2,18 +2,17 @@ import { environment } from '../config/environment.js';
 
 const { siteKey, secretKey } = environment.turnstile;
 
-// Turnstile is optional as a pair: with no keys the check is skipped entirely
-// (local dev, CI, the failover copy) and the upload form renders no widget.
+// Needs both keys. Without them the check is skipped (local dev, CI, the
+// failover copy) and the upload form shows no widget.
 export const turnstileConfigured = Boolean(siteKey && secretKey);
 export const turnstileSiteKey = siteKey || '';
 
-// Siteverify normally answers in well under a second. Without a limit a stalled call
-// would hold the upload request open until the platform timed it out.
+// siteverify usually answers in well under a second. Without a limit a stalled call
+// holds the upload request open until the platform times it out.
 const SITEVERIFY_TIMEOUT_MS = 5000;
 
-// Verifies a widget token against Cloudflare's siteverify endpoint. A network
-// failure or timeout is treated as a failed check rather than an open door — a bot
-// can't use "make verification time out" to get in.
+// A network error or timeout counts as a failed check, so a bot can't get in by
+// making verification time out.
 export const verifyTurnstile = async (token, remoteIp) => {
   if (!turnstileConfigured) return true;
   if (!token) return false;

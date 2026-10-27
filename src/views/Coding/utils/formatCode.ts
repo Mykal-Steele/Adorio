@@ -1,18 +1,11 @@
-// Java's convention (and every starter template in problems.ts) is 4 spaces
-// per level; this app's JS templates are 2. Both editor engines' live
-// indentation already keys off this per language (see CodeMirrorEditor's
-// indentUnit and MonacoEditor's TAB_SIZE), formatCode has to match, or
-// pressing Format would immediately re-indent Java back down to 2 spaces
-// and undo that consistency.
+// Java starters use 4 spaces, JS uses 2. Has to match the editors' indentUnit
+// and TAB_SIZE or Format would knock Java back down to 2.
 export const INDENT_WIDTH_BY_LANGUAGE: Record<string, number> = { java: 4 };
 const DEFAULT_INDENT_WIDTH = 2;
 
-// Minimal brace-aware formatter for the practice editor. Java and JS are
-// both brace languages, so one implementation covers both. This is not a
-// parser: it only normalizes leading indentation from bracket depth and
-// trims trailing whitespace, leaving everything else byte-identical.
-// Braces inside strings, template literals, and comments are skipped when
-// counting so they never shift indentation.
+// Not a parser. Only redoes leading indentation from bracket depth and trims
+// trailing whitespace, works for Java and JS since both use braces. Braces in
+// strings, template literals and comments don't count.
 export const formatCode = (code: string, language?: string): string => {
   const INDENT = ' '.repeat(
     (language && INDENT_WIDTH_BY_LANGUAGE[language]) || DEFAULT_INDENT_WIDTH,
@@ -27,8 +20,7 @@ export const formatCode = (code: string, language?: string): string => {
     const line = raw.replace(/[ \t]+$/, '');
     if (line.trim() === '') return '';
 
-    // A line in the middle of a multi-line template literal is string
-    // content, re-indenting it would change the program's value.
+    // inside a multi-line template literal, re-indenting would change the string
     const verbatim = inTemplate;
 
     let opens = 0;
@@ -96,15 +88,9 @@ export const formatCode = (code: string, language?: string): string => {
   return formatted.join('\n');
 };
 
-// Maps a cursor offset in `oldText` to the equivalent offset in `newText`
-// after `formatCode` ran. formatCode never adds/removes lines, it only
-// rewrites leading indentation (tabs -> spaces, brace-depth indent) and
-// trims trailing whitespace, so the cursor's line number is stable and
-// only its column needs adjusting by the indent delta. A cursor sitting in
-// (or at the end of) the old indent lands at the corresponding spot in the
-// new indent; a cursor in the code keeps its offset within the code. This
-// is what keeps Enter-auto-format from snapping the cursor to 0 the way a
-// bare whole-doc replace does.
+// formatCode never adds or removes lines, so the cursor keeps its line and
+// only the column shifts by the indent change. Without this a whole-doc
+// replace snaps the cursor to 0.
 export const mapPosThroughFormat = (oldText: string, newText: string, pos: number): number => {
   const oldLines = oldText.split('\n');
   const newLines = newText.split('\n');

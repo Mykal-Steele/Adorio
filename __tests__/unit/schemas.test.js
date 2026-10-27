@@ -14,8 +14,6 @@ import {
 const pass = (schema, data) => expect(schema.safeParse(data).success).toBe(true);
 const fail = (schema, data) => expect(schema.safeParse(data).success).toBe(false);
 
-// ── registerSchema ─────────────────────────────────────────────────────────────
-
 describe('registerSchema', () => {
   const base = { username: 'alice_1', email: 'alice@example.com', password: 'pass123' };
 
@@ -48,8 +46,6 @@ describe('registerSchema', () => {
   test('rejects missing fields', () => fail(registerSchema, {}));
 });
 
-// ── loginSchema ────────────────────────────────────────────────────────────────
-
 describe('loginSchema', () => {
   test('accepts valid email and password', () =>
     pass(loginSchema, { email: 'a@b.com', password: 'pass' }));
@@ -59,8 +55,6 @@ describe('loginSchema', () => {
   test('rejects missing password', () => fail(loginSchema, { email: 'a@b.com' }));
   test('rejects empty object', () => fail(loginSchema, {}));
 });
-
-// ── createPostSchema ───────────────────────────────────────────────────────────
 
 describe('createPostSchema', () => {
   const base = { title: 'Hello World', content: 'Some content here' };
@@ -81,8 +75,6 @@ describe('createPostSchema', () => {
   test('rejects missing content', () => fail(createPostSchema, { title: 'hi' }));
 });
 
-// ── addCommentSchema ───────────────────────────────────────────────────────────
-
 describe('addCommentSchema', () => {
   test('accepts non-empty text', () => pass(addCommentSchema, { text: 'nice post!' }));
   test('accepts text at max length (5000 chars)', () =>
@@ -91,8 +83,6 @@ describe('addCommentSchema', () => {
   test('rejects text over 5000 chars', () => fail(addCommentSchema, { text: 'x'.repeat(5001) }));
   test('rejects missing text field', () => fail(addCommentSchema, {}));
 });
-
-// ── getPostsQuerySchema ────────────────────────────────────────────────────────
 
 describe('getPostsQuerySchema', () => {
   test('defaults page to 1 and limit to 5 when empty', () => {
@@ -115,8 +105,6 @@ describe('getPostsQuerySchema', () => {
   test('rejects negative page', () => fail(getPostsQuerySchema, { page: -1 }));
 });
 
-// ── updateScoreSchema ──────────────────────────────────────────────────────────
-
 describe('updateScoreSchema', () => {
   test('accepts score and valid difficulty', () =>
     pass(updateScoreSchema, { score: 42, difficulty: 'normal' }));
@@ -137,8 +125,6 @@ describe('updateScoreSchema', () => {
   test('rejects missing difficulty', () => fail(updateScoreSchema, { score: 10 }));
 });
 
-// ── createSecretSchema ─────────────────────────────────────────────────────────
-
 describe('createSecretSchema', () => {
   test('accepts message and password', () =>
     pass(createSecretSchema, { message: 'hello', password: 'pw' }));
@@ -146,8 +132,6 @@ describe('createSecretSchema', () => {
   test('rejects empty password', () => fail(createSecretSchema, { message: 'hi', password: '' }));
   test('rejects missing fields', () => fail(createSecretSchema, {}));
 });
-
-// ── pageViewsQuerySchema ───────────────────────────────────────────────────────
 
 describe('pageViewsQuerySchema', () => {
   test('accepts empty query (all optional)', () => pass(pageViewsQuerySchema, {}));
@@ -164,16 +148,12 @@ describe('pageViewsQuerySchema', () => {
   test('rejects negative limit', () => fail(pageViewsQuerySchema, { limit: -1 }));
 });
 
-// ── recentVisitsQuerySchema ────────────────────────────────────────────────────
-
 describe('recentVisitsQuerySchema', () => {
   test('accepts empty query', () => pass(recentVisitsQuerySchema, {}));
   test('accepts limit and visitorId', () =>
     pass(recentVisitsQuerySchema, { limit: 20, visitorId: 'abc123' }));
   test('rejects limit over 500', () => fail(recentVisitsQuerySchema, { limit: 501 }));
 });
-
-// ── visitorStatsQuerySchema ────────────────────────────────────────────────────
 
 describe('visitorStatsQuerySchema', () => {
   test('accepts empty query', () => pass(visitorStatsQuerySchema, {}));

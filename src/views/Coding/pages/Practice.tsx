@@ -88,10 +88,8 @@ const Practice = ({ classId }: PracticeProps) => {
   };
   const runBlockedLabel = getRunBlockedLabel();
 
-  // Any in-flight run is only allowed to write its results if nothing has
-  // superseded it since, a code edit, a reset, or switching problem/language.
-  // Bumping the id (and dropping isRunning) makes a stale run's eventual
-  // resolution a no-op instead of a race that can clobber newer state.
+  // An edit, reset, or problem/language switch bumps the id, so a run that
+  // finishes after that can't clobber newer state.
   const executionIdRef = useRef(0);
   const invalidateActiveExecution = useCallback(() => {
     executionIdRef.current += 1;
@@ -102,9 +100,7 @@ const Practice = ({ classId }: PracticeProps) => {
     setSolvedIds(new Set(classProblems.filter(isProblemSolved).map((p) => p.id)));
   }, [classProblems]);
 
-  // Restore the last-visited problem for this class after hydration, reading
-  // localStorage during the initial render would make the server-rendered HTML
-  // mismatch the client's.
+  // after hydration, reading localStorage during render would cause a mismatch
   useEffect(() => {
     const lastProblemId = getLastActiveProblem(classId);
     const resolvedProblemId = classProblems.some((p) => p.id === lastProblemId)
@@ -115,7 +111,6 @@ const Practice = ({ classId }: PracticeProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [classId]);
 
-  // Reset to the problem's first available language whenever the problem changes.
   useEffect(() => {
     setLanguage(availableLanguages[0] ?? '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -183,15 +178,14 @@ const Practice = ({ classId }: PracticeProps) => {
     (nextCode: string) => {
       invalidateActiveExecution();
       setCode(nextCode);
-      // Results intentionally stay on screen until the next Run press,       // clearing them on every keystroke made the test output unusable.
-      // The draft is still persisted on every edit (keeping the last run's
-      // results alongside it) via saveCode below, so a reload restores the
-      // latest code together with its last results.
+      // Results stay until the next Run, clearing them on every keystroke made
+      // the output unusable. The draft still saves with the last results, so a
+      // reload brings both back.
       if (activeProblem && activeVariant && nextCode !== activeVariant.starterCode) {
         saveCodeDebounced(activeProblem.id, language, nextCode);
       } else {
-        // Typed back to exactly the starter code before the debounce fired,         // otherwise the stale queued save would still land and persist code
-        // that's no longer on screen.
+        // typed back to the starter code, drop the pending save or it would
+        // persist code that's no longer on screen
         saveCodeDebounced.cancel();
       }
     },
@@ -250,9 +244,7 @@ const Practice = ({ classId }: PracticeProps) => {
       };
     }
 
-    // Superseded by an edit, reset, or navigation while the run was in
-    // flight, invalidateActiveExecution already reset isRunning, and this
-    // result no longer describes the code currently on screen.
+    // superseded while running, isRunning was already reset
     if (executionIdRef.current !== executionId) return;
 
     setResults(testResults);
@@ -302,8 +294,7 @@ const Practice = ({ classId }: PracticeProps) => {
     }
   }, [runQueued, runnerReady, runnerStarting]);
 
-  // Ctrl/Cmd+Enter runs the tests from anywhere on the page, the standard
-  // shortcut on LeetCode/HackerRank, so there's no mouse round-trip to Run.
+  // Ctrl/Cmd+Enter runs from anywhere on the page, same as LeetCode/HackerRank
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
