@@ -9,8 +9,10 @@ param githubRepo = 'Mykal-Steele/Adorio'
 
 param clientUrl = 'https://adorio.space'
 
-// Values below are read from the shell environment at deploy time — never committed.
-// Source them from backend/.env (or export directly) before running `az deployment group create`.
+// Values below are read from the environment at deploy time and never committed.
+// Apply with `node infra/deploy.mjs`, which loads them from .env.production and sets
+// CONTAINER_IMAGE to the image running now. No default on purpose, see main.bicep.
+param containerImage = readEnvironmentVariable('CONTAINER_IMAGE')
 param cloudinaryName = readEnvironmentVariable('CLOUDINARY_NAME')
 param mongoUri = readEnvironmentVariable('MONGO_URI')
 param jwtSecret = readEnvironmentVariable('JWT_SECRET')
