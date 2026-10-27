@@ -90,11 +90,11 @@ export default function HostingView() {
       return;
     }
     if (usage && file.size > usage.remainingBytes) {
-      setError(`Not enough space left. ${formatBytes(usage.remainingBytes)} is free.`);
+      setError("There isn't room for a file this big right now. Try a smaller one.");
       return;
     }
     if (usage?.turnstileSiteKey && !turnstileToken) {
-      setError('Finish the bot check above first.');
+      setError('Finish the bot check below first.');
       return;
     }
     setError('');
@@ -171,7 +171,7 @@ export default function HostingView() {
       <PaperTornEdge />
 
       <section className="relative -mt-4 bg-[var(--paper-hero)] px-4 pb-12 pt-12 sm:-mt-6 sm:px-8 sm:pb-14 sm:pt-16">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-3xl">
           <p className="mb-3 font-paper-mono text-xs uppercase tracking-[.2em] text-[var(--paper-muted-2)]">
             share a file
           </p>
@@ -210,23 +210,6 @@ export default function HostingView() {
             </div>
           )}
 
-          {usage && uploadsEnabled && (
-            <div className="mb-5">
-              <div className="mb-1.5 flex items-baseline justify-between gap-3 font-paper-mono text-[10px] uppercase tracking-[.12em] text-[var(--paper-muted-2)]">
-                <span>Shared storage</span>
-                <span className="tabular-nums">
-                  {formatBytes(usage.usedBytes)} of {formatBytes(usage.limitBytes)} used
-                </span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-[rgba(60,44,24,.12)]">
-                <div
-                  className={`h-full rounded-full ${storageFull ? 'bg-[#8d3a33]' : 'bg-[var(--paper-accent)]'}`}
-                  style={{ width: `${Math.min(100, (usage.usedBytes / usage.limitBytes) * 100)}%` }}
-                />
-              </div>
-            </div>
-          )}
-
           {usageFailed && (
             <p className="mb-5 rounded-[3px] border border-[#8d3a33] bg-[#f3ded9] px-4 py-3 text-sm text-[#7a2f29]">
               Couldn&apos;t check the storage, so uploads are paused.{' '}
@@ -246,85 +229,89 @@ export default function HostingView() {
             </p>
           )}
 
-          {usage?.turnstileSiteKey && canUpload && (
-            <div className="mb-5">
-              <TurnstileWidget
-                key={turnstileKey}
-                siteKey={usage.turnstileSiteKey}
-                onToken={handleToken}
-              />
-            </div>
-          )}
-
-          <div
-            role="button"
-            tabIndex={canUpload ? 0 : -1}
-            aria-disabled={!canUpload}
-            onClick={() => canUpload && fileInputRef.current?.click()}
-            onKeyDown={(e) => {
-              if (canUpload && (e.key === 'Enter' || e.key === ' ')) {
-                e.preventDefault();
-                fileInputRef.current?.click();
-              }
-            }}
-            onDragOver={(e) => {
-              e.preventDefault();
-              if (canUpload) setDragging(true);
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={handleDrop}
-            className={`relative mb-7 rounded-[3px] border-[1.5px] border-dashed transition-colors ${
-              !canUpload && !uploading
-                ? 'cursor-not-allowed border-[rgba(60,44,24,.3)] bg-[var(--paper-cream)] opacity-70'
-                : dragging
-                  ? 'cursor-pointer border-[var(--paper-accent-strong)] bg-[var(--paper-yellow-soft)]'
-                  : 'cursor-pointer border-[rgba(60,44,24,.45)] bg-[var(--paper-cream)] hover:border-[var(--paper-accent-strong)] hover:bg-[var(--paper-yellow-soft)]'
-            }`}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleFile(f);
-                e.target.value = '';
+          <div className="mb-7 rounded-[3px] bg-[var(--paper-cream)] p-3 shadow-[0_10px_20px_-14px_rgba(60,44,24,.35),0_2px_0_rgba(60,44,24,.1)] sm:p-4">
+            <div
+              role="button"
+              tabIndex={canUpload ? 0 : -1}
+              aria-disabled={!canUpload}
+              onClick={() => canUpload && fileInputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (canUpload && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
               }}
-            />
-            <div className="flex flex-col items-center gap-3 px-4 py-12">
-              {uploading ? (
-                <div className="w-full max-w-xs text-center">
-                  <p className="font-paper-sans text-base text-[var(--paper-muted)]">
-                    Uploading… <span className="tabular-nums">{Math.round(progress * 100)}%</span>
-                  </p>
-                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[rgba(60,44,24,.12)]">
-                    <div
-                      className="h-full rounded-full bg-[var(--paper-accent)] transition-[width] duration-150"
-                      style={{ width: `${Math.round(progress * 100)}%` }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                if (canUpload) setDragging(true);
+              }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={handleDrop}
+              className={`relative rounded-[3px] border-[1.5px] border-dashed transition-colors ${
+                !canUpload && !uploading
+                  ? 'cursor-not-allowed border-[rgba(60,44,24,.3)] opacity-70'
+                  : dragging
+                    ? 'cursor-pointer border-[var(--paper-accent-strong)] bg-[var(--paper-yellow-soft)]'
+                    : 'cursor-pointer border-[rgba(60,44,24,.4)] hover:border-[var(--paper-accent-strong)] hover:bg-[var(--paper-yellow-soft)]'
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleFile(f);
+                  e.target.value = '';
+                }}
+              />
+              <div className="flex flex-col items-center gap-3 px-4 py-10 sm:py-14">
+                {uploading ? (
+                  <div className="w-full max-w-xs text-center">
+                    <p className="font-paper-sans text-base text-[var(--paper-muted)]">
+                      Uploading… <span className="tabular-nums">{Math.round(progress * 100)}%</span>
+                    </p>
+                    <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[rgba(60,44,24,.12)]">
+                      <div
+                        className="h-full rounded-full bg-[var(--paper-accent)] transition-[width] duration-150"
+                        style={{ width: `${Math.round(progress * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <CloudArrowUpIcon
+                      className={`h-10 w-10 ${
+                        dragging ? 'text-[var(--paper-accent)]' : 'text-[var(--paper-muted-2)]'
+                      }`}
                     />
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <CloudArrowUpIcon
-                    className={`h-10 w-10 ${
-                      dragging ? 'text-[var(--paper-accent)]' : 'text-[var(--paper-muted-2)]'
-                    }`}
-                  />
-                  <div className="text-center">
-                    <p className="text-[15px] font-medium">
-                      Drop a file or{' '}
-                      <span className="font-bold text-[var(--paper-accent)] underline underline-offset-[3px]">
-                        browse
-                      </span>
-                    </p>
-                    <p className="mt-1 font-paper-mono text-[10px] uppercase tracking-[.14em] text-[var(--paper-muted-2)]">
-                      {dropHint}
-                    </p>
-                  </div>
-                </>
-              )}
+                    <div className="text-center">
+                      <p className="text-[15px] font-medium">
+                        Drop a file or{' '}
+                        <span className="font-bold text-[var(--paper-accent)] underline underline-offset-[3px]">
+                          browse
+                        </span>
+                      </p>
+                      <p className="mt-1 font-paper-mono text-[10px] uppercase tracking-[.14em] text-[var(--paper-muted-2)]">
+                        {dropHint}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
+            {usage?.turnstileSiteKey && canUpload && (
+              <div className="mt-3 flex flex-col items-center gap-2 border-t border-dashed border-[rgba(60,44,24,.25)] pt-3 sm:flex-row sm:justify-between sm:gap-4">
+                <p className="font-paper-mono text-[10px] uppercase tracking-[.14em] text-[var(--paper-muted-2)]">
+                  Quick bot check before you upload
+                </p>
+                <TurnstileWidget
+                  key={turnstileKey}
+                  siteKey={usage.turnstileSiteKey}
+                  onToken={handleToken}
+                />
+              </div>
+            )}
           </div>
 
           <AnimatePresence>
@@ -368,9 +355,9 @@ export default function HostingView() {
               ))}
             </div>
           ) : files.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-[3px] border-[1.5px] border-dashed border-[rgba(60,44,24,.35)] py-16">
-              <DocumentIcon className="h-8 w-8 text-[var(--paper-muted-2)]" />
-              <p className="font-paper-sans text-base text-[var(--paper-muted)]">No files yet.</p>
+            <div className="flex items-center gap-3 px-1 py-2 text-[var(--paper-muted)]">
+              <DocumentIcon className="size-5 shrink-0 text-[var(--paper-muted-2)]" />
+              <p className="text-[15px]">No files yet. Upload one and its link shows up here.</p>
             </div>
           ) : (
             <div className="space-y-3">
