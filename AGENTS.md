@@ -229,6 +229,10 @@ A separate React/TypeScript app built independently and served at `/cao/`. It ha
 | `PISTON_CONTROL_CLIENT_ID`       | Backend (Azure only)      | Which managed identity to use for that control           |
 | `CLIENT_URL`                     | Backend                   | CORS allowed origin                                      |
 | `CLOUDINARY_NAME/KEY/SECRET/URL` | Backend + Frontend        | Image upload/CDN                                         |
+| `R2_ACCOUNT_ID/BUCKET/PUBLIC_URL`| Backend                   | Cloudflare R2 file host: account, bucket, public origin  |
+| `R2_ACCESS_KEY_ID/SECRET_ACCESS_KEY` | Backend               | R2 API token (S3) for presigning uploads and deletes     |
+| `HOSTED_STORAGE_LIMIT_BYTES`     | Backend                   | Hard cap on total hosted-file storage (default 9 GiB, under R2's 10 GB free tier) |
+| `TURNSTILE_SITE_KEY/SECRET_KEY`  | Backend                   | Cloudflare Turnstile bot check on uploads (blank disables it) |
 | `VITE_GEMINI_API_KEY`            | ai-slop build             | Gemini API for exam prep                                 |
 | `NODE_ENV`                       | All                       | `development` \| `production`                            |
 

@@ -89,8 +89,10 @@ export { runCodingSubmission, requestCodeRunnerSession, holdCodeRunner } from '.
 export type { CodeRunnerState, CodeRunnerStatus } from './coding';
 export { getPosts, createPost, likePost, addComment, getSinglePost } from './posts';
 export {
-  uploadHostedFile,
+  presignHostedUpload,
+  confirmHostedUpload,
   getMyHostedFiles,
+  getHostedUsage,
   deleteHostedFile,
   getAllHostedFilesAdmin,
 } from './hosting';

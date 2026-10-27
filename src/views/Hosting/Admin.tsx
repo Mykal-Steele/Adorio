@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store/hooks';
 import { getAllHostedFilesAdmin, deleteHostedFile, type HostedFile } from '@/api/hosting';
 import PaperTornEdge from '@/components/PaperTornEdge';
+import { formatBytes } from './formatBytes';
 
 export default function HostingAdminView() {
   const user = useAppSelector((s) => s.user.user);
@@ -40,6 +41,7 @@ export default function HostingAdminView() {
   }, {});
 
   const totalViews = files.reduce((sum, f) => sum + f.views, 0);
+  const totalSize = files.reduce((sum, f) => sum + f.size, 0);
 
   return (
     <div className="paper-theme min-h-screen">
@@ -56,7 +58,7 @@ export default function HostingAdminView() {
           <p className="mt-3.5 text-[17px] leading-[1.62] text-[var(--paper-muted)]">
             {files.length} file{files.length !== 1 ? 's' : ''} across {Object.keys(grouped).length}{' '}
             user{Object.keys(grouped).length !== 1 ? 's' : ''} &middot; {totalViews} total view
-            {totalViews !== 1 ? 's' : ''}
+            {totalViews !== 1 ? 's' : ''} &middot; {formatBytes(totalSize)} stored
           </p>
         </div>
       </section>
@@ -97,7 +99,7 @@ export default function HostingAdminView() {
                             /h/{f.slug}
                           </p>
                           <p className="mt-0.5 font-paper-mono text-[10px] uppercase tracking-[.08em] text-[var(--paper-muted-2)]">
-                            {(f.size / 1024).toFixed(1)} KB &middot; {f.views} view
+                            {formatBytes(f.size)} &middot; {f.views} view
                             {f.views !== 1 ? 's' : ''} &middot;{' '}
                             {new Date(f.createdAt).toLocaleDateString()}
                           </p>
