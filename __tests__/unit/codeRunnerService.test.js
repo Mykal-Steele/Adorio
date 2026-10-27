@@ -162,6 +162,86 @@ describe('runner event log', () => {
       usageMinutes: 45,
     });
   });
+
+  test('should log the startup time from the stop check when nobody is waiting on the page', async () => {
+    const doc = {
+      keepUntil: new Date(clock + 20 * 60000),
+      lastStartAt: new Date(clock - 40000),
+      lastReadyAt: null,
+    };
+    mockClaimRunnerTick.mockImplementation(() => Promise.resolve(doc));
+    mockFindRunnerState.mockImplementation(() => Promise.resolve(doc));
+    mockMarkRunnerReady.mockImplementationOnce(() => Promise.resolve(doc));
+    mockGetVmPowerState.mockImplementation(() => Promise.resolve('running'));
+    await runRunnerStopCheck(now());
+    expect(events().filter((e) => e.event === 'ready')).toEqual([
+      { scope: 'code-runner', event: 'ready', startupSeconds: 40 },
+    ]);
+  });
+});
+
+// A wrong token is not "still booting": Piston will never accept it, so it is
+// logged as an error the alert in infra/main.bicep can match on.
+describe('piston auth failure log', () => {
+  const rejectWith = (status) =>
+    mockFetch.mockImplementation(() => Promise.resolve({ ok: false, status }));
+  const nextStatusCheck = () => {
+    clock += 5000;
+    setSystemTime(now());
+    return getRunnerStatus();
+  };
+  const authFailures = () => events().filter((e) => e.event === 'auth_failed');
+
+  // Each test starts from a probe Piston accepted, so none inherits another
+  // test's "already logged" state.
+  beforeEach(async () => {
+    mockGetVmPowerState.mockImplementation(() => Promise.resolve('running'));
+    await nextStatusCheck();
+    logged.length = 0;
+  });
+
+  test('should log an error when Piston rejects the token with 401', async () => {
+    rejectWith(401);
+    const status = await nextStatusCheck();
+    expect(status.state).toBe('starting');
+    expect(authFailures()).toEqual([
+      { scope: 'code-runner', event: 'auth_failed', level: 'error', status: 401 },
+    ]);
+  });
+
+  test('should log an error when Piston answers 403', async () => {
+    rejectWith(403);
+    await nextStatusCheck();
+    expect(authFailures()).toMatchObject([{ status: 403 }]);
+  });
+
+  test('should log the failure once, not on every status check', async () => {
+    rejectWith(401);
+    await nextStatusCheck();
+    await nextStatusCheck();
+    await nextStatusCheck();
+    expect(authFailures()).toHaveLength(1);
+  });
+
+  test('should log it again if the token breaks after Piston accepted it', async () => {
+    rejectWith(401);
+    await nextStatusCheck();
+    mockFetch.mockImplementation(() =>
+      Promise.resolve({ ok: true, json: () => Promise.resolve(RUNTIMES) }),
+    );
+    await nextStatusCheck();
+    rejectWith(401);
+    await nextStatusCheck();
+    expect(authFailures()).toHaveLength(2);
+  });
+
+  test('should not log an auth failure when Piston is just not up yet', async () => {
+    mockFetch.mockImplementation(() => Promise.reject(new Error('ECONNREFUSED')));
+    await nextStatusCheck();
+    rejectWith(502);
+    await nextStatusCheck();
+    expect(authFailures()).toEqual([]);
+  });
 });
 
 // ── getRunnerStatus ────────────────────────────────────────────────────────────

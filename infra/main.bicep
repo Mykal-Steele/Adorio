@@ -336,6 +336,111 @@ resource containerAppsContributorForDeployIdentity 'Microsoft.Authorization/role
   }
 }
 
+@description('Where code runner alerts are emailed')
+param alertEmail string = 'mykal.stele@gmail.com'
+
+resource alertEmailGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
+  name: 'adorio-alert-email'
+  location: 'global'
+  properties: {
+    groupShortName: 'adorioalert'
+    enabled: true
+    emailReceivers: [
+      {
+        name: 'owner'
+        emailAddress: alertEmail
+        useCommonAlertSchema: true
+      }
+    ]
+  }
+}
+
+// The practice page shows "starting" for every way the runner can fail to come
+// up, so without these nobody hears about it. Both read the code-runner log
+// lines from backend/services/codeRunnerService.js. A 15 minute check is the
+// cheapest log alert tier, and these are stateful: one email when it fires,
+// one when it clears.
+resource runnerTokenRejectedAlert 'Microsoft.Insights/scheduledQueryRules@2023-12-01' = {
+  name: 'code-runner-token-rejected'
+  location: location
+  properties: {
+    displayName: 'Code runner token rejected'
+    description: 'Piston answered 401 or 403, so PISTON_TOKEN on the Container App does not match PISTON_AUTH_TOKEN in infra/.secrets/piston-deploy.env. Set the piston-token secret to that value and restart the revision.'
+    severity: 1
+    enabled: true
+    scopes: [logAnalytics.id]
+    evaluationFrequency: 'PT15M'
+    windowSize: 'PT30M'
+    autoMitigate: true
+    criteria: {
+      allOf: [
+        {
+          query: '''
+ContainerAppConsoleLogs_CL
+| where Log_s startswith '{"scope":"code-runner"'
+| where tostring(parse_json(Log_s).event) == 'auth_failed'
+'''
+          timeAggregation: 'Count'
+          operator: 'GreaterThan'
+          threshold: 0
+          failingPeriods: {
+            numberOfEvaluationPeriods: 1
+            minFailingPeriodsToAlert: 1
+          }
+        }
+      ]
+    }
+    actions: {
+      actionGroups: [alertEmailGroup.id]
+    }
+  }
+}
+
+// A start normally logs "ready" within about 30 seconds, and the stop check
+// logs it within a minute even if nobody is on the page. A start with no
+// "ready" after it for 10 minutes means the runner is not coming up: a wrong
+// token, Docker or Piston failing on the VM, or the VM unreachable.
+resource runnerStuckStartingAlert 'Microsoft.Insights/scheduledQueryRules@2023-12-01' = {
+  name: 'code-runner-stuck-starting'
+  location: location
+  properties: {
+    displayName: 'Code runner never became ready'
+    description: 'The Piston VM was started over 10 minutes ago and Piston has not answered with both runtimes since. Check the code-runner logs for auth_failed, then the VM with az vm run-command.'
+    severity: 2
+    enabled: true
+    scopes: [logAnalytics.id]
+    evaluationFrequency: 'PT15M'
+    windowSize: 'PT1H'
+    autoMitigate: true
+    criteria: {
+      allOf: [
+        {
+          query: '''
+let runner = ContainerAppConsoleLogs_CL
+| where Log_s startswith '{"scope":"code-runner"'
+| extend event = tostring(parse_json(Log_s).event);
+let lastReady = toscalar(runner | where event == 'ready' | summarize max(TimeGenerated));
+runner
+| where event == 'start_requested'
+| where TimeGenerated < ago(10m)
+| where isnull(lastReady) or TimeGenerated > lastReady
+'''
+          timeAggregation: 'Count'
+          operator: 'GreaterThan'
+          threshold: 0
+          failingPeriods: {
+            numberOfEvaluationPeriods: 1
+            minFailingPeriodsToAlert: 1
+          }
+        }
+      ]
+    }
+    actions: {
+      actionGroups: [alertEmailGroup.id]
+    }
+  }
+}
+
 output containerAppFqdn string = containerApp.properties.configuration.ingress.fqdn
 output registryLoginServer string = registry.properties.loginServer
 output deployIdentityClientId string = deployIdentity.properties.clientId
