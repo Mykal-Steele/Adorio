@@ -66,9 +66,17 @@ describe('portfolio projects', () => {
     }
   });
 
-  test('should have an Adorio project in place of the old social feed entry', () => {
+  // Adorio is the platform; the apps on it are their own projects
+  test('should list Social and Hosting as their own projects next to Adorio', () => {
     expect(project('adorio')?.liveUrl).toBe('https://adorio.space');
-    expect(project('social')).toBeUndefined();
+    expect(project('social')?.liveUrl).toBe('/social');
+    expect(project('hosting')?.liveUrl).toBe('/hosting');
+  });
+
+  test('should not describe Adorio with the social feed', () => {
+    const adorio = project('adorio');
+    expect(adorio?.image?.src).not.toContain('/social/');
+    expect(JSON.stringify(adorio)).not.toMatch(/infinite scroll|threaded comments/i);
   });
 
   test('should not tell visitors to ask for a demo account', () => {
