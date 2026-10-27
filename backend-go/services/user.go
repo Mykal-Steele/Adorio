@@ -41,16 +41,14 @@ func GetAllUsers() ([]models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// 1. Find returns a cursor
 	cursor, err := coll.Find(ctx, bson.M{})
 	if err != nil {
 		log.Println("Error initiating find:", err)
 		return nil, err
 	}
-	defer cursor.Close(ctx) // Always close your cursors!
+	defer cursor.Close(ctx)
 
 	var users []models.User
-	// 2. Short-statement: Decode all results into the slice
 	if err := cursor.All(ctx, &users); err != nil {
 		log.Println("Error decoding users list:", err)
 		return nil, err

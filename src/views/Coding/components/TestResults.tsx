@@ -17,10 +17,8 @@ const formatDuration = (duration: number) => {
 
 const TestTicket = ({ test }: { test: TestRunResult }) => {
   const isSuccess = test.passed && !test.error;
-  // A passing test's detail (input/expected/actual) is only useful for
-  // double-checking, not for debugging, collapsed by default so a run with
-  // a dozen passes isn't a dozen full cards to scroll through. A failure is
-  // exactly what someone opened this panel to read, so it starts open.
+  // passes start collapsed so a dozen of them aren't a dozen cards to scroll,
+  // failures start open since that's what you came to read
   const [open, setOpen] = useState(!isSuccess);
 
   return (

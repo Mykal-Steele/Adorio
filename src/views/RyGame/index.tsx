@@ -24,7 +24,6 @@ import {
 } from '../../api/gameApi';
 import { getToken } from '../../utils/tokenStorage';
 
-// Stateless game primitives, defined at module level so React doesn't recreate them every render.
 const DOT_RADIUS = 11;
 
 class Color {
@@ -197,7 +196,6 @@ const RyGame = () => {
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const achievementsSyncedRef = useRef(false);
-  // Game constants and refs
   const game = useRef({
     messageHeight: 50,
     canvasWidth: 650,
@@ -246,8 +244,8 @@ const RyGame = () => {
       this.lineIndex = lineIndex;
       this.linePosY = 0;
       this.createdAt = Date.now();
-      this.isHit = false; // flag for hit dots so we can animate them out
-      this.hitTime = 0; // when was the dot hit
+      this.isHit = false; // hit dots stay around a bit to fade out
+      this.hitTime = 0;
       game.dotList.push(this);
     }
 
@@ -274,7 +272,6 @@ const RyGame = () => {
       }
       const tempPos = game.linePosList[tempOffset + this.linePosY];
 
-      // fade out hit dots
       if (this.isHit) {
         const elapsed = Date.now() - this.hitTime;
         const opacity = Math.max(0, 1 - elapsed / 100);
@@ -297,7 +294,6 @@ const RyGame = () => {
       drawCircleOutline(tempPos, game.dotRadius + 1);
       game.context.restore();
 
-      // restore opacity for hit dots
       if (this.isHit) {
         game.context.restore();
       }
@@ -388,7 +384,6 @@ const RyGame = () => {
         (tempPosX1 - game.canvasWidth / 2) / (game.lineTaper - game.rockingOffset) +
         game.canvasWidth / 2;
 
-      // Draw upper lines
       let tempLinePosY = 0;
       while (tempLinePosY <= game.lineHeight) {
         const tempPos = game.linePosList[index];
@@ -398,7 +393,6 @@ const RyGame = () => {
         tempLinePosY += 1;
       }
 
-      // Draw lower lines
       tempLinePosY = 0;
       while (tempLinePosY <= game.lineHeight) {
         const tempPos = game.linePosList[index];
@@ -418,8 +412,7 @@ const RyGame = () => {
     } else {
       setContextColor(colors.whiteColor);
     }
-    // in the drawText function
-    // draw text shadow for better visibility
+    // shadow so the text stays readable
     game.context.save();
     game.context.shadowOffsetX = 2;
     game.context.shadowOffsetY = 2;
@@ -455,7 +448,6 @@ const RyGame = () => {
     game.dotList.forEach((dot) => dot.draw());
   };
 
-  // Create a hit effect at a specific position
   // eslint-disable-next-line react-hooks/exhaustive-deps -- pushes onto the stable `game.hitEffects` ref array.
   const createHitEffect = (pos, colorIndex) => {
     if (!game.hitEffects) game.hitEffects = [];
@@ -465,7 +457,6 @@ const RyGame = () => {
     game.hitEffects.push(newEffect);
   };
 
-  // Draw all active hit effects
   const drawHitEffects = () => {
     if (!game.hitEffects || game.hitEffects.length === 0) return;
 
@@ -512,7 +503,6 @@ const RyGame = () => {
     const tempProgress = game.audioCurrentTime / game.songDuration;
     let tempCount;
 
-    // Adjust dot creation rate based on difficulty
     let difficultyMultiplier = 1;
     if (difficulty === 'easy') difficultyMultiplier = 0.7;
     if (difficulty === 'hard') difficultyMultiplier = 1.3;
@@ -535,14 +525,12 @@ const RyGame = () => {
     }
   };
 
-  // Load high P-Level from local storage
   useEffect(() => {
     const savedHighPLevel = localStorage.getItem('rhythmDotsHighPLevel');
     if (savedHighPLevel) {
       setHighPLevel(parseInt(savedHighPLevel));
     }
 
-    // Check if this is the first visit to show tutorial
     const firstVisit = localStorage.getItem('rhythmDotsFirstVisit');
     if (!firstVisit) {
       setShowTutorial(true);
@@ -550,7 +538,6 @@ const RyGame = () => {
     }
   }, []);
 
-  // Function to update user's peak P-Level
   const fetchLeaderboardData = useCallback(async () => {
     try {
       setIsLoadingLeaderboard(true);
@@ -564,14 +551,12 @@ const RyGame = () => {
     }
   }, []);
 
-  // Ensure the leaderboard loads on mount, not conditionally
   useEffect(() => {
     fetchLeaderboardData();
 
-    // Set up a refresh interval for real-time updates
     const refreshInterval = setInterval(() => {
       fetchLeaderboardData();
-    }, 60000); // Refresh every minute
+    }, 60000);
 
     return () => clearInterval(refreshInterval);
   }, [fetchLeaderboardData]);
@@ -582,7 +567,6 @@ const RyGame = () => {
         const response = await updateScore(score, difficulty);
 
         if (response && !response.anonymous) {
-          // Only update UI if it's an authenticated user
           setCurrentUser((prev) =>
             prev
               ? {
@@ -597,7 +581,6 @@ const RyGame = () => {
           );
         }
 
-        // Always update the leaderboard after a score update
         fetchLeaderboardData();
       } catch (error) {
         console.error('Failed to update score:', error);
@@ -606,7 +589,6 @@ const RyGame = () => {
     [fetchLeaderboardData],
   );
 
-  // Check for and save high P-Level
   const checkHighPLevel = useCallback(() => {
     if (maxPLevel > highPLevel) {
       setHighPLevel(maxPLevel);
@@ -626,7 +608,6 @@ const RyGame = () => {
     if (getToken()) updateAchievements(next).catch(() => {});
   }, []);
 
-  // Check for achievements
   const checkAchievements = useCallback(() => {
     const newAchievements = { ...achievements };
     let achievementUnlocked = null;
@@ -662,7 +643,6 @@ const RyGame = () => {
       persistAchievements(newAchievements);
       setShowAchievement(achievementUnlocked);
 
-      // Hide achievement notification after 3 seconds
       setTimeout(() => {
         setShowAchievement(null);
       }, 3000);
@@ -673,11 +653,9 @@ const RyGame = () => {
     checkAchievements();
   }, [checkAchievements]);
 
-  // Generate quests based on player skill level
   const generateSkillBasedQuests = useCallback(() => {
     const baseQuests = [{ goal: 5, description: 'Reach P-Level 5', completed: false }];
 
-    // For better players, generate more challenging quests
     if (highPLevel > 10) {
       const advancedQuest = {
         goal: Math.min(Math.max(Math.floor(highPLevel * 0.7), 8), 25),
@@ -699,7 +677,6 @@ const RyGame = () => {
     return baseQuests[Math.floor(Math.random() * baseQuests.length)];
   }, [highPLevel]);
 
-  // Memoize the game-related functions
   const startGame = useCallback(() => {
     const audio = audioRef.current;
     if (!audio || !audioHasLoaded) return;
@@ -717,7 +694,6 @@ const RyGame = () => {
       });
     }
 
-    // Trigger first play achievement if it's the player's first time
     if (!achievements.firstPlay) {
       persistAchievements({ ...achievements, firstPlay: true });
 
@@ -727,7 +703,6 @@ const RyGame = () => {
         icon: <SparklesIcon className="h-6 w-6 text-[var(--paper-accent)]" />,
       });
 
-      // Hide after 3 seconds
       setTimeout(() => {
         setShowAchievement(null);
       }, 3000);
@@ -791,12 +766,11 @@ const RyGame = () => {
   const handleKeyDownEvent = useCallback(
     (event) => {
       let keyCode = event.which;
-      if (keyCode === 59) keyCode = 186; // Firefox fix
+      if (keyCode === 59) keyCode = 186; // Firefox sends 59 for ; instead of 186
 
       if (showTutorial) return;
 
       if (keyCode === 27) {
-        // Escape
         setMessage('Press space to play!');
         stopGame();
         resetGameAndAudio();
@@ -805,8 +779,7 @@ const RyGame = () => {
       }
 
       if (keyCode === 32) {
-        // Space
-        event.preventDefault(); // Prevent default space bar behavior
+        event.preventDefault(); // stop space from scrolling the page
         if (audioHasLoaded && !gameIsActive) {
           resetGameAndAudio();
           startGame();
@@ -827,30 +800,25 @@ const RyGame = () => {
               checkHighPLevel();
             }
           } else {
-            // Get dot position for hit effect
             const dotPos = tempDot.getPosition();
 
-            // Create hit effect
             const colorIndex = Math.floor(Math.random() * colors.hitEffects.length);
             createHitEffect(dotPos, colorIndex);
 
-            // Mark dot as hit but don't remove it yet - let it fade out
+            // don't remove yet, let it fade out first
             tempDot.isHit = true;
             tempDot.hitTime = Date.now();
 
-            // Remove dot after animation completes - match to hit effect duration
             setTimeout(() => {
               if (tempDot) tempDot.remove();
-            }, 100); // Changed to 100ms for snappier response
+            }, 100); // same 100ms as the fade in draw()
 
-            // Update streak
             setPLevel((prev) => {
               const newPLevel = prev + 1;
               setMaxPLevel((current) => Math.max(current, newPLevel));
               return newPLevel;
             });
 
-            // Save last hit time for animations
             game.lastHitTime = Date.now();
           }
         }
@@ -874,15 +842,12 @@ const RyGame = () => {
   const gameLoop = useCallback(() => {
     if (!gameIsActive || !game.context) return;
 
-    // update audio time each frame
     if (audioRef.current && game.audioHasLoaded) {
       game.audioCurrentTime = audioRef.current.currentTime;
       const tempTime = game.audioCurrentTime - game.audioTimeOffset;
 
-      // check where we are in the music
       const tempMeasure = tempTime / game.tempo;
 
-      // visual effects based on music progress
       if (tempMeasure >= 4 && !game.hasStartedPulsating) {
         game.hasStartedPulsating = true;
       }
@@ -917,7 +882,6 @@ const RyGame = () => {
         game.advanceToggle = false;
       }
 
-      // visual effects
       let tempOffset;
       if (game.hasStartedPulsating) {
         const tempNumber = 1 - Math.sin(((tempTime / (game.tempo / 4)) % 1) * Math.PI);
@@ -944,10 +908,9 @@ const RyGame = () => {
       }
     }
 
-    // fast frame drawing - all in one go
     const ctx = game.context;
 
-    // fill bg instead of clear - way faster
+    // fillRect instead of clearRect, way faster
     const bgColor = game.hasStartedWhiteForeground
       ? colors.backgroundColorSet[game.backgroundColorIndex]
       : colors.backgroundColorSet[0];
@@ -956,7 +919,6 @@ const RyGame = () => {
     setContextColor(bgColor);
     ctx.fillRect(0, 0, game.canvasWidth, game.canvasHeight);
 
-    // grid pattern in bg
     ctx.strokeStyle = 'rgba(253, 250, 243, 0.05)';
     ctx.lineWidth = 1;
 
@@ -978,7 +940,6 @@ const RyGame = () => {
 
     drawMessage();
 
-    // draw the main game elements
     ctx.lineWidth = 3;
     ctx.shadowBlur = 12;
     ctx.shadowColor = 'rgba(242, 199, 68, 0.35)';
@@ -1004,13 +965,12 @@ const RyGame = () => {
       drawCircleOutline(rightPos2, game.destinationRadius);
     }
 
-    // effects and dots - these are fps critical
+    // effects and dots are the fps critical part
     drawHitEffects();
     drawAllDots();
 
     ctx.restore();
 
-    // keep the loop going
     gameLoopRef.current = requestAnimationFrame(gameLoop);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- requestAnimationFrame loop reads from the stable `game` ref.
   }, [gameIsActive, pLevel]);
@@ -1034,7 +994,6 @@ const RyGame = () => {
     ctx.strokeStyle = colors.blackColor.toString();
     ctx.imageSmoothingEnabled = true;
 
-    // Initialize line positions once
     const linePosList = [];
     for (let i = 0; i < game.numberOfColumns; i++) {
       for (let j = 0; j <= game.lineHeight; j++) {
@@ -1100,17 +1059,14 @@ const RyGame = () => {
     };
   }, [markAudioReady]);
 
-  // Create key-to-note mapping for visualization
   const keyMap = [
     ['Q', 'W', 'E', 'R', 'U', 'I', 'O', 'P'],
     ['A', 'S', 'D', 'F', 'J', 'K', 'L', ';'],
   ];
 
-  // Daily quest - generate a random goal every day
   const [dailyQuest, setDailyQuest] = useState(null);
 
   useEffect(() => {
-    // Generate daily quest based on date
     const today = new Date().toDateString();
     const savedQuest = localStorage.getItem('rhythmDotsDailyQuest');
     const savedQuestDate = localStorage.getItem('rhythmDotsDailyQuestDate');
@@ -1118,7 +1074,6 @@ const RyGame = () => {
     if (savedQuestDate === today && savedQuest) {
       setDailyQuest(JSON.parse(savedQuest));
     } else {
-      // Generate new quest based on player skill
       const newQuest = generateSkillBasedQuests();
       setDailyQuest(newQuest);
 
@@ -1127,7 +1082,6 @@ const RyGame = () => {
     }
   }, [generateSkillBasedQuests]);
 
-  // Check if daily quest is completed
   useEffect(() => {
     if (!dailyQuest || dailyQuest.completed) return;
 
@@ -1156,20 +1110,16 @@ const RyGame = () => {
     }
   }, [pLevel, maxPLevel, dailyQuest]);
 
-  // Check if we need to update the user's score when the game ends
   useEffect(() => {
     if (!showGameOverScreen || maxPLevel <= 0 || !getToken()) return;
     updateUserScore(maxPLevel, difficulty);
   }, [showGameOverScreen, maxPLevel, difficulty, updateUserScore]);
 
-  // Get current user on mount
   useEffect(() => {
     const getUserGameStats = async () => {
       try {
-        // First try to get user game stats
         const gameStats = await fetchUserGameStats();
 
-        // If we got valid non-anonymous stats, use them
         if (gameStats && !gameStats.anonymous) {
           setHighPLevel(gameStats.peakPLevel || 0);
 
@@ -1201,7 +1151,6 @@ const RyGame = () => {
             });
           }
 
-          // Try to get the full user profile if we have stats
           if (getToken()) {
             try {
               const userData = await fetchUserData();
@@ -1211,7 +1160,6 @@ const RyGame = () => {
             }
           }
         } else {
-          // For anonymous users, use local storage
           const savedHighPLevel = localStorage.getItem('rhythmDotsHighPLevel');
           if (savedHighPLevel) {
             setHighPLevel(parseInt(savedHighPLevel) || 0);
@@ -1229,7 +1177,6 @@ const RyGame = () => {
     getUserGameStats();
   }, []);
 
-  // Check auth status periodically and clear user if token is missing
   useEffect(() => {
     if (!currentUser) return;
     const checkAuthInterval = setInterval(() => {
@@ -1237,12 +1184,11 @@ const RyGame = () => {
       if (!token) {
         setCurrentUser(null);
       }
-    }, 30000); // Check every 30 seconds
+    }, 30000);
 
     return () => clearInterval(checkAuthInterval);
   }, [currentUser]);
 
-  // When rendering the leaderboard, add additional safety checks
   const renderLeaderboard = useCallback(() => {
     if (!Array.isArray(leaderboard) || leaderboard.length === 0) {
       return (
@@ -1253,7 +1199,6 @@ const RyGame = () => {
     }
 
     return leaderboard.map((player, index) => {
-      // Add safety checks to handle potentially undefined values
       if (!player) return null;
 
       return (
@@ -1309,7 +1254,6 @@ const RyGame = () => {
     <div className="paper-theme min-h-screen">
       <PaperTornEdge />
       <div className="flex flex-col lg:flex-row">
-        {/* Main Game Content */}
         <div className="flex flex-1 flex-col items-center p-4 pt-7">
           <div className="relative w-full max-w-4xl space-y-6 rounded-[3px] bg-[var(--paper-cream)] p-6 text-center shadow-[0_14px_26px_-14px_rgba(60,44,24,.3),0_2px_0_rgba(60,44,24,.1)]">
             <span
@@ -1325,7 +1269,6 @@ const RyGame = () => {
               <MusicalNoteIcon className="h-7 w-7 text-[var(--paper-accent)]" />
             </div>
 
-            {/* Game status indicator */}
             <div className="absolute right-5 top-3 flex items-center">
               <div
                 className={`mr-2 h-2.5 w-2.5 rounded-full ${
@@ -1337,7 +1280,6 @@ const RyGame = () => {
               </span>
             </div>
 
-            {/* Updated left sidebar to show only necessary information */}
             <div className="absolute top-6 left-6 flex flex-col gap-2 z-30">
               <div
                 className="rounded-[2px] border border-[var(--paper-line)] bg-[var(--paper-hero)] px-3 py-1.5"
@@ -1370,7 +1312,6 @@ const RyGame = () => {
               )}
             </div>
 
-            {/* Achievement notification */}
             <AnimatePresence>
               {showAchievement && (
                 <motion.div
@@ -1396,7 +1337,6 @@ const RyGame = () => {
               )}
             </AnimatePresence>
 
-            {/* Canvas wrapper with stylized border */}
             <div className="relative overflow-hidden rounded-[2px] border-[1.5px] border-[var(--paper-ink)] shadow-[0_14px_26px_-16px_rgba(60,44,24,.45)]">
               <canvas
                 ref={canvasRef}
@@ -1405,7 +1345,6 @@ const RyGame = () => {
                 className="mx-auto max-h-full max-w-full bg-[#141210]"
               />
 
-              {/* Game over screen updated to focus on P-Level */}
               {showGameOverScreen && (
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[rgba(43,39,35,.62)]">
                   <div className="max-w-sm rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-6 text-left shadow-[4px_5px_0_var(--paper-ink)]">
@@ -1453,7 +1392,6 @@ const RyGame = () => {
                 </div>
               )}
 
-              {/* Other overlays */}
               {!gameIsActive && !showGameOverScreen && audioHasLoaded && (
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[rgba(43,39,35,.55)]">
                   <div className="max-w-sm rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-6 text-center shadow-[4px_5px_0_var(--paper-ink)]">
@@ -1474,7 +1412,6 @@ const RyGame = () => {
                 </div>
               )}
 
-              {/* Loading indicator */}
               {!audioHasLoaded && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-[rgba(43,39,35,.55)]">
                   <div className="flex flex-col items-center">
@@ -1495,7 +1432,6 @@ const RyGame = () => {
               )}
             </div>
 
-            {/* Song Progress Bar */}
             <div className="w-full px-1">
               <div className="mb-1 flex items-center justify-between font-paper-mono text-[10px] uppercase tracking-[.1em] text-[var(--paper-muted-2)]">
                 <span>{formatTime(elapsedTime)}</span>
@@ -1547,7 +1483,6 @@ const RyGame = () => {
               onError={() => setAudioLoadError(true)}
             />
 
-            {/* Tutorial modal */}
             {showTutorial && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
                 <div className="w-full max-w-lg rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-6 shadow-[4px_5px_0_var(--paper-ink)]">
@@ -1581,9 +1516,7 @@ const RyGame = () => {
               </div>
             )}
 
-            {/* Game info and controls */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Game instructions */}
               <div className="relative overflow-hidden rounded-[3px] bg-[var(--paper-cream)] p-5 shadow-[0_10px_20px_-16px_rgba(60,44,24,.35),0_2px_0_rgba(60,44,24,.08)] md:col-span-2">
                 <div className="relative z-10 space-y-4 text-sm text-[var(--paper-muted)]">
                   <div className="flex justify-between font-paper-mono text-[10px] uppercase tracking-[.1em] text-[var(--paper-muted-2)]">
@@ -1595,7 +1528,6 @@ const RyGame = () => {
                     Hit the corresponding key when a dot lands in a circle.
                   </p>
 
-                  {/* Keyboard visualization */}
                   <div className="mx-auto grid max-w-md grid-rows-2 gap-2">
                     {keyMap.map((row, rowIndex) => (
                       <div key={rowIndex} className="flex justify-center gap-1">
@@ -1615,7 +1547,6 @@ const RyGame = () => {
                     ))}
                   </div>
 
-                  {/* Controls */}
                   <div className="mt-4 flex flex-wrap justify-center gap-3">
                     <div className="flex items-center rounded-[2px] border border-dashed border-[rgba(60,44,24,.45)] px-3 py-2 text-[var(--paper-muted)]">
                       <KeyIcon className="mr-2 h-4 w-4 text-[var(--paper-accent)]" />
@@ -1633,10 +1564,8 @@ const RyGame = () => {
                 </div>
               </div>
 
-              {/* Daily Quest & Achievements Panel */}
               <div className="relative overflow-hidden rounded-[3px] bg-[var(--paper-cream)] p-5 shadow-[0_10px_20px_-16px_rgba(60,44,24,.35),0_2px_0_rgba(60,44,24,.08)]">
                 <div className="relative z-10 space-y-4">
-                  {/* Difficulty selector */}
                   <div className="mb-4">
                     <h3 className="mb-2 font-paper-mono text-[11px] uppercase tracking-[.14em] text-[var(--paper-muted-2)]">
                       Difficulty
@@ -1659,7 +1588,6 @@ const RyGame = () => {
                     </div>
                   </div>
 
-                  {/* Daily Quest */}
                   <div>
                     <h3 className="mb-2 font-paper-mono text-[11px] uppercase tracking-[.14em] text-[var(--paper-muted-2)]">
                       Daily Quest
@@ -1708,7 +1636,6 @@ const RyGame = () => {
                     )}
                   </div>
 
-                  {/* Achievements */}
                   <div>
                     <h3 className="mb-2 font-paper-mono text-[11px] uppercase tracking-[.14em] text-[var(--paper-muted-2)]">
                       Achievements
@@ -1801,7 +1728,6 @@ const RyGame = () => {
                     </div>
                   </div>
 
-                  {/* Tutorial button */}
                   <div className="mt-4">
                     <button
                       onClick={() => setShowTutorial(true)}
@@ -1816,7 +1742,6 @@ const RyGame = () => {
           </div>
         </div>
 
-        {/* Leaderboard Panel - Changed from fixed positioning to responsive flex */}
         <div className="p-4 lg:w-80 lg:min-w-80 lg:max-w-80">
           <div className="sticky top-20 max-h-[calc(100vh-8rem)] overflow-hidden rounded-[3px] bg-[var(--paper-cream)] shadow-[0_14px_26px_-14px_rgba(60,44,24,.3),0_2px_0_rgba(60,44,24,.1)]">
             <div className="sticky top-0 border-b border-dashed border-[var(--paper-line)] bg-[var(--paper-cream)] p-3">

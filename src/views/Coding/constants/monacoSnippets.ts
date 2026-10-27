@@ -1,7 +1,6 @@
 import type * as Monaco from 'monaco-editor';
 
-// Monaco's own equivalent of constants/snippets.ts, using Monaco's
-// `$1`/`$0` snippet placeholder syntax instead of CodeMirror's `${x}`.
+// same as snippets.ts but with Monaco's `$1`/`$0` placeholders instead of `${x}`
 const JAVA_SNIPPETS: Array<[string, string, string]> = [
   ['sout', 'print line', 'System.out.println($1);'],
   ['fori', 'indexed for loop', 'for (int $1 = 0; $1 < $2; $1++) {\n\t$0\n}'],

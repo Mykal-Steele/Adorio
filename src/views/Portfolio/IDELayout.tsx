@@ -115,10 +115,6 @@ function MobileMoreMenu({
   );
 }
 
-// One shell for every screen size. CSS picks which bars show, so the server renders the
-// right layout and nothing swaps in after JavaScript loads. Below md (768px): mobile header
-// and bottom nav. md to lg: title bar, a rail with an explorer drawer, tabs, status bar.
-// lg and up: the full editor with the activity bar and explorer.
 // Eases the new page in when you move between pages. Not on the first load, so the first
 // paint is never held back. A layout effect runs before the browser paints the new page,
 // so it never shows at full opacity for a frame and then jumps to the start of the fade.
@@ -143,6 +139,10 @@ function usePageEnter() {
   return pageRef;
 }
 
+// One shell for every screen size. CSS picks which bars show, so the server renders the
+// right layout and nothing swaps in after JavaScript loads. Below md (768px): mobile header
+// and bottom nav. md to lg: title bar, a rail with an explorer drawer, tabs, status bar.
+// lg and up: the full editor with the activity bar and explorer.
 function Shell({ children }: { children: ReactNode }) {
   const { terminalOpen, sidePanelOpen } = useIDE();
   const pageRef = usePageEnter();

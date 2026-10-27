@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 /**
- * One-time migration: clears all SecretEnv records.
+ * One-time migration that deletes every SecretEnv record.
  *
- * Old records were encrypted + hashed with `password + username`.
- * New scheme uses `password + email`. Old records are unrecoverable
- * without the original plaintext passwords, so they're dropped.
+ * Old records were hashed with password + username, the new scheme uses
+ * password + email. Without the plaintext passwords the old ones can't be
+ * recovered, so they get dropped.
  *
- * Usage (run from backend/):
- *   node migrate-clear-secretenv.mjs
+ * Run from backend/: node migrate-clear-secretenv.mjs
  */
 
 import mongoose from 'mongoose';

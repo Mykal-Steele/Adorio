@@ -1,12 +1,9 @@
-/* Google Fonts are loaded via <link> tags in app/layout.tsx (not @import) so the
-   browser can discover and fetch them in parallel instead of after this file loads. */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Portfolio IDE theme tokens — the root block is the pre-hydration fallback.
-   next-themes overwrites these at runtime via [data-theme]. Tailwind can't drive runtime themes. */
+/* Portfolio IDE theme tokens. This root block is the fallback before hydration, next-themes
+   swaps them at runtime via [data-theme] (Tailwind can't do runtime themes). */
 :root {
   --ide-on-yellow: #1d1b17;
   --ide-ink: rgba(0, 0, 0, 0.85);
@@ -90,10 +87,8 @@
   --ide-scrollbar: #353b45;
 }
 
-/* IDE themes — every theme has its own explicit block so :root is only a
-   silent fallback that never shows through during navigation.
-   next-themes sets [data-theme="X"] on <html> synchronously via a blocking
-   script before first paint, and it persists across client-side navigation. */
+/* Every theme has its own block so :root never shows through during navigation.
+   next-themes sets [data-theme] on <html> with a blocking script before first paint. */
 
 [data-theme='midnight'] {
   --ide-bg-0: #060a0f;
@@ -557,7 +552,7 @@ body {
   box-shadow: none;
 }
 
-/* Theme-aware hover backgrounds — values use CSS vars, !important overrides base resets */
+/* Theme-aware hover backgrounds. !important beats the base resets */
 .ide-hover:hover {
   background: color-mix(in srgb, var(--ide-text-1) 8%, transparent) !important;
 }
@@ -918,9 +913,8 @@ html[data-auth='in'] .auth-out {
   display: none !important;
 }
 
-/* Paper-craft theme tokens — the color/font vocabulary for the social feed (/social)
-   and the site-wide Navbar. Custom properties are inert until referenced, so declaring
-   them on :root is safe even on pages that don't use any of them. */
+/* Paper theme tokens for /social and the Navbar. Unused custom properties do nothing,
+   so they're fine on :root. */
 :root {
   --paper-bg: #e5d8c0;
   --paper-cream: #fdfaf3;
@@ -936,13 +930,11 @@ html[data-auth='in'] .auth-out {
   --paper-highlight: #f5eeb8;
   --paper-line: rgba(60, 44, 24, 0.3);
 }
-/* Paints the paper-craft page background — scoped to .paper-theme (currently just
-   /social) so the noise texture and Karla body font don't leak into the rest of the
-   still-dark site. */
+/* Scoped to .paper-theme so the grain and Karla font don't leak into the dark pages */
 .paper-theme {
   font-family: var(--font-karla), Helvetica, Arial, sans-serif;
   background-color: var(--paper-bg);
-  /* Fractal-noise paper grain — no Tailwind equivalent for an inline SVG filter background */
+  /* Paper grain from an inline SVG noise filter, no Tailwind equivalent */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.2'/%3E%3C/svg%3E");
   color: var(--paper-ink);
 }
@@ -950,17 +942,11 @@ html[data-auth='in'] .auth-out {
   background: var(--paper-yellow);
   color: var(--paper-ink);
 }
-/* Code editors paint their own selection as a decoration layer (CodeMirror's
-   .cm-selectionBackground, Monaco's overlay divs) — real DOM text underneath
-   is still selectable, so the browser's native ::selection above ALSO fires
-   on it. The two overlays don't share geometry (native selection follows DOM
-   text-node/inline-box boundaries, which split differently around a
-   syntax-highlighted token like a bracket than the editor's own virtualized
-   selection rects do), so you get a visibly doubled/offset highlight, with
-   the native rule's near-black text color on top of it. Turning native
-   selection transparent inside the editor leaves the editor's own
-   (correctly positioned, non-text-recoloring) decoration as the only visible
-   highlight. */
+/* CodeMirror (.cm-selectionBackground) and Monaco draw their own selection, but the text
+   under it is real DOM, so the native ::selection above fires too. The two don't line up
+   (they split differently around highlighted tokens like brackets), which gives a doubled,
+   offset highlight with dark text on top. Making the native one transparent leaves only
+   the editor's. */
 .paper-theme .cm-editor ::selection,
 .paper-theme .monaco-editor ::selection {
   background: transparent;
@@ -979,11 +965,9 @@ html[data-auth='in'] .auth-out {
 .font-paper-sans {
   font-family: var(--font-karla), Helvetica, Arial, sans-serif;
 }
-/* Ruled notebook lines behind the compose textarea — repeating-linear-gradient has no Tailwind utility.
-   background-color must be set explicitly: browsers give <textarea> an opaque
-   default background, and background-image alone (unlike the `background`
-   shorthand) doesn't reset it, so the ruled lines were drawing on top of a
-   white box instead of the cream card behind it. */
+/* Ruled lines behind the compose textarea (no Tailwind utility for repeating gradients).
+   background-color has to be set: <textarea> has an opaque default background that
+   background-image alone doesn't reset, so the lines drew on a white box. */
 .paper-ruled {
   background-color: transparent;
   background-image: repeating-linear-gradient(
@@ -993,7 +977,7 @@ html[data-auth='in'] .auth-out {
   );
   background-attachment: local;
 }
-/* Dashed section rule under the feed tabs — same reason, no Tailwind utility for repeating gradients */
+/* Dashed rule under the feed tabs, same reason */
 .paper-dashed-rule {
   background-image: repeating-linear-gradient(90deg, var(--paper-line) 0 8px, transparent 8px 14px);
 }
@@ -1016,7 +1000,7 @@ html[data-auth='in'] .auth-out {
     @apply bg-transparent h-[16px] w-3;
   }
 
-  /* CSS border triangle trick — no Tailwind equivalent */
+  /* Border triangle trick, no Tailwind equivalent */
   ::-webkit-scrollbar-button:single-button:vertical:decrement {
     border: 0 6px 8px 6px solid transparent;
     border-bottom-color: #4b5563;
@@ -1027,7 +1011,7 @@ html[data-auth='in'] .auth-out {
     border-top-color: #4b5563;
   }
 
-  /* Firefox scrollbar — scrollbar-color shorthand has no Tailwind mapping */
+  /* Firefox scrollbar, no Tailwind mapping for scrollbar-color */
   @supports (scrollbar-color: auto) {
     * {
       scrollbar-color: #4b5563 transparent;

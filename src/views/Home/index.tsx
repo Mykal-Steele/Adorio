@@ -256,10 +256,9 @@ const Home = ({ initialPosts = [], initialHasMore = true }) => {
     fetchPosts();
   }, [fetchPosts]);
 
-  // Switching filters queries a different set on the backend now (see fetchPosts),
-  // so the existing page needs to be thrown away and pagination restarted from
-  // page 1 for it, otherwise switching to Photos would either show a stale mix
-  // of results or try to append page 2 of the new filter onto page 1 of the old one.
+  // Each filter is a different query on the backend (see fetchPosts), so drop the
+  // loaded posts and start again at page 1. Otherwise Photos shows a stale mix, or
+  // page 2 of the new filter lands on page 1 of the old one.
   const isFirstFilterRender = useRef(true);
   useEffect(() => {
     if (isFirstFilterRender.current) {

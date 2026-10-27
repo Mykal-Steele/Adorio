@@ -85,9 +85,9 @@ const storageFullError = () =>
     { code: 'STORAGE_LIMIT_REACHED', limitBytes: environment.hostedStorageLimitBytes },
   );
 
-// Seeds the ledger from any R2 files that existed before it (no-op after the
-// first call). Runs before every reservation so a fresh database never starts
-// the count at zero while files are already stored.
+// Seeds the ledger from R2 files that existed before it (no-op after the first
+// call). Runs before every reservation so a fresh database doesn't start at zero
+// while files are already stored.
 const ensureStorageLedger = async () => {
   if (await storageLedgerExists()) return;
   await initStorageLedger(await sumHostedR2Bytes());
@@ -179,7 +179,7 @@ export const confirmUpload = async ({ userId, rawBody }) => {
     head = await headObject(file.r2Key);
   } catch (error) {
     if (error?.$metadata?.httpStatusCode === 404) {
-      // The PUT never landed — drop the placeholder and its reservation.
+      // The PUT never landed, so drop the placeholder and its reservation.
       await discardPending(slug);
       throw ApiError.badRequest('Upload did not complete — no file was received');
     }

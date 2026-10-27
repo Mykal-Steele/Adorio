@@ -31,8 +31,7 @@ param pistonVmName = 'adorio-piston-vm'
 param runnerControlIdentityName = 'adorio-piston-control-identity'
 
 // Cloudflare R2 file hosting. Defaults to '' so a deploy with these unset
-// simply leaves the feature off. Export the three vars before deploying to
-// turn it on.
+// leaves the feature off. Export the three vars before deploying to turn it on.
 param r2AccountId = readEnvironmentVariable('R2_ACCOUNT_ID', '')
 param r2AccessKeyId = readEnvironmentVariable('R2_ACCESS_KEY_ID', '')
 param r2SecretAccessKey = readEnvironmentVariable('R2_SECRET_ACCESS_KEY', '')

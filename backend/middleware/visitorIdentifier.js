@@ -24,10 +24,9 @@ const visitorIdentifier = (req, res, next) => {
 
   const fingerprintData = body.fingerprint || {};
 
-  // req.ip is already resolved correctly by Express trust proxy config
+  // trust proxy already resolves req.ip
   const ipAddress = req.ip || 'unknown';
 
-  // Create fingerprint
   const fingerprint = createVisitorFingerprint({
     screen: fingerprintData.screen,
     locale: fingerprintData.locale,
@@ -39,10 +38,8 @@ const visitorIdentifier = (req, res, next) => {
 
   let cookieVisitorId = cookies[VISITOR_COOKIE_NAME] || headerVisitorId || bodyVisitorId;
 
-  // Create stable visitor ID using cookie and fingerprint
   const stableVisitorId = createStableVisitorId(cookieVisitorId, fingerprint, ipAddress);
 
-  // Use stable ID as the primary visitor ID
   let visitorId = stableVisitorId;
 
   if (!cookieVisitorId) {
@@ -51,7 +48,6 @@ const visitorIdentifier = (req, res, next) => {
 
   const visitorSessionId = headers[VISITOR_SESSION_HEADER] || body.sessionId || null;
 
-  // Set cookie with the original cookie ID (for consistency)
   if (cookies[VISITOR_COOKIE_NAME] !== cookieVisitorId) {
     res.cookie(VISITOR_COOKIE_NAME, cookieVisitorId, {
       httpOnly: true,
@@ -62,8 +58,8 @@ const visitorIdentifier = (req, res, next) => {
   }
 
   req.visitor = {
-    id: visitorId, // Use stable fingerprint-based ID
-    cookieId: cookieVisitorId, // Keep original cookie ID
+    id: visitorId,
+    cookieId: cookieVisitorId,
     sessionId: visitorSessionId,
     fingerprint,
     fingerprintData,

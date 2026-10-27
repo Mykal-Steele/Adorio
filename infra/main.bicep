@@ -16,12 +16,10 @@ param deployIdentityName string = 'adorio-github-deploy-identity'
 @description('GitHub repo in "owner/repo" form, used to scope the OIDC federated credential')
 param githubRepo string = 'Mykal-Steele/Adorio'
 
-// No default on purpose. This template gets re-applied for infra changes unrelated to
-// app code (RBAC, scaling, etc.) — CI owns image updates via `az containerapp update`
-// and never re-runs this template. If this had a default, re-applying the template for
-// an infra tweak would silently reset the running app back to that default and cut
-// traffic over to it, which is exactly what happened once already. Always pass the
-// currently-running image explicitly: `--parameters containerImage=<current image>`.
+// No default on purpose. CI updates the image with `az containerapp update` and never
+// runs this template, which only gets re-applied for infra changes (RBAC, scaling).
+// With a default, an infra apply silently reset the live app to that image and moved
+// traffic to it. That already happened once. Pass the running image every time.
 @description('Image the container app should run — always pass the current running image explicitly, no default')
 param containerImage string
 
@@ -58,9 +56,8 @@ param pistonToken string
 @description('Self-signed TLS cert (PEM, fullchain) baked into the Piston VM via piston.bicep\'s pistonTlsCert. Pinned here as an extra trusted CA so the backend can verify HTTPS to Piston without a public CA.')
 param pistonCaCert string
 
-// R2-backed file hosting (Cloudflare R2, S3 API). Optional as a group: leave
-// the account id and keys empty and the app deploys without it — the hosting
-// endpoints report as unconfigured, everything else still works.
+// Cloudflare R2 file hosting (S3 API). Optional: leave the account id and keys
+// empty and the hosting endpoints just report unconfigured.
 @description('Cloudflare account id that owns the R2 bucket (empty disables R2 file hosting)')
 param r2AccountId string = ''
 
@@ -106,8 +103,7 @@ param runnerControlIdentityName string = ''
 
 var runnerControlEnabled = !empty(pistonVmName) && !empty(runnerControlIdentityName)
 
-// Looked up rather than passed in, so the resource id and client id can never
-// drift from what piston.bicep actually created.
+// looked up instead of passed in so the ids can't drift from what piston.bicep made
 resource runnerControlIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' existing = if (runnerControlEnabled) {
   name: runnerControlIdentityName
 }
@@ -151,7 +147,7 @@ resource registry 'Microsoft.ContainerRegistry/registries@2025-11-01' = {
   }
 }
 
-// Identity the Container App itself uses to pull from ACR — no admin credentials involved.
+// the app pulls from ACR with this, no admin credentials
 resource containerAppPullIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
   name: '${containerAppName}-pull-identity'
   location: location
@@ -177,9 +173,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
       runnerControlEnabled ? { '${runnerControlIdentity.id}': {} } : {}
     )
   }
-  // Bicep can't infer this from the identity block above (role assignments aren't
-  // referenced there), so it's spelled out: the AcrPull grant must exist before the
-  // container app tries to pull from the registry using that identity.
+  // Bicep can't infer this one. The AcrPull grant has to exist before the first pull.
   dependsOn: [
     acrPullForContainerApp
   ]
@@ -286,7 +280,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
   }
 }
 
-// Identity GitHub Actions authenticates as (via OIDC federated credential — no stored secret).
+// GitHub Actions signs in as this through OIDC, no stored secret
 resource deployIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
   name: deployIdentityName
   location: location
@@ -312,10 +306,9 @@ resource acrPushForDeployIdentity 'Microsoft.Authorization/roleAssignments@2022-
   }
 }
 
-// `az acr build` needs this in addition to AcrPush — it's an ARM-level orchestration
-// role (uploading build context, queuing the run), not a data-plane push/pull action.
-// AcrPush alone gets "resource could not be found" / "AuthorizationFailed" on
-// listBuildSourceUploadUrl, confirmed the hard way against the real registry.
+// `az acr build` needs this on top of AcrPush, since uploading the context and queuing
+// the run are ARM actions. With AcrPush alone, listBuildSourceUploadUrl fails with
+// "resource could not be found" / "AuthorizationFailed" (found out the hard way).
 resource acrTasksContributorForDeployIdentity 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(registry.id, deployIdentity.id, 'ContainerRegistryTasksContributor')
   scope: registry

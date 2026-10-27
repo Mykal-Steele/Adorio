@@ -15,9 +15,8 @@ import {
   findPostCommentsMeta,
 } from '../models/index.js';
 
-// Thread levels 0, 1, 2 render indented; anything deeper is flattened onto its
-// level-2 ancestor (same rule as the frontend MAX_THREAD_DEPTH in
-// src/views/Home/constants/feed.ts — keep the two in sync).
+// Levels 0, 1, 2 render indented, anything deeper gets flattened onto its level-2
+// ancestor. Keep in sync with MAX_THREAD_DEPTH in src/views/Home/constants/feed.ts.
 export const MAX_THREAD_DEPTH = 2;
 
 const normalizePost = (doc) => {
@@ -39,11 +38,9 @@ export const createPost = async ({ userId, title, content, image }) => {
 export const getPaginatedPosts = async (rawQuery) => {
   const { page, limit, hasImage, user } = validate(getPostsQuerySchema, rawQuery);
   const skip = (page - 1) * limit;
-  // Filtering has to happen in the query itself, not after fetching a page of
-  // unfiltered posts client-side — otherwise pagination and "has more" are
-  // computed against the wrong set, and a filtered view that matches only a
-  // handful of posts out of many keeps triggering more page loads long after
-  // it's actually run out of matching content.
+  // Filter in the query, not client-side after fetching a page. Otherwise
+  // pagination and "has more" count the wrong set, and a filter that matches a
+  // few posts keeps loading pages long after it's out of matches.
   const filter = {
     ...(hasImage ? { image: { $ne: null } } : {}),
     ...(user ? { user } : {}),
@@ -95,8 +92,8 @@ export const addCommentToPost = async ({ postId, userId, text, parentId, mention
     parentId: cleanParentId,
     mentions: mentionIds,
   } = validate(addCommentSchema, { text, parentId, mentions });
-  // Parent validation runs against a comments-only lean query — the full
-  // populated fetch happens once, inside pushCommentToPost for the response.
+  // cheap comments-only query to check the parent. The full populate happens
+  // once, in pushCommentToPost, for the response.
   const meta = await findPostCommentsMeta(postId);
   if (!meta) throw ApiError.notFound('Post not found');
 

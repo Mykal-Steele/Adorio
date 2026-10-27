@@ -24,8 +24,8 @@ export const findTransactionsPaginated = ({ userId, filter = {}, skip, limit }) 
 export const countTransactions = ({ userId, filter = {} }) =>
   FinanceTransaction.countDocuments({ user: { $eq: userId }, ...filter });
 
-// Unpaginated, lean, populated only with the budget-relevant category flag —
-// feeds the overview/budget math, not a listing endpoint.
+// Unpaginated on purpose, it feeds the overview/budget math and not a list.
+// Only populates the category flag the budget needs.
 export const findTransactionsInRange = ({ userId, startDate, endDate }) =>
   FinanceTransaction.find({
     user: { $eq: userId },
@@ -52,8 +52,7 @@ export const reassignTransactionsCategory = (userId, fromCategoryId, toCategoryI
     { $set: { category: toCategoryId } },
   );
 
-// All-time income/expense totals for the given user, regardless of any
-// list filters — powers the History summary strip.
+// All-time income/expense totals, ignoring list filters (History summary strip)
 export const sumTransactionsByType = async (userId) => {
   const rows = await FinanceTransaction.aggregate([
     { $match: { user: new mongoose.Types.ObjectId(userId) } },

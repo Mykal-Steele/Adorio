@@ -6,10 +6,8 @@ param amount int = 150
 @description('Email to notify when spend crosses a threshold')
 param contactEmail string = 'mykal.stele@gmail.com'
 
-// utcNow() only works as a parameter default — computed at deploy time, not committed
-// as a fixed value. Needed because a hardcoded date would eventually fall outside the
-// "past start date must be within the current time-grain period" rule on any future
-// redeploy of this same template (e.g. touching notification thresholds later).
+// utcNow() only works as a param default. A hardcoded date would break a later redeploy
+// (say, changing thresholds) because the start date has to be in the current period.
 @description('First-of-month start date for the budget period — always computed as the current month, not fixed, so redeploying this template months from now still works')
 param startDate string = utcNow('yyyy-MM-01T00:00:00Z')
 

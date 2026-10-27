@@ -249,14 +249,12 @@ export default function RetroTV({ style = 'beige' }: { style?: string }) {
       <div
         className={`bg-gradient-to-b ${tvStyles[style]} rounded-lg shadow-lg border border-gray-300`}
       >
-        {/* Top vents */}
         <div className="flex justify-center gap-1 pt-2 pb-1">
           {[...Array(12)].map((_, i) => (
             <div key={i} className="w-4 h-0.5 bg-gray-400/50 rounded-full" />
           ))}
         </div>
 
-        {/* Screen area */}
         <div className="mx-3 mb-3">
           <div className="bg-gradient-to-b from-gray-800 via-gray-900 to-gray-800 p-2 rounded-lg">
             <div
@@ -265,7 +263,6 @@ export default function RetroTV({ style = 'beige' }: { style?: string }) {
                 boxShadow: 'inset 0 0 20px rgba(0,0,0,0.3), inset 0 0 60px rgba(0,0,0,0.1)',
               }}
             >
-              {/* Scanlines overlay */}
               <div
                 className="absolute inset-0 z-30 pointer-events-none opacity-[0.03]"
                 style={{
@@ -273,7 +270,6 @@ export default function RetroTV({ style = 'beige' }: { style?: string }) {
                     'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.5) 2px, rgba(0,0,0,0.5) 4px)',
                 }}
               />
-              {/* Screen glare */}
               <div
                 className="absolute inset-0 z-20 pointer-events-none opacity-20"
                 style={{
@@ -281,7 +277,6 @@ export default function RetroTV({ style = 'beige' }: { style?: string }) {
                     'linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 40%, transparent 100%)',
                 }}
               />
-              {/* Fade Gradients */}
               {useInfiniteScroll && (
                 <>
                   <div
@@ -300,7 +295,6 @@ export default function RetroTV({ style = 'beige' }: { style?: string }) {
                 </>
               )}
 
-              {/* Carousel Content */}
               <div
                 ref={trackRef}
                 className="overflow-x-auto"
@@ -326,7 +320,6 @@ export default function RetroTV({ style = 'beige' }: { style?: string }) {
           </div>
         </div>
 
-        {/* Control panel */}
         <div className="flex items-center justify-between px-4 pb-3">
           <span className="text-xs font-bold text-gray-600 tracking-wider">ADORIO</span>
           <div className="flex items-center gap-2">

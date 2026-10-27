@@ -9,36 +9,30 @@ const pistonHeaders = () => ({
   'X-Auth-Token': environment.piston.token,
 });
 
-// A Piston connection can succeed and then just never respond (no timeout of
-// its own on the client side) — bounded well under the nginx sidecar's own
-// proxy_read_timeout (60s, see infra/piston.bicep) so this fires first with a
-// clean ApiError instead of leaving a concurrency slot tied up indefinitely.
+// Piston can accept the connection and then never answer, and fetch has no
+// timeout of its own. Kept well under the nginx sidecar's proxy_read_timeout
+// (60s, infra/piston.bicep) so this fires first with a clean ApiError instead
+// of tying up a concurrency slot forever.
 const PISTON_TIMEOUT_MS = 30000;
 
-// Piston has its own internal defaults for these, but relying on an
-// undocumented default means a version bump could silently change how long
-// a `while(true)` gets to run before the sandbox kills it. Setting them
-// explicitly makes the infinite-loop protection a decision, not an accident.
-// This deployment's Piston has a server-side cap of 3000ms on run_timeout
-// (PISTON_RUN_TIMEOUT, see infra/piston.bicep) - anything higher is rejected
-// with a 400, so this can't be raised without raising that cap too.
+// Set explicitly because Piston's defaults are undocumented, and a version bump
+// could change how long a `while(true)` runs before the sandbox kills it.
+// Our Piston caps run_timeout at 3000ms (PISTON_RUN_TIMEOUT, infra/piston.bicep)
+// and answers 400 to anything higher, so raise that cap first.
 const RUN_TIMEOUT_MS = 3000;
 const COMPILE_TIMEOUT_MS = 10000;
 
-// Every language this backend can submit to Piston. Adding a new one is just
-// an entry here (the Piston language id Piston reports in /api/v2/runtimes,
-// and a plausible entry-file name — Piston doesn't enforce a naming
-// convention for interpreted languages, but a real-looking name keeps stack
-// traces readable) plus installing the package on the Piston VM itself (see
-// infra/piston.bicep) and adding 'language' to codingRunSchema's enum.
+// To add a language: an entry here (the id from Piston's /api/v2/runtimes and
+// a file name, which Piston doesn't check for interpreted languages but keeps
+// stack traces readable), install the package on the Piston VM
+// (infra/piston.bicep), and add it to codingRunSchema's enum.
 const LANGUAGE_CONFIG = {
   java: { pistonLanguage: 'java', fileName: 'Main.java' },
   python: { pistonLanguage: 'python', fileName: 'main.py' },
 };
 
-// Wraps fetch (connection failures, non-2xx, and malformed JSON bodies) so
-// every failure path here throws an ApiError like the rest of the service,
-// instead of a raw rejection reaching asyncHandler. Returns the parsed body.
+// Turns connection errors, non-2xx and bad JSON into ApiErrors so a raw
+// rejection never reaches asyncHandler. Returns the parsed body.
 const pistonFetch = async (path, options) => {
   let res;
   try {
@@ -63,8 +57,8 @@ const pistonFetch = async (path, options) => {
   }
 };
 
-// Keyed by our internal language id (not Piston's), so two internal ids that
-// happened to share a Piston language wouldn't collide.
+// keyed by our language id, not Piston's, so two of ours sharing a Piston
+// language can't collide
 const versionCache = new Map();
 
 const resolveVersion = async (language) => {
@@ -83,10 +77,8 @@ const resolveVersion = async (language) => {
   return match.version;
 };
 
-// Caps how many of one submission's test cases hit the execution service at
-// once, so a single run doesn't monopolize capacity while other people's
-// submissions are also in flight — relevant once many people are practicing
-// at the same time (a class, not just everyday sparse traffic).
+// Max test cases from one submission running at once, so one run can't hog
+// Piston while a whole class is submitting.
 const TEST_CASE_CONCURRENCY = 4;
 
 const mapWithConcurrency = async (items, limit, fn) => {
@@ -102,9 +94,8 @@ const mapWithConcurrency = async (items, limit, fn) => {
   return results;
 };
 
-// Mirrors the normalize() every MainTest.java in the source practice-question
-// repo already implements: normalize line endings, drop leading/trailing blank
-// lines, and ignore trailing whitespace on each remaining line.
+// Same as normalize() in the practice-question repo's MainTest.java files: unify
+// line endings, drop leading/trailing blank lines, ignore trailing whitespace.
 const normalizeOutput = (output) => {
   const lines = output.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   let start = 0;

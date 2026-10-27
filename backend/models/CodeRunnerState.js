@@ -5,9 +5,8 @@ export const CodeRunnerState = mongoose.model('CodeRunnerState', codeRunnerState
 
 export const findRunnerState = (key) => CodeRunnerState.findOne({ key: { $eq: key } }).lean();
 
-// $max so the time only ever moves forward: a 30-minute extension from one
-// person's run can't shorten a 3-hour hold an admin set a moment earlier, no
-// matter which write lands last.
+// $max so the time only moves forward. A 30 minute extension from someone's
+// run can't cut short a 3 hour admin hold, whichever write lands last.
 export const extendRunnerKeepUntil = (key, keepUntil) =>
   CodeRunnerState.findOneAndUpdate(
     { key: { $eq: key } },
@@ -15,9 +14,9 @@ export const extendRunnerKeepUntil = (key, keepUntil) =>
     { new: true, upsert: true, setDefaultsOnInsert: true },
   ).lean();
 
-// Returns the state only to the first caller for a given minute and null to
-// everyone after, which is what keeps several replicas from each running the
-// stop check (and each counting the same minute of usage).
+// Only the first caller for a minute gets the state back, everyone else gets
+// null. Stops several replicas from each running the stop check (and each
+// counting the same minute of usage).
 export const claimRunnerTick = (key, minute) =>
   CodeRunnerState.findOneAndUpdate(
     { key: { $eq: key }, lastTickMinute: { $lt: minute } },
@@ -31,8 +30,8 @@ export const markRunnerStartRequested = (key, at) =>
     { $set: { lastStartAt: at, lastReadyAt: null } },
   );
 
-// Matches only the first time the runner is seen ready after a start, so the
-// start duration is logged once no matter how many requests notice it.
+// Only matches the first time the runner is seen ready after a start, so the
+// start time gets logged once however many requests notice it.
 export const markRunnerReady = (key, at) =>
   CodeRunnerState.findOneAndUpdate(
     { key: { $eq: key }, lastStartAt: { $ne: null }, lastReadyAt: { $eq: null } },

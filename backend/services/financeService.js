@@ -74,9 +74,8 @@ const ensureUserCategoriesSeeded = async (userId) => {
   try {
     await insertManyCategories(DEFAULT_CATEGORIES.map((c) => ({ ...c, user: userId })));
   } catch (error) {
-    // The overview/categories/transactions requests on first load race each
-    // other; a concurrent request can win the seed first, tripping the
-    // unique (user, slug) index here. That's not a real failure.
+    // The first-load requests race each other to seed, so another one can win and
+    // trip the unique (user, slug) index. Not a real failure.
     if (error.code !== 11000) throw error;
   }
 };
@@ -119,13 +118,11 @@ export const updateCategory = async ({ userId, categoryId, ...rawBody }) => {
   return updateCategoryById(categoryId, update);
 };
 
-// Deletion and reassignment aren't wrapped in a Mongo session/transaction —
-// this codebase doesn't use multi-doc transactions anywhere (same risk class
-// as e.g. postService's like toggle). A transaction created for this
-// category in the narrow window between the ownership check in
-// createTransaction and this delete committing can end up pointing at a
-// deleted category id. Rare in practice; revisit with a session if it shows
-// up in the wild.
+// No Mongo transaction around the delete and reassign (nothing here uses
+// multi-doc transactions, same risk as postService's like toggle). A transaction
+// created for this category between createTransaction's ownership check and
+// this delete can end up pointing at a deleted category. Rare, add a session
+// if it ever shows up.
 export const deleteCategory = async ({ userId, categoryId }) => {
   const category = await findCategoryById(categoryId);
   if (!category) throw ApiError.notFound('Category not found');
@@ -151,7 +148,6 @@ export const updateSettings = async ({ userId, ...rawBody }) => {
   return upsertSettings(userId, update);
 };
 
-// A transaction's effect on the balance: income adds, expense subtracts.
 const balanceEffect = (type, amount) => (type === 'income' ? amount : -amount);
 
 export const createTransaction = async ({ userId, ...rawBody }) => {
@@ -221,8 +217,7 @@ export const getTransactions = async ({ userId, ...rawQuery }) => {
     totalTransactions,
     currentPage: page,
     totalPages: Math.max(Math.ceil(totalTransactions / limit), 1),
-    // All-time, unaffected by the filters above — matches the ported
-    // Runway UX where the summary strip always shows the full history.
+    // all-time and ignores the filters, like Runway's summary strip
     summary: {
       totalIncome: allTimeTotals.income,
       totalExpense: allTimeTotals.expense,
@@ -252,13 +247,11 @@ export const getOverview = async (userId) => {
 
   const dailyBudget = daysInMonth > 0 ? settings.monthlyBudget / daysInMonth : 0;
 
-  // A user who starts partway through the month hasn't had a chance to
-  // spend (or save) anything before that point — crediting them with the
-  // full monthlyBudget from day 1 would wildly overstate what's left, while
-  // penalizing them for days before they even opened the tracker would be
-  // unfair. `trackingStartDay` (from when their settings doc was first
-  // created) clips both the budget and the day-by-day rollover to the
-  // portion of the month they've actually been using this.
+  // Someone who starts mid-month couldn't spend or save before then. Giving them
+  // the full monthlyBudget from day 1 overstates what's left, and charging them
+  // for days before they opened the tracker isn't fair. `trackingStartDay` (when
+  // their settings doc was created) clips the budget and the daily rollover to
+  // the part of the month they've actually used it.
   const trackingStartDateString = toDateString(new Date(settings.createdAt || now));
   const effectiveStartDateString =
     trackingStartDateString > startDate ? trackingStartDateString : startDate;
@@ -279,9 +272,8 @@ export const getOverview = async (userId) => {
     }
     monthlySpendAll += txn.amount;
     const isBudgetEligible = !txn.category?.excludeFromBudget;
-    // A transaction dated before tracking started (a backdated entry, most
-    // likely) isn't covered by `adjustedMonthlyBudget` — counting it here
-    // would eat into a budget that only spans the days actually tracked.
+    // Entries dated before tracking started (usually backdated) aren't part of
+    // `adjustedMonthlyBudget`, so counting them would eat into the tracked days.
     if (isBudgetEligible && txn.date >= effectiveStartDateString) {
       monthlySpend += txn.amount;
       budgetSpendByDate.set(txn.date, (budgetSpendByDate.get(txn.date) || 0) + txn.amount);
@@ -297,11 +289,10 @@ export const getOverview = async (userId) => {
     }
   }
 
-  // "Saved" only accounts for fully-completed days — today's own spending
-  // shows up in the live gauge below, not here, so the number doesn't jitter
-  // as someone logs expenses through the day. Every completed day rolls its
-  // unused (or overspent) share of the daily budget into this running total;
-  // once it goes negative, that's real overspending against the plan.
+  // "Saved" only counts finished days. Today's spending goes in the live gauge
+  // below so this number doesn't jump around as expenses get logged. Each
+  // finished day adds its unused (or overspent) daily budget here, and a
+  // negative total means real overspending.
   let saved = 0;
   for (let day = trackingStartDay; day < currentDay; day++) {
     const dateString = `${year}-${pad2(monthIndex + 1)}-${pad2(day)}`;
@@ -311,9 +302,8 @@ export const getOverview = async (userId) => {
   const adjustedMonthlyBudget = dailyBudget * (daysInMonth - trackingStartDay + 1);
   const remainingThisMonth = adjustedMonthlyBudget - monthlySpend;
   const todayAllowance = dailyBudget + saved;
-  // Same eligibility rule as monthlySpend/budgetSpendByDate — an excluded
-  // category (rent, say) spent today shouldn't eat into the daily allowance
-  // that dailyBudget/saved are built from.
+  // Same eligibility rule as monthlySpend/budgetSpendByDate, so an excluded
+  // category like rent doesn't eat into today's allowance.
   const todayRemaining = todayAllowance - todayBudgetSpend;
   const isPartialMonth = trackingStartDay > 1;
 

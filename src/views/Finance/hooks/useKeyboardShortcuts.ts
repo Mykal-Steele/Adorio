@@ -14,10 +14,9 @@ interface Handlers {
   isModalOpen: boolean;
 }
 
-// Handlers close over per-render state (current tab, open modal, etc.), so
-// a plain effect dep array would either re-subscribe every render or run
-// stale. Keeping the latest handlers in a ref lets the listener attach once
-// and always call through to the current render's callbacks.
+// Handlers close over per-render state (tab, open modal), so a dep array would
+// either resubscribe every render or go stale. The ref lets the listener attach
+// once and still call the latest handlers.
 export function useKeyboardShortcuts(handlers: Handlers) {
   const handlersRef = useRef(handlers);
   handlersRef.current = handlers;

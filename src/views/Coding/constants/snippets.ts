@@ -1,9 +1,7 @@
 import type { Completion, CompletionContext } from '@codemirror/autocomplete';
 import { snippetCompletion } from '@codemirror/autocomplete';
 
-// VSCode-style snippet completions (label + Tab-through placeholders).
-// Neither language backend here is a real language server, so these are the
-// dozen constructs people actually type in practice problems.
+// no language server here, so just the dozen constructs people actually type
 const defineSnippets = (entries: Array<[string, string, string]>): Completion[] =>
   entries.map(([label, detail, template]) =>
     snippetCompletion(template, { label, detail, type: 'snippet', boost: 2 }),
@@ -32,8 +30,7 @@ const JS_SNIPPETS = defineSnippets([
   ['class', 'class block', 'class ${Name} {\n  ${}\n}'],
 ]);
 
-// Offers the snippet list when the user is typing a word (or explicitly
-// invoked it with Ctrl+Space on an empty prefix).
+// only while typing a word, or on Ctrl+Space with nothing typed
 const snippetSourceFor = (snippets: Completion[]) => (context: CompletionContext) => {
   const word = context.matchBefore(/\w*/);
   if (!word || (word.from === word.to && !context.explicit)) return null;

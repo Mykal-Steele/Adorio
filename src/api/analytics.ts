@@ -95,7 +95,7 @@ const trackPageView = withPerformanceTracking(
         }
       }
     } catch (mainError) {
-      // Complete failure - don't break the site
+      // tracking failing should never break the site
       if (process.env.NODE_ENV === 'development') {
         console.error('Analytics tracking completely failed:', mainError);
       }

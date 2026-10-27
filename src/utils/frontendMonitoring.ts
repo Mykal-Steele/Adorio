@@ -1,8 +1,3 @@
-/**
- * Frontend analytics performance monitor
- * Tracks client-side performance and errors
- */
-
 interface MonitorMetrics {
   trackingAttempts: number;
   trackingSuccess: number;
@@ -37,14 +32,13 @@ class FrontendMonitor {
     this.metrics.lastError = {
       message: error.message,
       timestamp: new Date().toISOString(),
-      stack: error.stack?.substring(0, 500), // Truncate stack trace
+      stack: error.stack?.substring(0, 500),
     };
   }
 
   recordFingerprintingTime(duration: number) {
     this.metrics.fingerprintingTime.push(duration);
 
-    // Keep only last 50 measurements
     if (this.metrics.fingerprintingTime.length > 50) {
       this.metrics.fingerprintingTime.shift();
     }
@@ -74,12 +68,10 @@ class FrontendMonitor {
     };
   }
 
-  // Send stats to backend periodically (optional)
   async sendStatsToBackend() {
     try {
       const stats = this.getStats();
 
-      // Only send if there's meaningful data
       if (stats.trackingAttempts > 0) {
         await fetch('/api/stats/client-metrics', {
           method: 'POST',
@@ -89,7 +81,7 @@ class FrontendMonitor {
         });
       }
     } catch (error) {
-      // Silent failure for stats reporting
+      // stats are best effort
       if (process.env.NODE_ENV === 'development') {
         console.warn('Failed to send client metrics:', error);
       }
@@ -97,10 +89,8 @@ class FrontendMonitor {
   }
 }
 
-// Global frontend monitor
 const frontendMonitor = new FrontendMonitor();
 
-// Performance timing wrapper
 export const withPerformanceTracking = <TArgs extends unknown[]>(
   name: string,
   fn: (...args: TArgs) => Promise<unknown>,
@@ -137,9 +127,7 @@ export const withPerformanceTracking = <TArgs extends unknown[]>(
 // Export monitor for debugging
 export { frontendMonitor };
 
-// Send stats periodically in production
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
-  // Send stats every 5 minutes
   setInterval(
     () => {
       frontendMonitor.sendStatsToBackend();

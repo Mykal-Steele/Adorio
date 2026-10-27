@@ -22,8 +22,8 @@ const ImageModal = ({ isVisible, imageUrl, title, onClose, instanceId }) => {
           exit={{ scale: 0.95 }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* A fixed frame (not shrink-to-fit) so a small source image scales up to
-              a reasonable viewing size instead of floating tiny in the backdrop,               object-contain still preserves its aspect ratio inside the frame. */}
+          {/* A fixed frame, not shrink-to-fit, so a small image scales up instead of floating
+              tiny in the backdrop. object-contain keeps its aspect ratio. */}
           <img
             src={imageUrl}
             alt={title || 'Post image'}

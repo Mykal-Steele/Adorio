@@ -9,7 +9,7 @@ import {
 const router = Router();
 
 router.post('/', verifyToken, secretLimiter, storeSecretMessage);
-// No auth by design — curl-friendly personal message saver; the passphrase protects the content
+// no auth on purpose, it's a curl-friendly message saver and the passphrase protects the content
 router.get('/', secretLimiter, retrieveSecretMessageHandler);
 router.get('/:name', secretLimiter, retrieveSecretMessageHandler);
 

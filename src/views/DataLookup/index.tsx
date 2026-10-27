@@ -225,7 +225,6 @@ const RecentVisitsTable = ({ data }) => (
   </div>
 );
 
-// Chart color palette
 const CHART_COLORS = [
   '#3B82F6',
   '#10B981',
@@ -251,7 +250,6 @@ interface ChartTooltipProps {
   label?: string;
 }
 
-// Custom tooltip for charts
 const ChartTooltip = ({ active, payload, label }: ChartTooltipProps) => {
   if (active && payload && payload.length) {
     return (
@@ -273,14 +271,12 @@ const ChartTooltip = ({ active, payload, label }: ChartTooltipProps) => {
 };
 
 const PageVisitsPieChart = ({ data }) => {
-  const chartData = data
-    .slice(0, 8) // Show top 8 pages
-    .map((item, index) => ({
-      name: item.path.length > 20 ? `${item.path.substring(0, 20)}...` : item.path,
-      value: item.totalVisits,
-      fullPath: item.path,
-      color: CHART_COLORS[index % CHART_COLORS.length],
-    }));
+  const chartData = data.slice(0, 8).map((item, index) => ({
+    name: item.path.length > 20 ? `${item.path.substring(0, 20)}...` : item.path,
+    value: item.totalVisits,
+    fullPath: item.path,
+    color: CHART_COLORS[index % CHART_COLORS.length],
+  }));
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
@@ -331,14 +327,12 @@ const VisitorStatsChart = ({ data }) => {
     );
   }
 
-  const chartData = data
-    .slice(0, 10) // Show top 10 visitors
-    .map((visitor) => ({
-      nickname: visitor.nickname || 'Anonymous',
-      visits: visitor.totalVisits || 0,
-      avgDuration: visitor.avgDuration ? Math.round(visitor.avgDuration / 1000) : 0, // Convert to seconds
-      uniquePages: visitor.uniquePages || 0,
-    }));
+  const chartData = data.slice(0, 10).map((visitor) => ({
+    nickname: visitor.nickname || 'Anonymous',
+    visits: visitor.totalVisits || 0,
+    avgDuration: visitor.avgDuration ? Math.round(visitor.avgDuration / 1000) : 0, // Convert to seconds
+    uniquePages: visitor.uniquePages || 0,
+  }));
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
@@ -402,7 +396,6 @@ const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
               </div>
             ) : visitorDetails ? (
               <div className="space-y-6">
-                {/* Basic Info */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
@@ -469,7 +462,6 @@ const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
                   </div>
                 </div>
 
-                {/* Pages Visited */}
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                   <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
                     Pages Visited
@@ -486,7 +478,6 @@ const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
                   </div>
                 </div>
 
-                {/* Visit History */}
                 <div>
                   <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
                     Recent Visit History
@@ -531,7 +522,6 @@ const VisitorDetailsModal = ({ isOpen, onClose, visitorDetails, loading }) => {
                   </div>
                 </div>
 
-                {/* Technical Information */}
                 {(visitorDetails.fingerprint ||
                   visitorDetails.screenInfo ||
                   visitorDetails.browserInfo) && (
@@ -678,7 +668,6 @@ const DataLookup = () => {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  // Visitor details modal state
   const [selectedVisitorId, setSelectedVisitorId] = useState(null);
   const [visitorDetails, setVisitorDetails] = useState(null);
   const [visitorDetailsLoading, setVisitorDetailsLoading] = useState(false);
@@ -702,32 +691,29 @@ const DataLookup = () => {
       setError(null);
 
       try {
-        // Load each endpoint individually to handle partial failures gracefully
+        // each endpoint settles on its own so one failing doesn't blank the others
         const results = await Promise.allSettled([
           fetchPageViewSummary(),
           fetchRecentVisits({ limit: recentLimit }),
           fetchVisitorStats({ limit: 50 }),
         ]);
 
-        // Handle page view summary
         const summaryResponse = results[0];
         setSummary(
           summaryResponse.status === 'fulfilled' ? summaryResponse.value.results || [] : [],
         );
 
-        // Handle recent visits
         const recentResponse = results[1];
         setRecentVisits(
           recentResponse.status === 'fulfilled' ? recentResponse.value.results || [] : [],
         );
 
-        // Handle visitor stats (new feature that might not be deployed yet)
+        // visitor stats might not be deployed yet
         const visitorResponse = results[2];
         setVisitorStats(
           visitorResponse.status === 'fulfilled' ? visitorResponse.value.results || [] : [],
         );
 
-        // Check if any endpoints failed
         const failedEndpoints = results.filter((r) => r.status === 'rejected');
         if (failedEndpoints.length > 0) {
           console.warn(`${failedEndpoints.length} analytics endpoints failed:`, failedEndpoints);
@@ -939,7 +925,6 @@ const DataLookup = () => {
         </section>
       </div>
 
-      {/* Visitor Details Modal */}
       <VisitorDetailsModal
         isOpen={showVisitorModal}
         onClose={handleCloseVisitorModal}

@@ -1,8 +1,3 @@
-/**
- * Converts milliseconds to a human-readable duration string
- * @param {number} ms - Duration in milliseconds
- * @returns {string} - Formatted duration string
- */
 export const formatDuration = (ms) => {
   if (typeof ms !== 'number' || ms < 0 || Number.isNaN(ms)) {
     return '—';
@@ -41,11 +36,7 @@ export const formatDuration = (ms) => {
   return `${seconds}s`;
 };
 
-/**
- * Formats a number with appropriate units (K, M, B)
- * @param {number} value - The number to format
- * @returns {string} - Formatted number string
- */
+// Shortens big numbers with K, M or B
 export const formatCompactNumber = (value) => {
   if (typeof value !== 'number' || Number.isNaN(value)) {
     return '—';

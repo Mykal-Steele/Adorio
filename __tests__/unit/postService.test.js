@@ -1,7 +1,5 @@
 import { describe, test, it, expect, mock, beforeEach } from 'bun:test';
 
-// ── module mocks ───────────────────────────────────────────────────────────────
-
 mock.module('../../backend/utils/imageFormatter.js', () => ({
   normalizeExistingImage: (img) => img || null,
 }));
@@ -45,8 +43,6 @@ const makePost = (overrides = {}) => ({
   ...overrides,
 });
 
-// ── createPost ─────────────────────────────────────────────────────────────────
-
 describe('createPost', () => {
   test('throws 400 when title is empty', async () => {
     let caught;
@@ -76,8 +72,6 @@ describe('createPost', () => {
     expect(result).toHaveProperty('content', 'World');
   });
 });
-
-// ── getPaginatedPosts ──────────────────────────────────────────────────────────
 
 describe('getPaginatedPosts', () => {
   beforeEach(() => {
@@ -142,8 +136,6 @@ describe('getPaginatedPosts', () => {
   });
 });
 
-// ── getPostById ────────────────────────────────────────────────────────────────
-
 describe('getPostById', () => {
   test('throws 404 when the post does not exist', async () => {
     mockFindPostById.mockImplementation(() => Promise.resolve(null));
@@ -163,8 +155,6 @@ describe('getPostById', () => {
     expect(result).toHaveProperty('_id', 'post1');
   });
 });
-
-// ── togglePostLike ─────────────────────────────────────────────────────────────
 
 describe('togglePostLike', () => {
   test('throws 404 when post does not exist', async () => {
@@ -205,8 +195,6 @@ describe('togglePostLike', () => {
   });
 });
 
-// ── deletePost ─────────────────────────────────────────────────────────────────
-
 describe('deletePost', () => {
   test('throws 404 when post does not exist', async () => {
     mockFindPostById.mockImplementation(() => Promise.resolve(null));
@@ -240,8 +228,6 @@ describe('deletePost', () => {
     await expect(deletePost({ postId: 'post1', userId: 'owner' })).resolves.toBeUndefined();
   });
 });
-
-// ── addCommentToPost ───────────────────────────────────────────────────────────
 
 describe('addCommentToPost', () => {
   test('throws 400 when comment text is empty', async () => {

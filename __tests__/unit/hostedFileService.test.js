@@ -2,8 +2,6 @@ import { describe, test, expect, mock, beforeEach } from 'bun:test';
 
 const MB = 1024 * 1024;
 
-// ── module mocks ───────────────────────────────────────────────────────────────
-
 const models = {
   createHostedFile: mock(async (data) => ({ ...data, _id: 'f1' })),
   findHostedFileBySlug: mock(async () => null),
@@ -82,8 +80,6 @@ const statusOf = async (promise) => {
   }
 };
 
-// ── presign ────────────────────────────────────────────────────────────────────
-
 describe('presignUpload', () => {
   test('should keep uploads under their own prefix so they cannot overwrite other files in the bucket', async () => {
     await presignUpload({
@@ -107,8 +103,6 @@ describe('presignUpload', () => {
     expect(models.releaseStorage.mock.calls.some(([bytes]) => bytes === 500)).toBe(false);
   });
 });
-
-// ── confirm ────────────────────────────────────────────────────────────────────
 
 describe('confirmUpload', () => {
   test('should not touch the ledger when another request already confirmed the upload', async () => {
@@ -156,8 +150,6 @@ describe('confirmUpload', () => {
   });
 });
 
-// ── serve ──────────────────────────────────────────────────────────────────────
-
 describe('getFileTarget', () => {
   test('should not serve or count an upload that was never confirmed', async () => {
     models.findHostedFileBySlug.mockImplementation(async () => pendingFile());
@@ -165,8 +157,6 @@ describe('getFileTarget', () => {
     expect(models.incrementFileViews).not.toHaveBeenCalled();
   });
 });
-
-// ── delete ─────────────────────────────────────────────────────────────────────
 
 describe('removeFile', () => {
   test('should release storage only when this request deleted the record', async () => {

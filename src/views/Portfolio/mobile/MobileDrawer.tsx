@@ -27,7 +27,7 @@ export function MobileDrawer({
   children,
   position = 'bottom',
 }: MobileDrawerProps) {
-  // Keep the DOM mounted during close animation, then unmount after it finishes.
+  // stays mounted until the close animation is done
   const [mounted, setMounted] = useState(open);
   const [closing, setClosing] = useState(false);
 
@@ -36,7 +36,6 @@ export function MobileDrawer({
       setMounted(true);
       setClosing(false);
     } else if (mounted) {
-      // Trigger the slide-out, then unmount after the animation duration.
       setClosing(true);
       const t = setTimeout(() => {
         setMounted(false);

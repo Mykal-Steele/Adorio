@@ -35,8 +35,8 @@ export const findPostById = (id) => postPopulate(Post.findById(id));
 
 export const findPostLikesById = (id) => Post.findById(id).select('likes').lean();
 
-// Comments only, no populates — for validating reply parents without paying
-// for the full user/likes/comments populate that the response path needs.
+// Comments only, no populates. Enough to check a reply's parent without the
+// full user/likes/comments populate the response needs.
 export const findPostCommentsMeta = (id) => Post.findById(id).select('comments').lean();
 
 export const updatePostById = (id, update, options) => Post.findByIdAndUpdate(id, update, options);

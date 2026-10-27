@@ -6,14 +6,14 @@ const ARM_ENDPOINT = 'https://management.azure.com';
 const ARM_SCOPE = `${ARM_ENDPOINT}/.default`;
 const API_VERSION = '2024-11-01';
 
-// Callers sit on the request path behind the Cloudflare failover worker,
-// which gives up on the primary after 5s. A slow Azure call has to lose to
-// that budget with room left for the Piston readiness probe that follows it.
+// These calls run on the request path, and the Cloudflare failover worker gives
+// up on the primary after 5s. A slow Azure call has to time out well before
+// that, with room left for the Piston readiness probe after it.
 const ARM_TIMEOUT_MS = 2000;
 
 // In production this is the Container App's user-assigned identity (see
-// infra/piston.bicep). Locally it falls back to whoever is logged in to the
-// Azure CLI, so the same code can be exercised against a real VM.
+// infra/piston.bicep). Locally it uses whoever is logged in to the Azure CLI,
+// so the same code can run against a real VM.
 let credential;
 const getCredential = () => {
   credential ??= isProduction

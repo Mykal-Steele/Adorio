@@ -51,9 +51,8 @@ export const updateUserScore = async ({ userId, rawBody }) => {
     return { peakPLevel: score, difficulty };
   }
 
-  // Not a new peak, but the player is still active — keep their existing
-  // best score visible on the recency-filtered leaderboard by refreshing
-  // lastPlayed instead of leaving it pinned to whenever they set that peak.
+  // Not a new best, but bump lastPlayed so their best score stays on the
+  // recency-filtered leaderboard while they're still playing.
   await updateUserRhythm(userId, {
     peakPLevel: user.rhythmGame.peakPLevel,
     difficulty: user.rhythmGame.difficulty,

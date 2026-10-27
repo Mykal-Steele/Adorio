@@ -17,7 +17,6 @@ func getPostCollection() *mongo.Collection {
 }
 
 func GetPost(id string) (models.Post, error) {
-	// get post collection
 	coll := getPostCollection()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -50,8 +49,7 @@ func GetPaginatedPosts(limit int64, lastID string) ([]models.Post, string, bool,
 			log.Println("Invalid lastID format:", err)
 			return nil, "", false, err
 		}
-		// Using $lt (less than) because MongoDB ObjectIDs
-		// encode time; smaller ID = older post.
+		// $lt because ObjectIDs encode time, so a smaller ID is an older post
 		filter = bson.M{"_id": bson.M{"$lt": objID}}
 	}
 
@@ -69,7 +67,7 @@ func GetPaginatedPosts(limit int64, lastID string) ([]models.Post, string, bool,
 		return nil, "", false, err
 	}
 
-	// Identify the new "last_id" to send back to the client
+	// the client sends this back as last_id
 	var nextCursor string
 	if len(posts) > 0 {
 		nextCursor = posts[len(posts)-1].ID.Hex()

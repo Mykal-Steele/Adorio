@@ -18,7 +18,6 @@ describe('Analytics API', () => {
       },
       { validateStatus: null },
     );
-    // Should succeed or rate-limit — never a 500
     expect(res.status).not.toBe(500);
     expect([200, 201, 429]).toContain(res.status);
   });

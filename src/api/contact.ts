@@ -1,6 +1,5 @@
-// /api/contact is a Next.js Route Handler (same-origin), not the Express
-// backend. Using fetch with a relative path keeps it routed to Next.js in both
-// dev (localhost:3001) and production (nginx → :3001).
+// /api/contact is a Next.js route handler, not the Express backend. A relative fetch
+// keeps it on Next.js in dev (localhost:3001) and in prod (nginx sends it to :3001).
 import { CONTACT_ENDPOINT } from './constants/contact_const';
 import type { ContactMessagePayload } from './types/contact';
 

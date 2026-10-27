@@ -37,10 +37,9 @@ export function useImageLoader({ postImage, postId, instanceId }) {
     }
 
     try {
-      // No cache-busting query string here: each upload now gets a unique Cloudinary
-      // public_id, so this URL is already unique and stable for this image forever.
-      // Appending a fresh timestamp/random param on every load defeated the browser's
-      // HTTP cache entirely, forcing a full re-download on every mount and re-render.
+      // No cache-busting param: each upload gets its own Cloudinary public_id, so the URL
+      // is already unique. A fresh timestamp on every load skipped the HTTP cache and
+      // re-downloaded the image on every mount.
       const url = postImage.url;
 
       setImageState((prev) => ({ ...prev, url, postId }));

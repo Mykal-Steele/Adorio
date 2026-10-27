@@ -5,10 +5,10 @@ const isProd = process.env.NODE_ENV === 'production';
 const config: NextConfig = {
   output: 'standalone',
 
-  // Skip on prod builds (Docker) — type checking runs locally via `npm run typecheck`
+  // skipped in prod (Docker) builds, type checking runs locally with `npm run typecheck`
   typescript: { ignoreBuildErrors: isProd },
 
-  // framer-motion v12 is ESM-only; transpile it so webpack handles it correctly
+  // framer-motion v12 is ESM only, webpack chokes on it without this
   transpilePackages: ['framer-motion'],
 
   images: {
@@ -18,8 +18,7 @@ const config: NextConfig = {
     ],
   },
 
-  // Proxy /api to Express — works in dev and standalone builds.
-  // In Docker production, Nginx intercepts /api before Next.js, so this is a no-op there.
+  // for dev and standalone builds. In Docker, Nginx takes /api before it gets here.
   async rewrites() {
     const backend = process.env.BACKEND_INTERNAL_URL || 'http://localhost:3000';
     return [
@@ -54,9 +53,8 @@ const config: NextConfig = {
 
   experimental: {
     optimizePackageImports: ['@heroicons/react', 'lucide-react'],
-    // Portfolio routes are fully static (generateStaticParams, no per-request data), so
-    // router.prefetch() results are safe to reuse well past the 5 min default. A visitor
-    // who reads About for a while shouldn't pay for a re-fetch when they click Projects next.
+    // portfolio pages are fully static, so prefetches can live well past the 5 min default.
+    // Someone reading About for a while shouldn't refetch Projects when they click it.
     staleTimes: {
       static: 1800,
     },

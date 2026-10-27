@@ -1,6 +1,4 @@
-// Both engine implementations (CodeMirrorEditor, MonacoEditor) expose this
-// same imperative surface so the shared header (CodeEditor.tsx) can trigger
-// a format without knowing which engine is actually mounted.
+// both engines expose this so CodeEditor.tsx can format without caring which is mounted
 export interface EditorHandle {
   format: () => void;
 }

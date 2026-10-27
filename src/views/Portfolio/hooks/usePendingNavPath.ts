@@ -5,12 +5,9 @@ import { usePathname } from 'next/navigation';
 
 const NAV_START_EVENT = 'adorio:nav-start';
 
-/**
- * The active-tab highlight normally only updates once a navigation actually
- * completes, which on a slow origin reads as "I clicked and nothing happened."
- * This tracks the destination of an in-flight navigation (from Next's
- * onRouterTransitionStart) so callers can highlight it immediately on click.
- */
+// The active tab only moves once a navigation finishes, which on a slow origin feels
+// like the click did nothing. Tracks where an in-flight navigation is headed (from
+// onRouterTransitionStart) so the tab can light up on click.
 export function usePendingNavPath() {
   const pathname = usePathname();
   const [pendingPath, setPendingPath] = useState<string | null>(null);

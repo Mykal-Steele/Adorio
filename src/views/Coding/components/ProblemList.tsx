@@ -20,11 +20,8 @@ const ProblemList = ({
   onProblemSelect,
 }: ProblemListProps) => {
   const [hardestFirst, setHardestFirst] = useState(false);
-  // Below the `lg` breakpoint the list sits above the problem/editor instead
-  // of beside it (see Practice.tsx's grid), so an 11-problem class means
-  // scrolling past the whole list before reaching any actual content.
-  // Collapsed by default there; `lg:block` below always shows it regardless
-  // of this state once there's room for it beside the content.
+  // below lg the list sits above the editor, so it starts collapsed or you
+  // scroll past 11 problems to reach anything. lg:block always shows it.
   const [expanded, setExpanded] = useState(false);
 
   const sortedProblems = useMemo(
@@ -55,11 +52,8 @@ const ProblemList = ({
 
   return (
     <div className="rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-cream)] p-4 shadow-[3px_4px_0_rgba(60,44,24,.16)] lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
-      {/* Below lg the list is a real collapsible disclosure. At lg it's
-          always visible (see the panel below), so this header is a static,
-          non-interactive row there instead of a button that could still be
-          keyboard-activated, toggling aria-expanded with nothing visibly
-          changing would give screen reader users a false disclosure state. */}
+      {/* at lg the list is always open, so this header stops being a button
+          there. otherwise aria-expanded would toggle with nothing changing. */}
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}

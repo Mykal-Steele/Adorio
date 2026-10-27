@@ -1,8 +1,6 @@
-// Auth tokens live in localStorage (persistent) or sessionStorage (cleared when
-// the tab closes), depending on whether the user checked "keep me signed in"
-// at login. The choice itself is recorded in localStorage so every reader
-// knows which storage to check, sessionStorage can't hold that flag across
-// a closed tab, and localStorage is a safe place to remember a boolean.
+// Tokens go in localStorage or sessionStorage (cleared when the tab closes), depending on
+// "keep me signed in" at login. The choice itself is kept in localStorage so every reader
+// knows where to look, since sessionStorage loses it when the tab closes.
 const REMEMBER_KEY = 'auth_remember';
 
 const rememberChoice = (): boolean => {

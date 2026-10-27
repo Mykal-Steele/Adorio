@@ -1,9 +1,6 @@
-// Two fixed columns instead of a CSS multi-column layout: a native `column-width`
-// rebalances its entire contents from scratch whenever the total content changes,
-// which visibly moves already-rendered posts into a different column every time
-// a new page loads. Assigning each post to a column by its own stable index means
-// a newly loaded post only ever appends to the end of a column, it never moves
-// one that's already on screen.
+// Two fixed columns instead of CSS columns: `column-width` rebalances everything when
+// the content changes, so every new page moves posts that are already on screen.
+// Picking the column from each post's index means new posts only append to the end.
 export function splitIntoColumns<T>(posts: T[]) {
   const columns: { post: T; index: number }[][] = [[], []];
   posts.forEach((post, index) => {

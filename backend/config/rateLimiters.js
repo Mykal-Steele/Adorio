@@ -1,22 +1,20 @@
 import rateLimit from 'express-rate-limit';
 
-// Standard rate limiter - 300 requests per 15 minutes
 const standardLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300, // Limit each IP to 300 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 300,
   message: {
     error: 'Too many requests from this IP, please try again later.',
     retryAfter: '15 minutes',
   },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  // Trust proxy is now set in the main Express app, so this will work correctly
+  standardHeaders: true,
+  legacyHeaders: false,
+  // per-IP keys rely on trust proxy in index.js
 });
 
-// Post creation limiter - 30 posts per 10 minutes
 const postLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 30, // Limit each IP to 30 post creations per windowMs
+  windowMs: 10 * 60 * 1000,
+  max: 30,
   message: {
     error: 'Too many posts created from this IP, please try again later.',
     retryAfter: '10 minutes',
@@ -25,10 +23,9 @@ const postLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Like action limiter - 60 likes per minute
 const likeLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 60, // Limit each IP to 60 like actions per windowMs
+  windowMs: 60 * 1000,
+  max: 60,
   message: {
     error: 'Too many like actions from this IP, please slow down.',
     retryAfter: '1 minute',
@@ -37,9 +34,8 @@ const likeLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Registration limiter - 10 accounts per hour per IP
 const registrationLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
+  windowMs: 60 * 60 * 1000,
   max: 10,
   message: {
     error: 'Too many accounts created from this IP, please try again later.',
@@ -49,7 +45,7 @@ const registrationLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Auth limiter - 10 login/refresh attempts per 15 minutes per IP
+// login and refresh
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -61,7 +57,6 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Secret message retrieval limiter - 20 attempts per 5 minutes per IP
 const secretLimiter = rateLimit({
   windowMs: 5 * 60 * 1000,
   max: 20,
@@ -84,9 +79,8 @@ const uploadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Hosted-file upload limiter - 10 presigns per hour per account. Keyed on the
-// user (not the IP) so a shared network can't be used to dodge it, and kept
-// tight because each upload can reserve up to 100 MB against the storage cap.
+// Keyed on the user, not the IP, so a shared network can't dodge it. Tight
+// because each presign can reserve up to 100 MB of the storage cap.
 const hostedUploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 10,
@@ -99,8 +93,7 @@ const hostedUploadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Code execution limiter - 20 runs per 5 minutes per IP (each run costs real
-// compute on the Piston sandbox, so it's kept tight like secretLimiter)
+// tight because every run costs real compute on Piston
 const codingLimiter = rateLimit({
   windowMs: 5 * 60 * 1000,
   max: 20,
@@ -112,10 +105,9 @@ const codingLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Code runner status/start limiter - 30 requests per minute per user. These
-// routes are login-only, and a whole class often shares one school IP, so
-// this counts per account instead of per IP. A page waiting on a start polls
-// about 6 times a minute.
+// Runner status/start. Per account, not per IP, because these routes need a
+// login and a whole class often shares one school IP. A page waiting on a
+// start polls about 6 times a minute.
 const codeRunnerLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 30,
@@ -128,9 +120,8 @@ const codeRunnerLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Mention autocomplete limiter - 60 searches per minute per IP. Typing one
-// name fires a debounced burst of ~4-8 requests, so this is generous for
-// humans but stops scripts from dumping the user collection.
+// Mention autocomplete. Typing one name fires about 4-8 debounced requests, so
+// 60/min is plenty for people but stops scripts dumping the user collection.
 const searchLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 60,
@@ -142,8 +133,7 @@ const searchLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Finance write limiter - 100 changes per 10 minutes. Generous compared to
-// postLimiter since rapid transaction entry is normal usage, not abuse.
+// looser than postLimiter, entering lots of transactions quickly is normal
 const financeWriteLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 100,

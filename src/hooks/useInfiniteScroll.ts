@@ -21,9 +21,8 @@ const useInfiniteScroll = ({ loading, hasMore, onLoadMore }: UseInfiniteScrollOp
             onLoadMore();
           }
         },
-        // Fire well before the sentinel actually reaches the viewport, so the next
-        // page is loading while there's still a few posts of scroll room left
-        // instead of the user hitting a dead stop at the bottom of the page.
+        // Fire well before the sentinel is on screen, so the next page loads while there
+        // are still a few posts to scroll instead of hitting a dead stop at the bottom
         { rootMargin: '0px 0px 1200px 0px' },
       );
 

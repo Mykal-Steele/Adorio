@@ -1,33 +1,12 @@
 #!/usr/bin/env node
 /**
- * Adorio Site Audit v3
- * ─────────────────────────────────────────────────────────────────────────────
- * Statistical multi-run benchmarking + comprehensive site quality audit.
+ * Site audit. Loads every page several times cold and warm, then checks Web Vitals,
+ * nav timing, SEO tags, security headers, axe (WCAG 2.1 AA), UX heuristics,
+ * resources, broken links, a mobile run at 375x812, and HTTP/2. robots.txt,
+ * sitemap.xml, the SSL cert, HSTS, and compression get checked once.
  *
- * WHAT IT TESTS (per page):
- *   Performance  — 3× cold load avg/min/max/stddev/CV, 3× warm load same
- *   Core Web Vitals — FCP, LCP, CLS, TBT (injected PerformanceObserver)
- *   Navigation Timing — DNS, TCP+TLS, TTFB, Download, DOM Ready, Load
- *   Lighthouse — programmatic Performance / A11y / Best-Practices / SEO scores
- *   SEO          — title, description, OG, twitter, canonical, H1, JSON-LD
- *   Security     — 7 response headers scored, SSL cert info
- *   Accessibility — axe-core WCAG 2.1 AA violations (impact bucketed)
- *   UX           — interactive element density, tap target sizes, form labels,
- *                  text legibility, scroll depth, keyboard-focus rings
- *   Resources    — JS/CSS/IMG/Font breakdown, render-blocking, 3rd-party domains,
- *                  top-5 slowest + top-5 largest resources
- *   Content      — word count, link count, broken internal links, image audit
- *   Reliability  — coefficient of variation across runs, consistency grade
- *   Mobile       — repeat FCP/LCP/TTFB at 375×812 viewport
- *   Protocol     — HTTP/2 detection, redirect count
- *   Dynamic      — API call latency + post card scrape (on /home)
- *
- * Infrastructure checks (once):
- *   robots.txt · sitemap.xml · SSL cert · HSTS · Compression · Protocol
- *
- * Usage:
- *   node scripts/audit.mjs [base-url] [--runs=N]
- *   Defaults: https://adorio.space, 3 runs each
+ * Usage: node scripts/audit.mjs [base-url] [--runs=N]
+ * Defaults to https://adorio.space with 3 runs per page.
  */
 
 import puppeteer from 'puppeteer';
@@ -42,7 +21,6 @@ import os from 'os';
 const require = createRequire(import.meta.url);
 const AXE_PATH = require.resolve('axe-core/axe.min.js');
 
-// ── config ─────────────────────────────────────────────────────────────────────
 const BASE = process.argv.find((a) => a.startsWith('http')) ?? 'https://adorio.space';
 const RUNS = parseInt(process.argv.find((a) => a.startsWith('--runs='))?.split('=')[1] ?? '3', 10);
 const NOW = new Date().toLocaleString('en-GB', {
@@ -68,9 +46,6 @@ const PAGES = [
   { path: '/cao/', name: 'AI Sidecar (/cao/)', dynamic: false },
 ];
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// SECTION 1 — TERMINAL STYLE HELPERS
-// ═══════════════════════════════════════════════════════════════════════════════
 const R = '\x1b[0m';
 const B = '\x1b[1m';
 const DIM = '\x1b[2m';
@@ -120,7 +95,6 @@ function truncate(str, len = 80) {
   return s.length > len ? s.substring(0, len) + '…' : s;
 }
 
-/** Score badge with background colour */
 function badge(score) {
   const n = Math.max(0, Math.min(100, Math.round(score ?? 0)));
   const label = String(n).padStart(3);
@@ -129,7 +103,6 @@ function badge(score) {
   return co(bgRED + B, ` ${label} `);
 }
 
-/** Letter grade A–F */
 function letterGrade(score) {
   if (score >= 90) return co(GRN + B, 'A');
   if (score >= 80) return co(GRN, 'B');
@@ -138,7 +111,6 @@ function letterGrade(score) {
   return co(RED + B, 'F');
 }
 
-/** Colour millisecond value */
 function msColor(ms, warn = 600, bad = 1500) {
   if (ms == null) return dim('  N/A');
   const v = Math.round(ms);
@@ -147,7 +119,6 @@ function msColor(ms, warn = 600, bad = 1500) {
   return red(`${v}ms`);
 }
 
-/** CLS colour threshold */
 function clsColor(v) {
   const f = (v ?? 0).toFixed(3);
   if (v <= 0.1) return grn(f);
@@ -155,7 +126,6 @@ function clsColor(v) {
   return red(f);
 }
 
-/** Horizontal timing bar */
 function timingBar(ms, maxMs = 5000, width = 24) {
   if (!ms) return co(DIM, '░'.repeat(width));
   const ratio = Math.min(Math.max(ms, 0) / maxMs, 1);
@@ -165,30 +135,23 @@ function timingBar(ms, maxMs = 5000, width = 24) {
   return co(colour, '█'.repeat(filled)) + co(DIM, '░'.repeat(empty));
 }
 
-/** +/- % change between two values */
 function pctDelta(before, after) {
   if (!before || !after) return '';
   const d = Math.round(((after - before) / before) * 100);
   return d <= 0 ? grn(`(${d}%)`) : red(`(+${d}%)`);
 }
 
-/** Coefficient of variation colour */
 function cvColor(cv) {
   if (cv < 0.1) return grn(`${(cv * 100).toFixed(1)}%`);
   if (cv < 0.25) return yel(`${(cv * 100).toFixed(1)}%`);
   return red(`${(cv * 100).toFixed(1)}%`);
 }
 
-/** Reliability label from CV */
 function reliabilityLabel(cv) {
   if (cv < 0.1) return co(bgGRN + B, ' STABLE ');
   if (cv < 0.25) return co(bgYEL + B, ' VARIABLE ');
   return co(bgRED + B, ' UNSTABLE ');
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// SECTION 2 — STATISTICS UTILITIES
-// ═══════════════════════════════════════════════════════════════════════════════
 
 /** @param {number[]} arr */
 function stats(arr) {
@@ -209,7 +172,6 @@ function stats(arr) {
   };
 }
 
-/** Format stats as "avg [min–max] ±sd" */
 function fmtStats(s, warnMs, badMs) {
   if (!s || s.avg == null) return dim('N/A');
   const avgStr = msColor(s.avg, warnMs, badMs);
@@ -218,13 +180,7 @@ function fmtStats(s, warnMs, badMs) {
   return `${avgStr}  ${rangeStr}  ${sdStr}`;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// SECTION 3 — COLLECTORS
-// Each collector is a pure async function: (page) => result object
-// Easy to add new collectors without touching runners or reporters.
-// ═══════════════════════════════════════════════════════════════════════════════
-
-/** Inject CWV PerformanceObservers BEFORE navigation */
+/** has to run before navigation */
 async function injectCWV(page) {
   await page.evaluateOnNewDocument(() => {
     window.__cwv = { lcp: null, cls: 0, fcp: null, tbt: 0, longTaskCount: 0 };
@@ -245,7 +201,6 @@ async function injectCWV(page) {
   });
 }
 
-/** Navigation + resource timing metrics */
 async function collectTimingMetrics(page) {
   return page.evaluate(() => {
     const nav = performance.getEntriesByType('navigation')[0];
@@ -279,7 +234,6 @@ async function collectTimingMetrics(page) {
       (r) => r.initiatorType === 'link' && r.renderBlockingStatus === 'blocking',
     ).length;
 
-    // 3rd-party domains
     const origin = window.location.origin;
     const thirdPartyDomains = [
       ...new Set(
@@ -296,7 +250,6 @@ async function collectTimingMetrics(page) {
       ),
     ];
 
-    // Top 5 slowest resources by duration
     const slowest = [...res]
       .filter((r) => r.duration > 0)
       .sort((a, b) => b.duration - a.duration)
@@ -306,7 +259,6 @@ async function collectTimingMetrics(page) {
         ms: Math.round(r.duration),
       }));
 
-    // Top 5 largest by transfer size
     const largest = [...res]
       .sort((a, b) => safe(b) - safe(a))
       .slice(0, 5)
@@ -348,12 +300,10 @@ async function collectTimingMetrics(page) {
   });
 }
 
-/** CWV after page load settles */
 async function collectCWV(page) {
   return page.evaluate(() => window.__cwv ?? {});
 }
 
-/** SEO signals */
 async function collectSEO(page) {
   return page.evaluate(() => {
     const get = (sel) => document.querySelector(sel)?.getAttribute('content') ?? null;
@@ -385,7 +335,7 @@ async function collectSEO(page) {
   });
 }
 
-/** UX heuristics — interactive density, tap targets, forms, legibility */
+/** interactive density, tap targets, form labels, legibility */
 async function collectUX(page) {
   return page.evaluate(() => {
     const allInteractive = [
@@ -397,13 +347,12 @@ async function collectUX(page) {
     const links = [...document.querySelectorAll('a[href]')];
     const inputs = [...document.querySelectorAll('input:not([type="hidden"]), select, textarea')];
 
-    // Tap target size audit (< 44×44px is a problem per WCAG 2.5.5)
+    // under 44x44px fails WCAG 2.5.5
     const smallTargets = allInteractive.filter((el) => {
       const r = el.getBoundingClientRect();
       return r.width > 0 && r.height > 0 && (r.width < 44 || r.height < 44);
     }).length;
 
-    // Form label coverage
     const unlabeledInputs = inputs.filter((el) => {
       const id = el.id;
       return (
@@ -413,14 +362,14 @@ async function collectUX(page) {
       );
     }).length;
 
-    // Text legibility: count paragraphs with font-size < 14px
+    // text under 14px
     const paras = [...document.querySelectorAll('p, li, span')].slice(0, 50);
     const smallText = paras.filter((el) => {
       const fs = parseFloat(window.getComputedStyle(el).fontSize);
       return fs < 14;
     }).length;
 
-    // Focus ring: check if any focusable element has outline:none without other focus style
+    // outline:none with no other focus style
     const missingFocusRing = [...document.querySelectorAll('a, button, [tabindex="0"]')].filter(
       (el) => {
         const s = window.getComputedStyle(el, ':focus');
@@ -428,14 +377,11 @@ async function collectUX(page) {
       },
     ).length;
 
-    // Scroll depth indicator (page height vs viewport)
     const scrollRatio = document.documentElement.scrollHeight / (window.innerHeight || 1);
 
-    // Internal vs external links
     const internalLinks = links.filter((a) => a.href.startsWith(window.location.origin)).length;
     const externalLinks = links.length - internalLinks;
 
-    // Word count approximation
     const bodyText = document.body.innerText ?? '';
     const wordCount = bodyText.split(/\s+/).filter((w) => w.length > 1).length;
 
@@ -456,7 +402,7 @@ async function collectUX(page) {
   });
 }
 
-/** Content quality: broken links check (internal only, head requests) */
+/** internal links only, HEAD requests */
 async function collectBrokenLinks(page) {
   const hrefs = await page.evaluate(() => {
     return [...document.querySelectorAll('a[href]')]
@@ -479,7 +425,6 @@ async function collectBrokenLinks(page) {
   return { checked: hrefs.length, broken };
 }
 
-/** axe-core WCAG 2.1 AA */
 async function collectA11y(page) {
   try {
     await page.addScriptTag({ path: AXE_PATH });
@@ -502,7 +447,6 @@ async function collectA11y(page) {
   }
 }
 
-/** Dynamic content scraping (posts on /home) */
 async function collectDynamic(page, entry) {
   if (!entry.dynamic) return null;
   return page.evaluate(() => {
@@ -522,7 +466,6 @@ async function collectDynamic(page, entry) {
   });
 }
 
-/** Intercept /api/* calls */
 function setupApiInterception(page) {
   const calls = [];
   page.on('response', (res) => {
@@ -539,7 +482,6 @@ function setupApiInterception(page) {
   return calls;
 }
 
-/** HTTP response headers */
 async function collectHeaders(url) {
   try {
     const res = await fetch(url, { redirect: 'follow' });
@@ -564,7 +506,6 @@ async function collectHeaders(url) {
   }
 }
 
-/** SSL certificate details (Node TLS) */
 async function collectSSL(hostname) {
   return new Promise((resolve) => {
     try {
@@ -593,7 +534,7 @@ async function collectSSL(hostname) {
   });
 }
 
-/** DNS timing from Node (complements browser timing) */
+/** DNS timing from Node, next to the browser's number */
 async function collectDNS(hostname) {
   const start = Date.now();
   try {
@@ -604,7 +545,6 @@ async function collectDNS(hostname) {
   }
 }
 
-/** Infrastructure one-time checks */
 async function collectInfrastructure() {
   const [robots, sitemap, root] = await Promise.all([
     fetch(`${BASE}/robots.txt`, { redirect: 'follow' }).catch(() => null),
@@ -635,10 +575,7 @@ async function collectInfrastructure() {
   };
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// SECTION 4 — SCORERS
-// Pure functions: (data) => { score: number, issues: string[] }
-// ═══════════════════════════════════════════════════════════════════════════════
+// scorers return { score, issues }
 
 function scoreSEO(seo) {
   let s = 100;
@@ -815,7 +752,6 @@ function scoreUX(ux) {
 }
 
 function scoreReliability(coldCV) {
-  // CV-based reliability score
   if (coldCV == null) return { score: 100, issues: [] };
   const pct = coldCV * 100;
   if (pct < 10) return { score: 100, issues: [] };
@@ -825,11 +761,6 @@ function scoreReliability(coldCV) {
     return { score: 60, issues: [`Load time CV ${pct.toFixed(1)}% — moderate variance`] };
   return { score: 30, issues: [`Load time CV ${pct.toFixed(1)}% — highly unstable`] };
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// SECTION 5 — RUNNER
-// Runs N cold and N warm measurements, returning raw arrays + aggregated stats.
-// ═══════════════════════════════════════════════════════════════════════════════
 
 async function runTimingPass(ctx, url, { isWarm = false } = {}) {
   const page = await ctx.newPage();
@@ -850,17 +781,13 @@ async function runTimingPass(ctx, url, { isWarm = false } = {}) {
   return { timing, cwv, elapsed };
 }
 
-/**
- * Audit one page with N cold runs (isolated contexts) + N warm runs (same context).
- * Returns all raw data needed by reporters.
- */
+// N cold runs in their own contexts, then N warm runs sharing one context
 async function auditPage(browser, entry) {
   const url = BASE + entry.path;
 
   const coldResults = [];
   let seo, axeData, uxData, dynamicData, apiCalls, brokenLinks;
 
-  // ── N cold runs ────────────────────────────────────────────────────────────
   for (let i = 0; i < RUNS; i++) {
     const ctx = await browser.createBrowserContext();
     const page = await ctx.newPage();
@@ -882,7 +809,7 @@ async function auditPage(browser, entry) {
     const [timing, cwv] = await Promise.all([collectTimingMetrics(page), collectCWV(page)]);
     const elapsed = Date.now() - start;
 
-    // Only run heavy collectors once (on first cold run)
+    // heavy collectors only on the first cold run
     if (i === 0) {
       [seo, axeData, uxData, dynamicData, brokenLinks] = await Promise.all([
         collectSEO(page),
@@ -898,11 +825,11 @@ async function auditPage(browser, entry) {
     await ctx.close();
   }
 
-  // ── N warm runs (new shared context so cache is fresh) ─────────────────────
+  // warm runs share one context so they hit the cache
   const warmResults = [];
   const warmCtx = await browser.createBrowserContext();
 
-  // Prime the cache with one cold load inside the warm context
+  // prime the cache with one load first
   {
     const primePage = await warmCtx.newPage();
     await primePage.setViewport({ width: 1280, height: 800 });
@@ -918,7 +845,6 @@ async function auditPage(browser, entry) {
   }
   await warmCtx.close();
 
-  // ── mobile run (single, cold, 375×812) ─────────────────────────────────────
   let mobileTiming = null,
     mobileCWV = null;
   try {
@@ -935,10 +861,8 @@ async function auditPage(browser, entry) {
     await mCtx.close();
   } catch (_) {}
 
-  // ── headers ────────────────────────────────────────────────────────────────
   const headers = await collectHeaders(url);
 
-  // ── aggregate stats ────────────────────────────────────────────────────────
   const coldStats = {
     ttfb: stats(coldResults.map((r) => r.timing.ttfb)),
     fcp: stats(coldResults.map((r) => r.cwv.fcp ?? r.timing.fcp)),
@@ -977,11 +901,6 @@ async function auditPage(browser, entry) {
   };
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// SECTION 6 — REPORTERS
-// Each reporter prints a section. They receive the aggregated page data object.
-// ═══════════════════════════════════════════════════════════════════════════════
-
 function reportHeader(idx, total, entry, headers) {
   const statusColor = (headers.status ?? 0) < 400 ? GRN : RED;
   console.log(`\n${sep('━')}`);
@@ -999,7 +918,6 @@ function reportHeader(idx, total, entry, headers) {
 function reportPerformance(coldStats, warmStats, snapshot, cwvSnapshot, mobileTiming, mobileCWV) {
   console.log(`\n  ${co(bgCYN + B, '  PERFORMANCE  ')}`);
 
-  // ── cold stats table ───────────────────────────────────────────────────────
   console.log(`\n  ${bold('COLD LOAD')}  ${dim(`(${RUNS} isolated runs — empty cache)`)}`);
 
   const perfRows = [
@@ -1026,7 +944,6 @@ function reportPerformance(coldStats, warmStats, snapshot, cwvSnapshot, mobileTi
     );
   }
 
-  // ── CWV box ───────────────────────────────────────────────────────────────
   const fcp = coldStats.fcp?.avg ?? cwvSnapshot?.fcp;
   const lcp = coldStats.lcp?.avg ?? cwvSnapshot?.lcp;
   const cls =
@@ -1048,13 +965,11 @@ function reportPerformance(coldStats, warmStats, snapshot, cwvSnapshot, mobileTi
   );
   console.log(`  ${dim('└' + '─'.repeat(66) + '┘')}`);
 
-  // Reliability indicator
   const ttfbCV = coldStats.ttfb?.cv ?? 0;
   console.log(
     `\n  ${bold('RELIABILITY')}  ${reliabilityLabel(ttfbCV)}  ${dim('TTFB coefficient of variation:')}  ${cvColor(ttfbCV)}`,
   );
 
-  // ── warm cache stats (same table style as cold) ────────────────────────────
   console.log(`\n  ${bold('WARM CACHE')}  ${dim(`(${RUNS} runs — cache populated, vs cold avg)`)}`);
   const warmRows = [
     ['TTFB', warmStats.ttfb, 200, 600, coldStats.ttfb?.avg],
@@ -1079,7 +994,6 @@ function reportPerformance(coldStats, warmStats, snapshot, cwvSnapshot, mobileTi
     );
   }
 
-  // ── mobile ────────────────────────────────────────────────────────────────
   if (mobileTiming) {
     const mFcp = mobileCWV?.fcp ?? mobileTiming.fcp;
     const mLcp = mobileCWV?.lcp;
@@ -1095,7 +1009,6 @@ function reportPerformance(coldStats, warmStats, snapshot, cwvSnapshot, mobileTi
     }
   }
 
-  // ── nav timing breakdown (first cold run) ─────────────────────────────────
   if (snapshot) {
     console.log(`\n  ${bold('NAV TIMING BREAKDOWN')}  ${dim('(first cold run)')}`);
     const navRows2 = [
@@ -1347,10 +1260,6 @@ function reportScoreSummaryLine(entry, coldStats, headers, scores) {
   return composite;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// SECTION 7 — INFRASTRUCTURE REPORTER
-// ═══════════════════════════════════════════════════════════════════════════════
-
 function reportInfrastructure(infra) {
   console.log(`\n${sep('━')}`);
   console.log(co(bgMAG + B, '  INFRASTRUCTURE & DNS / SSL  '));
@@ -1409,10 +1318,6 @@ function reportInfrastructure(infra) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// SECTION 8 — SUMMARY TABLE
-// ═══════════════════════════════════════════════════════════════════════════════
-
 function reportSummary(results) {
   console.log(`\n${sep('━')}`);
   console.log(co(bgMAG + B, '  FINAL SUMMARY  '));
@@ -1466,7 +1371,6 @@ function reportSummary(results) {
   }
   console.log(sep('━'));
 
-  // ── Top Issues ─────────────────────────────────────────────────────────────
   const deduped = new Map();
   for (const i of allIssues) {
     const key = `${i.type}:${i.msg}`;
@@ -1492,7 +1396,6 @@ function reportSummary(results) {
     }
   }
 
-  // ── Errors ─────────────────────────────────────────────────────────────────
   const errors = [...results.values()].filter((r) => r.error);
   if (errors.length) {
     console.log(`\n  ${red('ERRORS')}`);
@@ -1501,11 +1404,6 @@ function reportSummary(results) {
 
   console.log();
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// SECTION 10 — HTML REPORT BUILDER + PDF EXPORT
-// Pure functions that mirror terminal sections but output dark-mode HTML.
-// ═══════════════════════════════════════════════════════════════════════════════
 
 function buildHtmlReport(results, infra) {
   const e = (s) =>
@@ -1558,7 +1456,7 @@ function buildHtmlReport(results, infra) {
     return d <= 0 ? `<span class="good">(${d}%)</span>` : `<span class="bad">(+${d}%)</span>`;
   };
 
-  /** Render a metrics table — rows: [{label, st, warn, bad, coldAvg?}], extraHeader for extra column */
+  /** rows: [{label, st, warn, bad, coldAvg?}], extraHeader adds a column */
   const metricsTable = (rows, extraHeader = '') => {
     let t = `<table class="mtable"><thead><tr><th>Metric</th><th>Avg</th><th>Min</th><th>Max</th><th>&plusmn;SD</th><th>CV</th><th>Bar</th>${extraHeader ? `<th>${extraHeader}</th>` : ''}</tr></thead><tbody>`;
     for (const { label, st, warn: w, bad: b, coldAvg } of rows) {
@@ -1581,7 +1479,6 @@ function buildHtmlReport(results, infra) {
   const lines = [];
   const p = (...ss) => lines.push(...ss);
 
-  // ── CSS ─────────────────────────────────────────────────────────────────────
   p(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Adorio Site Audit &mdash; ${e(NOW)}</title>
 <style>
 :root{--bg:#111827;--bg2:#1f2937;--bg3:#374151;--border:#374151;--text:#f9fafb;--dim:#9ca3af;
@@ -1627,7 +1524,7 @@ a:hover{text-decoration:underline}
 @media print{body{padding:0;max-width:none;font-size:11px}.page-hdr{page-break-before:always;margin-top:0}}
 </style></head><body>`);
 
-  // ── Collect summary data first (needed for the top-of-page summary) ────────
+  // summary data first since the summary goes at the top
   const summaryTotals = { seo: 0, perf: 0, sec: 0, a11y: 0, ux: 0, n: 0 };
   const summaryAllIssues = [];
   for (const [, r] of results) {
@@ -1662,7 +1559,6 @@ a:hover{text-decoration:underline}
   }
   const sortedIssues = [...dedupedIssues.values()].sort((a, b) => b.pages.length - a.pages.length);
 
-  // ── Report header ─────────────────────────────────────────────────────────
   p(`<div class="report-hdr">
   <h1>Adorio Site Audit</h1>
   <div style="color:var(--dim);font-size:12px;margin-top:6px">
@@ -1673,7 +1569,6 @@ a:hover{text-decoration:underline}
   <div style="color:var(--dim);font-size:11px;margin-top:4px">Covers: Core Web Vitals &middot; Navigation Timing &middot; Mobile performance &middot; SSL &middot; SEO &middot; Security headers &middot; WCAG 2.1 AA accessibility &middot; UX &middot; Resources</div>
 </div>`);
 
-  // ── SUMMARY (top of report) ───────────────────────────────────────────────
   p(`<div class="section">
 <h2>Summary &mdash; all pages</h2>
 <p style="font-size:12px;color:var(--dim);margin-bottom:10px">
@@ -1732,7 +1627,6 @@ a:hover{text-decoration:underline}
   }
   p(`</tbody></table></div>`);
 
-  // ── Top Issues (also at top) ─────────────────────────────────────────────
   if (sortedIssues.length) {
     const typeColor = { Sec: 'bad', Perf: 'warn', SEO: 'purple', A11y: 'blue', UX: 'cyan' };
     p(`<div class="section"><h2>Top issues across all pages</h2>
@@ -1753,7 +1647,6 @@ a:hover{text-decoration:underline}
     p(`</tbody></table></div>`);
   }
 
-  // ── Infrastructure ─────────────────────────────────────────────────────────
   p(`<div class="section"><h2>Infrastructure</h2>
 <p style="font-size:12px;color:var(--dim);margin-bottom:8px">One-time checks for the whole site — robots.txt, SSL certificate, compression, and security headers at the root level.</p>
 <table><tbody>
@@ -1780,7 +1673,6 @@ a:hover{text-decoration:underline}
   }
   p(`</div>`);
 
-  // ── Per-page sections ───────────────────────────────────────────────────────
   let pageIdx = 0;
   for (const [, r] of results) {
     pageIdx++;
@@ -1839,7 +1731,6 @@ a:hover{text-decoration:underline}
   </div>
 </div>`);
 
-    // Performance
     p(`<div class="section"><h2>Performance</h2>
 <p style="font-size:12px;color:var(--dim);margin-bottom:10px">
   All timings are averages across ${RUNS} separate browser runs. <b>Cold</b> = fresh browser with no cache (simulates a first-time visitor).
@@ -1861,7 +1752,6 @@ a:hover{text-decoration:underline}
       ]),
     );
 
-    // CWV box
     const fcpAvg = coldStats.fcp?.avg ?? cwvSnapshot?.fcp;
     const lcpAvg = coldStats.lcp?.avg ?? cwvSnapshot?.lcp;
     const clsVal = cwvSnapshot?.cls ?? 0;
@@ -1876,13 +1766,11 @@ a:hover{text-decoration:underline}
   </div>
 </div>`);
 
-    // Reliability
     const ttfbCV = coldStats.ttfb?.cv ?? 0;
     p(
       `<div class="row" style="margin-top:6px"><span class="label" title="How consistent the load time is across runs. CV = standard deviation / average. Under 10% is stable, over 25% is noisy.">Reliability</span>${relBadge(ttfbCV)}&ensp;<span class="dim">TTFB variation (CV):</span>&ensp;${cvSpan(ttfbCV)}</div>`,
     );
 
-    // Warm table
     p(`<h3 style="margin-top:14px">Warm cache &mdash; ${RUNS} runs, cache populated</h3>
 <p style="font-size:11px;color:var(--dim);margin-bottom:6px">
   The page was loaded once to warm the cache, then measured ${RUNS} more times.
@@ -1905,7 +1793,6 @@ a:hover{text-decoration:underline}
       ),
     );
 
-    // Mobile
     if (mobileTiming) {
       const mFcp = mobileCWV?.fcp ?? mobileTiming.fcp;
       const mLcp = mobileCWV?.lcp;
@@ -1917,7 +1804,6 @@ a:hover{text-decoration:underline}
 </div>${mobDelta != null ? `<div class="row"><span class="dim">Mobile vs Desktop FCP:</span>&ensp;<span class="${mobDelta > 0 ? 'bad' : 'good'}">${mobDelta > 0 ? `+${mobDelta}%` : `${mobDelta}%`}</span></div>` : ''}`);
     }
 
-    // Nav timing breakdown
     if (snapshot) {
       p(`<h3>Nav Timing Breakdown (first cold run)</h3><table><tbody>
   ${snapshot.dns != null ? `<tr><td class="dim" style="width:130px">DNS lookup</td><td>${pBar(snapshot.dns, 5000)}</td><td>${hms(snapshot.dns, 200, 800)}</td></tr>` : ''}
@@ -1928,7 +1814,6 @@ a:hover{text-decoration:underline}
     }
     p(`</div>`);
 
-    // Resources
     if (snapshot) {
       p(`<div class="section"><h2>Resources</h2><div class="grid2">
 <div class="card">
@@ -1968,7 +1853,6 @@ a:hover{text-decoration:underline}
       p(`</div>`);
     }
 
-    // SEO
     if (seo) {
       p(`<div class="section"><h2>SEO &mdash; ${bdg(scores.seoScore.score)} ${grd(scores.seoScore.score)}</h2>
 <p style="font-size:12px;color:var(--dim);margin-bottom:8px">Checks what search engines can read about this page. Missing tags mean Google/social platforms can't generate good previews.</p>
@@ -1985,7 +1869,6 @@ a:hover{text-decoration:underline}
   </tbody></table></div>`);
     }
 
-    // Security
     p(`<div class="section"><h2>Security &mdash; ${bdg(scores.secScore.score)} ${grd(scores.secScore.score)}</h2>
 <p style="font-size:12px;color:var(--dim);margin-bottom:8px">HTTP response headers that protect users. HSTS forces HTTPS. CSP limits what scripts can run. X-Frame-Options stops clickjacking. X-Content-Type stops MIME sniffing attacks.</p>
 <table><tbody>
@@ -1999,7 +1882,6 @@ a:hover{text-decoration:underline}
   <tr><td class="label">${icon(!headers.poweredBy)} X-Powered-By</td><td class="${headers.poweredBy ? 'warn' : 'good'}">${headers.poweredBy ? `Exposed: ${e(headers.poweredBy)}` : 'Hidden'}</td></tr>
   </tbody></table></div>`);
 
-    // Accessibility
     const violations = axeData?.violations ?? [];
     p(
       `<div class="section"><h2>Accessibility &mdash; ${bdg(scores.a11yScore.score)} ${grd(scores.a11yScore.score)} <span class="dim" style="font-size:11px">WCAG 2.1 AA</span></h2>
@@ -2035,7 +1917,6 @@ a:hover{text-decoration:underline}
     }
     p(`</div>`);
 
-    // UX
     p(`<div class="section"><h2>User Experience &mdash; ${bdg(scores.uxScore.score)} ${grd(scores.uxScore.score)}</h2>
 <p style="font-size:12px;color:var(--dim);margin-bottom:8px">Heuristic checks for usability. Tap targets under 44px are hard to tap on mobile. Unlabeled inputs break screen readers. Missing focus rings make keyboard navigation impossible.</p>
 <div class="grid2"><div class="card">
@@ -2061,7 +1942,6 @@ a:hover{text-decoration:underline}
     }
     p(`</div>`);
 
-    // Dynamic content
     if (entry.dynamic && dynamicData) {
       p(`<div class="section"><h2>Dynamic Content</h2>`);
       if (apiCalls?.length) {
@@ -2104,10 +1984,9 @@ async function saveHtml(results, infra) {
   const htmlPath = path.join(reportsDir, `audit-${ts}.html`);
   await fs.writeFile(htmlPath, html, 'utf8');
 
-  // Prune: keep only the 3 most recent reports
   const files = (await fs.readdir(reportsDir))
     .filter((f) => f.startsWith('audit-') && f.endsWith('.html'))
-    .sort(); // ISO timestamp names sort lexicographically = chronologically
+    .sort(); // ISO timestamps, so this is oldest first
   if (files.length > 3) {
     const toDelete = files.slice(0, files.length - 3);
     await Promise.all(toDelete.map((f) => fs.unlink(path.join(reportsDir, f))));
@@ -2115,10 +1994,6 @@ async function saveHtml(results, infra) {
 
   return htmlPath;
 }
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// SECTION 9 — MAIN ORCHESTRATOR
-// ═══════════════════════════════════════════════════════════════════════════════
 
 async function main() {
   console.log(`\n${sep('━')}`);
@@ -2131,7 +2006,6 @@ async function main() {
   );
   console.log(sep('━'));
 
-  // Infrastructure
   process.stdout.write(`\n  ${INFO('Checking infrastructure + SSL ...')}`);
   const infra = await collectInfrastructure();
   process.stdout.write(` ${grn('done')}\n`);
@@ -2145,8 +2019,7 @@ async function main() {
   /** @type {Map<string, object>} */
   const results = new Map();
   const pageResults = new Array(PAGES.length);
-  // Use one worker per CPU core, capped at the number of pages.
-  // Each worker runs full browser sessions so we don't want more than ~1 per core.
+  // one worker per core, capped at the page count. Each one runs full browser sessions.
   const CONCURRENCY = Math.min(os.cpus().length, PAGES.length);
   let nextPage = 0;
 
@@ -2181,7 +2054,7 @@ async function main() {
   );
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, PAGES.length) }, pageWorker));
 
-  // Populate results Map and print per-page reports in original page order
+  // workers finish out of order, print in page order
   for (let i = 0; i < pageResults.length; i++) {
     const r = pageResults[i];
     results.set(r.entry.name, r);
@@ -2206,7 +2079,6 @@ async function main() {
 
   reportSummary(results);
 
-  // ── Save HTML report ───────────────────────────────────────────────────────
   process.stdout.write(`\n  ${INFO('Generating HTML report...')}`);
   try {
     const htmlFile = await saveHtml(results, infra);

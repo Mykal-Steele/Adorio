@@ -1,10 +1,9 @@
 import { Fragment } from 'react';
 import type { ReactNode } from 'react';
 
-// Minimal markdown-lite renderer for problem statements: paragraphs,
-// "- " bullet lists, "1. " ordered lists, plus **bold** and `code`
-// inline. It builds React nodes from plain strings and never injects
-// raw HTML, so problem text cannot break the page or run scripts.
+// tiny markdown for problem statements: paragraphs, "- " and "1. " lists,
+// **bold** and `code`. Builds React nodes, never raw HTML, so problem text
+// can't run scripts.
 const renderInline = (text: string, keyPrefix: string): ReactNode[] => {
   const codeSplit = text.split(/(`[^`]*`)/g);
   return codeSplit.map((part, i) => {

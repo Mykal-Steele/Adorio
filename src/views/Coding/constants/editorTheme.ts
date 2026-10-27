@@ -1,11 +1,7 @@
 import { tags as t } from '@lezer/highlight';
 import { createTheme } from '@uiw/codemirror-themes';
 
-// The paper-craft palette itself, shared between the CodeMirror theme below
-// and the Monaco theme (constants/monacoTheme.ts) so switching editor
-// engines (see components/CodeEditor.tsx) doesn't also switch colors. Same
-// warm ink-and-parchment family (amber, rust, olive, ink) as the rest of the
-// site, instead of the generic blue/purple/pink of most editor themes.
+// shared with monacoTheme.ts so switching engines doesn't switch colors
 export const PAPER_EDITOR_PALETTE = {
   background: '#211d17',
   foreground: '#e8dfc9',
@@ -13,11 +9,8 @@ export const PAPER_EDITOR_PALETTE = {
   selection: 'rgba(242, 199, 68, 0.25)',
   lineHighlight: 'rgba(255, 255, 255, 0.05)',
   gutterBackground: '#1a1712',
-  // #6b6252 (the original muted taupe) reads fine as body text on cream but
-  // was only 2.79:1 against this dark editor background, below WCAG AA's
-  // 4.5:1 for normal text. #948a76 keeps the same de-emphasized "dimmer than
-  // the main foreground" role (line numbers/comments still read as secondary
-  // next to #e8dfc9) while clearing 4.9:1.
+  // the old #6b6252 was 2.79:1 on this background, under WCAG AA's 4.5:1.
+  // this one is 4.9:1 and still reads dimmer than the foreground.
   gutterForeground: '#948a76',
   gutterActiveForeground: '#e8dfc9',
   keyword: '#e0b64f',

@@ -23,8 +23,6 @@ describe('Auth API', () => {
     }
   });
 
-  // ── Registration ──────────────────────────────────────────────────────────
-
   describe('Registration', () => {
     test('register creates a new user and returns access and refresh tokens', async () => {
       const res = await axios.post(`${BASE_URL}/api/users/register`, {
@@ -88,8 +86,6 @@ describe('Auth API', () => {
     });
   });
 
-  // ── Login ─────────────────────────────────────────────────────────────────
-
   describe('Login', () => {
     test('login returns access and refresh tokens', async () => {
       const res = await axios.post(`${BASE_URL}/api/users/login`, {
@@ -130,8 +126,6 @@ describe('Auth API', () => {
       expect(res.status).toBe(400);
     });
   });
-
-  // ── Token validation ──────────────────────────────────────────────────────
 
   describe('Token validation', () => {
     test('GET /api/users/me without token returns 401 with message', async () => {

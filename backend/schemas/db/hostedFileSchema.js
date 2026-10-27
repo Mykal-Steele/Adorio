@@ -13,15 +13,14 @@ const hostedFileSchema = new mongoose.Schema(
     storage: { type: String, enum: ['r2', 'mongo'] },
     r2Key: { type: String },
     content: { type: String },
-    // True between presigning a URL and the client confirming the upload
-    // finished; unconfirmed records stay hidden from listings.
+    // True from presign until the client confirms the upload. Hidden from
+    // listings until then.
     pending: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
 
-// The stale-pending sweep looks for uploads that were presigned but never
-// confirmed; this keeps that lookup off a full collection scan.
+// for the stale pending sweep, so it doesn't scan the whole collection
 hostedFileSchema.index({ pending: 1, createdAt: 1 });
 
 export default hostedFileSchema;

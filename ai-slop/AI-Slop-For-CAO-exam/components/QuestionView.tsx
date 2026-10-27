@@ -25,7 +25,6 @@ export const QuestionView: React.FC<QuestionViewProps> = ({ problem }) => {
     <div className="flex-1 h-screen overflow-y-auto bg-white dark:bg-gray-900 p-12 text-gray-900 dark:text-gray-100">
       <div className="max-w-4xl mx-auto pb-20">
         
-        {/* Article Header */}
         <div className="border-b border-gray-300 dark:border-gray-600 pb-4 mb-8">
           <h1 className="text-4xl font-serif font-bold text-black dark:text-white mb-2">{problem.title}</h1>
           <div className="text-sm text-gray-500 dark:text-gray-400 flex gap-4">
@@ -34,7 +33,6 @@ export const QuestionView: React.FC<QuestionViewProps> = ({ problem }) => {
           </div>
         </div>
 
-        {/* Key Concepts / Definitions */}
         {problem.definitions && problem.definitions.length > 0 && (
           <div className="mb-8 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 rounded-sm">
             <h3 className="font-serif text-lg font-bold mb-3 flex items-center gap-2 text-gray-800 dark:text-gray-200">
@@ -51,7 +49,6 @@ export const QuestionView: React.FC<QuestionViewProps> = ({ problem }) => {
           </div>
         )}
         
-        {/* Main Content */}
         <div className="mb-8">
           <h2 className="font-serif text-2xl font-bold mb-4 border-b border-gray-200 pb-1">Question</h2>
           <div className="p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-sm shadow-sm text-lg leading-relaxed font-serif text-gray-800 dark:text-gray-200">
@@ -61,7 +58,6 @@ export const QuestionView: React.FC<QuestionViewProps> = ({ problem }) => {
           </div>
         </div>
 
-        {/* Cheat Sheet (Wikipedia Infobox Style) */}
         {!isNote && problem.cheatSheet && problem.cheatSheet.length > 0 && (
           <div className="float-right ml-6 mb-6 w-72 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 p-4 text-sm shadow-sm">
             <div className="font-bold text-center border-b border-gray-300 pb-2 mb-2 bg-gray-200 dark:bg-gray-700 -mx-4 -mt-4 p-2">
@@ -83,7 +79,6 @@ export const QuestionView: React.FC<QuestionViewProps> = ({ problem }) => {
           </div>
         )}
 
-        {/* Solution Section */}
         {!isNote && (
           <div className="clear-both mt-12">
             <h2 className="font-serif text-2xl font-bold mb-4 border-b border-gray-200 pb-1 flex justify-between items-end">

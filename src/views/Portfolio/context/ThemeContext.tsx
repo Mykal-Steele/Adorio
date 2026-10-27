@@ -4,8 +4,7 @@ import { flushSync } from 'react-dom';
 import { useTheme as useNextTheme } from 'next-themes';
 import { prefersReducedMotion } from '../motion';
 
-// Theme metadata. The actual CSS variables live in globals.css as [data-theme="X"] blocks.
-// Here we only keep the theme names and their menu labels.
+// Just names and menu labels. The CSS variables live in globals.css as [data-theme="X"] blocks.
 
 export type ThemeName = 'paper' | 'midnight' | 'nord' | 'dracula' | 'one-dark' | 'catppuccin';
 

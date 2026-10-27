@@ -5,7 +5,6 @@ import useClickOutside from '@/hooks/useClickOutside';
 import MentionSuggestions from './components/MentionSuggestions';
 import type { MentionCandidate } from './hooks/useMentionAutocomplete';
 
-// this form handles all the comment input stuff
 const CommentForm = ({
   value,
   onChange,

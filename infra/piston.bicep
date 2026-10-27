@@ -36,14 +36,12 @@ param idleBackstopSeconds int = 18000
 
 var proxyPort = 2358
 
-// Raw (non-interpolating) multi-line string. Placeholders are substituted via
-// replace() below, not Bicep interpolation, so the script's own bash/nginx
-// ${...} syntax is never at risk of colliding with it.
+// Raw string, placeholders are filled by replace() below instead of Bicep
+// interpolation so they can't collide with the script's own bash/nginx ${...}.
 //
-// cloud-init runs this once, at first provisioning. Every later boot (each
-// start from deallocated) skips it: Docker's restart policy brings the two
-// containers back, the installed runtimes are still on the OS disk, and the
-// systemd units below are already enabled.
+// cloud-init runs this once, at first provisioning. Later boots (each start from
+// deallocated) skip it: Docker's restart policy brings the two containers back,
+// the runtimes are still on the OS disk, and the systemd units are already enabled.
 var cloudInitScript = '''#!/bin/bash
 set -euo pipefail
 
@@ -453,9 +451,8 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-11-01' = {
   }
 }
 
-// Identity the backend (the Container App in main.bicep) uses to start and
-// stop the VM. It is separate from the ACR pull identity so each one carries
-// exactly one job's worth of access.
+// the backend (Container App in main.bicep) starts and stops the VM with this.
+// Kept apart from the ACR pull identity so each one only has one job's access.
 resource runnerControlIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
   name: '${name}-control-identity'
   location: location

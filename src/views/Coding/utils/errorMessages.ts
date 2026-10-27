@@ -1,10 +1,7 @@
-// Known-flaky failure modes that aren't the user's fault, like the Piston
-// sandbox getting SIGKILL'd under load (autoscaling cold start, host memory
-// pressure). They clear up on their own; there's no code-side fix yet, so
-// just point people at the workaround instead of leaving them staring at a
-// raw stack-trace-looking message. (Expired-token 401s/403s used to live
-// here too, but those self-heal now via the refresh-and-retry interceptor
-// in src/api/index.ts.)
+// Flaky failures that aren't the user's fault, like Piston getting SIGKILL'd
+// under load (cold start, memory pressure). They go away on retry and there's
+// no fix yet, so add a note instead of a scary raw message. Expired tokens
+// used to be here too, the refresh interceptor in src/api/index.ts covers them now.
 const FLAKY_PATTERNS = [/terminated by signal/i, /sigkill/i];
 
 const FRIENDLY_NOTE =

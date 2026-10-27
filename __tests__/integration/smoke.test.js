@@ -22,8 +22,6 @@ describe('Smoke, Environment, Security, SEO, Performance', () => {
     if (browser) await browser.close();
   });
 
-  // ── Smoke ─────────────────────────────────────────────────────────────────
-
   describe('Smoke', () => {
     test.concurrent(
       'health endpoint returns healthy with correct shape and rate-limit headers',
@@ -96,9 +94,9 @@ describe('Smoke, Environment, Security, SEO, Performance', () => {
       expect(res.headers.location).toMatch(/\/cao\/$/);
     });
 
-    // Both routes are Next.js Route Handlers that nginx must exempt from the
-    // Express catch-all; a 404 here means that exemption regressed and the
-    // request fell through to Express instead, same as the original bug.
+    // Both are Next.js route handlers that nginx has to keep away from the
+    // Express catch-all. A 404 means they fell through to Express again, like
+    // the original bug.
     test.concurrent('/api/github-activity reaches Next.js, not the Express catch-all', async () => {
       const res = await axios.get(`${BASE_URL}/api/github-activity`, { validateStatus: null });
       expect(res.status).not.toBe(404);
@@ -111,8 +109,6 @@ describe('Smoke, Environment, Security, SEO, Performance', () => {
       expect(res.status).toBe(400); // empty body fails Zod validation before any email is sent
     });
   });
-
-  // ── Environment ───────────────────────────────────────────────────────────
 
   describe('Environment', () => {
     test('required backend env vars are set', async () => {
@@ -131,8 +127,6 @@ describe('Smoke, Environment, Security, SEO, Performance', () => {
     });
   });
 
-  // ── Security headers ──────────────────────────────────────────────────────
-
   describe('Security headers', () => {
     test('security headers are present on all routes', async () => {
       const res = await axios.get(BASE_URL);
@@ -142,8 +136,6 @@ describe('Smoke, Environment, Security, SEO, Performance', () => {
       expect(res.headers['permissions-policy']).toBe('camera=(), microphone=(), geolocation=()');
     });
   });
-
-  // ── SEO ───────────────────────────────────────────────────────────────────
 
   describe('SEO', () => {
     let seoPage;
@@ -211,8 +203,6 @@ describe('Smoke, Environment, Security, SEO, Performance', () => {
       30_000,
     );
   });
-
-  // ── Performance ───────────────────────────────────────────────────────────
 
   describe('Performance', () => {
     test.concurrent('/api/health responds within 500ms', async () => {

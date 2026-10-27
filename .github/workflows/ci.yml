@@ -132,21 +132,15 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      # Authenticates the local docker CLI to ACR using the OIDC identity
-      # from azure/login above (same AcrPush role as before) — no admin
-      # credentials, just a `docker login` instead of going through ACR
-      # Tasks for the build itself.
+      # docker login with the OIDC identity from azure/login (AcrPush), no admin credentials
       - name: Log in to ACR
         run: az acr login --name adorioacr
-      # Pinned to a full commit SHA, not a mutable version tag — this job
-      # requests an Azure OIDC token and reads a build-arg secret, so a
-      # compromised upstream tag would run with that access.
+      # pinned to a commit SHA, not a tag. This job gets an Azure OIDC token and a
+      # build-arg secret, so a hijacked upstream tag would run with that access.
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-      # Building here (instead of `az acr build`, which builds remotely on
-      # ACR Tasks with no layer cache) is what actually gets a build cache:
-      # GitHub's cache backend persists layers between runs, so a push with
-      # no dependency changes reuses the npm-install and build layers
-      # instead of redoing them from scratch every time.
+      # built here instead of `az acr build` because ACR Tasks has no layer cache.
+      # The gha cache keeps layers between runs, so a push with no dependency
+      # changes reuses the npm install and build layers.
       - name: Build and push image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
@@ -163,13 +157,9 @@ jobs:
             --image adorioacr.azurecr.io/adorio:${{ github.sha }}
       - name: Verify deployment health
         run: node scripts/wait-for-url.cjs https://adorio.orangeground-7d1e6e2f.southeastasia.azurecontainerapps.io/api/health 180000 2000
-      # Next.js prerendered pages (like /) come back from origin with
-      # s-maxage=31536000, so Cloudflare caches them for up to a year.
-      # Every deploy ships a fresh _next/static/ folder with new hashed
-      # chunk names and drops the old ones, so a stale cached HTML page
-      # left pointing at last build's chunks 404s on every asset and
-      # never hydrates. Purge on every successful deploy so Cloudflare
-      # re-fetches HTML that matches what's actually on disk.
+      # prerendered pages like / are sent with s-maxage=31536000, so Cloudflare keeps
+      # them for a year. Each deploy replaces the hashed chunks in _next/static/, so
+      # old cached HTML 404s on every asset and never hydrates. Purging fixes that.
       - name: Purge Cloudflare cache
         run: |
           curl -sS --fail-with-body -X POST \

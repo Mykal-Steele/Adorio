@@ -16,8 +16,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
     );
   }
 
-  // Hosted files live in R2 — the backend hands back a presigned location and
-  // the browser fetches the object directly (no large payload through here).
+  // Hosted files live in R2. The backend hands back a presigned URL and the browser
+  // fetches the file directly, so big files don't go through here.
   if (res.status >= 300 && res.status < 400) {
     const location = res.headers.get('location');
     if (location) {

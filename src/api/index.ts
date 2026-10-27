@@ -15,12 +15,10 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
-// The 15-min access token expiring mid-session used to just fail every
-// request with a raw 401/403 until a full page reload re-ran the one-time
-// refresh in useAuthBootstrap. This catches that here instead: refresh once
-// (shared across any requests that fail at the same moment, so a burst of
-// expired-token failures doesn't fire the refresh endpoint more than once)
-// and retry the original request with the new token.
+// The 15 min access token can expire mid-session. Before, every request then failed with
+// 401/403 until a reload re-ran the refresh in useAuthBootstrap. Now it refreshes once
+// (shared by every request that fails at the same moment, so a burst only hits the
+// refresh endpoint once) and retries the original request.
 let refreshPromise: Promise<string> | null = null;
 
 const AUTH_ENDPOINTS = ['/users/login', '/users/register', '/users/refresh-token'];

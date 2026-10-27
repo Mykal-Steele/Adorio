@@ -1,6 +1,6 @@
 import { mock, beforeEach, afterAll, describe, test, expect, setSystemTime } from 'bun:test';
 
-// ── module mocks (must be set up before any dynamic imports) ───────────────────
+// mock.module has to run before the dynamic imports below
 
 const environment = {
   piston: {
@@ -48,8 +48,6 @@ const {
   prepareRunnerForSubmission,
   runRunnerStopCheck,
 } = await import('../../backend/services/codeRunnerService.js');
-
-// ── helpers ────────────────────────────────────────────────────────────────────
 
 const RUNTIMES = [{ language: 'java' }, { language: 'python' }];
 const originalFetch = globalThis.fetch;
@@ -105,8 +103,6 @@ afterAll(() => {
   console.info = originalConsole.info;
   console.error = originalConsole.error;
 });
-
-// ── logging ────────────────────────────────────────────────────────────────────
 
 describe('runner event log', () => {
   test('should log who started the runner and why', async () => {
@@ -244,8 +240,6 @@ describe('piston auth failure log', () => {
   });
 });
 
-// ── getRunnerStatus ────────────────────────────────────────────────────────────
-
 describe('getRunnerStatus', () => {
   test('should report off when the VM is deallocated', async () => {
     const status = await getRunnerStatus();
@@ -291,8 +285,6 @@ describe('getRunnerStatus', () => {
   });
 });
 
-// ── requestRunnerSession ───────────────────────────────────────────────────────
-
 describe('requestRunnerSession', () => {
   test('should start the VM and keep it on for the idle window when it is off', async () => {
     const status = await requestRunnerSession();
@@ -334,8 +326,6 @@ describe('requestRunnerSession', () => {
   });
 });
 
-// ── holdRunner ─────────────────────────────────────────────────────────────────
-
 describe('holdRunner', () => {
   test('should keep the runner on for the requested minutes and start it', async () => {
     const status = await holdRunner('admin-1', { minutes: 120 });
@@ -363,8 +353,6 @@ describe('holdRunner', () => {
   });
 });
 
-// ── prepareRunnerForSubmission ─────────────────────────────────────────────────
-
 describe('prepareRunnerForSubmission', () => {
   test('should resolve when the runner is ready', async () => {
     mockGetVmPowerState.mockImplementation(() => Promise.resolve('running'));
@@ -379,8 +367,6 @@ describe('prepareRunnerForSubmission', () => {
     expect(mockStartVm).toHaveBeenCalledTimes(1);
   });
 });
-
-// ── runRunnerStopCheck ─────────────────────────────────────────────────────────
 
 describe('runRunnerStopCheck', () => {
   const claimTick = (keepUntil) => {

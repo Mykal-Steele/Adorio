@@ -7,9 +7,8 @@ const financeCategorySchema = new mongoose.Schema(
     color: { type: String, required: true },
     excludeFromBudget: { type: Boolean, default: false },
     isDefault: { type: Boolean, default: false },
-    // Stable lookup key used internally to find "this user's other/rent
-    // category" without matching on the mutable, user-editable `name`.
-    // Never exposed as the Transaction foreign key — that's a real ObjectId.
+    // Stable key for finding a user's other/rent category, since `name` is
+    // editable. Transactions still reference the category by ObjectId.
     slug: { type: String, required: true },
   },
   { timestamps: true },

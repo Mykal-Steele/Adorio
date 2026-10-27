@@ -1,11 +1,7 @@
-# Base pinned by digest (not just the `24-alpine` tag) so Docker/BuildKit
-# can skip the registry pull-check on all three stages when nothing local
-# has changed, instead of hitting the registry every build to confirm the
-# tag still points at the same image. Bump this manually (or via a
-# Dependabot/renovate digest-update rule) when picking up a new alpine patch.
+# pinned by digest so BuildKit can skip the registry check on every stage when
+# nothing changed. Bump it by hand (or with a renovate digest rule) for a new alpine patch.
 FROM node:24-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS base
 
-# Stage 1: Build Next.js frontend
 FROM base AS build-nextjs
 
 WORKDIR /app
@@ -19,7 +15,6 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
     BACKEND_INTERNAL_URL=http://localhost:3000
 RUN npm run build
 
-# Stage 2: Build AI-Slop
 FROM base AS build-ai-slop
 
 WORKDIR /ai-slop
@@ -30,7 +25,6 @@ RUN npm ci
 COPY ./ai-slop/AI-Slop-For-CAO-exam ./
 RUN npm run build
 
-# Stage 3: Production runtime
 FROM base
 
 RUN apk add --no-cache nginx
@@ -40,18 +34,14 @@ COPY --from=build-nextjs /app/.next/standalone /nextjs
 COPY --from=build-nextjs /app/.next/static /nextjs/.next/static
 COPY --from=build-nextjs /app/public /nextjs/public
 
-# AI-Slop static files
 COPY --from=build-ai-slop /ai-slop/dist /usr/share/nginx/html/cao/
 
-# Express backend — manifest first so an unrelated backend source edit
-# (no dependency change) doesn't bust the `npm ci` layer cache the way
-# copying the whole `./backend` tree before installing did.
+# package.json first so a backend code change doesn't bust the npm ci layer
 COPY ./backend/package*.json /app/backend/
 WORKDIR /app/backend
 RUN npm ci --omit=dev --prefer-offline --no-audit --no-fund
 COPY ./backend /app/backend
 
-# Nginx config
 ARG ENV=production
 COPY nginx.${ENV}.conf /etc/nginx/nginx.conf
 

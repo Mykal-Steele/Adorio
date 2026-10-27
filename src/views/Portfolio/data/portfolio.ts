@@ -1,4 +1,4 @@
-// Portfolio data is the single source of truth for all portfolio UI.
+// Every bit of portfolio content comes from here
 
 export interface ProjectDecision {
   title: string;

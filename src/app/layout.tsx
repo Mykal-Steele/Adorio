@@ -46,9 +46,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* A fixed string from this file, nothing user supplied goes in it */}
         <script type="speculationrules" dangerouslySetInnerHTML={{ __html: SPECULATION_RULES }} />
       </head>
-      {/* suppressHydrationWarning: browser extensions (Grammarly, password managers, etc.)
-          inject attributes like data-gr-ext-installed onto <body> before React hydrates.
-          That's a real DOM difference React can't help mismatching, but it's harmless. This only silences the warning for body's own attributes, not its children. */}
+      {/* Extensions (Grammarly, password managers) add attributes like data-gr-ext-installed
+          to <body> before React hydrates. Harmless, and this only silences body's own
+          attributes, not its children. */}
       <body className="bg-[var(--paper-hero)]" suppressHydrationWarning>
         <Providers>
           <NavigationProgressBar />

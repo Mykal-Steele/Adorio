@@ -1,10 +1,8 @@
 import type * as Monaco from 'monaco-editor';
 import { PAPER_EDITOR_PALETTE } from './editorTheme';
 
-// Same palette as the CodeMirror theme (editorTheme.ts), translated to
-// Monaco's IStandaloneThemeData shape (token names are Monaco/TextMate scope
-// names, not Lezer tags, the categories don't map one-to-one, but the goal
-// is the same page identity across engines, not pixel-perfect parity).
+// editorTheme.ts palette in Monaco's shape. TextMate scopes don't map
+// one-to-one to Lezer tags, so it's close, not pixel-identical.
 export const PAPER_MONACO_THEME_NAME = 'paper-dark';
 
 const strip = (hex: string) => hex.replace('#', '');
