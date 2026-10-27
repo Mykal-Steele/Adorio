@@ -50,6 +50,7 @@ export default function TurnstileWidget({
       if (widgetIdRef.current) window.turnstile.remove(widgetIdRef.current);
       widgetIdRef.current = window.turnstile.render(containerRef.current, {
         sitekey: siteKey,
+        theme: 'light',
         callback: (token: string) => onTokenRef.current(token),
         'error-callback': () => onTokenRef.current(''),
         'expired-callback': () => onTokenRef.current(''),
