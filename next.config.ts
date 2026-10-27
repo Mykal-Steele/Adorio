@@ -35,7 +35,6 @@ const config: NextConfig = {
     return [
       { source: '/OakarResume.pdf', destination: '/resume', permanent: true },
       { source: '/about', destination: '/', permanent: true },
-      { source: '/projects/social', destination: '/projects/adorio', permanent: true },
     ];
   },
 
