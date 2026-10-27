@@ -51,6 +51,23 @@ describe('Smoke, Environment, Security, SEO, Performance', () => {
       await page.close();
     }, 30_000);
 
+    // A leftover redirect once sent /projects/social to the Adorio page
+    test('every project card opens its own page without a redirect', async () => {
+      const list = await axios.get(`${BASE_URL}/projects`);
+      const paths = [...new Set(list.data.match(/\/projects\/[a-z0-9-]+(?=")/g))];
+      expect(paths.length).toBeGreaterThan(0);
+      const titles = [];
+      for (const path of paths) {
+        const res = await axios.get(`${BASE_URL}${path}`, {
+          maxRedirects: 0,
+          validateStatus: null,
+        });
+        expect({ path, status: res.status }).toEqual({ path, status: 200 });
+        titles.push(res.data.match(/<title>([^<]*)<\/title>/)?.[1]);
+      }
+      expect(new Set(titles).size).toBe(paths.length);
+    }, 60_000);
+
     test('frontend can reach /api/health via fetch', async () => {
       const page = await browser.newPage();
       await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
