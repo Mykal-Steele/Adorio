@@ -167,3 +167,15 @@ describe('liveLabel', () => {
     expect(liveLabel('https://adorio.space')).toBe('adorio.space');
   });
 });
+
+describe('portfolio redirects', () => {
+  // A leftover redirect hid /projects/social behind the Adorio page after Social got its own entry
+  test('should not redirect away from a project that has its own page', async () => {
+    const { default: config } = await import('../../next.config.ts');
+    const sources = (await config.redirects()).map((r) => r.source);
+    const shadowed = portfolioData.projects
+      .map((p) => `/projects/${p.id}`)
+      .filter((path) => sources.includes(path));
+    expect(shadowed).toEqual([]);
+  });
+});
