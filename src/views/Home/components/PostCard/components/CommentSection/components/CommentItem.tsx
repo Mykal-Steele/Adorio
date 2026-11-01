@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import moment from 'moment';
 import { ADMIN_AVATAR_URL } from '@/components/PostCard/constants';
 import { THREAD_INDENT_PX } from '../../../../../constants/feed';
-import { getVisualDepth, type ThreadNode } from '../utils/commentTree';
+import type { ThreadNode } from '../utils/commentTree';
 import MentionText from './MentionText';
 import { getAvatarColor } from '../../../../../utils/avatarColor';
 
@@ -14,15 +14,15 @@ interface CommentItemProps {
 }
 
 const CommentItem = ({ node, onReply }: CommentItemProps) => {
-  const { comment, children } = node;
+  const { comment, children, depth } = node;
   const [isExpanded, setIsExpanded] = useState(false);
-  const depth = getVisualDepth(comment.depth);
   const username = comment.user?.username || 'Unknown';
   const shouldShowExpand = comment.text.length > MAX_COMMENT_LENGTH;
   const avatarSize = depth === 0 ? 30 : depth === 1 ? 28 : 26;
 
   return (
-    <div style={depth > 0 ? { marginLeft: depth * THREAD_INDENT_PX } : undefined}>
+    // Replies are nested inside their parent, so each one steps in once, from the parent.
+    <div style={depth > 0 ? { marginLeft: THREAD_INDENT_PX } : undefined}>
       <div className="flex items-start gap-3 rounded-[3px] bg-[#f6efe0] p-3 shadow-[0_2px_0_rgba(60,44,24,.1)]">
         <span
           aria-hidden="true"

@@ -9,7 +9,6 @@ const CommentForm = ({
   value,
   onChange,
   onSubmit,
-  isSubmitting,
   showEmojiPicker,
   onToggleEmojiPicker,
   onEmojiSelect,
@@ -25,7 +24,6 @@ const CommentForm = ({
   value: string;
   onChange: (next: string) => void;
   onSubmit: (e: React.FormEvent) => void;
-  isSubmitting: boolean;
   showEmojiPicker: boolean;
   onToggleEmojiPicker: (next: boolean) => void;
   onEmojiSelect: (emoji: { native: string }) => void;
@@ -99,10 +97,9 @@ const CommentForm = ({
 
       <button
         type="submit"
-        className="shrink-0 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-4 py-2 font-paper-mono text-xs font-bold tracking-[.1em] shadow-[2px_2px_0_var(--paper-ink)] transition-transform hover:-translate-y-px disabled:opacity-60"
-        disabled={isSubmitting}
+        className="shrink-0 rounded-[3px] border-[1.5px] border-[var(--paper-ink)] bg-[var(--paper-yellow)] px-4 py-2 font-paper-mono text-xs font-bold tracking-[.1em] shadow-[2px_2px_0_var(--paper-ink)] transition-transform hover:-translate-y-px"
       >
-        {isSubmitting ? '...' : 'Post'}
+        Post
       </button>
     </form>
   );

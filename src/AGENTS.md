@@ -98,7 +98,7 @@ src/
   │           └── CommentSection/
   │               ├── index.tsx    — Threaded comment list (oldest-first tree) + reply/mention form state
   │               ├── CommentForm.tsx — Text input + emoji picker + mention suggestions dropdown
-  │               ├── utils/commentTree.ts — buildCommentTree, getEffectiveParent, getVisualDepth (depth cap 2, flatten deeper)
+  │               ├── utils/commentTree.ts — buildCommentTree (indent level from the tree, replies deeper than level 2 shown as siblings at level 2), getEffectiveParent
   │               ├── hooks/useMentionAutocomplete.ts — @query detection, debounced user search, keyboard nav
   │               └── components/
   │                   ├── CommentItem.tsx — Recursive thread node (indent only, no connector lines)
