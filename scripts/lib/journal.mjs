@@ -60,5 +60,36 @@ export function forgetBackups(dir) {
   return backups.length;
 }
 
+// The old values are only dead weight once a run finished. After a rollback or a
+// failed run they are what production uses again, so testing them would tell you
+// to revoke live credentials.
+export function oldValuesToTest(state) {
+  if (state.phase !== 'done') {
+    throw new Error(
+      `The last run ended as "${state.phase}", so its old values may still be the live ones. Only a finished run has old values that are safe to revoke.`,
+    );
+  }
+  const old = Object.fromEntries(
+    (state.items ?? [])
+      .filter((item) => item.old !== undefined)
+      .map((item) => [item.key, item.old]),
+  );
+  if (!Object.keys(old).length)
+    throw new Error('The last run did not keep any old values to test.');
+  return old;
+}
+
+export function markRolledBack(file) {
+  const state = loadBackup(file);
+  writePrivateFile(
+    file,
+    JSON.stringify(
+      { ...state, phase: 'rolled-back', updatedAt: new Date().toISOString() },
+      null,
+      2,
+    ),
+  );
+}
+
 export const backupAgeDays = (state, now = new Date()) =>
   Math.floor((now.getTime() - Date.parse(state.startedAt)) / 86_400_000);

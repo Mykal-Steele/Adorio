@@ -63,6 +63,17 @@ describe('MONGO_URI', () => {
     expect(result.warnings).toEqual([]);
   });
 
+  test('accepts a replica set string with several hosts', () => {
+    const hosts = 'h1.example.net:27017,h2.example.net:27017,h3.example.net:27017/?replicaSet=rs0';
+    const result = validate('MONGO_URI', mongoUrl('mongodb', 'dbuser:dbpass', hosts));
+    expect(result.ok).toBe(true);
+  });
+
+  test('still wants a login on a several host string', () => {
+    const result = validate('MONGO_URI', 'mongodb://h1.example.net:27017,h2.example.net:27017/');
+    expect(result.ok).toBe(false);
+  });
+
   test('rejects the <db_password> placeholder', () => {
     const result = validate(
       'MONGO_URI',

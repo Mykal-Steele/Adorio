@@ -13,7 +13,7 @@
 ## What the wizard does
 
 1. **Checks your setup.** `az` and `gh` are installed and logged in, Azure can see the app, GitHub lets you set secrets, `.env.production` exists. It warns about env files other users can read, saved old secrets that are still around, and values where Azure and `.env.production` disagree.
-2. **Asks what to rotate.** One line per provider, all checked.
+2. **Asks what to rotate.** One line per provider, all checked except the slow code runner token, which shows its time estimate in red.
 3. **Walks through each provider.** It shows the exact steps for that dashboard and why they are in that order, then asks for each value. For a database it asks for the user name and the password only and builds the connection string from them and the host in the current one. Enter keeps the current value of each part, so the user name can stay while the password changes. If you keep every part, the group is skipped. Typing shows `*`, backspace works, and enter on the first value skips the provider, which leaves every value as it is. Each prompt shows what is in use now: in full when it is not secret (a user name), the first three characters when it is. A wrong shape is caught at once: a Cloudinary secret pasted into the key field, an Atlas string that still says `<db_password>`, an R2 secret pasted where the key id goes.
 4. **Tests every new value with its provider** before anything changes. A rejected value stops the run and you can type it again.
 5. **Shows a review.** A short fingerprint of the old and new value (never the value), where each one is written, and what people will notice.

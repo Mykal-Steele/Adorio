@@ -26,7 +26,7 @@ const TOOLS = [
   },
   {
     name: 'pbcopy',
-    when: () => process.platform === 'darwin',
+    when: (_env, platform) => platform === 'darwin',
     probe: ['-help'],
     args: [],
     hidden: false,
@@ -34,10 +34,13 @@ const TOOLS = [
 ];
 
 // The text goes in on stdin, never on the command line.
-export async function copyToClipboard(text, { run = defaultRun, env = process.env } = {}) {
+export async function copyToClipboard(
+  text,
+  { run = defaultRun, env = process.env, platform = process.platform } = {},
+) {
   if (!text) return { ok: false, reason: 'Nothing to copy.' };
   for (const tool of TOOLS) {
-    if (!tool.when(env)) continue;
+    if (!tool.when(env, platform)) continue;
     const probe = await run(tool.name, tool.probe, { timeoutMs: 10_000 });
     if (probe.code === 127) continue;
     const result = await run(tool.name, tool.args, {

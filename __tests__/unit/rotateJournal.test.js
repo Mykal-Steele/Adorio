@@ -15,6 +15,8 @@ import {
   loadBackup,
   backupAgeDays,
   forgetBackups,
+  oldValuesToTest,
+  markRolledBack,
 } from '../../scripts/lib/journal.mjs';
 
 describe('journal', () => {
@@ -111,5 +113,40 @@ describe('journal', () => {
     expect(state.files).toEqual({ files: { '.env': 'K=o\n' } });
     expect(state.items[0].old).toBe('o');
     expect(state.githubPending).toEqual([{ key: 'K', error: 'x' }]);
+  });
+  describe('oldValuesToTest', () => {
+    const items = [
+      { key: 'JWT_SECRET', old: 'o1', value: 'n1' },
+      { key: 'NEW_ONLY', value: 'n2' },
+    ];
+
+    test('returns the old values of a finished run', () => {
+      expect(oldValuesToTest({ phase: 'done', items })).toEqual({ JWT_SECRET: 'o1' });
+    });
+
+    test.each(['rolled-back', 'failed', 'azure-applied', 'snapshotted'])(
+      'refuses a run that ended as %s, because its old values may be live',
+      (phase) => {
+        expect(() => oldValuesToTest({ phase, items })).toThrow(/old values/i);
+      },
+    );
+
+    test('refuses a finished run that kept no old values', () => {
+      expect(() => oldValuesToTest({ phase: 'done', items: [{ key: 'A', value: 'b' }] })).toThrow(
+        /did not keep any old values/i,
+      );
+    });
+  });
+
+  test('markRolledBack changes the phase on disk and keeps everything else', async () => {
+    const journal = createJournal({ dir, id: 'rb1' });
+    await journal.save({ phase: 'done', items: [{ key: 'K', old: 'o', value: 'n' }] });
+    const file = path.join(dir, 'rb1.json');
+    markRolledBack(file);
+    const state = loadBackup(file);
+    expect(state.phase).toBe('rolled-back');
+    expect(state.items[0].old).toBe('o');
+    expect(statSync(file).mode & 0o777).toBe(0o600);
+    expect(() => oldValuesToTest(state)).toThrow();
   });
 });

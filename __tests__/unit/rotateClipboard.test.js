@@ -4,7 +4,7 @@ function fakeRun(available) {
   const calls = [];
   const run = async (command, args, options = {}) => {
     calls.push({ command, args, options });
-    if (args.includes('--version') || args.includes('-version')) {
+    if (['--version', '-version', '-help'].some((flag) => args.includes(flag))) {
       return available.includes(command)
         ? { code: 0, stdout: 'x', stderr: '' }
         : { code: 127, stdout: '', stderr: 'missing' };
@@ -43,8 +43,15 @@ describe('copyToClipboard', () => {
     const result = await copyToClipboard('KEY=v\n', {
       run,
       env: { WAYLAND_DISPLAY: 'wayland-1', DISPLAY: ':0' },
+      platform: 'darwin',
     });
     expect(result.ok).toBe(false);
+  });
+
+  test('uses pbcopy only on macOS', async () => {
+    const run = fakeRun(['pbcopy']);
+    expect((await copyToClipboard('K=v\n', { run, env: {}, platform: 'linux' })).ok).toBe(false);
+    expect(run.calls).toEqual([]);
   });
 
   test('does nothing for empty text', async () => {

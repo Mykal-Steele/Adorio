@@ -5,7 +5,13 @@ import { createAzureAdapter, createGithubAdapter } from './cloud.mjs';
 import { buildExternals } from './externals/index.mjs';
 import { createFilesAdapter } from './files.mjs';
 import { explainFailure } from './explain.mjs';
-import { forgetBackups, listBackups, loadBackup } from './journal.mjs';
+import {
+  forgetBackups,
+  listBackups,
+  loadBackup,
+  markRolledBack,
+  oldValuesToTest,
+} from './journal.mjs';
 import { preflight } from './preflight.mjs';
 import { verifyValues } from './verify.mjs';
 import { confirm, line, print, printBox, spinner, style as c, symbols } from './tui.mjs';
@@ -73,6 +79,7 @@ export async function rollbackMode(args) {
     return 3;
   }
   spin.succeed('The old values are back');
+  markRolledBack(entry.file);
   if (result.githubPending.length) {
     line(
       'warn',
@@ -113,14 +120,13 @@ export async function syncGithubMode(args) {
 // Tries the old values. One that still works has not been revoked.
 export async function checkRevokedMode() {
   const { entry, state } = latestBackup();
-  const old = Object.fromEntries(
-    (state.items ?? [])
-      .filter((item) => item.old !== undefined)
-      .map((item) => [item.key, item.old]),
-  );
+  let old;
+  try {
+    old = oldValuesToTest(state);
+  } catch (error) {
+    throw new Fatal(error.message);
+  }
   Object.values(old).forEach(track);
-  if (!Object.keys(old).length)
-    throw new Fatal('The last run did not keep any old values to test.');
   printBox({
     title: 'Are the old credentials dead?',
     tone: 'cyan',

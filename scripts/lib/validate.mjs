@@ -19,7 +19,8 @@ const pass = (value, warnings = []) => ({ ok: true, value, warnings });
 function checkMongoUri(value) {
   let url;
   try {
-    url = new URL(value);
+    // URL cannot read a host list (h1:27017,h2:27017), so it sees only the first host.
+    url = new URL(value.replace(/(@?[^@/?,]+)(?:,[^@/?]+)+(?=[/?]|$)/, '$1'));
   } catch {
     return fail('This is not a valid connection string. It should start with mongodb+srv://');
   }
