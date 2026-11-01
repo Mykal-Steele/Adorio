@@ -14,6 +14,7 @@ const mockPushCommentToPost = mock(() => Promise.resolve(null));
 const mockDeletePostById = mock(() => Promise.resolve());
 const mockFindUsersByIds = mock(() => Promise.resolve([]));
 const mockFindPostCommentsMeta = mock(() => Promise.resolve(null));
+const mockFindUserById = mock(() => Promise.resolve(null));
 
 mock.module('../../backend/models/index.js', () => ({
   createPost: mockCreatePost,
@@ -26,6 +27,7 @@ mock.module('../../backend/models/index.js', () => ({
   deletePostById: mockDeletePostById,
   findUsersByIds: mockFindUsersByIds,
   findPostCommentsMeta: mockFindPostCommentsMeta,
+  findUserById: mockFindUserById,
 }));
 
 const { createPost, getPaginatedPosts, getPostById, togglePostLike, deletePost, addCommentToPost } =
@@ -70,6 +72,49 @@ describe('createPost', () => {
     const result = await createPost({ userId: 'u1', title: 'Hello', content: 'World' });
     expect(result).toHaveProperty('title', 'Hello');
     expect(result).toHaveProperty('content', 'World');
+  });
+
+  describe('expiry of integration test posts', () => {
+    const lastCreated = () => mockCreatePost.mock.calls.at(-1)[0];
+
+    beforeEach(() => {
+      mockCreatePost.mockClear();
+      mockCreatePost.mockImplementation(() => Promise.resolve(makePost()));
+    });
+
+    test('sets expiresAt about 60 seconds ahead when the author has an @integration.test email', async () => {
+      mockFindUserById.mockImplementation(() =>
+        Promise.resolve({ _id: 'u1', email: 'u1abc@integration.test' }),
+      );
+      const before = Date.now();
+      await createPost({ userId: 'u1', title: 'Anything', content: 'World' });
+      const { expiresAt } = lastCreated();
+      expect(expiresAt).toBeInstanceOf(Date);
+      expect(expiresAt.getTime() - before).toBeGreaterThanOrEqual(60_000);
+      expect(expiresAt.getTime() - before).toBeLessThan(65_000);
+    });
+
+    test('never sets expiresAt for a real user, even with the title Integration Test Post', async () => {
+      mockFindUserById.mockImplementation(() =>
+        Promise.resolve({ _id: 'u2', email: 'alice@gmail.com' }),
+      );
+      await createPost({ userId: 'u2', title: 'Integration Test Post', content: 'World' });
+      expect(lastCreated()).not.toHaveProperty('expiresAt');
+    });
+
+    test('does not treat a lookalike domain as a test account', async () => {
+      mockFindUserById.mockImplementation(() =>
+        Promise.resolve({ _id: 'u3', email: 'bob@integration.test.example.com' }),
+      );
+      await createPost({ userId: 'u3', title: 'Hi', content: 'World' });
+      expect(lastCreated()).not.toHaveProperty('expiresAt');
+    });
+
+    test('does not set expiresAt when the author cannot be found', async () => {
+      mockFindUserById.mockImplementation(() => Promise.resolve(null));
+      await createPost({ userId: 'ghost', title: 'Hi', content: 'World' });
+      expect(lastCreated()).not.toHaveProperty('expiresAt');
+    });
   });
 });
 

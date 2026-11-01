@@ -26,6 +26,8 @@ const postSchema = new mongoose.Schema(
       },
     ],
     image: { type: imageSchema, default: null },
+    // Set by the server for integration test posts only. Posts without it never expire.
+    expiresAt: { type: Date },
   },
   {
     timestamps: true,
@@ -37,5 +39,8 @@ const postSchema = new mongoose.Schema(
 postSchema.index({ createdAt: -1 });
 postSchema.index({ user: 1, createdAt: -1 });
 postSchema.index({ 'comments.createdAt': -1 });
+
+// Mongo deletes a post once its expiresAt has passed, checked about once a minute.
+postSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export default postSchema;
