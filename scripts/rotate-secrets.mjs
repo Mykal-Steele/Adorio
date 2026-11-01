@@ -1,269 +1,204 @@
 #!/usr/bin/env node
-// Rotate secrets across local env files, GitHub Actions secrets, and the Azure
-// Container App in one run.
+// Rotates the repository's secrets in one guided run:
 //
-//   1. Add an entry to the ROTATIONS block below (or use --gen / --set).
-//   2. `npm run secrets`            -> dry run, prints exactly what would change
-//   3. `npm run secrets -- --apply` -> actually writes files, gh secrets, az secrets
+//   npm run secrets                  the wizard
+//   npm run secrets -- --dry-run     everything except the final write
+//   npm run secrets -- --help        all options
 //
-// Only keys already present in a local file are rewritten; nothing is ever
-// appended to a file. GitHub and Azure values are written from what you type
-// here, never read back (both are write-only), so the local files stay the
-// source of truth.
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { execFileSync } from 'node:child_process';
-import { randomBytes } from 'node:crypto';
-import { createInterface } from 'node:readline/promises';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
+// New values are tested with their providers before anything changes. Then the old
+// values are saved privately, anything outside the app platform that checks a value is
+// updated, Azure is updated and restarted, and the app has to report healthy before the
+// local files and GitHub are touched. If anything before GitHub fails, everything is put
+// back. The steps are in docs/secret-rotation.md.
 import { SECRETS, NOT_MANAGED } from './secrets.manifest.mjs';
-
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-
-const AZURE = { resourceGroup: 'adorio-prod-rg', app: 'adorio' };
-
-// Edit this block, then run `npm run secrets`. Everything not listed is untouched.
-//   KEY: { generate: 'hex32' }         make a fresh random value
-//   KEY: { value: 'paste-the-new-one' } set it to something you have
-const ROTATIONS = {
-  // JWT_SECRET: { generate: 'hex32' },
-  // REFRESH_TOKEN_SECRET: { generate: 'hex32' },
-  // RESEND_API_KEY: { value: 're_xxxxxxxxxxxxxxxx' },
-};
+import { CONFIG } from './secrets.config.mjs';
+import { buildPlan } from './lib/plan.mjs';
+import {
+  checkRevokedMode,
+  forgetMode,
+  resumeMode,
+  rollbackMode,
+  syncGithubMode,
+} from './lib/modes.mjs';
+import { preflight } from './lib/preflight.mjs';
+import { runApply, showOutcome } from './lib/run.mjs';
+import {
+  Fatal,
+  Usage,
+  ensureStateDir,
+  readCurrent,
+  scrub,
+  stateDir,
+  track,
+  unlock,
+} from './lib/session.mjs';
+import {
+  NoTerminalError,
+  confirm,
+  heading,
+  onInterrupt,
+  print,
+  printBox,
+  style as c,
+  symbols,
+} from './lib/tui.mjs';
+import { collectScripted, collectWizard, review, verifyAndFix } from './lib/wizard.mjs';
 
 function parseArgs(argv) {
-  const out = { apply: false, yes: false, reveal: false, gen: [], set: {} };
+  const out = { mode: 'rotate', dryRun: false, yes: false, gen: [], set: [] };
+  const needKey = (key) => {
+    if (!key || !SECRETS[key]) {
+      throw new Usage(
+        `${key ?? 'A key'} is not a managed secret. Known keys: ${Object.keys(SECRETS).join(', ')}`,
+      );
+    }
+    return key;
+  };
+  const modes = {
+    '--rollback': 'rollback',
+    '--forget': 'forget',
+    '--resume': 'resume',
+    '--sync-github': 'sync-github',
+    '--check-revoked': 'check-revoked',
+  };
   for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (a === '--apply') out.apply = true;
-    else if (a === '--yes' || a === '-y') out.yes = true;
-    else if (a === '--reveal') out.reveal = true;
-    else if (a === '--gen') out.gen.push(argv[++i]);
-    else if (a === '--set') {
-      const pair = argv[++i] ?? '';
-      const eq = pair.indexOf('=');
-      if (eq < 1) throw new Error(`--set expects KEY=VALUE, got "${pair}"`);
-      out.set[pair.slice(0, eq)] = pair.slice(eq + 1);
-    } else if (a === '--help' || a === '-h') out.help = true;
-    else throw new Error(`unknown argument "${a}" (try --help)`);
+    const arg = argv[i];
+    if (arg === '--help' || arg === '-h') out.mode = 'help';
+    else if (arg === '--dry-run') out.dryRun = true;
+    else if (arg === '--yes' || arg === '-y') out.yes = true;
+    else if (arg === '--ask' || arg === '--apply') continue;
+    else if (arg === '--gen') out.gen.push(needKey(argv[++i]));
+    else if (arg === '--set') {
+      const next = argv[++i];
+      if (next?.includes('=')) {
+        throw new Usage(
+          '--set no longer takes a value. It would end up in your shell history and in the process list. Use --set KEY and paste the value when asked.',
+        );
+      }
+      out.set.push(needKey(next));
+    } else if (modes[arg]) out.mode = modes[arg];
+    else throw new Usage(`Unknown option ${arg}. Try --help.`);
   }
   return out;
 }
 
-function renderValue(value) {
-  if (value.includes('\n')) {
-    return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`;
-  }
-  if (/[\s#"'`$]/.test(value)) {
-    return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
-  }
-  return value;
-}
-
-// Matches KEY= then either a double-quoted value (possibly spanning lines), a
-// single-quoted value, or a bare value up to the end of the line.
-function upsertEnvValue(content, key, value) {
-  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(
-    `^${escaped}=("(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\r\\n]*)`,
-    'm',
-  );
-  const rendered = renderValue(value);
-  // a replacer function so `$&`, `$$` etc. in a pasted value get written as is
-  if (!pattern.test(content)) return { content, missing: true };
-  return { content: content.replace(pattern, () => `${key}=${rendered}`) };
-}
-
-function mask(value, reveal) {
-  if (reveal) return value;
-  if (value.length <= 8) return '********';
-  return `${value.slice(0, 4)}… (${value.length} chars)`;
-}
-
-function resolveValue(key, cfg) {
-  if (cfg.value != null) return cfg.value;
-  if (cfg.generate === 'hex32') return randomBytes(32).toString('hex');
-  if (cfg.generate) throw new Error(`${key}: unknown generator "${cfg.generate}"`);
-  throw new Error(`${key}: neither { value } nor { generate } given in ROTATIONS`);
-}
-
-function buildPlan(rotations) {
-  const plan = [];
-  for (const [key, cfg] of Object.entries(rotations)) {
-    const spec = SECRETS[key];
-    if (!spec) {
-      console.warn(`! ${key}: not in secrets.manifest.mjs — skipping`);
-      continue;
-    }
-    if (cfg.generate && spec.generate == null) {
-      console.warn(`! ${key}: automatic generation is disabled — use --set ${key}=VALUE`);
-      continue;
-    }
-    plan.push({ key, spec, value: resolveValue(key, cfg) });
-  }
-  return plan;
-}
-
-function report(plan, args) {
-  console.log(
-    args.apply
-      ? '\nApplying to: local files, GitHub, Azure\n'
-      : '\nDRY RUN (add --apply to write)\n',
-  );
-  for (const { key, spec, value } of plan) {
-    console.log(`${key} = ${mask(value, args.reveal)}`);
-    if (spec.note) console.log(`  note        ${spec.note}`);
-    if (spec.files.length) console.log(`  local       ${spec.files.join(', ')}`);
-    if (spec.github) console.log('  github      gh secret set');
-    if (spec.azure?.secret) console.log(`  azure       secret ${spec.azure.secret}`);
-    if (spec.azure?.env) console.log(`  azure       env ${spec.azure.env}`);
-    console.log('');
-  }
-}
-
-function writeFiles(plan) {
-  for (const { key, spec, value } of plan) {
-    for (const rel of spec.files) {
-      const abs = path.join(repoRoot, rel);
-      if (!existsSync(abs)) {
-        console.log(`  ~  ${rel}: file missing, skipped`);
-        continue;
-      }
-      const original = readFileSync(abs, 'utf8');
-      const { content, missing } = upsertEnvValue(original, key, value);
-      if (missing) {
-        console.log(`  ~  ${rel}: ${key} not present, skipped`);
-        continue;
-      }
-      if (content === original) {
-        console.log(`  -  ${rel}: ${key} unchanged`);
-        continue;
-      }
-      writeFileSync(abs, content);
-      console.log(`  ~  ${rel}: ${key} updated`);
-    }
-  }
-}
-
-function pushGithub(plan) {
-  const keys = plan.filter((p) => p.spec.github);
-  for (const { key, value } of keys) {
-    // stdin, not argv, since any local user can see argv in `ps`
-    execFileSync('gh', ['secret', 'set', key], {
-      input: value,
-      stdio: ['pipe', 'inherit', 'inherit'],
-    });
-    console.log(`  ~  github: ${key} set`);
-  }
-}
-
-function pushAzure(plan) {
-  const secrets = plan.filter((p) => p.spec.azure?.secret);
-  const envs = plan.filter((p) => p.spec.azure?.env);
-
-  // `az` has no stdin form for these commands, so the value is passed as an
-  // argv entry and is briefly visible in the process table while it runs.
-  if (secrets.length) {
-    const pairs = secrets.map((p) => `${p.spec.azure.secret}=${p.value}`);
-    execFileSync(
-      'az',
-      [
-        'containerapp',
-        'secret',
-        'set',
-        '-g',
-        AZURE.resourceGroup,
-        '-n',
-        AZURE.app,
-        '--secrets',
-        ...pairs,
-      ],
-      { stdio: 'inherit' },
-    );
-    for (const p of secrets) console.log(`  ~  azure: secret ${p.spec.azure.secret} set`);
-  }
-  if (envs.length) {
-    const pairs = envs.map((p) => `${p.spec.azure.env}=${p.value}`);
-    execFileSync(
-      'az',
-      [
-        'containerapp',
-        'update',
-        '-g',
-        AZURE.resourceGroup,
-        '-n',
-        AZURE.app,
-        '--set-env-vars',
-        ...pairs,
-      ],
-      { stdio: 'inherit' },
-    );
-    for (const p of envs) console.log(`  ~  azure: env ${p.spec.azure.env} set`);
-  }
-}
-
-async function confirm(plan) {
-  const gh = plan.filter((p) => p.spec.github).length;
-  const az = plan.filter((p) => p.spec.azure).length;
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  const answer = await rl.question(
-    `\nWrite ${plan.length} secret(s) — ${gh} GitHub, ${az} Azure, plus local files? [y/N] `,
-  );
-  rl.close();
-  return /^y(es)?$/i.test(answer.trim());
-}
-
 function printHelp() {
-  console.log(`usage: npm run secrets [-- <options>]
+  const option = (flag, text) => `${c.bold(flag.padEnd(16))}${text}`;
+  printBox({
+    title: 'npm run secrets',
+    tone: 'cyan',
+    lines: [
+      'Rotates credentials in Azure, GitHub and the env files, and keeps them in step.',
+      '',
+      option('(no options)', 'the wizard'),
+      option('--dry-run', 'everything except the final write'),
+      option('--gen KEY', 'generate a value for KEY'),
+      option('--set KEY', 'ask for the value of KEY (hidden)'),
+      option('--yes', 'skip the final confirmation'),
+      option('--rollback', 'undo the last run'),
+      option('--resume', 'push GitHub secrets that failed'),
+      option('--sync-github', 'push GitHub secrets that are missing'),
+      option('--check-revoked', 'test if the old credentials still work'),
+      option('--forget', 'delete the saved old values'),
+      '',
+      c.gray(`Old values are kept in ${stateDir}`),
+      c.gray('(owner-only, outside the repository).'),
+      '',
+      c.bold('Not managed here, set by hand:'),
+      ...Object.entries(NOT_MANAGED).map(([names, how]) => `${names}: ${c.gray(how)}`),
+    ],
+  });
+}
 
-  --apply            write changes (default is a dry run)
-  --yes, -y          skip the confirmation prompt
-  --reveal           print full secret values instead of masking them
-  --gen KEY          generate a value for KEY this run
-  --set KEY=VALUE    set KEY to VALUE this run
-  --help, -h         this text
+async function rotateMode(args) {
+  const interactive = !args.gen.length && !args.set.length;
+  if (interactive && !process.stdin.isTTY) {
+    throw new Fatal(
+      'The wizard needs an interactive terminal. Run it directly in a terminal, or use --gen KEY.',
+    );
+  }
+  printBox({
+    title: `${CONFIG.name} secret rotation`,
+    tone: 'cyan',
+    lines: [
+      'Rotates credentials in Azure, GitHub and the env files.',
+      c.gray(
+        'Nothing is written until you confirm the review. If a step fails, everything is put back.',
+      ),
+    ],
+  });
+  await preflight();
 
-Edit the ROTATIONS block in scripts/rotate-secrets.mjs, or pass --gen/--set.
+  let values = interactive ? await collectWizard() : await collectScripted(args, args.gen);
+  if (!Object.keys(values).length) {
+    print(`\n  ${symbols.skip} Nothing selected, nothing changed.`);
+    return 0;
+  }
+  values = await verifyAndFix(values, { interactive });
 
-Not managed here (set by hand):`);
-  for (const [k, v] of Object.entries(NOT_MANAGED)) console.log(`  ${k} — ${v}`);
+  const plan = buildPlan({ values, current: readCurrent });
+  if (plan.errors.length) throw new Fatal(plan.errors.join('\n'));
+  plan.items.forEach((item) => {
+    track(item.value);
+    track(item.old);
+  });
+  review(plan);
+  if (!plan.changed.length) {
+    print(`\n  ${symbols.skip} Every value is the same as the current one, nothing to do.`);
+    return 0;
+  }
+  if (args.dryRun) {
+    printBox({
+      title: 'Dry run',
+      tone: 'gray',
+      lines: ['Nothing was changed. The checks above used the real providers.'],
+    });
+    return 0;
+  }
+  if (!args.yes && !(await confirm('Apply these changes?', { defaultYes: false }))) {
+    print(`\n  ${symbols.skip} Stopped, nothing changed.`);
+    return 0;
+  }
+  heading('Applying');
+  const outcome = await runApply(plan.items);
+  return showOutcome(outcome, plan.items, args);
 }
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  if (args.help) return printHelp();
-
-  const rotations = { ...ROTATIONS };
-  for (const key of args.gen) rotations[key] = { generate: 'hex32' };
-  for (const [key, value] of Object.entries(args.set)) rotations[key] = { value };
-
-  if (!Object.keys(rotations).length) {
-    console.log(
-      'Nothing to rotate. Edit the ROTATIONS block or pass --gen/--set. (--help for more)',
-    );
-    return;
-  }
-
-  const plan = buildPlan(rotations);
-  if (!plan.length) return;
-  report(plan, args);
-  if (!args.apply) return;
-
-  if (!args.yes && !(await confirm(plan))) {
-    console.log('Aborted.');
-    return;
-  }
-
-  console.log('\nLocal files');
-  writeFiles(plan);
-  console.log('\nGitHub');
-  pushGithub(plan);
-  console.log('\nAzure');
-  pushAzure(plan);
-  console.log('\nDone. Azure secret changes roll a fresh revision automatically.');
+  if (args.mode === 'help') return printHelp();
+  onInterrupt(unlock);
+  process.on('exit', unlock);
+  const modes = {
+    rotate: rotateMode,
+    rollback: rollbackMode,
+    resume: resumeMode,
+    'sync-github': syncGithubMode,
+    'check-revoked': checkRevokedMode,
+    forget: forgetMode,
+  };
+  if (args.mode === 'forget' || args.mode === 'check-revoked') ensureStateDir();
+  process.exitCode = await modes[args.mode](args);
 }
 
-main().catch((err) => {
-  console.error(`\n${err.message}`);
-  process.exit(1);
+main().catch((error) => {
+  const message = scrub(error.message ?? String(error));
+  if (error instanceof Usage) {
+    print(`\n  ${symbols.fail} ${message}`);
+  } else if (error instanceof Fatal || error instanceof NoTerminalError) {
+    printBox({ title: 'Stopped', tone: 'red', lines: message.split('\n') });
+  } else {
+    printBox({
+      title: 'Something unexpected went wrong',
+      tone: 'red',
+      lines: [
+        message,
+        '',
+        c.gray(
+          'Nothing is half changed unless a step above says so. npm run secrets:check shows where things stand.',
+        ),
+      ],
+    });
+  }
+  process.exit(error instanceof Usage ? 2 : 1);
 });

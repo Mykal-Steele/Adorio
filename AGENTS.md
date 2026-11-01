@@ -296,4 +296,6 @@ One centralized set at the repo root — frontend, backend, and Docker dev all r
 | `scripts/.env`                 | `scripts/audit.mjs` only — a single `AUDIT_PASSWORD`, unrelated to the app                                                                                        |
 | `infra/.secrets/`              | Deploy-time secrets (SSH key, TLS keypair, Piston auth token) for redeploying `infra/piston.bicep` — never app runtime config, see its `README.md`                |
 
+To rotate the secrets in these files, in Azure and on GitHub together, run `npm run secrets` and see `docs/secret-rotation.md`. `npm run secrets:check` compares them without changing anything.
+
 All of the above are gitignored and local-only. Nothing here is what's actually running in production — that's Azure Container App secrets (`infra/main.bicep`) and, for the Northflank failover copy, its own separately-configured dashboard env vars — anything changed here that the app needs at runtime must be mirrored there too.
