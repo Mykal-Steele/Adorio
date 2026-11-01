@@ -124,12 +124,10 @@ const ComposeCard = ({
         </button>
       </div>
 
-      {imagePreview && (
+      {imagePreview.startsWith('blob:') && (
         <div className="relative mt-4 inline-block rotate-[-0.7deg] bg-[#f1e7d3] p-[10px] shadow-[0_2px_0_rgba(60,44,24,.12)]">
-          {/* imagePreview is always either '' or a same-origin blob: URL from
-              URL.createObjectURL() in handleImageChange below, never user-supplied text */}
           <img
-            src={imagePreview} // lgtm[js/xss-through-dom] -- browser-generated blob: URL, not DOM text
+            src={imagePreview}
             alt="Selected upload preview"
             className="h-48 max-w-full rounded-[1px] object-cover"
           />
