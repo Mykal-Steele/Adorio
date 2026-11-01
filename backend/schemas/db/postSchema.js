@@ -38,4 +38,11 @@ postSchema.index({ createdAt: -1 });
 postSchema.index({ user: 1, createdAt: -1 });
 postSchema.index({ 'comments.createdAt': -1 });
 
+// Deletes the posts the integration suite creates. Mongo's TTL sweep runs about
+// once a minute, so 60s is as low as it is worth going.
+postSchema.index(
+  { createdAt: 1 },
+  { expireAfterSeconds: 60, partialFilterExpression: { title: 'Integration Test Post' } },
+);
+
 export default postSchema;
