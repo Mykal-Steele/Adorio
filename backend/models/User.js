@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import userSchema from '../schemas/db/userSchema.js';
+import { TEST_EMAIL_PATTERN } from '../utils/testAccount.js';
 
 export const User = mongoose.model('User', userSchema);
 
@@ -45,7 +46,7 @@ export const deleteStaleTestUsers = ({ createdBefore }) =>
   User.deleteMany({
     isAdmin: { $ne: true },
     createdAt: { $lt: createdBefore },
-    $or: [{ username: TEST_USERNAME_PATTERN }, { email: /@integration\.test$/ }],
+    $or: [{ username: TEST_USERNAME_PATTERN }, { email: TEST_EMAIL_PATTERN }],
   });
 
 export const findUsersByIds = (ids) =>

@@ -13,7 +13,9 @@ import {
   deletePostById,
   findUsersByIds,
   findPostCommentsMeta,
+  findUserById,
 } from '../models/index.js';
+import { isTestEmail } from '../utils/testAccount.js';
 
 // Levels 0, 1, 2 render indented, anything deeper gets flattened onto its level-2
 // ancestor. Keep in sync with MAX_THREAD_DEPTH in src/views/Home/constants/feed.ts.
@@ -29,9 +31,23 @@ const normalizePost = (doc) => {
   return plain;
 };
 
+const TEST_POST_LIFETIME_MS = 60_000;
+
 export const createPost = async ({ userId, title, content, image }) => {
   validate(createPostSchema, { title, content });
-  const post = await dbCreatePost({ title, content, user: userId, image: image || null });
+  // Only the integration suite's accounts get an expiry, and the server decides that
+  // from the author, never from anything the request sends.
+  const author = await findUserById(userId);
+  const expiresAt = isTestEmail(author?.email)
+    ? new Date(Date.now() + TEST_POST_LIFETIME_MS)
+    : undefined;
+  const post = await dbCreatePost({
+    title,
+    content,
+    user: userId,
+    image: image || null,
+    ...(expiresAt && { expiresAt }),
+  });
   return normalizePost(post);
 };
 

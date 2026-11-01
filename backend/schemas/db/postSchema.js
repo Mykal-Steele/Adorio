@@ -26,6 +26,8 @@ const postSchema = new mongoose.Schema(
       },
     ],
     image: { type: imageSchema, default: null },
+    // Set by the server for integration test posts only. Posts without it never expire.
+    expiresAt: { type: Date },
   },
   {
     timestamps: true,
@@ -38,11 +40,7 @@ postSchema.index({ createdAt: -1 });
 postSchema.index({ user: 1, createdAt: -1 });
 postSchema.index({ 'comments.createdAt': -1 });
 
-// Deletes the posts the integration suite creates. Mongo's TTL sweep runs about
-// once a minute, so 60s is as low as it is worth going.
-postSchema.index(
-  { createdAt: 1 },
-  { expireAfterSeconds: 60, partialFilterExpression: { title: 'Integration Test Post' } },
-);
+// Mongo deletes a post once its expiresAt has passed, checked about once a minute.
+postSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export default postSchema;

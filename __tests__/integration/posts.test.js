@@ -126,6 +126,9 @@ describe('Posts API', () => {
       expect(res.status).toBe(201);
       expect(res.data).toHaveProperty('_id');
       expect(res.data.content).toBe('Created by integration test suite.');
+      // The suite's accounts use @integration.test emails, so the server marks the
+      // post to delete itself shortly after.
+      expect(new Date(res.data.expiresAt).getTime()).toBeGreaterThan(Date.now());
       createdPostId = res.data._id;
     });
 
