@@ -24,6 +24,7 @@
     "sync-platform": "node scripts/sync-platform-deps.cjs",
     "check-nginx-routes": "node scripts/check-nginx-routes.cjs",
     "secrets": "node scripts/rotate-secrets.mjs",
+    "secrets:check": "node scripts/secrets-check.mjs",
     "test": "npm run test:dev",
     "test:unit": "for f in __tests__/unit/*.test.js; do bun test \"$f\" || exit 1; done",
     "test:integration": "npx jest --testPathPattern __tests__/integration/ --runInBand --forceExit",
