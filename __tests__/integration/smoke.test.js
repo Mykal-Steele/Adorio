@@ -1,12 +1,14 @@
 const axios = require('axios');
-const puppeteer = require('puppeteer');
 const { BASE_URL, waitForBackend } = require('./helpers');
 
 describe('Smoke, Environment, Security, SEO, Performance', () => {
+  let puppeteer;
   let browser;
   let nodeEnv;
 
   beforeAll(async () => {
+    // puppeteer 25 is ESM only, so it loads through import() instead of require()
+    ({ default: puppeteer } = await import('puppeteer'));
     await waitForBackend();
     const res = await axios.get(`${BASE_URL}/api/test-env`, { validateStatus: null });
     nodeEnv = res.status === 200 ? res.data.NODE_ENV : 'production';
