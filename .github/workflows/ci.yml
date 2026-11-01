@@ -61,15 +61,16 @@ jobs:
     name: Integration tests (prod)
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
+      # the tests only use the root packages (jest, axios, puppeteer). The app is installed
+      # and built inside the Docker image, which ignores the host node_modules.
       - name: Install dependencies
-        run: npm run setup
+        run: npm ci
       - name: Set Puppeteer Chrome path
         run: |
           CHROME=$(which google-chrome-stable 2>/dev/null || which google-chrome 2>/dev/null || which chromium-browser 2>/dev/null || which chromium 2>/dev/null || echo "")
@@ -110,7 +111,8 @@ jobs:
   deploy:
     name: Deploy to Azure Container Apps
     runs-on: ubuntu-latest
-    needs: integration
+    # build runs next to integration now, so deploy waits for both
+    needs: [integration, build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     # One deploy at a time. Container Apps rejects an update while another is still
     # provisioning, so merges that landed close together failed each other, and the one that
