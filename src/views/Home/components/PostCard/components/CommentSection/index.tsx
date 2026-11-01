@@ -30,7 +30,6 @@ interface CommentSectionProps {
 const CommentSection = ({ visible, comments, onClose, onSubmitComment }: CommentSectionProps) => {
   const [draft, setDraft] = useState('');
   const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -66,21 +65,23 @@ const CommentSection = ({ visible, comments, onClose, onSubmitComment }: Comment
     resetMentions();
   };
 
+  // The comment shows up in the list and the box empties as soon as Enter is pressed,
+  // the same way the like button and the comment count react. If the server turns it
+  // down, the text goes back into the box so nothing typed is lost.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const text = draft.trim();
-    if (!text || isSubmitting) return;
-    setIsSubmitting(true);
+    if (!text) return;
+    const target = replyTarget;
+    const mentions = resolveMentionIds(text);
+    setDraft('');
+    setReplyTarget(null);
+    resetMentions();
     try {
-      await onSubmitComment(text, {
-        parentId: replyTarget?.id ?? null,
-        mentions: resolveMentionIds(text),
-      });
-      setDraft('');
-      setReplyTarget(null);
-      resetMentions();
-    } finally {
-      setIsSubmitting(false);
+      await onSubmitComment(text, { parentId: target?.id ?? null, mentions });
+    } catch {
+      setDraft((current) => (current === '' ? text : current));
+      setReplyTarget((current) => current ?? target);
     }
   };
 
@@ -118,7 +119,6 @@ const CommentSection = ({ visible, comments, onClose, onSubmitComment }: Comment
         value={draft}
         onChange={setDraft}
         onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
         showEmojiPicker={showEmojiPicker}
         onToggleEmojiPicker={setShowEmojiPicker}
         onEmojiSelect={handleEmojiSelect}
