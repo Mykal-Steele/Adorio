@@ -15,7 +15,7 @@ const connectDatabase = async ({ retries = 5, delayMs = 5000 } = {}) => {
 
   while (attempt <= retries) {
     try {
-      await mongoose.connect(environment.mongoUri);
+      await mongoose.connect(environment.mongoUri, { appName: 'adorio' });
       console.log('Connected to MongoDB');
       return mongoose.connection;
     } catch (error) {
