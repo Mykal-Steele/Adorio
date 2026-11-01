@@ -16,11 +16,21 @@ export function cleanInput(raw, key) {
 const fail = (problem) => ({ ok: false, problem });
 const pass = (value, warnings = []) => ({ ok: true, value, warnings });
 
+// URL cannot read a host list (h1:27017,h2:27017), so give it just the first host.
+function firstHostOnly(value) {
+  const start = value.indexOf('://') + 3;
+  const end = value.slice(start).search(/[/?]/);
+  const authority = end === -1 ? value.slice(start) : value.slice(start, start + end);
+  const hostsAt = authority.lastIndexOf('@') + 1;
+  const comma = authority.indexOf(',', hostsAt);
+  if (comma === -1) return value;
+  return value.slice(0, start + comma) + value.slice(start + authority.length);
+}
+
 function checkMongoUri(value) {
   let url;
   try {
-    // URL cannot read a host list (h1:27017,h2:27017), so it sees only the first host.
-    url = new URL(value.replace(/(@?[^@/?,]+)(?:,[^@/?]+)+(?=[/?]|$)/, '$1'));
+    url = new URL(firstHostOnly(value));
   } catch {
     return fail('This is not a valid connection string. It should start with mongodb+srv://');
   }
