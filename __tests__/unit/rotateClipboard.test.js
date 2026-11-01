@@ -27,6 +27,7 @@ describe('copyToClipboard', () => {
     expect(copy.command).toBe('wl-copy');
     expect(copy.args).toEqual(['--sensitive']);
     expect(copy.options.input).toBe('KEY=value-123\n');
+    expect(copy.options.background).toBe(true);
     expect(JSON.stringify(run.calls.map((c) => c.args))).not.toContain('value-123');
   });
 

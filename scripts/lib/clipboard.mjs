@@ -40,7 +40,11 @@ export async function copyToClipboard(text, { run = defaultRun, env = process.en
     if (!tool.when(env)) continue;
     const probe = await run(tool.name, tool.probe, { timeoutMs: 10_000 });
     if (probe.code === 127) continue;
-    const result = await run(tool.name, tool.args, { input: text, timeoutMs: 10_000 });
+    const result = await run(tool.name, tool.args, {
+      input: text,
+      timeoutMs: 10_000,
+      background: true,
+    });
     if (result.code === 0) return { ok: true, tool: tool.name, hidden: tool.hidden };
   }
   return { ok: false, reason: 'No clipboard tool was found (wl-copy, xclip, xsel).' };

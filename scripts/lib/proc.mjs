@@ -3,11 +3,16 @@ import { spawn } from 'node:child_process';
 // Runs a program without a shell, so nothing typed or pasted can be read as a
 // command. It never throws: the caller gets { code, stdout, stderr }, with 127 for
 // a missing program and 124 for a timeout.
+//
+// `background` is for programs that start a process of their own and leave it running,
+// such as wl-copy, which keeps serving the clipboard after it returns. That process holds
+// the output pipes open, so waiting for them to close would never end. With it, the
+// program's output is dropped and the call returns as soon as the program itself exits.
 export function createRunner({ baseEnv = process.env } = {}) {
   return function run(
     command,
     args = [],
-    { input, timeoutMs = 120_000, inherit = false, env = {} } = {},
+    { input, timeoutMs = 120_000, inherit = false, background = false, env = {} } = {},
   ) {
     return new Promise((resolve) => {
       let stdout = '';
@@ -26,7 +31,9 @@ export function createRunner({ baseEnv = process.env } = {}) {
       try {
         child = spawn(command, args, {
           env: { ...baseEnv, ...env },
-          stdio: inherit ? 'inherit' : ['pipe', 'pipe', 'pipe'],
+          stdio: inherit
+            ? 'inherit'
+            : ['pipe', background ? 'ignore' : 'pipe', background ? 'ignore' : 'pipe'],
           shell: false,
         });
       } catch (error) {
@@ -47,7 +54,7 @@ export function createRunner({ baseEnv = process.env } = {}) {
             error.code === 'ENOENT' ? `${command} is not installed or not on PATH.` : error.message,
         });
       });
-      child.on('close', (code) => {
+      child.on(background ? 'exit' : 'close', (code) => {
         if (timedOut) {
           finish({
             code: 124,
@@ -60,8 +67,8 @@ export function createRunner({ baseEnv = process.env } = {}) {
       });
 
       if (!inherit) {
-        child.stdout.on('data', (chunk) => (stdout += chunk));
-        child.stderr.on('data', (chunk) => (stderr += chunk));
+        child.stdout?.on('data', (chunk) => (stdout += chunk));
+        child.stderr?.on('data', (chunk) => (stderr += chunk));
         child.stdin.on('error', () => {});
         child.stdin.end(input);
       }
