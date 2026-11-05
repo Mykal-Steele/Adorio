@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
+import { forgetScroll, forgetScrollExcept } from '../hooks/useScrollMemory';
 
 const IDEContext = createContext<{
   sidePanelOpen: boolean;
@@ -56,9 +57,15 @@ export function IDEProvider({ children }: { children: ReactNode }) {
         terminalOpen,
         toggleTerminal: () => setTerminalOpen((v) => !v),
         openTabs,
-        closeTab: (path) => setOpenTabs((prev) => prev.filter((t) => t !== path)),
+        closeTab: (path) => {
+          forgetScroll(path);
+          setOpenTabs((prev) => prev.filter((t) => t !== path));
+        },
         // The page on screen always keeps its tab
-        closeOtherTabs: () => setOpenTabs([pathname]),
+        closeOtherTabs: () => {
+          forgetScrollExcept(pathname);
+          setOpenTabs([pathname]);
+        },
         themeHintEnabled,
         setThemeHintEnabled,
       }}
