@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { portfolioData } from '../../src/views/Portfolio/data/portfolio.ts';
 import { projectsForSkill, skillsForProject } from '../../src/views/Portfolio/data/skills.ts';
 import { liveLabel } from '../../src/views/Portfolio/data/links.ts';
@@ -177,5 +178,57 @@ describe('portfolio redirects', () => {
       .map((p) => `/projects/${p.id}`)
       .filter((path) => sources.includes(path));
     expect(shadowed).toEqual([]);
+  });
+});
+
+describe('portfolio certificates', () => {
+  const certs = portfolioData.certificates;
+  const cert = (id) => certs.find((c) => c.id === id);
+
+  test('should list ISC2 CC, Google IT Support and Microsoft Student Ambassador', () => {
+    expect(certs.map((c) => c.id).sort()).toEqual(['google-it-support', 'isc2-cc', 'msa']);
+    expect(cert('isc2-cc').name).toBe('ISC2 Certified in Cybersecurity (CC)');
+    expect(cert('google-it-support').name).toBe('Google IT Support Professional Certificate');
+    expect(cert('msa').name).toBe('Microsoft Student Ambassador');
+  });
+
+  test('should name the issuer and the year for every certificate', () => {
+    for (const c of certs) {
+      expect(c.issuer).toBeTruthy();
+      expect(c.issued).toMatch(/2026/);
+      expect(c.summary.length).toBeGreaterThan(20);
+    }
+  });
+
+  test('should ship an image file and alt text for every certificate', () => {
+    for (const c of certs) {
+      expect(c.image.src).toMatch(/^\/certificates\/.+\.(webp|png|jpg)$/);
+      expect(existsSync(`public${c.image.src}`)).toBe(true);
+      expect(c.image.alt.length).toBeGreaterThan(10);
+      expect(c.image.width).toBeGreaterThan(0);
+      expect(c.image.height).toBeGreaterThan(0);
+    }
+  });
+
+  test('should link the Google certificate to its Coursera verification page', () => {
+    expect(cert('google-it-support').verifyUrl).toBe(
+      'https://coursera.org/verify/professional-cert/5C70N9AVQC69',
+    );
+  });
+
+  test('should list the six courses of the Google certificate', () => {
+    expect(cert('google-it-support').courses).toEqual([
+      'Technical Support Fundamentals',
+      'The Bits and Bytes of Computer Networking',
+      'Operating Systems and You: Becoming a Power User',
+      'System Administration and IT Infrastructure Services',
+      'IT Security: Defense against the digital dark arts',
+      'Accelerate Your Job Search with AI',
+    ]);
+  });
+
+  test('should not claim a verification link for certificates that have none', () => {
+    expect(cert('isc2-cc').verifyUrl).toBeUndefined();
+    expect(cert('msa').verifyUrl).toBeUndefined();
   });
 });

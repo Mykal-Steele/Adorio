@@ -1,11 +1,18 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { IntentLink } from '@/components/IntentLink';
 import { ChevronRight, Folder as FolderClosed, FolderOpen } from 'lucide-react';
 import { portfolioData } from './data/portfolio';
-import { ROOT_FILES, projectFileName } from './data/files';
+import {
+  CERTIFICATES_INDEX,
+  ROOT_FILES,
+  certificateFileName,
+  initialOpenFolders,
+  projectFileName,
+  revealFolder,
+} from './data/files';
 import { usePendingNavPath } from './hooks/usePendingNavPath';
 import { sans } from './constants/fonts';
 import { FileIcon } from './shared';
@@ -57,11 +64,13 @@ function Folder({
   color,
   open,
   onToggle,
+  depth = 0,
   children,
 }: {
   name: string;
   color: string;
   open: boolean;
+  depth?: number;
   onToggle: () => void;
   children: ReactNode;
 }) {
@@ -74,7 +83,7 @@ function Folder({
         className="ide-hover"
         style={{
           ...rowStyle,
-          paddingLeft: 8,
+          paddingLeft: 8 + depth * 22,
           gap: 6,
           background: 'transparent',
           color: 'var(--ide-text-1)',
@@ -96,7 +105,7 @@ function Folder({
             aria-hidden="true"
             style={{
               position: 'absolute',
-              left: 15,
+              left: 15 + depth * 22,
               top: 0,
               bottom: 0,
               width: 1,
@@ -113,8 +122,14 @@ function Folder({
 // The shell renders it inline on wide screens and inside a drawer below lg
 export function SidePanel({ inDrawer = false }: { inDrawer?: boolean }) {
   const pathname = usePathname();
-  const [projectsOpen, setProjectsOpen] = useState(pathname.startsWith('/projects/'));
-  const [skillsOpen, setSkillsOpen] = useState(true);
+  const [open, setOpen] = useState(() => initialOpenFolders(pathname));
+  const toggle = (folder: keyof typeof open) =>
+    setOpen((prev) => ({ ...prev, [folder]: !prev[folder] }));
+
+  // The explorer stays mounted while pages change, so open the folder of the page you land on
+  useEffect(() => {
+    setOpen((prev) => revealFolder(prev, pathname));
+  }, [pathname]);
 
   return (
     <nav
@@ -147,8 +162,8 @@ export function SidePanel({ inDrawer = false }: { inDrawer?: boolean }) {
         <Folder
           name="projects"
           color="var(--ide-blue)"
-          open={projectsOpen}
-          onToggle={() => setProjectsOpen((v) => !v)}
+          open={open.projects}
+          onToggle={() => toggle('projects')}
         >
           {portfolioData.projects.map((p) => (
             <FileRow key={p.id} path={`/projects/${p.id}`} name={projectFileName(p.id)} depth={1} />
@@ -157,11 +172,27 @@ export function SidePanel({ inDrawer = false }: { inDrawer?: boolean }) {
         <Folder
           name="skills"
           color="var(--ide-orange)"
-          open={skillsOpen}
-          onToggle={() => setSkillsOpen((v) => !v)}
+          open={open.skills}
+          onToggle={() => toggle('skills')}
         >
           {portfolioData.skills.map((s) => (
             <FileRow key={s.id} path={`/skills/${s.id}`} name={`${s.id}.md`} depth={1} />
+          ))}
+        </Folder>
+        <Folder
+          name="certificates"
+          color="var(--ide-green)"
+          open={open.certificates}
+          onToggle={() => toggle('certificates')}
+        >
+          <FileRow path={CERTIFICATES_INDEX.path} name={CERTIFICATES_INDEX.name} depth={1} />
+          {portfolioData.certificates.map((c) => (
+            <FileRow
+              key={c.id}
+              path={`/certificates/${c.id}`}
+              name={certificateFileName(c.id)}
+              depth={1}
+            />
           ))}
         </Folder>
         <FileRow path={ROOT_FILES[2].path} name={ROOT_FILES[2].name} depth={0} />

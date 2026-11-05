@@ -1,4 +1,4 @@
-import { Braces, FileText, Terminal } from 'lucide-react';
+import { Award, Braces, FileText, Terminal } from 'lucide-react';
 import { portfolioData } from '../data/portfolio';
 import { TechLogo, skillIdForLanguage } from './TechLogo';
 
@@ -12,6 +12,9 @@ export function FileIcon({ path, size = 16 }: { path: string; size?: number }) {
     ) : (
       <FileText size={size} color="var(--ide-text-5)" />
     );
+  }
+  if (path === '/certificates' || folder === 'certificates') {
+    return <Award size={size} color="var(--ide-text-5)" className="shrink-0" />;
   }
   if (path === '/projects') return <Braces size={size} color="var(--ide-text-5)" />;
   if (path === '/contact') return <Terminal size={size} color="var(--ide-text-5)" />;

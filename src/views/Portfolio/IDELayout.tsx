@@ -20,6 +20,7 @@ import { sans } from './constants/fonts';
 import { eyebrow } from './constants/type';
 import { SettingsButton } from './shared';
 import { prefersReducedMotion } from './motion';
+import { useScrollMemory } from './hooks/useScrollMemory';
 
 type MobileDrawerType = 'explorer' | 'terminal' | 'more' | null;
 
@@ -146,6 +147,8 @@ function usePageEnter() {
 function Shell({ children }: { children: ReactNode }) {
   const { terminalOpen, sidePanelOpen } = useIDE();
   const pageRef = usePageEnter();
+  const mainRef = useRef<HTMLElement>(null);
+  useScrollMemory(mainRef);
   const [drawer, setDrawer] = useState<MobileDrawerType>(null);
   const open = (type: MobileDrawerType) => setDrawer(type);
   const close = () => setDrawer(null);
@@ -222,6 +225,7 @@ function Shell({ children }: { children: ReactNode }) {
             <TabBar />
           </div>
           <main
+            ref={mainRef}
             className="@container flex-1 overflow-y-auto"
             style={{
               background: 'var(--ide-bg-0)',

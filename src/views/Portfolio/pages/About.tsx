@@ -3,12 +3,29 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, type CSSProperties, type ReactNode } from 'react';
-import { ChevronDown, Download, Github, Linkedin, Mail, MessageSquare } from 'lucide-react';
+import {
+  ArrowRight,
+  ChevronDown,
+  Download,
+  ExternalLink,
+  Github,
+  Linkedin,
+  Mail,
+  MessageSquare,
+} from 'lucide-react';
 import { portfolioData, type Project, type SkillGroup } from '../data/portfolio';
 import { skillsForProject } from '../data/skills';
 import { sans, serif } from '../constants/fonts';
 import { body, eyebrow, preview } from '../constants/type';
-import { LiveTag, LogoTile, ProjectImage, SectionLabel, StatusLabel, Tape } from '../shared';
+import {
+  CertificateCard,
+  LiveTag,
+  LogoTile,
+  ProjectImage,
+  SectionLabel,
+  StatusLabel,
+  Tape,
+} from '../shared';
 
 const FEATURED_IDS = ['chronochunk', 'coding-challenges', 'create-adorex'];
 const SKILL_GROUPS: SkillGroup[] = ['Languages', 'Web & Backend', 'Databases', 'Tools & Infra'];
@@ -510,6 +527,7 @@ function Community() {
     display: 'flex',
     alignItems: 'center',
     gap: 20,
+    height: '100%',
     padding: 20,
     background: 'var(--ide-bg-3)',
     borderRadius: 3,
@@ -715,39 +733,31 @@ export function About() {
 
       <Band>
         <SectionLabel>Certificates</SectionLabel>
-        <ul className="flex flex-col" style={{ gap: 12, margin: 0, padding: 0, listStyle: 'none' }}>
+        <ul
+          className="grid grid-cols-1 @[880px]:grid-cols-3"
+          style={{ gap: 24, margin: 0, padding: 0, listStyle: 'none' }}
+        >
           {portfolioData.certificates.map((cert) => (
-            <li key={cert.name}>
-              <a
-                href={`https://${portfolioData.linkedin}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="pf-card block"
-                style={{
-                  padding: 20,
-                  background: 'var(--ide-bg-3)',
-                  borderRadius: 3,
-                  textDecoration: 'none',
-                }}
-              >
-                <span
-                  style={{
-                    display: 'block',
-                    fontFamily: serif,
-                    fontSize: 20,
-                    fontWeight: 700,
-                    color: 'var(--ide-text-1)',
-                  }}
-                >
-                  {cert.name}
-                </span>
-                <span style={{ ...body, display: 'block', fontSize: 15, marginTop: 4 }}>
-                  {cert.detail}
-                </span>
-              </a>
+            <li key={cert.id}>
+              <CertificateCard certificate={cert} sizes="(min-width: 1200px) 320px, 100vw" />
             </li>
           ))}
         </ul>
+        <div className="flex flex-wrap items-center" style={{ gap: 12, marginTop: 24 }}>
+          <Link href="/certificates" className="pf-btn">
+            See all certificates
+            <ArrowRight size={14} />
+          </Link>
+          <a
+            href={`https://${portfolioData.linkedin}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pf-btn"
+          >
+            More on LinkedIn
+            <ExternalLink size={14} />
+          </a>
+        </div>
       </Band>
     </div>
   );
