@@ -12,3 +12,5 @@ export { TechLogo, skillIdForLanguage } from './TechLogo';
 export { Lightbox } from './Lightbox';
 export { SettingsButton } from './SettingsButton';
 export { LiveTag } from './LiveTag';
+export { CertificateImage } from './CertificateImage';
+export { CertificateCard } from './CertificateCard';

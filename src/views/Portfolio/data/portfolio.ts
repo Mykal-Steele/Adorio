@@ -97,6 +97,19 @@ export interface Skill {
   setup?: SetupGroup[];
 }
 
+export interface Certificate {
+  id: string;
+  name: string;
+  issuer: string;
+  issued: string;
+  summary: string;
+  // Shown as a list on the certificate page
+  courses?: string[];
+  // Only for certificates that can be checked online
+  verifyUrl?: string;
+  image: Omit<ProjectShot, 'caption'>;
+}
+
 export type SetupGroup = {
   group: string;
   items: { label: string; value: string }[];
@@ -145,10 +158,57 @@ export const portfolioData = {
 
   certificates: [
     {
-      name: 'Google IT Support Professional Certificate',
-      detail: 'Plus other Coursera and Microsoft Learn certificates, all listed on LinkedIn.',
+      id: 'isc2-cc',
+      name: 'ISC2 Certified in Cybersecurity (CC)',
+      issuer: 'ISC2',
+      issued: '2026',
+      summary:
+        'I passed the CC exam and agreed to the ISC2 Code of Ethics. The exam covers security principles, access control, network security, incident response, and security operations. ISC2 asks for renewal every three years.',
+      image: {
+        src: '/certificates/isc2-cc.webp',
+        alt: 'ISC2 Certified in Cybersecurity certificate awarded to Oakar Oo',
+        width: 1650,
+        height: 1275,
+      },
     },
-  ],
+    {
+      id: 'google-it-support',
+      name: 'Google IT Support Professional Certificate',
+      issuer: 'Google, on Coursera',
+      issued: 'Jul 2026',
+      summary:
+        'Six courses on IT support work: troubleshooting, computer networking, operating systems, system administration, and IT security. I finished it on Jul 29, 2026.',
+      courses: [
+        'Technical Support Fundamentals',
+        'The Bits and Bytes of Computer Networking',
+        'Operating Systems and You: Becoming a Power User',
+        'System Administration and IT Infrastructure Services',
+        'IT Security: Defense against the digital dark arts',
+        'Accelerate Your Job Search with AI',
+      ],
+      verifyUrl: 'https://coursera.org/verify/professional-cert/5C70N9AVQC69',
+      image: {
+        src: '/certificates/google-it-support.webp',
+        alt: 'Google IT Support Professional Certificate from Coursera, completed by Oakar Oo',
+        width: 1201,
+        height: 928,
+      },
+    },
+    {
+      id: 'msa',
+      name: 'Microsoft Student Ambassador',
+      issuer: 'Microsoft',
+      issued: '2026',
+      summary:
+        "Certificate for being part of the Microsoft Student Ambassadors community, signed by Pablo Veramendi, the program's global director. I joined in Apr 2026.",
+      image: {
+        src: '/certificates/microsoft-student-ambassador.webp',
+        alt: 'Microsoft Student Ambassadors 2026 certificate presented to Oakar Oo',
+        width: 1462,
+        height: 1130,
+      },
+    },
+  ] as Certificate[],
 
   now: [
     {
