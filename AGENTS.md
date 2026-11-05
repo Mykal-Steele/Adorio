@@ -131,7 +131,7 @@ src/views/Portfolio/
 ├── IDELayout.tsx          — PortfolioShell and one Shell; CSS breakpoints pick which bars show
 ├── TitleBar.tsx            — 48px top bar with Portfolio label + ThemeSwitcher
 ├── ActivityBar.tsx         — 48px left column, one button that shows or hides the explorer
-├── SidePanel.tsx           — 240px explorer: root files plus projects/ and skills/ folders
+├── SidePanel.tsx           — 240px explorer: root files plus projects/, skills/ and certificates/ folders. Projects starts open, the others closed
 ├── TabBar.tsx              — 40px tab row of open files, closable like an editor
 ├── StatusBar.tsx           — 24px bottom status bar
 ├── Terminal.tsx            — Animated boot terminal with interactive commands
@@ -139,19 +139,22 @@ src/views/Portfolio/
 │   ├── IDEContext.tsx      — sidePanelOpen, terminalOpen, openTabs (every visited page gets a tab)
 │   └── ThemeContext.tsx    — theme names and labels, plus useTheme over next-themes
 ├── hooks/useContentWidth.ts — editor-area width, only for behavior (the theme tip); layout uses container queries
+├── hooks/useScrollMemory.ts + scrollMemory.ts — each page keeps its scroll position (the scroller is `<main>`, not the window), also across a refresh; closing a tab forgets it
 ├── data/portfolio.ts       — All portfolio content (projects, experience, skills with a `story` field, setup, timeline)
 ├── data/files.ts           — file names for tabs and the explorer
 ├── data/skills.ts          — which projects and roles mention each skill
 ├── constants/fonts.ts      — Font family strings
 ├── constants/status.ts     — statusConfig (display label per project status)
 ├── constants/type.ts       — shared text and button styles (eyebrow, body, primaryButton, textLink)
-├── shared/                 — IDECard (with Tape), FileIcon, Lightbox, LogoTile, PageHeader, ProjectCard, ProjectImage, SectionLabel, StatusLabel, TechLogo, ThemeHint, ThemeSwitcher
+├── shared/                 — IDECard (with Tape), CertificateCard, CertificateImage, FileIcon, Lightbox, LogoTile, PageHeader, ProjectCard, ProjectImage, SectionLabel, StatusLabel, TechLogo, ThemeHint, ThemeSwitcher
 ├── mobile/                 — MobileHeader, MobileNav, MobileDrawer
 └── pages/
     ├── About.tsx           — / (bio, social links, featured projects, stack, timeline, community)
     ├── Projects.tsx        — /projects (visual project card grid)
     ├── ProjectDetail.tsx   — /projects/[id] (accepts id prop)
     ├── SkillDetail.tsx     — /skills/[id]: logo, your story, and the projects and roles that use it
+    ├── Certificates.tsx    — /certificates (a card per certificate with its image)
+    ├── CertificateDetail.tsx — /certificates/[id]: the image (click for full size), summary, courses, verify link
     └── Contact.tsx         — /contact (channels + message form)
 ```
 
@@ -299,3 +302,13 @@ One centralized set at the repo root — frontend, backend, and Docker dev all r
 To rotate the secrets in these files, in Azure and on GitHub together, run `npm run secrets` and see `docs/secret-rotation.md`. `npm run secrets:check` compares them without changing anything.
 
 All of the above are gitignored and local-only. Nothing here is what's actually running in production — that's Azure Container App secrets (`infra/main.bicep`) and, for the Northflank failover copy, its own separately-configured dashboard env vars — anything changed here that the app needs at runtime must be mirrored there too.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

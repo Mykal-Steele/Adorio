@@ -43,7 +43,10 @@ src/
 │   │   ├── projects/
 │   │   │   ├── page.tsx         — /projects → mounts views/Portfolio/pages/Projects
 │   │   │   └── [id]/page.tsx    — /projects/[id] → mounts views/Portfolio/pages/ProjectDetail
-│   │   └── skills/[id]/page.tsx — /skills/[id] → mounts views/Portfolio/pages/SkillDetail
+│   │   ├── skills/[id]/page.tsx — /skills/[id] → mounts views/Portfolio/pages/SkillDetail
+│   │   └── certificates/
+│   │       ├── page.tsx         — /certificates → mounts views/Portfolio/pages/Certificates
+│   │       └── [id]/page.tsx    — /certificates/[id] → mounts views/Portfolio/pages/CertificateDetail
 │   └── (with-navbar)/           — Route group: app pages (Navbar rendered in group layout)
 │       ├── layout.tsx           — Renders <Navbar /> above {children}
 │       ├── login/page.tsx       — /login → mounts views/Login
@@ -160,7 +163,7 @@ src/
     └── Portfolio/               — VSCode-style IDE portfolio (public-facing, no auth)
         ├── IDELayout.tsx        — PortfolioShell and one Shell; CSS breakpoints pick which bars show
         ├── ActivityBar.tsx      — 48px left column, toggles the explorer
-        ├── SidePanel.tsx        — Explorer tree: root files, projects/, skills/
+        ├── SidePanel.tsx        — Explorer tree: root files, projects/ (open at first), skills/ and certificates/ (closed at first)
         ├── TabBar.tsx           — Open files as closable tabs
         ├── TitleBar.tsx         — 48px top bar with Portfolio label + ThemeSwitcher
         ├── StatusBar.tsx        — 24px bottom status bar
@@ -170,14 +173,16 @@ src/
         │   ├── IDEContext.tsx   — sidePanelOpen, terminalOpen, openTabs
         │   └── ThemeContext.tsx — theme names and labels, useTheme over next-themes
         ├── data/portfolio.ts    — All portfolio content (projects, experience, skills, setup, timeline)
-        ├── data/files.ts        — File names for tabs and the explorer
+        ├── data/files.ts        — File names for tabs and the explorer, and which folders start open
         ├── data/skills.ts       — Projects and roles that mention each skill
         ├── constants/
         │   ├── fonts.ts         — Font family strings
         │   ├── status.ts        — statusConfig (display label per project status)
         │   └── type.ts          — shared text and button styles
+        ├── scrollMemory.ts      — Saves and loads each page's scroll position (sessionStorage)
         ├── hooks/
-        │   └── useContentWidth.ts — editor-area width for behavior only; layout uses container queries
+        │   ├── useContentWidth.ts — editor-area width for behavior only; layout uses container queries
+        │   └── useScrollMemory.ts — Puts each page back where it was left; the scroller is <main>, so the browser and Next.js can't
         ├── shared/              — IDE-specific shared primitives
         │   ├── index.ts         — Barrel export
         │   ├── IDECard.tsx      — Paper card with optional tape strip
@@ -188,6 +193,8 @@ src/
         │   ├── TechLogo.tsx     — simple-icons logo (or lettered tile) for a skill id
         │   ├── LogoTile.tsx     — Logo tile with a name tooltip
         │   ├── ProjectImage.tsx — Project screenshot, or a logo cover when there is none
+        │   ├── CertificateImage.tsx — Certificate image on a white sheet with a thin border
+        │   ├── CertificateCard.tsx — Equal-size certificate card used on About and /certificates
         │   ├── FileIcon.tsx     — Icon for a file in tabs and the explorer
         │   └── ThemeSwitcher.tsx — Theme selector dropdown
         ├── mobile/
@@ -199,6 +206,8 @@ src/
             ├── Projects.tsx     — /projects: visual project card grid
             ├── ProjectDetail.tsx — /projects/[id]: detailed project view
             ├── SkillDetail.tsx  — /skills/[id]: skill story and where it was used
+            ├── Certificates.tsx — /certificates: card grid of certificates
+            ├── CertificateDetail.tsx — /certificates/[id]: certificate image, summary, courses, verify link
             └── Contact.tsx      — /contact: channels + message form (uses contactSchema)
 ```
 
