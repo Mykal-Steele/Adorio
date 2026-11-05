@@ -1,57 +1,49 @@
-import { useEffect, useLayoutEffect, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react';
 import { usePathname } from 'next/navigation';
-import {
-  forgetPosition,
-  keepOnlyPosition,
-  loadScrollPositions,
-  saveScrollPositions,
-  scrollPositionFor,
-  type ScrollPositions,
-} from '../scrollMemory';
+import { createScrollMemory } from '../scrollMemory';
 
-const memory = { positions: {} as ScrollPositions, loaded: false };
+let memory: ReturnType<typeof createScrollMemory> | null = null;
 
-function session() {
-  try {
-    return window.sessionStorage;
-  } catch {
-    return null;
+function getMemory() {
+  if (!memory) {
+    let storage: Storage | null = null;
+    try {
+      storage = window.sessionStorage;
+    } catch {
+      // Storage blocked: positions last until the page is refreshed
+    }
+    memory = createScrollMemory(storage);
   }
+  return memory;
 }
-
-function ensureLoaded() {
-  if (memory.loaded) return;
-  memory.positions = loadScrollPositions(session());
-  memory.loaded = true;
-}
-
-const persist = () => saveScrollPositions(session(), memory.positions);
 
 // Closing a tab is like closing a file in an editor: next time it opens at the top
 export function forgetScroll(path: string) {
-  ensureLoaded();
-  memory.positions = forgetPosition(memory.positions, path);
-  persist();
+  const scrollMemory = getMemory();
+  scrollMemory.forget(path);
+  scrollMemory.persist();
 }
 
 export function forgetScrollExcept(path: string) {
-  ensureLoaded();
-  memory.positions = keepOnlyPosition(memory.positions, path);
-  persist();
+  const scrollMemory = getMemory();
+  scrollMemory.forgetExcept(path);
+  scrollMemory.persist();
 }
 
 // Keeps each page where you left it when you come back to it, and after a refresh.
 // A page you have not visited yet starts at the top.
 export function useScrollMemory(scroller: RefObject<HTMLElement | null>) {
   const pathname = usePathname();
+  const activePath = useRef(pathname);
 
   // Before the browser paints the new page, put it where it was left. The router scrolls to
   // the top of a new page during the same update, so this runs after it and wins.
   useLayoutEffect(() => {
     const el = scroller.current;
     if (!el) return;
-    ensureLoaded();
-    const top = scrollPositionFor(memory.positions, pathname);
+    // Set before scrollTop changes, so the scroll event that causes is filed under this page
+    activePath.current = pathname;
+    const top = getMemory().visit(pathname);
     el.scrollTop = top;
     // Applied again next frame in case the router's own scroll landed after this effect
     const frame = requestAnimationFrame(() => {
@@ -60,14 +52,15 @@ export function useScrollMemory(scroller: RefObject<HTMLElement | null>) {
     return () => cancelAnimationFrame(frame);
   }, [pathname, scroller]);
 
-  // Record the position as the page scrolls. The scroll events from a page change come after
-  // the effect above has put the new page in place, so they are filed under the new path.
+  // One listener for the life of the shell. It files each scroll under the page on screen.
   useEffect(() => {
     const el = scroller.current;
     if (!el) return;
+    const scrollMemory = getMemory();
+    const persist = () => scrollMemory.persist();
     let timer: ReturnType<typeof setTimeout>;
     const onScroll = () => {
-      memory.positions[pathname] = el.scrollTop;
+      scrollMemory.record(activePath.current, el.scrollTop);
       clearTimeout(timer);
       timer = setTimeout(persist, 150);
     };
@@ -75,8 +68,10 @@ export function useScrollMemory(scroller: RefObject<HTMLElement | null>) {
     window.addEventListener('pagehide', persist);
     return () => {
       clearTimeout(timer);
+      // Leaving the portfolio unmounts the shell without a pagehide, so save what is pending
+      persist();
       el.removeEventListener('scroll', onScroll);
       window.removeEventListener('pagehide', persist);
     };
-  }, [pathname, scroller]);
+  }, [scroller]);
 }

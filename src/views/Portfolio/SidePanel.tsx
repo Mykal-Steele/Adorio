@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { IntentLink } from '@/components/IntentLink';
 import { ChevronRight, Folder as FolderClosed, FolderOpen } from 'lucide-react';
@@ -11,6 +11,7 @@ import {
   certificateFileName,
   initialOpenFolders,
   projectFileName,
+  revealFolder,
 } from './data/files';
 import { usePendingNavPath } from './hooks/usePendingNavPath';
 import { sans } from './constants/fonts';
@@ -124,6 +125,11 @@ export function SidePanel({ inDrawer = false }: { inDrawer?: boolean }) {
   const [open, setOpen] = useState(() => initialOpenFolders(pathname));
   const toggle = (folder: keyof typeof open) =>
     setOpen((prev) => ({ ...prev, [folder]: !prev[folder] }));
+
+  // The explorer stays mounted while pages change, so open the folder of the page you land on
+  useEffect(() => {
+    setOpen((prev) => revealFolder(prev, pathname));
+  }, [pathname]);
 
   return (
     <nav

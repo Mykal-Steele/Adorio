@@ -38,3 +38,33 @@ export function forgetPosition(positions: ScrollPositions, path: string) {
 
 export const keepOnlyPosition = (positions: ScrollPositions, path: string): ScrollPositions =>
   path in positions ? { [path]: positions[path] } : {};
+
+type MemoryStorage = Pick<Storage, 'getItem' | 'setItem'>;
+
+// The positions for one tab session. A page whose tab was closed keeps scrolling for a moment
+// until the next page replaces it, so its scrolling is ignored until the page is shown again.
+export function createScrollMemory(storage: MemoryStorage | null) {
+  let positions = loadScrollPositions(storage);
+  const closed = new Set<string>();
+
+  return {
+    // Call when a page is shown. Returns where to scroll it to.
+    visit(path: string) {
+      closed.delete(path);
+      return scrollPositionFor(positions, path);
+    },
+    record(path: string, top: number) {
+      if (usable(top) && !closed.has(path)) positions[path] = top;
+    },
+    forget(path: string) {
+      positions = forgetPosition(positions, path);
+      closed.add(path);
+    },
+    forgetExcept(path: string) {
+      positions = keepOnlyPosition(positions, path);
+    },
+    persist() {
+      saveScrollPositions(storage, positions);
+    },
+  };
+}

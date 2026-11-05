@@ -3,6 +3,7 @@ import {
   certificateFileName,
   fileNameForPath,
   initialOpenFolders,
+  revealFolder,
 } from '../../src/views/Portfolio/data/files.ts';
 import sitemap from '../../src/app/sitemap.ts';
 
@@ -44,6 +45,48 @@ describe('explorer folders on first load', () => {
         skills: false,
         certificates: true,
       });
+    }
+  });
+});
+
+describe('revealing the folder of the open page', () => {
+  const closed = { projects: false, skills: false, certificates: false };
+
+  test('should open skills when a skill page is shown and leave the others alone', () => {
+    expect(revealFolder(closed, '/skills/bun')).toEqual({
+      projects: false,
+      skills: true,
+      certificates: false,
+    });
+  });
+
+  test('should open projects when a project page is shown', () => {
+    expect(revealFolder(closed, '/projects/adorio')).toEqual({
+      projects: true,
+      skills: false,
+      certificates: false,
+    });
+  });
+
+  test('should open certificates for the overview and for each certificate', () => {
+    for (const path of ['/certificates', '/certificates/isc2-cc']) {
+      expect(revealFolder(closed, path)).toEqual({
+        projects: false,
+        skills: false,
+        certificates: true,
+      });
+    }
+  });
+
+  test('should not close a folder the visitor opened', () => {
+    const open = { projects: true, skills: true, certificates: false };
+    expect(revealFolder(open, '/')).toEqual(open);
+    expect(revealFolder(open, '/certificates/msa')).toEqual({ ...open, certificates: true });
+  });
+
+  test('should change nothing for pages that are files at the root', () => {
+    for (const path of ['/', '/projects', '/contact']) {
+      expect(revealFolder(closed, path)).toEqual(closed);
     }
   });
 });

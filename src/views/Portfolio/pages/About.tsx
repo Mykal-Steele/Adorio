@@ -739,7 +739,7 @@ export function About() {
         >
           {portfolioData.certificates.map((cert) => (
             <li key={cert.id}>
-              <CertificateCard certificate={cert} sizes="(max-width: 880px) 100vw, 320px" />
+              <CertificateCard certificate={cert} sizes="(min-width: 1200px) 320px, 100vw" />
             </li>
           ))}
         </ul>

@@ -27,7 +27,7 @@ export function Certificates() {
           <li key={certificate.id}>
             <CertificateCard
               certificate={certificate}
-              sizes="(max-width: 880px) 100vw, 320px"
+              sizes="(min-width: 1200px) 320px, 100vw"
               priority={index === 0}
             />
           </li>

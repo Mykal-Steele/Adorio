@@ -34,12 +34,23 @@ export function fileNameForPath(path: string) {
   return path;
 }
 
-// Projects start open. Skills and certificates start closed unless the page on screen is
-// inside them, so the active file is never hidden.
-export function initialOpenFolders(pathname: string) {
-  return {
-    projects: true,
-    skills: pathname.startsWith('/skills/'),
-    certificates: pathname === '/certificates' || pathname.startsWith('/certificates/'),
-  };
+export type OpenFolders = { projects: boolean; skills: boolean; certificates: boolean };
+
+function folderForPath(pathname: string): keyof OpenFolders | null {
+  if (pathname.startsWith('/projects/')) return 'projects';
+  if (pathname.startsWith('/skills/')) return 'skills';
+  if (pathname === '/certificates' || pathname.startsWith('/certificates/')) return 'certificates';
+  return null;
 }
+
+// Opens the folder that holds the page on screen, so the active file is never hidden.
+// A folder the visitor opened stays open.
+export function revealFolder(open: OpenFolders, pathname: string): OpenFolders {
+  const folder = folderForPath(pathname);
+  return folder && !open[folder] ? { ...open, [folder]: true } : open;
+}
+
+// Projects start open. Skills and certificates start closed unless the page on screen is
+// inside them.
+export const initialOpenFolders = (pathname: string) =>
+  revealFolder({ projects: true, skills: false, certificates: false }, pathname);

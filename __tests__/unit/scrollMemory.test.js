@@ -1,5 +1,6 @@
 import {
   SCROLL_KEY,
+  createScrollMemory,
   forgetPosition,
   keepOnlyPosition,
   loadScrollPositions,
@@ -109,5 +110,66 @@ describe('forgetting positions when tabs close', () => {
     forgetPosition(positions, '/');
     keepOnlyPosition(positions, '/');
     expect(positions).toEqual({ '/': 640, '/projects': 200, '/contact': 30 });
+  });
+});
+
+describe('scroll memory for one tab session', () => {
+  test('should hand back where a page was left, also in a new session', () => {
+    const storage = fakeStorage();
+    const first = createScrollMemory(storage);
+    first.record('/', 640);
+    first.persist();
+    expect(createScrollMemory(storage).visit('/')).toBe(640);
+  });
+
+  test('should start a page that was never visited at the top', () => {
+    expect(createScrollMemory(fakeStorage()).visit('/contact')).toBe(0);
+  });
+
+  test('should not keep positions that are not usable numbers', () => {
+    const memory = createScrollMemory(fakeStorage());
+    memory.record('/', -5);
+    memory.record('/', Number.NaN);
+    expect(memory.visit('/')).toBe(0);
+  });
+
+  test('should save a position only when asked to persist', () => {
+    const storage = fakeStorage();
+    createScrollMemory(storage).record('/', 300);
+    expect(loadScrollPositions(storage)).toEqual({});
+  });
+
+  test('should ignore scrolling on a page whose tab was closed until it is shown again', () => {
+    const memory = createScrollMemory(fakeStorage());
+    memory.record('/projects/adorio', 400);
+    memory.forget('/projects/adorio');
+    // the page can still scroll for a moment before the next page replaces it
+    memory.record('/projects/adorio', 120);
+    expect(memory.visit('/projects/adorio')).toBe(0);
+    memory.record('/projects/adorio', 90);
+    expect(memory.visit('/projects/adorio')).toBe(90);
+  });
+
+  test('should keep recording other pages after one tab is closed', () => {
+    const memory = createScrollMemory(fakeStorage());
+    memory.forget('/projects/adorio');
+    memory.record('/', 700);
+    expect(memory.visit('/')).toBe(700);
+  });
+
+  test('should keep only the open page when the other tabs are closed', () => {
+    const memory = createScrollMemory(fakeStorage());
+    memory.record('/', 700);
+    memory.record('/contact', 50);
+    memory.forgetExcept('/contact');
+    expect(memory.visit('/')).toBe(0);
+    expect(memory.visit('/contact')).toBe(50);
+  });
+
+  test('should not throw when storage is blocked', () => {
+    const memory = createScrollMemory(blockedStorage);
+    memory.record('/', 10);
+    expect(() => memory.persist()).not.toThrow();
+    expect(memory.visit('/')).toBe(10);
   });
 });
