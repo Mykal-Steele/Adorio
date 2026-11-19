@@ -47,6 +47,7 @@ const facts = [
   },
   { label: 'Graduating', value: ['2028, both degrees'] },
   { label: 'Based in', value: [`${portfolioData.location} (${portfolioData.timezone})`] },
+  { label: 'Also known as', value: ['Kruskal', 'Mykal-Steele on GitHub'] },
 ];
 
 // What a recruiter should take away in one pass; each line links to the full write-up

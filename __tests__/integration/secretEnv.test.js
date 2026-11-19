@@ -51,7 +51,7 @@ describe('SecretEnv API', () => {
 
     expect(store.status).toBe(201);
     expect(store.data.name).toBe(name);
-    expect(store.data.retrievalCommand).toContain('env.adorio.space');
+    expect(store.data.retrievalCommand).toContain('env.oakar.dev');
 
     const queryGet = await getText(`${BASE_URL}/api/secretenv?name=${name}`, passphrase);
     expect(queryGet.status).toBe(200);

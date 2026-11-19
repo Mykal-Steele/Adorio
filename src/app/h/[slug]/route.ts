@@ -45,7 +45,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ slu
   }
 
   // Legacy: files uploaded before R2 stored their HTML in Mongo directly. It's someone's
-  // HTML served on adorio.space itself, so it runs sandboxed: without allow-same-origin it
+  // HTML served on oakar.dev itself, so it runs sandboxed: without allow-same-origin it
   // gets an opaque origin and its scripts can't read this site's storage (where the login
   // token lives) or call the API as the visitor. Scripts, forms and popups still work.
   const html = await res.text();

@@ -7,7 +7,7 @@ param containerAppName = 'adorio'
 param deployIdentityName = 'adorio-github-deploy-identity'
 param githubRepo = 'Mykal-Steele/Adorio'
 
-param clientUrl = 'https://adorio.space'
+param clientUrl = 'https://oakar.dev'
 
 // Values below are read from the environment at deploy time and never committed.
 // Apply with `node infra/deploy.mjs`, which loads them from .env.production and sets
@@ -36,7 +36,7 @@ param r2AccountId = readEnvironmentVariable('R2_ACCOUNT_ID', '')
 param r2AccessKeyId = readEnvironmentVariable('R2_ACCESS_KEY_ID', '')
 param r2SecretAccessKey = readEnvironmentVariable('R2_SECRET_ACCESS_KEY', '')
 param r2Bucket = readEnvironmentVariable('R2_BUCKET', 'adorio-hosted')
-param r2PublicUrl = readEnvironmentVariable('R2_PUBLIC_URL', 'https://files.adorio.space')
+param r2PublicUrl = readEnvironmentVariable('R2_PUBLIC_URL', 'https://files.oakar.dev')
 
 // Cloudflare Turnstile bot check on uploads. Defaults to '' so a deploy with
 // these unset leaves the check off.

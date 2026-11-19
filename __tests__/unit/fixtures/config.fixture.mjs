@@ -29,7 +29,7 @@ export const CONFIG = {
   mongo: { probeCollections: ['users', 'posts'] },
   health: {
     path: '/api/health',
-    publicUrl: 'https://adorio.space',
+    publicUrl: 'https://oakar.dev',
     backupHeader: {
       name: 'x-served-by',
       value: 'northflank-backup',

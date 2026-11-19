@@ -123,6 +123,8 @@ const defaultOrigins = [
   'http://localhost:3001',
   'http://localhost:5173',
   'http://localhost:5174', // vite's fallback port
+  'https://oakar.dev',
+  // the old domain only redirects now, kept so a tab left open from before still works
   'https://adorio.space',
   'http://adorio.space',
   'https://www.adorio.space',

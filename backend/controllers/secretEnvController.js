@@ -13,14 +13,14 @@ const storeSecretMessage = asyncHandler(async (req, res) => {
     res.status(201).json({
       message: 'Secret message stored successfully',
       name: result.name,
-      retrievalCommand: 'curl -fsSL https://env.adorio.space | sh',
+      retrievalCommand: 'curl -fsSL https://env.oakar.dev | sh',
     });
     return;
   }
 
   res.status(201).json({
     message: 'Secret message stored successfully',
-    retrievalCommand: `curl -H "Authorization: ${result.realPassword}" https://adorio.space/api/secretenv`,
+    retrievalCommand: `curl -H "Authorization: ${result.realPassword}" https://oakar.dev/api/secretenv`,
   });
 });
 

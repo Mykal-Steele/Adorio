@@ -73,7 +73,7 @@ param r2SecretAccessKey string = ''
 param r2Bucket string = 'adorio-hosted'
 
 @description('Public base URL files are served from — the bucket\'s custom domain, no trailing slash')
-param r2PublicUrl string = 'https://files.adorio.space'
+param r2PublicUrl string = 'https://files.oakar.dev'
 
 var r2Enabled = !empty(r2AccountId) && !empty(r2AccessKeyId) && !empty(r2SecretAccessKey)
 
@@ -108,7 +108,7 @@ resource runnerControlIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities
   name: runnerControlIdentityName
 }
 
-param clientUrl string = 'https://adorio.space'
+param clientUrl string = 'https://oakar.dev'
 param cloudinaryName string
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {

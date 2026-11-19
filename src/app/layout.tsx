@@ -7,17 +7,22 @@ import Script from 'next/script';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { NavigationProgressBar } from '@/components/NavigationProgressBar';
 import { fontVariables } from './fonts';
+import { JsonLd } from '@/components/JsonLd';
+import { PROFILES, SITE_URL, siteJsonLd } from '@/lib/identity';
 
 export const metadata: Metadata = {
-  title: { default: 'Adorio', template: '%s | Adorio' },
+  title: { default: 'Oakar Oo', template: '%s | Oakar Oo' },
   description:
-    'Oakar Oo, a backend developer in Bangkok. My portfolio, projects, and apps all live on adorio.space.',
-  metadataBase: new URL('https://adorio.space'),
+    'Oakar Oo, a backend developer in Bangkok. My portfolio, projects, and apps all live on oakar.dev.',
+  metadataBase: new URL('https://oakar.dev'),
+  authors: [{ name: 'Oakar Oo', url: SITE_URL }],
+  creator: 'Oakar Oo',
+  twitter: { creator: '@kruskal_oakar' },
   openGraph: {
-    siteName: 'Adorio',
+    siteName: 'Oakar Oo',
     images: [
       {
-        url: 'https://adorio.space/og.png',
+        url: 'https://oakar.dev/og.png',
         width: 1200,
         height: 630,
         alt: 'Oakar Oo, backend developer',
@@ -43,6 +48,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {`try{if(localStorage.getItem('token')||sessionStorage.getItem('token'))document.documentElement.dataset.auth='in'}catch(e){}`}
         </Script>
         <link rel="preconnect" href="https://res.cloudinary.com" />
+        {/* Who owns the site. rel="me" says each profile is the same person as this page */}
+        <JsonLd data={siteJsonLd()} />
+        {PROFILES.map((profile) => (
+          <link key={profile.url} rel="me" href={profile.url} />
+        ))}
         {/* A fixed string from this file, nothing user supplied goes in it */}
         <script type="speculationrules" dangerouslySetInnerHTML={{ __html: SPECULATION_RULES }} />
       </head>

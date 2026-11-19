@@ -2,7 +2,7 @@
 set -e
 
 api="$ADORIO_API"
-[ -n "$api" ] || api='https://adorio.space/api/secretenv'
+[ -n "$api" ] || api='https://oakar.dev/api/secretenv'
 file="$ADORIO_ENV_FILE"
 [ -n "$file" ] || file='.env'
 

@@ -14,16 +14,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? `${certificate.name}, issued by ${certificate.issuer} in ${certificate.issued}.`
     : 'Certificate details.';
   return {
-    title,
+    title: { absolute: title },
     description,
+    alternates: { canonical: `/certificates/${id}` },
     openGraph: {
       title,
       description,
-      url: `https://adorio.space/certificates/${id}`,
+      url: `https://oakar.dev/certificates/${id}`,
       siteName: 'Oakar Oo',
       images: [
         {
-          url: 'https://adorio.space/og.png',
+          url: 'https://oakar.dev/og.png',
           width: 1200,
           height: 630,
           alt: 'Oakar Oo, backend developer',

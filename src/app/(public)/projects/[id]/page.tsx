@@ -12,20 +12,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = project ? `${project.name} | Oakar Oo` : 'Project | Oakar Oo';
   const description = project?.summary ?? 'Project details.';
   return {
-    title,
+    title: { absolute: title },
     description,
     keywords: project ? [project.name, 'Oakar Oo', ...project.stack] : ['Oakar Oo', 'project'],
+    alternates: { canonical: `/projects/${id}` },
     openGraph: {
       title,
       description,
-      url: `https://adorio.space/projects/${id}`,
+      url: `https://oakar.dev/projects/${id}`,
       siteName: 'Oakar Oo',
       type: 'article',
       images: [
         project?.image
-          ? { url: `https://adorio.space${project.image.src}`, alt: project.image.alt }
+          ? { url: `https://oakar.dev${project.image.src}`, alt: project.image.alt }
           : {
-              url: 'https://adorio.space/og.png',
+              url: 'https://oakar.dev/og.png',
               width: 1200,
               height: 630,
               alt: `${project?.name ?? 'Project'} by Oakar Oo`,

@@ -181,7 +181,7 @@ export default function HostingView() {
           <p className="mt-3.5 max-w-[56ch] text-[17px] leading-[1.62] text-[var(--paper-muted)]">
             Upload a file and get a link to it at{' '}
             <span className="font-paper-mono text-[15px] text-[var(--paper-accent)]">
-              adorio.space/h/your-file
+              oakar.dev/h/your-file
             </span>
             . HTML, PDFs, images, zips, anything up to 100&nbsp;MB.
           </p>

@@ -14,16 +14,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? `How Oakar Oo uses ${skill.name}, and the projects built with it.`
     : 'Skill details.';
   return {
-    title,
+    title: { absolute: title },
     description,
+    alternates: { canonical: `/skills/${id}` },
     openGraph: {
       title,
       description,
-      url: `https://adorio.space/skills/${id}`,
+      url: `https://oakar.dev/skills/${id}`,
       siteName: 'Oakar Oo',
       images: [
         {
-          url: 'https://adorio.space/og.png',
+          url: 'https://oakar.dev/og.png',
           width: 1200,
           height: 630,
           alt: 'Oakar Oo, backend developer',

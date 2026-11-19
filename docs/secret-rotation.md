@@ -74,7 +74,7 @@ Other commands:
 - `npm run secrets -- --sync-github` pushes GitHub secrets that exist locally but not on GitHub.
 - Ctrl-C while applying lets the run finish first, so nothing is left half changed. Press it twice to force quit, then run `--rollback`.
 
-If `https://adorio.space/api/health` answers 502 with the header `x-served-by: northflank-backup` while the Azure address is healthy, the Cloudflare worker has failed over and has not switched back. It probes every 5 minutes and needs two good probes in a row, so allow about 10 minutes. If it stays on the backup, check the Northflank env vars.
+If `https://oakar.dev/api/health` answers 502 with the header `x-served-by: northflank-backup` while the Azure address is healthy, the Cloudflare worker has failed over and has not switched back. It probes every 5 minutes and needs two good probes in a row, so allow about 10 minutes. If it stays on the backup, check the Northflank env vars.
 
 ## Security notes
 

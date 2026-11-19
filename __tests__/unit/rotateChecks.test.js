@@ -166,7 +166,7 @@ describe('collectChecks', () => {
     const result = await collectChecks(
       context({
         fetch: async (url) =>
-          url.includes('adorio.space')
+          url.includes('oakar.dev')
             ? {
                 ok: false,
                 status: 502,
@@ -175,7 +175,7 @@ describe('collectChecks', () => {
             : { ok: true, status: 200, headers: { get: () => null } },
       }),
     );
-    const row = find(result, 'health', 'https://adorio.space/api/health');
+    const row = find(result, 'health', 'https://oakar.dev/api/health');
     expect(row.state).toBe('fail');
     expect(row.detail).toMatch(/502/);
     expect(row.detail).toMatch(/northflank-backup/);
@@ -351,7 +351,7 @@ describe('collectChecks', () => {
     const result = await collectChecks(context({ azure: null }));
     expect(rowsOf(result, 'azure')).toEqual([]);
     expect(rowsOf(result, 'health').map((row) => row.label)).toEqual([
-      'https://adorio.space/api/health',
+      'https://oakar.dev/api/health',
     ]);
   });
 

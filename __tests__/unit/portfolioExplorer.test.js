@@ -111,9 +111,9 @@ describe('explorer file names', () => {
 describe('sitemap', () => {
   test('should list the certificates page and every certificate page', () => {
     const urls = sitemap().map((entry) => entry.url);
-    expect(urls).toContain('https://adorio.space/certificates');
+    expect(urls).toContain('https://oakar.dev/certificates');
     for (const cert of portfolioData.certificates) {
-      expect(urls).toContain(`https://adorio.space/certificates/${cert.id}`);
+      expect(urls).toContain(`https://oakar.dev/certificates/${cert.id}`);
     }
   });
 });

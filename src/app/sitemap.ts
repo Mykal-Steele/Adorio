@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { portfolioData } from '@/views/Portfolio/data/portfolio';
 
-const BASE = 'https://adorio.space';
+const BASE = 'https://oakar.dev';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const projectEntries: MetadataRoute.Sitemap = portfolioData.projects.map((p) => ({

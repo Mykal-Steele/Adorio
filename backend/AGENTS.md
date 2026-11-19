@@ -141,44 +141,44 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 
 ### All endpoints
 
-| Method | Path                            | Auth                 | Handler                                     |
-| ------ | ------------------------------- | -------------------- | ------------------------------------------- |
-| GET    | `/api/users/me`                 | required             | getCurrentUser                              |
-| GET    | `/api/users/search`             | required             | searchUsersHandler (mention autocomplete)   |
-| POST   | `/api/users/register`           | none                 | registerUser                                |
-| POST   | `/api/users/login`              | none                 | loginUser                                   |
-| POST   | `/api/users/refresh-token`      | none                 | refreshToken                                |
-| POST   | `/api/posts`                    | required             | createPostHandler (+ multer upload)         |
-| GET    | `/api/posts`                    | none                 | getPostsHandler                             |
-| GET    | `/api/posts/:id`                | none                 | getSinglePostHandler                        |
-| PUT    | `/api/posts/:id/like`           | required             | toggleLikeHandler                           |
-| POST   | `/api/posts/:id/comment`        | required             | addCommentHandler                           |
-| GET    | `/api/game/leaderboard`         | none                 | getLeaderboardHandler                       |
-| POST   | `/api/game/update-score`        | optional             | updateScoreHandler                          |
-| GET    | `/api/game/user-stats`          | optional             | getUserStatsHandler                         |
-| POST   | `/api/secretenv`                | required             | storeSecretMessage                          |
-| GET    | `/api/secretenv`                | **none** (by design) | retrieveSecretMessageHandler                |
-| GET    | `/api/secretenv/:name`          | **none** (by design) | retrieveSecretMessageHandler                |
-| POST   | `/api/stats/track`              | optional             | trackVisit (+ visitorIdentifier middleware) |
-| GET    | `/api/stats/page-views`         | required             | getPageViewSummary                          |
-| GET    | `/api/stats/recent`             | required             | getRecentVisitEntries                       |
-| GET    | `/api/stats/visitor-stats`      | required             | getVisitorSummary                           |
-| GET    | `/api/stats/visitor/:visitorId` | required             | getVisitorDetailsInfo                       |
-| GET    | `/api/stats/health`             | none                 | getHealthStatus                             |
-| GET    | `/api/stats/stats`              | required             | getSystemStats                              |
-| POST   | `/api/coding/run`               | required             | runCodingSubmissionHandler (409 if the runner is not ready) |
-| GET    | `/api/coding/runner`            | required             | getCodeRunnerStatusHandler                  |
-| POST   | `/api/coding/runner/sessions`   | required             | requestCodeRunnerSessionHandler (keeps the runner on, starts it if off) |
-| POST   | `/api/coding/runner/holds`      | required + admin     | holdCodeRunnerHandler (keep on for 15 to 240 minutes) |
+| Method | Path                            | Auth                 | Handler                                                                       |
+| ------ | ------------------------------- | -------------------- | ----------------------------------------------------------------------------- |
+| GET    | `/api/users/me`                 | required             | getCurrentUser                                                                |
+| GET    | `/api/users/search`             | required             | searchUsersHandler (mention autocomplete)                                     |
+| POST   | `/api/users/register`           | none                 | registerUser                                                                  |
+| POST   | `/api/users/login`              | none                 | loginUser                                                                     |
+| POST   | `/api/users/refresh-token`      | none                 | refreshToken                                                                  |
+| POST   | `/api/posts`                    | required             | createPostHandler (+ multer upload)                                           |
+| GET    | `/api/posts`                    | none                 | getPostsHandler                                                               |
+| GET    | `/api/posts/:id`                | none                 | getSinglePostHandler                                                          |
+| PUT    | `/api/posts/:id/like`           | required             | toggleLikeHandler                                                             |
+| POST   | `/api/posts/:id/comment`        | required             | addCommentHandler                                                             |
+| GET    | `/api/game/leaderboard`         | none                 | getLeaderboardHandler                                                         |
+| POST   | `/api/game/update-score`        | optional             | updateScoreHandler                                                            |
+| GET    | `/api/game/user-stats`          | optional             | getUserStatsHandler                                                           |
+| POST   | `/api/secretenv`                | required             | storeSecretMessage                                                            |
+| GET    | `/api/secretenv`                | **none** (by design) | retrieveSecretMessageHandler                                                  |
+| GET    | `/api/secretenv/:name`          | **none** (by design) | retrieveSecretMessageHandler                                                  |
+| POST   | `/api/stats/track`              | optional             | trackVisit (+ visitorIdentifier middleware)                                   |
+| GET    | `/api/stats/page-views`         | required             | getPageViewSummary                                                            |
+| GET    | `/api/stats/recent`             | required             | getRecentVisitEntries                                                         |
+| GET    | `/api/stats/visitor-stats`      | required             | getVisitorSummary                                                             |
+| GET    | `/api/stats/visitor/:visitorId` | required             | getVisitorDetailsInfo                                                         |
+| GET    | `/api/stats/health`             | none                 | getHealthStatus                                                               |
+| GET    | `/api/stats/stats`              | required             | getSystemStats                                                                |
+| POST   | `/api/coding/run`               | required             | runCodingSubmissionHandler (409 if the runner is not ready)                   |
+| GET    | `/api/coding/runner`            | required             | getCodeRunnerStatusHandler                                                    |
+| POST   | `/api/coding/runner/sessions`   | required             | requestCodeRunnerSessionHandler (keeps the runner on, starts it if off)       |
+| POST   | `/api/coding/runner/holds`      | required + admin     | holdCodeRunnerHandler (keep on for 15 to 240 minutes)                         |
 | POST   | `/api/hosted/presign`           | required             | presign (reserves storage, checks Turnstile, returns an R2 presigned PUT URL) |
-| POST   | `/api/hosted/confirm`           | required             | confirm (checks the object, settles the reservation, publishes it) |
-| GET    | `/api/hosted`                   | required             | listMine                                    |
-| GET    | `/api/hosted/usage`             | required             | usage (storage meter, uploadsEnabled, Turnstile site key) |
-| GET    | `/api/hosted/all`               | required + admin     | listAll                                     |
-| GET    | `/api/hosted/:slug`             | none                 | serveFile (302 to R2, or old inline HTML, sandboxed) |
-| DELETE | `/api/hosted/:slug`             | required             | deleteFile (removes the R2 object first)    |
-| GET    | `/api/health`                   | none                 | getHealthStatus (inline in index.js)        |
-| GET    | `/api/test-env`                 | none (dev only)      | inline in index.js                          |
+| POST   | `/api/hosted/confirm`           | required             | confirm (checks the object, settles the reservation, publishes it)            |
+| GET    | `/api/hosted`                   | required             | listMine                                                                      |
+| GET    | `/api/hosted/usage`             | required             | usage (storage meter, uploadsEnabled, Turnstile site key)                     |
+| GET    | `/api/hosted/all`               | required + admin     | listAll                                                                       |
+| GET    | `/api/hosted/:slug`             | none                 | serveFile (302 to R2, or old inline HTML, sandboxed)                          |
+| DELETE | `/api/hosted/:slug`             | required             | deleteFile (removes the R2 object first)                                      |
+| GET    | `/api/health`                   | none                 | getHealthStatus (inline in index.js)                                          |
+| GET    | `/api/test-env`                 | none (dev only)      | inline in index.js                                                            |
 
 ### Auth middleware variants (`verifyToken.js`)
 
@@ -189,18 +189,18 @@ controllers/  calls services; pure HTTP — parse req, call service, send res
 
 ### Rate limiters (`rateLimiters.js`)
 
-| Limiter               | Window | Max | Applied to                            |
-| --------------------- | ------ | --- | ------------------------------------- |
-| `standardLimiter`     | 15 min | 300 | all routes (global)                   |
-| `registrationLimiter` | 1 hour | 10  | POST /api/users/register              |
-| `authLimiter`         | 15 min | 10  | POST /api/users/login + refresh-token |
-| `postLimiter`         | 10 min | 30  | POST /api/posts                       |
-| `likeLimiter`         | 1 min  | 60  | PUT /api/posts/:id/like               |
-| `secretLimiter`         | 5 min  | 20  | GET /api/secretenv                    |
-| `searchLimiter`         | 1 min  | 60  | GET /api/users/search                 |
-| `codingLimiter`         | 5 min  | 20  | POST /api/coding/run                  |
-| `codeRunnerLimiter`     | 1 min  | 30  | `/api/coding/runner/*` (per user, not per IP) |
-| `hostedUploadLimiter`   | 1 hour | 10  | POST /api/hosted/presign (per user)   |
+| Limiter               | Window | Max | Applied to                                    |
+| --------------------- | ------ | --- | --------------------------------------------- |
+| `standardLimiter`     | 15 min | 300 | all routes (global)                           |
+| `registrationLimiter` | 1 hour | 10  | POST /api/users/register                      |
+| `authLimiter`         | 15 min | 10  | POST /api/users/login + refresh-token         |
+| `postLimiter`         | 10 min | 30  | POST /api/posts                               |
+| `likeLimiter`         | 1 min  | 60  | PUT /api/posts/:id/like                       |
+| `secretLimiter`       | 5 min  | 20  | GET /api/secretenv                            |
+| `searchLimiter`       | 1 min  | 60  | GET /api/users/search                         |
+| `codingLimiter`       | 5 min  | 20  | POST /api/coding/run                          |
+| `codeRunnerLimiter`   | 1 min  | 30  | `/api/coding/runner/*` (per user, not per IP) |
+| `hostedUploadLimiter` | 1 hour | 10  | POST /api/hosted/presign (per user)           |
 
 `app.set('trust proxy', 1)` is set in `index.js` — Northflank sits behind one Cloudflare hop.
 
@@ -243,16 +243,16 @@ Three components work together:
 
 `services/codeRunnerService.js` writes one JSON line per event, all with `"scope":"code-runner"`. Use them to see how the on-demand runner behaves and where it needs tuning.
 
-| Event                 | Fields                                              | Tells you                                             |
-| --------------------- | --------------------------------------------------- | ----------------------------------------------------- |
-| `start_requested`     | `trigger` (`session`, `run`, `hold`), `userId`      | How often the VM starts, and what woke it             |
-| `ready`               | `startupSeconds`                                    | How long people wait on a start                       |
-| `run_rejected`        | `userId`, `state`, `dailyLimitReached`              | Runs that were told to wait (should be rare)          |
-| `hold`                | `userId`, `minutes`, `keepUntil`                    | Admin holds                                           |
-| `stopped`             | `reason`, `onSeconds`, `usageDay`, `usageMinutes`   | How long each session ran, and the day's total on-time |
-| `daily_limit_blocked` | `trigger`, `userId`, `usageMinutes`                 | The daily cap is being hit, raise it or look for abuse |
-| `start_failed`, `power_state_failed`, `stop_check_failed` | `message` | Azure calls failing                                   |
-| `auth_failed`         | `status` (401 or 403)                               | `PISTON_TOKEN` doesn't match the VM's token. Logged once until Piston accepts it again |
+| Event                                                     | Fields                                            | Tells you                                                                              |
+| --------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `start_requested`                                         | `trigger` (`session`, `run`, `hold`), `userId`    | How often the VM starts, and what woke it                                              |
+| `ready`                                                   | `startupSeconds`                                  | How long people wait on a start                                                        |
+| `run_rejected`                                            | `userId`, `state`, `dailyLimitReached`            | Runs that were told to wait (should be rare)                                           |
+| `hold`                                                    | `userId`, `minutes`, `keepUntil`                  | Admin holds                                                                            |
+| `stopped`                                                 | `reason`, `onSeconds`, `usageDay`, `usageMinutes` | How long each session ran, and the day's total on-time                                 |
+| `daily_limit_blocked`                                     | `trigger`, `userId`, `usageMinutes`               | The daily cap is being hit, raise it or look for abuse                                 |
+| `start_failed`, `power_state_failed`, `stop_check_failed` | `message`                                         | Azure calls failing                                                                    |
+| `auth_failed`                                             | `status` (401 or 403)                             | `PISTON_TOKEN` doesn't match the VM's token. Logged once until Piston accepts it again |
 
 Two log alerts in `infra/main.bicep` email the owner: `code-runner-token-rejected` on any `auth_failed`, and `code-runner-stuck-starting` when a `start_requested` has no `ready` after it for 10 minutes. The stop check probes Piston every minute while the VM runs, so `ready` gets logged even when nobody has the page open.
 
@@ -282,10 +282,10 @@ A personal encrypted env/message vault. Authenticated users POST `{ name, messag
 
 `/api/hosted` hosts any file up to 100 MB. Files never pass through the backend: the browser asks `POST /api/hosted/presign` for a presigned R2 PUT URL, uploads straight to R2 (which gets around Cloudflare's 100 MB request limit), then calls `POST /api/hosted/confirm`.
 
-- `utils/r2.js` builds the `S3Client` (region `auto`, `forcePathStyle`). `requestChecksumCalculation`/`responseChecksumValidation: 'WHEN_REQUIRED'` stop @aws-sdk v3 from adding `x-amz-checksum-*` to the signature, which a browser PUT can't reproduce. The bucket's CORS rule allows PUT with `content-type` from adorio.space and localhost.
+- `utils/r2.js` builds the `S3Client` (region `auto`, `forcePathStyle`). `requestChecksumCalculation`/`responseChecksumValidation: 'WHEN_REQUIRED'` stop @aws-sdk v3 from adding `x-amz-checksum-*` to the signature, which a browser PUT can't reproduce. The bucket's CORS rule allows PUT with `content-type` from oakar.dev, adorio.space and localhost.
 - Objects live under `h/` in the bucket (`h/<slug>.<ext>`). The bucket also holds `learn-korean.html` and its audio, and the prefix keeps an upload from overwriting them.
 - Presign creates the record with `pending: true`. Pending files are hidden from the lists and `GET /api/hosted/:slug` answers 404 for them. Confirm HEADs the object, rejects anything over 100 MB (a presigned PUT can't bind the size), and publishes it with its real size. Upload URLs last 15 minutes.
-- `GET /api/hosted/:slug` (no auth) counts a view and 302s to `R2_PUBLIC_URL/<key>`. Files from before R2 keep their HTML in `content` and are served inline with a `sandbox` CSP, so their scripts can't read adorio.space storage. `src/app/h/[slug]/route.ts` sets the same header.
+- `GET /api/hosted/:slug` (no auth) counts a view and 302s to `R2_PUBLIC_URL/<key>`. Files from before R2 keep their HTML in `content` and are served inline with a `sandbox` CSP, so their scripts can't read oakar.dev storage. `src/app/h/[slug]/route.ts` sets the same header.
 - R2 is optional as a group: without the account id, both keys, the bucket and the public URL, `r2Configured` is false, `/usage` returns `uploadsEnabled: false` and the page says uploads are off.
 - **Never 5xx from hosting.** "Not configured" and R2 errors answer 409 with `details.code` (`HOSTING_NOT_CONFIGURED`, `STORAGE_UNAVAILABLE`), because the failover worker reads two 5xx in a row as the backend being down.
 
@@ -346,27 +346,27 @@ throw new Error('Post not found');
 
 Loaded by `config/environment.js`, which resolves the repo root from its own file location (works regardless of CWD) and reads `../../.env.development` in dev. In production (Azure Container Apps, and the Northflank failover copy) env vars are injected directly by the platform — no file involved. See the root `AGENTS.md`'s Environment Files section for the full picture across all local env files.
 
-| Variable               | Purpose                                                        |
-| ---------------------- | -------------------------------------------------------------- |
-| `PORT`                 | Express listen port (default 3000)                             |
-| `MONGO_URI`            | MongoDB Atlas connection string                                |
-| `JWT_SECRET`           | Signs 15-min access tokens; also the HMAC key for legacy SecretEnv lookup |
-| `REFRESH_TOKEN_SECRET` | Signs 7-day refresh tokens (falls back to `JWT_SECRET`)        |
-| `CLIENT_URL`           | Dynamically added to CORS allowed origins                      |
-| `LEADERBOARD_MAX_AGE_DAYS` | Leaderboard only shows scores played within this window (default 30) |
-| `TEST_USER_TTL_MINUTES` | Janitor deletes test-pattern accounts older than this (default 60) |
-| `PISTON_URL` / `PISTON_TOKEN` / `PISTON_CA_CERT` | Piston endpoint, shared auth token, pinned TLS cert |
-| `PISTON_VM_RESOURCE_ID` | Azure resource id of the Piston VM. Set only on the Azure Container App; when set, the backend starts and deallocates the VM |
-| `PISTON_CONTROL_CLIENT_ID` | Client id of the managed identity allowed to do that |
-| `PISTON_IDLE_MINUTES`   | How long the VM stays on after the last run (default 30) |
-| `PISTON_DAILY_LIMIT_MINUTES` | Most minutes per UTC day the VM may be on without an admin hold (default 480) |
-| `CLOUDINARY_NAME`      | Cloudinary cloud name                                          |
-| `CLOUDINARY_KEY`       | Cloudinary API key                                             |
-| `CLOUDINARY_SECRET`    | Cloudinary API secret                                          |
-| `R2_ACCOUNT_ID` / `R2_BUCKET` / `R2_PUBLIC_URL` | Cloudflare R2 account, bucket and public base URL for hosted files |
-| `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | R2 API token (S3) used to sign upload URLs and delete objects. All five R2 values must be set or hosting reports as off |
-| `HOSTED_STORAGE_LIMIT_BYTES` | Hard cap on total hosted-file storage, in bytes (default 9 GiB) |
-| `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile keys for the upload bot check. Blank turns the check off |
-| `NODE_ENV`             | `development` or `production`                                  |
+| Variable                                         | Purpose                                                                                                                      |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `PORT`                                           | Express listen port (default 3000)                                                                                           |
+| `MONGO_URI`                                      | MongoDB Atlas connection string                                                                                              |
+| `JWT_SECRET`                                     | Signs 15-min access tokens; also the HMAC key for legacy SecretEnv lookup                                                    |
+| `REFRESH_TOKEN_SECRET`                           | Signs 7-day refresh tokens (falls back to `JWT_SECRET`)                                                                      |
+| `CLIENT_URL`                                     | Dynamically added to CORS allowed origins                                                                                    |
+| `LEADERBOARD_MAX_AGE_DAYS`                       | Leaderboard only shows scores played within this window (default 30)                                                         |
+| `TEST_USER_TTL_MINUTES`                          | Janitor deletes test-pattern accounts older than this (default 60)                                                           |
+| `PISTON_URL` / `PISTON_TOKEN` / `PISTON_CA_CERT` | Piston endpoint, shared auth token, pinned TLS cert                                                                          |
+| `PISTON_VM_RESOURCE_ID`                          | Azure resource id of the Piston VM. Set only on the Azure Container App; when set, the backend starts and deallocates the VM |
+| `PISTON_CONTROL_CLIENT_ID`                       | Client id of the managed identity allowed to do that                                                                         |
+| `PISTON_IDLE_MINUTES`                            | How long the VM stays on after the last run (default 30)                                                                     |
+| `PISTON_DAILY_LIMIT_MINUTES`                     | Most minutes per UTC day the VM may be on without an admin hold (default 480)                                                |
+| `CLOUDINARY_NAME`                                | Cloudinary cloud name                                                                                                        |
+| `CLOUDINARY_KEY`                                 | Cloudinary API key                                                                                                           |
+| `CLOUDINARY_SECRET`                              | Cloudinary API secret                                                                                                        |
+| `R2_ACCOUNT_ID` / `R2_BUCKET` / `R2_PUBLIC_URL`  | Cloudflare R2 account, bucket and public base URL for hosted files                                                           |
+| `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY`      | R2 API token (S3) used to sign upload URLs and delete objects. All five R2 values must be set or hosting reports as off      |
+| `HOSTED_STORAGE_LIMIT_BYTES`                     | Hard cap on total hosted-file storage, in bytes (default 9 GiB)                                                              |
+| `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY`    | Cloudflare Turnstile keys for the upload bot check. Blank turns the check off                                                |
+| `NODE_ENV`                                       | `development` or `production`                                                                                                |
 
 Run `node backend/test-env.js` to verify all required vars are set before starting.

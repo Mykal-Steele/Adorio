@@ -25,7 +25,7 @@ node scripts/sync-platform-deps.cjs
 
 ## Project Overview
 
-Adorio is a social media platform deployed at **adorio.space**. JavaScript monorepo:
+Adorio is a social media platform deployed at **oakar.dev**. The old domain, adorio.space, and its subdomains answer with a 301 to the same path on oakar.dev, sent by the `adorio-redirect` worker in `cloudflare-worker/domain-redirect/`. JavaScript monorepo:
 
 | Directory     | Purpose                                   | Port |
 | ------------- | ----------------------------------------- | ---- |
@@ -220,24 +220,24 @@ A separate React/TypeScript app built independently and served at `/cao/`. It ha
 
 ## Key Environment Variables
 
-| Variable                         | Where                     | Purpose                                                  |
-| -------------------------------- | ------------------------- | -------------------------------------------------------- |
-| `BACKEND_INTERNAL_URL`           | Next.js server (SSR only) | Internal URL for `serverFetch` (`http://localhost:3000`) |
-| `NEXT_PUBLIC_CLOUDINARY_NAME`    | Next.js client            | Cloudinary cloud name                                    |
-| `MONGO_URI`                      | Backend                   | MongoDB Atlas connection string                          |
-| `JWT_SECRET`                     | Backend                   | Signs access tokens                                      |
-| `REFRESH_TOKEN_SECRET`           | Backend                   | Signs refresh tokens (falls back to `JWT_SECRET`)        |
-| `PISTON_URL/TOKEN/CA_CERT`       | Backend                   | Where Piston is, its shared token, its pinned TLS cert   |
-| `PISTON_VM_RESOURCE_ID`          | Backend (Azure only)      | Turns on start/stop control of the Piston VM             |
-| `PISTON_CONTROL_CLIENT_ID`       | Backend (Azure only)      | Which managed identity to use for that control           |
-| `CLIENT_URL`                     | Backend                   | CORS allowed origin                                      |
-| `CLOUDINARY_NAME/KEY/SECRET/URL` | Backend + Frontend        | Image upload/CDN                                         |
-| `R2_ACCOUNT_ID/BUCKET/PUBLIC_URL`| Backend                   | Cloudflare R2 file host: account, bucket, public origin  |
-| `R2_ACCESS_KEY_ID/SECRET_ACCESS_KEY` | Backend               | R2 API token (S3) for presigning uploads and deletes     |
-| `HOSTED_STORAGE_LIMIT_BYTES`     | Backend                   | Hard cap on total hosted-file storage (default 9 GiB, under R2's 10 GB free tier) |
-| `TURNSTILE_SITE_KEY/SECRET_KEY`  | Backend                   | Cloudflare Turnstile bot check on uploads (blank disables it) |
-| `VITE_GEMINI_API_KEY`            | ai-slop build             | Gemini API for exam prep                                 |
-| `NODE_ENV`                       | All                       | `development` \| `production`                            |
+| Variable                             | Where                     | Purpose                                                                           |
+| ------------------------------------ | ------------------------- | --------------------------------------------------------------------------------- |
+| `BACKEND_INTERNAL_URL`               | Next.js server (SSR only) | Internal URL for `serverFetch` (`http://localhost:3000`)                          |
+| `NEXT_PUBLIC_CLOUDINARY_NAME`        | Next.js client            | Cloudinary cloud name                                                             |
+| `MONGO_URI`                          | Backend                   | MongoDB Atlas connection string                                                   |
+| `JWT_SECRET`                         | Backend                   | Signs access tokens                                                               |
+| `REFRESH_TOKEN_SECRET`               | Backend                   | Signs refresh tokens (falls back to `JWT_SECRET`)                                 |
+| `PISTON_URL/TOKEN/CA_CERT`           | Backend                   | Where Piston is, its shared token, its pinned TLS cert                            |
+| `PISTON_VM_RESOURCE_ID`              | Backend (Azure only)      | Turns on start/stop control of the Piston VM                                      |
+| `PISTON_CONTROL_CLIENT_ID`           | Backend (Azure only)      | Which managed identity to use for that control                                    |
+| `CLIENT_URL`                         | Backend                   | CORS allowed origin                                                               |
+| `CLOUDINARY_NAME/KEY/SECRET/URL`     | Backend + Frontend        | Image upload/CDN                                                                  |
+| `R2_ACCOUNT_ID/BUCKET/PUBLIC_URL`    | Backend                   | Cloudflare R2 file host: account, bucket, public origin                           |
+| `R2_ACCESS_KEY_ID/SECRET_ACCESS_KEY` | Backend                   | R2 API token (S3) for presigning uploads and deletes                              |
+| `HOSTED_STORAGE_LIMIT_BYTES`         | Backend                   | Hard cap on total hosted-file storage (default 9 GiB, under R2's 10 GB free tier) |
+| `TURNSTILE_SITE_KEY/SECRET_KEY`      | Backend                   | Cloudflare Turnstile bot check on uploads (blank disables it)                     |
+| `VITE_GEMINI_API_KEY`                | ai-slop build             | Gemini API for exam prep                                                          |
+| `NODE_ENV`                           | All                       | `development` \| `production`                                                     |
 
 Backend-specific values live in the root `.env.development` / `.env.production` — see [Environment Files](#environment-files) below.
 

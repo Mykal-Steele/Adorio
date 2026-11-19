@@ -6,7 +6,7 @@
  * sitemap.xml, the SSL cert, HSTS, and compression get checked once.
  *
  * Usage: node scripts/audit.mjs [base-url] [--runs=N]
- * Defaults to https://adorio.space with 3 runs per page.
+ * Defaults to https://oakar.dev with 3 runs per page.
  */
 
 import puppeteer from 'puppeteer';
@@ -21,7 +21,7 @@ import os from 'os';
 const require = createRequire(import.meta.url);
 const AXE_PATH = require.resolve('axe-core/axe.min.js');
 
-const BASE = process.argv.find((a) => a.startsWith('http')) ?? 'https://adorio.space';
+const BASE = process.argv.find((a) => a.startsWith('http')) ?? 'https://oakar.dev';
 const RUNS = parseInt(process.argv.find((a) => a.startsWith('--runs='))?.split('=')[1] ?? '3', 10);
 const NOW = new Date().toLocaleString('en-GB', {
   day: '2-digit',

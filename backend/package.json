@@ -6,7 +6,7 @@
   "engines": {
     "node": ">=24.0.0"
   },
-  "homepage": "https://adorio.space/",
+  "homepage": "https://oakar.dev/",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",

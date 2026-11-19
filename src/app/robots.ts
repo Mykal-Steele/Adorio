@@ -17,6 +17,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://adorio.space/sitemap.xml',
+    sitemap: 'https://oakar.dev/sitemap.xml',
   };
 }
