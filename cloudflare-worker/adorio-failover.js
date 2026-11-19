@@ -1,133 +1,146 @@
-const PRIMARY_ORIGIN = 'https://adorio.orangeground-7d1e6e2f.southeastasia.azurecontainerapps.io';
-const BACKUP_ORIGIN = 'https://p01--adorio--y9gwmvv64g9t.code.run';
+import hostsFile from '../hosting/hosts.json' with { type: 'json' };
+
+// Hosts are tried in the order hosting/hosts.json lists them. Moving the app to
+// another platform means editing that file and running `wrangler deploy`, not
+// changing this code.
+export const HOSTS = hostsFile.hosts.filter((host) => host.enabled !== false);
+
 const HEALTH_PATH = '/api/health';
-const KV_KEY = 'primary-health';
-const PRIMARY_TIMEOUT_MS = 5000;
-// /api/coding/run runs real code through Piston and normal runs have taken 5.6-5.9s,
-// over the 5s budget above. With 5s, a slow run went to the backup and counted toward
-// FAIL_THRESHOLD, so a couple of Java submissions could fail over the whole domain.
-// 20s covers codingService.js's worst case (COMPILE_TIMEOUT_MS + RUN_TIMEOUT_MS per
-// test, batched by TEST_CASE_CONCURRENCY) with headroom, and still fails over on a real outage.
-const SLOW_PATH_TIMEOUT_MS = 20000;
-const SLOW_PATHS = ['/api/coding/run'];
-const PROBE_TIMEOUT_MS = 5000;
+const KV_KEY = 'host-health';
 const FAIL_THRESHOLD = 2;
 const OK_THRESHOLD = 2;
-const DEFAULT_STATE = { healthy: true, consecutiveFail: 0, consecutiveOk: 0 };
+// /api/coding/run runs real code through Piston and normal runs have taken 5.6-5.9s,
+// over the normal budget. With 5s, a slow Java run counted as a host failure, so a
+// couple of submissions could fail the whole domain over. 20s covers codingService.js's
+// worst case with headroom and still fails over on a real outage.
+const SLOW_PATHS = ['/api/coding/run'];
+// Only these are sent to a second host after the first one timed out or answered
+// 5xx. A POST that timed out may already have been saved, so sending it again could
+// create it twice.
+const RETRY_SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
-async function getState(env) {
-  try {
-    const raw = await env.FAILOVER_STATE.get(KV_KEY, { type: 'json', cacheTtl: 60 });
-    if (raw && typeof raw.healthy === 'boolean') return raw;
-    return DEFAULT_STATE;
-  } catch (err) {
-    return DEFAULT_STATE;
+// plain startsWith would also give /api/coding/runaway the slow budget
+const isSlowPath = (pathname) =>
+  SLOW_PATHS.some((path) => pathname === path || pathname.startsWith(path + '/'));
+
+// Two failures in a row take a host out, two good probes bring it back. Both
+// counters stop at their threshold so a host that stays up (or down) produces the
+// same state every time, and nothing is written to KV.
+function nextHealth(entry = { healthy: true, fail: 0, ok: 0 }, passed) {
+  if (passed) {
+    const ok = Math.min(entry.ok + 1, OK_THRESHOLD);
+    return { healthy: entry.healthy || ok >= OK_THRESHOLD, fail: 0, ok };
   }
+  const fail = Math.min(entry.fail + 1, FAIL_THRESHOLD);
+  return { healthy: entry.healthy && fail < FAIL_THRESHOLD, fail, ok: 0 };
 }
 
-async function putState(env, state) {
-  try {
-    await env.FAILOVER_STATE.put(KV_KEY, JSON.stringify(state));
-  } catch (err) {
-    // a failed KV write shouldn't break the request
-  }
-}
+const sameHealth = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-async function recordLiveFailure(env, state) {
-  const consecutiveFail = state.consecutiveFail + 1;
-  await putState(env, {
-    ...state,
-    healthy: state.healthy && consecutiveFail < FAIL_THRESHOLD,
-    consecutiveFail,
-    consecutiveOk: 0,
-  });
-}
-
-async function pingHealth() {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
-  try {
-    const res = await fetch(PRIMARY_ORIGIN + HEALTH_PATH, { signal: controller.signal });
-    return res.ok;
-  } catch (err) {
-    return false;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-function withServedBy(res, who) {
+function withServedBy(res, name) {
   const headers = new Headers(res.headers);
-  headers.set('X-Served-By', who);
-  return new Response(res.body, { status: res.status, headers });
+  headers.set('X-Served-By', name);
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
 }
 
-async function serveBackup(request, url) {
-  try {
-    const backupReq = new Request(BACKUP_ORIGIN + url.pathname + url.search, request);
-    const res = await fetch(backupReq);
-    return withServedBy(res, 'northflank-backup');
-  } catch (err) {
-    return new Response('Service temporarily unavailable', { status: 502 });
-  }
-}
-
-export default {
-  async fetch(request, env, ctx) {
-    let url;
+export function createWorker({
+  hosts = HOSTS,
+  fetchImpl = (...args) => fetch(...args),
+  timeoutMs = 5000,
+  slowTimeoutMs = 20000,
+  // Long enough for a host that scales to zero to start (4 to 8s on Cloud Run).
+  probeTimeoutMs = 10000,
+} = {}) {
+  async function readHealth(env) {
     try {
-      url = new URL(request.url);
-    } catch (err) {
-      return new Response('Bad request', { status: 400 });
+      return (await env.FAILOVER_STATE.get(KV_KEY, { type: 'json', cacheTtl: 60 })) ?? {};
+    } catch {
+      return {};
     }
+  }
 
-    const state = await getState(env);
+  async function writeHealth(env, health) {
+    try {
+      await env.FAILOVER_STATE.put(KV_KEY, JSON.stringify(health));
+    } catch {
+      // a failed KV write shouldn't break the request
+    }
+  }
 
-    if (state.healthy) {
-      // plain startsWith would also give /api/coding/runaway the slow budget
-      const timeoutMs = SLOW_PATHS.some(
-        (path) => url.pathname === path || url.pathname.startsWith(path + '/'),
-      )
-        ? SLOW_PATH_TIMEOUT_MS
-        : PRIMARY_TIMEOUT_MS;
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
+  async function recordFailure(env, name) {
+    const health = await readHealth(env);
+    const next = nextHealth(health[name], false);
+    if (!sameHealth(health[name], next)) await writeHealth(env, { ...health, [name]: next });
+  }
+
+  async function tryHost(host, request, url, limitMs) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), limitMs);
+    try {
+      const forwarded = new Request(host.origin + url.pathname + url.search, request.clone());
+      return { response: await fetchImpl(forwarded, { signal: controller.signal }) };
+    } catch {
+      return { timedOut: controller.signal.aborted };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function probe(host) {
+    try {
+      const res = await fetchImpl(host.origin + HEALTH_PATH, {
+        signal: AbortSignal.timeout(probeTimeoutMs),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  return {
+    async fetch(request, env, ctx) {
+      let url;
       try {
-        const primaryReq = new Request(PRIMARY_ORIGIN + url.pathname + url.search, request.clone());
-        const res = await fetch(primaryReq, { signal: controller.signal });
-        clearTimeout(timer);
-        if (res.status < 500) return withServedBy(res, 'azure-primary');
-        throw new Error('primary returned ' + res.status);
-      } catch (err) {
-        clearTimeout(timer);
-        ctx.waitUntil(recordLiveFailure(env, state));
+        url = new URL(request.url);
+      } catch {
+        return new Response('Bad request', { status: 400 });
       }
-    }
 
-    // recovery is only checked by the cron below, which fires once per schedule
-    // network wide. It used to probe here on every request while unhealthy, so
-    // every colo (each caches its own FAILOVER_STATE) probed and wrote KV on its
-    // own, and that blew through the free tier's 1,000 writes/day before an
-    // outage day was over.
-    return serveBackup(request, url);
-  },
+      const health = await readHealth(env);
+      const isUp = (host) => health[host.name]?.healthy !== false;
+      // Hosts marked down still go at the end: if every healthy host fails too,
+      // a stale health entry is a better bet than answering 502.
+      const order = [...hosts.filter(isUp), ...hosts.filter((host) => !isUp(host))];
+      const retrySafe = RETRY_SAFE_METHODS.has(request.method);
+      const limitMs = isSlowPath(url.pathname) ? slowTimeoutMs : timeoutMs;
 
-  async scheduled(event, env, ctx) {
-    const state = await getState(env);
-    const ok = await pingHealth();
-    const next = ok
-      ? {
-          ...state,
-          healthy: state.healthy || state.consecutiveOk + 1 >= OK_THRESHOLD,
-          consecutiveOk: state.consecutiveOk + 1,
-          consecutiveFail: 0,
-        }
-      : {
-          ...state,
-          healthy: state.healthy && state.consecutiveFail + 1 < FAIL_THRESHOLD,
-          consecutiveFail: state.consecutiveFail + 1,
-          consecutiveOk: 0,
-        };
-    await putState(env, next);
-  },
-};
+      for (const host of order) {
+        const { response, timedOut } = await tryHost(host, request, url, limitMs);
+        if (response && response.status < 500) return withServedBy(response, host.name);
+        ctx.waitUntil(recordFailure(env, host.name));
+        if (response && !retrySafe) return withServedBy(response, host.name);
+        if (timedOut && !retrySafe) return new Response('Gateway timeout', { status: 504 });
+      }
+      return new Response('Service temporarily unavailable', { status: 502 });
+    },
+
+    // Runs from the cron trigger in wrangler.toml, once per schedule network wide.
+    // Health is only probed here, never on the request path: every colo caches its
+    // own copy of FAILOVER_STATE, so probing per request multiplied KV writes and
+    // blew through the free plan's 1,000 writes a day during an outage. The probe
+    // also keeps hosts that scale to zero warm, since each one idles for up to 15
+    // minutes after a request before it is shut down.
+    async scheduled(event, env) {
+      const health = await readHealth(env);
+      const results = await Promise.all(hosts.map(probe));
+      const next = Object.fromEntries(
+        hosts.map((host, i) => [host.name, nextHealth(health[host.name], results[i])]),
+      );
+      if (hosts.some((host) => !sameHealth(health[host.name], next[host.name]))) {
+        await writeHealth(env, next);
+      }
+    },
+  };
+}
+
+export default createWorker();

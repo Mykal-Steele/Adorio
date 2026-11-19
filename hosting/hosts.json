@@ -1,0 +1,10 @@
+{
+  "hosts": [
+    {
+      "name": "northflank-us",
+      "origin": "https://p01--adorio--y9gwmvv64g9t.code.run",
+      "platform": "northflank",
+      "region": "us-central"
+    }
+  ]
+}
