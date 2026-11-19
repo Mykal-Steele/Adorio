@@ -126,7 +126,7 @@ export const portfolioData = {
   role: 'Backend Developer',
   headline:
     'CS student at KMUTT, Bangkok. I build backends and the setup that keeps them running: APIs, databases, deployment, and developer experience. Mostly TypeScript, Express/Hono, Prisma, and PostgreSQL.',
-  email: 'oakar@adorio.space',
+  email: 'me@oakar.dev',
   github: 'github.com/Mykal-Steele',
   linkedin: 'linkedin.com/in/oakaroo',
   googleDev: 'g.dev/oakaroo',
@@ -287,7 +287,7 @@ export const portfolioData = {
       language: 'TypeScript',
       langColor: '#3178c6',
       summary:
-        'My own platform at adorio.space. It runs this portfolio and my apps, like Social, Coding Challenges, and Hosting, under one domain. I build, host, and deploy all of it.',
+        'My own platform at oakar.dev. It runs this portfolio and my apps, like Social, Coding Challenges, and Hosting, under one domain. I build, host, and deploy all of it.',
       problem:
         'I kept building small apps and wanted them under one domain, deployed automatically, and still up when the main server has a problem.',
       role: 'Solo project. I built the Express backend, the Next.js frontend, login with refresh tokens, and all of the infrastructure.',
@@ -341,10 +341,10 @@ export const portfolioData = {
       note: "Why the name? I wanted something unique so it's easy to find on search. It's inspired by Arduino, and it sounds round. I like it.",
       color: '#00ffc2',
       repoUrl: 'github.com/Mykal-Steele/Adorio',
-      liveUrl: 'https://adorio.space',
+      liveUrl: 'https://oakar.dev',
       image: {
         src: '/projects/adorio/cover.webp',
-        alt: 'The adorio.space home page, this portfolio, laid out like a code editor.',
+        alt: 'The oakar.dev home page, this portfolio, laid out like a code editor.',
       },
     },
     {
@@ -380,7 +380,7 @@ export const portfolioData = {
       liveUrl: '/social',
       image: {
         src: '/projects/social/cover.webp',
-        alt: 'The /social feed on adorio.space with the post composer and recent posts pinned to the wall.',
+        alt: 'The /social feed on oakar.dev with the post composer and recent posts pinned to the wall.',
       },
     },
     {
@@ -390,7 +390,7 @@ export const portfolioData = {
       language: 'TypeScript',
       langColor: '#3178c6',
       summary:
-        'Upload a file and get a link to it at adorio.space/h/<name>. Each file counts its views.',
+        'Upload a file and get a link to it at oakar.dev/h/<name>. Each file counts its views.',
       problem: 'Putting one page online usually means setting up a whole site for it.',
       role: 'Solo project. I built the upload page, the file list with view counts, the /h/ links, and an admin page for every file.',
       result: 'Live since June 2026 for anyone with an account.',

@@ -69,7 +69,7 @@ describe('portfolio projects', () => {
 
   // Adorio is the platform; the apps on it are their own projects
   test('should list Social and Hosting as their own projects next to Adorio', () => {
-    expect(project('adorio')?.liveUrl).toBe('https://adorio.space');
+    expect(project('adorio')?.liveUrl).toBe('https://oakar.dev');
     expect(project('social')?.liveUrl).toBe('/social');
     expect(project('hosting')?.liveUrl).toBe('/hosting');
   });
@@ -163,9 +163,9 @@ describe('portfolio experience', () => {
 
 describe('liveLabel', () => {
   test('should show where a live project runs, without the protocol', () => {
-    expect(liveLabel('/coding')).toBe('adorio.space/coding');
+    expect(liveLabel('/coding')).toBe('oakar.dev/coding');
     expect(liveLabel('https://loom.psstee.me/')).toBe('loom.psstee.me');
-    expect(liveLabel('https://adorio.space')).toBe('adorio.space');
+    expect(liveLabel('https://oakar.dev')).toBe('oakar.dev');
   });
 });
 

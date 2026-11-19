@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, test } from 'bun:test';
 
-const R2_URL = 'https://files.adorio.space/learn-korean.html';
+const R2_URL = 'https://files.oakar.dev/learn-korean.html';
 const realFetch = globalThis.fetch;
 const html = '<!doctype html><title>Learn Korean</title>';
 
 // Each test gets a fresh copy of the route, so the in-memory copy starts empty
 let n = 0;
 const loadRoute = () => import(`../../src/app/learn-korean/route.ts?case=${n++}`);
-const visit = (headers = {}) => new Request('https://adorio.space/learn-korean', { headers });
+const visit = (headers = {}) => new Request('https://oakar.dev/learn-korean', { headers });
 
 const r2Serves = (status, headers = {}) => {
   const calls = [];

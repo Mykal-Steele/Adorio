@@ -1,12 +1,16 @@
 import type { Metadata } from 'next';
 import { About } from '@/views/Portfolio/pages/About';
+import { JsonLd } from '@/components/JsonLd';
+import { profilePageJsonLd } from '@/lib/identity';
 
 export const metadata: Metadata = {
-  title: 'Oakar Oo | Backend Developer',
+  title: { absolute: 'Oakar Oo | Backend Developer' },
   description:
     'Backend developer in Bangkok. I focus on backends and the setup that keeps them running, mostly with TypeScript, Express, Hono, Prisma, and Docker on Azure.',
   keywords: [
     'Oakar Oo',
+    'Kruskal',
+    'Mykal-Steele',
     'backend developer',
     'TypeScript',
     'Next.js',
@@ -16,15 +20,16 @@ export const metadata: Metadata = {
     'create-adorex',
     'portfolio',
   ],
+  alternates: { canonical: '/' },
   openGraph: {
     title: 'Oakar Oo | Backend Developer',
     description:
       'Backend developer in Bangkok, studying CS at KMUTT and looking for a software engineering internship.',
-    url: 'https://adorio.space',
+    url: 'https://oakar.dev',
     siteName: 'Oakar Oo',
     images: [
       {
-        url: 'https://adorio.space/og.png',
+        url: 'https://oakar.dev/og.png',
         width: 1200,
         height: 630,
         alt: 'Oakar Oo, backend developer',
@@ -34,13 +39,19 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
+    creator: '@kruskal_oakar',
     title: 'Oakar Oo | Backend Developer',
     description:
       'Backend developer in Bangkok, studying CS at KMUTT and looking for a software engineering internship.',
-    images: ['https://adorio.space/og.png'],
+    images: ['https://oakar.dev/og.png'],
   },
 };
 
 export default function LandingPage() {
-  return <About />;
+  return (
+    <>
+      <JsonLd data={profilePageJsonLd()} />
+      <About />
+    </>
+  );
 }

@@ -5,7 +5,7 @@ export const revalidate = 900;
 const GITHUB_USER = 'Mykal-Steele';
 const EVENTS_URL = `https://api.github.com/users/${GITHUB_USER}/events/public`;
 const GITHUB_HEADERS = {
-  'User-Agent': 'adorio.space-portfolio',
+  'User-Agent': 'oakar.dev-portfolio',
   Accept: 'application/vnd.github+json',
 };
 

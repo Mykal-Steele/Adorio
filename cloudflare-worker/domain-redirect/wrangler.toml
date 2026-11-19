@@ -1,0 +1,14 @@
+name = "adorio-redirect"
+main = "index.js"
+compatibility_date = "2026-09-09"
+workers_dev = false
+
+# adorio.space and www.adorio.space were routes of adorio-failover. *.adorio.space also
+# catches files and resume, which are R2 custom domains. env.adorio.space is a custom
+# domain, and a custom domain wins over any route, so it is bound to this worker directly.
+routes = [
+  { pattern = "adorio.space/*", zone_name = "adorio.space" },
+  { pattern = "*.adorio.space/*", zone_name = "adorio.space" },
+  { pattern = "env.adorio.space", custom_domain = true },
+  { pattern = "www.oakar.dev", custom_domain = true },
+]

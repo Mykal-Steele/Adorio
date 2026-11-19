@@ -124,7 +124,7 @@ describe('confirmUpload', () => {
     expect(reserved).toBe(released);
   });
 
-  // Cloudflare caches files.adorio.space. Without a short max-age a deleted file stays
+  // Cloudflare caches files.oakar.dev. Without a short max-age a deleted file stays
   // downloadable from the cache for the default two hours.
   test('should give the object a short cache lifetime before publishing it', async () => {
     const order = [];

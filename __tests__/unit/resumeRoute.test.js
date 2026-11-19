@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, test } from 'bun:test';
 
-const R2_URL = 'https://resume.adorio.space/Oakar-Oo-Resume.pdf';
+const R2_URL = 'https://resume.oakar.dev/Oakar-Oo-Resume.pdf';
 const realFetch = globalThis.fetch;
 const pdf = new Uint8Array([37, 80, 68, 70]); // "%PDF"
 
 // Each test gets a fresh copy of the route, so the in-memory copy starts empty
 let n = 0;
 const loadRoute = () => import(`../../src/app/resume/route.ts?case=${n++}`);
-const visit = (headers = {}) => new Request('https://adorio.space/resume', { headers });
+const visit = (headers = {}) => new Request('https://oakar.dev/resume', { headers });
 
 const r2Serves = (status, headers = {}) => {
   const calls = [];

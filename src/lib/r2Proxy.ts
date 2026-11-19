@@ -1,4 +1,4 @@
-// Serves a file kept in R2 under an adorio.space URL. Each visit asks R2 with the
+// Serves a file kept in R2 under an oakar.dev URL. Each visit asks R2 with the
 // cached copy's ETag, so an unchanged file costs a 304, and the last good copy is
 // kept for when R2 can't be reached.
 

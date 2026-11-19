@@ -3,7 +3,7 @@
 [![CI](https://github.com/Mykal-Steele/Adorio/actions/workflows/ci.yml/badge.svg)](https://github.com/Mykal-Steele/Adorio/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
-My personal site and a social app, plus a handful of side projects, all living in one repo and deployed together. Live at [adorio.space](https://adorio.space).
+My personal site and a social app, plus a handful of side projects, all living in one repo and deployed together. Live at [oakar.dev](https://oakar.dev).
 
 **Stack:** Next.js 16 (App Router) + Express + MongoDB, served through Nginx in Docker, hosted on Azure Container Apps.
 

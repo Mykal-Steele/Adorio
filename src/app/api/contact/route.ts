@@ -31,23 +31,25 @@ export async function POST(req: NextRequest) {
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
-      from: 'Adorio Contact <noreply@adorio.space>',
-      to: 'oakar@adorio.space',
+    // Resend reports a rejected message in the result instead of throwing
+    const { error } = await resend.emails.send({
+      from: 'Oakar Oo Contact <noreply@oakar.dev>',
+      to: 'me@oakar.dev',
       replyTo: email,
       subject: subject?.trim() || `New message from ${name}`,
       html: `
         <div style="font-family: monospace; max-width: 600px; background: #0a0e14; color: #f1f3fc; padding: 24px; border-radius: 4px;">
-          <div style="color: #00ffc2; font-size: 11px; letter-spacing: 0.1em; margin-bottom: 16px;">// NEW MESSAGE FROM ADORIO.SPACE</div>
+          <div style="color: #00ffc2; font-size: 11px; letter-spacing: 0.1em; margin-bottom: 16px;">// NEW MESSAGE FROM OAKAR.DEV</div>
           <table style="width:100%; border-collapse: collapse; font-size: 13px;">
             <tr><td style="color:#64748b; padding: 4px 0; width: 80px;">from</td><td style="color:#f1f3fc;">${esc(name)} &lt;${esc(email)}&gt;</td></tr>
             <tr><td style="color:#64748b; padding: 4px 0;">subject</td><td style="color:#f1f3fc;">${subject ? esc(subject) : '(no subject)'}</td></tr>
           </table>
           <div style="margin-top: 20px; padding: 16px; background: #0d1117; border-left: 2px solid #00ffc2; font-size: 14px; line-height: 1.6; color: #a8abb3; white-space: pre-wrap;">${esc(message)}</div>
-          <div style="margin-top: 16px; color: #3d4f6b; font-size: 10px;">Sent from adorio.space portfolio</div>
+          <div style="margin-top: 16px; color: #3d4f6b; font-size: 10px;">Sent from the contact form on oakar.dev</div>
         </div>
       `,
     });
+    if (error) throw error;
 
     return NextResponse.json({ success: true });
   } catch (err) {

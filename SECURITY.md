@@ -1,6 +1,6 @@
 # Security policy
 
-I run Adorio (adorio.space) by myself, and I want to hear about any security problem you find in it.
+I run Adorio (oakar.dev) by myself, and I want to hear about any security problem you find in it.
 
 ## How to report
 
@@ -28,7 +28,7 @@ Only the live site and the `main` branch. There are no older releases to patch.
 
 ## In scope
 
-- adorio.space and its `/api` routes
+- oakar.dev and its `/api` routes
 - The code in this repo, including the Next.js app, the Express backend, and the code runner integration
 
 Examples I care about: getting into another person's account or data, bypassing login or admin checks, injection, cross-site scripting, unsafe file uploads, escaping the code runner sandbox, and secrets committed to the repo.

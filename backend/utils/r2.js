@@ -52,7 +52,7 @@ export const headObject = (key) =>
 export const deleteObject = (key) =>
   requireClient().send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
 
-// Cloudflare caches files.adorio.space, and an object without Cache-Control is kept at the
+// Cloudflare caches files.oakar.dev, and an object without Cache-Control is kept at the
 // edge for two hours, so a deleted file would stay downloadable that long. Copying the
 // object onto itself is how S3 (and R2) change an object's headers after upload. Keys are
 // h/<slug>.<ext> with a [a-z0-9-] slug, so they need no escaping in CopySource.
