@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: { absolute: 'Certificates | Oakar Oo' },
   description:
     'Certificates earned by Oakar Oo: ISC2 Certified in Cybersecurity, Google IT Support Professional Certificate, and Microsoft Student Ambassador.',
-  alternates: { canonical: '/certificates' },
+  alternates: { canonical: '/certificates', types: { 'text/markdown': '/certificates.md' } },
   openGraph: {
     title: 'Certificates | Oakar Oo',
     description: 'Exams Oakar Oo passed and courses he finished.',

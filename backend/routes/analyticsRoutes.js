@@ -4,6 +4,8 @@ import {
   getPageViewSummary,
   getRecentVisitEntries,
   getVisitorSummary,
+  getMonthlyVisitors,
+  getOverview,
   getVisitorDetailsInfo,
   getHealthStatus,
   getSystemStats,
@@ -17,6 +19,8 @@ router.post('/track', visitorIdentifier, optional, trackVisit);
 router.get('/page-views', protect, admin, getPageViewSummary);
 router.get('/recent', protect, admin, getRecentVisitEntries);
 router.get('/visitor-stats', protect, admin, getVisitorSummary);
+router.get('/monthly-visitors', protect, admin, getMonthlyVisitors);
+router.get('/overview', protect, admin, getOverview);
 router.get('/visitor/:visitorId', protect, admin, getVisitorDetailsInfo);
 router.get('/health', getHealthStatus);
 router.get('/stats', protect, admin, getSystemStats);

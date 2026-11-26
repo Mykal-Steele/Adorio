@@ -49,6 +49,9 @@ export const deleteStaleTestUsers = ({ createdBefore }) =>
     $or: [{ username: TEST_USERNAME_PATTERN }, { email: TEST_EMAIL_PATTERN }],
   });
 
+export const findAdminUserIds = async () =>
+  (await User.find({ isAdmin: true }, '_id').lean()).map((user) => user._id);
+
 export const findUsersByIds = (ids) =>
   User.find({ _id: { $in: ids } }, 'username email displayName').lean();
 

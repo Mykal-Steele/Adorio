@@ -3,7 +3,7 @@ import API from './index';
 import { generateBrowserFingerprint, generateVisitorId } from '../utils/browserFingerprinting';
 import { withPerformanceTracking } from '../utils/frontendMonitoring';
 import { TRACK_ENDPOINT } from './constants/analytics_const';
-import type { TrackPageViewPayload } from './types/analytics';
+import type { AnalyticsOverview, Period, TrackPageViewPayload } from './types/analytics';
 
 const normalizeDuration = (value: unknown): number | undefined => {
   if (typeof value !== 'number' || Number.isNaN(value)) {
@@ -103,30 +103,17 @@ const trackPageView = withPerformanceTracking(
   },
 );
 
-const fetchPageViewSummary = async (params = {}) => {
-  const response = await API.get('/stats/page-views', { params });
+const fetchMonthlyVisitors = async (params: { months?: number } = {}) => {
+  const response = await API.get('/stats/monthly-visitors', { params });
   return response.data;
 };
 
-const fetchRecentVisits = async (params = {}) => {
-  const response = await API.get('/stats/recent', { params });
+const fetchAnalyticsOverview = async (
+  params: { period: Period; all?: boolean },
+  signal?: AbortSignal,
+): Promise<AnalyticsOverview> => {
+  const response = await API.get('/stats/overview', { params, signal });
   return response.data;
 };
 
-const fetchVisitorStats = async (params = {}) => {
-  const response = await API.get('/stats/visitor-stats', { params });
-  return response.data;
-};
-
-const fetchVisitorDetails = async (visitorId: string) => {
-  const response = await API.get(`/stats/visitor/${visitorId}`);
-  return response.data;
-};
-
-export {
-  trackPageView,
-  fetchPageViewSummary,
-  fetchRecentVisits,
-  fetchVisitorStats,
-  fetchVisitorDetails,
-};
+export { trackPageView, fetchMonthlyVisitors, fetchAnalyticsOverview };

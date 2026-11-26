@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     'create-adorex',
     'portfolio',
   ],
-  alternates: { canonical: '/' },
+  alternates: { canonical: '/', types: { 'text/markdown': '/index.md' } },
   openGraph: {
     title: 'Oakar Oo | Backend Developer',
     description:
