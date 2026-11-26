@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     'Java',
     'open source',
   ],
-  alternates: { canonical: '/projects' },
+  alternates: { canonical: '/projects', types: { 'text/markdown': '/projects.md' } },
   openGraph: {
     title: 'Projects | Oakar Oo',
     description: 'Things Oakar Oo has built, mostly backends and the setup around them.',

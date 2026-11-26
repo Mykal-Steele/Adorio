@@ -15,7 +15,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: { absolute: title },
     description,
     keywords: project ? [project.name, 'Oakar Oo', ...project.stack] : ['Oakar Oo', 'project'],
-    alternates: { canonical: `/projects/${id}` },
+    alternates: {
+      canonical: `/projects/${id}`,
+      types: { 'text/markdown': `/projects/${id}.md` },
+    },
     openGraph: {
       title,
       description,

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: { absolute: 'Contact | Oakar Oo' },
   description: 'Send Oakar Oo a message about an internship, a collab, or anything else.',
   keywords: ['Oakar Oo', 'contact', 'hire', 'internship', 'collaboration', 'Bangkok developer'],
-  alternates: { canonical: '/contact' },
+  alternates: { canonical: '/contact', types: { 'text/markdown': '/contact.md' } },
   openGraph: {
     title: 'Contact | Oakar Oo',
     description: 'Send Oakar Oo a message about an internship, a collab, or anything else.',
