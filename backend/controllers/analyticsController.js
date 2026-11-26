@@ -7,6 +7,8 @@ import {
   getVisitorStats,
   getVisitorDetails,
 } from '../services/analyticsService.js';
+import { getMonthlyVisitorStats } from '../services/visitorStats.js';
+import { getAnalyticsOverview } from '../services/analyticsOverview.js';
 import {
   monitor,
   rateLimiter,
@@ -73,6 +75,8 @@ const trackVisit = asyncHandler(async (req, res) => {
   const monitoredRecordVisit = monitoredFunction('recordVisit', recordVisit);
   await monitoredRecordVisit({
     visitorId,
+    browserId: req.visitor?.cookieId || visitorIdFromBody,
+    country: req.headers['cf-ipcountry'],
     userId,
     sessionId,
     path,
@@ -125,6 +129,19 @@ const getVisitorSummary = asyncHandler(async (req, res) => {
   });
 });
 
+const getMonthlyVisitors = asyncHandler(async (req, res) => {
+  const stats = await getMonthlyVisitorStats({ months: req.query.months });
+  res.json({ ok: true, ...stats });
+});
+
+const getOverview = asyncHandler(async (req, res) => {
+  const overview = await getAnalyticsOverview({
+    period: req.query.period,
+    includeAll: req.query.all === 'true',
+  });
+  res.json({ ok: true, ...overview });
+});
+
 const getHealthStatus = asyncHandler(async (req, res) => {
   const healthStatus = await monitor.performHealthCheck();
   const stats = monitor.getHealthStatus();
@@ -173,6 +190,8 @@ export {
   getPageViewSummary,
   getRecentVisitEntries,
   getVisitorSummary,
+  getMonthlyVisitors,
+  getOverview,
   getVisitorDetailsInfo,
   getHealthStatus,
   getSystemStats,

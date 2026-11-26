@@ -83,9 +83,17 @@ const generateVisitorNickname = (visitorId, ipAddress, userData = null, fingerpr
   });
 };
 
+// CF-IPCountry: a two-letter code, or XX (unknown) and T1 (Tor)
+const countryCode = (value) => {
+  const code = typeof value === 'string' ? value.trim().toUpperCase() : '';
+  return /^[A-Z]{2}$/.test(code) && code !== 'XX' && code !== 'T1' ? code : null;
+};
+
 export const recordVisit = async (payload) => {
   const {
     visitorId,
+    browserId,
+    country,
     userId,
     sessionId,
     path,
@@ -106,6 +114,8 @@ export const recordVisit = async (payload) => {
 
   const visitPayload = {
     visitorId,
+    browserId,
+    country: countryCode(country),
     sessionId,
     path: sanitizePath(path),
     fullUrl,

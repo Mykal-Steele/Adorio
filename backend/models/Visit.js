@@ -7,6 +7,15 @@ export const createVisit = (data) => Visit.create(data);
 
 export const aggregateVisits = (pipeline) => Visit.aggregate(pipeline).allowDiskUse(true);
 
+// browser ids (or the older hashed visitor ids) of the visits that match the filter
+export const distinctVisitBrowsers = async (filter) => {
+  const rows = await Visit.aggregate([
+    { $match: filter },
+    { $group: { _id: { $ifNull: ['$browserId', '$visitorId'] } } },
+  ]);
+  return rows.map((row) => row._id).filter(Boolean);
+};
+
 export const findRecentVisits = ({ query = {}, limit }) =>
   Visit.find(query)
     .populate('userId', 'username email displayName')
