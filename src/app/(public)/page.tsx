@@ -6,7 +6,7 @@ import { profilePageJsonLd } from '@/lib/identity';
 export const metadata: Metadata = {
   title: { absolute: 'Oakar Oo | Backend Developer' },
   description:
-    'Backend developer in Bangkok. I focus on backends and the setup that keeps them running, mostly with TypeScript, Express, Hono, Prisma, and Docker.',
+    'Backend developer in Bangkok. I focus on backends and the setup that keeps them running, mostly with TypeScript, Express, Hono, Prisma, and Docker on Azure and Google Cloud.',
   keywords: [
     'Oakar Oo',
     'Kruskal',
