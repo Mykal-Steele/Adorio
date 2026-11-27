@@ -417,17 +417,17 @@ export const portfolioData = {
         'A Discord bot for my KMUTT classes. It answers course questions from the real class material (lecture recordings, slides, assignments, and files the professors upload) and says where each answer came from.',
       problem:
         'Finding the answer to one course question meant scrolling through hours of lecture recordings and slide decks spread across Teams and SharePoint. A general chatbot answers from memory and can make things up. I wanted one place to ask that answers from our own material and cites it, so anyone can check the answer.',
-      role: 'Solo project. I built the sync that pulls class material into a searchable database, the search itself, the step that decides when a question needs course material, study mode, and the deployment on Azure.',
+      role: 'Solo project. I built the sync that pulls class material into a searchable database, the search itself, the step that decides when a question needs course material, study mode, the Uniloom sign-in, and the deployment on Google Cloud.',
       result:
         'People use it a lot, mostly to TL;DR a Discord channel in UniCorp (it reads the messages and images too), and also for advice and study guides. Course answers come from about 183 hours of lecture transcripts plus slides and assignments across 9 courses, and each one cites the page, slide, or lecture timestamp it used.',
       stack: [
         'Python',
         'SQLite',
         'Docker',
-        'Azure',
+        'Google Cloud',
         'GitHub Actions',
         'discord.py',
-        'Azure OpenAI',
+        'Gemini on Vertex AI',
         'sqlite-vec',
       ],
       features: [
@@ -435,6 +435,7 @@ export const portfolioData = {
         'Search combines meaning-based search (embeddings in sqlite-vec) with keyword search (SQLite FTS5) and merges the two rankings. Adding keyword search is what got the English test set to 9 out of 10.',
         'Slide pages are also read as images so tables and charts can be found, and Thai slides are translated to English.',
         'Study mode writes quizzes of up to 100 questions with an answer key, PDF study guides, and system diagrams.',
+        'It can read and change your Uniloom board as you, after you sign in once. Lookups happen straight away, but a change waits until you press the button under its message.',
         'It also plays music, sums up a channel with /tldr, and can search the web.',
       ],
       decisions: [
@@ -449,16 +450,21 @@ export const portfolioData = {
             'AI calls have daily, monthly, and per-user limits, so one heavy user cannot run up the bill.',
         },
         {
-          title: 'Docker Compose on one small Azure VM',
+          title: 'Docker Compose on one free Google Cloud VM',
           reason:
-            'The bot runs on a VM with 1 GiB of RAM. A health check runs every minute and the database is backed up daily, keeping the newest 7.',
+            'The bot runs on an e2-micro with 1 GB of RAM, inside the free tier. A health check runs every minute, the database is backed up daily (keeping the newest 7), and an encrypted copy goes to Cloudflare R2 every night.',
+        },
+        {
+          title: 'Moving from Azure to Gemini',
+          reason:
+            'It ran on Azure OpenAI until November 2026, when my Azure access ended. Before switching I ran three Gemini models on the same 10 messages with the real system prompt, and picked Flash Lite for chat and the bigger Flash for study sets and documents.',
         },
       ],
       numbers: [
         'About 3 to 5 classmates use it regularly.',
         'Two courses alone came to 3,944 chunks, embedded for about $0.015.',
         'Search takes about 51 ms over 50,000 chunks.',
-        '995 tests, run with ruff and pyright on every push.',
+        'Over 1,500 tests, run with ruff and pyright on every pull request.',
       ],
       hardPart:
         'Handling massive context. A busy channel, hours of lectures, and a pile of slides are way more than the model can take in at once. At first I kept patching problems, like old topics coming back and the bot repeating itself.',
@@ -1075,7 +1081,7 @@ export const portfolioData = {
       name: 'Azure',
       group: 'Tools & Infra',
       story:
-        "I started using it once I became a Microsoft Student Ambassador and got $150 of free Azure credit every month. Adorio, ChronoChunk, and the code runner for Coding Challenges all run on it.\n\nThe big lesson was idle costs. The code runner's scale set was costing about $60 a month just sitting there, so I switched to one VM that turns itself off when nobody is coding. I also set budget alerts so I find out before the credit runs out, not after. And GitHub deploys to it with OIDC, so there's no Azure password stored anywhere.",
+        "I started using it once I became a Microsoft Student Ambassador and got $150 of free Azure credit every month. Adorio, ChronoChunk, and the code runner for Coding Challenges all ran on it until my access ended in November 2026.\n\nThe big lesson was idle costs. The code runner's scale set was costing about $60 a month just sitting there, so I switched to one VM that turns itself off when nobody is coding. I also set budget alerts so I find out before the credit runs out, not after. And GitHub deploys to it with OIDC, so there's no Azure password stored anywhere.",
     },
     {
       id: 'cloudflare',
