@@ -145,7 +145,7 @@ export const portfolioData = {
       color: '#00a4ef',
       since: 'Apr 2026',
       detail:
-        'I share Microsoft Learn resources and events on social media and go to community events. The Azure credit is also what hosts most of my projects.',
+        'I share Microsoft Learn resources and events on social media and go to community events. The Azure credit hosted most of my projects until November 2026.',
     },
     {
       name: 'Google Developer Group (GDG)',
@@ -303,16 +303,16 @@ export const portfolioData = {
         'MongoDB',
         'Docker',
         'Nginx',
-        'Azure',
+        'Northflank',
         'Cloudflare',
         'GitHub Actions',
         'Zod',
       ],
       features: [
         'The backend is split into controllers, services, models, and schemas. Zod checks every request, and login, posting, likes, and code runs each have a rate limit.',
-        'One container runs Nginx, the Express API, and the Next.js server on Azure Container Apps, with health checks and scaling from 1 to 3 copies.',
-        'GitHub Actions checks format and lint, builds, runs integration tests against production containers, deploys to Azure without a stored password (OIDC), waits for the health check, and clears the Cloudflare cache.',
-        'The Azure setup is written in Bicep, with a $150 monthly budget and spending alerts.',
+        'One container runs Nginx, the Express API, and the Next.js server. Northflank builds it from the Dockerfile and deploys it on every push to main.',
+        'GitHub Actions checks format and lint, builds, and runs integration tests against production containers on every push and pull request.',
+        'A Cloudflare Worker sits in front of oakar.dev. It checks the host on /api/health and can switch traffic to a backup copy when it fails.',
       ],
       decisions: [
         {
@@ -323,12 +323,12 @@ export const portfolioData = {
         {
           title: 'Failover instead of a second region',
           reason:
-            'A Worker and a backup copy on Northflank keep the site up during an Azure outage without paying for two Azure regions.',
+            'A Worker in front of the site can switch hosts, so I never paid for a second region. Northflank started as the backup for Azure, and it took over the whole site when my Azure access ended.',
         },
         {
           title: 'Moved hosts as it grew',
           reason:
-            'Render in February 2025, a DigitalOcean server in May 2026, and Azure Container Apps in August 2026, once the site needed scaling, managed TLS, and deploys without SSH.',
+            'Render in February 2025, a DigitalOcean server in May 2026, Azure Container Apps in August 2026 once the site needed scaling, managed TLS, and deploys without SSH, and Northflank in November 2026 when my Azure access ended.',
         },
       ],
       numbers: [

@@ -54,7 +54,7 @@ const facts = [
 const proof = [
   {
     id: 'adorio',
-    text: ', the site you are on. I run it on Azure with automatic deploys, and a Cloudflare Worker moves traffic to a free backup server on Northflank if Azure goes down.',
+    text: ', the site you are on. It runs on Northflank and deploys itself on every push, with a Cloudflare Worker in front that can switch to a backup host.',
   },
   {
     id: 'smartcity-financial',
