@@ -303,6 +303,7 @@ export const portfolioData = {
         'MongoDB',
         'Docker',
         'Nginx',
+        'Azure',
         'Northflank',
         'Cloudflare',
         'GitHub Actions',
@@ -310,8 +311,9 @@ export const portfolioData = {
       ],
       features: [
         'The backend is split into controllers, services, models, and schemas. Zod checks every request, and login, posting, likes, and code runs each have a rate limit.',
-        'One container runs Nginx, the Express API, and the Next.js server. Northflank builds it from the Dockerfile and deploys it on every push to main.',
-        'GitHub Actions checks format and lint, builds, and runs integration tests against production containers on every push and pull request.',
+        'One container runs Nginx, the Express API, and the Next.js server. On Azure Container Apps it had health checks and scaled from 1 to 3 copies. Now Northflank builds it from the Dockerfile on every push to main.',
+        'GitHub Actions checks format and lint, builds, and runs integration tests against production containers. While the site was on Azure, it also deployed without a stored password (OIDC), waited for the health check, and cleared the Cloudflare cache.',
+        'I wrote the Azure setup in Bicep, with a $150 monthly budget and spending alerts.',
         'A Cloudflare Worker sits in front of oakar.dev. It checks the host on /api/health and can switch traffic to a backup copy when it fails.',
       ],
       decisions: [
@@ -323,7 +325,7 @@ export const portfolioData = {
         {
           title: 'Failover instead of a second region',
           reason:
-            'A Worker in front of the site can switch hosts, so I never paid for a second region. Northflank started as the backup for Azure, and it took over the whole site when my Azure access ended.',
+            'I put a Worker and a free backup copy on Northflank in front of Azure, so an outage would not take the site down and I did not have to pay for a second Azure region. That backup ended up mattering more than I planned. When my Azure access ended in November 2026, Northflank took over the whole site.',
         },
         {
           title: 'Moved hosts as it grew',
@@ -417,16 +419,18 @@ export const portfolioData = {
         'A Discord bot for my KMUTT classes. It answers course questions from the real class material (lecture recordings, slides, assignments, and files the professors upload) and says where each answer came from.',
       problem:
         'Finding the answer to one course question meant scrolling through hours of lecture recordings and slide decks spread across Teams and SharePoint. A general chatbot answers from memory and can make things up. I wanted one place to ask that answers from our own material and cites it, so anyone can check the answer.',
-      role: 'Solo project. I built the sync that pulls class material into a searchable database, the search itself, the step that decides when a question needs course material, study mode, the Uniloom sign-in, and the deployment on Google Cloud.',
+      role: 'Solo project. I built the sync that pulls class material into a searchable database, the search itself, the step that decides when a question needs course material, study mode, the Uniloom sign-in, and the deployment, first on Azure and now on Google Cloud.',
       result:
         'People use it a lot, mostly to TL;DR a Discord channel in UniCorp (it reads the messages and images too), and also for advice and study guides. Course answers come from about 183 hours of lecture transcripts plus slides and assignments across 9 courses, and each one cites the page, slide, or lecture timestamp it used.',
       stack: [
         'Python',
         'SQLite',
         'Docker',
+        'Azure',
         'Google Cloud',
         'GitHub Actions',
         'discord.py',
+        'Azure OpenAI',
         'Gemini on Vertex AI',
         'sqlite-vec',
       ],
@@ -450,14 +454,14 @@ export const portfolioData = {
             'AI calls have daily, monthly, and per-user limits, so one heavy user cannot run up the bill.',
         },
         {
-          title: 'Docker Compose on one free Google Cloud VM',
+          title: 'Docker Compose on one small VM',
           reason:
-            'The bot runs on an e2-micro with 1 GB of RAM, inside the free tier. A health check runs every minute, the database is backed up daily (keeping the newest 7), and an encrypted copy goes to Cloudflare R2 every night.',
+            'It started on a small Azure VM with 1 GiB of RAM. When my Azure access ended in November 2026, I moved the same Compose setup to a free Google Cloud e2-micro. A health check runs every minute, the database is backed up daily (keeping the newest 7), and an encrypted copy goes to Cloudflare R2 every night.',
         },
         {
           title: 'Moving from Azure to Gemini',
           reason:
-            'It ran on Azure OpenAI until November 2026, when my Azure access ended. Before switching I ran three Gemini models on the same 10 messages with the real system prompt, and picked Flash Lite for chat and the bigger Flash for study sets and documents.',
+            'The bot started on Azure OpenAI, with gpt-6-luna for chat. Losing Azure meant losing the models too, so I moved it to Gemini on Vertex AI. Before switching I ran three Gemini models on the same 10 messages with the real system prompt, and picked Flash Lite for chat and the bigger Flash for study sets and documents.',
         },
       ],
       numbers: [
@@ -1081,7 +1085,7 @@ export const portfolioData = {
       name: 'Azure',
       group: 'Tools & Infra',
       story:
-        "I started using it once I became a Microsoft Student Ambassador and got $150 of free Azure credit every month. Adorio, ChronoChunk, and the code runner for Coding Challenges all ran on it until my access ended in November 2026.\n\nThe big lesson was idle costs. The code runner's scale set was costing about $60 a month just sitting there, so I switched to one VM that turns itself off when nobody is coding. I also set budget alerts so I find out before the credit runs out, not after. And GitHub deploys to it with OIDC, so there's no Azure password stored anywhere.",
+        "I started using it once I became a Microsoft Student Ambassador and got $150 of free Azure credit every month. Adorio, ChronoChunk, and the code runner for Coding Challenges all ran on it until my access ended in November 2026. After that Adorio moved to Northflank and ChronoChunk to Google Cloud.\n\nThe big lesson was idle costs. The code runner's scale set was costing about $60 a month just sitting there, so I switched to one VM that turns itself off when nobody is coding. I also set budget alerts so I find out before the credit runs out, not after. And GitHub deploys to it with OIDC, so there's no Azure password stored anywhere.",
     },
     {
       id: 'cloudflare',
